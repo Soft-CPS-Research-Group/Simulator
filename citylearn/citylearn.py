@@ -9,6 +9,8 @@ from typing import Any, List, Mapping, Tuple, Union
 from gymnasium import Env, spaces
 import numpy as np
 import pandas as pd
+import json
+import csv
 from citylearn.base import Environment, EpisodeTracker
 from citylearn.building import Building, DynamicsBuilding
 from citylearn.electric_vehicle import ElectricVehicle
@@ -1176,7 +1178,7 @@ class CityLearnEnv(Environment, Env):
 
     def next_time_step(self):
         r"""Advance all buildings to next `time_step`."""
-
+        self.render()
         for building in self.buildings:
             building.next_time_step()
 
@@ -1266,6 +1268,77 @@ class CityLearnEnv(Environment, Env):
         self.update_variables()
 
         return self.observations, self.get_info()
+    
+    # demonstrate a program writing multiple records
+    def render(self):
+        """
+        Render the current state of the CityLearn environment, summarizing key metrics for each building.
+        """
+        #kpi_data = self.evaluate()
+        #kpi_summary = kpi_data.to_json()
+        
+        environment_data = {
+            "Time Step": self.time_step,
+            "Net Electricity Consumption": f"{self.net_electricity_consumption[self.time_step]}",
+            "Total Solar Generation": f"{self.solar_generation[self.time_step]}",
+        }   
+        building_summaries = []
+        for idx, building in enumerate(self.buildings):
+            building_data = {
+                "Building": f"Building {idx}",
+                "Net Electricity Consumption": f"{building.net_electricity_consumption[building.time_step]} kWh",
+                "Cooling Demand": f"{building.cooling_demand[building.time_step]} kWh",
+                "Heating Demand": f"{building.heating_demand[building.time_step]} kWh",
+                "DHW Demand": f"{building.dhw_demand[building.time_step]} kWh",
+                "Non-shiftable Load": f"{building.non_shiftable_load[building.time_step]} kWh",
+                "Electrical Storage Level": f"{building.energy_to_electrical_storage[building.time_step]} kWh",
+                "Solar Generation": f"{building.solar_generation[building.time_step]} kWh",
+                "Indoor Temperature": f"{building.indoor_dry_bulb_temperature[building.time_step]} C"
+            }
+            building_summaries.append(building_data)
+        # Combine the data for JSON output
+        output = {
+            "Environment Summary": environment_data,
+            "Building Summary": building_summaries
+        }
+        ## JSON ##
+        # filename = "outputted-data.json"
+        # try:
+        #    if os.path.exists(filename):
+        #        with open(filename, 'r') as json_file:
+        #            try:
+        #                data = json.load(json_file)
+        #            except json.JSONDecodeError:
+        #                data = []
+        #    else:
+        #        data = []
+        
+        #    data.append(output)
+        
+        #    with open(filename, 'w') as json_file:
+        #        json.dump(data, json_file, indent=4)
+        #    print(f"Data successfully written to {filename}")
+        # except Exception as e:
+        #    print(f"An error occurred while writing to the file: {e}")
+        ## CSV ##
+        # Define the CSV filename
+        filenameCSV = "outputted-data.csv"
+        # Check if file exists to write header
+        file_exists = os.path.isfile(filenameCSV)
+        with open(filenameCSV, 'a', newline='') as csvfile:
+            fieldnames = ["Time Step", "Net Electricity Consumption", "Total Solar Generation", "Building", 
+                        "Net Electricity Consumption (Building)", "Cooling Demand", "Heating Demand", 
+                        "DHW Demand", "Non-shiftable Load", "Electrical Storage Level", 
+                        "Solar Generation", "Indoor Temperature"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            # Write header only if file does not exist
+            if not file_exists:
+                writer.writeheader()
+            # Prepare and write rows for the environment and buildings
+            for building_data in building_summaries:
+                # Combine environment data with each building's data
+                row_data = {**environment_data, **building_data}
+                writer.writerow(row_data)
 
     def update_variables(self):
         # net electricity consumption

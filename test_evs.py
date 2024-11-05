@@ -15,10 +15,4 @@ env = CityLearnEnv(dataset_name, central_agent=True)
 model = Agent(env)
 model.learn(episodes=1, logging_level=1)
 
-# print cost functions at the end of episode
-kpis = model.env.evaluate()
-kpis = kpis.pivot(index='cost_function', columns='name', values='value').round(3)
-kpis = kpis.dropna(how='all')
-print(kpis)
-
 print(citylearn.data.DataSet.get_names())
