@@ -9,6 +9,8 @@ from typing import Any, List, Mapping, Tuple, Union
 from gymnasium import Env, spaces
 import numpy as np
 import pandas as pd
+import datetime
+import shutil
 import json
 import csv
 from citylearn.base import Environment, EpisodeTracker
@@ -181,6 +183,26 @@ class CityLearnEnv(Environment, Env):
 
         # reward history tracker
         self.__episode_rewards = []
+
+        if root_directory is None:
+            root_directory = os.path.dirname(os.path.abspath(__file__))  # Get the current file's directory
+
+        self.root_directory = root_directory
+
+        if schema:  # Check if schema is provided
+            # Construct the dataset path using the schema
+            dataset_path = root_directory
+
+            # Generate a timestamp for the new folder name
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            self.new_folder_path = os.path.join(self.root_directory, "..", "..", "..", "..", "results", timestamp)
+
+            # Check if the dataset path exists and copy it to the new folder
+            if os.path.exists(dataset_path):
+                shutil.copytree(dataset_path, self.new_folder_path)  # Copy the dataset to the new folder
+                print(f"Dataset '{dataset_path}' copied to '{self.new_folder_path}'")
+            else:
+                raise FileNotFoundError(f"Error: The dataset '{dataset_path}' does not exist.")
 
     @property
     def schema(self) -> Mapping[str, Any]:
@@ -1322,7 +1344,7 @@ class CityLearnEnv(Environment, Env):
         #    print(f"An error occurred while writing to the file: {e}")
         ## CSV ##
         # Define the CSV filename
-        filenameCSV = "outputted-data.csv"
+        filenameCSV = os.path.join(self.new_folder_path, "outputted-data.csv")  # Set CSV path in the new folder
         # Check if file exists to write header
         file_exists = os.path.isfile(filenameCSV)
         with open(filenameCSV, 'a', newline='') as csvfile:
