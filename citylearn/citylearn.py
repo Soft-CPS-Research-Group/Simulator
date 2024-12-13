@@ -886,6 +886,12 @@ class CityLearnEnv(Environment, Env):
         for building, building_actions in zip(self.buildings, actions):
             building.apply_actions(**building_actions)
 
+        print("BBBBBBBBBBBBBBBBBBBBBBBB")
+        print(self.__net_electricity_consumption)
+
+        print("AHHHHHH")
+        print(self.net_electricity_consumption)
+
         self.update_variables()
 
         # NOTE:
