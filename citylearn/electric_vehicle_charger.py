@@ -139,13 +139,13 @@ class Charger(Environment):
         return self.__past_connected_evs
 
     @property
-    def past_charging_action_values(self) -> List[float]:
+    def past_charging_action_values(self) -> List[float]: # exportar estes
         r"""Actions given to charge/discharge in [kWh]. Different from the electricity consumption as in this an action can be given but no electric_vehicle being connect it will not consume such energy"""
        
         return self.__past_charging_action_values
 
     @property
-    def electricity_consumption(self) -> List[float]:
+    def electricity_consumption(self) -> List[float]: # se positivo consome eletricidade, se negativo deu de volta à rede
         r"""Electricity consumption time series."""
 
         return self.__electricity_consumption
@@ -211,7 +211,7 @@ class Charger(Environment):
 
     @connected_electric_vehicle.setter
     def connected_electric_vehicle(self, electric_vehicle: ElectricVehicle):
-            self.__connected_ev = electric_vehicle if electric_vehicle is None else None 
+            self.__connected_ev = electric_vehicle  # Stores None even if EV exists
 
     @incoming_electric_vehicle.setter
     def incoming_electric_vehicle(self, electric_vehicle: ElectricVehicle):
@@ -292,7 +292,7 @@ class Charger(Environment):
         """
         self.incoming_electric_vehicle = None
 
-    def update_connected_electric_vehicle_soc(self, action_value: float):
+    def update_connected_electric_vehicle_soc(self, action_value: float): # Modelo da bateria do Carregador do EV
         self.__past_charging_action_values[self.time_step] = action_value #ToDo
         if self.connected_electric_vehicle and action_value != 0:
             electric_vehicle = self.connected_electric_vehicle
@@ -350,3 +350,8 @@ class Charger(Environment):
             f"Currently Connected electric_vehicle: {self.connected_electric_vehicle}\n"
             f"Incoming electric_vehicle: {self.incoming_electric_vehicle}\n"
        )
+# Total production = solar_generation + o que vem dos carros (+ o que vem das baterias)
+
+# 1 ficheiro para comunidade, 1 para cada edificio, 1 carregadores dos carros dos edificios - B1C1, B1C2 //  c1_electricity_consumption
+
+# 1 ficheiro dos Evs - 1 ficheiro para cada EV 
