@@ -80,6 +80,8 @@ class CityLearnEnv(Environment, Env):
         Parameters to be parsed to :py:attr:`reward_function` at intialization.
     central_agent: bool, optional
         Expect 1 central agent to control all buildings.
+    render: bool, optional
+        If :code:`True`, call :py:meth:`render` at every environment step. Defaults to :code:`True` when not specified.
     shared_observations: List[str], optional
         Names of common observations across all buildings i.e. observations that have the same value irrespective of the building.
     active_observations: Union[List[str], List[List[str]]], optional
@@ -118,7 +120,7 @@ class CityLearnEnv(Environment, Env):
         electric_vehicles: Union[List[ElectricVehicle], List[str], List[int]] = None,
         simulation_start_time_step: int = None, simulation_end_time_step: int = None, episode_time_steps: Union[int, List[Tuple[int, int]]] = None, rolling_episode_split: bool = None,
         random_episode_split: bool = None, seconds_per_time_step: float = None, reward_function: Union[RewardFunction, str] = None, reward_function_kwargs: Mapping[str, Any] = None,
-        central_agent: bool = None, shared_observations: List[str] = None, active_observations: Union[List[str], List[List[str]]] = None,
+        central_agent: bool = None, render: bool = None, shared_observations: List[str] = None, active_observations: Union[List[str], List[List[str]]] = None,
         inactive_observations: Union[List[str], List[List[str]]] = None, active_actions: Union[List[str], List[List[str]]] = None,
         inactive_actions: Union[List[str], List[List[str]]] = None, simulate_power_outage: bool = None, solar_generation: bool = None, random_seed: int = None, **kwargs: Any
     ):
@@ -127,7 +129,7 @@ class CityLearnEnv(Environment, Env):
         self.buildings = []
         self.random_seed = self.schema.get('random_seed', None) if random_seed is None else random_seed
         root_directory, buildings, electric_vehicles, episode_time_steps, rolling_episode_split, random_episode_split, \
-            seconds_per_time_step, reward_function, central_agent, shared_observations, episode_tracker = self._load(
+            seconds_per_time_step, reward_function, central_agent, shared_observations, render, episode_tracker = self._load(
                 deepcopy(self.schema),
                 root_directory=root_directory,
                 buildings=buildings,
@@ -149,6 +151,7 @@ class CityLearnEnv(Environment, Env):
                 simulate_power_outage=simulate_power_outage,
                 solar_generation=solar_generation,
                 random_seed=self.random_seed,
+                render=render,
             )
         self.root_directory = root_directory
         self.buildings = buildings
@@ -163,6 +166,7 @@ class CityLearnEnv(Environment, Env):
         self.random_episode_split = random_episode_split
         self.central_agent = central_agent
         self.shared_observations = shared_observations
+        self.render_env = render
 
         # set reward function
         self.reward_function = reward_function
@@ -823,6 +827,7 @@ class CityLearnEnv(Environment, Env):
             **super().get_metadata(),
             'reward_function': self.reward_function.__class__.__name__,
             'central_agent': self.central_agent,
+            'render': self.render_env,
             'shared_observations': self.shared_observations,
             'buildings': [b.get_metadata() for b in self.buildings],
         }
@@ -881,7 +886,6 @@ class CityLearnEnv(Environment, Env):
             Override :meth"`get_info` to get custom key-value pairs in `info`.
         """
 
-        self.next_time_step()
         actions = self._parse_actions(actions)
 
         for building, building_actions in zip(self.buildings, actions):
@@ -889,13 +893,19 @@ class CityLearnEnv(Environment, Env):
 
         self.update_variables()
 
+        if self.render_env:
+            self.render()
+
         # NOTE:
-        # This call to retrieve each building's observation dictionary is an expensive call especially since the observations 
+        # This call to retrieve each building's observation dictionary is an expensive call especially since the observations
         # are retrieved again to send to agent but the observations in dict form is needed for the reward function to easily
         # extract building-level values. Can't think of a better way to handle this without giving the reward direct access to
         # env, which is not the best design for competition integrity sake. Will revisit the building.observations() function
         # to see how it can be optimized.
-        reward_observations = [b.observations(include_all=True, normalize=False, periodic_normalization=False) for b in self.buildings]
+        reward_observations = [
+            b.observations(include_all=True, normalize=False, periodic_normalization=False)
+            for b in self.buildings
+        ]
         reward = self.reward_function.calculate(observations=reward_observations)
         self.__rewards.append(reward)
 
@@ -906,11 +916,10 @@ class CityLearnEnv(Environment, Env):
                 'min': rewards.min(axis=0).tolist(),
                 'max': rewards.max(axis=0).tolist(),
                 'sum': rewards.sum(axis=0).tolist(),
-                'mean': rewards.mean(axis=0).tolist()
+                'mean': rewards.mean(axis=0).tolist(),
             })
-
         else:
-            pass
+            self.next_time_step()
 
         return self.observations, reward, self.terminated, self.truncated, self.get_info()
 
@@ -918,6 +927,11 @@ class CityLearnEnv(Environment, Env):
         """Other information to return from the `citylearn.CityLearnEnv.step` function."""
 
         return {}
+
+    def render(self) -> None:
+        """Render environment state at current time step."""
+
+        print(f'time_step: {self.time_step}')
 
     def _parse_actions(self, actions: List[List[float]]) -> List[Mapping[str, float]]:
         """Return mapping of action name to action value for each building."""
@@ -1290,7 +1304,7 @@ class CityLearnEnv(Environment, Env):
 
         return agent
 
-    def _load(self, schema: Mapping[str, Any], **kwargs) -> Tuple[Union[Path, str], List[Building], List[ElectricVehicle], Union[int, List[Tuple[int, int]]], bool, bool, float, RewardFunction, bool, List[str], EpisodeTracker]:
+    def _load(self, schema: Mapping[str, Any], **kwargs) -> Tuple[Union[Path, str], List[Building], List[ElectricVehicle], Union[int, List[Tuple[int, int]]], bool, bool, float, RewardFunction, bool, List[str], bool, EpisodeTracker]:
         """Return `CityLearnEnv` and `Controller` objects as defined by the `schema`.
 
         Parameters
@@ -1321,11 +1335,14 @@ class CityLearnEnv(Environment, Env):
             Expect 1 central agent to control all building storage device.
         shared_observations : List[str]
             Names of common observations across all buildings i.e. observations that have the same value irrespective of the building.
+        render : bool
+            If :code:`True`, call :py:meth:`render` at every environment step.
         """
 
         schema['root_directory'] = kwargs['root_directory'] if kwargs.get('root_directory') is not None else schema['root_directory']
         schema['random_seed'] = schema.get('random_seed', None) if kwargs.get('random_seed', None) is None else schema.get('random_seed', None)
         schema['central_agent'] = kwargs['central_agent'] if kwargs.get('central_agent') is not None else schema['central_agent']
+        schema['render'] = kwargs['render'] if kwargs.get('render') is not None else schema.get('render', True)
 
         #Separated chargers observations to create one for each charger at each building based on active ones at the schema
         schema['chargers_observations_helper'] = {key: value for key, value in schema["observations"].items() if key.startswith("electric_vehicle_")}
@@ -1428,7 +1445,7 @@ class CityLearnEnv(Environment, Env):
             schema['root_directory'], buildings, electric_vehicles, schema['episode_time_steps'], schema['rolling_episode_split'],
             schema['random_episode_split'],
             schema['seconds_per_time_step'], reward_function, schema['central_agent'], schema['shared_observations'],
-            episode_tracker
+            schema['render'], episode_tracker
         )
 
     def _load_building(self, index: int, building_name: str, schema: dict, episode_tracker: EpisodeTracker, pv_sizing_data: pd.DataFrame, battery_sizing_data: pd.DataFrame, **kwargs) -> Building:

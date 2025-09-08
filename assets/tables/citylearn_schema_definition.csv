@@ -7,6 +7,7 @@ Key,Definition
 :code:`rolling_episode_split`,"True if episode sequences are split such that each time step is a candidate for `episode_start_time_step` otherwise, False to split episodes in steps of `episode_time_steps`"
 :code:`random_episode_split`,"True if episode splits are to be selected at random during training otherwise, False to select sequentially."
 :code:`seconds_per_time_step`,"Used to define the time resolution of the data files."
+:code:`render`,"Set to :code:`true` to render the environment at each time step else :code:`false`."
 :code:`observations`,"Used to define the observation space."
 :code:`observations:<observation>:active`,"Set to :code:`true` if named :code:`<observation>` should be added to the observation space and provided to the agent  else :code:`false`."
 :code:`observations:<observation>:shared_in_central_agent`,"Set to :code:`true` if if named :code:`<observation>` values will be common in all buildings."
