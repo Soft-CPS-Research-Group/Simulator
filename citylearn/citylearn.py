@@ -1013,21 +1013,27 @@ class CityLearnEnv(Environment, Env):
         # Update environment/building variables for timestep t (reflect effects of actions)
         self.update_variables()
 
+        import time
         # NOTE:
         # This call to retrieve each building's observation dictionary is an expensive call especially since the observations 
         # are retrieved again to send to agent but the observations in dict form is needed for the reward function to easily
         # extract building-level values. Can't think of a better way to handle this without giving the reward direct access to
         # env, which is not the best design for competition integrity sake. Will revisit the building.observations() function
         # to see how it can be optimized.
+    
+        building_observations_retrieval_start = time.time();    
         reward_observations = [b.observations(include_all=True, normalize=False, periodic_normalization=False) for b in self.buildings]
+        building_observations_retrieval_end = time.time();
+        
         reward = self.reward_function.calculate(observations=reward_observations)
         self.__rewards.append(reward)
 
         # Advance to next timestep t+1
-        self.next_time_step()
+        partial_render_time = self.next_time_step()
 
         # store episode reward summary at the end of episode (upon reaching final timestep)
         if self.terminated:
+
             if self.render_mode == 'during' and self.render_enabled:
                 # Capture the terminal timestep snapshot that occurs after the final transition.
                 self.render()
@@ -1052,8 +1058,8 @@ class CityLearnEnv(Environment, Env):
 
             if self.render_enabled and not self._final_kpis_exported:
                 self.export_final_kpis()
-
-        return self.observations, reward, self.terminated, self.truncated, self.get_info()
+        
+        return self.observations, reward, self.terminated, self.truncated, self.get_info(), building_observations_retrieval_end - building_observations_retrieval_start, partial_render_time
 
     def get_info(self) -> Mapping[Any, Any]:
         """Other information to return from the `citylearn.CityLearnEnv.step` function."""
@@ -1132,6 +1138,7 @@ class CityLearnEnv(Environment, Env):
 
 
         return parsed_actions
+
 
     def evaluate(self, control_condition: EvaluationCondition = None, baseline_condition: EvaluationCondition = None, comfort_band: float = None) -> pd.DataFrame:
         r"""Evaluate cost functions at current time step.
@@ -1324,6 +1331,8 @@ class CityLearnEnv(Environment, Env):
 
     def next_time_step(self):
         r"""Advance all buildings to next `time_step`."""
+        import time
+        render_start = time.time();
         if getattr(self, 'render_enabled', False):
             if self.render_mode == 'during':
                 self.render()
@@ -1333,6 +1342,7 @@ class CityLearnEnv(Environment, Env):
                     self.render()
                 finally:
                     self._defer_render_flush = False
+        render_end = time.time();
         for building in self.buildings:
             building.next_time_step()
 
@@ -1349,6 +1359,8 @@ class CityLearnEnv(Environment, Env):
         #This function is here so that, when the new time step is reached, the first thing to do is plug in/out the EVs according to their individual dataset
         #It basicly associates an EV to a Building.Charger
         self.associate_chargers_to_electric_vehicles()
+
+        return render_end - render_start
 
     def associate_chargers_to_electric_vehicles(self):
         r"""Associate charger to its corresponding electric_vehicle based on charger simulation state."""
