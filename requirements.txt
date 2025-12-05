@@ -1,4 +1,3 @@
-doe_xstock>=1.1.0
 gymnasium<=0.28.1
 nrel-pysam
 numpy<2.0.0
@@ -8,4 +7,5 @@ scikit-learn<=1.2.2
 simplejson
 torch
 torchvision
-openstudio<=3.3.0
+platformdirs
+requests
