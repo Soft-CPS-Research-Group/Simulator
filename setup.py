@@ -31,6 +31,9 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=requirements,
+    extras_require={
+        'pysam': ['nrel-pysam'],
+    },
     entry_points={'console_scripts': ['citylearn = citylearn.__main__:main']},
     classifiers=[
         'Programming Language :: Python :: 3',

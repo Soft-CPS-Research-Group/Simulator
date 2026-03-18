@@ -15,6 +15,11 @@ Install latest release in PyPi with `pip`:
 pip install CityLearn
 ```
 
+Optional dependency for PV autosizing (`PySAM`):
+```console
+pip install "CityLearn[pysam]"
+```
+
 ## Documentation
 Refer to the [docs](https://intelligent-environments-lab.github.io/CityLearn/).
 
