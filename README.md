@@ -15,6 +15,11 @@ Install latest release in PyPi with `pip`:
 pip install softcpsrecsimulator
 ```
 
+Optional dependency for PV autosizing (`PySAM`):
+```console
+pip install "softcpsrecsimulator[pysam]"
+```
+
 Python import path remains:
 ```python
 from citylearn.citylearn import CityLearnEnv
