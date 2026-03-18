@@ -8,4 +8,4 @@ scikit-learn<=1.2.2
 simplejson
 torch
 torchvision
-openstudio<=3.3.0
+openstudio<=3.10.0
