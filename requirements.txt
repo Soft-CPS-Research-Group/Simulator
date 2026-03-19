@@ -1,4 +1,4 @@
-doe_xstock>=1.1.0
+doe_xstock>=2.0.0
 gymnasium<=0.28.1
 numpy<2.0.0
 pandas
