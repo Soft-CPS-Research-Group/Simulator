@@ -34,6 +34,6 @@ The interface is available in two options:
 
 You can check a tutorial at the official CityLearn [website](https://intelligent-environments-lab.github.io/CityLearn/ui.html), in the CityLearn UI repository [README](https://github.com/Soft-CPS-Research-Group/citylearn-ui), or at the help [tooltip of the oficial webapp](https://citylearn-ui.netlify.app/admin/help).
 
-**Compatibility:** This version of the UI currently supports CityLearn v2.5.0 simulation data.
+**Compatibility:** This version of the UI currently supports CityLearn v2.6.0b1 simulation data.
 
 **Developed by:** José, a member of the [SoftCPS](https://www2.isep.ipp.pt/softcps/), Software for Cyber-Physical Systems research group (ISEP, Portugal) in collaboration with the Intelligent Environments Lab, University of Texas at Austin.
