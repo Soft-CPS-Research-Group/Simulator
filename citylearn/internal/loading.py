@@ -114,9 +114,8 @@ class CityLearnLoadingService:
         schema['simulation_end_time_step'] = kwargs['simulation_end_time_step'] if kwargs.get('simulation_end_time_step') is not None else schema['simulation_end_time_step']
         episode_tracker = EpisodeTracker(schema['simulation_start_time_step'], schema['simulation_end_time_step'])
 
-        dataset = DataSet()
-        pv_sizing_data = dataset.get_pv_sizing_data()
-        battery_sizing_data = dataset.get_battery_sizing_data()
+        pv_sizing_data = None
+        battery_sizing_data = None
 
         buildings_to_include = list(schema['buildings'].keys())
         buildings: List[Building] = []
@@ -144,6 +143,54 @@ class CityLearnLoadingService:
                 b for b in buildings_to_include
                 if parse_bool(schema['buildings'][b].get('include', True), default=True, path=f'buildings.{b}.include')
             ]
+
+        if len(buildings_to_include) > 0:
+            solar_generation = kwargs.get('solar_generation')
+            solar_generation = True if solar_generation is None else solar_generation
+
+            def _is_solar_generation_enabled(index: int) -> bool:
+                if isinstance(solar_generation, list):
+                    return bool(
+                        parse_bool(
+                            solar_generation[index],
+                            default=True,
+                            path=f'solar_generation[{index}]',
+                        )
+                    )
+
+                return bool(parse_bool(solar_generation, default=True, path='solar_generation'))
+
+            require_pv_sizing_data = False
+            require_battery_sizing_data = False
+
+            for i, building_name in enumerate(buildings_to_include):
+                building_schema = schema['buildings'][building_name]
+                pv_schema = building_schema.get('pv') or {}
+                electrical_storage_schema = building_schema.get('electrical_storage') or {}
+                pv_autosize = parse_bool(
+                    pv_schema.get('autosize', False),
+                    default=False,
+                    path=f'buildings.{building_name}.pv.autosize',
+                )
+                battery_autosize = parse_bool(
+                    electrical_storage_schema.get('autosize', False),
+                    default=False,
+                    path=f'buildings.{building_name}.electrical_storage.autosize',
+                )
+                require_pv_sizing_data = require_pv_sizing_data or (pv_autosize and _is_solar_generation_enabled(i))
+                require_battery_sizing_data = require_battery_sizing_data or battery_autosize
+
+                if require_pv_sizing_data and require_battery_sizing_data:
+                    break
+
+            if require_pv_sizing_data or require_battery_sizing_data:
+                dataset = DataSet(offline=self.env.offline)
+
+                if require_pv_sizing_data:
+                    pv_sizing_data = dataset.get_pv_sizing_data()
+
+                if require_battery_sizing_data:
+                    battery_sizing_data = dataset.get_battery_sizing_data()
 
         for i, building_name in enumerate(buildings_to_include):
             buildings.append(self.load_building(i, building_name, schema, episode_tracker, pv_sizing_data, battery_sizing_data, **kwargs))

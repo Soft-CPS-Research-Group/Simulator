@@ -21,8 +21,11 @@ if str(ROOT) not in sys.path:
 
 
 @pytest.fixture(autouse=True)
-def _prefer_local_datasets(monkeypatch):
+def _prefer_local_datasets(monkeypatch, request):
     """Ensure tests use the repo's datasets without hitting the network."""
+
+    if request.node.get_closest_marker("use_real_dataset_resolution") is not None:
+        return
 
     from citylearn.data import DataSet
 

@@ -15,7 +15,7 @@ import random
 from citylearn.base import Environment, EpisodeTracker
 from citylearn.building import Building, DynamicsBuilding
 from citylearn.cost_function import CostFunction
-from citylearn.data import CarbonIntensity, DataSet, ChargerSimulation, EnergySimulation, LogisticRegressionOccupantParameters, Pricing, WashingMachineSimulation, Weather
+from citylearn.data import CarbonIntensity, DataSet, OfflineDataError, ChargerSimulation, EnergySimulation, LogisticRegressionOccupantParameters, Pricing, WashingMachineSimulation, Weather
 from citylearn.electric_vehicle import ElectricVehicle
 from citylearn.energy_model import Battery, PV, WashingMachine
 from citylearn.exporter import EpisodeExporter
@@ -116,6 +116,9 @@ class CityLearnEnv(Environment, Env):
         each building independently in a :code:`List[bool]`. Will override :code:`pv` defined in the :code:`schema`.
     random_seed: int, optional
         Pseudorandom number generator seed for repeatable results.
+    offline: bool, default: False
+        If True, disables all network fallbacks for datasets and misc sizing data. Initialization fails with a clear
+        error when required files are not available locally.
 
     Other Parameters
     ----------------
@@ -150,7 +153,7 @@ class CityLearnEnv(Environment, Env):
         random_episode_split: bool = None, seconds_per_time_step: float = None, reward_function: Union[RewardFunction, str] = None, reward_function_kwargs: Mapping[str, Any] = None,
         central_agent: bool = None, shared_observations: List[str] = None, active_observations: Union[List[str], List[List[str]]] = None,
         inactive_observations: Union[List[str], List[List[str]]] = None, active_actions: Union[List[str], List[List[str]]] = None,
-        inactive_actions: Union[List[str], List[List[str]]] = None, simulate_power_outage: bool = None, solar_generation: bool = None, random_seed: int = None, time_step_ratio: int = None,
+        inactive_actions: Union[List[str], List[List[str]]] = None, simulate_power_outage: bool = None, solar_generation: bool = None, random_seed: int = None, offline: bool = None, time_step_ratio: int = None,
         start_date: Union[str, datetime.date] = None, render_session_name: str = None, render_mode: str = 'none',
         export_kpis_on_episode_end: bool = None, **kwargs: Any
     ):
@@ -169,6 +172,7 @@ class CityLearnEnv(Environment, Env):
         kw_render_session_name = kwargs.pop('render_session_name', None)
         if kw_render_session_name is not None:
             render_session_name = kw_render_session_name if render_session_name is None else render_session_name
+        self.offline = offline
         self.schema = schema
         self.community_market_enabled = False
         self.community_market_sell_ratio = 0.8
@@ -341,6 +345,12 @@ class CityLearnEnv(Environment, Env):
         """`dict` object of CityLearn schema."""
 
         return self.__schema
+
+    @property
+    def offline(self) -> bool:
+        """Whether network access should be disabled for dataset/misc lookups."""
+
+        return self.__offline
 
     @property
     def render_enabled(self) -> bool:
@@ -912,18 +922,40 @@ class CityLearnEnv(Environment, Env):
 
     @schema.setter
     def schema(self, schema: Union[str, Path, Mapping[str, Any]]):
-        dataset = DataSet()
+        dataset = DataSet(offline=self.offline)
 
-        if isinstance(schema, (str, Path)) and os.path.isfile(schema):
-            schema_filepath = Path(schema) if isinstance(schema, str) else schema
-            schema = FileHandler.read_json(schema)
-            schema['root_directory'] = os.path.split(schema_filepath.absolute())[0] if schema['root_directory'] is None \
-                else schema['root_directory']
-        
-        elif isinstance(schema, str) and schema in dataset.get_dataset_names():
-            schema = dataset.get_schema(schema)
-            schema['root_directory'] = '' if schema['root_directory'] is None else schema['root_directory']
-        
+        if isinstance(schema, (str, Path)):
+            schema_path = Path(schema).expanduser()
+
+            if schema_path.is_dir():
+                schema_path = schema_path / 'schema.json'
+
+            if schema_path.is_file():
+                schema = FileHandler.read_json(schema_path)
+                schema['root_directory'] = os.path.split(schema_path.absolute())[0] if schema['root_directory'] is None \
+                    else schema['root_directory']
+
+            elif isinstance(schema, str):
+                try:
+                    dataset_names = dataset.get_dataset_names()
+                except OfflineDataError as e:
+                    raise UnknownSchemaError(str(e)) from e
+
+                if schema in dataset_names:
+                    schema = dataset.get_schema(schema)
+                    schema['root_directory'] = '' if schema['root_directory'] is None else schema['root_directory']
+                else:
+                    if self.offline:
+                        raise UnknownSchemaError(
+                            f"Schema '{schema}' was not found locally while offline mode is enabled. "
+                            "Provide a local schema.json file path or place the dataset under a local datasets root."
+                        )
+
+                    raise UnknownSchemaError()
+
+            else:
+                raise UnknownSchemaError(f'Schema file path does not exist: {schema_path}')
+
         elif isinstance(schema, dict):
             schema = deepcopy(schema)
             schema['root_directory'] = '' if schema['root_directory'] is None else schema['root_directory']
@@ -932,6 +964,10 @@ class CityLearnEnv(Environment, Env):
             raise UnknownSchemaError()
         
         self.__schema = schema
+
+    @offline.setter
+    def offline(self, value: bool):
+        self.__offline = False if value is None else bool(parse_bool(value, default=False, path='offline'))
 
     @render_enabled.setter
     def render_enabled(self, enabled: bool):

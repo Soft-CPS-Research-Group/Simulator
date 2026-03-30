@@ -3,14 +3,14 @@ import os
 from pathlib import Path
 from platformdirs import user_cache_dir
 import shutil
-from typing import Any, Iterable, Mapping, List, Union
+from typing import Any, Iterable, Mapping, List, Optional, Union
 import numpy as np
 import pandas as pd
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from citylearn.__init__ import __version__
-from citylearn.utilities import FileHandler, NoiseUtils
+from citylearn.utilities import FileHandler, NoiseUtils, parse_bool
 
 LOGGER = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
@@ -20,9 +20,26 @@ ZERO_DIVISION_PLACEHOLDER = 0.000001
 MISC_DIRECTORY = os.path.join(os.path.dirname(__file__), 'misc')
 QUERIES_DIRECTORY = os.path.join(MISC_DIRECTORY, 'queries')
 SETTINGS_FILEPATH = os.path.join(MISC_DIRECTORY, 'settings.yaml')
-LOCAL_DATA_MISC_DIRECTORY = os.path.normpath(
-    os.path.join(os.path.dirname(__file__), '..', 'data', 'misc')
+LOCAL_DATA_DIRECTORY = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), '..', 'data')
 )
+LOCAL_DATA_DATASETS_DIRECTORY = os.path.join(LOCAL_DATA_DIRECTORY, 'datasets')
+LOCAL_DATA_MISC_DIRECTORY = os.path.normpath(
+    os.path.join(LOCAL_DATA_DIRECTORY, 'misc')
+)
+
+
+class OfflineDataError(RuntimeError):
+    """Raised when offline mode blocks network fallback or required local data is unavailable."""
+
+
+def _parse_env_bool(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+
+    if value is None:
+        return default
+
+    return bool(parse_bool(value, default=default, path=name))
 
 def get_settings():
     directory = os.path.join(os.path.join(os.path.dirname(__file__), 'misc'))
@@ -37,6 +54,7 @@ class DataSet:
     GITHUB_ACCOUNT = os.getenv('CITYLEARN_DATASET_GITHUB_ACCOUNT', 'Soft-CPS-Research-Group')
     REPOSITORY_NAME = os.getenv('CITYLEARN_DATASET_REPOSITORY', 'Simulator')
     REPOSITORY_TAG = os.getenv('CITYLEARN_DATASET_TAG', f'v{__version__}')
+    OFFLINE = _parse_env_bool('CITYLEARN_OFFLINE', False)
     REPOSITORY_DATA_PATH = FileHandler.join_url('data')
     REPOSITORY_DATA_DATASETS_PATH = FileHandler.join_url(REPOSITORY_DATA_PATH, 'datasets')
     REPOSITORY_DATA_MISC_PATH = FileHandler.join_url(REPOSITORY_DATA_PATH, 'misc')
@@ -45,13 +63,17 @@ class DataSet:
     BATTERY_CHOICES_FILENAME = 'battery_choices.yaml'
     PV_CHOICES_FILENAME = 'lbl-tracking_the_sun-res-pv.csv'
 
-    def __init__(self, github_account: str = None, repository: str = None, tag: str = None, datasets_path: str = None, misc_path: str = None, logging_level: int = None):
+    def __init__(
+        self, github_account: str = None, repository: str = None, tag: str = None, datasets_path: str = None,
+        misc_path: str = None, logging_level: int = None, offline: bool = None
+    ):
         self.github_account = github_account
         self.repository = repository
         self.tag = tag
         self.datasets_path = datasets_path
         self.misc_path = misc_path
         self.logging_level = logging_level
+        self.offline = offline
 
     @property
     def github_account(self) -> str:
@@ -87,6 +109,32 @@ class DataSet:
     @property
     def logging_level(self) -> int:
         return self.__logging_level
+
+    @property
+    def offline(self) -> bool:
+        return self.__offline
+
+    @property
+    def local_datasets_directories(self) -> List[str]:
+        env_value = os.getenv('CITYLEARN_LOCAL_DATASETS_PATH')
+        env_paths = [] if env_value is None else [p for p in env_value.split(os.pathsep) if p.strip() != '']
+        default_paths = [
+            LOCAL_DATA_DATASETS_DIRECTORY,
+            os.path.join(os.getcwd(), 'data', 'datasets'),
+        ]
+
+        return self._existing_directories([*env_paths, *default_paths])
+
+    @property
+    def local_misc_directories(self) -> List[str]:
+        env_value = os.getenv('CITYLEARN_LOCAL_MISC_PATH')
+        env_paths = [] if env_value is None else [p for p in env_value.split(os.pathsep) if p.strip() != '']
+        default_paths = [
+            LOCAL_DATA_MISC_DIRECTORY,
+            os.path.join(os.getcwd(), 'data', 'misc'),
+        ]
+
+        return self._existing_directories([*env_paths, *default_paths])
     
     @github_account.setter
     def github_account(self, value: str):
@@ -113,6 +161,64 @@ class DataSet:
         self.__logging_level = 20 if value is None else value
         LOGGER.setLevel(self.logging_level)
 
+    @offline.setter
+    def offline(self, value: bool):
+        self.__offline = self.OFFLINE if value is None else bool(parse_bool(value, default=False, path='offline'))
+
+    @staticmethod
+    def _existing_directories(directories: Iterable[str]) -> List[str]:
+        existing_directories: List[str] = []
+        seen_directories = set()
+
+        for directory in directories:
+            if directory is None:
+                continue
+
+            normalized_directory = os.path.abspath(os.path.expanduser(str(directory)))
+
+            if normalized_directory in seen_directories:
+                continue
+
+            if os.path.isdir(normalized_directory):
+                seen_directories.add(normalized_directory)
+                existing_directories.append(normalized_directory)
+
+        return existing_directories
+
+    def _find_local_dataset_root(self, name: str) -> Optional[str]:
+        normalized_name = str(name).strip()
+        name_path = Path(normalized_name).expanduser()
+
+        if name_path.is_dir() and (name_path / 'schema.json').is_file():
+            return str(name_path.resolve())
+
+        for root in self.local_datasets_directories:
+            candidate = Path(root) / normalized_name
+
+            if candidate.is_dir() and (candidate / 'schema.json').is_file():
+                return str(candidate.resolve())
+
+        return None
+
+    def _find_local_misc_filepath(self, filename: str) -> Optional[str]:
+        for root in self.local_misc_directories:
+            filepath = Path(root) / filename
+
+            if filepath.is_file():
+                return str(filepath.resolve())
+
+        return None
+
+    def _get_local_dataset_names(self) -> List[str]:
+        dataset_names = set()
+
+        for root in self.local_datasets_directories:
+            for dataset_path in Path(root).iterdir():
+                if dataset_path.is_dir() and (dataset_path / 'schema.json').is_file():
+                    dataset_names.add(dataset_path.name)
+
+        return sorted(dataset_names)
+
     def get_schema(self, name: str) -> dict:
         schema_filepath = self.get_dataset(name)
         schema = FileHandler.read_json(schema_filepath)
@@ -121,65 +227,86 @@ class DataSet:
         return schema
 
     def get_dataset(self, name: str, directory: Union[Path, str] = None) -> str:
+        dataset_name = Path(str(name).rstrip('/')).name
         datasets_directory = os.path.join(self.cache_directory, 'datasets')
-        root_directory = os.path.join(datasets_directory, name)
+        root_directory = os.path.join(datasets_directory, dataset_name)
         schema_filepath = os.path.join(root_directory, 'schema.json')
-        path = FileHandler.join_url(self.datasets_path, name)
+        path = FileHandler.join_url(self.datasets_path, dataset_name)
 
         # check that dataset does not already exist using the schema as a proxy
-        LOGGER.info(f'Go here {schema_filepath} ')
         if not os.path.isfile(schema_filepath):
-            LOGGER.info(f'The {name} dataset DNE in cache. Will download from '
-                f'{self.github_account}/{self.repository}/tree/{self.tag} GitHub repository and write to {datasets_directory}. '
-                    f'Next time DataSet.get_dataset(\'{name}\') is called, it will read '
-                        'from cache unless DataSet.clear_cache is run first.')
-            contents = self.get_github_contents(path)
+            local_root_directory = self._find_local_dataset_root(str(name))
 
-            if os.path.isdir(root_directory):
-                shutil.rmtree(root_directory)
-            
+            if local_root_directory is not None:
+                if os.path.isdir(root_directory):
+                    shutil.rmtree(root_directory)
+
+                shutil.copytree(local_root_directory, root_directory)
+
             else:
-                pass
+                if self.offline:
+                    local_directories = self.local_datasets_directories
+                    local_directories_message = ', '.join(local_directories) if len(local_directories) > 0 else '(none)'
+                    raise OfflineDataError(
+                        f"Offline mode is enabled and dataset '{dataset_name}' was not found locally. "
+                        f"Checked cache file '{schema_filepath}' and local dataset roots: {local_directories_message}. "
+                        "Pass a local schema.json file path or place the dataset under one of the local roots."
+                    )
 
-            for c in contents:
-                if c['type'] == 'file':
-                    relative_directory_content = c['path'].split(f'{name}/')[-1].split('/')[:-1]
-                    content_directory = os.path.join(root_directory, *relative_directory_content)
-                    filepath = os.path.join(content_directory, c['name'])
-                    os.makedirs(content_directory, exist_ok=True)
-                    response = self.get_requests_session().get(c['download_url'])
+                LOGGER.info(
+                    f'The {dataset_name} dataset DNE in cache/local roots. Will download from '
+                    f'{self.github_account}/{self.repository}/tree/{self.tag} GitHub repository and write to {datasets_directory}. '
+                    f'Next time DataSet.get_dataset(\'{dataset_name}\') is called, it will read '
+                    'from cache unless DataSet.clear_cache is run first.'
+                )
+                contents = self.get_github_contents(path)
 
-                    with open(filepath, 'wb') as f:
-                        f.write(response.content)
+                if os.path.isdir(root_directory):
+                    shutil.rmtree(root_directory)
 
-                else:
-                    pass
+                for c in contents:
+                    if c['type'] == 'file':
+                        relative_directory_content = c['path'].split(f'{dataset_name}/')[-1].split('/')[:-1]
+                        content_directory = os.path.join(root_directory, *relative_directory_content)
+                        filepath = os.path.join(content_directory, c['name'])
+                        os.makedirs(content_directory, exist_ok=True)
+                        response = self.get_requests_session().get(c['download_url'])
 
-        else:
-            pass
+                        with open(filepath, 'wb') as f:
+                            f.write(response.content)
 
         if directory is not None:
             os.makedirs(directory, exist_ok=True)
             shutil.copytree(root_directory, directory, dirs_exist_ok=True)
-            schema_filepath = os.path.join(directory, name, 'schema.json')
-        
-        else:
-            pass
+            schema_filepath = os.path.join(directory, dataset_name, 'schema.json')
     
         return schema_filepath
 
     def get_dataset_names(self) -> List[str]:
-        contents = self.get_github_contents(self.datasets_path)
         filepath = os.path.join(self.cache_directory, 'dataset_names.json')
+        local_dataset_names = self._get_local_dataset_names()
 
-        if os.path.isfile(filepath):
+        if len(local_dataset_names) > 0:
+            cached_dataset_names = FileHandler.read_json(filepath) if os.path.isfile(filepath) else []
+            contents = sorted(set(local_dataset_names).union(cached_dataset_names))
+
+        elif os.path.isfile(filepath):
             contents = FileHandler.read_json(filepath)
-        
+
+        elif self.offline:
+            local_directories = self.local_datasets_directories
+            local_directories_message = ', '.join(local_directories) if len(local_directories) > 0 else '(none)'
+            raise OfflineDataError(
+                'Offline mode is enabled and dataset names are not cached and no local datasets were found. '
+                f'Checked dataset roots: {local_directories_message}.'
+            )
+
         else:
             LOGGER.info(f'The dataset names DNE in cache. Will download from '
                 f'{self.github_account}/{self.repository}/tree/{self.tag} GitHub repository and write to {filepath}. '
                     'Next time DataSet.get_dataset_names is called, it will read '
                         'from cache unless DataSet.clear_cache is run first.')
+            contents = self.get_github_contents(self.datasets_path)
             contents = [
                 r['name'] for r in contents 
                     if r.get('type') == 'dir' 
@@ -204,15 +331,23 @@ class DataSet:
         filepath = os.path.join(misc_directory, self.PV_CHOICES_FILENAME)
         path = FileHandler.join_url(self.misc_path)
 
-        # Prefer local repository data to avoid unnecessary network usage.
+        # Prefer local data to avoid unnecessary network usage.
         if not os.path.isfile(filepath):
-            local_filepath = os.path.join(LOCAL_DATA_MISC_DIRECTORY, self.PV_CHOICES_FILENAME)
+            local_filepath = self._find_local_misc_filepath(self.PV_CHOICES_FILENAME)
 
-            if os.path.isfile(local_filepath):
+            if local_filepath is not None:
                 shutil.copy(local_filepath, filepath)
 
         # check that file DNE
         if not os.path.isfile(filepath):
+            if self.offline:
+                local_directories = self.local_misc_directories
+                local_directories_message = ', '.join(local_directories) if len(local_directories) > 0 else '(none)'
+                raise OfflineDataError(
+                    f"Offline mode is enabled and '{self.PV_CHOICES_FILENAME}' was not found locally. "
+                    f"Checked cache file '{filepath}' and local misc roots: {local_directories_message}."
+                )
+
             LOGGER.info(f'The PV sizing data DNE in cache. Will download from '
                 f'{self.github_account}/{self.repository}/tree/{self.tag} GitHub repository and write to {misc_directory}. '
                     'Next time DataSet.get_pv_sizing_data is called, it will read '
@@ -244,15 +379,23 @@ class DataSet:
         filepath = os.path.join(misc_directory, self.BATTERY_CHOICES_FILENAME)
         path = FileHandler.join_url(self.misc_path)
 
-        # Prefer local repository data to avoid unnecessary network usage.
+        # Prefer local data to avoid unnecessary network usage.
         if not os.path.isfile(filepath):
-            local_filepath = os.path.join(LOCAL_DATA_MISC_DIRECTORY, self.BATTERY_CHOICES_FILENAME)
+            local_filepath = self._find_local_misc_filepath(self.BATTERY_CHOICES_FILENAME)
 
-            if os.path.isfile(local_filepath):
+            if local_filepath is not None:
                 shutil.copy(local_filepath, filepath)
 
         # check that file DNE
         if not os.path.isfile(filepath):
+            if self.offline:
+                local_directories = self.local_misc_directories
+                local_directories_message = ', '.join(local_directories) if len(local_directories) > 0 else '(none)'
+                raise OfflineDataError(
+                    f"Offline mode is enabled and '{self.BATTERY_CHOICES_FILENAME}' was not found locally. "
+                    f"Checked cache file '{filepath}' and local misc roots: {local_directories_message}."
+                )
+
             LOGGER.info(f'The battery sizing data DNE in cache. Will download from '
                 f'{self.github_account}/{self.repository}/tree/{self.tag} GitHub repository and write to {misc_directory}. '
                     'Next time DataSet.get_battery_sizing_data is called, it will read '
@@ -281,6 +424,12 @@ class DataSet:
             pass
 
     def get_github_contents(self, path: str = None) -> List[Mapping[str, Any]]:
+        if self.offline:
+            raise OfflineDataError(
+                'Offline mode is enabled and GitHub access is disabled. '
+                'Provide local data files or disable offline mode.'
+            )
+
         url = self.GITHUB_API_CONTENT_URL if path is None else FileHandler.join_url(self.GITHUB_API_CONTENT_URL, path) 
         params = dict(ref=self.tag)
         contents = self.get_requests_session().get(url, params=params)
@@ -305,6 +454,7 @@ class DataSet:
         }
         retries = Retry(**kwargs)
         session.mount('http://', HTTPAdapter(max_retries=retries))
+        session.mount('https://', HTTPAdapter(max_retries=retries))
         
         return session
     

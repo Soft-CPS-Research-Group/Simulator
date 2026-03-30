@@ -69,13 +69,14 @@ def run_work_order(work_order_filepath, max_workers=None, start_index=None, end_
 class Simulator:
     def __init__(self, schema: str, agent_name: str = None, env_kwargs: Mapping[str, Any] = None, agent_kwargs: Mapping[str, Any] = None, wrappers: List[str] = None,
      time_series_variables: List[str] = None, simulation_id: str = None, output_directory: Union[Path, str] = None, agent_filepath: Union[Path, str] = None,
-     random_seed: int = None, overwrite: bool = None
+     random_seed: int = None, offline: bool = None, overwrite: bool = None
     ) -> None:
         self.schema = schema
         self.agent_name = agent_name
         self.env_kwargs = env_kwargs
         self.agent_kwargs = agent_kwargs
         self.random_seed = random_seed
+        self.offline = offline
         self.wrappers = wrappers
         self.time_series_variables = time_series_variables
         self.simulation_id = simulation_id
@@ -123,6 +124,10 @@ class Simulator:
     @property
     def random_seed(self) -> int:
         return self.__random_seed
+
+    @property
+    def offline(self) -> bool:
+        return self.__offline
     
     @property
     def overwrite(self) -> bool:
@@ -189,6 +194,13 @@ class Simulator:
 
         else:
             pass
+
+    @offline.setter
+    def offline(self, value: bool):
+        self.__offline = False if value is None else bool(value)
+
+        if self.offline:
+            self.env_kwargs['offline'] = True
 
     @overwrite.setter
     def overwrite(self, value: bool):
@@ -464,6 +476,8 @@ def main():
         'Add to output for existing simulation with `simulation_id` i.e. do not overwrite.'))
     subparser_simulate.add_argument('-rs', '--random_seed', dest='random_seed', type=int, help=(
         'Random seed used during environment and agent initialization.'))
+    subparser_simulate.add_argument('--offline', dest='offline', action='store_true', help=(
+        'Disable network access and require datasets/misc files to be available locally.'))
     simulation_subparsers = subparser_simulate.add_subparsers(title='simulate subcommands', required=True, dest='subcommands')
 
     # -> train an agent
