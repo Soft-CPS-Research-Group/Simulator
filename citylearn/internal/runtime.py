@@ -463,6 +463,38 @@ class CityLearnRuntimeService:
 
         return allocations
 
+    @staticmethod
+    def _allocate_weighted_share_import(imports: np.ndarray, traded_kwh: float, weights: np.ndarray) -> np.ndarray:
+        """Allocate local traded energy among importers using member weights with demand caps."""
+
+        allocations = np.zeros_like(imports, dtype='float64')
+        remaining = max(float(traded_kwh), 0.0)
+        eps = 1e-9
+        weights = np.array(weights, dtype='float64')
+        weights = np.clip(weights, 0.0, None)
+
+        while remaining > eps:
+            needs = imports - allocations
+            active = needs > eps
+            if not np.any(active):
+                break
+
+            active_weights = weights[active]
+            weight_sum = float(active_weights.sum())
+            if weight_sum <= eps:
+                granted = np.minimum(remaining / float(np.count_nonzero(active)), needs[active])
+            else:
+                granted = np.minimum(remaining * (active_weights / weight_sum), needs[active])
+
+            granted_total = float(granted.sum())
+            if granted_total <= eps:
+                break
+
+            allocations[active] += granted
+            remaining -= granted_total
+
+        return allocations
+
     def _apply_community_market_settlement(self):
         """Apply optional intracommunity settlement and override building costs for current step."""
 
@@ -481,9 +513,14 @@ class CityLearnRuntimeService:
         total_import = float(imports.sum())
         total_export = float(exports.sum())
         traded_kwh = min(total_import, total_export)
+        weights_cfg = getattr(env, 'community_market_import_member_weights', {}) or {}
+        weights = np.array(
+            [self._to_scalar(weights_cfg.get(building.name, 1.0), 1.0) for building in env.buildings],
+            dtype='float64',
+        )
 
         if total_import > 0.0 and traded_kwh > 0.0:
-            local_import = self._allocate_equal_share_import(imports, traded_kwh)
+            local_import = self._allocate_weighted_share_import(imports, traded_kwh, weights)
         else:
             local_import = np.zeros_like(imports, dtype='float64')
 

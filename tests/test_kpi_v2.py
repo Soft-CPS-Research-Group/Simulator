@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -15,6 +16,29 @@ from citylearn.cost_function import CostFunction
 SCHEMA = Path(__file__).resolve().parents[1] / "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json"
 THREE_PHASE_SCHEMA = Path(__file__).resolve().parents[1] / "data/datasets/citylearn_three_phase_electrical_service_demo/schema.json"
 MINUTE_DATASET_DIR = Path(__file__).resolve().parents[1] / "tests" / "data" / "minute_ev_demo"
+LEGACY_KPI_KEYS = {
+    "all_time_peak_average",
+    "annual_normalized_unserved_energy_total",
+    "carbon_emissions_total",
+    "cost_total",
+    "daily_one_minus_load_factor_average",
+    "daily_peak_average",
+    "discomfort_cold_delta_average",
+    "discomfort_cold_delta_maximum",
+    "discomfort_cold_delta_minimum",
+    "discomfort_cold_proportion",
+    "discomfort_hot_delta_average",
+    "discomfort_hot_delta_maximum",
+    "discomfort_hot_delta_minimum",
+    "discomfort_hot_proportion",
+    "discomfort_proportion",
+    "electricity_consumption_total",
+    "monthly_one_minus_load_factor_average",
+    "one_minus_thermal_resilience_proportion",
+    "power_outage_normalized_unserved_energy_total",
+    "ramping_average",
+    "zero_net_energy",
+}
 
 
 def _run_episode(schema: Path, seconds_per_time_step: int, episode_steps: int = 24) -> CityLearnEnv:
@@ -279,7 +303,7 @@ def test_daily_and_monthly_kpis_use_time_aware_windows(seconds_per_time_step: in
     try:
         control = EvaluationCondition.WITH_STORAGE_AND_PV
         baseline = EvaluationCondition.WITHOUT_STORAGE_BUT_WITH_PV
-        df = env.evaluate(control_condition=control, baseline_condition=baseline)
+        df = env.evaluate_v2(control_condition=control, baseline_condition=baseline)
 
         daily_steps = max(1, int(round((24 * 3600) / seconds_per_time_step)))
         monthly_steps = max(1, int(round((730 * 3600) / seconds_per_time_step)))
@@ -310,9 +334,9 @@ def test_daily_and_monthly_kpis_use_time_aware_windows(seconds_per_time_step: in
         expected_peak_daily = safe_div(float(peak_daily_c), float(peak_daily_b))
 
         district = df[df["name"] == "District"].set_index("cost_function")["value"]
-        assert float(district["daily_one_minus_load_factor_average"]) == pytest.approx(expected_daily)
-        assert float(district["monthly_one_minus_load_factor_average"]) == pytest.approx(expected_monthly)
-        assert float(district["daily_peak_average"]) == pytest.approx(expected_peak_daily)
+        assert float(district["district_energy_grid_shape_quality_load_factor_penalty_daily_average_to_baseline_ratio"]) == pytest.approx(expected_daily)
+        assert float(district["district_energy_grid_shape_quality_load_factor_penalty_monthly_average_to_baseline_ratio"]) == pytest.approx(expected_monthly)
+        assert float(district["district_energy_grid_shape_quality_peak_daily_average_to_baseline_ratio"]) == pytest.approx(expected_peak_daily)
     finally:
         env.close()
 
@@ -335,15 +359,15 @@ def test_cost_baseline_total_eur_not_forced_to_zero_when_price_sum_is_zero(tmp_p
         baseline_array = np.asarray(baseline_series, dtype="float64")
         expected_baseline_total = float(baseline_array[np.isfinite(baseline_array)].sum())
 
-        df = env.evaluate(
+        df = env.evaluate_v2(
             control_condition=EvaluationCondition.WITH_STORAGE_AND_PV,
             baseline_condition=baseline_condition,
         )
         building_value = float(
-            df[(df["name"] == "Building_1") & (df["cost_function"] == "cost_baseline_total_eur")]["value"].iloc[0]
+            df[(df["name"] == "Building_1") & (df["cost_function"] == "building_cost_total_baseline_eur")]["value"].iloc[0]
         )
         district_value = float(
-            df[(df["name"] == "District") & (df["cost_function"] == "cost_baseline_total_eur")]["value"].iloc[0]
+            df[(df["name"] == "District") & (df["cost_function"] == "district_cost_total_baseline_eur")]["value"].iloc[0]
         )
 
         assert expected_baseline_total != 0.0
@@ -360,30 +384,67 @@ def test_kpi_v2_adds_domain_and_market_metrics(tmp_path: Path):
     try:
         env.reset()
         env.step([np.zeros(len(env.action_names[0]), dtype="float32")])
-        df = env.evaluate()
+        df = env.evaluate_v2()
 
         expected = {
-            "electricity_consumption_control_total_kwh",
-            "cost_control_total_eur",
-            "cost_control_daily_average_eur",
-            "ev_departure_success_rate",
-            "bess_throughput_total_kwh",
-            "pv_generation_total_kwh",
-            "pv_export_daily_average_kwh",
-            "community_local_import_total_kwh",
-            "community_grid_export_after_local_daily_average_kwh",
-            "community_settled_cost_total_eur",
-            "community_market_savings_daily_average_eur",
-            "community_market_savings_total_eur",
+            "building_energy_grid_total_import_control_kwh",
+            "building_cost_total_control_eur",
+            "building_cost_daily_average_control_eur",
+            "building_ev_events_departure_within_tolerance_count",
+            "building_ev_performance_departure_success_ratio",
+            "building_ev_performance_departure_within_tolerance_ratio",
+            "building_battery_total_throughput_kwh",
+            "building_solar_self_consumption_total_generation_kwh",
+            "building_solar_self_consumption_daily_average_export_kwh",
+            "district_energy_grid_community_market_local_traded_total_kwh",
+            "district_energy_grid_community_market_local_traded_daily_average_kwh",
+            "district_solar_self_consumption_community_market_import_share_ratio",
         }
         assert expected.issubset(set(df["cost_function"].unique()))
+    finally:
+        env.close()
 
-        district = df[df["name"] == "District"].set_index("cost_function")["value"]
-        settled = float(district["community_settled_cost_total_eur"])
-        counterfactual = float(district["community_counterfactual_cost_total_eur"])
-        savings = float(district["community_market_savings_total_eur"])
 
-        assert savings == pytest.approx(counterfactual - settled, abs=1e-9)
+def test_ev_within_tolerance_kpis_are_consistent():
+    env = _run_episode(SCHEMA, seconds_per_time_step=60, episode_steps=120)
+
+    try:
+        df = env.evaluate_v2()
+        keys = set(df["cost_function"].unique())
+        assert "building_ev_events_departure_within_tolerance_count" in keys
+        assert "building_ev_performance_departure_within_tolerance_ratio" in keys
+        assert "district_ev_events_departure_within_tolerance_count" in keys
+        assert "district_ev_performance_departure_within_tolerance_ratio" in keys
+
+        for level, name in df[["level", "name"]].drop_duplicates().itertuples(index=False):
+            scoped = df[(df["level"] == level) & (df["name"] == name)].set_index("cost_function")["value"]
+            prefix = f"{level}_ev"
+
+            total_key = f"{prefix}_events_departure_count"
+            met_key = f"{prefix}_events_departure_met_count"
+            within_key = f"{prefix}_events_departure_within_tolerance_count"
+            success_ratio_key = f"{prefix}_performance_departure_success_ratio"
+            within_ratio_key = f"{prefix}_performance_departure_within_tolerance_ratio"
+
+            if total_key not in scoped:
+                continue
+
+            total = float(scoped[total_key])
+            met = float(scoped[met_key])
+            within = float(scoped[within_key])
+
+            assert within <= total + 1e-9
+
+            within_ratio = scoped[within_ratio_key]
+            success_ratio = scoped[success_ratio_key]
+
+            if total <= 1e-9:
+                assert pd.isna(within_ratio)
+            else:
+                assert float(within_ratio) == pytest.approx(within / total, abs=1e-9)
+                if not pd.isna(success_ratio):
+                    assert 0.0 - 1e-9 <= float(success_ratio) <= 1.0 + 1e-9
+            assert met <= total + 1e-9
     finally:
         env.close()
 
@@ -395,17 +456,16 @@ def test_daily_average_kpis_match_total_over_simulated_days(tmp_path: Path):
     try:
         env.reset()
         env.step([np.zeros(len(env.action_names[0]), dtype="float32")])
-        df = env.evaluate()
+        df = env.evaluate_v2()
         district = df[df["name"] == "District"].set_index("cost_function")["value"]
 
         simulated_days = max(int(env.time_step), 1) * float(env.seconds_per_time_step) / (24.0 * 3600.0)
 
         pairs = [
-            ("cost_delta_total_eur", "cost_delta_daily_average_eur"),
-            ("electricity_consumption_delta_total_kwh", "electricity_consumption_delta_daily_average_kwh"),
-            ("pv_export_total_kwh", "pv_export_daily_average_kwh"),
-            ("community_grid_export_after_local_total_kwh", "community_grid_export_after_local_daily_average_kwh"),
-            ("community_market_savings_total_eur", "community_market_savings_daily_average_eur"),
+            ("district_cost_total_delta_eur", "district_cost_daily_average_delta_eur"),
+            ("district_energy_grid_total_import_delta_kwh", "district_energy_grid_daily_average_import_delta_kwh"),
+            ("district_solar_self_consumption_total_export_kwh", "district_solar_self_consumption_daily_average_export_kwh"),
+            ("district_energy_grid_community_market_local_traded_total_kwh", "district_energy_grid_community_market_local_traded_daily_average_kwh"),
         ]
 
         for total_key, daily_key in pairs:
@@ -421,19 +481,19 @@ def test_phase_kpis_are_present_only_when_electrical_service_is_enabled():
     env_legacy = _run_episode(SCHEMA, seconds_per_time_step=60, episode_steps=8)
 
     try:
-        phase_df = env_phase.evaluate()
-        legacy_df = env_legacy.evaluate()
+        phase_df = env_phase.evaluate_v2()
+        legacy_df = env_legacy.evaluate_v2()
 
         phase_keys = set(phase_df["cost_function"].unique())
         legacy_keys = set(legacy_df["cost_function"].unique())
 
-        assert "phase_import_peak_kw_L1" in phase_keys
-        assert "phase_import_peak_kw_L2" in phase_keys
-        assert "phase_import_peak_kw_L3" in phase_keys
-        assert "electrical_service_violation_total_kwh" in phase_keys
+        assert "district_electrical_service_phase_phase_peaks_import_peak_l1_kw" in phase_keys
+        assert "district_electrical_service_phase_phase_peaks_import_peak_l2_kw" in phase_keys
+        assert "district_electrical_service_phase_phase_peaks_import_peak_l3_kw" in phase_keys
+        assert "district_electrical_service_phase_violations_energy_total_kwh" in phase_keys
 
-        assert "phase_import_peak_kw_L2" not in legacy_keys
-        assert "phase_import_peak_kw_L3" not in legacy_keys
+        assert "district_electrical_service_phase_phase_peaks_import_peak_l2_kw" not in legacy_keys
+        assert "district_electrical_service_phase_phase_peaks_import_peak_l3_kw" not in legacy_keys
     finally:
         env_phase.close()
         env_legacy.close()
@@ -444,24 +504,24 @@ def test_equity_kpis_are_exported_and_bpr_is_none_when_groups_are_incomplete(tmp
     env = _run_episode(schema_path, seconds_per_time_step=60, episode_steps=12)
 
     try:
-        df = env.evaluate()
+        df = env.evaluate_v2()
         expected = {
-            "equity_relative_benefit_percent",
-            "equity_gini_benefit",
-            "equity_cr20_benefit",
-            "equity_losers_percent",
-            "equity_bpr_asset_poor_over_rich",
+            "building_equity_benefit_relative_percent",
+            "district_equity_distribution_gini_benefit_ratio",
+            "district_equity_distribution_top20_benefit_ratio",
+            "district_equity_distribution_losers_percent",
+            "district_equity_distribution_bpr_asset_poor_over_rich_ratio",
         }
         assert expected.issubset(set(df["cost_function"].unique()))
 
         building_rows = df[
             (df["level"] == "building")
-            & (df["cost_function"] == "equity_relative_benefit_percent")
+            & (df["cost_function"] == "building_equity_benefit_relative_percent")
         ]
         assert len(building_rows) == len(env.buildings)
 
         district = df[df["name"] == "District"].set_index("cost_function")["value"]
-        assert pd.isna(district["equity_bpr_asset_poor_over_rich"])
+        assert pd.isna(district["district_equity_distribution_bpr_asset_poor_over_rich_ratio"])
     finally:
         env.close()
 
@@ -485,6 +545,11 @@ def test_equity_group_is_loaded_from_schema(tmp_path: Path):
 
 def test_extended_cost_and_equity_use_raw_cost_series(tmp_path: Path):
     schema_path = _build_two_building_market_schema(tmp_path)
+    with open(schema_path, "r", encoding="utf-8") as f:
+        schema = json.load(f)
+    schema["community_market"]["enabled"] = False
+    with open(schema_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f, indent=2)
     env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=2, random_seed=0)
 
     try:
@@ -516,21 +581,55 @@ def test_extended_cost_and_equity_use_raw_cost_series(tmp_path: Path):
         setattr(env, "net_electricity_consumption_cost_test_control", control_cost * env_count)
         setattr(env, "net_electricity_consumption_cost_test_baseline", baseline_cost * env_count)
 
-        df = env.evaluate(control_condition=control, baseline_condition=baseline)
+        df = env.evaluate_v2(control_condition=control, baseline_condition=baseline)
         building_name = env.buildings[0].name
         building_df = df[df["name"] == building_name].set_index("cost_function")["value"]
         district_df = df[df["name"] == "District"].set_index("cost_function")["value"]
 
-        assert float(building_df["cost_control_total_eur"]) == pytest.approx(-1.0)
-        assert float(building_df["cost_baseline_total_eur"]) == pytest.approx(2.0)
-        assert float(building_df["cost_delta_total_eur"]) == pytest.approx(-3.0)
-        assert float(building_df["equity_relative_benefit_percent"]) == pytest.approx(150.0)
+        assert float(building_df["building_cost_total_control_eur"]) == pytest.approx(-1.0)
+        assert float(building_df["building_cost_total_baseline_eur"]) == pytest.approx(2.0)
+        assert float(building_df["building_cost_total_delta_eur"]) == pytest.approx(-3.0)
+        assert float(building_df["building_equity_benefit_relative_percent"]) == pytest.approx(150.0)
 
         # Legacy normalized cost still uses clipped CostFunction.cost semantics.
-        assert float(building_df["cost_total"]) == pytest.approx(0.5)
+        legacy_df = env.evaluate(control_condition=control, baseline_condition=baseline)
+        legacy_building = legacy_df[legacy_df["name"] == building_name].set_index("cost_function")["value"]
+        assert float(legacy_building["cost_total"]) == pytest.approx(0.5)
 
-        assert float(district_df["cost_control_total_eur"]) == pytest.approx(-2.0)
-        assert float(district_df["cost_baseline_total_eur"]) == pytest.approx(4.0)
-        assert float(district_df["cost_delta_total_eur"]) == pytest.approx(-6.0)
+        assert float(district_df["district_cost_total_control_eur"]) == pytest.approx(-2.0)
+        assert float(district_df["district_cost_total_baseline_eur"]) == pytest.approx(4.0)
+        assert float(district_df["district_cost_total_delta_eur"]) == pytest.approx(-6.0)
+    finally:
+        env.close()
+
+
+def test_evaluate_is_legacy_only_and_v2_uses_prefixed_family_names():
+    env = _run_episode(SCHEMA, seconds_per_time_step=60, episode_steps=10)
+
+    try:
+        legacy = env.evaluate()
+        v2 = env.evaluate_v2()
+
+        legacy_keys = set(legacy["cost_function"].unique())
+        assert legacy_keys == LEGACY_KPI_KEYS
+
+        v2_keys = set(v2["cost_function"].unique())
+        assert not any(key in LEGACY_KPI_KEYS for key in v2_keys)
+        assert all(key.startswith(("building_", "district_")) for key in v2_keys)
+        assert all(re.match(r"^(building|district)_[a-z0-9]+(?:_[a-z0-9]+)+$", key) for key in v2_keys)
+
+        # Community-only KPIs must stay district-level whenever they exist.
+        for community_key in [
+            "district_energy_grid_community_market_local_traded_total_kwh",
+            "district_energy_grid_community_market_local_traded_daily_average_kwh",
+            "district_solar_self_consumption_community_market_import_share_ratio",
+        ]:
+            rows = v2[v2["cost_function"] == community_key]
+            if rows.empty:
+                continue
+            assert set(rows["level"]) == {"district"}
+            assert set(rows["name"]) == {"District"}
+
+        assert all("_autoconsumo_" not in key for key in v2_keys)
     finally:
         env.close()

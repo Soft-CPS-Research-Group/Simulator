@@ -205,11 +205,11 @@ def test_ui_export_layout_files_and_headers_contract(tmp_path):
 
         # Keep KPI CSV schema stable even when some metrics are undefined (all-NaN before CSV fill).
         for expected_kpi in {
-            "equity_gini_benefit",
-            "equity_cr20_benefit",
-            "equity_bpr_asset_poor_over_rich",
-            "equity_losers_percent",
-            "equity_relative_benefit_percent",
+            "district_equity_distribution_gini_benefit_ratio",
+            "district_equity_distribution_top20_benefit_ratio",
+            "district_equity_distribution_bpr_asset_poor_over_rich_ratio",
+            "district_equity_distribution_losers_percent",
+            "building_equity_benefit_relative_percent",
         }:
             assert expected_kpi in kpi_names, f"Missing KPI row in export contract: {expected_kpi}"
     finally:

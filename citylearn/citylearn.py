@@ -177,6 +177,9 @@ class CityLearnEnv(Environment, Env):
         self.community_market_enabled = False
         self.community_market_sell_ratio = 0.8
         self.community_market_grid_export_price = 0.0
+        self.community_market_import_member_weights: Mapping[str, float] = {}
+        self.community_market_kpi_local_traded_enabled = True
+        self.community_market_kpi_self_consumption_enabled = True
         self._last_community_market_settlement = []
         self._community_market_settlement_history = []
         self._configure_community_market()
@@ -1043,8 +1046,14 @@ class CityLearnEnv(Environment, Env):
             'shared_observations': self.shared_observations,
             'community_market': {
                 'enabled': self.community_market_enabled,
+                'local_price_ratio_to_grid_import': self.community_market_sell_ratio,
                 'intra_community_sell_ratio': self.community_market_sell_ratio,
                 'grid_export_price': self.community_market_grid_export_price,
+                'import_member_weights': self.community_market_import_member_weights,
+                'kpis': {
+                    'community_local_traded_enabled': self.community_market_kpi_local_traded_enabled,
+                    'community_self_consumption_enabled': self.community_market_kpi_self_consumption_enabled,
+                },
                 'matching_granularity': 'aggregate_building',
             },
             'buildings': [b.get_metadata() for b in self.buildings],
@@ -1120,7 +1129,18 @@ class CityLearnEnv(Environment, Env):
     def evaluate(self, control_condition: EvaluationCondition = None, baseline_condition: EvaluationCondition = None, comfort_band: float = None) -> pd.DataFrame:
         r"""Evaluate cost functions at current time step."""
 
-        return self._kpi_service.evaluate(
+        return self._kpi_service.evaluate_legacy(
+            control_condition=control_condition,
+            baseline_condition=baseline_condition,
+            comfort_band=comfort_band,
+            evaluation_condition_cls=EvaluationCondition,
+            dynamics_building_cls=DynamicsBuilding,
+        )
+
+    def evaluate_v2(self, control_condition: EvaluationCondition = None, baseline_condition: EvaluationCondition = None, comfort_band: float = None) -> pd.DataFrame:
+        r"""Evaluate v2 cost functions at current time step."""
+
+        return self._kpi_service.evaluate_v2(
             control_condition=control_condition,
             baseline_condition=baseline_condition,
             comfort_band=comfort_band,
@@ -1273,7 +1293,7 @@ class CityLearnEnv(Environment, Env):
             default=False,
             path='community_market.enabled',
         )
-        ratio = config.get('intra_community_sell_ratio', 0.8)
+        ratio = config.get('local_price_ratio_to_grid_import', config.get('intra_community_sell_ratio', 0.8))
 
         try:
             ratio = float(ratio)
@@ -1282,6 +1302,27 @@ class CityLearnEnv(Environment, Env):
 
         self.community_market_sell_ratio = min(max(ratio, 0.0), 1.0)
         self.community_market_grid_export_price = config.get('grid_export_price', 0.0)
+        weights = config.get('import_member_weights', {}) or {}
+        parsed_weights = {}
+        if isinstance(weights, Mapping):
+            for key, value in weights.items():
+                try:
+                    parsed_weights[str(key)] = max(float(value), 0.0)
+                except (TypeError, ValueError):
+                    continue
+
+        self.community_market_import_member_weights = parsed_weights
+        kpis_config = config.get('kpis', {}) or {}
+        self.community_market_kpi_local_traded_enabled = parse_bool(
+            kpis_config.get('community_local_traded_enabled', True),
+            default=True,
+            path='community_market.kpis.community_local_traded_enabled',
+        )
+        self.community_market_kpi_self_consumption_enabled = parse_bool(
+            kpis_config.get('community_self_consumption_enabled', True),
+            default=True,
+            path='community_market.kpis.community_self_consumption_enabled',
+        )
 
     def update_variables(self):
         """Update district-level aggregate variables."""

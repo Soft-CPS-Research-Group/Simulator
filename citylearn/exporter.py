@@ -59,9 +59,9 @@ class EpisodeExporter:
         file_path = os.path.join(env.new_folder_path, filepath)
 
         if model is not None and getattr(model, 'env', None) is not None:
-            kpis = model.env.evaluate()
+            kpis = model.env.evaluate_v2()
         else:
-            kpis = env.evaluate()
+            kpis = env.evaluate_v2()
 
         kpis = kpis.pivot(index='cost_function', columns='name', values='value').round(3)
         kpis = kpis.fillna('')

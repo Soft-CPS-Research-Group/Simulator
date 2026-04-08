@@ -848,6 +848,11 @@ class RLlibMultiAgentEnv(MultiAgentEnv):
 
         return self.env.unwrapped.evaluate(**kwargs)
 
+    def evaluate_v2(self, **kwargs) -> pd.DataFrame:
+        """Convenience method for :py:meth:`citylearn.citylearn.CityLearnEnv.evaluate_v2`."""
+
+        return self.env.unwrapped.evaluate_v2(**kwargs)
+
     def reset(self, *, seed: int = None, options: Mapping[str, Any] = None) -> Tuple[Mapping[str, np.ndarray], Mapping[str, dict]]:
         """Calls :py:meth:`citylearn.citylearn.CityLearnEnv.reset` and parses returned values into dictionaries."""
 

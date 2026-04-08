@@ -15,6 +15,31 @@ if TYPE_CHECKING:
 class CityLearnKPIService:
     """Internal KPI/evaluation service for `CityLearnEnv`."""
 
+    EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT = 0.05
+    LEGACY_COST_FUNCTIONS = {
+        'all_time_peak_average',
+        'annual_normalized_unserved_energy_total',
+        'carbon_emissions_total',
+        'cost_total',
+        'daily_one_minus_load_factor_average',
+        'daily_peak_average',
+        'discomfort_cold_delta_average',
+        'discomfort_cold_delta_maximum',
+        'discomfort_cold_delta_minimum',
+        'discomfort_cold_proportion',
+        'discomfort_hot_delta_average',
+        'discomfort_hot_delta_maximum',
+        'discomfort_hot_delta_minimum',
+        'discomfort_hot_proportion',
+        'discomfort_proportion',
+        'electricity_consumption_total',
+        'monthly_one_minus_load_factor_average',
+        'one_minus_thermal_resilience_proportion',
+        'power_outage_normalized_unserved_energy_total',
+        'ramping_average',
+        'zero_net_energy',
+    }
+
     def __init__(self, env: "CityLearnEnv"):
         self.env = env
 
@@ -190,9 +215,17 @@ class CityLearnKPIService:
         t_final = int(max(building.time_step, 0))
         departures_total = 0
         departures_met = 0
+        departures_within_tolerance = 0
         departure_deficit_sum = 0.0
         charge_total_kwh = 0.0
         v2g_export_total_kwh = 0.0
+        tolerance = max(
+            self._to_scalar(
+                getattr(self.env, 'ev_departure_within_tolerance', self.EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT),
+                self.EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT,
+            ),
+            0.0,
+        )
 
         for charger in building.electric_vehicle_chargers or []:
             consumption = np.array(charger.electricity_consumption[0:t_final + 1], dtype='float64')
@@ -230,19 +263,24 @@ class CityLearnKPIService:
                     continue
 
                 departures_total += 1
+                if abs(actual_soc - target_soc) <= tolerance + 1e-6:
+                    departures_within_tolerance += 1
                 deficit = max(target_soc - actual_soc, 0.0)
                 departure_deficit_sum += deficit
                 if deficit <= 1e-6:
                     departures_met += 1
 
         success_rate = None if departures_total == 0 else departures_met / departures_total
+        within_tolerance_rate = None if departures_total == 0 else departures_within_tolerance / departures_total
         deficit_mean = None if departures_total == 0 else departure_deficit_sum / departures_total
 
         return {
             'departures_total': float(departures_total),
             'departures_met': float(departures_met),
+            'departures_within_tolerance': float(departures_within_tolerance),
             'departure_deficit_sum': float(departure_deficit_sum),
             'ev_departure_success_rate': success_rate,
+            'ev_departure_within_tolerance_rate': within_tolerance_rate,
             'ev_departure_soc_deficit_mean': deficit_mean,
             'ev_charge_total_kwh': float(charge_total_kwh),
             'ev_v2g_export_total_kwh': float(v2g_export_total_kwh),
@@ -393,6 +431,138 @@ class CityLearnKPIService:
 
         return by_building, district
 
+    @staticmethod
+    def _resolve_step_value(value, time_step: int, default: float = 0.0) -> float:
+        if isinstance(value, (list, tuple, np.ndarray)):
+            if len(value) == 0:
+                return float(default)
+            index = min(max(time_step, 0), len(value) - 1)
+            return CityLearnKPIService._to_scalar(value[index], default)
+
+        return CityLearnKPIService._to_scalar(value, default)
+
+    @staticmethod
+    def _allocate_weighted_share_import(imports: np.ndarray, traded_kwh: float, weights: np.ndarray) -> np.ndarray:
+        allocations = np.zeros_like(imports, dtype='float64')
+        remaining = max(float(traded_kwh), 0.0)
+        eps = 1e-9
+        weights = np.array(weights, dtype='float64')
+        weights = np.clip(weights, 0.0, None)
+
+        while remaining > eps:
+            needs = imports - allocations
+            active = needs > eps
+            if not np.any(active):
+                break
+
+            active_weights = weights[active]
+            sum_weights = float(active_weights.sum())
+
+            if sum_weights <= eps:
+                # Fallback to equal-share for active importers when weights are invalid.
+                share = remaining / float(np.count_nonzero(active))
+                granted = np.minimum(share, needs[active])
+            else:
+                granted = np.minimum(remaining * (active_weights / sum_weights), needs[active])
+
+            granted_total = float(granted.sum())
+            if granted_total <= eps:
+                break
+
+            allocations[active] += granted
+            remaining -= granted_total
+
+        return allocations
+
+    def _default_building_conditions(self, building, control_condition, baseline_condition, *, evaluation_condition_cls, dynamics_building_cls):
+        if isinstance(building, dynamics_building_cls):
+            building_control_condition = (
+                evaluation_condition_cls.WITH_STORAGE_AND_PARTIAL_LOAD_AND_PV
+                if control_condition is None else control_condition
+            )
+            building_baseline_condition = (
+                evaluation_condition_cls.WITHOUT_STORAGE_AND_PARTIAL_LOAD_BUT_WITH_PV
+                if baseline_condition is None else baseline_condition
+            )
+        else:
+            building_control_condition = (
+                evaluation_condition_cls.WITH_STORAGE_AND_PV
+                if control_condition is None else control_condition
+            )
+            building_baseline_condition = (
+                evaluation_condition_cls.WITHOUT_STORAGE_BUT_WITH_PV
+                if baseline_condition is None else baseline_condition
+            )
+
+        return building_control_condition, building_baseline_condition
+
+    def _condition_settled_cost_totals(
+        self,
+        *,
+        condition_by_building: Mapping[str, object],
+    ) -> Tuple[Mapping[str, float], float]:
+        env = self.env
+        building_names = [b.name for b in env.buildings]
+        totals = {name: 0.0 for name in building_names}
+        if len(building_names) == 0:
+            return totals, 0.0
+
+        final_t = int(max(getattr(env, 'time_step', 0), 0))
+        ratio = self._to_scalar(getattr(env, 'community_market_sell_ratio', 0.8), 0.8)
+        ratio = min(max(ratio, 0.0), 1.0)
+        weights_config = getattr(env, 'community_market_import_member_weights', {}) or {}
+        weights = np.array(
+            [
+                self._to_scalar(weights_config.get(name, 1.0), 1.0)
+                for name in building_names
+            ],
+            dtype='float64',
+        )
+
+        for t in range(final_t + 1):
+            net_values = []
+            for building in env.buildings:
+                condition = condition_by_building.get(building.name)
+                net_series = np.array(getattr(building, f'net_electricity_consumption{condition.value}'), dtype='float64')
+                net_values.append(self._to_scalar(net_series[t] if t < len(net_series) else np.nan, 0.0))
+
+            net_values = np.array(net_values, dtype='float64')
+            imports = np.clip(net_values, 0.0, None)
+            exports = np.clip(-net_values, 0.0, None)
+            total_import = float(imports.sum())
+            total_export = float(exports.sum())
+            traded_kwh = min(total_import, total_export)
+
+            if total_import > 0.0 and traded_kwh > 0.0:
+                local_import = self._allocate_weighted_share_import(imports, traded_kwh, weights)
+            else:
+                local_import = np.zeros_like(imports, dtype='float64')
+
+            if total_export > 0.0 and traded_kwh > 0.0:
+                local_export = exports * (traded_kwh / total_export)
+            else:
+                local_export = np.zeros_like(exports, dtype='float64')
+
+            grid_export_price_cfg = getattr(env, 'community_market_grid_export_price', 0.0)
+
+            for idx, building in enumerate(env.buildings):
+                grid_import_price = self._to_scalar(building.pricing.electricity_pricing[t], 0.0)
+                local_price = ratio * grid_import_price
+                grid_export_price = self._resolve_step_value(grid_export_price_cfg, t, 0.0)
+                grid_import_remaining = max(imports[idx] - local_import[idx], 0.0)
+                grid_export_remaining = max(exports[idx] - local_export[idx], 0.0)
+
+                cost = (
+                    grid_import_remaining * grid_import_price
+                    + local_import[idx] * local_price
+                    - local_export[idx] * local_price
+                    - grid_export_remaining * grid_export_price
+                )
+                totals[building.name] += float(cost)
+
+        district_total = float(sum(totals.values()))
+        return totals, district_total
+
     def evaluate(
         self,
         control_condition=None,
@@ -420,6 +590,7 @@ class CityLearnKPIService:
 
         ev_departures_total = 0.0
         ev_departures_met = 0.0
+        ev_departures_within_tolerance = 0.0
         ev_deficit_sum = 0.0
         ev_charge_total = 0.0
         ev_v2g_total = 0.0
@@ -480,6 +651,10 @@ class CityLearnKPIService:
                 + building.energy_to_non_shiftable_load
             ec_c = CostFunction.electricity_consumption(get_net_electricity_consumption(building, building_control_condition))[-1]
             ec_b = CostFunction.electricity_consumption(get_net_electricity_consumption(building, building_baseline_condition))[-1]
+            net_c_series = np.array(get_net_electricity_consumption(building, building_control_condition), dtype='float64')
+            net_b_series = np.array(get_net_electricity_consumption(building, building_baseline_condition), dtype='float64')
+            export_c = self._sum_finite(np.clip(-net_c_series, 0.0, None))
+            export_b = self._sum_finite(np.clip(-net_b_series, 0.0, None))
             zne_c = CostFunction.zero_net_energy(get_net_electricity_consumption(building, building_control_condition))[-1]
             zne_b = CostFunction.zero_net_energy(get_net_electricity_consumption(building, building_baseline_condition))[-1]
             ce_c = CostFunction.carbon_emissions(get_net_electricity_consumption_emission(building, building_control_condition))[-1]
@@ -555,6 +730,12 @@ class CityLearnKPIService:
                 self._metric('electricity_consumption_control_daily_average_kwh', self._daily_average(ec_c, simulated_days), building.name, 'building'),
                 self._metric('electricity_consumption_baseline_daily_average_kwh', self._daily_average(ec_b, simulated_days), building.name, 'building'),
                 self._metric('electricity_consumption_delta_daily_average_kwh', self._daily_average(ec_c - ec_b, simulated_days), building.name, 'building'),
+                self._metric('electricity_export_control_total_kwh', export_c, building.name, 'building'),
+                self._metric('electricity_export_baseline_total_kwh', export_b, building.name, 'building'),
+                self._metric('electricity_export_delta_total_kwh', export_c - export_b, building.name, 'building'),
+                self._metric('electricity_export_control_daily_average_kwh', self._daily_average(export_c, simulated_days), building.name, 'building'),
+                self._metric('electricity_export_baseline_daily_average_kwh', self._daily_average(export_b, simulated_days), building.name, 'building'),
+                self._metric('electricity_export_delta_daily_average_kwh', self._daily_average(export_c - export_b, simulated_days), building.name, 'building'),
                 self._metric('zero_net_energy_control_total_kwh', zne_c, building.name, 'building'),
                 self._metric('zero_net_energy_baseline_total_kwh', zne_b, building.name, 'building'),
                 self._metric('zero_net_energy_delta_total_kwh', zne_c - zne_b, building.name, 'building'),
@@ -578,13 +759,18 @@ class CityLearnKPIService:
 
             ev_metrics = self._compute_ev_metrics(building)
             extended_building_rows.extend([
+                self._metric('ev_departure_events_count', ev_metrics['departures_total'], building.name, 'building'),
+                self._metric('ev_departure_met_events_count', ev_metrics['departures_met'], building.name, 'building'),
+                self._metric('ev_departure_within_tolerance_events_count', ev_metrics['departures_within_tolerance'], building.name, 'building'),
                 self._metric('ev_departure_success_rate', ev_metrics['ev_departure_success_rate'], building.name, 'building'),
+                self._metric('ev_departure_within_tolerance_rate', ev_metrics['ev_departure_within_tolerance_rate'], building.name, 'building'),
                 self._metric('ev_departure_soc_deficit_mean', ev_metrics['ev_departure_soc_deficit_mean'], building.name, 'building'),
                 self._metric('ev_charge_total_kwh', ev_metrics['ev_charge_total_kwh'], building.name, 'building'),
                 self._metric('ev_v2g_export_total_kwh', ev_metrics['ev_v2g_export_total_kwh'], building.name, 'building'),
             ])
             ev_departures_total += ev_metrics['departures_total']
             ev_departures_met += ev_metrics['departures_met']
+            ev_departures_within_tolerance += ev_metrics['departures_within_tolerance']
             ev_deficit_sum += ev_metrics['departure_deficit_sum']
             ev_charge_total += ev_metrics['ev_charge_total_kwh']
             ev_v2g_total += ev_metrics['ev_v2g_export_total_kwh']
@@ -680,6 +866,10 @@ class CityLearnKPIService:
         # Extended KPI district-level
         ec_c_env = CostFunction.electricity_consumption(get_net_electricity_consumption(env, env_control_condition))[-1]
         ec_b_env = CostFunction.electricity_consumption(get_net_electricity_consumption(env, env_baseline_condition))[-1]
+        net_c_env_series = np.array(get_net_electricity_consumption(env, env_control_condition), dtype='float64')
+        net_b_env_series = np.array(get_net_electricity_consumption(env, env_baseline_condition), dtype='float64')
+        export_c_env = self._sum_finite(np.clip(-net_c_env_series, 0.0, None))
+        export_b_env = self._sum_finite(np.clip(-net_b_env_series, 0.0, None))
         zne_c_env = CostFunction.zero_net_energy(get_net_electricity_consumption(env, env_control_condition))[-1]
         zne_b_env = CostFunction.zero_net_energy(get_net_electricity_consumption(env, env_baseline_condition))[-1]
         ce_c_env = CostFunction.carbon_emissions(get_net_electricity_consumption_emission(env, env_control_condition))[-1]
@@ -696,6 +886,12 @@ class CityLearnKPIService:
             self._metric('electricity_consumption_control_daily_average_kwh', self._daily_average(ec_c_env, simulated_days), 'District', 'district'),
             self._metric('electricity_consumption_baseline_daily_average_kwh', self._daily_average(ec_b_env, simulated_days), 'District', 'district'),
             self._metric('electricity_consumption_delta_daily_average_kwh', self._daily_average(ec_c_env - ec_b_env, simulated_days), 'District', 'district'),
+            self._metric('electricity_export_control_total_kwh', export_c_env, 'District', 'district'),
+            self._metric('electricity_export_baseline_total_kwh', export_b_env, 'District', 'district'),
+            self._metric('electricity_export_delta_total_kwh', export_c_env - export_b_env, 'District', 'district'),
+            self._metric('electricity_export_control_daily_average_kwh', self._daily_average(export_c_env, simulated_days), 'District', 'district'),
+            self._metric('electricity_export_baseline_daily_average_kwh', self._daily_average(export_b_env, simulated_days), 'District', 'district'),
+            self._metric('electricity_export_delta_daily_average_kwh', self._daily_average(export_c_env - export_b_env, simulated_days), 'District', 'district'),
             self._metric('zero_net_energy_control_total_kwh', zne_c_env, 'District', 'district'),
             self._metric('zero_net_energy_baseline_total_kwh', zne_b_env, 'District', 'district'),
             self._metric('zero_net_energy_delta_total_kwh', zne_c_env - zne_b_env, 'District', 'district'),
@@ -717,9 +913,14 @@ class CityLearnKPIService:
         ]
 
         ev_success_rate = None if ev_departures_total <= 0.0 else ev_departures_met / ev_departures_total
+        ev_within_tolerance_rate = None if ev_departures_total <= 0.0 else ev_departures_within_tolerance / ev_departures_total
         ev_deficit_mean = None if ev_departures_total <= 0.0 else ev_deficit_sum / ev_departures_total
         extended_district_rows.extend([
+            self._metric('ev_departure_events_count', ev_departures_total, 'District', 'district'),
+            self._metric('ev_departure_met_events_count', ev_departures_met, 'District', 'district'),
+            self._metric('ev_departure_within_tolerance_events_count', ev_departures_within_tolerance, 'District', 'district'),
             self._metric('ev_departure_success_rate', ev_success_rate, 'District', 'district'),
+            self._metric('ev_departure_within_tolerance_rate', ev_within_tolerance_rate, 'District', 'district'),
             self._metric('ev_departure_soc_deficit_mean', ev_deficit_mean, 'District', 'district'),
             self._metric('ev_charge_total_kwh', ev_charge_total, 'District', 'district'),
             self._metric('ev_v2g_export_total_kwh', ev_v2g_total, 'District', 'district'),
@@ -860,3 +1061,399 @@ class CityLearnKPIService:
         cost_functions = pd.concat([legacy_cost_functions, extended_district, extended_building], ignore_index=True, sort=False)
 
         return cost_functions
+
+    @staticmethod
+    def _v2_name(
+        level: str,
+        family: str,
+        subfamily: str,
+        metric: str,
+        variant: Optional[str] = None,
+        unit: Optional[str] = None,
+    ) -> str:
+        tokens = [level, family, subfamily, metric]
+
+        if variant not in (None, ''):
+            tokens.append(str(variant))
+
+        if unit not in (None, ''):
+            tokens.append(str(unit))
+
+        return '_'.join(tokens)
+
+    def evaluate_legacy(
+        self,
+        control_condition=None,
+        baseline_condition=None,
+        comfort_band: float = None,
+        *,
+        evaluation_condition_cls,
+        dynamics_building_cls,
+    ) -> pd.DataFrame:
+        all_metrics = self.evaluate(
+            control_condition=control_condition,
+            baseline_condition=baseline_condition,
+            comfort_band=comfort_band,
+            evaluation_condition_cls=evaluation_condition_cls,
+            dynamics_building_cls=dynamics_building_cls,
+        )
+
+        legacy = all_metrics[all_metrics['cost_function'].isin(self.LEGACY_COST_FUNCTIONS)].copy()
+        return legacy.reset_index(drop=True)
+
+    def evaluate_v2(
+        self,
+        control_condition=None,
+        baseline_condition=None,
+        comfort_band: float = None,
+        *,
+        evaluation_condition_cls,
+        dynamics_building_cls,
+    ) -> pd.DataFrame:
+        env = self.env
+        all_metrics = self.evaluate(
+            control_condition=control_condition,
+            baseline_condition=baseline_condition,
+            comfort_band=comfort_band,
+            evaluation_condition_cls=evaluation_condition_cls,
+            dynamics_building_cls=dynamics_building_cls,
+        )
+        legacy_df = all_metrics[all_metrics['cost_function'].isin(self.LEGACY_COST_FUNCTIONS)].copy()
+        extended_df = all_metrics[~all_metrics['cost_function'].isin(self.LEGACY_COST_FUNCTIONS)].copy()
+        simulated_days = self._simulated_days(env)
+
+        records: Dict[Tuple[str, str, str], Dict[str, object]] = {}
+
+        def put(level: str, name: str, cost_function: str, value):
+            records[(level, name, cost_function)] = {
+                'cost_function': cost_function,
+                'value': value,
+                'name': name,
+                'level': level,
+            }
+
+        def v2(
+            level: str,
+            family: str,
+            subfamily: str,
+            metric: str,
+            variant: Optional[str] = None,
+            unit: Optional[str] = None,
+        ) -> str:
+            return self._v2_name(
+                level,
+                family,
+                subfamily,
+                metric,
+                variant=variant,
+                unit=unit,
+            )
+
+        def map_from(
+            source_df: pd.DataFrame,
+            old_name: str,
+            family: str,
+            subfamily: str,
+            metric: str,
+            variant: Optional[str] = None,
+            unit: Optional[str] = None,
+        ):
+            subset = source_df[source_df['cost_function'] == old_name]
+            for _, row in subset.iterrows():
+                level = str(row['level'])
+                put(
+                    level,
+                    str(row['name']),
+                    v2(level, family, subfamily, metric, variant, unit),
+                    row['value'],
+                )
+
+        # Ratios to baseline and comfort/resilience from legacy.
+        legacy_map = [
+            ('electricity_consumption_total', 'energy_grid', 'ratio_to_baseline', 'import_total', None, 'ratio'),
+            ('zero_net_energy', 'energy_grid', 'ratio_to_baseline', 'net_exchange_total', None, 'ratio'),
+            ('carbon_emissions_total', 'emissions', 'ratio_to_baseline', 'total', None, 'ratio'),
+            ('cost_total', 'cost', 'ratio_to_baseline', 'total', None, 'ratio'),
+            ('ramping_average', 'energy_grid', 'shape_quality', 'ramping_average_to_baseline', None, 'ratio'),
+            ('daily_one_minus_load_factor_average', 'energy_grid', 'shape_quality', 'load_factor_penalty_daily_average_to_baseline', None, 'ratio'),
+            ('monthly_one_minus_load_factor_average', 'energy_grid', 'shape_quality', 'load_factor_penalty_monthly_average_to_baseline', None, 'ratio'),
+            ('daily_peak_average', 'energy_grid', 'shape_quality', 'peak_daily_average_to_baseline', None, 'ratio'),
+            ('all_time_peak_average', 'energy_grid', 'shape_quality', 'peak_all_time_average_to_baseline', None, 'ratio'),
+            ('discomfort_proportion', 'comfort_resilience', 'discomfort', 'overall', None, 'ratio'),
+            ('discomfort_cold_proportion', 'comfort_resilience', 'discomfort', 'cold', None, 'ratio'),
+            ('discomfort_hot_proportion', 'comfort_resilience', 'discomfort', 'hot', None, 'ratio'),
+            ('discomfort_cold_delta_minimum', 'comfort_resilience', 'discomfort', 'cold_delta', 'min', 'c'),
+            ('discomfort_cold_delta_maximum', 'comfort_resilience', 'discomfort', 'cold_delta', 'max', 'c'),
+            ('discomfort_cold_delta_average', 'comfort_resilience', 'discomfort', 'cold_delta', 'average', 'c'),
+            ('discomfort_hot_delta_minimum', 'comfort_resilience', 'discomfort', 'hot_delta', 'min', 'c'),
+            ('discomfort_hot_delta_maximum', 'comfort_resilience', 'discomfort', 'hot_delta', 'max', 'c'),
+            ('discomfort_hot_delta_average', 'comfort_resilience', 'discomfort', 'hot_delta', 'average', 'c'),
+            ('one_minus_thermal_resilience_proportion', 'comfort_resilience', 'resilience', 'one_minus_thermal', None, 'ratio'),
+            ('power_outage_normalized_unserved_energy_total', 'comfort_resilience', 'resilience', 'unserved_energy_outage_normalized', None, 'ratio'),
+            ('annual_normalized_unserved_energy_total', 'comfort_resilience', 'resilience', 'unserved_energy_annual_normalized', None, 'ratio'),
+        ]
+        for old_name, family, subfamily, metric, variant, unit in legacy_map:
+            map_from(legacy_df, old_name, family, subfamily, metric, variant, unit)
+
+        extended_map = [
+            ('cost_control_total_eur', 'cost', 'total', 'control', None, 'eur'),
+            ('cost_baseline_total_eur', 'cost', 'total', 'baseline', None, 'eur'),
+            ('cost_delta_total_eur', 'cost', 'total', 'delta', None, 'eur'),
+            ('cost_control_daily_average_eur', 'cost', 'daily_average', 'control', None, 'eur'),
+            ('cost_baseline_daily_average_eur', 'cost', 'daily_average', 'baseline', None, 'eur'),
+            ('cost_delta_daily_average_eur', 'cost', 'daily_average', 'delta', None, 'eur'),
+            ('electricity_consumption_control_total_kwh', 'energy_grid', 'total', 'import', 'control', 'kwh'),
+            ('electricity_consumption_baseline_total_kwh', 'energy_grid', 'total', 'import', 'baseline', 'kwh'),
+            ('electricity_consumption_delta_total_kwh', 'energy_grid', 'total', 'import', 'delta', 'kwh'),
+            ('electricity_consumption_control_daily_average_kwh', 'energy_grid', 'daily_average', 'import', 'control', 'kwh'),
+            ('electricity_consumption_baseline_daily_average_kwh', 'energy_grid', 'daily_average', 'import', 'baseline', 'kwh'),
+            ('electricity_consumption_delta_daily_average_kwh', 'energy_grid', 'daily_average', 'import', 'delta', 'kwh'),
+            ('electricity_export_control_total_kwh', 'energy_grid', 'total', 'export', 'control', 'kwh'),
+            ('electricity_export_baseline_total_kwh', 'energy_grid', 'total', 'export', 'baseline', 'kwh'),
+            ('electricity_export_delta_total_kwh', 'energy_grid', 'total', 'export', 'delta', 'kwh'),
+            ('electricity_export_control_daily_average_kwh', 'energy_grid', 'daily_average', 'export', 'control', 'kwh'),
+            ('electricity_export_baseline_daily_average_kwh', 'energy_grid', 'daily_average', 'export', 'baseline', 'kwh'),
+            ('electricity_export_delta_daily_average_kwh', 'energy_grid', 'daily_average', 'export', 'delta', 'kwh'),
+            ('zero_net_energy_control_total_kwh', 'energy_grid', 'total', 'net_exchange', 'control', 'kwh'),
+            ('zero_net_energy_baseline_total_kwh', 'energy_grid', 'total', 'net_exchange', 'baseline', 'kwh'),
+            ('zero_net_energy_delta_total_kwh', 'energy_grid', 'total', 'net_exchange', 'delta', 'kwh'),
+            ('zero_net_energy_control_daily_average_kwh', 'energy_grid', 'daily_average', 'net_exchange', 'control', 'kwh'),
+            ('zero_net_energy_baseline_daily_average_kwh', 'energy_grid', 'daily_average', 'net_exchange', 'baseline', 'kwh'),
+            ('zero_net_energy_delta_daily_average_kwh', 'energy_grid', 'daily_average', 'net_exchange', 'delta', 'kwh'),
+            ('carbon_emissions_control_total_kgco2', 'emissions', 'total', 'control', None, 'kgco2'),
+            ('carbon_emissions_baseline_total_kgco2', 'emissions', 'total', 'baseline', None, 'kgco2'),
+            ('carbon_emissions_delta_total_kgco2', 'emissions', 'total', 'delta', None, 'kgco2'),
+            ('carbon_emissions_control_daily_average_kgco2', 'emissions', 'daily_average', 'control', None, 'kgco2'),
+            ('carbon_emissions_baseline_daily_average_kgco2', 'emissions', 'daily_average', 'baseline', None, 'kgco2'),
+            ('carbon_emissions_delta_daily_average_kgco2', 'emissions', 'daily_average', 'delta', None, 'kgco2'),
+            ('pv_generation_total_kwh', 'solar_self_consumption', 'total', 'generation', None, 'kwh'),
+            ('pv_export_total_kwh', 'solar_self_consumption', 'total', 'export', None, 'kwh'),
+            ('pv_generation_daily_average_kwh', 'solar_self_consumption', 'daily_average', 'generation', None, 'kwh'),
+            ('pv_export_daily_average_kwh', 'solar_self_consumption', 'daily_average', 'export', None, 'kwh'),
+            ('pv_self_consumption_ratio', 'solar_self_consumption', 'ratio', 'self_consumption', None, 'ratio'),
+            ('ev_departure_events_count', 'ev', 'events', 'departure', None, 'count'),
+            ('ev_departure_met_events_count', 'ev', 'events', 'departure_met', None, 'count'),
+            ('ev_departure_within_tolerance_events_count', 'ev', 'events', 'departure_within_tolerance', None, 'count'),
+            ('ev_departure_success_rate', 'ev', 'performance', 'departure_success', None, 'ratio'),
+            ('ev_departure_within_tolerance_rate', 'ev', 'performance', 'departure_within_tolerance', None, 'ratio'),
+            ('ev_departure_soc_deficit_mean', 'ev', 'performance', 'departure_soc_deficit_mean', None, 'ratio'),
+            ('ev_charge_total_kwh', 'ev', 'total', 'charge', None, 'kwh'),
+            ('ev_v2g_export_total_kwh', 'ev', 'total', 'v2g_export', None, 'kwh'),
+            ('bess_charge_total_kwh', 'battery', 'total', 'charge', None, 'kwh'),
+            ('bess_discharge_total_kwh', 'battery', 'total', 'discharge', None, 'kwh'),
+            ('bess_throughput_total_kwh', 'battery', 'total', 'throughput', None, 'kwh'),
+            ('bess_equivalent_full_cycles', 'battery', 'health', 'equivalent_full_cycles', None, 'count'),
+            ('bess_capacity_fade_ratio', 'battery', 'health', 'capacity_fade', None, 'ratio'),
+            ('electrical_service_violation_total_kwh', 'electrical_service_phase', 'violations', 'energy_total', None, 'kwh'),
+            ('electrical_service_violation_time_step_count', 'electrical_service_phase', 'violations', 'event', None, 'count'),
+            ('phase_imbalance_ratio_average', 'electrical_service_phase', 'imbalance', 'phase_average', None, 'ratio'),
+            ('equity_relative_benefit_percent', 'equity', 'benefit', 'relative', None, 'percent'),
+            ('equity_gini_benefit', 'equity', 'distribution', 'gini_benefit', None, 'ratio'),
+            ('equity_cr20_benefit', 'equity', 'distribution', 'top20_benefit', None, 'ratio'),
+            ('equity_losers_percent', 'equity', 'distribution', 'losers', None, 'percent'),
+            ('equity_bpr_asset_poor_over_rich', 'equity', 'distribution', 'bpr_asset_poor_over_rich', None, 'ratio'),
+        ]
+        for old_name, family, subfamily, metric, variant, unit in extended_map:
+            map_from(extended_df, old_name, family, subfamily, metric, variant, unit)
+
+        # Phase peaks have dynamic suffixes (L1/L2/L3) and are conditionally present.
+        for _, row in extended_df.iterrows():
+            old_name = str(row['cost_function'])
+            level = str(row['level'])
+            name = str(row['name'])
+
+            if old_name.startswith('phase_import_peak_kw_'):
+                phase = old_name.split('phase_import_peak_kw_', 1)[1].lower()
+                put(
+                    level,
+                    name,
+                    v2(level, 'electrical_service_phase', 'phase_peaks', f'import_peak_{phase}', None, 'kw'),
+                    row['value'],
+                )
+            elif old_name.startswith('phase_export_peak_kw_'):
+                phase = old_name.split('phase_export_peak_kw_', 1)[1].lower()
+                put(
+                    level,
+                    name,
+                    v2(level, 'electrical_service_phase', 'phase_peaks', f'export_peak_{phase}', None, 'kw'),
+                    row['value'],
+                )
+
+        building_names = [building.name for building in env.buildings]
+
+        # Optional community KPIs are district-only.
+        if getattr(env, 'community_market_enabled', False):
+            district_rows = extended_df[(extended_df['level'] == 'district') & (extended_df['name'] == 'District')]
+            if getattr(env, 'community_market_kpi_local_traded_enabled', True):
+                local_total = district_rows[district_rows['cost_function'] == 'community_local_import_total_kwh']['value']
+                local_daily = district_rows[district_rows['cost_function'] == 'community_local_import_daily_average_kwh']['value']
+                if len(local_total) > 0:
+                    put(
+                        'district',
+                        'District',
+                        v2('district', 'energy_grid', 'community_market', 'local_traded', 'total', 'kwh'),
+                        local_total.iloc[0],
+                    )
+                if len(local_daily) > 0:
+                    put(
+                        'district',
+                        'District',
+                        v2('district', 'energy_grid', 'community_market', 'local_traded', 'daily_average', 'kwh'),
+                        local_daily.iloc[0],
+                    )
+
+            if getattr(env, 'community_market_kpi_self_consumption_enabled', True):
+                local_total = district_rows[district_rows['cost_function'] == 'community_local_import_total_kwh']['value']
+                if len(local_total) > 0:
+                    local_total_value = self._to_scalar(local_total.iloc[0], 0.0)
+                    district_import_control = self._to_scalar(
+                        records.get((
+                            'district',
+                            'District',
+                            v2('district', 'energy_grid', 'total', 'import', 'control', 'kwh'),
+                        ), {}).get('value'),
+                        0.0,
+                    )
+                    share = None if district_import_control <= float(ZERO_DIVISION_PLACEHOLDER) else local_total_value / district_import_control
+                    put(
+                        'district',
+                        'District',
+                        v2('district', 'solar_self_consumption', 'community_market', 'import_share', None, 'ratio'),
+                        share,
+                    )
+
+        # Export ratio_to_baseline is derived from totals with safe division.
+        for building in env.buildings:
+            control_cond, baseline_cond = self._default_building_conditions(
+                building,
+                control_condition,
+                baseline_condition,
+                evaluation_condition_cls=evaluation_condition_cls,
+                dynamics_building_cls=dynamics_building_cls,
+            )
+            net_c = np.array(getattr(building, f'net_electricity_consumption{control_cond.value}'), dtype='float64')
+            net_b = np.array(getattr(building, f'net_electricity_consumption{baseline_cond.value}'), dtype='float64')
+            export_c = self._sum_finite(np.clip(-net_c, 0.0, None))
+            export_b = self._sum_finite(np.clip(-net_b, 0.0, None))
+            put(
+                'building',
+                building.name,
+                v2('building', 'energy_grid', 'ratio_to_baseline', 'export_total', None, 'ratio'),
+                self._safe_div(export_c, export_b),
+            )
+
+        env_control_condition = (
+            evaluation_condition_cls.WITH_STORAGE_AND_PARTIAL_LOAD_AND_PV
+            if control_condition is None else control_condition
+        )
+        env_baseline_condition = (
+            evaluation_condition_cls.WITHOUT_STORAGE_AND_PARTIAL_LOAD_BUT_WITH_PV
+            if baseline_condition is None else baseline_condition
+        )
+        env_net_c = np.array(getattr(env, f'net_electricity_consumption{env_control_condition.value}'), dtype='float64')
+        env_net_b = np.array(getattr(env, f'net_electricity_consumption{env_baseline_condition.value}'), dtype='float64')
+        env_export_c = self._sum_finite(np.clip(-env_net_c, 0.0, None))
+        env_export_b = self._sum_finite(np.clip(-env_net_b, 0.0, None))
+        put(
+            'district',
+            'District',
+            v2('district', 'energy_grid', 'ratio_to_baseline', 'export_total', None, 'ratio'),
+            self._safe_div(env_export_c, env_export_b),
+        )
+
+        # Cost metrics: market-enabled scenarios settle both control and baseline with same rules.
+        control_condition_by_building = {}
+        baseline_condition_by_building = {}
+        for building in env.buildings:
+            c_cond, b_cond = self._default_building_conditions(
+                building,
+                control_condition,
+                baseline_condition,
+                evaluation_condition_cls=evaluation_condition_cls,
+                dynamics_building_cls=dynamics_building_cls,
+            )
+            control_condition_by_building[building.name] = c_cond
+            baseline_condition_by_building[building.name] = b_cond
+
+        control_cost_totals: Dict[str, float] = {}
+        baseline_cost_totals: Dict[str, float] = {}
+        district_control_total = 0.0
+        district_baseline_total = 0.0
+
+        if getattr(env, 'community_market_enabled', False):
+            control_cost_totals, district_control_total = self._condition_settled_cost_totals(
+                condition_by_building=control_condition_by_building,
+            )
+            baseline_cost_totals, district_baseline_total = self._condition_settled_cost_totals(
+                condition_by_building=baseline_condition_by_building,
+            )
+        else:
+            # Read mapped values from records when market is disabled.
+            for building_name in building_names:
+                key_control = ('building', building_name, v2('building', 'cost', 'total', 'control', None, 'eur'))
+                key_baseline = ('building', building_name, v2('building', 'cost', 'total', 'baseline', None, 'eur'))
+                control_cost_totals[building_name] = self._to_scalar(records.get(key_control, {}).get('value'), 0.0)
+                baseline_cost_totals[building_name] = self._to_scalar(records.get(key_baseline, {}).get('value'), 0.0)
+
+            district_control_total = self._to_scalar(
+                records.get(('district', 'District', v2('district', 'cost', 'total', 'control', None, 'eur')), {}).get('value'),
+                0.0,
+            )
+            district_baseline_total = self._to_scalar(
+                records.get(('district', 'District', v2('district', 'cost', 'total', 'baseline', None, 'eur')), {}).get('value'),
+                0.0,
+            )
+
+        for building_name in building_names:
+            control_total = self._to_scalar(control_cost_totals.get(building_name), 0.0)
+            baseline_total = self._to_scalar(baseline_cost_totals.get(building_name), 0.0)
+            delta_total = control_total - baseline_total
+            put('building', building_name, v2('building', 'cost', 'total', 'control', None, 'eur'), control_total)
+            put('building', building_name, v2('building', 'cost', 'total', 'baseline', None, 'eur'), baseline_total)
+            put('building', building_name, v2('building', 'cost', 'total', 'delta', None, 'eur'), delta_total)
+            put('building', building_name, v2('building', 'cost', 'daily_average', 'control', None, 'eur'), self._daily_average(control_total, simulated_days))
+            put('building', building_name, v2('building', 'cost', 'daily_average', 'baseline', None, 'eur'), self._daily_average(baseline_total, simulated_days))
+            put('building', building_name, v2('building', 'cost', 'daily_average', 'delta', None, 'eur'), self._daily_average(delta_total, simulated_days))
+            put('building', building_name, v2('building', 'cost', 'ratio_to_baseline', 'total', None, 'ratio'), self._safe_div(control_total, baseline_total))
+
+        district_delta_total = district_control_total - district_baseline_total
+        put('district', 'District', v2('district', 'cost', 'total', 'control', None, 'eur'), district_control_total)
+        put('district', 'District', v2('district', 'cost', 'total', 'baseline', None, 'eur'), district_baseline_total)
+        put('district', 'District', v2('district', 'cost', 'total', 'delta', None, 'eur'), district_delta_total)
+        put('district', 'District', v2('district', 'cost', 'daily_average', 'control', None, 'eur'), self._daily_average(district_control_total, simulated_days))
+        put('district', 'District', v2('district', 'cost', 'daily_average', 'baseline', None, 'eur'), self._daily_average(district_baseline_total, simulated_days))
+        put('district', 'District', v2('district', 'cost', 'daily_average', 'delta', None, 'eur'), self._daily_average(district_delta_total, simulated_days))
+        put('district', 'District', v2('district', 'cost', 'ratio_to_baseline', 'total', None, 'ratio'), self._safe_div(district_control_total, district_baseline_total))
+
+        # Equity metrics are recomputed from cost totals for consistency.
+        equity_valid_benefits: Dict[str, float] = {}
+        groups = {building.name: getattr(building, 'equity_group', None) for building in env.buildings}
+        for building_name in building_names:
+            benefit = self._equity_relative_benefit_percent(
+                control_cost_totals.get(building_name, 0.0),
+                baseline_cost_totals.get(building_name, 0.0),
+            )
+            put(
+                'building',
+                building_name,
+                v2('building', 'equity', 'benefit', 'relative', None, 'percent'),
+                benefit,
+            )
+            if benefit is not None:
+                equity_valid_benefits[building_name] = float(benefit)
+
+        equity_distribution = self._equity_distribution_metrics(np.array(list(equity_valid_benefits.values()), dtype='float64'))
+        non_negative_benefits = {name: max(value, 0.0) for name, value in equity_valid_benefits.items()}
+        has_complete_manual_groups = all(groups.get(name) in {'asset_rich', 'asset_poor'} for name in building_names)
+        equity_bpr = self._equity_bpr(non_negative_benefits, groups) if has_complete_manual_groups else None
+        put('district', 'District', v2('district', 'equity', 'distribution', 'gini_benefit', None, 'ratio'), equity_distribution['equity_gini_benefit'])
+        put('district', 'District', v2('district', 'equity', 'distribution', 'top20_benefit', None, 'ratio'), equity_distribution['equity_cr20_benefit'])
+        put('district', 'District', v2('district', 'equity', 'distribution', 'losers', None, 'percent'), equity_distribution['equity_losers_percent'])
+        put('district', 'District', v2('district', 'equity', 'distribution', 'bpr_asset_poor_over_rich', None, 'ratio'), equity_bpr)
+
+        output = pd.DataFrame(list(records.values()))
+        if output.empty:
+            return pd.DataFrame(columns=['cost_function', 'value', 'name', 'level'])
+
+        output = output.sort_values(['level', 'name', 'cost_function']).reset_index(drop=True)
+        return output

@@ -231,6 +231,17 @@
     "type": "citylearn.reward_function.Electric_Vehicles_Reward_Function",
     "attributes": {}
   },
+  "community_market": {
+    "enabled": true,
+    "local_price_ratio_to_grid_import": 0.8,
+    "intra_community_sell_ratio": 0.8,
+    "grid_export_price": 0.0,
+    "import_member_weights": {},
+    "kpis": {
+      "community_local_traded_enabled": true,
+      "community_self_consumption_enabled": true
+    }
+  },
   "electric_vehicles_def": {
     "Electric_Vehicle_1": {
       "include": true,
