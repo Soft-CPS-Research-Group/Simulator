@@ -136,4 +136,6 @@ You can check a tutorial at the official CityLearn [website](https://intelligent
 
 **Compatibility:** This version of the UI currently supports CityLearn v2.5.0 simulation data.
 
+The KPI export consumed by the UI is generated from `evaluate_v2()` by default, and `evaluate()` remains available only for legacy workflows.
+
 **Developed by:** José, a member of the [SoftCPS](https://www2.isep.ipp.pt/softcps/), Software for Cyber-Physical Systems research group (ISEP, Portugal) in collaboration with the Intelligent Environments Lab, University of Texas at Austin.
