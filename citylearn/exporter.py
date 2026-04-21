@@ -26,6 +26,61 @@ class EpisodeExporter:
     def __init__(self, env: "CityLearnEnv"):
         self.env = env
 
+    def _buildings_for_time_step(self, time_step: int):
+        env = self.env
+        if getattr(env, 'topology_mode', 'static') != 'dynamic':
+            return list(env.buildings)
+
+        topology_service = getattr(env, '_topology_service', None)
+        if topology_service is None:
+            return list(env.buildings)
+
+        active_ids = topology_service.active_member_ids_at(time_step)
+        return [
+            topology_service.member_pool[member_id]
+            for member_id in active_ids
+            if member_id in topology_service.member_pool
+        ]
+
+    def _electric_vehicles_for_time_step(self, time_step: int):
+        env = self.env
+        if getattr(env, 'topology_mode', 'static') != 'dynamic':
+            return list(env.electric_vehicles)
+
+        topology_service = getattr(env, '_topology_service', None)
+        if topology_service is None:
+            return list(env.electric_vehicles)
+
+        active_ids = topology_service.active_ev_ids_at(time_step)
+        return [
+            topology_service.ev_pool[ev_id]
+            for ev_id in active_ids
+            if ev_id in topology_service.ev_pool
+        ]
+
+    def _chargers_for_time_step(self, building, time_step: int):
+        env = self.env
+        if getattr(env, 'topology_mode', 'static') != 'dynamic':
+            return list(building.electric_vehicle_chargers or [])
+
+        topology_service = getattr(env, '_topology_service', None)
+        if topology_service is None:
+            return list(building.electric_vehicle_chargers or [])
+
+        charger_map = topology_service.active_chargers_at(time_step, building.name)
+        return list(charger_map.values())
+
+    def _electrical_storage_for_time_step(self, building, time_step: int):
+        env = self.env
+        if getattr(env, 'topology_mode', 'static') != 'dynamic':
+            return building.electrical_storage
+
+        topology_service = getattr(env, '_topology_service', None)
+        if topology_service is None:
+            return building.electrical_storage
+
+        return topology_service.active_storage_at(time_step, building.name)
+
     @staticmethod
     def parse_render_start_date(start_date: Union[str, datetime.date, datetime.datetime]) -> datetime.date:
         """Return a valid start date for rendering timestamps."""
@@ -95,30 +150,36 @@ class EpisodeExporter:
             {"timestamp": iso_timestamp, **env.as_dict()},
         )
 
-        for building in env.buildings:
+        buildings = self._buildings_for_time_step(env.time_step)
+
+        for building in buildings:
             self.save_to_csv(
                 f"exported_data_{building.name.lower()}_ep{episode_num}.csv",
                 {"timestamp": iso_timestamp, **building.as_dict()},
             )
 
-            battery = building.electrical_storage
-            self.save_to_csv(
-                f"exported_data_{building.name.lower()}_battery_ep{episode_num}.csv",
-                {"timestamp": iso_timestamp, **battery.as_dict()},
-            )
+            battery = self._electrical_storage_for_time_step(building, env.time_step)
+            if battery is not None:
+                battery.time_step = env.time_step
+                self.save_to_csv(
+                    f"exported_data_{building.name.lower()}_battery_ep{episode_num}.csv",
+                    {"timestamp": iso_timestamp, **battery.as_dict()},
+                )
 
-            for charger in building.electric_vehicle_chargers or []:
+            for charger in self._chargers_for_time_step(building, env.time_step):
+                charger.time_step = env.time_step
                 self.save_to_csv(
                     f"exported_data_{building.name.lower()}_{charger.charger_id}_ep{episode_num}.csv",
                     {"timestamp": iso_timestamp, **charger.as_dict()},
                 )
 
-        self.save_to_csv(
-            f"exported_data_pricing_ep{episode_num}.csv",
-            {"timestamp": iso_timestamp, **env.buildings[0].pricing.as_dict(env.time_step)},
-        )
+        if len(buildings) > 0:
+            self.save_to_csv(
+                f"exported_data_pricing_ep{episode_num}.csv",
+                {"timestamp": iso_timestamp, **buildings[0].pricing.as_dict(env.time_step)},
+            )
 
-        for ev in env.electric_vehicles:
+        for ev in self._electric_vehicles_for_time_step(env.time_step):
             self.save_to_csv(
                 f"exported_data_{ev.name.lower()}_ep{episode_num}.csv",
                 {"timestamp": iso_timestamp, **ev.as_dict()},
@@ -149,8 +210,13 @@ class EpisodeExporter:
         self.ensure_output_dir()
         episode_num = env.episode_tracker.episode
         rows_by_filename: Dict[str, List[Mapping[str, Any]]] = defaultdict(list)
-        ev_lookup = {ev.name: ev for ev in env.electric_vehicles}
+        if getattr(env, 'topology_mode', 'static') == 'dynamic' and getattr(env, '_topology_service', None) is not None:
+            ev_lookup = dict(env._topology_service.ev_pool)
+        else:
+            ev_lookup = {ev.name: ev for ev in env.electric_vehicles}
         original_charger_state = {}
+        original_active_buildings = list(env.buildings)
+        original_active_evs = list(env.electric_vehicles)
         time_step_snapshot = self.override_render_time_step(0)
         original_year = env.year
         original_day = env.current_day
@@ -160,6 +226,12 @@ class EpisodeExporter:
             self.reset_time_tracking()
 
             for t in range(final_index + 1):
+                buildings = self._buildings_for_time_step(t)
+                evs = self._electric_vehicles_for_time_step(t)
+                if getattr(env, 'topology_mode', 'static') == 'dynamic':
+                    env.buildings = buildings
+                    env.electric_vehicles = evs
+
                 for obj, _ in time_step_snapshot:
                     try:
                         obj.time_step = t
@@ -171,16 +243,19 @@ class EpisodeExporter:
                     {"timestamp": timestamp, **env.as_dict()}
                 )
 
-                for building in env.buildings:
+                for building in buildings:
                     rows_by_filename[f"exported_data_{building.name.lower()}_ep{episode_num}.csv"].append(
                         {"timestamp": timestamp, **building.as_dict()}
                     )
-                    battery = building.electrical_storage
-                    rows_by_filename[f"exported_data_{building.name.lower()}_battery_ep{episode_num}.csv"].append(
-                        {"timestamp": timestamp, **battery.as_dict()}
-                    )
+                    battery = self._electrical_storage_for_time_step(building, t)
+                    if battery is not None:
+                        battery.time_step = t
+                        rows_by_filename[f"exported_data_{building.name.lower()}_battery_ep{episode_num}.csv"].append(
+                            {"timestamp": timestamp, **battery.as_dict()}
+                        )
 
-                    for charger in building.electric_vehicle_chargers or []:
+                    for charger in self._chargers_for_time_step(building, t):
+                        charger.time_step = t
                         if charger not in original_charger_state:
                             original_charger_state[charger] = (
                                 charger.connected_electric_vehicle,
@@ -191,11 +266,12 @@ class EpisodeExporter:
                             {"timestamp": timestamp, **charger.as_dict()}
                         )
 
-                rows_by_filename[f"exported_data_pricing_ep{episode_num}.csv"].append(
-                    {"timestamp": timestamp, **env.buildings[0].pricing.as_dict(t)}
-                )
+                if len(buildings) > 0:
+                    rows_by_filename[f"exported_data_pricing_ep{episode_num}.csv"].append(
+                        {"timestamp": timestamp, **buildings[0].pricing.as_dict(t)}
+                    )
 
-                for ev in env.electric_vehicles:
+                for ev in evs:
                     rows_by_filename[f"exported_data_{ev.name.lower()}_ep{episode_num}.csv"].append(
                         {"timestamp": timestamp, **ev.as_dict()}
                     )
@@ -205,6 +281,8 @@ class EpisodeExporter:
                 charger.connected_electric_vehicle, charger.incoming_electric_vehicle = state
 
             self.restore_render_time_step(time_step_snapshot)
+            env.buildings = original_active_buildings
+            env.electric_vehicles = original_active_evs
             env.year = original_year
             env.current_day = original_day
             env._render_start_datetime = original_start_datetime
@@ -376,14 +454,28 @@ class EpisodeExporter:
 
         env = self.env
         snapshot = []
+        seen = set()
 
         def _record(obj):
+            if obj is None:
+                return
+            marker = id(obj)
+            if marker in seen:
+                return
+            seen.add(marker)
             if hasattr(obj, 'time_step'):
                 snapshot.append((obj, obj.time_step))
                 obj.time_step = index
 
         _record(env)
-        for building in getattr(env, 'buildings', []):
+        if getattr(env, 'topology_mode', 'static') == 'dynamic' and getattr(env, '_topology_service', None) is not None:
+            buildings_iterable = list(env._topology_service.member_pool.values())
+            ev_iterable = list(env._topology_service.ev_pool.values())
+        else:
+            buildings_iterable = list(getattr(env, 'buildings', []))
+            ev_iterable = list(getattr(env, 'electric_vehicles', []))
+
+        for building in buildings_iterable:
             _record(building)
             electrical_storage = getattr(building, 'electrical_storage', None)
             if electrical_storage is not None:
@@ -395,7 +487,7 @@ class EpisodeExporter:
             for washing_machine in getattr(building, 'washing_machines', []) or []:
                 _record(washing_machine)
 
-        for ev in getattr(env, 'electric_vehicles', []):
+        for ev in ev_iterable:
             _record(ev)
             battery = getattr(ev, 'battery', None)
             if battery is not None:

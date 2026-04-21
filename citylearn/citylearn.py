@@ -23,6 +23,7 @@ from citylearn.internal.kpi import CityLearnKPIService
 from citylearn.internal.loading import CityLearnLoadingService
 from citylearn.internal.runtime import CityLearnRuntimeService
 from citylearn.internal.entity_interface import CityLearnEntityInterfaceService
+from citylearn.internal.topology import CityLearnTopologyService
 from citylearn.utilities import parse_bool
 from citylearn.reward_function import (
     MultiBuildingRewardFunction,
@@ -156,6 +157,7 @@ class CityLearnEnv(Environment, Env):
         inactive_observations: Union[List[str], List[List[str]]] = None, active_actions: Union[List[str], List[List[str]]] = None,
         inactive_actions: Union[List[str], List[List[str]]] = None, simulate_power_outage: bool = None, solar_generation: bool = None, random_seed: int = None, offline: bool = None, time_step_ratio: int = None,
         interface: str = None,
+        topology_mode: str = None,
         start_date: Union[str, datetime.date] = None, render_session_name: str = None, render_mode: str = 'none',
         export_kpis_on_episode_end: bool = None, **kwargs: Any
     ):
@@ -178,6 +180,10 @@ class CityLearnEnv(Environment, Env):
         self.schema = schema
         schema_interface = self.schema.get('interface') if isinstance(self.schema, dict) else None
         self.interface = interface if interface is not None else schema_interface
+        schema_topology_mode = self.schema.get('topology_mode') if isinstance(self.schema, dict) else None
+        self.topology_mode = topology_mode if topology_mode is not None else schema_topology_mode
+        if self.topology_mode == 'dynamic' and self.interface != 'entity':
+            raise ValueError("topology_mode='dynamic' requires interface='entity'.")
         self.community_market_enabled = False
         self.community_market_sell_ratio = 0.8
         self.community_market_grid_export_price = 0.0
@@ -239,6 +245,7 @@ class CityLearnEnv(Environment, Env):
         self._runtime_service = CityLearnRuntimeService(self)
         self._kpi_service = CityLearnKPIService(self)
         self._entity_service = CityLearnEntityInterfaceService(self)
+        self._topology_service = CityLearnTopologyService(self)
         root_directory, buildings, electric_vehicles, episode_time_steps, rolling_episode_split, random_episode_split, \
             seconds_per_time_step, reward_function, central_agent, shared_observations, episode_tracker = self._load(
                 deepcopy(self.schema),
@@ -265,9 +272,17 @@ class CityLearnEnv(Environment, Env):
                 random_seed=self.random_seed,
             )
         self.root_directory = root_directory
-        self.buildings = buildings
-        self.electric_vehicles = electric_vehicles
-        get_time_step_ratio = buildings[0].time_step_ratio if len(buildings) > 0 else 1.0
+        self._all_buildings = list(buildings)
+        self._all_electric_vehicles = list(electric_vehicles)
+        if self.topology_mode == 'dynamic':
+            self._topology_service.initialize(self._all_buildings, self._all_electric_vehicles)
+            self.buildings = list(self._all_buildings)
+            self.electric_vehicles = list(self._all_electric_vehicles)
+        else:
+            self.buildings = buildings
+            self.electric_vehicles = electric_vehicles
+        reference_buildings = self.buildings if len(self.buildings) > 0 else self._all_buildings
+        get_time_step_ratio = reference_buildings[0].time_step_ratio if len(reference_buildings) > 0 else 1.0
         self.time_step_ratio = get_time_step_ratio
 
         # now call super class initialization and set episode tracker now that buildings are set
@@ -458,6 +473,39 @@ class CityLearnEnv(Environment, Env):
         """Environment I/O interface mode."""
 
         return self.__interface
+
+    @property
+    def topology_mode(self) -> str:
+        """Topology execution mode."""
+
+        return self.__topology_mode
+
+    @property
+    def topology_version(self) -> int:
+        """Incrementing topology mutation version."""
+
+        if getattr(self, '_topology_service', None) is None or self.topology_mode != 'dynamic':
+            return 0
+
+        return self._topology_service.topology_version
+
+    @property
+    def topology_event_log(self) -> List[Mapping[str, Any]]:
+        """Applied topology event trace for the current episode."""
+
+        if getattr(self, '_topology_service', None) is None or self.topology_mode != 'dynamic':
+            return []
+
+        return [dict(entry) for entry in self._topology_service.event_log]
+
+    @property
+    def topology_member_lifecycle(self) -> Mapping[str, Mapping[str, Any]]:
+        """Member lifecycle metadata keyed by member id."""
+
+        if getattr(self, '_topology_service', None) is None or self.topology_mode != 'dynamic':
+            return {}
+
+        return self._topology_service.member_lifecycle
 
     @property
     def terminated(self) -> bool:
@@ -1073,7 +1121,18 @@ class CityLearnEnv(Environment, Env):
         mode = 'flat' if interface is None else str(interface).strip().lower()
         if mode not in {'flat', 'entity'}:
             raise ValueError("interface must be one of {'flat', 'entity'}.")
+        if mode != 'entity' and getattr(self, '_CityLearnEnv__topology_mode', 'static') == 'dynamic':
+            raise ValueError("topology_mode='dynamic' requires interface='entity'.")
         self.__interface = mode
+
+    @topology_mode.setter
+    def topology_mode(self, topology_mode: str):
+        mode = 'static' if topology_mode is None else str(topology_mode).strip().lower()
+        if mode not in {'static', 'dynamic'}:
+            raise ValueError("topology_mode must be one of {'static', 'dynamic'}.")
+        if mode == 'dynamic' and getattr(self, '_CityLearnEnv__interface', 'flat') != 'entity':
+            raise ValueError("topology_mode='dynamic' requires interface='entity'.")
+        self.__topology_mode = mode
 
     @Environment.random_seed.setter
     def random_seed(self, seed: int):
@@ -1093,6 +1152,9 @@ class CityLearnEnv(Environment, Env):
         return {
             **super().get_metadata(),
             'interface': self.interface,
+            'topology_mode': self.topology_mode,
+            'topology_version': self.topology_version,
+            'topology_event_log': self.topology_event_log,
             'reward_function': self.reward_function.__class__.__name__,
             'central_agent': self.central_agent,
             'shared_observations': self.shared_observations,
@@ -1308,11 +1370,14 @@ class CityLearnEnv(Environment, Env):
             self.random_seed,
         )
 
-        for building in self.buildings:
-            building.reset()
+        if self.topology_mode == 'dynamic':
+            self._topology_service.reset()
+        else:
+            for building in self.buildings:
+                building.reset()
 
-        for ev in self.electric_vehicles:
-            ev.reset()
+            for ev in self.electric_vehicles:
+                ev.reset()
 
         self.associate_chargers_to_electric_vehicles()
 
@@ -1334,6 +1399,7 @@ class CityLearnEnv(Environment, Env):
         self._refresh_action_cache()
         self.update_variables()
         self._entity_service.reset()
+        self.reward_function.env_metadata = self.get_metadata()
 
         return self.observations, self.get_info()
 

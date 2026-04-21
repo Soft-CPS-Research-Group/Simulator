@@ -1455,5 +1455,33 @@ class CityLearnKPIService:
         if output.empty:
             return pd.DataFrame(columns=['cost_function', 'value', 'name', 'level'])
 
+        if getattr(env, 'topology_mode', 'static') == 'dynamic':
+            lifecycle = getattr(env, 'topology_member_lifecycle', {}) or {}
+            existing_buildings = set(output[output['level'] == 'building']['name'].astype(str).tolist())
+            lifecycle_rows = []
+
+            for member_id in lifecycle.keys():
+                if member_id not in existing_buildings:
+                    lifecycle_rows.append(
+                        {
+                            'cost_function': 'topology_lifecycle_presence',
+                            'value': np.nan,
+                            'name': member_id,
+                            'level': 'building',
+                        }
+                    )
+
+            if lifecycle_rows:
+                output = pd.concat([output, pd.DataFrame(lifecycle_rows)], ignore_index=True)
+
+            output['topology_born_at'] = np.nan
+            output['topology_removed_at'] = np.nan
+            output['topology_active'] = np.nan
+            for member_id, state in lifecycle.items():
+                mask = (output['level'] == 'building') & (output['name'] == member_id)
+                output.loc[mask, 'topology_born_at'] = state.get('born_at')
+                output.loc[mask, 'topology_removed_at'] = state.get('removed_at')
+                output.loc[mask, 'topology_active'] = 1.0 if state.get('active', False) else 0.0
+
         output = output.sort_values(['level', 'name', 'cost_function']).reset_index(drop=True)
         return output

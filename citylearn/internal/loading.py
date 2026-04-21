@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import hashlib
 import importlib
 import os
-from typing import TYPE_CHECKING, Any, List, Mapping, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -43,6 +43,11 @@ class CityLearnLoadingService:
 
     def __init__(self, env: "CityLearnEnv"):
         self.env = env
+        self._dynamic_mode: bool = False
+        self._dynamic_expected_rows: int = 0
+        self._dynamic_member_windows: Dict[str, Tuple[int, int]] = {}
+        self._dynamic_charger_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
+        self._dynamic_washing_machine_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
 
     def load(
         self,
@@ -117,6 +122,26 @@ class CityLearnLoadingService:
         pv_sizing_data = None
         battery_sizing_data = None
 
+        dynamic_mode = getattr(self.env, 'topology_mode', 'static') == 'dynamic'
+        self._dynamic_mode = dynamic_mode
+        self._dynamic_expected_rows = int(episode_tracker.simulation_time_steps)
+        self._dynamic_member_windows = {}
+        self._dynamic_charger_windows = {}
+        self._dynamic_washing_machine_windows = {}
+
+        if dynamic_mode:
+            self._dynamic_member_windows = self._build_dynamic_member_windows(schema, self._dynamic_expected_rows)
+            self._dynamic_charger_windows = self._build_dynamic_charger_windows(
+                schema,
+                self._dynamic_member_windows,
+                self._dynamic_expected_rows,
+            )
+            self._dynamic_washing_machine_windows = self._build_dynamic_washing_machine_windows(
+                schema,
+                self._dynamic_member_windows,
+                self._dynamic_expected_rows,
+            )
+
         buildings_to_include = list(schema['buildings'].keys())
         buildings: List[Building] = []
 
@@ -139,10 +164,14 @@ class CityLearnLoadingService:
                 raise Exception('Unknown buildings type. Allowed types are citylearn.building.Building, int and str.')
 
         else:
-            buildings_to_include = [
-                b for b in buildings_to_include
-                if parse_bool(schema['buildings'][b].get('include', True), default=True, path=f'buildings.{b}.include')
-            ]
+            if dynamic_mode:
+                # Dynamic topology needs both initially active members and potential templates.
+                buildings_to_include = list(schema['buildings'].keys())
+            else:
+                buildings_to_include = [
+                    b for b in buildings_to_include
+                    if parse_bool(schema['buildings'][b].get('include', True), default=True, path=f'buildings.{b}.include')
+                ]
 
         if len(buildings_to_include) > 0:
             solar_generation = kwargs.get('solar_generation')
@@ -202,7 +231,12 @@ class CityLearnLoadingService:
             electric_vehicle_schemas = schema.get('electric_vehicles_def', {})
 
         for electric_vehicle_name, electric_vehicle_schema in electric_vehicle_schemas.items():
-            if parse_bool(electric_vehicle_schema.get('include', True), default=True, path=f'electric_vehicles_def.{electric_vehicle_name}.include'):
+            include_ev = True if dynamic_mode else parse_bool(
+                electric_vehicle_schema.get('include', True),
+                default=True,
+                path=f'electric_vehicles_def.{electric_vehicle_name}.include',
+            )
+            if include_ev:
                 time_step_ratio = buildings[0].time_step_ratio if len(buildings) > 0 else 1.0
                 electric_vehicles.append(
                     self.load_electric_vehicle(electric_vehicle_name, schema, electric_vehicle_schema, episode_tracker, time_step_ratio)
@@ -294,22 +328,48 @@ class CityLearnLoadingService:
             building_kwargs['electrical_storage_phase_connection'] = electrical_storage_attributes.get('phase_connection')
         seconds_per_time_step = schema['seconds_per_time_step']
         noise_std = building_schema.get('noise_std', 0.0)
+        expected_rows = int(getattr(self, '_dynamic_expected_rows', episode_tracker.simulation_time_steps))
+        member_window = self._dynamic_member_windows.get(building_name)
 
         energy_simulation = pd.read_csv(os.path.join(schema['root_directory'], building_schema['energy_simulation']))
+        energy_simulation = self._align_dynamic_timeseries_dataframe(
+            energy_simulation,
+            expected_rows=expected_rows,
+            window=member_window,
+            source_label=f'buildings.{building_name}.energy_simulation',
+        )
         energy_simulation = EnergySimulation(**energy_simulation.to_dict('list'), seconds_per_time_step=seconds_per_time_step, noise_std=noise_std)
         ratios = getattr(energy_simulation, 'time_step_ratios', None) or []
         building_kwargs['time_step_ratio'] = ratios[-1] if len(ratios) > 0 else 1.0
         weather = pd.read_csv(os.path.join(schema['root_directory'], building_schema['weather']))
+        weather = self._align_dynamic_timeseries_dataframe(
+            weather,
+            expected_rows=expected_rows,
+            window=member_window,
+            source_label=f'buildings.{building_name}.weather',
+        )
         weather = Weather(**weather.to_dict('list'), noise_std=noise_std)
 
         if building_schema.get('carbon_intensity', None) is not None:
             carbon_intensity = pd.read_csv(os.path.join(schema['root_directory'], building_schema['carbon_intensity']))
+            carbon_intensity = self._align_dynamic_timeseries_dataframe(
+                carbon_intensity,
+                expected_rows=expected_rows,
+                window=member_window,
+                source_label=f'buildings.{building_name}.carbon_intensity',
+            )
             carbon_intensity = CarbonIntensity(**carbon_intensity.to_dict('list'), noise_std=noise_std)
         else:
             carbon_intensity = CarbonIntensity(np.zeros(energy_simulation.hour.shape[0], dtype='float32'), noise_std=noise_std)
 
         if building_schema.get('pricing', None) is not None:
             pricing = pd.read_csv(os.path.join(schema['root_directory'], building_schema['pricing']))
+            pricing = self._align_dynamic_timeseries_dataframe(
+                pricing,
+                expected_rows=expected_rows,
+                window=member_window,
+                source_label=f'buildings.{building_name}.pricing',
+            )
             pricing = Pricing(**pricing.to_dict('list'), noise_std=noise_std)
         else:
             pricing = Pricing(
@@ -385,6 +445,13 @@ class CityLearnLoadingService:
                 charger_simulation_file = pd.read_csv(
                     os.path.join(schema['root_directory'], charger_config['charger_simulation'])
                 ).iloc[schema['simulation_start_time_step']:schema['simulation_end_time_step'] + 1].copy()
+                charger_window = self._dynamic_charger_windows.get((building_name, charger_name))
+                charger_simulation_file = self._align_dynamic_timeseries_dataframe(
+                    charger_simulation_file,
+                    expected_rows=expected_rows,
+                    window=charger_window,
+                    source_label=f'buildings.{building_name}.chargers.{charger_name}.charger_simulation',
+                )
 
                 charger_simulation = ChargerSimulation(*charger_simulation_file.values.T, noise_std=noise_std)
                 if 'electric_vehicle_current_soc' in charger_simulation_file.columns:
@@ -422,7 +489,15 @@ class CityLearnLoadingService:
             washing_machine_schemas = building_schema.get('washing_machines', {})
 
         for washing_machine_name, washing_machine_schema in washing_machine_schemas.items():
-            washing_machines_list.append(self.load_washing_machine(washing_machine_name, schema, washing_machine_schema, episode_tracker))
+            washing_machines_list.append(
+                self.load_washing_machine(
+                    washing_machine_name,
+                    building_name,
+                    schema,
+                    washing_machine_schema,
+                    episode_tracker,
+                )
+            )
 
         observation_metadata, action_metadata = self.process_metadata(
             schema,
@@ -708,6 +783,7 @@ class CityLearnLoadingService:
     def load_washing_machine(
         self,
         washing_machine_name: str,
+        building_name: str,
         schema: dict,
         washing_machine_schema: dict,
         episode_tracker: EpisodeTracker,
@@ -719,6 +795,14 @@ class CityLearnLoadingService:
         washing_machine_simulation = pd.read_csv(file_path).iloc[
             schema['simulation_start_time_step']:schema['simulation_end_time_step'] + 1
         ].copy()
+        washing_window = self._dynamic_washing_machine_windows.get((building_name, washing_machine_name))
+        expected_rows = int(getattr(self, '_dynamic_expected_rows', episode_tracker.simulation_time_steps))
+        washing_machine_simulation = self._align_dynamic_timeseries_dataframe(
+            washing_machine_simulation,
+            expected_rows=expected_rows,
+            window=washing_window,
+            source_label=f'buildings.{building_name}.washing_machines.{washing_machine_name}.washing_machine_energy_simulation',
+        )
 
         washing_machine_simulation = WashingMachineSimulation(*washing_machine_simulation.values.T)
 
@@ -731,3 +815,179 @@ class CityLearnLoadingService:
         )
 
         return washing_machine
+
+    @staticmethod
+    def _collect_topology_events(schema: Mapping[str, Any]) -> List[Mapping[str, Any]]:
+        raw_events = schema.get('topology_events', []) if isinstance(schema, Mapping) else []
+        events = [event for event in raw_events if isinstance(event, Mapping)]
+        events.sort(
+            key=lambda event: (
+                int(event.get('time_step', 0)),
+                str(event.get('id', '')),
+            )
+        )
+        return events
+
+    def _build_dynamic_member_windows(
+        self,
+        schema: Mapping[str, Any],
+        expected_rows: int,
+    ) -> Dict[str, Tuple[int, int]]:
+        windows: Dict[str, Tuple[int, int]] = {}
+        events = self._collect_topology_events(schema)
+        buildings = schema.get('buildings', {}) if isinstance(schema, Mapping) else {}
+
+        for member_id, member_schema in buildings.items():
+            include = parse_bool(
+                (member_schema or {}).get('include', True),
+                default=True,
+                path=f'buildings.{member_id}.include',
+            )
+            start = 0 if include else None
+            end = int(expected_rows)
+
+            if start is None:
+                for event in events:
+                    if str(event.get('operation', '')).strip().lower() != 'add_member':
+                        continue
+                    if event.get('target_member_id') != member_id:
+                        continue
+                    start = int(event.get('time_step', 0))
+                    break
+
+            if start is None:
+                continue
+
+            for event in events:
+                if str(event.get('operation', '')).strip().lower() != 'remove_member':
+                    continue
+                if event.get('target_member_id') != member_id:
+                    continue
+                candidate = int(event.get('time_step', 0))
+                if candidate >= start:
+                    end = min(end, candidate)
+                    break
+
+            start = max(0, min(int(start), int(expected_rows)))
+            end = max(start, min(int(end), int(expected_rows)))
+
+            if end > start:
+                windows[str(member_id)] = (start, end)
+
+        return windows
+
+    def _build_dynamic_charger_windows(
+        self,
+        schema: Mapping[str, Any],
+        member_windows: Mapping[str, Tuple[int, int]],
+        expected_rows: int,
+    ) -> Dict[Tuple[str, str], Tuple[int, int]]:
+        windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
+        events = self._collect_topology_events(schema)
+        buildings = schema.get('buildings', {}) if isinstance(schema, Mapping) else {}
+
+        for member_id, member_schema in buildings.items():
+            member_window = member_windows.get(str(member_id))
+            if member_window is None:
+                continue
+
+            base_start, base_end = member_window
+            chargers = (member_schema or {}).get('chargers', {}) or {}
+
+            for charger_id in chargers.keys():
+                start, end = int(base_start), int(base_end)
+
+                for event in events:
+                    if str(event.get('operation', '')).strip().lower() != 'remove_asset':
+                        continue
+                    if str(event.get('target_asset_type', '')).strip().lower() != 'charger':
+                        continue
+                    if event.get('target_member_id') != member_id:
+                        continue
+                    if event.get('target_asset_id') != charger_id:
+                        continue
+                    candidate = int(event.get('time_step', 0))
+                    if candidate >= start:
+                        end = min(end, candidate)
+                        break
+
+                start = max(0, min(start, int(expected_rows)))
+                end = max(start, min(end, int(expected_rows)))
+                if end > start:
+                    windows[(str(member_id), str(charger_id))] = (start, end)
+
+        return windows
+
+    @staticmethod
+    def _build_dynamic_washing_machine_windows(
+        schema: Mapping[str, Any],
+        member_windows: Mapping[str, Tuple[int, int]],
+        expected_rows: int,
+    ) -> Dict[Tuple[str, str], Tuple[int, int]]:
+        windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
+        buildings = schema.get('buildings', {}) if isinstance(schema, Mapping) else {}
+
+        for member_id, member_schema in buildings.items():
+            member_window = member_windows.get(str(member_id))
+            if member_window is None:
+                continue
+
+            start, end = member_window
+            start = max(0, min(int(start), int(expected_rows)))
+            end = max(start, min(int(end), int(expected_rows)))
+            if end <= start:
+                continue
+
+            washing_machines = (member_schema or {}).get('washing_machines', {}) or {}
+            for washing_machine_id in washing_machines.keys():
+                windows[(str(member_id), str(washing_machine_id))] = (start, end)
+
+        return windows
+
+    def _align_dynamic_timeseries_dataframe(
+        self,
+        dataframe: pd.DataFrame,
+        *,
+        expected_rows: int,
+        window: Optional[Tuple[int, int]],
+        source_label: str,
+    ) -> pd.DataFrame:
+        if not self._dynamic_mode or window is None:
+            return dataframe
+
+        expected_rows = int(expected_rows)
+        if expected_rows <= 0:
+            return dataframe
+
+        df = dataframe.copy()
+        if len(df) > expected_rows:
+            df = df.iloc[:expected_rows].copy()
+
+        start, end = window
+        start = max(0, min(int(start), expected_rows))
+        end = max(start, min(int(end), expected_rows))
+        active_rows = end - start
+        row_count = len(df)
+
+        if row_count == expected_rows:
+            return df.reset_index(drop=True)
+
+        if active_rows <= 0:
+            raise ValueError(
+                f'{source_label} has no active window in dynamic mode. '
+                f'Provide full-horizon data ({expected_rows} rows) for this source.'
+            )
+
+        if row_count <= 0:
+            raise ValueError(
+                f'{source_label} has 0 rows in dynamic mode. '
+                f'Provide at least 1 row or a full-horizon file ({expected_rows} rows).'
+            )
+
+        aligned = pd.DataFrame(index=np.arange(expected_rows), columns=df.columns)
+        window_rows = min(active_rows, row_count)
+        aligned.iloc[start:start + window_rows, :] = df.iloc[:window_rows].to_numpy()
+        for column in aligned.columns:
+            with pd.option_context('future.no_silent_downcasting', True):
+                aligned[column] = aligned[column].ffill().bfill()
+        return aligned.reset_index(drop=True)

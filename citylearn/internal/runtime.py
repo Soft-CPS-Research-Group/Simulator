@@ -56,16 +56,57 @@ class CityLearnRuntimeService:
         env.rewards.append(reward)
 
         partial_render_time = self.next_time_step()
+        topology_changed = False
+        if getattr(env, 'topology_mode', 'static') == 'dynamic':
+            topology_changed = env._topology_service.apply_events_for_time_step(int(env.time_step))
+            if topology_changed:
+                # Re-associate only when topology actually changed (e.g., added member/charger).
+                # Otherwise this would duplicate the association already done in `next_time_step()`.
+                self.associate_chargers_to_electric_vehicles()
+                env._refresh_action_cache()
+                env._entity_service.invalidate()
+                env.reward_function.env_metadata = env.get_metadata()
         end_export_time = 0.0
         env._maybe_log_periodic_metrics()
 
         if env.terminated:
-            rewards = np.array(env.rewards[1:], dtype='float32')
+            reward_history = env.rewards[1:]
+            reward_vectors: List[np.ndarray] = []
+            max_len = 1
+
+            for reward_item in reward_history:
+                arr = np.asarray(reward_item, dtype='float32')
+                vec = arr.reshape(1) if arr.ndim == 0 else arr.reshape(-1)
+                reward_vectors.append(vec)
+                max_len = max(max_len, int(vec.size))
+
+            rewards = np.full((len(reward_vectors), max_len), np.nan, dtype='float32')
+            for i, vec in enumerate(reward_vectors):
+                rewards[i, :vec.size] = vec
+
+            valid = ~np.isnan(rewards)
+            valid_count = valid.sum(axis=0).astype(np.float32)
+            safe_min = np.where(np.any(valid, axis=0), np.nanmin(rewards, axis=0), np.nan)
+            safe_max = np.where(np.any(valid, axis=0), np.nanmax(rewards, axis=0), np.nan)
+            safe_sum = np.nansum(rewards, axis=0)
+            safe_mean = np.divide(
+                safe_sum,
+                valid_count,
+                out=np.full_like(safe_sum, np.nan, dtype='float32'),
+                where=valid_count > 0,
+            )
+
+            def _to_python(value: np.ndarray):
+                scalar = value.reshape(-1)
+                if scalar.size == 1:
+                    return float(scalar[0])
+                return scalar.tolist()
+
             env.episode_rewards.append({
-                'min': rewards.min(axis=0).tolist(),
-                'max': rewards.max(axis=0).tolist(),
-                'sum': rewards.sum(axis=0).tolist(),
-                'mean': rewards.mean(axis=0).tolist(),
+                'min': _to_python(safe_min),
+                'max': _to_python(safe_max),
+                'sum': _to_python(safe_sum),
+                'mean': _to_python(safe_mean),
             })
             if env.render_mode == 'end' and env.render_enabled:
                 final_index = min(env.time_steps - 1, env.time_step - 1) if env.time_step > 0 else 0
@@ -304,11 +345,24 @@ class CityLearnRuntimeService:
                     for ev in env.electric_vehicles:
                         if ev.name == ev_id:
                             if state == 1:
-                                charger.plug_car(ev)
+                                # Idempotent behavior: the method may be called again in the same
+                                # time step when topology changed and action/observation layouts are refreshed.
+                                just_connected = False
+                                if charger.connected_electric_vehicle is None:
+                                    charger.plug_car(ev)
+                                    just_connected = True
+                                elif charger.connected_electric_vehicle is not ev:
+                                    raise ValueError(
+                                        f"Charger '{charger.charger_id}' already connected to "
+                                        f"'{charger.connected_electric_vehicle.name}' but dataset requires '{ev.name}' "
+                                        f"at time step {env.time_step}."
+                                    )
                                 is_new_connection = (
-                                    prev_state != 1
-                                    or not isinstance(prev_ev_id, str)
-                                    or prev_ev_id != ev_id
+                                    just_connected and (
+                                        prev_state != 1
+                                        or not isinstance(prev_ev_id, str)
+                                        or prev_ev_id != ev_id
+                                    )
                                 )
                                 if is_new_connection:
                                     soc_value = _resolve_arrival_soc(sim, env.time_step, prev_state, prev_ev_id, ev_id)

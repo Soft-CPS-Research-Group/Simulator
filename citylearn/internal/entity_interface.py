@@ -20,6 +20,17 @@ class ChargerRef:
     global_id: str
 
 
+@dataclass(frozen=True)
+class StorageRef:
+    """Resolved storage location inside the environment."""
+
+    row: int
+    building_index: int
+    building_name: str
+    storage_id: str
+    global_id: str
+
+
 class CityLearnEntityInterfaceService:
     """Build and parse canonical entity payloads."""
 
@@ -41,10 +52,17 @@ class CityLearnEntityInterfaceService:
         "battery_capacity_kwh",
         "depth_of_discharge_ratio",
     ]
+    STORAGE_FEATURES = [
+        "soc",
+        "capacity_kwh",
+        "nominal_power_kw",
+        "electricity_consumption_kwh",
+    ]
 
     def __init__(self, env):
         self.env = env
         self._initialized = False
+        self._layout_topology_version = -1
 
     def reset(self):
         """Rebuild specs and reusable buffers for the current episode layout."""
@@ -53,6 +71,12 @@ class CityLearnEntityInterfaceService:
         self._build_spaces()
         self._build_specs()
         self._initialized = True
+        self._layout_topology_version = int(getattr(self.env, 'topology_version', 0))
+
+    def invalidate(self):
+        """Mark specs/layout as stale and rebuild on next access."""
+
+        self._initialized = False
 
     @property
     def observation_space(self) -> spaces.Dict:
@@ -81,6 +105,7 @@ class CityLearnEntityInterfaceService:
         self._building_obs.fill(0.0)
         self._charger_obs.fill(0.0)
         self._ev_obs.fill(0.0)
+        self._storage_obs.fill(0.0)
 
         for i, building in enumerate(env.buildings):
             # Exogenous signals are read at current t, while endogenous values come from
@@ -122,6 +147,21 @@ class CityLearnEntityInterfaceService:
             self._ev_obs[i, 1] = self._safe_scalar(ev.battery.capacity, 0.0)
             self._ev_obs[i, 2] = self._safe_scalar(ev.battery.depth_of_discharge, 0.0)
 
+        for ref in self._storage_refs:
+            building = env.buildings[ref.building_index]
+            storage = building.electrical_storage
+            values = {
+                "soc": self._safe_scalar(storage.soc[endogenous_t], 0.0),
+                "capacity_kwh": self._safe_scalar(getattr(storage, "capacity", 0.0), 0.0),
+                "nominal_power_kw": self._safe_scalar(getattr(storage, "nominal_power", 0.0), 0.0),
+                "electricity_consumption_kwh": self._safe_scalar(
+                    building.electrical_storage_electricity_consumption[endogenous_t],
+                    0.0,
+                ),
+            }
+            for col, feature_name in enumerate(self.STORAGE_FEATURES):
+                self._storage_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
+
         self._charger_to_ev_connected.fill(-1)
         self._charger_to_ev_connected_mask.fill(0.0)
         self._charger_to_ev_incoming.fill(-1)
@@ -148,10 +188,12 @@ class CityLearnEntityInterfaceService:
                 "building": self._building_obs,
                 "charger": self._charger_obs,
                 "ev": self._ev_obs,
+                "storage": self._storage_obs,
             },
             "edges": {
                 "district_to_building": self._district_to_building,
                 "building_to_charger": self._building_to_charger,
+                "building_to_storage": self._building_to_storage,
                 "charger_to_ev_connected": self._charger_to_ev_connected,
                 "charger_to_ev_connected_mask": self._charger_to_ev_connected_mask,
                 "charger_to_ev_incoming": self._charger_to_ev_incoming,
@@ -161,6 +203,7 @@ class CityLearnEntityInterfaceService:
                 "time_step": t,
                 "endogenous_time_step": endogenous_t,
                 "spec_version": "entity_v1",
+                "topology_version": int(getattr(env, "topology_version", 0)),
             },
         }
 
@@ -178,16 +221,15 @@ class CityLearnEntityInterfaceService:
         tables = actions.get("tables", actions)
         building_table = tables.get("building")
         charger_table = tables.get("charger")
-        building_map = actions.get("building") or {}
-        charger_map = actions.get("charger") or {}
 
         building_table = self._to_2d_array(building_table, rows=len(self._building_ids), cols=len(self._building_action_features))
         charger_table = self._to_2d_array(charger_table, rows=len(self._charger_refs), cols=len(self._charger_action_features))
+        building_overrides, charger_overrides = self._resolve_map_overrides(actions)
 
         vectors: List[List[float]] = []
         for building_idx, building in enumerate(self.env.buildings):
             building_values = []
-            per_building_map = building_map.get(building.name, {}) if isinstance(building_map, Mapping) else {}
+            per_building_map = building_overrides.get(building.name, {})
 
             for action_name, low, high in zip(building.active_actions, building.action_space.low, building.action_space.high):
                 value = 0.0
@@ -200,11 +242,11 @@ class CityLearnEntityInterfaceService:
 
                 elif action_name.startswith("electric_vehicle_storage_"):
                     row = self._charger_row_by_ev_action_name.get((building_idx, action_name))
-                    if row is not None and charger_table is not None and charger_table.shape[1] > 0:
+                    if row is not None and row >= 0 and charger_table is not None and charger_table.shape[1] > 0:
                         value = charger_table[row, 0]
-                    charger_ref = self._charger_refs[row] if row is not None else None
-                    if charger_ref is not None and isinstance(charger_map, Mapping):
-                        charger_payload = charger_map.get(charger_ref.global_id) or charger_map.get(charger_ref.charger_id) or {}
+                    charger_ref = self._charger_refs[row] if row is not None and row >= 0 else None
+                    if charger_ref is not None:
+                        charger_payload = charger_overrides.get(charger_ref.global_id, {})
                         if isinstance(charger_payload, Mapping) and "electric_vehicle_storage" in charger_payload:
                             value = self._safe_scalar(charger_payload["electric_vehicle_storage"], float(value))
 
@@ -218,6 +260,97 @@ class CityLearnEntityInterfaceService:
             vectors.append(building_values)
 
         return self._map_vectors_to_action_dicts(vectors)
+
+    def _resolve_map_overrides(self, actions: Mapping[str, Any]) -> Tuple[Mapping[str, Mapping[str, Any]], Mapping[str, Mapping[str, Any]]]:
+        raw_map = actions.get("map")
+        if raw_map is None:
+            raw_map = {}
+            legacy_building_map = actions.get("building") or {}
+            legacy_charger_map = actions.get("charger") or {}
+            if isinstance(legacy_building_map, Mapping):
+                for key, payload in legacy_building_map.items():
+                    raw_map[f"building:{key}"] = payload
+            if isinstance(legacy_charger_map, Mapping):
+                for key, payload in legacy_charger_map.items():
+                    raw_map[f"charger:{key}"] = payload
+
+        if not isinstance(raw_map, Mapping):
+            raise AssertionError("Entity action 'map' must be a mapping keyed by canonical entity ids.")
+
+        building_ids = set(self._building_ids)
+        charger_global_ids = {ref.global_id for ref in self._charger_refs}
+        charger_raw_to_global = {ref.charger_id: ref.global_id for ref in self._charger_refs}
+        building_overrides: Dict[str, Mapping[str, Any]] = {}
+        charger_overrides: Dict[str, Mapping[str, Any]] = {}
+
+        for raw_id, payload in raw_map.items():
+            if not isinstance(payload, Mapping):
+                raise AssertionError(f"Entity action map entry for '{raw_id}' must be a mapping of action values.")
+
+            raw_key = str(raw_id)
+            entity_kind, entity_id = self._split_map_id(raw_key)
+
+            if entity_kind is None:
+                if raw_key in building_ids:
+                    entity_kind, entity_id = "building", raw_key
+                elif raw_key in charger_global_ids:
+                    entity_kind, entity_id = "charger", raw_key
+                elif raw_key in charger_raw_to_global:
+                    entity_kind, entity_id = "charger", charger_raw_to_global[raw_key]
+                else:
+                    raise AssertionError(f"Unknown entity id '{raw_key}' in action map.")
+
+            if entity_kind == "building":
+                if entity_id not in building_ids:
+                    raise AssertionError(f"Unknown building id '{entity_id}' in action map.")
+                building_overrides[entity_id] = dict(payload)
+                continue
+
+            if entity_kind == "charger":
+                if entity_id in charger_raw_to_global:
+                    entity_id = charger_raw_to_global[entity_id]
+                if entity_id not in charger_global_ids:
+                    raise AssertionError(f"Unknown charger id '{entity_id}' in action map.")
+                charger_overrides[entity_id] = dict(payload)
+                continue
+
+            raise AssertionError(f"Unknown entity kind '{entity_kind}' in action map id '{raw_key}'.")
+
+        self._validate_override_keys(building_overrides, charger_overrides)
+        return building_overrides, charger_overrides
+
+    @staticmethod
+    def _split_map_id(raw_key: str) -> Tuple[Optional[str], Optional[str]]:
+        if ":" not in raw_key:
+            return None, None
+        entity_kind, entity_id = raw_key.split(":", 1)
+        entity_kind = entity_kind.strip().lower()
+        entity_id = entity_id.strip()
+        if entity_kind == "" or entity_id == "":
+            return None, None
+        return entity_kind, entity_id
+
+    def _validate_override_keys(
+        self,
+        building_overrides: Mapping[str, Mapping[str, Any]],
+        charger_overrides: Mapping[str, Mapping[str, Any]],
+    ):
+        for building in self.env.buildings:
+            payload = building_overrides.get(building.name, {})
+            if not payload:
+                continue
+            unknown = [key for key in payload.keys() if key not in set(building.active_actions)]
+            if unknown:
+                raise AssertionError(
+                    f"Unknown building action keys for '{building.name}': {sorted(unknown)}."
+                )
+
+        for charger_global_id, payload in charger_overrides.items():
+            unknown = [key for key in payload.keys() if key != "electric_vehicle_storage"]
+            if unknown:
+                raise AssertionError(
+                    f"Unknown charger action keys for '{charger_global_id}': {sorted(unknown)}."
+                )
 
     def _parse_flat_like(self, actions: Any) -> List[List[float]]:
         env = self.env
@@ -326,6 +459,23 @@ class CityLearnEntityInterfaceService:
                 )
                 row += 1
 
+        self._storage_refs: List[StorageRef] = []
+        storage_row = 0
+        for b_idx, building in enumerate(env.buildings):
+            if self._has_electrical_storage(building):
+                storage_id = "electrical_storage"
+                global_id = f"{building.name}/{storage_id}"
+                self._storage_refs.append(
+                    StorageRef(
+                        row=storage_row,
+                        building_index=b_idx,
+                        building_name=building.name,
+                        storage_id=storage_id,
+                        global_id=global_id,
+                    )
+                )
+                storage_row += 1
+
         self._charger_row_by_global_id = {ref.global_id: ref.row for ref in self._charger_refs}
         self._charger_row_by_raw_id = {ref.charger_id: ref.row for ref in self._charger_refs}
         self._charger_row_by_building_and_raw_id = {
@@ -354,10 +504,11 @@ class CityLearnEntityInterfaceService:
             for action_name in building.active_actions:
                 if action_name.startswith("electric_vehicle_storage_"):
                     charger_id = action_name.replace("electric_vehicle_storage_", "")
-                    self._charger_row_by_ev_action_name[(b_idx, action_name)] = self._charger_row_by_building_and_raw_id.get(
-                        (b_idx, charger_id),
-                        self._charger_row_by_raw_id.get(charger_id, -1),
-                    )
+                    resolved_row = self._charger_row_by_building_and_raw_id.get((b_idx, charger_id))
+                    if resolved_row is None:
+                        resolved_row = self._charger_row_by_raw_id.get(charger_id)
+                    if resolved_row is not None:
+                        self._charger_row_by_ev_action_name[(b_idx, action_name)] = resolved_row
                     if "electric_vehicle_storage" not in self._charger_action_features:
                         self._charger_action_features.append("electric_vehicle_storage")
                 elif "washing_machine" in action_name:
@@ -372,6 +523,7 @@ class CityLearnEntityInterfaceService:
         self._building_obs = np.zeros((len(self._building_ids), len(self._building_features)), dtype=np.float32)
         self._charger_obs = np.zeros((len(self._charger_refs), len(self.CHARGER_FEATURES)), dtype=np.float32)
         self._ev_obs = np.zeros((len(self._ev_ids), len(self.EV_FEATURES)), dtype=np.float32)
+        self._storage_obs = np.zeros((len(self._storage_refs), len(self.STORAGE_FEATURES)), dtype=np.float32)
 
         self._district_to_building = np.zeros((len(self._building_ids), 2), dtype=np.int32)
         if len(self._building_ids) > 0:
@@ -380,6 +532,10 @@ class CityLearnEntityInterfaceService:
         self._building_to_charger = np.full((len(self._charger_refs), 2), -1, dtype=np.int32)
         for ref in self._charger_refs:
             self._building_to_charger[ref.row] = np.array([ref.building_index, ref.row], dtype=np.int32)
+
+        self._building_to_storage = np.full((len(self._storage_refs), 2), -1, dtype=np.int32)
+        for ref in self._storage_refs:
+            self._building_to_storage[ref.row] = np.array([ref.building_index, ref.row], dtype=np.int32)
 
         self._charger_to_ev_connected = np.full((len(self._charger_refs), 2), -1, dtype=np.int32)
         self._charger_to_ev_connected_mask = np.zeros((len(self._charger_refs),), dtype=np.float32)
@@ -391,6 +547,7 @@ class CityLearnEntityInterfaceService:
         building_low, building_high = self._observation_bounds_for_features(self._building_features, owner="building", per_building=True)
         charger_low, charger_high = self._charger_observation_bounds()
         ev_low, ev_high = self._ev_observation_bounds()
+        storage_low, storage_high = self._storage_observation_bounds()
 
         self._observation_space = spaces.Dict(
             {
@@ -400,6 +557,7 @@ class CityLearnEntityInterfaceService:
                         "building": spaces.Box(low=building_low, high=building_high, dtype=np.float32),
                         "charger": spaces.Box(low=charger_low, high=charger_high, dtype=np.float32),
                         "ev": spaces.Box(low=ev_low, high=ev_high, dtype=np.float32),
+                        "storage": spaces.Box(low=storage_low, high=storage_high, dtype=np.float32),
                     }
                 ),
                 "edges": spaces.Dict(
@@ -415,6 +573,14 @@ class CityLearnEntityInterfaceService:
                                 [[max(len(self._building_ids) - 1, 0), max(len(self._charger_refs) - 1, 0)]],
                                 dtype=np.int32,
                             ).repeat(len(self._charger_refs), axis=0),
+                            dtype=np.int32,
+                        ),
+                        "building_to_storage": spaces.Box(
+                            low=np.full((len(self._storage_refs), 2), -1, dtype=np.int32),
+                            high=np.array(
+                                [[max(len(self._building_ids) - 1, 0), max(len(self._storage_refs) - 1, 0)]],
+                                dtype=np.int32,
+                            ).repeat(len(self._storage_refs), axis=0),
                             dtype=np.int32,
                         ),
                         "charger_to_ev_connected": spaces.Box(
@@ -502,6 +668,11 @@ class CityLearnEntityInterfaceService:
                     "features": list(self.EV_FEATURES),
                     "units": _units_for(self.EV_FEATURES),
                 },
+                "storage": {
+                    "ids": [ref.global_id for ref in self._storage_refs],
+                    "features": list(self.STORAGE_FEATURES),
+                    "units": _units_for(self.STORAGE_FEATURES),
+                },
             },
             "actions": {
                 "building": {
@@ -524,6 +695,10 @@ class CityLearnEntityInterfaceService:
                     "source": "building",
                     "target": "charger",
                 },
+                "building_to_storage": {
+                    "source": "building",
+                    "target": "storage",
+                },
                 "charger_to_ev_connected": {
                     "source": "charger",
                     "target": "ev",
@@ -532,6 +707,18 @@ class CityLearnEntityInterfaceService:
                     "source": "charger",
                     "target": "ev",
                 },
+            },
+            "topology": {
+                "mode": getattr(self.env, "topology_mode", "static"),
+                "version": int(getattr(self.env, "topology_version", 0)),
+                "active_ids": {
+                    "building": list(self._building_ids),
+                    "ev": list(self._ev_ids),
+                    "charger": [ref.global_id for ref in self._charger_refs],
+                    "storage": [ref.global_id for ref in self._storage_refs],
+                },
+                "lifecycle_fields": ["born_at", "removed_at", "active"],
+                "member_lifecycle": getattr(self.env, "topology_member_lifecycle", {}),
             },
         }
 
@@ -618,6 +805,33 @@ class CityLearnEntityInterfaceService:
         high[:, 2] = 1.0
         return low, high
 
+    def _storage_observation_bounds(self):
+        rows = len(self._storage_refs)
+        cols = len(self.STORAGE_FEATURES)
+        low = np.full((rows, cols), -1.0e6, dtype=np.float32)
+        high = np.full((rows, cols), 1.0e6, dtype=np.float32)
+
+        if rows == 0:
+            return low, high
+
+        for ref in self._storage_refs:
+            building = self.env.buildings[ref.building_index]
+            storage = building.electrical_storage
+            capacity = self._safe_scalar(getattr(storage, "capacity", 0.0), 0.0)
+            nominal_power = self._safe_scalar(getattr(storage, "nominal_power", 0.0), 0.0)
+            row = ref.row
+
+            low[row, self.STORAGE_FEATURES.index("soc")] = 0.0
+            high[row, self.STORAGE_FEATURES.index("soc")] = 1.0
+            low[row, self.STORAGE_FEATURES.index("capacity_kwh")] = 0.0
+            high[row, self.STORAGE_FEATURES.index("capacity_kwh")] = max(capacity, 1.0)
+            low[row, self.STORAGE_FEATURES.index("nominal_power_kw")] = 0.0
+            high[row, self.STORAGE_FEATURES.index("nominal_power_kw")] = max(nominal_power, 1.0)
+            low[row, self.STORAGE_FEATURES.index("electricity_consumption_kwh")] = -max(nominal_power, 1.0)
+            high[row, self.STORAGE_FEATURES.index("electricity_consumption_kwh")] = max(nominal_power, 1.0)
+
+        return low, high
+
     def _building_action_bounds(self):
         rows = len(self._building_ids)
         cols = len(self._building_action_features)
@@ -654,6 +868,11 @@ class CityLearnEntityInterfaceService:
     def _ensure_initialized(self):
         if not self._initialized:
             self.reset()
+            return
+
+        current_topology_version = int(getattr(self.env, 'topology_version', 0))
+        if current_topology_version != self._layout_topology_version:
+            self.reset()
 
     @staticmethod
     def _safe_scalar(value: Any, default: float = 0.0) -> float:
@@ -684,6 +903,15 @@ class CityLearnEntityInterfaceService:
         if arr.shape[0] != rows or arr.shape[1] != cols:
             raise AssertionError(f"Entity action table shape mismatch: expected ({rows}, {cols}) got {arr.shape}.")
         return arr
+
+    @staticmethod
+    def _has_electrical_storage(building) -> bool:
+        storage = getattr(building, "electrical_storage", None)
+        if storage is None:
+            return False
+        capacity = float(getattr(storage, "capacity", 0.0))
+        nominal_power = float(getattr(storage, "nominal_power", 0.0))
+        return capacity > 0.0 and nominal_power > 0.0
 
     @staticmethod
     def _is_entity_specific_observation(name: str) -> bool:
