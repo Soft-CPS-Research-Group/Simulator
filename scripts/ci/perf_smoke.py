@@ -28,7 +28,7 @@ SCHEMA = ROOT / "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schem
 DEFAULT_BASELINE_FILE = ROOT / "scripts/ci/perf_baseline.json"
 
 
-def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, seed: int) -> Dict[str, Any]:
+def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, seed: int, interface: str = "flat") -> Dict[str, Any]:
     render_dir = Path(tempfile.mkdtemp(prefix=f"citylearn_perf_{render_mode}_"))
 
     kwargs = {
@@ -37,6 +37,7 @@ def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, s
         "seconds_per_time_step": seconds_per_time_step,
         "random_seed": seed,
         "debug_timing": True,
+        "interface": interface,
     }
 
     if render_mode != "none":
@@ -55,13 +56,25 @@ def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, s
     observations, _ = env.reset()
     t2 = time.perf_counter()
 
-    action = np.zeros(env.action_space[0].shape[0], dtype="float32")
+    if interface == "entity":
+        action = {
+            "tables": {
+                "building": np.zeros(env.action_space["tables"]["building"].shape, dtype="float32"),
+                "charger": np.zeros(env.action_space["tables"]["charger"].shape, dtype="float32"),
+            }
+        }
+    else:
+        action = np.zeros(env.action_space[0].shape[0], dtype="float32")
+
     step_times = []
     end_export_s = 0.0
 
     while not env.terminated:
         s0 = time.perf_counter()
-        observations, _, terminated, truncated, info = env.step([action])
+        if interface == "entity":
+            observations, _, terminated, truncated, info = env.step(action)
+        else:
+            observations, _, terminated, truncated, info = env.step([action])
         s1 = time.perf_counter()
         step_times.append(s1 - s0)
         end_export_s += float(info.get("end_export_time", 0.0))
@@ -77,6 +90,7 @@ def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, s
 
     return {
         "render_mode": render_mode,
+        "interface": interface,
         "configured_steps": episode_steps,
         "executed_steps": len(step_times),
         "seconds_per_time_step": seconds_per_time_step,
@@ -98,6 +112,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--none-max-ms", type=float, default=30.0)
     parser.add_argument("--end-max-ms", type=float, default=45.0)
     parser.add_argument("--ratio-max", type=float, default=2.0)
+    parser.add_argument(
+        "--entity-overhead-ratio-max",
+        type=float,
+        default=1.05,
+        help="Allowed entity(flat-none baseline) avg_step_ms ratio upper bound.",
+    )
 
     parser.add_argument(
         "--baseline-file",
@@ -132,7 +152,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _build_report(args: argparse.Namespace, none_case: Dict[str, Any], end_case: Dict[str, Any]) -> Dict[str, Any]:
+def _build_report(args: argparse.Namespace, none_case: Dict[str, Any], end_case: Dict[str, Any], entity_case: Dict[str, Any]) -> Dict[str, Any]:
     try:
         schema_path = str(SCHEMA.relative_to(ROOT))
     except ValueError:
@@ -149,11 +169,13 @@ def _build_report(args: argparse.Namespace, none_case: Dict[str, Any], end_case:
         "cases": {
             "none": none_case,
             "end": end_case,
+            "entity_none": entity_case,
         },
         "thresholds": {
             "none_max_ms": args.none_max_ms,
             "end_max_ms": args.end_max_ms,
             "ratio_max": args.ratio_max,
+            "entity_overhead_ratio_max": args.entity_overhead_ratio_max,
             "baseline_regression_ratio": args.baseline_regression_ratio,
             "baseline_slack_ms": args.baseline_slack_ms,
         },
@@ -196,10 +218,17 @@ def _compare_to_baseline(report: Dict[str, Any], baseline: Dict[str, Any], regre
     return errors
 
 
-def _validate_absolute_thresholds(report: Dict[str, Any], none_max_ms: float, end_max_ms: float, ratio_max: float) -> list[str]:
+def _validate_absolute_thresholds(
+    report: Dict[str, Any],
+    none_max_ms: float,
+    end_max_ms: float,
+    ratio_max: float,
+    entity_overhead_ratio_max: float,
+) -> list[str]:
     errors: list[str] = []
     none_case = report["cases"]["none"]
     end_case = report["cases"]["end"]
+    entity_case = report["cases"]["entity_none"]
 
     if none_case["executed_steps"] <= 0 or end_case["executed_steps"] <= 0:
         errors.append("No steps executed in one or more perf-smoke runs.")
@@ -219,6 +248,13 @@ def _validate_absolute_thresholds(report: Dict[str, Any], none_max_ms: float, en
         if ratio > ratio_max:
             errors.append(f"end/none ratio too high: {ratio:.3f} > {ratio_max}")
 
+    if none_case["avg_step_ms"] > 0:
+        entity_ratio = entity_case["avg_step_ms"] / none_case["avg_step_ms"]
+        if entity_ratio > entity_overhead_ratio_max:
+            errors.append(
+                f"entity/flat ratio too high: {entity_ratio:.3f} > {entity_overhead_ratio_max}"
+            )
+
     return errors
 
 
@@ -230,9 +266,10 @@ def _write_json(path: Path, data: Dict[str, Any]) -> None:
 def main() -> int:
     args = parse_args()
 
-    none_case = run_case("none", args.episode_steps, args.seconds, args.seed)
-    end_case = run_case("end", args.episode_steps, args.seconds, args.seed)
-    report = _build_report(args, none_case, end_case)
+    none_case = run_case("none", args.episode_steps, args.seconds, args.seed, interface="flat")
+    end_case = run_case("end", args.episode_steps, args.seconds, args.seed, interface="flat")
+    entity_case = run_case("none", args.episode_steps, args.seconds, args.seed, interface="entity")
+    report = _build_report(args, none_case, end_case, entity_case)
 
     if args.write_baseline:
         _write_json(args.baseline_file, report)
@@ -246,6 +283,7 @@ def main() -> int:
         none_max_ms=args.none_max_ms,
         end_max_ms=args.end_max_ms,
         ratio_max=args.ratio_max,
+        entity_overhead_ratio_max=args.entity_overhead_ratio_max,
     )
 
     baseline_loaded = False

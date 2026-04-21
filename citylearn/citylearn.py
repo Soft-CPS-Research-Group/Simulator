@@ -22,6 +22,7 @@ from citylearn.exporter import EpisodeExporter
 from citylearn.internal.kpi import CityLearnKPIService
 from citylearn.internal.loading import CityLearnLoadingService
 from citylearn.internal.runtime import CityLearnRuntimeService
+from citylearn.internal.entity_interface import CityLearnEntityInterfaceService
 from citylearn.utilities import parse_bool
 from citylearn.reward_function import (
     MultiBuildingRewardFunction,
@@ -154,6 +155,7 @@ class CityLearnEnv(Environment, Env):
         central_agent: bool = None, shared_observations: List[str] = None, active_observations: Union[List[str], List[List[str]]] = None,
         inactive_observations: Union[List[str], List[List[str]]] = None, active_actions: Union[List[str], List[List[str]]] = None,
         inactive_actions: Union[List[str], List[List[str]]] = None, simulate_power_outage: bool = None, solar_generation: bool = None, random_seed: int = None, offline: bool = None, time_step_ratio: int = None,
+        interface: str = None,
         start_date: Union[str, datetime.date] = None, render_session_name: str = None, render_mode: str = 'none',
         export_kpis_on_episode_end: bool = None, **kwargs: Any
     ):
@@ -174,6 +176,8 @@ class CityLearnEnv(Environment, Env):
             render_session_name = kw_render_session_name if render_session_name is None else render_session_name
         self.offline = offline
         self.schema = schema
+        schema_interface = self.schema.get('interface') if isinstance(self.schema, dict) else None
+        self.interface = interface if interface is not None else schema_interface
         self.community_market_enabled = False
         self.community_market_sell_ratio = 0.8
         self.community_market_grid_export_price = 0.0
@@ -234,6 +238,7 @@ class CityLearnEnv(Environment, Env):
         self._loading_service = CityLearnLoadingService(self)
         self._runtime_service = CityLearnRuntimeService(self)
         self._kpi_service = CityLearnKPIService(self)
+        self._entity_service = CityLearnEntityInterfaceService(self)
         root_directory, buildings, electric_vehicles, episode_time_steps, rolling_episode_split, random_episode_split, \
             seconds_per_time_step, reward_function, central_agent, shared_observations, episode_tracker = self._load(
                 deepcopy(self.schema),
@@ -449,6 +454,12 @@ class CityLearnEnv(Environment, Env):
         return self.__shared_observations
 
     @property
+    def interface(self) -> str:
+        """Environment I/O interface mode."""
+
+        return self.__interface
+
+    @property
     def terminated(self) -> bool:
         """Check if simulation has reached completion."""
 
@@ -461,7 +472,7 @@ class CityLearnEnv(Environment, Env):
         return False
 
     @property
-    def observation_space(self) -> List[spaces.Box]:
+    def observation_space(self) -> Union[List[spaces.Box], spaces.Dict]:
         """Controller(s) observation spaces.
 
         Returns
@@ -476,6 +487,12 @@ class CityLearnEnv(Environment, Env):
         many as `buildings` is returned in the same order as `buildings`.
         """
 
+        if self.interface == 'entity':
+            return self._entity_service.observation_space
+
+        return self._get_flat_observation_space()
+
+    def _get_flat_observation_space(self) -> List[spaces.Box]:
         if self.central_agent:
             low_limit = []
             high_limit = []
@@ -504,7 +521,7 @@ class CityLearnEnv(Environment, Env):
         return observation_space
 
     @property
-    def action_space(self) -> List[spaces.Box]:
+    def action_space(self) -> Union[List[spaces.Box], spaces.Dict]:
         """Controller(s) action spaces.
 
         Returns
@@ -518,6 +535,12 @@ class CityLearnEnv(Environment, Env):
         If `central_agent` is False, a list of `space.Box` objects as many as `buildings` is returned in the same order as `buildings`.
         """
 
+        if self.interface == 'entity':
+            return self._entity_service.action_space
+
+        return self._get_flat_action_space()
+
+    def _get_flat_action_space(self) -> List[spaces.Box]:
         if self.central_agent:
             low_limit = [v for b in self.buildings for v in b.action_space.low]
             high_limit = [v for b in self.buildings for v in b.action_space.high]
@@ -528,7 +551,7 @@ class CityLearnEnv(Environment, Env):
         return action_space
 
     @property
-    def observations(self) -> List[List[float]]:
+    def observations(self) -> Union[List[List[float]], Mapping[str, Any]]:
         """Observations at current time step.
         
         Notes
@@ -537,6 +560,9 @@ class CityLearnEnv(Environment, Env):
         The `shared_observations` values are only included in the first building's observation values. If `central_agent` is False, a list of sublists 
         is returned where each sublist is a list of 1 building's observation values and the sublist in the same order as `buildings`.
         """
+        if self.interface == 'entity':
+            return self._entity_service.observation_payload()
+
         if self._observations_cache is not None and self._observations_cache_time_step == self.time_step:
             return self._observations_cache
 
@@ -623,6 +649,24 @@ class CityLearnEnv(Environment, Env):
             action_names = [b.active_actions for b in self.buildings]
 
         return action_names
+
+    @property
+    def flat_observation_space(self) -> List[spaces.Box]:
+        """Flat interface observation space irrespective of `interface` mode."""
+
+        return self._get_flat_observation_space()
+
+    @property
+    def flat_action_space(self) -> List[spaces.Box]:
+        """Flat interface action space irrespective of `interface` mode."""
+
+        return self._get_flat_action_space()
+
+    @property
+    def entity_specs(self) -> Mapping[str, Any]:
+        """Canonical entity interface schema for tooling and model builders."""
+
+        return self._entity_service.specs
 
     def _refresh_action_cache(self):
         self._active_actions_cache = [list(b.active_actions) for b in self.buildings]
@@ -1024,6 +1068,13 @@ class CityLearnEnv(Environment, Env):
         self.__shared_observations = self.get_default_shared_observations() if shared_observations is None else shared_observations
         self._shared_observations_set = set(self.__shared_observations)
 
+    @interface.setter
+    def interface(self, interface: str):
+        mode = 'flat' if interface is None else str(interface).strip().lower()
+        if mode not in {'flat', 'entity'}:
+            raise ValueError("interface must be one of {'flat', 'entity'}.")
+        self.__interface = mode
+
     @Environment.random_seed.setter
     def random_seed(self, seed: int):
         Environment.random_seed.fset(self, seed)
@@ -1041,6 +1092,7 @@ class CityLearnEnv(Environment, Env):
     def get_metadata(self) -> Mapping[str, Any]:
         return {
             **super().get_metadata(),
+            'interface': self.interface,
             'reward_function': self.reward_function.__class__.__name__,
             'central_agent': self.central_agent,
             'shared_observations': self.shared_observations,
@@ -1056,6 +1108,7 @@ class CityLearnEnv(Environment, Env):
                 },
                 'matching_granularity': 'aggregate_building',
             },
+            'entity_specs': self._entity_service.specs if self.interface == 'entity' else None,
             'buildings': [b.get_metadata() for b in self.buildings],
         }
 
@@ -1082,7 +1135,7 @@ class CityLearnEnv(Environment, Env):
             'electricity_pricing_predicted_2', 'electricity_pricing_predicted_3',
         ]
 
-    def step(self, actions: List[List[float]]) -> Tuple[List[List[float]], List[float], bool, bool, dict]:
+    def step(self, actions: Any) -> Tuple[Any, List[float], bool, bool, dict]:
         """Apply actions and advance the environment by one transition."""
 
         return self._runtime_service.step(actions)
@@ -1121,7 +1174,7 @@ class CityLearnEnv(Environment, Env):
             float(self.__net_electricity_consumption_emission[idx]),
         )
 
-    def _parse_actions(self, actions: List[List[float]]) -> List[Mapping[str, float]]:
+    def _parse_actions(self, actions: Any) -> List[Mapping[str, float]]:
         """Compatibility wrapper for runtime action parsing service."""
 
         return self._runtime_service.parse_actions(actions)
@@ -1216,7 +1269,7 @@ class CityLearnEnv(Environment, Env):
     def _reset_time_tracking(self):
         return self._episode_exporter.reset_time_tracking()
 
-    def reset(self, seed: int = None, options: Mapping[str, Any] = None) -> Tuple[List[List[float]], dict]:
+    def reset(self, seed: int = None, options: Mapping[str, Any] = None) -> Tuple[Any, dict]:
         r"""Reset `CityLearnEnv` to initial state.
 
         Parameters
@@ -1280,6 +1333,7 @@ class CityLearnEnv(Environment, Env):
         self._render_buffer.clear()
         self._refresh_action_cache()
         self.update_variables()
+        self._entity_service.reset()
 
         return self.observations, self.get_info()
 

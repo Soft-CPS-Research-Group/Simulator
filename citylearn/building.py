@@ -13,6 +13,12 @@ from citylearn.dynamics import Dynamics, LSTMDynamics
 from citylearn.electric_vehicle_charger import Charger
 from citylearn.energy_model import Battery, ElectricDevice, ElectricHeater, HeatPump, PV, StorageDevice, StorageTank, WashingMachine
 from citylearn.internal.building_ops import BuildingOpsService
+from citylearn.internal.units import (
+    normalized_capacity_action_to_energy_kwh,
+    normalized_power_action_to_energy_kwh,
+    power_kw_to_energy_kwh,
+    to_dataset_resolution_energy,
+)
 from citylearn.occupant import LogisticRegressionOccupant, Occupant
 from citylearn.power_outage import PowerOutage
 from citylearn.preprocessing import Normalize, PeriodicNormalization
@@ -1466,7 +1472,12 @@ class Building(Environment):
             Fraction of `cooling_storage` `capacity` to charge/discharge by.
         """
 
-        energy = action * self.cooling_storage.capacity
+        energy = normalized_capacity_action_to_energy_kwh(
+            action,
+            self.cooling_storage.capacity,
+            seconds_per_time_step=self.seconds_per_time_step,
+            scale_with_time=False,
+        )
         temperature = self.weather.outdoor_dry_bulb_temperature[self.time_step]
 
         if energy > 0.0:
@@ -1514,7 +1525,12 @@ class Building(Environment):
             Fraction of `heating_storage` `capacity` to charge/discharge by.
         """
 
-        energy = action * self.cooling_storage.capacity * self.algorithm_action_based_time_step_hours_ratio
+        energy = normalized_capacity_action_to_energy_kwh(
+            action,
+            self.heating_storage.capacity,
+            seconds_per_time_step=self.seconds_per_time_step,
+            scale_with_time=True,
+        )
         temperature = self.weather.outdoor_dry_bulb_temperature[self.time_step]
 
         if energy > 0.0:
@@ -1559,7 +1575,12 @@ class Building(Environment):
             Fraction of `dhw_storage` `capacity` to charge/discharge by.
         """
 
-        energy = action * self.heating_storage.capacity * self.algorithm_action_based_time_step_hours_ratio
+        energy = normalized_capacity_action_to_energy_kwh(
+            action,
+            self.dhw_storage.capacity,
+            seconds_per_time_step=self.seconds_per_time_step,
+            scale_with_time=True,
+        )
         temperature = self.weather.outdoor_dry_bulb_temperature[self.time_step]
 
         if energy > 0.0:
@@ -1595,12 +1616,11 @@ class Building(Environment):
             Normalized charging or discharging action (range [-1, 1]).
         """
 
-        # Convert normalized action to power (kW)
-        power = action * self.electrical_storage.nominal_power  # kW
-
-        # Convert power (kW) to energy (kWh) based on time step duration
-        time_step_hours_ratio = self.seconds_per_time_step / 3600  # Convert seconds to fraction of hour
-        energy = power * time_step_hours_ratio  # Energy in kWh
+        energy = normalized_power_action_to_energy_kwh(
+            action,
+            self.electrical_storage.nominal_power,
+            self.seconds_per_time_step,
+        )
 
         # Optionally clamp to flexibility range if needed
         energy = min(energy, self.downward_electrical_flexibility)
@@ -1613,11 +1633,7 @@ class Building(Environment):
         """Convert energy for storage models that expect dataset-resolution values."""
 
         ratio = getattr(storage, 'time_step_ratio', None)
-
-        if ratio in (None, 0):
-            return energy
-
-        return energy / ratio
+        return to_dataset_resolution_energy(energy, ratio)
 
     def ___demand_limit_check(self, end_use: str, demand: float, max_device_output: float):
         message = f'timestep: {self.time_step}, building: {self.name}, outage: {self.power_outage}, demand: {demand},' \
@@ -1702,7 +1718,7 @@ class Building(Environment):
         total_charger_power_kw += sum(getattr(charger, 'max_charging_power', 0.0) or 0.0 for charger in self.electric_vehicle_chargers)
         total_charger_power_kw += sum(getattr(charger, 'max_discharging_power', 0.0) or 0.0 for charger in self.electric_vehicle_chargers)
         total_storage_power_kw = float(getattr(self.electrical_storage, 'nominal_power', 0.0) or 0.0)
-        max_violation_energy = (total_charger_power_kw + total_storage_power_kw) * (self.seconds_per_time_step / 3600)
+        max_violation_energy = power_kw_to_energy_kwh(total_charger_power_kw + total_storage_power_kw, self.seconds_per_time_step)
 
         for key in observation_names:
             if key.startswith('charging_phase_one_hot_'):
@@ -1959,7 +1975,7 @@ class Building(Environment):
             total_charger_power_kw += sum(getattr(charger, 'max_charging_power', 0.0) or 0.0 for charger in self.electric_vehicle_chargers)
             total_charger_power_kw += sum(getattr(charger, 'max_discharging_power', 0.0) or 0.0 for charger in self.electric_vehicle_chargers)
             total_storage_power_kw = float(getattr(self.electrical_storage, 'nominal_power', 0.0) or 0.0)
-            max_violation_energy = (total_charger_power_kw + total_storage_power_kw) * (self.seconds_per_time_step / 3600)
+            max_violation_energy = power_kw_to_energy_kwh(total_charger_power_kw + total_storage_power_kw, self.seconds_per_time_step)
             data['charging_constraint_violation_kwh'] = np.array([0.0, max_violation_energy], dtype='float32')
 
             phase_one_hot_keys = getattr(self, '_phase_encoding_observation_keys', []) or []

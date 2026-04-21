@@ -25,7 +25,7 @@ class CityLearnRuntimeService:
         step_hours = seconds / 3600.0
         return 0.2 * np.sqrt(step_hours)
 
-    def step(self, actions: List[List[float]]):
+    def step(self, actions):
         """Apply actions, update env variables/reward, then advance time."""
 
         env = self.env
@@ -88,10 +88,13 @@ class CityLearnRuntimeService:
 
         return next_observations, reward, env.terminated, env.truncated, info
 
-    def parse_actions(self, actions: List[List[float]]) -> List[Mapping[str, float]]:
+    def parse_actions(self, actions) -> List[Mapping[str, float]]:
         """Return mapping of action name to action value for each building."""
 
         env = self.env
+
+        if getattr(env, 'interface', 'flat') == 'entity':
+            return env._entity_service.parse_actions(actions)
 
         building_actions = []
         cache = getattr(env, '_active_actions_cache', None)

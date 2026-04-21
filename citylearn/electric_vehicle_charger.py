@@ -5,6 +5,10 @@ from citylearn.base import Environment, EpisodeTracker
 from citylearn.electric_vehicle import ElectricVehicle
 from citylearn.data import ChargerSimulation
 from citylearn.data import ZERO_DIVISION_PLACEHOLDER
+from citylearn.internal.units import (
+    normalized_power_action_to_energy_kwh,
+    to_dataset_resolution_energy,
+)
 np.seterr(divide='ignore', invalid='ignore')
 
 class Charger(Environment):
@@ -312,7 +316,6 @@ class Charger(Environment):
             self.__past_charging_action_values_kwh[self.time_step] = 0
             return
 
-        time_step_hours = self.algorithm_action_based_time_step_hours_ratio
         charging = action_value > 0
         efficiency = self.get_efficiency(abs(action_value), charging)
 
@@ -323,7 +326,11 @@ class Charger(Environment):
             else:
                 lower_bound_kw = min(self.min_charging_power, self.max_charging_power)
                 applied_power_kw = max(min(requested_power_kw, self.max_charging_power), lower_bound_kw)
-            commanded_energy_kwh = applied_power_kw * time_step_hours
+            commanded_energy_kwh = normalized_power_action_to_energy_kwh(
+                applied_power_kw / max(self.max_charging_power, ZERO_DIVISION_PLACEHOLDER),
+                self.max_charging_power,
+                self.seconds_per_time_step,
+            )
             battery_energy_kwh = commanded_energy_kwh * efficiency
         else:
             requested_power_kw = abs(action_value) * self.max_discharging_power
@@ -332,7 +339,11 @@ class Charger(Environment):
             else:
                 lower_bound_kw = min(self.min_discharging_power, self.max_discharging_power)
                 applied_power_kw = max(min(requested_power_kw, self.max_discharging_power), lower_bound_kw)
-            commanded_energy_kwh = -applied_power_kw * time_step_hours
+            commanded_energy_kwh = -normalized_power_action_to_energy_kwh(
+                applied_power_kw / max(self.max_discharging_power, ZERO_DIVISION_PLACEHOLDER),
+                self.max_discharging_power,
+                self.seconds_per_time_step,
+            )
             battery_energy_kwh = commanded_energy_kwh / max(efficiency, ZERO_DIVISION_PLACEHOLDER)
 
         self.__past_charging_action_values_kwh[self.time_step] = commanded_energy_kwh
@@ -342,7 +353,7 @@ class Charger(Environment):
 
             # Battery model expects dataset-resolution energy. Convert from control-step kWh when needed.
             ratio = getattr(electric_vehicle.battery, 'time_step_ratio', None)
-            battery_command = battery_energy_kwh if ratio in (None, 0) else battery_energy_kwh / ratio
+            battery_command = to_dataset_resolution_energy(battery_energy_kwh, ratio)
             electric_vehicle.battery.charge(battery_command)
 
             battery_energy_balance = electric_vehicle.battery.energy_balance[self.time_step]
