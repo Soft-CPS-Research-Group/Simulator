@@ -49,6 +49,13 @@ def test_entity_interface_shapes_and_specs_are_consistent():
         assert observations["tables"]["building"].shape[1] == len(specs["tables"]["building"]["features"])
         assert observations["tables"]["charger"].shape[1] == len(specs["tables"]["charger"]["features"])
         assert observations["tables"]["ev"].shape[1] == len(specs["tables"]["ev"]["features"])
+        assert observations["tables"]["storage"].shape[1] == len(specs["tables"]["storage"]["features"])
+        assert observations["tables"]["pv"].shape[1] == len(specs["tables"]["pv"]["features"])
+        for table_name in ("district", "building", "charger", "ev", "storage", "pv"):
+            feature_metadata = specs["tables"][table_name]["feature_metadata"]
+            for feature in specs["tables"][table_name]["features"]:
+                assert feature in feature_metadata
+                assert set(feature_metadata[feature].keys()) == {"unit", "bundle", "legacy"}
     finally:
         env.close()
 
@@ -68,7 +75,9 @@ def test_entity_interface_has_deterministic_id_and_edge_indexing():
         assert first_specs["tables"]["building"]["ids"] == second_specs["tables"]["building"]["ids"]
         assert first_specs["tables"]["charger"]["ids"] == second_specs["tables"]["charger"]["ids"]
         assert first_specs["tables"]["ev"]["ids"] == second_specs["tables"]["ev"]["ids"]
+        assert first_specs["tables"]["pv"]["ids"] == second_specs["tables"]["pv"]["ids"]
         assert np.array_equal(first_building_to_charger, second_building_to_charger)
+        assert np.array_equal(first_obs["edges"]["building_to_pv"], second_obs["edges"]["building_to_pv"])
     finally:
         env.close()
 
@@ -80,10 +89,13 @@ def test_entity_interface_includes_ev_and_charger_tables_and_edges():
         observations, _ = env.reset()
         expected_chargers = sum(len(building.electric_vehicle_chargers or []) for building in env.buildings)
         expected_evs = len(env.electric_vehicles)
+        expected_pv = sum(1 for building in env.buildings if float(getattr(building.pv, "nominal_power", 0.0)) > 0.0)
 
         assert observations["tables"]["charger"].shape[0] == expected_chargers
         assert observations["tables"]["ev"].shape[0] == expected_evs
+        assert observations["tables"]["pv"].shape[0] == expected_pv
         assert observations["edges"]["building_to_charger"].shape[0] == expected_chargers
+        assert observations["edges"]["building_to_pv"].shape[0] == expected_pv
     finally:
         env.close()
 

@@ -175,13 +175,15 @@ def test_dynamic_entity_layout_normalization_and_encoding_contract_stays_consist
             assert obs["tables"]["charger"].shape == space["tables"]["charger"].shape
             assert obs["tables"]["storage"].shape == space["tables"]["storage"].shape
             assert obs["tables"]["ev"].shape == space["tables"]["ev"].shape
+            assert obs["tables"]["pv"].shape == space["tables"]["pv"].shape
 
             assert obs["tables"]["building"].shape[0] == len(spec["tables"]["building"]["ids"])
             assert obs["tables"]["charger"].shape[0] == len(spec["tables"]["charger"]["ids"])
             assert obs["tables"]["storage"].shape[0] == len(spec["tables"]["storage"]["ids"])
+            assert obs["tables"]["pv"].shape[0] == len(spec["tables"]["pv"]["ids"])
 
             # Numerical stability contract for dynamic layouts: no NaN/inf while topology changes.
-            for table_name in ("district", "building", "charger", "ev", "storage"):
+            for table_name in ("district", "building", "charger", "ev", "storage", "pv"):
                 assert np.all(np.isfinite(obs["tables"][table_name]))
 
             # Phase encodings must remain binary during topology mutations.
@@ -195,6 +197,7 @@ def test_dynamic_entity_layout_normalization_and_encoding_contract_stays_consist
             b_count = obs["tables"]["building"].shape[0]
             c_count = obs["tables"]["charger"].shape[0]
             s_count = obs["tables"]["storage"].shape[0]
+            p_count = obs["tables"]["pv"].shape[0]
 
             if c_count > 0:
                 building_to_charger = obs["edges"]["building_to_charger"]
@@ -205,6 +208,11 @@ def test_dynamic_entity_layout_normalization_and_encoding_contract_stays_consist
                 building_to_storage = obs["edges"]["building_to_storage"]
                 assert np.all((building_to_storage[:, 0] >= 0) & (building_to_storage[:, 0] < max(b_count, 1)))
                 assert np.all((building_to_storage[:, 1] >= 0) & (building_to_storage[:, 1] < max(s_count, 1)))
+
+            if p_count > 0:
+                building_to_pv = obs["edges"]["building_to_pv"]
+                assert np.all((building_to_pv[:, 0] >= 0) & (building_to_pv[:, 0] < max(b_count, 1)))
+                assert np.all((building_to_pv[:, 1] >= 0) & (building_to_pv[:, 1] < max(p_count, 1)))
 
             obs, *_ = env.step(_zero_entity_actions(env))
     finally:

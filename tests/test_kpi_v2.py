@@ -44,6 +44,7 @@ LEGACY_KPI_KEYS = {
 def _run_episode(schema: Path, seconds_per_time_step: int, episode_steps: int = 24) -> CityLearnEnv:
     env = CityLearnEnv(
         str(schema),
+        interface="flat",
         central_agent=True,
         episode_time_steps=episode_steps,
         seconds_per_time_step=seconds_per_time_step,

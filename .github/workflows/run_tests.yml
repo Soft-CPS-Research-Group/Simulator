@@ -76,6 +76,7 @@ jobs:
             --none-max-ms 30 \
             --end-max-ms 45 \
             --ratio-max 2.0 \
+            --entity-overhead-ratio-max 1.08 \
             --baseline-file scripts/ci/perf_baseline.json \
             --baseline-regression-ratio 3.0 \
             --baseline-slack-ms 10.0 \

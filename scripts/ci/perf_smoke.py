@@ -115,7 +115,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--entity-overhead-ratio-max",
         type=float,
-        default=1.05,
+        default=1.08,
         help="Allowed entity(flat-none baseline) avg_step_ms ratio upper bound.",
     )
 

@@ -224,6 +224,20 @@
       "active": true
     }
   },
+  "observation_bundles": {
+    "entity_core_electrical": {
+      "active": true
+    },
+    "entity_community_operational": {
+      "active": true
+    },
+    "entity_forecasts_existing": {
+      "active": true
+    },
+    "entity_temporal_derived": {
+      "active": true
+    }
+  },
   "agent": {
     "type": "citylearn.agents.rbc.BasicElectricVehicleRBC_ReferenceController",
     "attributes": {}
