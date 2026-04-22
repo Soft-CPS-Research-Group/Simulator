@@ -1,0 +1,146 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Environment &mdash; CityLearn 0.2.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css?v=995e94df" />
+      <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css?v=21c0b90a" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=58050c01"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Observations" href="observations.html" />
+    <link rel="prev" title="Overview" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CityLearn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">QuickStart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Overview</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="observations.html">Observations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="actions.html">Actions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reward_function.html">Reward Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="agents.html">Agents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="schema.html">Schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cost_function.html">Cost Function</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kpis.html">KPIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">citylearn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citylearn_challenge/index.html">The CityLearn Challenge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CityLearn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Overview</a></li>
+      <li class="breadcrumb-item active">Environment</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/intelligent-environments-lab/CityLearn/blob/master/docs/source/overview/environment.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="environment">
+<h1>Environment<a class="headerlink" href="#environment" title="Link to this heading"></a></h1>
+<p>CityLearn includes energy models of buildings and distributed energy resources (DER) including air-to-water heat pumps, electric heaters and batteries. A collection of building energy models makes up a virtual district (a.k.a neighborhood or community). In each building, space cooling, space heating and domestic hot water end-use loads may be independently satisfied through air-to-water heat pumps. Alternatively, space heating and domestic hot water loads can be satisfied through electric heaters.</p>
+<img alt="CityLearn building model including electricity sources that power controllable DERs including electric devices and ESSs, used to satisfy thermal and electrical loads as well as provide the grid with energy flexibility. A distinction is made between environment and control aspects of a building to show the transfer of actions from the control agent and reception of measurable observations by the control agent that quantifies the building's states." class="align-center" src="../_images/environment.jpg" />
+<p>Buildings may have a combination of thermal storage tanks and batteries for active energy storage that provide continuous load shifting energy flexibility services. These storage devices may be used at peak or expensive periods to meet space cooling, space heating, domestic hot water and non-shiftable (plug) loads. The storage devices are charged by the cooling or heating devices (heat pump or electric heater) that satisfies the end-use the stored energy is for. All electric devices as well as plug loads consume electricity from the main grid. Photovoltaic (PV) arrays may be included in the buildings to offset all or part of the electricity consumption from the grid by allowing the buildings to generate their own electricity.</p>
+<p>The building devices can be autosized to meet the building’s needs (see <a class="reference internal" href="../api/citylearn.building.html#citylearn.building.Building.autosize_cooling_device" title="citylearn.building.Building.autosize_cooling_device"><code class="xref py py-meth docutils literal notranslate"><span class="pre">citylearn.building.Building.autosize_cooling_device()</span></code></a>, <a class="reference internal" href="../api/citylearn.building.html#citylearn.building.Building.autosize_heating_device" title="citylearn.building.Building.autosize_heating_device"><code class="xref py py-meth docutils literal notranslate"><span class="pre">citylearn.building.Building.autosize_heating_device()</span></code></a>, <a class="reference internal" href="../api/citylearn.building.html#citylearn.building.Building.autosize_dhw_device" title="citylearn.building.Building.autosize_dhw_device"><code class="xref py py-meth docutils literal notranslate"><span class="pre">citylearn.building.Building.autosize_dhw_device()</span></code></a>, <a class="reference internal" href="../api/citylearn.building.html#citylearn.building.Building.autosize_cooling_storage" title="citylearn.building.Building.autosize_cooling_storage"><code class="xref py py-meth docutils literal notranslate"><span class="pre">citylearn.building.Building.autosize_cooling_storage()</span></code></a>, <a class="reference internal" href="../api/citylearn.building.html#citylearn.building.Building.autosize_heating_storage" title="citylearn.building.Building.autosize_heating_storage"><code class="xref py py-meth docutils literal notranslate"><span class="pre">citylearn.building.Building.autosize_heating_storage()</span></code></a>, <a class="reference internal" href="../api/citylearn.building.html#citylearn.building.Building.autosize_dhw_storage" title="citylearn.building.Building.autosize_dhw_storage"><code class="xref py py-meth docutils literal notranslate"><span class="pre">citylearn.building.Building.autosize_dhw_storage()</span></code></a>, <a class="reference internal" href="../api/citylearn.building.html#citylearn.building.Building.autosize_electrical_storage" title="citylearn.building.Building.autosize_electrical_storage"><code class="xref py py-meth docutils literal notranslate"><span class="pre">citylearn.building.Building.autosize_electrical_storage()</span></code></a>, <a class="reference internal" href="../api/citylearn.building.html#citylearn.building.Building.autosize_pv" title="citylearn.building.Building.autosize_pv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">citylearn.building.Building.autosize_pv()</span></code></a>).</p>
+<p>An internal backup controller guarantees that the cooling and heating devices prioritize satisfying the building loads before storing energy in the storage devices. The backup controller also guarantees that the storage devices do not discharge more energy than is needed to meet the unsatisfied building loads.</p>
+<p>The legacy CityLearn guarantees that, at any time, the ideal space cooling, space heating, domestic hot water and non-shiftable building loads are satisfied by utilizing pre-computed or pre-measured demand of the buildings. Thus, ideal indoor dry-bulb temperature is always maintained and load shedding is not possible.</p>
+<p>Since CityLearn version <code class="code docutils literal notranslate"><span class="pre">2.0.0</span></code>, building indoor dry-bulb temperature can be dynamic to provide load shedding energy flexibility services compared to earlier versions where the temperature was pre-computed/pre=measured and remained static during simulation. This is achieved through an LSTM model that encodes a building’s temperature evolution as a result of supplied cooling or heating energy <span id="id1">[<a class="reference internal" href="../references.html#id13" title="Giuseppe Pinto, Davide Deltetto, and Alfonso Capozzoli. Data-driven district energy management with surrogate models and deep reinforcement learning. Applied Energy, 304:117642, 2021. URL: https://www.sciencedirect.com/science/article/pii/S0306261921010096, doi:https://doi.org/10.1016/j.apenergy.2021.117642.">18</a>]</span>. Thus, partial load satisfaction is made possible by controlling the cooling and heating device power which then influences temperature change.</p>
+<p>Since CityLearn version <code class="code docutils literal notranslate"><span class="pre">2.1.0</span></code>, power outages can be simulated where buildings can only make of their available distributed energy resources including storage devices and PV system to satisfy end-use loads otherwise, risk thermal discomfort and unserved energy during the outage period. During normal operation i.e., when there is no power outage, there is unlimited supply from the grid.</p>
+<p>Since CityLearn version <code class="code docutils literal notranslate"><span class="pre">2.2.0</span></code>, schema datasets can be generated using the End Use Load Profiles for the U.S. Building Stock dataset. Also, electric vehicle (EV) loads and occupant thermostat overrides have been modeled and can be included in the schema and control simulation.</p>
+<p>RBC, RL or MPC agent(s) control the active storage devices by determining how much energy to store or release, and the cooling and heating device by determining their supply power at each control time step.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="observations.html" class="btn btn-neutral float-right" title="Observations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jose Ramon Vazquez-Canteli, Kingsley Nweye, Zoltan Nagy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

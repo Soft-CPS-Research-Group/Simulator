@@ -1,0 +1,7 @@
+citylearn.internal.kpi module
+=============================
+
+.. automodule:: citylearn.internal.kpi
+   :members:
+   :show-inheritance:
+   :undoc-members:
