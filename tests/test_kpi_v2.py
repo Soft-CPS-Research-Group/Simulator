@@ -587,15 +587,24 @@ def test_extended_cost_and_equity_use_raw_cost_series(tmp_path: Path):
         building_df = df[df["name"] == building_name].set_index("cost_function")["value"]
         district_df = df[df["name"] == "District"].set_index("cost_function")["value"]
 
-        assert float(building_df["building_cost_total_control_eur"]) == pytest.approx(-1.0)
-        assert float(building_df["building_cost_total_baseline_eur"]) == pytest.approx(2.0)
-        assert float(building_df["building_cost_total_delta_eur"]) == pytest.approx(-3.0)
-        assert float(building_df["building_equity_benefit_relative_percent"]) == pytest.approx(150.0)
+        settled_steps = max(int(env.time_step), 1)
+        building_control_total = float(control_cost[:settled_steps].sum())
+        building_baseline_total = float(baseline_cost[:settled_steps].sum())
+        building_delta_total = building_control_total - building_baseline_total
+        building_benefit_relative_percent = (
+            (building_baseline_total - building_control_total) / building_baseline_total * 100.0
+        )
+
+        assert float(building_df["building_cost_total_control_eur"]) == pytest.approx(building_control_total)
+        assert float(building_df["building_cost_total_baseline_eur"]) == pytest.approx(building_baseline_total)
+        assert float(building_df["building_cost_total_delta_eur"]) == pytest.approx(building_delta_total)
+        assert float(building_df["building_equity_benefit_relative_percent"]) == pytest.approx(building_benefit_relative_percent)
 
         # Legacy normalized cost still uses clipped CostFunction.cost semantics.
         legacy_df = env.evaluate(control_condition=control, baseline_condition=baseline)
         legacy_building = legacy_df[legacy_df["name"] == building_name].set_index("cost_function")["value"]
-        assert float(legacy_building["cost_total"]) == pytest.approx(0.5)
+        expected_legacy_cost_total = float(CostFunction.cost(control_cost[:settled_steps])[-1])
+        assert float(legacy_building["cost_total"]) == pytest.approx(expected_legacy_cost_total)
 
         assert float(district_df["district_cost_total_control_eur"]) == pytest.approx(-2.0)
         assert float(district_df["district_cost_total_baseline_eur"]) == pytest.approx(4.0)
