@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 0.2.7 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=58050c01"></script>
+      <script src="../../_static/documentation_options.js?v=e259d695"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -108,6 +108,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.exporter</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpisodeExporter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.kpi</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnKPIService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.loading</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnLoadingService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.physics_invariants</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnPhysicsInvariantService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.runtime</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnRuntimeService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.entity_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnEntityInterfaceService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.topology</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnTopologyService</span>
@@ -261,6 +262,7 @@
             <span class="n">export_kpis_on_episode_end</span> <span class="o">=</span> <span class="n">kw_export_kpis_on_episode_end</span>
         <span class="n">debug_timing</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;debug_timing&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">check_observation_limits</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;check_observation_limits&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">physics_invariant_checks</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;physics_invariant_checks&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">metrics_log_interval</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;metrics_log_interval&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">kw_render_mode</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;render_mode&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">requested_render_mode</span> <span class="o">=</span> <span class="n">render_mode</span> <span class="k">if</span> <span class="n">kw_render_mode</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">kw_render_mode</span>
@@ -312,6 +314,11 @@
             <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">path</span><span class="o">=</span><span class="s1">&#39;check_observation_limits&#39;</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">physics_invariant_checks</span> <span class="o">=</span> <span class="n">parse_bool</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;physics_invariant_checks&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">if</span> <span class="n">physics_invariant_checks</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">physics_invariant_checks</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="s1">&#39;physics_invariant_checks&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metrics_log_interval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metrics_log_interval&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">metrics_log_interval</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">metrics_log_interval</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache_time_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -336,6 +343,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_loading_service</span> <span class="o">=</span> <span class="n">CityLearnLoadingService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_service</span> <span class="o">=</span> <span class="n">CityLearnRuntimeService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kpi_service</span> <span class="o">=</span> <span class="n">CityLearnKPIService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_physics_invariant_service</span> <span class="o">=</span> <span class="n">CityLearnPhysicsInvariantService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span> <span class="o">=</span> <span class="n">CityLearnEntityInterfaceService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_topology_service</span> <span class="o">=</span> <span class="n">CityLearnTopologyService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">root_directory</span><span class="p">,</span> <span class="n">buildings</span><span class="p">,</span> <span class="n">electric_vehicles</span><span class="p">,</span> <span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">rolling_episode_split</span><span class="p">,</span> <span class="n">random_episode_split</span><span class="p">,</span> \
@@ -1249,6 +1257,7 @@
             <span class="s1">&#39;topology_mode&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">topology_mode</span><span class="p">,</span>
             <span class="s1">&#39;topology_version&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">topology_version</span><span class="p">,</span>
             <span class="s1">&#39;topology_event_log&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">topology_event_log</span><span class="p">,</span>
+            <span class="s1">&#39;physics_invariant_checks&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;physics_invariant_checks&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
             <span class="s1">&#39;reward_function&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
             <span class="s1">&#39;central_agent&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">central_agent</span><span class="p">,</span>
             <span class="s1">&#39;shared_observations&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_observations</span><span class="p">,</span>
@@ -1525,6 +1534,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_render_buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_action_cache</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_variables</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;physics_invariant_checks&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_physics_invariant_service</span><span class="o">.</span><span class="n">assert_step_invariants</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="n">env_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
 

@@ -16,6 +16,7 @@ Submodules
    citylearn.internal.entity_interface
    citylearn.internal.kpi
    citylearn.internal.loading
+   citylearn.internal.physics_invariants
    citylearn.internal.runtime
    citylearn.internal.topology
    citylearn.internal.units
