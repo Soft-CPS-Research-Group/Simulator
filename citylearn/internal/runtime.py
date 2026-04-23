@@ -41,6 +41,8 @@ class CityLearnRuntimeService:
             building.apply_actions(**building_actions)
 
         self.update_variables()
+        if bool(getattr(env, 'physics_invariant_checks', False)):
+            env._physics_invariant_service.assert_step_invariants(int(env.time_step))
 
         if env.debug_timing:
             import time

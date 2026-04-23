@@ -1,0 +1,651 @@
+{
+  "actions": {
+    "building": {
+      "features": [
+        "electrical_storage"
+      ],
+      "ids": [
+        "Building_1",
+        "Building_2",
+        "Building_3",
+        "Building_4",
+        "Building_5",
+        "Building_6",
+        "Building_7",
+        "Building_8",
+        "Building_9",
+        "Building_10",
+        "Building_11",
+        "Building_12",
+        "Building_13",
+        "Building_14",
+        "Building_15",
+        "Building_16",
+        "Building_17"
+      ],
+      "units": [
+        "scalar"
+      ]
+    },
+    "charger": {
+      "features": [
+        "electric_vehicle_storage"
+      ],
+      "ids": [
+        "Building_1/charger_1_1",
+        "Building_4/charger_4_1",
+        "Building_5/charger_5_1",
+        "Building_7/charger_7_1",
+        "Building_10/charger_10_1",
+        "Building_12/charger_12_1",
+        "Building_15/charger_15_1",
+        "Building_15/charger_15_2"
+      ],
+      "units": [
+        "scalar"
+      ]
+    }
+  },
+  "edges": {
+    "building_to_charger": {
+      "source": "building",
+      "target": "charger"
+    },
+    "building_to_pv": {
+      "source": "building",
+      "target": "pv"
+    },
+    "building_to_storage": {
+      "source": "building",
+      "target": "storage"
+    },
+    "charger_to_ev_connected": {
+      "source": "charger",
+      "target": "ev"
+    },
+    "charger_to_ev_incoming": {
+      "source": "charger",
+      "target": "ev"
+    },
+    "district_to_building": {
+      "source": "district",
+      "target": "building"
+    }
+  },
+  "normalization": {
+    "dynamic_topology": {
+      "relation_masks": [
+        "charger_to_ev_connected_mask",
+        "charger_to_ev_incoming_mask"
+      ],
+      "running_stats_recommendation": "maintain_per_feature_stats_externally_and_ignore_inactive_ids",
+      "stable_ids": true,
+      "variable_size_tables": false
+    },
+    "encoding": {
+      "categorical": "numeric_or_binary_from_dataset",
+      "ids": "stable_canonical_ids",
+      "time": "raw_indices_unwrapped"
+    },
+    "policy": "external_running_stats",
+    "simulator_applies_normalization": false
+  },
+  "observation_bundles": {
+    "entity_community_operational": {
+      "active": false
+    },
+    "entity_core_electrical": {
+      "active": false
+    },
+    "entity_forecasts_existing": {
+      "active": false
+    },
+    "entity_temporal_derived": {
+      "active": false
+    }
+  },
+  "tables": {
+    "building": {
+      "feature_metadata": {
+        "electrical_storage_soc": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "ratio"
+        },
+        "net_electricity_consumption": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kwh"
+        },
+        "non_shiftable_load": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "solar_generation": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kwh"
+        }
+      },
+      "features": [
+        "non_shiftable_load",
+        "solar_generation",
+        "electrical_storage_soc",
+        "net_electricity_consumption"
+      ],
+      "ids": [
+        "Building_1",
+        "Building_2",
+        "Building_3",
+        "Building_4",
+        "Building_5",
+        "Building_6",
+        "Building_7",
+        "Building_8",
+        "Building_9",
+        "Building_10",
+        "Building_11",
+        "Building_12",
+        "Building_13",
+        "Building_14",
+        "Building_15",
+        "Building_16",
+        "Building_17"
+      ],
+      "units": [
+        "scalar",
+        "kwh",
+        "ratio",
+        "kwh"
+      ]
+    },
+    "charger": {
+      "feature_metadata": {
+        "connected_ev_battery_capacity_kwh": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kwh"
+        },
+        "connected_ev_departure_time_step": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "time_step"
+        },
+        "connected_ev_required_soc_departure": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "connected_ev_soc": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "ratio"
+        },
+        "connected_state": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "incoming_ev_estimated_arrival_time_step": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "time_step"
+        },
+        "incoming_ev_estimated_soc_arrival": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "incoming_state": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "last_charged_kwh": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kwh"
+        },
+        "max_charging_power_kw": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kw"
+        },
+        "max_discharging_power_kw": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kw"
+        }
+      },
+      "features": [
+        "connected_state",
+        "incoming_state",
+        "connected_ev_soc",
+        "connected_ev_required_soc_departure",
+        "connected_ev_battery_capacity_kwh",
+        "connected_ev_departure_time_step",
+        "incoming_ev_estimated_soc_arrival",
+        "incoming_ev_estimated_arrival_time_step",
+        "last_charged_kwh",
+        "max_charging_power_kw",
+        "max_discharging_power_kw"
+      ],
+      "ids": [
+        "Building_1/charger_1_1",
+        "Building_4/charger_4_1",
+        "Building_5/charger_5_1",
+        "Building_7/charger_7_1",
+        "Building_10/charger_10_1",
+        "Building_12/charger_12_1",
+        "Building_15/charger_15_1",
+        "Building_15/charger_15_2"
+      ],
+      "units": [
+        "scalar",
+        "scalar",
+        "ratio",
+        "scalar",
+        "kwh",
+        "time_step",
+        "scalar",
+        "time_step",
+        "kwh",
+        "kw",
+        "kw"
+      ]
+    },
+    "district": {
+      "feature_metadata": {
+        "carbon_intensity": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "day_type": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "index"
+        },
+        "diffuse_solar_irradiance": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "diffuse_solar_irradiance_predicted_1": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "diffuse_solar_irradiance_predicted_2": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "diffuse_solar_irradiance_predicted_3": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "direct_solar_irradiance": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "direct_solar_irradiance_predicted_1": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "direct_solar_irradiance_predicted_2": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "direct_solar_irradiance_predicted_3": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "electricity_pricing": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "electricity_pricing_predicted_1": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "electricity_pricing_predicted_2": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "electricity_pricing_predicted_3": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "hour": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "index"
+        },
+        "month": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "index"
+        },
+        "outdoor_dry_bulb_temperature": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "outdoor_dry_bulb_temperature_predicted_1": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "outdoor_dry_bulb_temperature_predicted_2": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "outdoor_dry_bulb_temperature_predicted_3": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "outdoor_relative_humidity": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "outdoor_relative_humidity_predicted_1": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "outdoor_relative_humidity_predicted_2": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        },
+        "outdoor_relative_humidity_predicted_3": {
+          "bundle": "entity_forecasts_existing",
+          "legacy": true,
+          "unit": "scalar"
+        }
+      },
+      "features": [
+        "month",
+        "day_type",
+        "hour",
+        "outdoor_dry_bulb_temperature",
+        "outdoor_dry_bulb_temperature_predicted_1",
+        "outdoor_dry_bulb_temperature_predicted_2",
+        "outdoor_dry_bulb_temperature_predicted_3",
+        "outdoor_relative_humidity",
+        "outdoor_relative_humidity_predicted_1",
+        "outdoor_relative_humidity_predicted_2",
+        "outdoor_relative_humidity_predicted_3",
+        "diffuse_solar_irradiance",
+        "diffuse_solar_irradiance_predicted_1",
+        "diffuse_solar_irradiance_predicted_2",
+        "diffuse_solar_irradiance_predicted_3",
+        "direct_solar_irradiance",
+        "direct_solar_irradiance_predicted_1",
+        "direct_solar_irradiance_predicted_2",
+        "direct_solar_irradiance_predicted_3",
+        "carbon_intensity",
+        "electricity_pricing",
+        "electricity_pricing_predicted_1",
+        "electricity_pricing_predicted_2",
+        "electricity_pricing_predicted_3"
+      ],
+      "ids": [
+        "district_0"
+      ],
+      "units": [
+        "index",
+        "index",
+        "index",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar"
+      ]
+    },
+    "ev": {
+      "feature_metadata": {
+        "battery_capacity_kwh": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kwh"
+        },
+        "depth_of_discharge_ratio": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "ratio"
+        },
+        "soc": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        }
+      },
+      "features": [
+        "soc",
+        "battery_capacity_kwh",
+        "depth_of_discharge_ratio"
+      ],
+      "ids": [
+        "Electric_Vehicle_1",
+        "Electric_Vehicle_2",
+        "Electric_Vehicle_3",
+        "Electric_Vehicle_4",
+        "Electric_Vehicle_5",
+        "Electric_Vehicle_6",
+        "Electric_Vehicle_7",
+        "Electric_Vehicle_8"
+      ],
+      "units": [
+        "scalar",
+        "kwh",
+        "ratio"
+      ]
+    },
+    "pv": {
+      "feature_metadata": {},
+      "features": [],
+      "ids": [
+        "Building_1/pv",
+        "Building_2/pv",
+        "Building_3/pv",
+        "Building_4/pv",
+        "Building_5/pv",
+        "Building_6/pv",
+        "Building_7/pv",
+        "Building_8/pv",
+        "Building_9/pv",
+        "Building_10/pv",
+        "Building_11/pv",
+        "Building_12/pv",
+        "Building_13/pv",
+        "Building_14/pv",
+        "Building_15/pv",
+        "Building_16/pv",
+        "Building_17/pv"
+      ],
+      "units": []
+    },
+    "storage": {
+      "feature_metadata": {
+        "capacity_kwh": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kwh"
+        },
+        "electricity_consumption_kwh": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kwh"
+        },
+        "nominal_power_kw": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "kw"
+        },
+        "soc": {
+          "bundle": "legacy",
+          "legacy": true,
+          "unit": "scalar"
+        }
+      },
+      "features": [
+        "soc",
+        "capacity_kwh",
+        "nominal_power_kw",
+        "electricity_consumption_kwh"
+      ],
+      "ids": [
+        "Building_1/electrical_storage",
+        "Building_2/electrical_storage",
+        "Building_3/electrical_storage",
+        "Building_4/electrical_storage",
+        "Building_5/electrical_storage",
+        "Building_6/electrical_storage",
+        "Building_7/electrical_storage",
+        "Building_8/electrical_storage",
+        "Building_9/electrical_storage",
+        "Building_10/electrical_storage",
+        "Building_11/electrical_storage",
+        "Building_12/electrical_storage",
+        "Building_13/electrical_storage",
+        "Building_14/electrical_storage",
+        "Building_15/electrical_storage",
+        "Building_16/electrical_storage",
+        "Building_17/electrical_storage"
+      ],
+      "units": [
+        "scalar",
+        "kwh",
+        "kw",
+        "kwh"
+      ]
+    }
+  },
+  "temporal_semantics": {
+    "endogenous": "t_minus_1_settled",
+    "event_boundary": "events_at_k_apply_after_transition_k_minus_1_to_k_before_observation_k",
+    "exogenous": "t"
+  },
+  "topology": {
+    "active_ids": {
+      "building": [
+        "Building_1",
+        "Building_2",
+        "Building_3",
+        "Building_4",
+        "Building_5",
+        "Building_6",
+        "Building_7",
+        "Building_8",
+        "Building_9",
+        "Building_10",
+        "Building_11",
+        "Building_12",
+        "Building_13",
+        "Building_14",
+        "Building_15",
+        "Building_16",
+        "Building_17"
+      ],
+      "charger": [
+        "Building_1/charger_1_1",
+        "Building_4/charger_4_1",
+        "Building_5/charger_5_1",
+        "Building_7/charger_7_1",
+        "Building_10/charger_10_1",
+        "Building_12/charger_12_1",
+        "Building_15/charger_15_1",
+        "Building_15/charger_15_2"
+      ],
+      "ev": [
+        "Electric_Vehicle_1",
+        "Electric_Vehicle_2",
+        "Electric_Vehicle_3",
+        "Electric_Vehicle_4",
+        "Electric_Vehicle_5",
+        "Electric_Vehicle_6",
+        "Electric_Vehicle_7",
+        "Electric_Vehicle_8"
+      ],
+      "pv": [
+        "Building_1/pv",
+        "Building_2/pv",
+        "Building_3/pv",
+        "Building_4/pv",
+        "Building_5/pv",
+        "Building_6/pv",
+        "Building_7/pv",
+        "Building_8/pv",
+        "Building_9/pv",
+        "Building_10/pv",
+        "Building_11/pv",
+        "Building_12/pv",
+        "Building_13/pv",
+        "Building_14/pv",
+        "Building_15/pv",
+        "Building_16/pv",
+        "Building_17/pv"
+      ],
+      "storage": [
+        "Building_1/electrical_storage",
+        "Building_2/electrical_storage",
+        "Building_3/electrical_storage",
+        "Building_4/electrical_storage",
+        "Building_5/electrical_storage",
+        "Building_6/electrical_storage",
+        "Building_7/electrical_storage",
+        "Building_8/electrical_storage",
+        "Building_9/electrical_storage",
+        "Building_10/electrical_storage",
+        "Building_11/electrical_storage",
+        "Building_12/electrical_storage",
+        "Building_13/electrical_storage",
+        "Building_14/electrical_storage",
+        "Building_15/electrical_storage",
+        "Building_16/electrical_storage",
+        "Building_17/electrical_storage"
+      ]
+    },
+    "lifecycle_fields": [
+      "born_at",
+      "removed_at",
+      "active"
+    ],
+    "member_lifecycle": {},
+    "mode": "static",
+    "version": 0
+  },
+  "version": "entity_v1"
+}

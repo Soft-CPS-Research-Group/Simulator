@@ -18,6 +18,8 @@ class RBC(Agent):
     """
     
     def __init__(self, env: CityLearnEnv, **kwargs: Any):
+        if str(getattr(env, 'interface', 'flat')).lower() != 'flat':
+            raise ValueError("RBC controllers require interface='flat'.")
         super().__init__(env, **kwargs)
 
 class HourRBC(RBC):

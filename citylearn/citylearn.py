@@ -21,6 +21,7 @@ from citylearn.energy_model import Battery, PV, WashingMachine
 from citylearn.exporter import EpisodeExporter
 from citylearn.internal.kpi import CityLearnKPIService
 from citylearn.internal.loading import CityLearnLoadingService
+from citylearn.internal.physics_invariants import CityLearnPhysicsInvariantService
 from citylearn.internal.runtime import CityLearnRuntimeService
 from citylearn.internal.entity_interface import CityLearnEntityInterfaceService
 from citylearn.internal.topology import CityLearnTopologyService
@@ -169,6 +170,7 @@ class CityLearnEnv(Environment, Env):
             export_kpis_on_episode_end = kw_export_kpis_on_episode_end
         debug_timing = kwargs.pop('debug_timing', None)
         check_observation_limits = kwargs.pop('check_observation_limits', None)
+        physics_invariant_checks = kwargs.pop('physics_invariant_checks', None)
         metrics_log_interval = kwargs.pop('metrics_log_interval', None)
         kw_render_mode = kwargs.pop('render_mode', None)
         requested_render_mode = render_mode if kw_render_mode is None else kw_render_mode
@@ -220,6 +222,11 @@ class CityLearnEnv(Environment, Env):
             default=False,
             path='check_observation_limits',
         )
+        self.physics_invariant_checks = parse_bool(
+            self.schema.get('physics_invariant_checks', False) if physics_invariant_checks is None else physics_invariant_checks,
+            default=False,
+            path='physics_invariant_checks',
+        )
         self.metrics_log_interval = int(self.schema.get('metrics_log_interval', 0) if metrics_log_interval is None else metrics_log_interval)
         self._observations_cache: List[List[float]] = None
         self._observations_cache_time_step: int = -1
@@ -244,6 +251,7 @@ class CityLearnEnv(Environment, Env):
         self._loading_service = CityLearnLoadingService(self)
         self._runtime_service = CityLearnRuntimeService(self)
         self._kpi_service = CityLearnKPIService(self)
+        self._physics_invariant_service = CityLearnPhysicsInvariantService(self)
         self._entity_service = CityLearnEntityInterfaceService(self)
         self._topology_service = CityLearnTopologyService(self)
         root_directory, buildings, electric_vehicles, episode_time_steps, rolling_episode_split, random_episode_split, \
@@ -1155,6 +1163,7 @@ class CityLearnEnv(Environment, Env):
             'topology_mode': self.topology_mode,
             'topology_version': self.topology_version,
             'topology_event_log': self.topology_event_log,
+            'physics_invariant_checks': bool(getattr(self, 'physics_invariant_checks', False)),
             'reward_function': self.reward_function.__class__.__name__,
             'central_agent': self.central_agent,
             'shared_observations': self.shared_observations,
@@ -1398,6 +1407,8 @@ class CityLearnEnv(Environment, Env):
         self._render_buffer.clear()
         self._refresh_action_cache()
         self.update_variables()
+        if bool(getattr(self, 'physics_invariant_checks', False)):
+            self._physics_invariant_service.assert_step_invariants(int(self.time_step))
         self._entity_service.reset()
         self.reward_function.env_metadata = self.get_metadata()
 

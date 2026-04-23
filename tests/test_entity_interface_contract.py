@@ -56,6 +56,11 @@ def test_entity_interface_shapes_and_specs_are_consistent():
             for feature in specs["tables"][table_name]["features"]:
                 assert feature in feature_metadata
                 assert set(feature_metadata[feature].keys()) == {"unit", "bundle", "legacy"}
+        assert specs["version"] == "entity_v1"
+        assert specs["temporal_semantics"]["endogenous"] == "t_minus_1_settled"
+        assert specs["normalization"]["policy"] == "external_running_stats"
+        assert specs["normalization"]["simulator_applies_normalization"] is False
+        assert specs["normalization"]["dynamic_topology"]["stable_ids"] is True
     finally:
         env.close()
 

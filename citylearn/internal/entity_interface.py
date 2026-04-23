@@ -454,6 +454,10 @@ class CityLearnEntityInterfaceService:
                 "time_step": t,
                 "endogenous_time_step": endogenous_t,
                 "spec_version": "entity_v1",
+                "temporal_semantics": {
+                    "exogenous": "t",
+                    "endogenous": "t_minus_1_settled",
+                },
                 "topology_version": int(getattr(env, "topology_version", 0)),
             },
         }
@@ -1271,6 +1275,29 @@ class CityLearnEntityInterfaceService:
 
         self._specs = {
             "version": "entity_v1",
+            "temporal_semantics": {
+                "exogenous": "t",
+                "endogenous": "t_minus_1_settled",
+                "event_boundary": "events_at_k_apply_after_transition_k_minus_1_to_k_before_observation_k",
+            },
+            "normalization": {
+                "simulator_applies_normalization": False,
+                "policy": "external_running_stats",
+                "encoding": {
+                    "ids": "stable_canonical_ids",
+                    "categorical": "numeric_or_binary_from_dataset",
+                    "time": "raw_indices_unwrapped",
+                },
+                "dynamic_topology": {
+                    "variable_size_tables": bool(getattr(self.env, "topology_mode", "static") == "dynamic"),
+                    "stable_ids": True,
+                    "relation_masks": [
+                        "charger_to_ev_connected_mask",
+                        "charger_to_ev_incoming_mask",
+                    ],
+                    "running_stats_recommendation": "maintain_per_feature_stats_externally_and_ignore_inactive_ids",
+                },
+            },
             "observation_bundles": {
                 bundle_name: {"active": bool(active)}
                 for bundle_name, active in self._observation_bundles.items()

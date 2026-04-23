@@ -11,7 +11,8 @@ import pytest
 
 pytest.importorskip("gymnasium")
 
-from citylearn.citylearn import CityLearnEnv
+from citylearn.building import DynamicsBuilding
+from citylearn.citylearn import CityLearnEnv, EvaluationCondition
 
 
 SCHEMA_PATH = Path(__file__).resolve().parents[1] / "data/datasets/citylearn_three_phase_dynamic_topology_demo/schema.json"
@@ -157,6 +158,35 @@ def test_hybrid_action_tables_plus_map_precedence_and_unknown_ids_validation():
                     },
                 }
             )
+    finally:
+        env.close()
+
+
+def test_removed_charger_action_id_is_invalid_after_topology_removal():
+    env = CityLearnEnv(_load_schema(), interface="entity", topology_mode="dynamic", episode_time_steps=12, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        removed_id = None
+        for charger_id in env.entity_specs["actions"]["charger"]["ids"]:
+            if charger_id.startswith("Building_5/") and charger_id.endswith("charger_5_1"):
+                removed_id = charger_id
+                break
+
+        assert removed_id is not None
+
+        _step_until(env, 4)  # event removes Building_5 charger 5_1
+        assert removed_id not in env.entity_specs["actions"]["charger"]["ids"]
+
+        payload = _zero_entity_actions(env)
+        payload["map"] = {
+            f"charger:{removed_id}": {
+                "electric_vehicle_storage": 0.2,
+            }
+        }
+
+        with pytest.raises(AssertionError, match="Unknown charger id"):
+            env._entity_service.parse_actions(payload)
     finally:
         env.close()
 
@@ -314,5 +344,45 @@ def test_end_mode_exports_respect_dynamic_asset_activity_windows(tmp_path):
         assert removed_charger_ts[-1] < _step_timestamp(4)
         assert removed_battery_ts[-1] < _step_timestamp(7)
         assert added_battery_ts[0] >= _step_timestamp(8)
+    finally:
+        env.close()
+
+
+def test_dynamic_kpis_for_added_member_use_active_window_only():
+    env = CityLearnEnv(_load_schema(), interface="entity", topology_mode="dynamic", episode_time_steps=12, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        while not env.terminated and not env.truncated:
+            env.step(_zero_entity_actions(env))
+
+        kpis = env.evaluate_v2()
+        row = kpis[
+            (kpis["level"] == "building")
+            & (kpis["name"] == "Building_18")
+            & (kpis["cost_function"] == "building_energy_grid_total_import_control_kwh")
+        ]
+        assert len(row) == 1
+
+        building_18 = env._topology_service.member_pool["Building_18"]
+        lifecycle = env.topology_member_lifecycle["Building_18"]
+        t_start = int(lifecycle["born_at"])
+        removed_at = lifecycle["removed_at"]
+        t_end = int(env.time_step) if removed_at is None else int(removed_at) - 1
+
+        control_cond, _ = env._kpi_service._default_building_conditions(
+            building_18,
+            None,
+            None,
+            evaluation_condition_cls=EvaluationCondition,
+            dynamics_building_cls=DynamicsBuilding,
+        )
+        series = np.array(
+            getattr(building_18, f"net_electricity_consumption{control_cond.value}"),
+            dtype="float64",
+        )[t_start:t_end + 1]
+        expected_import = float(np.clip(series, 0.0, None).sum())
+
+        assert float(row["value"].iloc[0]) == pytest.approx(expected_import)
     finally:
         env.close()
