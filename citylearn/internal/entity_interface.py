@@ -1393,6 +1393,18 @@ class CityLearnEntityInterfaceService:
             high_values: List[float] = []
             for name in names:
                 default_low, default_high = self._default_bounds_for_feature(name)
+                key = str(name).lower()
+                if (
+                    getattr(self.env, "topology_mode", "static") == "dynamic"
+                    and key in {"solar_generation", "electrical_storage_soc"}
+                ):
+                    low_values.append(float(default_low))
+                    high_values.append(float(default_high))
+                    continue
+                if "headroom_kw" in key:
+                    low_values.append(float(default_low))
+                    high_values.append(float(default_high))
+                    continue
                 low_values.append(self._safe_scalar(low_map.get(name, default_low), default_low))
                 high_values.append(self._safe_scalar(high_map.get(name, default_high), default_high))
             low = np.array([low_values], dtype=np.float32)
@@ -1413,6 +1425,18 @@ class CityLearnEntityInterfaceService:
             low_map, high_map = building.estimate_observation_space_limits(include_all=True, periodic_normalization=False)
             for j, name in enumerate(names):
                 default_low, default_high = self._default_bounds_for_feature(name)
+                key = str(name).lower()
+                if (
+                    getattr(self.env, "topology_mode", "static") == "dynamic"
+                    and key in {"solar_generation", "electrical_storage_soc"}
+                ):
+                    low[i, j] = float(default_low)
+                    high[i, j] = float(default_high)
+                    continue
+                if "headroom_kw" in key:
+                    low[i, j] = float(default_low)
+                    high[i, j] = float(default_high)
+                    continue
                 low[i, j] = self._safe_scalar(low_map.get(name, default_low), default_low)
                 high[i, j] = self._safe_scalar(high_map.get(name, default_high), default_high)
 
@@ -1443,6 +1467,7 @@ class CityLearnEntityInterfaceService:
         max_discharge_kw = max(discharging_limits + [0.0])
         max_abs_power_kw = max(max_charge_kw, max_discharge_kw, 1.0)
         max_energy_step = max_abs_power_kw * step_hours
+        max_theoretical_avg_power = max(max_capacity / max(step_hours, 1.0e-6), max_abs_power_kw, 1.0)
 
         bounds = {
             "connected_state": (0.0, 1.0),
@@ -1460,7 +1485,7 @@ class CityLearnEntityInterfaceService:
             "applied_power_kw": (-max_abs_power_kw, max_abs_power_kw),
             "applied_energy_kwh_step": (-max_energy_step, max_energy_step),
             "energy_to_required_soc_kwh": (0.0, max(max_capacity, 1.0)),
-            "avg_power_to_departure_kw": (0.0, max(max_abs_power_kw, 1.0)),
+            "avg_power_to_departure_kw": (0.0, max_theoretical_avg_power),
         }
 
         for j, feature in enumerate(self._charger_features):

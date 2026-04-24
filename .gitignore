@@ -187,3 +187,5 @@ SimulationData/
 results/
 runtime.csv
 *-runtime.csv
+outputs/
+tmp_entity_obs*.json
