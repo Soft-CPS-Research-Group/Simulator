@@ -1476,7 +1476,7 @@ class Building(Environment):
             action,
             self.cooling_storage.capacity,
             seconds_per_time_step=self.seconds_per_time_step,
-            scale_with_time=False,
+            scale_with_time=True,
         )
         temperature = self.weather.outdoor_dry_bulb_temperature[self.time_step]
 
@@ -1634,6 +1634,12 @@ class Building(Environment):
 
         ratio = getattr(storage, 'time_step_ratio', None)
         return to_dataset_resolution_energy(energy, ratio)
+
+    def _dataset_energy_to_control_step(self, energy: float) -> float:
+        """Convert dataset-resolution kWh to the active control-step kWh."""
+
+        ratio = 1.0 if self.time_step_ratio in (None, 0) else float(self.time_step_ratio)
+        return float(energy) * ratio
 
     def ___demand_limit_check(self, end_use: str, demand: float, max_device_output: float):
         message = f'timestep: {self.time_step}, building: {self.name}, outage: {self.power_outage}, demand: {demand},' \
@@ -2265,6 +2271,7 @@ class Building(Environment):
         demand = demand.groupby('year')['value'].sum().mean()
         epw_filepath = kwargs.pop('epw_filepath')
         self.pv.nominal_power, solar_generation = self.pv.autosize(demand, epw_filepath, **kwargs)
+        self.pv.generation_mode = 'per_kw'
         self.energy_simulation.__setattr__('solar_generation', np.array(solar_generation, dtype='float32'))
 
     def _estimate_baseline_electricity_consumption(self) -> np.ndarray:
@@ -2379,7 +2386,8 @@ class Building(Environment):
         self.reset_dynamic_variables()
         self.reset_data_sets()
         self._refresh_observation_source_cache()
-        self.__solar_generation = self.pv.get_generation(self.energy_simulation.solar_generation) * -1
+        ratio = 1.0 if self.time_step_ratio in (None, 0) else float(self.time_step_ratio)
+        self.__solar_generation = self.pv.get_generation(self.energy_simulation.solar_generation) * ratio * -1
         self.__energy_from_cooling_device = self.energy_simulation.cooling_demand.copy()
         self.__energy_from_heating_device = self.energy_simulation.heating_demand.copy()
         self.__energy_from_dhw_device = self.energy_simulation.dhw_demand.copy()
@@ -2449,12 +2457,16 @@ class Building(Environment):
             temperature = self.weather.outdoor_dry_bulb_temperature[self.time_step]
 
             # cooling electricity consumption
-            cooling_demand = self.__energy_from_cooling_device[self.time_step] + self.cooling_storage.energy_balance[self.time_step]
+            cooling_demand = self._dataset_energy_to_control_step(
+                self.__energy_from_cooling_device[self.time_step]
+            ) + self.cooling_storage.energy_balance[self.time_step]
             cooling_electricity_consumption = self.cooling_device.get_input_power(cooling_demand, temperature, heating=False)
             self.cooling_device.set_electricity_consumption(cooling_electricity_consumption)
 
             # heating electricity consumption
-            heating_demand = self.__energy_from_heating_device[self.time_step] + self.heating_storage.energy_balance[self.time_step]
+            heating_demand = self._dataset_energy_to_control_step(
+                self.__energy_from_heating_device[self.time_step]
+            ) + self.heating_storage.energy_balance[self.time_step]
 
             if isinstance(self.heating_device, HeatPump):
                 heating_electricity_consumption = self.heating_device.get_input_power(heating_demand, temperature, heating=True)
@@ -2464,7 +2476,9 @@ class Building(Environment):
             self.heating_device.set_electricity_consumption(heating_electricity_consumption)
 
             # dhw electricity consumption
-            dhw_demand = self.__energy_from_dhw_device[self.time_step] + self.dhw_storage.energy_balance[self.time_step]
+            dhw_demand = self._dataset_energy_to_control_step(
+                self.__energy_from_dhw_device[self.time_step]
+            ) + self.dhw_storage.energy_balance[self.time_step]
 
             if isinstance(self.dhw_device, HeatPump):
                 dhw_electricity_consumption = self.dhw_device.get_input_power(dhw_demand, temperature, heating=True)
@@ -2474,7 +2488,9 @@ class Building(Environment):
             self.dhw_device.set_electricity_consumption(dhw_electricity_consumption)
 
             # non shiftable load electricity consumption
-            non_shiftable_load_electricity_consumption = self.__energy_to_non_shiftable_load[self.time_step]
+            non_shiftable_load_electricity_consumption = self._dataset_energy_to_control_step(
+                self.__energy_to_non_shiftable_load[self.time_step]
+            )
             self.non_shiftable_load_device.set_electricity_consumption(non_shiftable_load_electricity_consumption)
 
             # electrical storage

@@ -330,17 +330,20 @@ def test_electrical_service_positive_infinite_limits_are_treated_as_unbounded(tm
 
 
 def test_three_phase_limits_clip_controllable_actions(tmp_path: Path):
+    total_import_limit_kw = 5.0
+    per_phase_import_limit_kw = 2.0
+
     def _mutate(schema):
         building = schema["buildings"]["Building_1"]
         building["electrical_service"] = {
             "mode": "three_phase",
             "default_split": "balanced",
             "limits": {
-                "total": {"import_kw": 2.5, "export_kw": 2.5},
+                "total": {"import_kw": total_import_limit_kw, "export_kw": 2.5},
                 "per_phase": {
-                    "L1": {"import_kw": 1.0, "export_kw": 1.0},
-                    "L2": {"import_kw": 1.0, "export_kw": 1.0},
-                    "L3": {"import_kw": 1.0, "export_kw": 1.0},
+                    "L1": {"import_kw": per_phase_import_limit_kw, "export_kw": 1.0},
+                    "L2": {"import_kw": per_phase_import_limit_kw, "export_kw": 1.0},
+                    "L3": {"import_kw": per_phase_import_limit_kw, "export_kw": 1.0},
                 },
             },
             "observations": {"headroom": True, "violation": True},
@@ -363,10 +366,10 @@ def test_three_phase_limits_clip_controllable_actions(tmp_path: Path):
         building = env.buildings[0]
         state = building._charging_constraints_state
         assert state is not None
-        assert state["total_power_kw"] <= 2.5 + 1e-6
-        assert state["phase_power_kw"]["L1"] <= 1.0 + 1e-6
-        assert state["phase_power_kw"]["L2"] <= 1.0 + 1e-6
-        assert state["phase_power_kw"]["L3"] <= 1.0 + 1e-6
+        assert state["total_power_kw"] <= total_import_limit_kw + 1e-6
+        assert state["phase_power_kw"]["L1"] <= per_phase_import_limit_kw + 1e-6
+        assert state["phase_power_kw"]["L2"] <= per_phase_import_limit_kw + 1e-6
+        assert state["phase_power_kw"]["L3"] <= per_phase_import_limit_kw + 1e-6
         assert building._charging_constraint_last_penalty_kwh == pytest.approx(0.0, abs=1e-6)
 
         t = building.time_step - 1

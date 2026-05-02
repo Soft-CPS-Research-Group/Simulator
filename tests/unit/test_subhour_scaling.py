@@ -8,7 +8,7 @@ pytest.importorskip("gymnasium")
 from citylearn.base import EpisodeTracker
 from citylearn.citylearn import CityLearnEnv
 from citylearn.data import EnergySimulation
-from citylearn.energy_model import Battery, ElectricDevice, StorageDevice
+from citylearn.energy_model import Battery, ElectricDevice, StorageDevice, StorageTank
 
 
 def _make_tracker(length: int) -> EpisodeTracker:
@@ -38,6 +38,7 @@ def test_energy_simulation_ratio_matches_dataset_cadence():
     )
 
     assert sim.time_step_ratios[0] == pytest.approx(1.0)
+    assert sim.dataset_seconds_per_time_step == pytest.approx(900.0)
 
 
 def test_energy_simulation_ratio_subhour_control_from_hourly_dataset():
@@ -60,6 +61,7 @@ def test_energy_simulation_ratio_subhour_control_from_hourly_dataset():
 
     # Hourly dataset, 15-minute control -> ratio should be 0.25
     assert sim.time_step_ratios[0] == pytest.approx(0.25)
+    assert sim.dataset_seconds_per_time_step == pytest.approx(3600.0)
 
 
 def test_energy_simulation_time_step_ratio_default_not_shared_across_instances():
@@ -114,6 +116,25 @@ def test_storage_charge_scaling_respects_time_ratio():
     storage.charge(dataset_energy)
 
     assert storage.energy_balance[0] == pytest.approx(energy_actual)
+
+
+def test_storage_tank_uses_single_time_ratio_scaling_and_step_power_limits():
+    tracker = _make_tracker(4)
+    tank = StorageTank(
+        capacity=10.0,
+        efficiency=1.0,
+        loss_coefficient=0.0,
+        initial_soc=0.0,
+        max_input_power=2.0,
+        time_step_ratio=0.25,
+        seconds_per_time_step=900,
+        episode_tracker=tracker,
+    )
+    tank.reset()
+
+    tank.charge(100.0)
+
+    assert tank.energy_balance[0] == pytest.approx(0.5)
 
 
 def test_electric_device_set_electricity_consumption_is_absolute():
@@ -205,3 +226,63 @@ def test_env_supports_subhour_seconds_per_time_step():
     zeros = [np.zeros(env.action_space[0].shape[0], dtype='float32')]
     env.step(zeros)
     env.close()
+
+
+def test_env_prints_explicit_notice_when_dataset_resolution_is_converted(capsys):
+    schema = 'data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json'
+    env = CityLearnEnv(
+        schema,
+        central_agent=True,
+        episode_time_steps=2,
+        seconds_per_time_step=900,
+        random_seed=0,
+    )
+
+    try:
+        captured = capsys.readouterr()
+
+        assert "[CityLearn][unit-conversion]" in captured.out
+        assert "dataset_seconds_per_time_step=3600" in captured.out
+        assert "seconds_per_time_step=900" in captured.out
+        assert "time_step_ratio=0.25" in captured.out
+    finally:
+        env.close()
+
+
+def test_subhour_env_scales_initial_and_step_energy_histories():
+    schema = 'data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json'
+    hourly = CityLearnEnv(schema, central_agent=True, episode_time_steps=24, seconds_per_time_step=3600, random_seed=0)
+    quarter_hour = CityLearnEnv(schema, central_agent=True, episode_time_steps=24, seconds_per_time_step=900, random_seed=0)
+
+    try:
+        hourly.reset()
+        quarter_hour.reset()
+        scale = quarter_hour.time_step_ratio / hourly.time_step_ratio
+
+        hourly_building = hourly.buildings[0]
+        quarter_hour_building = quarter_hour.buildings[0]
+
+        assert quarter_hour_building.non_shiftable_load_electricity_consumption[0] == pytest.approx(
+            hourly_building.non_shiftable_load_electricity_consumption[0] * scale
+        )
+
+        for env in [hourly, quarter_hour]:
+            for _ in range(12):
+                env.step([np.zeros(env.action_space[0].shape[0], dtype='float32')])
+
+        assert quarter_hour_building.non_shiftable_load_electricity_consumption[1] == pytest.approx(
+            hourly_building.non_shiftable_load_electricity_consumption[1] * scale
+        )
+
+        hourly_pv_building = next(b for b in hourly.buildings if b.pv.nominal_power > 0.0)
+        quarter_hour_pv_building = next(b for b in quarter_hour.buildings if b.name == hourly_pv_building.name)
+        solar_indices = np.flatnonzero(np.abs(hourly_pv_building.solar_generation) > 1.0e-8)
+
+        assert len(solar_indices) > 0
+        solar_index = int(solar_indices[0])
+        assert quarter_hour_pv_building.solar_generation[solar_index] == pytest.approx(
+            hourly_pv_building.solar_generation[solar_index] * scale
+        )
+    finally:
+        hourly.close()
+        quarter_hour.close()

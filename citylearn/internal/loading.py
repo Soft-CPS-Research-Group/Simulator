@@ -49,6 +49,37 @@ class CityLearnLoadingService:
         self._dynamic_charger_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
         self._dynamic_washing_machine_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
 
+    @staticmethod
+    def _print_time_step_conversion_notice(
+        *,
+        building_name: str,
+        source: str,
+        dataset_seconds_per_time_step,
+        seconds_per_time_step,
+        time_step_ratio,
+    ):
+        """Print an explicit notice when runtime energy conversions are active."""
+
+        try:
+            ratio = float(time_step_ratio)
+        except (TypeError, ValueError):
+            return
+
+        if not np.isfinite(ratio) or abs(ratio - 1.0) <= 1.0e-9:
+            return
+
+        dataset_seconds = "unknown" if dataset_seconds_per_time_step is None else f"{float(dataset_seconds_per_time_step):g}"
+        schema_seconds = "unknown" if seconds_per_time_step is None else f"{float(seconds_per_time_step):g}"
+        print(
+            "[CityLearn][unit-conversion] "
+            f"Building '{building_name}' dataset resolution differs from schema/control step: "
+            f"dataset_seconds_per_time_step={dataset_seconds}, "
+            f"seconds_per_time_step={schema_seconds}, "
+            f"time_step_ratio={ratio:g}. "
+            "Runtime energy quantities are converted with time_step_ratio; power limits/actions still use seconds_per_time_step. "
+            f"source={source}"
+        )
+
     def load(
         self,
         schema: Mapping[str, Any],
@@ -331,7 +362,8 @@ class CityLearnLoadingService:
         expected_rows = int(getattr(self, '_dynamic_expected_rows', episode_tracker.simulation_time_steps))
         member_window = self._dynamic_member_windows.get(building_name)
 
-        energy_simulation = pd.read_csv(os.path.join(schema['root_directory'], building_schema['energy_simulation']))
+        energy_simulation_filepath = os.path.join(schema['root_directory'], building_schema['energy_simulation'])
+        energy_simulation = pd.read_csv(energy_simulation_filepath)
         energy_simulation = self._align_dynamic_timeseries_dataframe(
             energy_simulation,
             expected_rows=expected_rows,
@@ -341,6 +373,13 @@ class CityLearnLoadingService:
         energy_simulation = EnergySimulation(**energy_simulation.to_dict('list'), seconds_per_time_step=seconds_per_time_step, noise_std=noise_std)
         ratios = getattr(energy_simulation, 'time_step_ratios', None) or []
         building_kwargs['time_step_ratio'] = ratios[-1] if len(ratios) > 0 else 1.0
+        self._print_time_step_conversion_notice(
+            building_name=building_name,
+            source=energy_simulation_filepath,
+            dataset_seconds_per_time_step=getattr(energy_simulation, 'dataset_seconds_per_time_step', None),
+            seconds_per_time_step=seconds_per_time_step,
+            time_step_ratio=building_kwargs['time_step_ratio'],
+        )
         weather = pd.read_csv(os.path.join(schema['root_directory'], building_schema['weather']))
         weather = self._align_dynamic_timeseries_dataframe(
             weather,

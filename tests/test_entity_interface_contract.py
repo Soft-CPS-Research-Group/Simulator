@@ -125,6 +125,28 @@ def test_entity_observations_use_latest_settled_endogenous_transition():
         env.close()
 
 
+def test_entity_observation_payload_returns_independent_arrays():
+    env = CityLearnEnv(str(SCHEMA), interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)
+
+    try:
+        observations, _ = env.reset(seed=0)
+        building_table = observations["tables"]["building"]
+        building_snapshot = building_table.copy()
+        connected_edges = observations["edges"]["charger_to_ev_connected"]
+        connected_edges_snapshot = connected_edges.copy()
+
+        next_observations, _, terminated, truncated, _ = env.step(_zero_entity_actions(env))
+        assert not terminated
+        assert not truncated
+
+        assert building_table is not next_observations["tables"]["building"]
+        assert connected_edges is not next_observations["edges"]["charger_to_ev_connected"]
+        assert np.array_equal(building_table, building_snapshot)
+        assert np.array_equal(connected_edges, connected_edges_snapshot)
+    finally:
+        env.close()
+
+
 def test_entity_soc_uses_settled_index_after_nonzero_storage_action():
     env = CityLearnEnv(str(SCHEMA), interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)
 

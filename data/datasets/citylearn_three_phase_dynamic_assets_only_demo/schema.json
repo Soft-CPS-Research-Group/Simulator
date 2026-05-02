@@ -395,7 +395,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 12.0
+          "nominal_power": 12.0,
+          "generation_mode": "absolute"
         }
       },
       "chargers": {
@@ -438,7 +439,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 4.0
+          "nominal_power": 4.0,
+          "generation_mode": "absolute"
         }
       }
     },
@@ -454,7 +456,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 4.0
+          "nominal_power": 4.0,
+          "generation_mode": "absolute"
         }
       }
     },
@@ -481,7 +484,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 8.0
+          "nominal_power": 8.0,
+          "generation_mode": "absolute"
         }
       },
       "chargers": {
@@ -524,7 +528,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 10.0
+          "nominal_power": 10.0,
+          "generation_mode": "absolute"
         }
       },
       "chargers": {
@@ -587,7 +592,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 9.0
+          "nominal_power": 9.0,
+          "generation_mode": "absolute"
         }
       },
       "chargers": {
@@ -630,7 +636,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 4.0
+          "nominal_power": 4.0,
+          "generation_mode": "absolute"
         }
       }
     },
@@ -657,7 +664,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 4.0
+          "nominal_power": 4.0,
+          "generation_mode": "absolute"
         }
       }
     },
@@ -684,7 +692,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 6.0
+          "nominal_power": 6.0,
+          "generation_mode": "absolute"
         }
       },
       "chargers": {
@@ -727,7 +736,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 5.0
+          "nominal_power": 5.0,
+          "generation_mode": "absolute"
         }
       }
     },
@@ -754,7 +764,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 8.0
+          "nominal_power": 8.0,
+          "generation_mode": "absolute"
         }
       },
       "chargers": {
@@ -797,7 +808,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 5.0
+          "nominal_power": 5.0,
+          "generation_mode": "absolute"
         }
       }
     },
@@ -824,7 +836,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 5.0
+          "nominal_power": 5.0,
+          "generation_mode": "absolute"
         }
       }
     },
@@ -852,7 +865,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 15.0
+          "nominal_power": 15.0,
+          "generation_mode": "absolute"
         }
       },
       "chargers": {
@@ -941,7 +955,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 5.0
+          "nominal_power": 5.0,
+          "generation_mode": "absolute"
         }
       }
     },
@@ -968,7 +983,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 5.0
+          "nominal_power": 5.0,
+          "generation_mode": "absolute"
         }
       }
     },
@@ -995,7 +1011,8 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 12.0
+          "nominal_power": 12.0,
+          "generation_mode": "absolute"
         }
       },
       "chargers": {

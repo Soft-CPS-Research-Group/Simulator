@@ -7,7 +7,7 @@ import numpy as np
 
 from citylearn.energy_model import HeatPump
 from citylearn.preprocessing import Normalize, PeriodicNormalization
-from citylearn.internal.units import power_kw_to_energy_kwh
+from citylearn.internal.units import energy_kwh_to_power_kw, power_kw_to_energy_kwh
 
 if TYPE_CHECKING:
     from citylearn.building import Building
@@ -468,6 +468,14 @@ class BuildingOpsService:
         except Exception:
             return float(default)
 
+    def _dataset_energy_to_control_step(self, energy_kwh: float) -> float:
+        ratio = getattr(self.building, 'time_step_ratio', None)
+        ratio = 1.0 if ratio in (None, 0) else float(ratio)
+        return float(energy_kwh) * ratio
+
+    def _control_step_energy_to_power_kw(self, energy_kwh: float) -> float:
+        return energy_kwh_to_power_kw(energy_kwh, self.building.seconds_per_time_step)
+
     def _current_phase_names(self):
         building = self.building
         if getattr(building, '_electrical_service_mode', 'single_phase') == 'three_phase':
@@ -513,33 +521,45 @@ class BuildingOpsService:
 
         temperature = self._safe_index(building.weather.outdoor_dry_bulb_temperature, t, 0.0)
 
-        cooling_demand = self._safe_index(building.energy_from_cooling_device, t, 0.0) + self._safe_index(
-            building.cooling_storage.energy_balance, t, 0.0
+        cooling_demand = self._dataset_energy_to_control_step(
+            self._safe_index(building.energy_from_cooling_device, t, 0.0)
+        ) + self._safe_index(building.cooling_storage.energy_balance, t, 0.0)
+        cooling_energy = self._safe_scalar(
+            building.cooling_device.get_input_power(cooling_demand, temperature, heating=False),
+            0.0,
         )
-        cooling_kw = self._safe_scalar(building.cooling_device.get_input_power(cooling_demand, temperature, heating=False), 0.0)
+        cooling_kw = self._control_step_energy_to_power_kw(cooling_energy)
 
-        heating_demand = self._safe_index(building.energy_from_heating_device, t, 0.0) + self._safe_index(
-            building.heating_storage.energy_balance, t, 0.0
-        )
+        heating_demand = self._dataset_energy_to_control_step(
+            self._safe_index(building.energy_from_heating_device, t, 0.0)
+        ) + self._safe_index(building.heating_storage.energy_balance, t, 0.0)
         if isinstance(building.heating_device, HeatPump):
-            heating_kw = self._safe_scalar(
+            heating_energy = self._safe_scalar(
                 building.heating_device.get_input_power(heating_demand, temperature, heating=True),
                 0.0,
             )
         else:
-            heating_kw = self._safe_scalar(building.heating_device.get_input_power(heating_demand), 0.0)
+            heating_energy = self._safe_scalar(building.heating_device.get_input_power(heating_demand), 0.0)
+        heating_kw = self._control_step_energy_to_power_kw(heating_energy)
 
-        dhw_demand = self._safe_index(building.energy_from_dhw_device, t, 0.0) + self._safe_index(
-            building.dhw_storage.energy_balance, t, 0.0
-        )
+        dhw_demand = self._dataset_energy_to_control_step(
+            self._safe_index(building.energy_from_dhw_device, t, 0.0)
+        ) + self._safe_index(building.dhw_storage.energy_balance, t, 0.0)
         if isinstance(building.dhw_device, HeatPump):
-            dhw_kw = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand, temperature, heating=True), 0.0)
+            dhw_energy = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand, temperature, heating=True), 0.0)
         else:
-            dhw_kw = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand), 0.0)
+            dhw_energy = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand), 0.0)
+        dhw_kw = self._control_step_energy_to_power_kw(dhw_energy)
 
-        non_shiftable_kw = self._safe_index(building.energy_to_non_shiftable_load, t, 0.0)
-        solar_kw = self._safe_index(building.solar_generation, t, 0.0)
-        washing_kw = sum(self._safe_index(wm.electricity_consumption, t, 0.0) for wm in building.washing_machines or [])
+        non_shiftable_energy = self._dataset_energy_to_control_step(
+            self._safe_index(building.energy_to_non_shiftable_load, t, 0.0)
+        )
+        non_shiftable_kw = self._control_step_energy_to_power_kw(non_shiftable_energy)
+        solar_kw = self._control_step_energy_to_power_kw(self._safe_index(building.solar_generation, t, 0.0))
+        washing_kw = sum(
+            self._control_step_energy_to_power_kw(self._safe_index(wm.electricity_consumption, t, 0.0))
+            for wm in building.washing_machines or []
+        )
 
         base_total_kw = cooling_kw + heating_kw + dhw_kw + non_shiftable_kw + solar_kw + washing_kw
         base_phase_kw = self._split_unassigned_power(base_total_kw)

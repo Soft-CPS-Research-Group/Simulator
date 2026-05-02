@@ -640,6 +640,7 @@ class EnergySimulation(TimeSeriesData):
             if seconds_per_time_step and base_step_seconds
             else None
         )
+        self.dataset_seconds_per_time_step = base_step_seconds
         ratios = [] if time_step_ratios is None else list(time_step_ratios)
         ratios.append(time_step_ratio)
         self.time_step_ratios = ratios

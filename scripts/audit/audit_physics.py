@@ -2,6 +2,8 @@
 """Deterministic physics audit runner for CityLearn.
 
 Writes a machine-readable report to ``outputs/audit/physics_audit.json``.
+The audit exercises multiple physical step durations and checks unit/power
+contracts for thermal devices, batteries, EV chargers, PV, net balance and KPIs.
 Exit codes:
 - 0: all scenarios passed
 - 1: one or more hard failures
@@ -74,8 +76,8 @@ def _scenario_matrix() -> List[Scenario]:
     """Build deterministic matrix covering interface/topology/step durations."""
 
     scenarios: List[Scenario] = []
-    seconds_values = [60, 300, 900]
-    seed_bases = {60: 100, 300: 200, 900: 300}
+    seconds_values = [60, 300, 900, 3600]
+    seed_bases = {60: 100, 300: 200, 900: 300, 3600: 400}
 
     for seconds in seconds_values:
         base = seed_bases[seconds]
@@ -202,7 +204,25 @@ def _check_observation_finite(env, observation: Any) -> Tuple[bool, List[str], i
     return len(errors) == 0, errors, checked
 
 
-def _build_zero_action(env) -> Tuple[Any, bool, str]:
+def _desired_audit_action(action_name: str, step_index: int) -> float:
+    """Return deterministic moderate action values that exercise constraints."""
+
+    name = str(action_name)
+    phase = int(step_index) % 6
+
+    if name == "electrical_storage":
+        return 0.45 if phase in {0, 1, 2} else -0.35
+
+    if name.startswith("electric_vehicle_storage_"):
+        return 0.7 if phase in {0, 1, 2, 3} else 0.0
+
+    if name in {"cooling_storage", "heating_storage", "dhw_storage"}:
+        return 0.15 if phase in {0, 1, 2} else -0.10
+
+    return 0.0
+
+
+def _build_audit_action(env, step_index: int) -> Tuple[Any, bool, str]:
     interface = str(getattr(env, "interface", "flat")).lower()
     central_agent = bool(getattr(env, "central_agent", False))
 
@@ -216,6 +236,27 @@ def _build_zero_action(env) -> Tuple[Any, bool, str]:
 
         building = np.zeros(building_space.shape, dtype=np.float32)
         charger = np.zeros(charger_space.shape, dtype=np.float32)
+        specs = getattr(env, "entity_specs", {})
+        action_specs = specs.get("actions", {}) if isinstance(specs, Mapping) else {}
+        building_features = (
+            action_specs.get("building", {}).get("features", [])
+            if isinstance(action_specs.get("building", {}), Mapping)
+            else []
+        )
+        charger_features = (
+            action_specs.get("charger", {}).get("features", [])
+            if isinstance(action_specs.get("charger", {}), Mapping)
+            else []
+        )
+
+        for col, feature in enumerate(building_features):
+            if col < building.shape[1]:
+                building[:, col] = _desired_audit_action(str(feature), step_index)
+
+        for col, feature in enumerate(charger_features):
+            if col < charger.shape[1]:
+                charger[:, col] = _desired_audit_action(str(feature), step_index)
+
         action = {"tables": {"building": building, "charger": charger}}
         if hasattr(space, "contains") and not bool(space.contains(action)):
             return action, False, "Entity action does not satisfy env.action_space.contains(action)."
@@ -227,15 +268,25 @@ def _build_zero_action(env) -> Tuple[Any, bool, str]:
         except Exception as exc:
             return None, False, f"Flat central action space missing index 0: {exc}"
         vector = np.zeros(flat_space.shape, dtype=np.float32)
+        action_names = getattr(env, "action_names", [[]])
+        names = action_names[0] if len(action_names) > 0 else []
+        for idx, name in enumerate(names):
+            if idx < vector.shape[0]:
+                vector[idx] = _desired_audit_action(str(name), step_index)
         if hasattr(flat_space, "contains") and not bool(flat_space.contains(vector)):
-            return [vector], False, "Flat central zero action outside action space bounds."
+            return [vector], False, "Flat central audit action outside action space bounds."
         return [vector], True, ""
 
     vectors = []
+    action_names = getattr(env, "action_names", [])
     for i, building_space in enumerate(env.action_space):
         vector = np.zeros(building_space.shape, dtype=np.float32)
+        names = action_names[i] if i < len(action_names) else []
+        for idx, name in enumerate(names):
+            if idx < vector.shape[0]:
+                vector[idx] = _desired_audit_action(str(name), step_index)
         if hasattr(building_space, "contains") and not bool(building_space.contains(vector)):
-            return None, False, f"Flat decentralized zero action outside bounds for building index {i}."
+            return None, False, f"Flat decentralized audit action outside bounds for building index {i}."
         vectors.append(vector)
     return vectors, True, ""
 
@@ -363,6 +414,232 @@ def _check_kw_kwh_step_consistency(env, observation: Any) -> Tuple[bool, List[st
     return len(errors) == 0, errors, checked
 
 
+def _check_net_balance(env, settled_time_step: int) -> Tuple[bool, List[str], int]:
+    """Check that building net electricity equals the sum of component energies."""
+
+    t = int(max(settled_time_step, 0))
+    errors: List[str] = []
+    checked = 0
+
+    for building in getattr(env, "buildings", []) or []:
+        name = str(getattr(building, "name", "<unknown_building>"))
+        try:
+            lhs = float(building.net_electricity_consumption[t])
+            rhs = (
+                float(building.cooling_electricity_consumption[t])
+                + float(building.heating_electricity_consumption[t])
+                + float(building.dhw_electricity_consumption[t])
+                + float(building.non_shiftable_load_electricity_consumption[t])
+                + float(building.electrical_storage_electricity_consumption[t])
+                + float(building.solar_generation[t])
+                + float(building.chargers_electricity_consumption[t])
+                + float(building.washing_machines_electricity_consumption[t])
+            )
+        except Exception as exc:
+            errors.append(f"{name} net balance unavailable at t={t}: {exc}")
+            continue
+
+        checked += 1
+        tolerance = max(1.0e-4, abs(rhs) * 1.0e-5)
+        diff = abs(lhs - rhs)
+        if diff > tolerance:
+            errors.append(
+                f"{name} net balance mismatch at t={t}: net={lhs:.8f}, "
+                f"components={rhs:.8f}, diff={diff:.8f}, tol={tolerance:.8f}"
+            )
+
+    return len(errors) == 0, errors, checked
+
+
+def _check_energy_limit(
+    errors: List[str],
+    *,
+    name: str,
+    energy_kwh: float,
+    limit_kw: Optional[float],
+    step_hours: float,
+    checked: int,
+    eps: float,
+) -> int:
+    if limit_kw is None:
+        return checked
+    limit = _safe_float(limit_kw, np.nan)
+    if not np.isfinite(limit):
+        return checked
+    checked += 1
+    max_energy = max(limit, 0.0) * step_hours
+    if abs(float(energy_kwh)) > max_energy + eps:
+        errors.append(
+            f"{name} exceeds power limit: energy={float(energy_kwh):.8f} kWh, "
+            f"limit={limit:.8f} kW, step_hours={step_hours:.8f}, "
+            f"max_energy={max_energy:.8f} kWh"
+        )
+    return checked
+
+
+def _check_component_power_limits(env, settled_time_step: int) -> Tuple[bool, List[str], int]:
+    """Check kWh/step component values against kW limits."""
+
+    t = int(max(settled_time_step, 0))
+    step_hours = max(_safe_float(getattr(env, "seconds_per_time_step", 3600.0), 3600.0) / 3600.0, 1.0e-9)
+    eps = max(5.0e-4, step_hours * 1.0e-4)
+    errors: List[str] = []
+    checked = 0
+
+    for building in getattr(env, "buildings", []) or []:
+        building_name = str(getattr(building, "name", "<unknown_building>"))
+
+        for device_attr, series_attr in (
+            ("cooling_device", "cooling_electricity_consumption"),
+            ("heating_device", "heating_electricity_consumption"),
+            ("dhw_device", "dhw_electricity_consumption"),
+        ):
+            device = getattr(building, device_attr, None)
+            if device is None:
+                continue
+            energy = _safe_series_value(getattr(building, series_attr, None), t)
+            if energy is None:
+                continue
+            checked = _check_energy_limit(
+                errors,
+                name=f"{building_name}.{device_attr}",
+                energy_kwh=energy,
+                limit_kw=getattr(device, "nominal_power", None),
+                step_hours=step_hours,
+                checked=checked,
+                eps=eps,
+            )
+
+        electrical_storage = getattr(building, "electrical_storage", None)
+        if electrical_storage is not None:
+            energy = _safe_series_value(getattr(electrical_storage, "energy_balance", None), t)
+            if energy is not None:
+                checked = _check_energy_limit(
+                    errors,
+                    name=f"{building_name}.electrical_storage.energy_balance",
+                    energy_kwh=energy,
+                    limit_kw=getattr(electrical_storage, "nominal_power", None),
+                    step_hours=step_hours,
+                    checked=checked,
+                    eps=eps,
+                )
+
+        for storage_attr in ("cooling_storage", "heating_storage", "dhw_storage"):
+            storage = getattr(building, storage_attr, None)
+            if storage is None:
+                continue
+            energy = _safe_series_value(getattr(storage, "energy_balance", None), t)
+            if energy is None:
+                continue
+            if energy >= 0.0:
+                checked = _check_energy_limit(
+                    errors,
+                    name=f"{building_name}.{storage_attr}.charge",
+                    energy_kwh=energy,
+                    limit_kw=getattr(storage, "max_input_power", None),
+                    step_hours=step_hours,
+                    checked=checked,
+                    eps=eps,
+                )
+            else:
+                checked = _check_energy_limit(
+                    errors,
+                    name=f"{building_name}.{storage_attr}.discharge",
+                    energy_kwh=energy,
+                    limit_kw=getattr(storage, "max_output_power", None),
+                    step_hours=step_hours,
+                    checked=checked,
+                    eps=eps,
+                )
+
+        pv = getattr(building, "pv", None)
+        nominal_power = _safe_float(getattr(pv, "nominal_power", 0.0), 0.0) if pv is not None else 0.0
+        if nominal_power > 0.0:
+            solar_energy = abs(_safe_float(_safe_series_value(getattr(building, "solar_generation", None), t), 0.0))
+            checked = _check_energy_limit(
+                errors,
+                name=f"{building_name}.pv",
+                energy_kwh=solar_energy,
+                limit_kw=nominal_power,
+                step_hours=step_hours,
+                checked=checked,
+                eps=eps,
+            )
+
+        for charger in getattr(building, "electric_vehicle_chargers", []) or []:
+            charger_id = str(getattr(charger, "charger_id", "<unknown_charger>"))
+            energy = _safe_series_value(getattr(charger, "electricity_consumption", None), t)
+            if energy is None:
+                continue
+            limit = getattr(charger, "max_charging_power", None) if energy >= 0.0 else getattr(charger, "max_discharging_power", None)
+            checked = _check_energy_limit(
+                errors,
+                name=f"{building_name}.{charger_id}",
+                energy_kwh=energy,
+                limit_kw=limit,
+                step_hours=step_hours,
+                checked=checked,
+                eps=eps,
+            )
+
+    for ev in getattr(env, "electric_vehicles", []) or []:
+        battery = getattr(ev, "battery", None)
+        if battery is None:
+            continue
+        energy = _safe_series_value(getattr(battery, "energy_balance", None), t)
+        if energy is None:
+            continue
+        checked = _check_energy_limit(
+            errors,
+            name=f"{getattr(ev, 'name', '<unknown_ev>')}.battery",
+            energy_kwh=energy,
+            limit_kw=getattr(battery, "nominal_power", None),
+            step_hours=step_hours,
+            checked=checked,
+            eps=eps,
+        )
+
+    return len(errors) == 0, errors, checked
+
+
+def _check_kpis_finite(env) -> Tuple[bool, List[str], int]:
+    """Evaluate KPI tables and check for invalid infinite values."""
+
+    errors: List[str] = []
+    checked = 0
+
+    for method_name in ("evaluate", "evaluate_v2"):
+        method = getattr(env, method_name, None)
+        if method is None:
+            continue
+        try:
+            df = method()
+        except Exception as exc:
+            errors.append(f"{method_name} failed: {exc}")
+            continue
+
+        if df is None or "value" not in getattr(df, "columns", []):
+            errors.append(f"{method_name} did not return a DataFrame with a value column.")
+            continue
+
+        values = np.asarray(df["value"], dtype=np.float64)
+        checked += int(values.size)
+        if values.size == 0:
+            errors.append(f"{method_name} returned no KPI rows.")
+            continue
+        finite_count = int(np.isfinite(values).sum())
+        if finite_count == 0:
+            errors.append(f"{method_name} returned no finite KPI values.")
+            continue
+
+        bad = np.where(np.isinf(values))[0]
+        if bad.size > 0:
+            first = int(bad[0])
+            errors.append(f"{method_name} contains infinite KPI value at row={first}: {values[first]}")
+
+    return len(errors) == 0, errors, checked
+
+
 def _new_checks_state() -> Dict[str, MutableMapping[str, Any]]:
     return {
         "finite_observations": {"calls": 0, "checked": 0, "failures": 0},
@@ -370,6 +647,9 @@ def _new_checks_state() -> Dict[str, MutableMapping[str, Any]]:
         "runtime_invariants": {"calls": 0, "failures": 0},
         "soc_bounds": {"calls": 0, "checked": 0, "failures": 0},
         "kw_kwh_step_consistency": {"calls": 0, "checked": 0, "failures": 0},
+        "net_balance": {"calls": 0, "checked": 0, "failures": 0},
+        "component_power_limits": {"calls": 0, "checked": 0, "failures": 0},
+        "kpi_evaluation": {"calls": 0, "checked": 0, "failures": 0},
     }
 
 
@@ -418,7 +698,7 @@ def _run_scenario(CityLearnEnv, scenario: Scenario) -> Dict[str, Any]:
                 checks["kw_kwh_step_consistency"]["failures"] += len(errors)
                 failures.extend(errors)
 
-            action, action_ok, action_message = _build_zero_action(env)
+            action, action_ok, action_message = _build_audit_action(env, steps_executed)
             checks["action_space_compatibility"]["calls"] += 1
             if not action_ok:
                 checks["action_space_compatibility"]["failures"] += 1
@@ -442,8 +722,29 @@ def _run_scenario(CityLearnEnv, scenario: Scenario) -> Dict[str, Any]:
                 checks["soc_bounds"]["failures"] += len(errors)
                 failures.extend(errors)
 
+            checks["net_balance"]["calls"] += 1
+            ok, errors, checked = _check_net_balance(env, settled_step)
+            checks["net_balance"]["checked"] += checked
+            if not ok:
+                checks["net_balance"]["failures"] += len(errors)
+                failures.extend(errors)
+
+            checks["component_power_limits"]["calls"] += 1
+            ok, errors, checked = _check_component_power_limits(env, settled_step)
+            checks["component_power_limits"]["checked"] += checked
+            if not ok:
+                checks["component_power_limits"]["failures"] += len(errors)
+                failures.extend(errors)
+
             if terminated or truncated:
                 break
+
+        checks["kpi_evaluation"]["calls"] += 1
+        ok, errors, checked = _check_kpis_finite(env)
+        checks["kpi_evaluation"]["checked"] += checked
+        if not ok:
+            checks["kpi_evaluation"]["failures"] += len(errors)
+            failures.extend(errors)
 
         final_topology_version = int(getattr(env, "topology_version", 0))
 
@@ -555,9 +856,19 @@ def main() -> int:
         },
         "status": "failed" if hard_failures > 0 else "passed",
         "scenario_matrix": {
-            "seconds_per_time_step": [60, 300, 900],
+            "seconds_per_time_step": [60, 300, 900, 3600],
             "covers_interface": ["flat", "entity"],
             "covers_topology_mode": ["static", "dynamic (entity only)"],
+            "covers_physical_checks": [
+                "finite_observations",
+                "action_space_compatibility",
+                "runtime_invariants",
+                "soc_bounds",
+                "kw_kwh_step_consistency",
+                "net_balance",
+                "component_power_limits",
+                "kpi_evaluation",
+            ],
         },
         "scenarios": results,
         "summary": {

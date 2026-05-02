@@ -18,6 +18,13 @@ def power_kw_to_energy_kwh(power_kw: float, seconds_per_time_step: float) -> flo
     return float(power_kw) * seconds_to_hours(seconds_per_time_step)
 
 
+def energy_kwh_to_power_kw(energy_kwh: float, seconds_per_time_step: float) -> float:
+    """Convert control-step energy in kWh to average power in kW."""
+
+    hours = max(seconds_to_hours(seconds_per_time_step), 1.0e-12)
+    return float(energy_kwh) / hours
+
+
 def normalized_power_action_to_energy_kwh(
     action: float,
     nominal_power_kw: float,

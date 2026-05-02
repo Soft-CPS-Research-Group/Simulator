@@ -11,6 +11,7 @@ except ModuleNotFoundError:  # pragma: no cover - optional dependency
     Pvwattsv8 = None
 from citylearn.base import Environment, EpisodeTracker
 from citylearn.data import DataSet, ZERO_DIVISION_PLACEHOLDER, EnergySimulation, WashingMachineSimulation
+from citylearn.internal.units import power_kw_to_energy_kwh, to_dataset_resolution_energy
 np.seterr(divide='ignore', invalid='ignore')
 
 LOGGER = logging.getLogger()
@@ -482,15 +483,47 @@ class PV(ElectricDevice):
     ----------
     nominal_power : float, default: 0.0
         PV array output power in [kW]. Must be >= 0.
+    generation_mode : str, default: 'per_kw'
+        How to interpret the `solar_generation` input passed to
+        :meth:`get_generation`. In ``'per_kw'`` mode, the input is inverter AC
+        output per kW of installed PV capacity in [W/kW]. In ``'absolute'``
+        mode, the input is already absolute PV generation in [kWh/step].
 
     Other Parameters
     ----------------
     **kwargs : Any
         Other keyword arguments used to initialize super class.
     """
-    
-    def __init__(self, nominal_power: float = None, **kwargs: Any):
+
+    def __init__(self, nominal_power: float = None, generation_mode: str = None, **kwargs: Any):
         super().__init__(nominal_power=nominal_power, **kwargs)
+        self.generation_mode = generation_mode
+
+    @property
+    def generation_mode(self) -> str:
+        """Mode used to interpret the PV generation input series."""
+
+        return self.__generation_mode
+
+    @generation_mode.setter
+    def generation_mode(self, generation_mode: str):
+        generation_mode = 'per_kw' if generation_mode is None else str(generation_mode).strip().lower()
+        generation_mode = generation_mode.replace('-', '_')
+        aliases = {
+            'profile': 'per_kw',
+            'per_kw': 'per_kw',
+            'w_per_kw': 'per_kw',
+            'absolute': 'absolute',
+            'absolute_kwh': 'absolute',
+            'kwh': 'absolute',
+            'kwh_step': 'absolute',
+            'energy': 'absolute',
+        }
+        assert generation_mode in aliases, (
+            "generation_mode must be one of {'per_kw', 'w_per_kw', 'profile', "
+            "'absolute', 'absolute_kwh', 'kwh', 'kwh_step', 'energy'}."
+        )
+        self.__generation_mode = aliases[generation_mode]
 
     def get_generation(self, inverter_ac_power_per_kw: Union[float, Iterable[float]]) -> Union[float, Iterable[float]]:
         r"""Get solar generation output.
@@ -498,7 +531,9 @@ class PV(ElectricDevice):
         Parameters
         ----------
         inverter_ac_power_perk_w : Union[float, Iterable[float]]
-            Inverter AC power output per kW of PV capacity in [W/kW].
+            Inverter AC power output per kW of PV capacity in [W/kW] when
+            ``generation_mode='per_kw'``. Absolute PV generation in [kWh/step]
+            when ``generation_mode='absolute'``.
 
         Returns
         -------
@@ -511,7 +546,16 @@ class PV(ElectricDevice):
             \textrm{generation} = \frac{\textrm{capacity} \times \textrm{inverter_ac_power_per_w}}{1000}
         """
 
+        if self.generation_mode == 'absolute':
+            return np.array(inverter_ac_power_per_kw)
+
         return self.nominal_power*np.array(inverter_ac_power_per_kw)/1000.0
+
+    def get_metadata(self) -> Mapping[str, Any]:
+        return {
+            **super().get_metadata(),
+            'generation_mode': self.generation_mode,
+        }
 
     def autosize(self, demand: float, epw_filepath: Union[Path, str], use_sample_target: bool = None, zero_net_energy_proportion: Union[float, Tuple[float, float]] = None, roof_area: float = None, safety_factor: Union[float, Tuple[float, float]] = None, sizing_data: pd.DataFrame = None) -> Tuple[float, np.ndarray]:
         r"""Autosize `nominal_power` and `inverter_ac_power_per_kw`.
@@ -886,13 +930,15 @@ class StorageTank(StorageDevice):
         If charging, soc = min(`soc_init` + energy*`efficiency`, `max_input_power`, `capacity`)
         If discharging, soc = max(0, `soc_init` + energy/`efficiency`, `max_output_power`)
         """
-        energy = energy * self.time_step_ratio
-
-        if energy >= 0:    
-            energy = energy if self.max_input_power is None else np.nanmin([energy, self.max_input_power])
+        if energy >= 0:
+            if self.max_input_power is not None:
+                max_input_energy = power_kw_to_energy_kwh(self.max_input_power, self.seconds_per_time_step)
+                energy = np.nanmin([energy, to_dataset_resolution_energy(max_input_energy, self.time_step_ratio)])
         else:
-            energy = energy if self.max_output_power is None else np.nanmax([-self.max_output_power, energy])
-        
+            if self.max_output_power is not None:
+                max_output_energy = power_kw_to_energy_kwh(self.max_output_power, self.seconds_per_time_step)
+                energy = np.nanmax([-to_dataset_resolution_energy(max_output_energy, self.time_step_ratio), energy])
+
         super().charge(energy)
 
 class Battery(StorageDevice, ElectricDevice):
