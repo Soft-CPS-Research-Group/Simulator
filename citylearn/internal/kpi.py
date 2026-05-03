@@ -1524,15 +1524,15 @@ class CityLearnKPIService:
                 local_total = district_rows[district_rows['cost_function'] == 'community_local_import_total_kwh']['value']
                 if len(local_total) > 0:
                     local_total_value = self._to_scalar(local_total.iloc[0], 0.0)
-                    district_import_control = self._to_scalar(
-                        records.get((
-                            'district',
-                            'District',
-                            v2('district', 'energy_grid', 'total', 'import', 'control', 'kwh'),
-                        ), {}).get('value'),
-                        0.0,
+                    grid_import_after_local = district_rows[
+                        district_rows['cost_function'] == 'community_grid_import_after_local_total_kwh'
+                    ]['value']
+                    grid_import_after_local_value = (
+                        self._to_scalar(grid_import_after_local.iloc[0], 0.0)
+                        if len(grid_import_after_local) > 0 else 0.0
                     )
-                    share = None if district_import_control <= float(ZERO_DIVISION_PLACEHOLDER) else local_total_value / district_import_control
+                    total_member_demand = local_total_value + grid_import_after_local_value
+                    share = None if total_member_demand <= float(ZERO_DIVISION_PLACEHOLDER) else local_total_value / total_member_demand
                     put(
                         'district',
                         'District',

@@ -129,6 +129,9 @@ class CityLearnTopologyService:
         for building in self._member_pool.values():
             self._bind_building_runtime_context(building)
             building.reset()
+            self._sync_dynamic_asset_metadata(building)
+            building.observation_space = building.estimate_observation_space(include_all=False, normalize=False)
+            building.action_space = building.estimate_action_space()
 
         for ev in self._ev_pool.values():
             self._bind_ev_runtime_context(ev)
@@ -650,8 +653,13 @@ class CityLearnTopologyService:
                 electrical_storage_phase_connection=getattr(building, '_electrical_storage_phase_connection', None),
             )
 
+        self._sync_dynamic_asset_metadata(building)
         building.observation_space = building.estimate_observation_space(include_all=False, normalize=False)
         building.action_space = building.estimate_action_space()
+
+    def _sync_dynamic_asset_metadata(self, building: Building):
+        self._sync_charger_metadata(building)
+        self._sync_electrical_storage_metadata(building)
 
     def _sync_charger_metadata(self, building: Building):
         if not hasattr(building, 'observation_metadata') or not hasattr(building, 'action_metadata'):
