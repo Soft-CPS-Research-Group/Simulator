@@ -48,6 +48,7 @@ class CityLearnLoadingService:
         self._dynamic_member_windows: Dict[str, Tuple[int, int]] = {}
         self._dynamic_charger_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
         self._dynamic_washing_machine_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
+        self._shared_timeseries_cache: Dict[Tuple[Any, ...], Any] = {}
 
     @staticmethod
     def _print_time_step_conversion_notice(
@@ -159,6 +160,7 @@ class CityLearnLoadingService:
         self._dynamic_member_windows = {}
         self._dynamic_charger_windows = {}
         self._dynamic_washing_machine_windows = {}
+        self._shared_timeseries_cache = {}
 
         if dynamic_mode:
             self._dynamic_member_windows = self._build_dynamic_member_windows(schema, self._dynamic_expected_rows)
@@ -363,7 +365,7 @@ class CityLearnLoadingService:
         member_window = self._dynamic_member_windows.get(building_name)
 
         energy_simulation_filepath = os.path.join(schema['root_directory'], building_schema['energy_simulation'])
-        energy_simulation = pd.read_csv(energy_simulation_filepath)
+        energy_simulation = self._read_simulation_dataframe(schema, energy_simulation_filepath)
         energy_simulation = self._align_dynamic_timeseries_dataframe(
             energy_simulation,
             expected_rows=expected_rows,
@@ -371,6 +373,7 @@ class CityLearnLoadingService:
             source_label=f'buildings.{building_name}.energy_simulation',
         )
         energy_simulation = EnergySimulation(**energy_simulation.to_dict('list'), seconds_per_time_step=seconds_per_time_step, noise_std=noise_std)
+        self._set_time_step_offset(energy_simulation, schema['simulation_start_time_step'])
         ratios = getattr(energy_simulation, 'time_step_ratios', None) or []
         building_kwargs['time_step_ratio'] = ratios[-1] if len(ratios) > 0 else 1.0
         self._print_time_step_conversion_notice(
@@ -380,36 +383,43 @@ class CityLearnLoadingService:
             seconds_per_time_step=seconds_per_time_step,
             time_step_ratio=building_kwargs['time_step_ratio'],
         )
-        weather = pd.read_csv(os.path.join(schema['root_directory'], building_schema['weather']))
-        weather = self._align_dynamic_timeseries_dataframe(
-            weather,
+        weather_filepath = os.path.join(schema['root_directory'], building_schema['weather'])
+        weather = self._load_shared_timeseries(
+            Weather,
+            schema=schema,
+            filepath=weather_filepath,
             expected_rows=expected_rows,
             window=member_window,
             source_label=f'buildings.{building_name}.weather',
+            noise_std=noise_std,
         )
-        weather = Weather(**weather.to_dict('list'), noise_std=noise_std)
 
         if building_schema.get('carbon_intensity', None) is not None:
-            carbon_intensity = pd.read_csv(os.path.join(schema['root_directory'], building_schema['carbon_intensity']))
-            carbon_intensity = self._align_dynamic_timeseries_dataframe(
-                carbon_intensity,
+            carbon_intensity_filepath = os.path.join(schema['root_directory'], building_schema['carbon_intensity'])
+            carbon_intensity = self._load_shared_timeseries(
+                CarbonIntensity,
+                schema=schema,
+                filepath=carbon_intensity_filepath,
                 expected_rows=expected_rows,
                 window=member_window,
                 source_label=f'buildings.{building_name}.carbon_intensity',
+                noise_std=noise_std,
             )
-            carbon_intensity = CarbonIntensity(**carbon_intensity.to_dict('list'), noise_std=noise_std)
         else:
             carbon_intensity = CarbonIntensity(np.zeros(energy_simulation.hour.shape[0], dtype='float32'), noise_std=noise_std)
+            self._set_time_step_offset(carbon_intensity, schema['simulation_start_time_step'])
 
         if building_schema.get('pricing', None) is not None:
-            pricing = pd.read_csv(os.path.join(schema['root_directory'], building_schema['pricing']))
-            pricing = self._align_dynamic_timeseries_dataframe(
-                pricing,
+            pricing_filepath = os.path.join(schema['root_directory'], building_schema['pricing'])
+            pricing = self._load_shared_timeseries(
+                Pricing,
+                schema=schema,
+                filepath=pricing_filepath,
                 expected_rows=expected_rows,
                 window=member_window,
                 source_label=f'buildings.{building_name}.pricing',
+                noise_std=noise_std,
             )
-            pricing = Pricing(**pricing.to_dict('list'), noise_std=noise_std)
         else:
             pricing = Pricing(
                 np.zeros(energy_simulation.hour.shape[0], dtype='float32'),
@@ -418,6 +428,7 @@ class CityLearnLoadingService:
                 np.zeros(energy_simulation.hour.shape[0], dtype='float32'),
                 noise_std=noise_std,
             )
+            self._set_time_step_offset(pricing, schema['simulation_start_time_step'])
 
         building_type = 'citylearn.citylearn.Building' if building_schema.get('type', None) is None else building_schema['type']
         building_type_module = '.'.join(building_type.split('.')[0:-1])
@@ -481,9 +492,8 @@ class CityLearnLoadingService:
             for charger_name, charger_config in building_schema['chargers'].items():
                 noise_std = charger_config.get('noise_std', 0.0)
 
-                charger_simulation_file = pd.read_csv(
-                    os.path.join(schema['root_directory'], charger_config['charger_simulation'])
-                ).iloc[schema['simulation_start_time_step']:schema['simulation_end_time_step'] + 1].copy()
+                charger_simulation_filepath = os.path.join(schema['root_directory'], charger_config['charger_simulation'])
+                charger_simulation_file = self._read_simulation_dataframe(schema, charger_simulation_filepath)
                 charger_window = self._dynamic_charger_windows.get((building_name, charger_name))
                 charger_simulation_file = self._align_dynamic_timeseries_dataframe(
                     charger_simulation_file,
@@ -493,6 +503,7 @@ class CityLearnLoadingService:
                 )
 
                 charger_simulation = ChargerSimulation(*charger_simulation_file.values.T, noise_std=noise_std)
+                self._set_time_step_offset(charger_simulation, schema['simulation_start_time_step'])
                 if 'electric_vehicle_current_soc' in charger_simulation_file.columns:
                     current_soc_raw = pd.to_numeric(charger_simulation_file['electric_vehicle_current_soc'], errors='coerce').to_numpy(dtype='float32')
                     current_soc = np.full(current_soc_raw.shape[0], -0.1, dtype='float32')
@@ -833,9 +844,7 @@ class CityLearnLoadingService:
 
         file_path = os.path.join(schema['root_directory'], washing_machine_schema['washing_machine_energy_simulation'])
 
-        washing_machine_simulation = pd.read_csv(file_path).iloc[
-            schema['simulation_start_time_step']:schema['simulation_end_time_step'] + 1
-        ].copy()
+        washing_machine_simulation = self._read_simulation_dataframe(schema, file_path)
         washing_window = self._dynamic_washing_machine_windows.get((building_name, washing_machine_name))
         expected_rows = int(getattr(self, '_dynamic_expected_rows', episode_tracker.simulation_time_steps))
         washing_machine_simulation = self._align_dynamic_timeseries_dataframe(
@@ -846,6 +855,7 @@ class CityLearnLoadingService:
         )
 
         washing_machine_simulation = WashingMachineSimulation(*washing_machine_simulation.values.T)
+        self._set_time_step_offset(washing_machine_simulation, schema['simulation_start_time_step'])
 
         washing_machine = WashingMachine(
             washing_machine_simulation=washing_machine_simulation,
@@ -856,6 +866,148 @@ class CityLearnLoadingService:
         )
 
         return washing_machine
+
+    @staticmethod
+    def _set_time_step_offset(time_series_data: Any, offset: int):
+        """Record the original file index represented by row 0 after windowed loading."""
+
+        setattr(time_series_data, 'time_step_offset', int(offset or 0))
+
+    @staticmethod
+    def _file_format(filepath: Union[str, os.PathLike]) -> str:
+        suffix = os.path.splitext(str(filepath))[1].lower()
+        if suffix in {'.parquet', '.pq', '.parq'}:
+            return 'parquet'
+
+        return 'csv'
+
+    def _read_simulation_dataframe(self, schema: Mapping[str, Any], filepath: Union[str, os.PathLike]) -> pd.DataFrame:
+        """Read only the configured simulation window from a CSV or Parquet time series file."""
+
+        return self._read_timeseries_dataframe(
+            filepath,
+            start_time_step=int(schema['simulation_start_time_step']),
+            end_time_step=int(schema['simulation_end_time_step']),
+        )
+
+    def _read_timeseries_dataframe(
+        self,
+        filepath: Union[str, os.PathLike],
+        *,
+        start_time_step: Optional[int] = None,
+        end_time_step: Optional[int] = None,
+    ) -> pd.DataFrame:
+        if start_time_step is not None and end_time_step is not None and end_time_step < start_time_step:
+            raise ValueError(
+                f'end_time_step ({end_time_step}) must be >= start_time_step ({start_time_step}) '
+                f'for source={filepath}.'
+            )
+
+        if self._file_format(filepath) == 'parquet':
+            return self._read_parquet_timeseries_dataframe(
+                filepath,
+                start_time_step=start_time_step,
+                end_time_step=end_time_step,
+            )
+
+        nrows = None if end_time_step is None else int(end_time_step) - int(start_time_step or 0) + 1
+
+        if start_time_step is None or int(start_time_step) <= 0:
+            return pd.read_csv(filepath, nrows=nrows)
+
+        return pd.read_csv(filepath, skiprows=range(1, int(start_time_step) + 1), nrows=nrows)
+
+    @staticmethod
+    def _read_parquet_timeseries_dataframe(
+        filepath: Union[str, os.PathLike],
+        *,
+        start_time_step: Optional[int] = None,
+        end_time_step: Optional[int] = None,
+    ) -> pd.DataFrame:
+        try:
+            import pyarrow as pa
+            import pyarrow.parquet as pq
+        except ImportError as exc:
+            raise ImportError(
+                "Reading Parquet CityLearn datasets requires the optional 'pyarrow' dependency. "
+                "Install pyarrow or use CSV files in the schema."
+            ) from exc
+
+        start = 0 if start_time_step is None else max(0, int(start_time_step))
+        end = None if end_time_step is None else int(end_time_step)
+        parquet_file = pq.ParquetFile(filepath)
+
+        if start == 0 and end is None:
+            return parquet_file.read().to_pandas()
+
+        batches = []
+        row_cursor = 0
+
+        for batch in parquet_file.iter_batches(batch_size=65_536):
+            batch_rows = batch.num_rows
+            batch_start = row_cursor
+            batch_end = row_cursor + batch_rows
+
+            if batch_end <= start:
+                row_cursor = batch_end
+                continue
+
+            if end is not None and batch_start > end:
+                break
+
+            local_start = max(0, start - batch_start)
+            local_end = batch_rows if end is None else min(batch_rows, end + 1 - batch_start)
+
+            if local_end > local_start:
+                batches.append(batch.slice(local_start, local_end - local_start))
+
+            row_cursor = batch_end
+
+        if len(batches) == 0:
+            schema = parquet_file.schema_arrow
+            arrays = [pa.array([], type=field.type) for field in schema]
+            return pa.Table.from_arrays(arrays, names=schema.names).to_pandas()
+
+        return pa.Table.from_batches(batches).to_pandas()
+
+    def _load_shared_timeseries(
+        self,
+        constructor: Any,
+        *,
+        schema: Mapping[str, Any],
+        filepath: Union[str, os.PathLike],
+        expected_rows: int,
+        window: Optional[Tuple[int, int]],
+        source_label: str,
+        noise_std: float,
+    ) -> Any:
+        cacheable = float(noise_std or 0.0) == 0.0
+        cache_key = (
+            constructor.__name__,
+            os.path.abspath(str(filepath)),
+            int(schema['simulation_start_time_step']),
+            int(schema['simulation_end_time_step']),
+            int(expected_rows),
+            tuple(window) if window is not None else None,
+        )
+
+        if cacheable and cache_key in self._shared_timeseries_cache:
+            return self._shared_timeseries_cache[cache_key]
+
+        dataframe = self._read_simulation_dataframe(schema, filepath)
+        dataframe = self._align_dynamic_timeseries_dataframe(
+            dataframe,
+            expected_rows=expected_rows,
+            window=window,
+            source_label=source_label,
+        )
+        time_series = constructor(**dataframe.to_dict('list'), noise_std=noise_std)
+        self._set_time_step_offset(time_series, schema['simulation_start_time_step'])
+
+        if cacheable:
+            self._shared_timeseries_cache[cache_key] = time_series
+
+        return time_series
 
     @staticmethod
     def _collect_topology_events(schema: Mapping[str, Any]) -> List[Mapping[str, Any]]:

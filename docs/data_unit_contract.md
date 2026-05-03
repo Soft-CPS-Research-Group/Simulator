@@ -86,6 +86,26 @@ Regras práticas:
 - Flags de qualidade como `generated`: manter no pipeline de ingestão/conversão.
   Elas não são, por si só, campos físicos nativos do CityLearn.
 
+## Formatos e carregamento
+
+Os ficheiros de séries temporais referenciados no schema podem estar em CSV
+(`.csv`) ou Parquet (`.parquet`, `.pq`, `.parq`). O contrato de colunas e unidades
+é o mesmo nos dois formatos; só muda o formato físico em disco.
+
+O loader lê apenas a janela declarada por `simulation_start_time_step` e
+`simulation_end_time_step`, mantendo internamente o offset para que episódios
+rolling ou não-zero continuem alinhados com os índices originais do dataset.
+
+Para datasets grandes, especialmente `15s` full-year, Parquet tende a ser melhor
+que CSV porque preserva tipos, comprime melhor e evita parsing de texto. O suporte
+a Parquet requer a dependência opcional `pyarrow`; sem ela, usar CSV. Instalar
+com `pip install .[parquet]` quando for necessário ler schemas com ficheiros
+Parquet.
+
+Quando vários buildings apontam para o mesmo ficheiro de `weather`, `pricing` ou
+`carbon_intensity`, e `noise_std = 0`, o simulador partilha a mesma série em
+memória. `energy_simulation` continua separado por building.
+
 Exemplo para dados a cada 15 segundos:
 
 ```text

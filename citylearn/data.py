@@ -1,3 +1,4 @@
+import ast
 import logging
 import os
 from pathlib import Path
@@ -515,8 +516,18 @@ class TimeSeriesData:
             variable = self.__dict__[f'_{name}']
         except KeyError:
             raise AttributeError(f'_{name}')
+        explicit_start = start_time_step is not None
+        explicit_end = end_time_step is not None
         start_time_step = self.start_time_step if start_time_step is None else start_time_step
         end_time_step = self.end_time_step if end_time_step is None else end_time_step
+        offset = int(self.__dict__.get('_time_step_offset', 0) or 0)
+
+        if offset != 0 and explicit_start:
+            start_time_step -= offset
+
+        if offset != 0 and explicit_end:
+            end_time_step -= offset
+
         return self._slice_variable(variable, start_time_step, end_time_step)
         
     def __setattr__(self, name: str, value: Any):
@@ -922,22 +933,22 @@ class ChargerSimulation(TimeSeriesData):
         self.electric_vehicle_charger_state = np.array([
             int(str(s)) if str(s).isdigit() else np.nan
             for s in electric_vehicle_charger_state
-        ], dtype=float)
+        ], dtype='float32')
 
         self.electric_vehicle_id = np.array(electric_vehicle_id, dtype=object)
 
 
-        departure_time_arr = np.array(electric_vehicle_departure_time, dtype=float)
+        departure_time_arr = np.array(electric_vehicle_departure_time, dtype='float32')
         self.electric_vehicle_departure_time = np.where(
             np.isnan(departure_time_arr), default_time_value, departure_time_arr
-        ).astype(int)
+        ).astype('int32')
 
-        arrival_time_arr = np.array(electric_vehicle_estimated_arrival_time, dtype=float)
+        arrival_time_arr = np.array(electric_vehicle_estimated_arrival_time, dtype='float32')
         self.electric_vehicle_estimated_arrival_time = np.where(
             np.isnan(arrival_time_arr), default_time_value, arrival_time_arr
-        ).astype(int)
+        ).astype('int32')
 
-        required_soc_arr = np.array(electric_vehicle_required_soc_departure, dtype=float)
+        required_soc_arr = np.array(electric_vehicle_required_soc_departure, dtype='float32')
         required_soc_arr = np.where(np.isnan(required_soc_arr), default_soc_value, required_soc_arr)
         self.electric_vehicle_required_soc_departure = np.where(
             required_soc_arr != default_soc_value,
@@ -946,9 +957,9 @@ class ChargerSimulation(TimeSeriesData):
                 0, 1
             ),
             required_soc_arr
-        )
+        ).astype('float32')
 
-        estimated_soc_arrival_arr = np.array(electric_vehicle_estimated_soc_arrival, dtype=float)
+        estimated_soc_arrival_arr = np.array(electric_vehicle_estimated_soc_arrival, dtype='float32')
         estimated_soc_arrival_arr = np.where(np.isnan(estimated_soc_arrival_arr), default_soc_value, estimated_soc_arrival_arr)
         self.electric_vehicle_estimated_soc_arrival = np.where(
             estimated_soc_arrival_arr != default_soc_value,
@@ -957,7 +968,7 @@ class ChargerSimulation(TimeSeriesData):
                 0, 1
             ),
             estimated_soc_arrival_arr
-        )
+        ).astype('float32')
 
 class WashingMachineSimulation(TimeSeriesData):
     """Washing Machine Simulation data class.
@@ -991,22 +1002,64 @@ class WashingMachineSimulation(TimeSeriesData):
 
         default_time_value = -1
 
-        self.day_type = np.array(day_type, dtype=int)
-        self.hour = np.array(hour, dtype=int)
+        self.day_type = np.array(day_type, dtype='int32')
+        self.hour = np.array(hour, dtype='int32')
 
         start_time_step_arr = np.array(wm_start_time_step, dtype=float)
         end_time_step_arr = np.array(wm_end_time_step, dtype=float)
         
 
-        self.wm_start_time_step = np.where(np.isnan(start_time_step_arr), default_time_value, start_time_step_arr).astype(int)
-        self.wm_end_time_step = np.where(np.isnan(end_time_step_arr), default_time_value, end_time_step_arr).astype(int)
+        self.wm_start_time_step = np.where(np.isnan(start_time_step_arr), default_time_value, start_time_step_arr).astype('int32')
+        self.wm_end_time_step = np.where(np.isnan(end_time_step_arr), default_time_value, end_time_step_arr).astype('int32')
 
-        # Parse load_profile strings like '[10,20,30]' into lists of floats
+        # Parse load_profile strings like '[10,20,30]' into lists of floats.
+        empty_profile = np.array([], dtype=float)
+        profile_cache = {}
+
         def parse_profile(profile_str):
+            if profile_str is None:
+                return empty_profile
+
+            if isinstance(profile_str, (list, tuple, np.ndarray)):
+                try:
+                    return np.array(profile_str, dtype=float).flatten()
+                except (TypeError, ValueError):
+                    return empty_profile
+
+            text = str(profile_str).strip()
+            if text == '' or text.lower() in {'nan', 'none'} or text == '-1':
+                return empty_profile
+
+            cached = profile_cache.get(text)
+            if cached is not None:
+                return cached
+
             try:
-                return np.array(eval(profile_str), dtype=float)
-            except:
-                return np.array([], dtype=float)
-            
+                parsed = ast.literal_eval(text)
+            except (SyntaxError, ValueError):
+                return empty_profile
+
+            if np.isscalar(parsed):
+                try:
+                    value = float(parsed)
+                except (TypeError, ValueError):
+                    return empty_profile
+
+                if not np.isfinite(value) or value < 0.0:
+                    return empty_profile
+
+                values = np.array([value], dtype=float)
+                profile_cache[text] = values
+                return values
+
+            try:
+                values = np.array(parsed, dtype=float).flatten()
+            except (TypeError, ValueError):
+                return empty_profile
+
+            values = values[np.isfinite(values)]
+            values = values[values >= 0.0]
+            profile_cache[text] = values
+            return values
 
         self.load_profile = np.array([parse_profile(lp) for lp in load_profile], dtype=object)

@@ -294,6 +294,58 @@ def test_subhour_ev_charger_reward_observation_uses_physical_hours():
         env.close()
 
 
+def test_ev_charger_schedule_aligns_with_nonzero_episode_start():
+    env = CityLearnEnv(
+        'tests/data/minute_ev_demo/schema.json',
+        central_agent=True,
+        episode_time_steps=4,
+        rolling_episode_split=False,
+        random_episode_split=False,
+        random_seed=0,
+    )
+
+    try:
+        env.reset(seed=0)
+        env.reset(seed=0)
+
+        assert env.episode_tracker.episode_start_time_step == 4
+        charger = env.buildings[0].electric_vehicle_chargers[0]
+        sim = charger.charger_simulation
+
+        assert sim.electric_vehicle_charger_state[0] == pytest.approx(3.0)
+        assert sim.electric_vehicle_departure_time[0] == -1
+        assert charger.connected_electric_vehicle is None
+    finally:
+        env.close()
+
+
+def test_ev_charger_schedule_alignment_respects_simulation_start_offset():
+    env = CityLearnEnv(
+        'tests/data/minute_ev_demo/schema.json',
+        central_agent=True,
+        simulation_start_time_step=2,
+        simulation_end_time_step=7,
+        episode_time_steps=3,
+        rolling_episode_split=False,
+        random_episode_split=False,
+        random_seed=0,
+    )
+
+    try:
+        env.reset(seed=0)
+        charger = env.buildings[0].electric_vehicle_chargers[0]
+        assert env.episode_tracker.episode_start_time_step == 2
+        assert charger.charger_simulation.electric_vehicle_charger_state[0] == pytest.approx(1.0)
+        assert charger.charger_simulation.electric_vehicle_departure_time[0] == 2
+
+        env.reset(seed=0)
+        assert env.episode_tracker.episode_start_time_step == 5
+        assert charger.charger_simulation.electric_vehicle_charger_state[0] == pytest.approx(3.0)
+        assert charger.charger_simulation.electric_vehicle_departure_time[0] == -1
+    finally:
+        env.close()
+
+
 def test_env_prints_explicit_notice_when_dataset_resolution_is_converted(capsys):
     schema = 'data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json'
     env = CityLearnEnv(

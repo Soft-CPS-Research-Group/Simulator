@@ -1387,8 +1387,12 @@ class WashingMachine(ElectricDevice):
 
         start_time_step = self.washing_machine_simulation.wm_start_time_step[self.time_step]
         end__time_step = self.washing_machine_simulation.wm_end_time_step[self.time_step]
+        episode_start_time_step = getattr(self.episode_tracker, 'episode_start_time_step', 0)
+        if not isinstance(episode_start_time_step, (int, float, np.integer, np.floating)):
+            episode_start_time_step = 0
+        current_global_time_step = int(episode_start_time_step) + int(self.time_step)
 
-        if not self.initiated and action_value > 0 and start_time_step != -1 and end__time_step != -1 and start_time_step <= self.time_step <= end__time_step:
+        if not self.initiated and action_value > 0 and start_time_step != -1 and end__time_step != -1 and start_time_step <= current_global_time_step <= end__time_step:
             load_profile = self.washing_machine_simulation.load_profile[self.time_step]
             if len(load_profile) == 0:
                 print("No load profile available at this step.")

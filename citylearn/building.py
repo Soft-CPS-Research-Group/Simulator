@@ -2442,14 +2442,22 @@ class Building(Environment):
 
         start_time_step = self.episode_tracker.episode_start_time_step
         end_time_step = self.episode_tracker.episode_end_time_step
-        self.energy_simulation.start_time_step = start_time_step
-        self.weather.start_time_step = start_time_step
-        self.pricing.start_time_step = start_time_step
-        self.carbon_intensity.start_time_step = start_time_step
-        self.energy_simulation.end_time_step = end_time_step
-        self.weather.end_time_step = end_time_step
-        self.pricing.end_time_step = end_time_step
-        self.carbon_intensity.end_time_step = end_time_step
+
+        def set_data_window(data, default_start, default_end):
+            offset = int(getattr(data, 'time_step_offset', 0) or 0)
+            data.start_time_step = default_start - offset
+            data.end_time_step = default_end - offset
+
+        set_data_window(self.energy_simulation, start_time_step, end_time_step)
+        set_data_window(self.weather, start_time_step, end_time_step)
+        set_data_window(self.pricing, start_time_step, end_time_step)
+        set_data_window(self.carbon_intensity, start_time_step, end_time_step)
+
+        for charger in self.electric_vehicle_chargers or []:
+            set_data_window(charger.charger_simulation, start_time_step, end_time_step)
+
+        for washing_machine in self.washing_machines or []:
+            set_data_window(washing_machine.washing_machine_simulation, start_time_step, end_time_step)
 
     def update_variables(self):
         """Update cooling, heating, dhw and net electricity consumption as well as net electricity consumption cost and carbon emissions."""
