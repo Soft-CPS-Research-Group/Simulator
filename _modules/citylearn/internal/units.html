@@ -111,6 +111,16 @@
 
 
 
+<div class="viewcode-block" id="energy_kwh_to_power_kw">
+<a class="viewcode-back" href="../../../api/citylearn.internal.units.html#citylearn.internal.units.energy_kwh_to_power_kw">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">energy_kwh_to_power_kw</span><span class="p">(</span><span class="n">energy_kwh</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">seconds_per_time_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert control-step energy in kWh to average power in kW.&quot;&quot;&quot;</span>
+
+    <span class="n">hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">seconds_to_hours</span><span class="p">(</span><span class="n">seconds_per_time_step</span><span class="p">),</span> <span class="mf">1.0e-12</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">energy_kwh</span><span class="p">)</span> <span class="o">/</span> <span class="n">hours</span></div>
+
+
+
 <div class="viewcode-block" id="normalized_power_action_to_energy_kwh">
 <a class="viewcode-back" href="../../../api/citylearn.internal.units.html#citylearn.internal.units.normalized_power_action_to_energy_kwh">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">normalized_power_action_to_energy_kwh</span><span class="p">(</span>

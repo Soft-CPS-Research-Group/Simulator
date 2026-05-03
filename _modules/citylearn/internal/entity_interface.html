@@ -171,8 +171,13 @@
         <span class="s2">&quot;commanded_power_kw&quot;</span><span class="p">,</span>
         <span class="s2">&quot;applied_power_kw&quot;</span><span class="p">,</span>
         <span class="s2">&quot;applied_energy_kwh_step&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hours_until_departure&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;time_until_departure_ratio&quot;</span><span class="p">,</span>
         <span class="s2">&quot;energy_to_required_soc_kwh&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;required_average_power_kw&quot;</span><span class="p">,</span>
         <span class="s2">&quot;avg_power_to_departure_kw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;charging_slack_kw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;charging_priority_ratio&quot;</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="n">LEGACY_EV_FEATURES</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;soc&quot;</span><span class="p">,</span>
@@ -391,25 +396,40 @@
             <span class="p">)</span>
             <span class="n">required_soc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_index</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_required_soc_departure</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">)</span>
             <span class="n">departure_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_index</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_departure_time</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">max_charging_power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_scalar</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">max_charging_power</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">max_discharging_power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_scalar</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">max_discharging_power</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">connected</span><span class="p">:</span>
                 <span class="n">connected_ev</span> <span class="o">=</span> <span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span>
                 <span class="n">current_soc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_scalar</span><span class="p">(</span><span class="n">connected_ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">endogenous_t</span><span class="p">],</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">)</span>
                 <span class="n">battery_capacity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_scalar</span><span class="p">(</span><span class="n">connected_ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">capacity</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">hours_until_departure</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">departure_steps</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">step_hours</span>
                 <span class="k">if</span> <span class="n">core_bundle_enabled</span><span class="p">:</span>
                     <span class="n">energy_to_required_soc</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">required_soc</span> <span class="o">-</span> <span class="n">current_soc</span><span class="p">)</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">battery_capacity</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
-                    <span class="n">avg_power_to_departure</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">energy_to_required_soc</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">departure_steps</span> <span class="o">*</span> <span class="n">step_hours</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">departure_steps</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
-                    <span class="p">)</span>
+                    <span class="n">required_average_power</span> <span class="o">=</span> <span class="n">energy_to_required_soc</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">hours_until_departure</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">)</span> <span class="k">if</span> <span class="n">energy_to_required_soc</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="mf">0.0</span>
+                    <span class="n">avg_power_to_departure</span> <span class="o">=</span> <span class="n">required_average_power</span>
+                    <span class="n">charging_slack</span> <span class="o">=</span> <span class="n">max_charging_power</span> <span class="o">-</span> <span class="n">required_average_power</span>
+                    <span class="k">if</span> <span class="n">energy_to_required_soc</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                        <span class="n">charging_priority</span> <span class="o">=</span> <span class="mf">0.0</span>
+                    <span class="k">elif</span> <span class="n">hours_until_departure</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">max_charging_power</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                        <span class="n">charging_priority</span> <span class="o">=</span> <span class="mf">1.0</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">charging_priority</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">required_average_power</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_charging_power</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">energy_to_required_soc</span> <span class="o">=</span> <span class="mf">0.0</span>
                     <span class="n">avg_power_to_departure</span> <span class="o">=</span> <span class="mf">0.0</span>
+                    <span class="n">required_average_power</span> <span class="o">=</span> <span class="mf">0.0</span>
+                    <span class="n">charging_slack</span> <span class="o">=</span> <span class="mf">0.0</span>
+                    <span class="n">charging_priority</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">current_soc</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
                 <span class="n">battery_capacity</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+                <span class="n">hours_until_departure</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
                 <span class="n">energy_to_required_soc</span> <span class="o">=</span> <span class="mf">0.0</span>
                 <span class="n">avg_power_to_departure</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="n">required_average_power</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="n">charging_slack</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="n">charging_priority</span> <span class="o">=</span> <span class="mf">0.0</span>
 
             <span class="n">values</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;connected_state&quot;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">connected</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -421,8 +441,8 @@
                 <span class="s2">&quot;incoming_ev_estimated_soc_arrival&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_index</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_estimated_soc_arrival</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">)</span> <span class="k">if</span> <span class="n">incoming</span> <span class="k">else</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span>
                 <span class="s2">&quot;incoming_ev_estimated_arrival_time_step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_index</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_estimated_arrival_time</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">incoming</span> <span class="k">else</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
                 <span class="s2">&quot;last_charged_kwh&quot;</span><span class="p">:</span> <span class="n">commanded_energy</span><span class="p">,</span>
-                <span class="s2">&quot;max_charging_power_kw&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_scalar</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">max_charging_power</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
-                <span class="s2">&quot;max_discharging_power_kw&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_scalar</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">max_discharging_power</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                <span class="s2">&quot;max_charging_power_kw&quot;</span><span class="p">:</span> <span class="n">max_charging_power</span><span class="p">,</span>
+                <span class="s2">&quot;max_discharging_power_kw&quot;</span><span class="p">:</span> <span class="n">max_discharging_power</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="n">core_bundle_enabled</span><span class="p">:</span>
                 <span class="n">values</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
@@ -430,8 +450,13 @@
                         <span class="s2">&quot;commanded_power_kw&quot;</span><span class="p">:</span> <span class="n">commanded_energy</span> <span class="o">/</span> <span class="n">step_hours</span><span class="p">,</span>
                         <span class="s2">&quot;applied_power_kw&quot;</span><span class="p">:</span> <span class="n">applied_energy</span> <span class="o">/</span> <span class="n">step_hours</span><span class="p">,</span>
                         <span class="s2">&quot;applied_energy_kwh_step&quot;</span><span class="p">:</span> <span class="n">applied_energy</span><span class="p">,</span>
+                        <span class="s2">&quot;hours_until_departure&quot;</span><span class="p">:</span> <span class="n">hours_until_departure</span><span class="p">,</span>
+                        <span class="s2">&quot;time_until_departure_ratio&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">hours_until_departure</span> <span class="o">/</span> <span class="mf">24.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">connected</span> <span class="k">else</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
                         <span class="s2">&quot;energy_to_required_soc_kwh&quot;</span><span class="p">:</span> <span class="n">energy_to_required_soc</span><span class="p">,</span>
+                        <span class="s2">&quot;required_average_power_kw&quot;</span><span class="p">:</span> <span class="n">required_average_power</span><span class="p">,</span>
                         <span class="s2">&quot;avg_power_to_departure_kw&quot;</span><span class="p">:</span> <span class="n">avg_power_to_departure</span><span class="p">,</span>
+                        <span class="s2">&quot;charging_slack_kw&quot;</span><span class="p">:</span> <span class="n">charging_slack</span><span class="p">,</span>
+                        <span class="s2">&quot;charging_priority_ratio&quot;</span><span class="p">:</span> <span class="n">charging_priority</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
             <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_charger_features</span><span class="p">):</span>
@@ -539,22 +564,22 @@
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;tables&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;district&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_district_obs</span><span class="p">,</span>
-                <span class="s2">&quot;building&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_obs</span><span class="p">,</span>
-                <span class="s2">&quot;charger&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_obs</span><span class="p">,</span>
-                <span class="s2">&quot;ev&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_obs</span><span class="p">,</span>
-                <span class="s2">&quot;storage&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage_obs</span><span class="p">,</span>
-                <span class="s2">&quot;pv&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pv_obs</span><span class="p">,</span>
+                <span class="s2">&quot;district&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_district_obs</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;building&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_obs</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;charger&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_obs</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;ev&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_obs</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;storage&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage_obs</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;pv&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pv_obs</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
             <span class="p">},</span>
             <span class="s2">&quot;edges&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;district_to_building&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_district_to_building</span><span class="p">,</span>
-                <span class="s2">&quot;building_to_charger&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_to_charger</span><span class="p">,</span>
-                <span class="s2">&quot;building_to_storage&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_to_storage</span><span class="p">,</span>
-                <span class="s2">&quot;building_to_pv&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_to_pv</span><span class="p">,</span>
-                <span class="s2">&quot;charger_to_ev_connected&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_to_ev_connected</span><span class="p">,</span>
-                <span class="s2">&quot;charger_to_ev_connected_mask&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_to_ev_connected_mask</span><span class="p">,</span>
-                <span class="s2">&quot;charger_to_ev_incoming&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_to_ev_incoming</span><span class="p">,</span>
-                <span class="s2">&quot;charger_to_ev_incoming_mask&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_to_ev_incoming_mask</span><span class="p">,</span>
+                <span class="s2">&quot;district_to_building&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_district_to_building</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;building_to_charger&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_to_charger</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;building_to_storage&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_to_storage</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;building_to_pv&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_to_pv</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;charger_to_ev_connected&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_to_ev_connected</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;charger_to_ev_connected_mask&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_to_ev_connected_mask</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;charger_to_ev_incoming&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_to_ev_incoming</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s2">&quot;charger_to_ev_incoming_mask&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_to_ev_incoming_mask</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
             <span class="p">},</span>
             <span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;time_step&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span>
@@ -853,6 +878,10 @@
         <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_power_kw&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;headroom_kw&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;kw&quot;</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_kw&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;kw&quot;</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_hours&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;hours_until_departure&quot;</span><span class="p">}:</span>
+            <span class="k">return</span> <span class="s2">&quot;h&quot;</span>
         <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_kwh_step&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="s2">&quot;kwh_step&quot;</span>
         <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_capacity_kwh&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_kwh&quot;</span><span class="p">):</span>
@@ -863,7 +892,7 @@
             <span class="k">return</span> <span class="s2">&quot;time_step&quot;</span>
         <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_count&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="s2">&quot;count&quot;</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;hour&quot;</span><span class="p">,</span> <span class="s2">&quot;day_type&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;minutes&quot;</span><span class="p">}:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;hour&quot;</span><span class="p">,</span> <span class="s2">&quot;day_type&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;minutes&quot;</span><span class="p">,</span> <span class="s2">&quot;seconds&quot;</span><span class="p">}:</span>
             <span class="k">return</span> <span class="s2">&quot;index&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;consumption&quot;</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">or</span> <span class="s2">&quot;generation&quot;</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">or</span> <span class="s2">&quot;demand&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;kwh&quot;</span>
@@ -1594,8 +1623,13 @@
             <span class="s2">&quot;commanded_power_kw&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">max_abs_power_kw</span><span class="p">,</span> <span class="n">max_abs_power_kw</span><span class="p">),</span>
             <span class="s2">&quot;applied_power_kw&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">max_abs_power_kw</span><span class="p">,</span> <span class="n">max_abs_power_kw</span><span class="p">),</span>
             <span class="s2">&quot;applied_energy_kwh_step&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">max_energy_step</span><span class="p">,</span> <span class="n">max_energy_step</span><span class="p">),</span>
+            <span class="s2">&quot;hours_until_departure&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">max_departure</span> <span class="o">*</span> <span class="n">step_hours</span><span class="p">),</span>
+            <span class="s2">&quot;time_until_departure_ratio&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
             <span class="s2">&quot;energy_to_required_soc_kwh&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_capacity</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)),</span>
+            <span class="s2">&quot;required_average_power_kw&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_theoretical_avg_power</span><span class="p">),</span>
             <span class="s2">&quot;avg_power_to_departure_kw&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_theoretical_avg_power</span><span class="p">),</span>
+            <span class="s2">&quot;charging_slack_kw&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">max_theoretical_avg_power</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_charge_kw</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)),</span>
+            <span class="s2">&quot;charging_priority_ratio&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
         <span class="p">}</span>
 
         <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_charger_features</span><span class="p">):</span>

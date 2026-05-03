@@ -677,13 +677,17 @@ cooling_cop = (<cite>t_target_cooling</cite> + 273.15)*`efficiency`/(outdoor_dry
 
 <dl class="py class">
 <dt class="sig sig-object py" id="citylearn.energy_model.PV">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">citylearn.energy_model.</span></span><span class="sig-name descname"><span class="pre">PV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nominal_power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#PV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.PV" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">citylearn.energy_model.</span></span><span class="sig-name descname"><span class="pre">PV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nominal_power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generation_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#PV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.PV" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#citylearn.energy_model.ElectricDevice" title="citylearn.energy_model.ElectricDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">ElectricDevice</span></code></a></p>
 <p>Base photovoltaic array class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>nominal_power</strong> (<em>float</em><em>, </em><em>default: 0.0</em>) – PV array output power in [kW]. Must be &gt;= 0.</p></li>
+<li><p><strong>generation_mode</strong> (<em>str</em><em>, </em><em>default: 'per_kw'</em>) – How to interpret the <cite>solar_generation</cite> input passed to
+<a class="reference internal" href="#citylearn.energy_model.PV.get_generation" title="citylearn.energy_model.PV.get_generation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_generation()</span></code></a>. In <code class="docutils literal notranslate"><span class="pre">'per_kw'</span></code> mode, the input is inverter AC
+output per kW of installed PV capacity in [W/kW]. In <code class="docutils literal notranslate"><span class="pre">'absolute'</span></code>
+mode, the input is already absolute PV generation in [kWh/step].</p></li>
 <li><p><strong>**kwargs</strong> (<em>Any</em>) – Other keyword arguments used to initialize super class.</p></li>
 </ul>
 </dd>
@@ -724,13 +728,21 @@ a building’s PV. If the dataframe is not provided it is read in using
 <p>Data source: <a class="reference external" href="https://github.com/intelligent-environments-lab/CityLearn/tree/master/citylearn/data/misc/lbl-tracking_the_sun_res-pv.csv">https://github.com/intelligent-environments-lab/CityLearn/tree/master/citylearn/data/misc/lbl-tracking_the_sun_res-pv.csv</a>.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="citylearn.energy_model.PV.generation_mode">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generation_mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#citylearn.energy_model.PV.generation_mode" title="Link to this definition"></a></dt>
+<dd><p>Mode used to interpret the PV generation input series.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.PV.get_generation">
 <span class="sig-name descname"><span class="pre">get_generation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inverter_ac_power_per_kw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#PV.get_generation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.PV.get_generation" title="Link to this definition"></a></dt>
 <dd><p>Get solar generation output.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>inverter_ac_power_perk_w</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Iterable</em><em>[</em><em>float</em><em>]</em><em>]</em>) – Inverter AC power output per kW of PV capacity in [W/kW].</p>
+<dd class="field-odd"><p><strong>inverter_ac_power_perk_w</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Iterable</em><em>[</em><em>float</em><em>]</em><em>]</em>) – Inverter AC power output per kW of PV capacity in [W/kW] when
+<code class="docutils literal notranslate"><span class="pre">generation_mode='per_kw'</span></code>. Absolute PV generation in [kWh/step]
+when <code class="docutils literal notranslate"><span class="pre">generation_mode='absolute'</span></code>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>generation</strong> – Solar generation as single value or time series depending on input parameter types.</p>
@@ -742,6 +754,12 @@ a building’s PV. If the dataframe is not provided it is read in using
 <p class="rubric">Notes</p>
 <div class="math notranslate nohighlight">
 \[\textrm{generation} = \frac{\textrm{capacity} \times \textrm{inverter_ac_power_per_w}}{1000}\]</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.energy_model.PV.get_metadata">
+<span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#PV.get_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.PV.get_metadata" title="Link to this definition"></a></dt>
+<dd><p>Returns general static information.</p>
 </dd></dl>
 
 </dd></dl>

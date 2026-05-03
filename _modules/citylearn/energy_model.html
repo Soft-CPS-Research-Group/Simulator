@@ -98,6 +98,7 @@
     <span class="n">Pvwattsv8</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">EpisodeTracker</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSet</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">,</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="n">WashingMachineSimulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">power_kw_to_energy_kwh</span><span class="p">,</span> <span class="n">to_dataset_resolution_energy</span>
 <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
@@ -622,15 +623,47 @@
 <span class="sd">    ----------</span>
 <span class="sd">    nominal_power : float, default: 0.0</span>
 <span class="sd">        PV array output power in [kW]. Must be &gt;= 0.</span>
+<span class="sd">    generation_mode : str, default: &#39;per_kw&#39;</span>
+<span class="sd">        How to interpret the `solar_generation` input passed to</span>
+<span class="sd">        :meth:`get_generation`. In ``&#39;per_kw&#39;`` mode, the input is inverter AC</span>
+<span class="sd">        output per kW of installed PV capacity in [W/kW]. In ``&#39;absolute&#39;``</span>
+<span class="sd">        mode, the input is already absolute PV generation in [kWh/step].</span>
 
 <span class="sd">    Other Parameters</span>
 <span class="sd">    ----------------</span>
 <span class="sd">    **kwargs : Any</span>
 <span class="sd">        Other keyword arguments used to initialize super class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nominal_power</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nominal_power</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">generation_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nominal_power</span><span class="o">=</span><span class="n">nominal_power</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generation_mode</span> <span class="o">=</span> <span class="n">generation_mode</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generation_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mode used to interpret the PV generation input series.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generation_mode</span>
+
+    <span class="nd">@generation_mode</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generation_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generation_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">generation_mode</span> <span class="o">=</span> <span class="s1">&#39;per_kw&#39;</span> <span class="k">if</span> <span class="n">generation_mode</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">generation_mode</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">generation_mode</span> <span class="o">=</span> <span class="n">generation_mode</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+        <span class="n">aliases</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;profile&#39;</span><span class="p">:</span> <span class="s1">&#39;per_kw&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;per_kw&#39;</span><span class="p">:</span> <span class="s1">&#39;per_kw&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;w_per_kw&#39;</span><span class="p">:</span> <span class="s1">&#39;per_kw&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;absolute&#39;</span><span class="p">:</span> <span class="s1">&#39;absolute&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;absolute_kwh&#39;</span><span class="p">:</span> <span class="s1">&#39;absolute&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;kwh&#39;</span><span class="p">:</span> <span class="s1">&#39;absolute&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;kwh_step&#39;</span><span class="p">:</span> <span class="s1">&#39;absolute&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="s1">&#39;absolute&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">assert</span> <span class="n">generation_mode</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;generation_mode must be one of {&#39;per_kw&#39;, &#39;w_per_kw&#39;, &#39;profile&#39;, &quot;</span>
+            <span class="s2">&quot;&#39;absolute&#39;, &#39;absolute_kwh&#39;, &#39;kwh&#39;, &#39;kwh_step&#39;, &#39;energy&#39;}.&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__generation_mode</span> <span class="o">=</span> <span class="n">aliases</span><span class="p">[</span><span class="n">generation_mode</span><span class="p">]</span>
 
 <div class="viewcode-block" id="PV.get_generation">
 <a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.PV.get_generation">[docs]</a>
@@ -640,7 +673,9 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        inverter_ac_power_perk_w : Union[float, Iterable[float]]</span>
-<span class="sd">            Inverter AC power output per kW of PV capacity in [W/kW].</span>
+<span class="sd">            Inverter AC power output per kW of PV capacity in [W/kW] when</span>
+<span class="sd">            ``generation_mode=&#39;per_kw&#39;``. Absolute PV generation in [kWh/step]</span>
+<span class="sd">            when ``generation_mode=&#39;absolute&#39;``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -653,7 +688,19 @@
 <span class="sd">            \textrm{generation} = \frac{\textrm{capacity} \times \textrm{inverter_ac_power_per_w}}{1000}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generation_mode</span> <span class="o">==</span> <span class="s1">&#39;absolute&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inverter_ac_power_per_kw</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nominal_power</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inverter_ac_power_per_kw</span><span class="p">)</span><span class="o">/</span><span class="mf">1000.0</span></div>
+
+
+<div class="viewcode-block" id="PV.get_metadata">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.PV.get_metadata">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="o">**</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(),</span>
+            <span class="s1">&#39;generation_mode&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">generation_mode</span><span class="p">,</span>
+        <span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="PV.autosize">
@@ -1058,13 +1105,15 @@
 <span class="sd">        If charging, soc = min(`soc_init` + energy*`efficiency`, `max_input_power`, `capacity`)</span>
 <span class="sd">        If discharging, soc = max(0, `soc_init` + energy/`efficiency`, `max_output_power`)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">energy</span> <span class="o">=</span> <span class="n">energy</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span>
-
-        <span class="k">if</span> <span class="n">energy</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>    
-            <span class="n">energy</span> <span class="o">=</span> <span class="n">energy</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_input_power</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">([</span><span class="n">energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_input_power</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">energy</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_input_power</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">max_input_energy</span> <span class="o">=</span> <span class="n">power_kw_to_energy_kwh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_input_power</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span>
+                <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">([</span><span class="n">energy</span><span class="p">,</span> <span class="n">to_dataset_resolution_energy</span><span class="p">(</span><span class="n">max_input_energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span><span class="p">)])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">energy</span> <span class="o">=</span> <span class="n">energy</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_output_power</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">([</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">max_output_power</span><span class="p">,</span> <span class="n">energy</span><span class="p">])</span>
-        
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_output_power</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">max_output_energy</span> <span class="o">=</span> <span class="n">power_kw_to_energy_kwh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_output_power</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span>
+                <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">([</span><span class="o">-</span><span class="n">to_dataset_resolution_energy</span><span class="p">(</span><span class="n">max_output_energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span><span class="p">),</span> <span class="n">energy</span><span class="p">])</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">charge</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span></div>
 </div>
 

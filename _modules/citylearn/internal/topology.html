@@ -226,6 +226,9 @@
         <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_member_pool</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bind_building_runtime_context</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>
             <span class="n">building</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sync_dynamic_asset_metadata</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>
+            <span class="n">building</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">building</span><span class="o">.</span><span class="n">estimate_observation_space</span><span class="p">(</span><span class="n">include_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">building</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">building</span><span class="o">.</span><span class="n">estimate_action_space</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_pool</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bind_ev_runtime_context</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
@@ -766,8 +769,13 @@
                 <span class="n">electrical_storage_phase_connection</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;_electrical_storage_phase_connection&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sync_dynamic_asset_metadata</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>
         <span class="n">building</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">building</span><span class="o">.</span><span class="n">estimate_observation_space</span><span class="p">(</span><span class="n">include_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">building</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">building</span><span class="o">.</span><span class="n">estimate_action_space</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_sync_dynamic_asset_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">:</span> <span class="n">Building</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sync_charger_metadata</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sync_electrical_storage_metadata</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_sync_charger_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">:</span> <span class="n">Building</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;observation_metadata&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;action_metadata&#39;</span><span class="p">):</span>
