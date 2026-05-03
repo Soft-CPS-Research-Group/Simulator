@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model &mdash; CityLearn 0.3.1 documentation</title>
+  <title>citylearn.energy_model &mdash; CityLearn 0.3.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/documentation_options.js?v=71d9d8e6"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1604,8 +1604,12 @@
 
         <span class="n">start_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machine_simulation</span><span class="o">.</span><span class="n">wm_start_time_step</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span>
         <span class="n">end__time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machine_simulation</span><span class="o">.</span><span class="n">wm_end_time_step</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span>
+        <span class="n">episode_start_time_step</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="p">,</span> <span class="s1">&#39;episode_start_time_step&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">episode_start_time_step</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">)):</span>
+            <span class="n">episode_start_time_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">current_global_time_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">episode_start_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">initiated</span> <span class="ow">and</span> <span class="n">action_value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">start_time_step</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">end__time_step</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">start_time_step</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&lt;=</span> <span class="n">end__time_step</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">initiated</span> <span class="ow">and</span> <span class="n">action_value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">start_time_step</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">end__time_step</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">start_time_step</span> <span class="o">&lt;=</span> <span class="n">current_global_time_step</span> <span class="o">&lt;=</span> <span class="n">end__time_step</span><span class="p">:</span>
             <span class="n">load_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machine_simulation</span><span class="o">.</span><span class="n">load_profile</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">load_profile</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No load profile available at this step.&quot;</span><span class="p">)</span>

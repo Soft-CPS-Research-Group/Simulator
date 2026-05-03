@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.loading &mdash; CityLearn 0.3.1 documentation</title>
+  <title>citylearn.internal.loading &mdash; CityLearn 0.3.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../../_static/documentation_options.js?v=71d9d8e6"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -140,6 +140,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_charger_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_washing_machine_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_print_time_step_conversion_notice</span><span class="p">(</span>
@@ -253,6 +254,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_charger_windows</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_washing_machine_windows</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">dynamic_mode</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dynamic_member_windows</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span><span class="p">)</span>
@@ -460,7 +462,7 @@
         <span class="n">member_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">building_name</span><span class="p">)</span>
 
         <span class="n">energy_simulation_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">building_schema</span><span class="p">[</span><span class="s1">&#39;energy_simulation&#39;</span><span class="p">])</span>
-        <span class="n">energy_simulation</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">energy_simulation_filepath</span><span class="p">)</span>
+        <span class="n">energy_simulation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_simulation_dataframe</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">energy_simulation_filepath</span><span class="p">)</span>
         <span class="n">energy_simulation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_dynamic_timeseries_dataframe</span><span class="p">(</span>
             <span class="n">energy_simulation</span><span class="p">,</span>
             <span class="n">expected_rows</span><span class="o">=</span><span class="n">expected_rows</span><span class="p">,</span>
@@ -468,6 +470,7 @@
             <span class="n">source_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;buildings.</span><span class="si">{</span><span class="n">building_name</span><span class="si">}</span><span class="s1">.energy_simulation&#39;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">energy_simulation</span> <span class="o">=</span> <span class="n">EnergySimulation</span><span class="p">(</span><span class="o">**</span><span class="n">energy_simulation</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">),</span> <span class="n">seconds_per_time_step</span><span class="o">=</span><span class="n">seconds_per_time_step</span><span class="p">,</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">energy_simulation</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
         <span class="n">ratios</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">energy_simulation</span><span class="p">,</span> <span class="s1">&#39;time_step_ratios&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="n">building_kwargs</span><span class="p">[</span><span class="s1">&#39;time_step_ratio&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ratios</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ratios</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_print_time_step_conversion_notice</span><span class="p">(</span>
@@ -477,36 +480,43 @@
             <span class="n">seconds_per_time_step</span><span class="o">=</span><span class="n">seconds_per_time_step</span><span class="p">,</span>
             <span class="n">time_step_ratio</span><span class="o">=</span><span class="n">building_kwargs</span><span class="p">[</span><span class="s1">&#39;time_step_ratio&#39;</span><span class="p">],</span>
         <span class="p">)</span>
-        <span class="n">weather</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">building_schema</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">]))</span>
-        <span class="n">weather</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_dynamic_timeseries_dataframe</span><span class="p">(</span>
-            <span class="n">weather</span><span class="p">,</span>
+        <span class="n">weather_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">building_schema</span><span class="p">[</span><span class="s1">&#39;weather&#39;</span><span class="p">])</span>
+        <span class="n">weather</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_shared_timeseries</span><span class="p">(</span>
+            <span class="n">Weather</span><span class="p">,</span>
+            <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
+            <span class="n">filepath</span><span class="o">=</span><span class="n">weather_filepath</span><span class="p">,</span>
             <span class="n">expected_rows</span><span class="o">=</span><span class="n">expected_rows</span><span class="p">,</span>
             <span class="n">window</span><span class="o">=</span><span class="n">member_window</span><span class="p">,</span>
             <span class="n">source_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;buildings.</span><span class="si">{</span><span class="n">building_name</span><span class="si">}</span><span class="s1">.weather&#39;</span><span class="p">,</span>
+            <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">weather</span> <span class="o">=</span> <span class="n">Weather</span><span class="p">(</span><span class="o">**</span><span class="n">weather</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">),</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">building_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;carbon_intensity&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">carbon_intensity</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">building_schema</span><span class="p">[</span><span class="s1">&#39;carbon_intensity&#39;</span><span class="p">]))</span>
-            <span class="n">carbon_intensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_dynamic_timeseries_dataframe</span><span class="p">(</span>
-                <span class="n">carbon_intensity</span><span class="p">,</span>
+            <span class="n">carbon_intensity_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">building_schema</span><span class="p">[</span><span class="s1">&#39;carbon_intensity&#39;</span><span class="p">])</span>
+            <span class="n">carbon_intensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_shared_timeseries</span><span class="p">(</span>
+                <span class="n">CarbonIntensity</span><span class="p">,</span>
+                <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
+                <span class="n">filepath</span><span class="o">=</span><span class="n">carbon_intensity_filepath</span><span class="p">,</span>
                 <span class="n">expected_rows</span><span class="o">=</span><span class="n">expected_rows</span><span class="p">,</span>
                 <span class="n">window</span><span class="o">=</span><span class="n">member_window</span><span class="p">,</span>
                 <span class="n">source_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;buildings.</span><span class="si">{</span><span class="n">building_name</span><span class="si">}</span><span class="s1">.carbon_intensity&#39;</span><span class="p">,</span>
+                <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">carbon_intensity</span> <span class="o">=</span> <span class="n">CarbonIntensity</span><span class="p">(</span><span class="o">**</span><span class="n">carbon_intensity</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">),</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">carbon_intensity</span> <span class="o">=</span> <span class="n">CarbonIntensity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">energy_simulation</span><span class="o">.</span><span class="n">hour</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">),</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">carbon_intensity</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">building_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pricing&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">pricing</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">building_schema</span><span class="p">[</span><span class="s1">&#39;pricing&#39;</span><span class="p">]))</span>
-            <span class="n">pricing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_dynamic_timeseries_dataframe</span><span class="p">(</span>
-                <span class="n">pricing</span><span class="p">,</span>
+            <span class="n">pricing_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">building_schema</span><span class="p">[</span><span class="s1">&#39;pricing&#39;</span><span class="p">])</span>
+            <span class="n">pricing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_shared_timeseries</span><span class="p">(</span>
+                <span class="n">Pricing</span><span class="p">,</span>
+                <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
+                <span class="n">filepath</span><span class="o">=</span><span class="n">pricing_filepath</span><span class="p">,</span>
                 <span class="n">expected_rows</span><span class="o">=</span><span class="n">expected_rows</span><span class="p">,</span>
                 <span class="n">window</span><span class="o">=</span><span class="n">member_window</span><span class="p">,</span>
                 <span class="n">source_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;buildings.</span><span class="si">{</span><span class="n">building_name</span><span class="si">}</span><span class="s1">.pricing&#39;</span><span class="p">,</span>
+                <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">pricing</span> <span class="o">=</span> <span class="n">Pricing</span><span class="p">(</span><span class="o">**</span><span class="n">pricing</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">),</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pricing</span> <span class="o">=</span> <span class="n">Pricing</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">energy_simulation</span><span class="o">.</span><span class="n">hour</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">),</span>
@@ -515,6 +525,7 @@
                 <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">energy_simulation</span><span class="o">.</span><span class="n">hour</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">),</span>
                 <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">pricing</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
 
         <span class="n">building_type</span> <span class="o">=</span> <span class="s1">&#39;citylearn.citylearn.Building&#39;</span> <span class="k">if</span> <span class="n">building_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">building_schema</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
         <span class="n">building_type_module</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">building_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -578,9 +589,8 @@
             <span class="k">for</span> <span class="n">charger_name</span><span class="p">,</span> <span class="n">charger_config</span> <span class="ow">in</span> <span class="n">building_schema</span><span class="p">[</span><span class="s1">&#39;chargers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">noise_std</span> <span class="o">=</span> <span class="n">charger_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;noise_std&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 
-                <span class="n">charger_simulation_file</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">charger_config</span><span class="p">[</span><span class="s1">&#39;charger_simulation&#39;</span><span class="p">])</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">]:</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_end_time_step&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">charger_simulation_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">charger_config</span><span class="p">[</span><span class="s1">&#39;charger_simulation&#39;</span><span class="p">])</span>
+                <span class="n">charger_simulation_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_simulation_dataframe</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">charger_simulation_filepath</span><span class="p">)</span>
                 <span class="n">charger_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_charger_windows</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">building_name</span><span class="p">,</span> <span class="n">charger_name</span><span class="p">))</span>
                 <span class="n">charger_simulation_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_dynamic_timeseries_dataframe</span><span class="p">(</span>
                     <span class="n">charger_simulation_file</span><span class="p">,</span>
@@ -590,6 +600,7 @@
                 <span class="p">)</span>
 
                 <span class="n">charger_simulation</span> <span class="o">=</span> <span class="n">ChargerSimulation</span><span class="p">(</span><span class="o">*</span><span class="n">charger_simulation_file</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">charger_simulation</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
                 <span class="k">if</span> <span class="s1">&#39;electric_vehicle_current_soc&#39;</span> <span class="ow">in</span> <span class="n">charger_simulation_file</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                     <span class="n">current_soc_raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">charger_simulation_file</span><span class="p">[</span><span class="s1">&#39;electric_vehicle_current_soc&#39;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
                     <span class="n">current_soc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">current_soc_raw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
@@ -939,9 +950,7 @@
 
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">washing_machine_schema</span><span class="p">[</span><span class="s1">&#39;washing_machine_energy_simulation&#39;</span><span class="p">])</span>
 
-        <span class="n">washing_machine_simulation</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span>
-            <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">]:</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_end_time_step&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">washing_machine_simulation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_simulation_dataframe</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
         <span class="n">washing_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_washing_machine_windows</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">building_name</span><span class="p">,</span> <span class="n">washing_machine_name</span><span class="p">))</span>
         <span class="n">expected_rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_dynamic_expected_rows&#39;</span><span class="p">,</span> <span class="n">episode_tracker</span><span class="o">.</span><span class="n">simulation_time_steps</span><span class="p">))</span>
         <span class="n">washing_machine_simulation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_dynamic_timeseries_dataframe</span><span class="p">(</span>
@@ -952,6 +961,7 @@
         <span class="p">)</span>
 
         <span class="n">washing_machine_simulation</span> <span class="o">=</span> <span class="n">WashingMachineSimulation</span><span class="p">(</span><span class="o">*</span><span class="n">washing_machine_simulation</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">washing_machine_simulation</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
 
         <span class="n">washing_machine</span> <span class="o">=</span> <span class="n">WashingMachine</span><span class="p">(</span>
             <span class="n">washing_machine_simulation</span><span class="o">=</span><span class="n">washing_machine_simulation</span><span class="p">,</span>
@@ -963,6 +973,148 @@
 
         <span class="k">return</span> <span class="n">washing_machine</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_time_step_offset</span><span class="p">(</span><span class="n">time_series_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Record the original file index represented by row 0 after windowed loading.&quot;&quot;&quot;</span>
+
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">time_series_data</span><span class="p">,</span> <span class="s1">&#39;time_step_offset&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">offset</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_file_format</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filepath</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;.parquet&#39;</span><span class="p">,</span> <span class="s1">&#39;.pq&#39;</span><span class="p">,</span> <span class="s1">&#39;.parq&#39;</span><span class="p">}:</span>
+            <span class="k">return</span> <span class="s1">&#39;parquet&#39;</span>
+
+        <span class="k">return</span> <span class="s1">&#39;csv&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_simulation_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only the configured simulation window from a CSV or Parquet time series file.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_timeseries_dataframe</span><span class="p">(</span>
+            <span class="n">filepath</span><span class="p">,</span>
+            <span class="n">start_time_step</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">]),</span>
+            <span class="n">end_time_step</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_end_time_step&#39;</span><span class="p">]),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_timeseries_dataframe</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">start_time_step</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_time_step</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">start_time_step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end_time_step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end_time_step</span> <span class="o">&lt;</span> <span class="n">start_time_step</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;end_time_step (</span><span class="si">{</span><span class="n">end_time_step</span><span class="si">}</span><span class="s1">) must be &gt;= start_time_step (</span><span class="si">{</span><span class="n">start_time_step</span><span class="si">}</span><span class="s1">) &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;for source=</span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_format</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_parquet_timeseries_dataframe</span><span class="p">(</span>
+                <span class="n">filepath</span><span class="p">,</span>
+                <span class="n">start_time_step</span><span class="o">=</span><span class="n">start_time_step</span><span class="p">,</span>
+                <span class="n">end_time_step</span><span class="o">=</span><span class="n">end_time_step</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">nrows</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">end_time_step</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time_step</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time_step</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">start_time_step</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time_step</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="n">nrows</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">nrows</span><span class="o">=</span><span class="n">nrows</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_parquet_timeseries_dataframe</span><span class="p">(</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">start_time_step</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_time_step</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow.parquet</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pq</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;Reading Parquet CityLearn datasets requires the optional &#39;pyarrow&#39; dependency. &quot;</span>
+                <span class="s2">&quot;Install pyarrow or use CSV files in the schema.&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">start_time_step</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time_step</span><span class="p">))</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">end_time_step</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time_step</span><span class="p">)</span>
+        <span class="n">parquet_file</span> <span class="o">=</span> <span class="n">pq</span><span class="o">.</span><span class="n">ParquetFile</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">start</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parquet_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+        <span class="n">batches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">row_cursor</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">parquet_file</span><span class="o">.</span><span class="n">iter_batches</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">65_536</span><span class="p">):</span>
+            <span class="n">batch_rows</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">num_rows</span>
+            <span class="n">batch_start</span> <span class="o">=</span> <span class="n">row_cursor</span>
+            <span class="n">batch_end</span> <span class="o">=</span> <span class="n">row_cursor</span> <span class="o">+</span> <span class="n">batch_rows</span>
+
+            <span class="k">if</span> <span class="n">batch_end</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">:</span>
+                <span class="n">row_cursor</span> <span class="o">=</span> <span class="n">batch_end</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">batch_start</span> <span class="o">&gt;</span> <span class="n">end</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">local_start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span> <span class="o">-</span> <span class="n">batch_start</span><span class="p">)</span>
+            <span class="n">local_end</span> <span class="o">=</span> <span class="n">batch_rows</span> <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">batch_rows</span><span class="p">,</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">batch_start</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">local_end</span> <span class="o">&gt;</span> <span class="n">local_start</span><span class="p">:</span>
+                <span class="n">batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">local_start</span><span class="p">,</span> <span class="n">local_end</span> <span class="o">-</span> <span class="n">local_start</span><span class="p">))</span>
+
+            <span class="n">row_cursor</span> <span class="o">=</span> <span class="n">batch_end</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="n">parquet_file</span><span class="o">.</span><span class="n">schema_arrow</span>
+            <span class="n">arrays</span> <span class="o">=</span> <span class="p">[</span><span class="n">pa</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="nb">type</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_batches</span><span class="p">(</span><span class="n">batches</span><span class="p">)</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_shared_timeseries</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">constructor</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">schema</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+        <span class="n">expected_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">window</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+        <span class="n">source_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">noise_std</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="n">cacheable</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">noise_std</span> <span class="ow">or</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.0</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">constructor</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filepath</span><span class="p">)),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">]),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_end_time_step&#39;</span><span class="p">]),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">expected_rows</span><span class="p">),</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">window</span><span class="p">)</span> <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cacheable</span> <span class="ow">and</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span>
+
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_simulation_dataframe</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_dynamic_timeseries_dataframe</span><span class="p">(</span>
+            <span class="n">dataframe</span><span class="p">,</span>
+            <span class="n">expected_rows</span><span class="o">=</span><span class="n">expected_rows</span><span class="p">,</span>
+            <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
+            <span class="n">source_label</span><span class="o">=</span><span class="n">source_label</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">time_series</span> <span class="o">=</span> <span class="n">constructor</span><span class="p">(</span><span class="o">**</span><span class="n">dataframe</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">),</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">time_series</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">cacheable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_series</span>
+
+        <span class="k">return</span> <span class="n">time_series</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_collect_topology_events</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
