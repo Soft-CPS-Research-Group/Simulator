@@ -189,3 +189,7 @@ runtime.csv
 *-runtime.csv
 outputs/
 tmp_entity_obs*.json
+
+# Generated full-year 15-second datasets are large artifacts, not source data.
+data/datasets/citylearn_three_phase_dynamic_assets_only_demo_15s/
+data/datasets/citylearn_three_phase_electrical_service_demo_15s/
