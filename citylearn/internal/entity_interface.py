@@ -73,8 +73,13 @@ class CityLearnEntityInterfaceService:
         "commanded_power_kw",
         "applied_power_kw",
         "applied_energy_kwh_step",
+        "hours_until_departure",
+        "time_until_departure_ratio",
         "energy_to_required_soc_kwh",
+        "required_average_power_kw",
         "avg_power_to_departure_kw",
+        "charging_slack_kw",
+        "charging_priority_ratio",
     ]
     LEGACY_EV_FEATURES = [
         "soc",
@@ -285,25 +290,40 @@ class CityLearnEntityInterfaceService:
             )
             required_soc = self._safe_index(sim.electric_vehicle_required_soc_departure, t, -0.1)
             departure_steps = self._safe_index(sim.electric_vehicle_departure_time, t, -1.0)
+            max_charging_power = self._safe_scalar(charger.max_charging_power, 0.0)
+            max_discharging_power = self._safe_scalar(charger.max_discharging_power, 0.0)
 
             if connected:
                 connected_ev = charger.connected_electric_vehicle
                 current_soc = self._safe_scalar(connected_ev.battery.soc[endogenous_t], -0.1)
                 battery_capacity = self._safe_scalar(connected_ev.battery.capacity, -1.0)
+                hours_until_departure = max(departure_steps, 0.0) * step_hours
                 if core_bundle_enabled:
                     energy_to_required_soc = max((required_soc - current_soc) * max(battery_capacity, 0.0), 0.0)
-                    avg_power_to_departure = (
-                        energy_to_required_soc / max(departure_steps * step_hours, 1.0e-6)
-                        if departure_steps > 0 else 0.0
-                    )
+                    required_average_power = energy_to_required_soc / max(hours_until_departure, 1.0e-6) if energy_to_required_soc > 0.0 else 0.0
+                    avg_power_to_departure = required_average_power
+                    charging_slack = max_charging_power - required_average_power
+                    if energy_to_required_soc <= 0.0:
+                        charging_priority = 0.0
+                    elif hours_until_departure <= 0.0 or max_charging_power <= 0.0:
+                        charging_priority = 1.0
+                    else:
+                        charging_priority = np.clip(required_average_power / max(max_charging_power, 1.0e-6), 0.0, 1.0)
                 else:
                     energy_to_required_soc = 0.0
                     avg_power_to_departure = 0.0
+                    required_average_power = 0.0
+                    charging_slack = 0.0
+                    charging_priority = 0.0
             else:
                 current_soc = -0.1
                 battery_capacity = -1.0
+                hours_until_departure = -1.0
                 energy_to_required_soc = 0.0
                 avg_power_to_departure = 0.0
+                required_average_power = 0.0
+                charging_slack = 0.0
+                charging_priority = 0.0
 
             values = {
                 "connected_state": 1.0 if connected else 0.0,
@@ -315,8 +335,8 @@ class CityLearnEntityInterfaceService:
                 "incoming_ev_estimated_soc_arrival": self._safe_index(sim.electric_vehicle_estimated_soc_arrival, t, -0.1) if incoming else -0.1,
                 "incoming_ev_estimated_arrival_time_step": self._safe_index(sim.electric_vehicle_estimated_arrival_time, t, -1.0) if incoming else -1.0,
                 "last_charged_kwh": commanded_energy,
-                "max_charging_power_kw": self._safe_scalar(charger.max_charging_power, 0.0),
-                "max_discharging_power_kw": self._safe_scalar(charger.max_discharging_power, 0.0),
+                "max_charging_power_kw": max_charging_power,
+                "max_discharging_power_kw": max_discharging_power,
             }
             if core_bundle_enabled:
                 values.update(
@@ -324,8 +344,13 @@ class CityLearnEntityInterfaceService:
                         "commanded_power_kw": commanded_energy / step_hours,
                         "applied_power_kw": applied_energy / step_hours,
                         "applied_energy_kwh_step": applied_energy,
+                        "hours_until_departure": hours_until_departure,
+                        "time_until_departure_ratio": np.clip(hours_until_departure / 24.0, 0.0, 1.0) if connected else -1.0,
                         "energy_to_required_soc_kwh": energy_to_required_soc,
+                        "required_average_power_kw": required_average_power,
                         "avg_power_to_departure_kw": avg_power_to_departure,
+                        "charging_slack_kw": charging_slack,
+                        "charging_priority_ratio": charging_priority,
                     }
                 )
             for col, feature_name in enumerate(self._charger_features):
@@ -743,6 +768,10 @@ class CityLearnEntityInterfaceService:
         key = str(name).lower()
         if key.endswith("_power_kw") or "headroom_kw" in key:
             return "kw"
+        if key.endswith("_kw"):
+            return "kw"
+        if key.endswith("_hours") or key in {"hours_until_departure"}:
+            return "h"
         if key.endswith("_kwh_step"):
             return "kwh_step"
         if key.endswith("_capacity_kwh") or key.endswith("_kwh"):
@@ -753,7 +782,7 @@ class CityLearnEntityInterfaceService:
             return "time_step"
         if key.endswith("_count"):
             return "count"
-        if key in {"hour", "day_type", "month", "minutes"}:
+        if key in {"hour", "day_type", "month", "minutes", "seconds"}:
             return "index"
         if "consumption" in key or "generation" in key or "demand" in key:
             return "kwh"
@@ -1484,8 +1513,13 @@ class CityLearnEntityInterfaceService:
             "commanded_power_kw": (-max_abs_power_kw, max_abs_power_kw),
             "applied_power_kw": (-max_abs_power_kw, max_abs_power_kw),
             "applied_energy_kwh_step": (-max_energy_step, max_energy_step),
+            "hours_until_departure": (-1.0, max_departure * step_hours),
+            "time_until_departure_ratio": (-1.0, 1.0),
             "energy_to_required_soc_kwh": (0.0, max(max_capacity, 1.0)),
+            "required_average_power_kw": (0.0, max_theoretical_avg_power),
             "avg_power_to_departure_kw": (0.0, max_theoretical_avg_power),
+            "charging_slack_kw": (-max_theoretical_avg_power, max(max_charge_kw, 1.0)),
+            "charging_priority_ratio": (0.0, 1.0),
         }
 
         for j, feature in enumerate(self._charger_features):

@@ -1193,7 +1193,7 @@ class CityLearnEnv(Environment, Env):
         """
 
         return [
-            'month', 'day_type', 'hour', 'minutes', 'daylight_savings_status',
+            'month', 'day_type', 'hour', 'minutes', 'seconds', 'daylight_savings_status',
             'outdoor_dry_bulb_temperature', 'outdoor_dry_bulb_temperature_predicted_1',
             'outdoor_dry_bulb_temperature_predicted_2', 'outdoor_dry_bulb_temperature_predicted_3',
             'outdoor_relative_humidity', 'outdoor_relative_humidity_predicted_1',

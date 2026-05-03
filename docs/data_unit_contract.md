@@ -75,6 +75,14 @@ Regras práticas:
   manter em `kW`.
 - Timestamps de EVs: converter tempos absolutos para os passos inteiros usados na
   simulação de carregadores.
+- CSVs de carregadores EV: `electric_vehicle_departure_time` e
+  `electric_vehicle_estimated_arrival_time` são contagens de passos até ao evento,
+  não horas absolutas do dia. Ao converter de 1h para 15s, um valor `12` passa para
+  `2880` no primeiro subpasso e decrece a cada passo de 15s.
+- Datasets abaixo de 1 minuto: incluir uma coluna opcional `seconds` no CSV de
+  `energy_simulation` quando possível. Sem essa coluna, `hour` + `minutes` não
+  conseguem inferir a cadência sub-minuto, e o simulador assume que a cadência do
+  dataset é a declarada em `seconds_per_time_step`.
 - Flags de qualidade como `generated`: manter no pipeline de ingestão/conversão.
   Elas não são, por si só, campos físicos nativos do CityLearn.
 
@@ -89,6 +97,18 @@ load_kwh_step = 55.0 * 15 / 3600 = 0.2291667
 Este valor pequeno está correto fisicamente. Se a interface do agente precisar de
 valores em `kW` ou normalizados, essa conversão deve acontecer na camada de
 observações do agente, não no balanço energético interno.
+
+Na interface entity, a flexibilidade EV deve ser consumida preferencialmente em
+features físicas/normalizadas derivadas:
+
+- `hours_until_departure`: tempo físico até saída.
+- `time_until_departure_ratio`: `hours_until_departure / 24`, limitado a `[0, 1]`.
+- `energy_to_required_soc_kwh`: energia ainda necessária para chegar ao SOC alvo.
+- `required_average_power_kw`: potência média necessária até à saída.
+- `charging_slack_kw`: margem entre potência máxima do carregador e potência média
+  necessária.
+- `charging_priority_ratio`: urgência em `[0, 1]`, calculada a partir da razão entre
+  potência média necessária e potência máxima do carregador.
 
 ## PV
 
@@ -164,6 +184,8 @@ energia já contém a duração do passo.
 Antes de usar um dataset novo:
 
 - Confirmar que a cadência do CSV coincide com `seconds_per_time_step`.
+- Para cadências sub-minuto, confirmar que a coluna `seconds` existe ou que o
+  schema declara a mesma cadência física do CSV.
 - Confirmar que cargas, demandas e energia PV codificada resultam em `kWh/step`.
 - Confirmar que ratings e limites continuam em `kW`.
 - Confirmar que preços e emissões continuam por `kWh`.

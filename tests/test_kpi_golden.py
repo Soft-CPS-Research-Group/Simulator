@@ -24,6 +24,7 @@ def _write_golden_schema(
     elapsed_seconds = np.arange(steps, dtype=int) * int(seconds_per_time_step)
     hours = ((elapsed_seconds // 3600) % 24).astype(int)
     minutes = ((elapsed_seconds % 3600) // 60).astype(int)
+    seconds = (elapsed_seconds % 60).astype(int)
 
     weather = pd.DataFrame(
         {
@@ -63,6 +64,7 @@ def _write_golden_schema(
         "month": np.ones(steps, dtype=int),
         "hour": hours,
         "minutes": minutes,
+        "seconds": seconds,
         "day_type": np.ones(steps, dtype=int),
         "daylight_savings_status": np.zeros(steps, dtype=int),
         "indoor_dry_bulb_temperature": np.full(steps, 21.0),
@@ -203,7 +205,7 @@ def _assert_value(df: pd.DataFrame, name: str, cost_function: str, expected: flo
     assert float(_value(df, name, cost_function)) == pytest.approx(expected, abs=1e-7)
 
 
-@pytest.mark.parametrize("seconds_per_time_step", [60, 300, 900, 3600])
+@pytest.mark.parametrize("seconds_per_time_step", [15, 60, 300, 900, 3600])
 def test_kpi_v2_golden_grid_pv_bess_ev_and_shape_metrics(tmp_path: Path, seconds_per_time_step: int):
     steps = 3
     dt = seconds_per_time_step / 3600.0
@@ -281,7 +283,7 @@ def test_kpi_v2_golden_grid_pv_bess_ev_and_shape_metrics(tmp_path: Path, seconds
         env.close()
 
 
-@pytest.mark.parametrize("seconds_per_time_step", [60, 300, 900, 3600])
+@pytest.mark.parametrize("seconds_per_time_step", [15, 60, 300, 900, 3600])
 def test_kpi_v2_golden_community_market_uses_bounded_local_demand_share(
     tmp_path: Path,
     seconds_per_time_step: int,

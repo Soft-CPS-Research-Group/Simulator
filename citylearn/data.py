@@ -538,6 +538,9 @@ class EnergySimulation(TimeSeriesData):
         Hour time series value ranging from 1 - 24.
     minutes : np.array
         Minutes time series value ranging from 0 - 60.
+    seconds : np.array
+        Seconds time series value ranging from 0 - 59. Optional, but needed to
+        infer dataset cadence below one minute.
     day_type : np.array
         Numeric day of week time series ranging from 1 - 8 where 1 - 7 is Monday - Sunday and 8 is reserved for special days e.g. holiday.
     indoor_dry_bulb_temperature : np.array
@@ -589,7 +592,7 @@ class EnergySimulation(TimeSeriesData):
         self, month: Iterable[int], hour: Iterable[int], day_type: Iterable[int],
          indoor_dry_bulb_temperature: Iterable[float], 
         non_shiftable_load: Iterable[float], dhw_demand: Iterable[float], cooling_demand: Iterable[float], heating_demand: Iterable[float], solar_generation: Iterable[float], 
-        daylight_savings_status: Iterable[int] = None, average_unmet_cooling_setpoint_difference: Iterable[float] = None, indoor_relative_humidity: Iterable[float] = None, occupant_count: Iterable[int] = None, indoor_dry_bulb_temperature_cooling_set_point: Iterable[int] = None, indoor_dry_bulb_temperature_heating_set_point: Iterable[int] = None, hvac_mode: Iterable[int] = None, power_outage: Iterable[int] = None, comfort_band: Iterable[float] = None, start_time_step: int = None, end_time_step: int = None,  seconds_per_time_step: int = None, minutes: Iterable[int] = None, time_step_ratios: List[float] = None, noise_std = 0.0
+        daylight_savings_status: Iterable[int] = None, average_unmet_cooling_setpoint_difference: Iterable[float] = None, indoor_relative_humidity: Iterable[float] = None, occupant_count: Iterable[int] = None, indoor_dry_bulb_temperature_cooling_set_point: Iterable[int] = None, indoor_dry_bulb_temperature_heating_set_point: Iterable[int] = None, hvac_mode: Iterable[int] = None, power_outage: Iterable[int] = None, comfort_band: Iterable[float] = None, start_time_step: int = None, end_time_step: int = None,  seconds_per_time_step: int = None, minutes: Iterable[int] = None, seconds: Iterable[int] = None, time_step_ratios: List[float] = None, noise_std = 0.0
     ):
         super().__init__(start_time_step=start_time_step, end_time_step=end_time_step)
         self.noise_std = noise_std
@@ -613,26 +616,40 @@ class EnergySimulation(TimeSeriesData):
 
         # optional
         self.minutes = np.array(minutes, dtype='int32') if minutes is not None else None
-        # delta between t1 and t2
-        time_delta = self.hour[1] * 60 - self.hour[0] * 60  
+        self.seconds = np.array(seconds, dtype='int32') if seconds is not None else None
+        time_delta_seconds = None
 
-        # Compute time difference if minutes exist
-        if self.minutes is not None and len(self.minutes) > 1:
-            t0 = self.hour[0] * 60 + self.minutes[0]  # Convert to total minutes
-            t1 = self.hour[1] * 60 + self.minutes[1]  # Convert to total minutes
+        if len(self.hour) > 1:
+            if self.minutes is not None and self.seconds is not None and len(self.minutes) > 1 and len(self.seconds) > 1:
+                t0 = self.hour[0] * 3600 + self.minutes[0] * 60 + self.seconds[0]
+                t1 = self.hour[1] * 3600 + self.minutes[1] * 60 + self.seconds[1]
+                time_delta_seconds = t1 - t0
 
-            time_delta = t1 - t0
+            elif self.minutes is not None and len(self.minutes) > 1:
+                t0 = self.hour[0] * 60 + self.minutes[0]
+                t1 = self.hour[1] * 60 + self.minutes[1]
+                time_delta_minutes = t1 - t0
 
-        # Fix negative difference if crossing midnight
-            # Add a full day in minutes
-        if time_delta < 0:
-                time_delta += 1440    
+                if time_delta_minutes == 0 and seconds_per_time_step is not None and float(seconds_per_time_step) < 60.0:
+                    time_delta_seconds = float(seconds_per_time_step)
+                else:
+                    time_delta_seconds = time_delta_minutes * 60
+
+            else:
+                time_delta_hours = self.hour[1] - self.hour[0]
+                time_delta_seconds = time_delta_hours * 3600
+
+        if time_delta_seconds is not None and time_delta_seconds < 0:
+            time_delta_seconds += 24 * 3600
+
+        if time_delta_seconds == 0 and seconds_per_time_step is not None:
+            time_delta_seconds = float(seconds_per_time_step)
 
         base_step_seconds = None
 
-        if time_delta is not None:
+        if time_delta_seconds is not None:
             # Convert dataset spacing to seconds (guard against zero/negative values)
-            candidate = max(1, time_delta * 60)
+            candidate = max(1, time_delta_seconds)
             base_step_seconds = candidate
 
         time_step_ratio = (

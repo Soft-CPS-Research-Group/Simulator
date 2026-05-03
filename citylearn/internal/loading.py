@@ -659,6 +659,8 @@ class CityLearnLoadingService:
         }
         if 'minutes' in observation_metadata and energy_simulation.minutes is None:
             observation_metadata.pop('minutes', None)
+        if 'seconds' in observation_metadata and getattr(energy_simulation, 'seconds', None) is None:
+            observation_metadata.pop('seconds', None)
 
         chargers_observations_metadata_helper = {
             k: parse_bool(v.get('active', False), default=False, path=f'observations.{k}.active')

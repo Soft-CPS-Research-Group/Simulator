@@ -41,6 +41,54 @@ def test_energy_simulation_ratio_matches_dataset_cadence():
     assert sim.dataset_seconds_per_time_step == pytest.approx(900.0)
 
 
+def test_energy_simulation_ratio_matches_15_second_dataset_cadence():
+    seconds_per_time_step = 15
+    num_steps = 4
+    seconds = [0, 15, 30, 45]
+
+    sim = EnergySimulation(
+        month=[1] * num_steps,
+        hour=[0] * num_steps,
+        minutes=[0] * num_steps,
+        seconds=seconds,
+        day_type=[1] * num_steps,
+        indoor_dry_bulb_temperature=[20.0] * num_steps,
+        non_shiftable_load=[1.0] * num_steps,
+        dhw_demand=[0.0] * num_steps,
+        cooling_demand=[0.0] * num_steps,
+        heating_demand=[0.0] * num_steps,
+        solar_generation=[0.0] * num_steps,
+        seconds_per_time_step=seconds_per_time_step,
+        time_step_ratios=[],
+    )
+
+    assert sim.time_step_ratios[0] == pytest.approx(1.0)
+    assert sim.dataset_seconds_per_time_step == pytest.approx(15.0)
+
+
+def test_energy_simulation_subminute_without_seconds_assumes_schema_cadence():
+    seconds_per_time_step = 15
+    num_steps = 4
+
+    sim = EnergySimulation(
+        month=[1] * num_steps,
+        hour=[0] * num_steps,
+        minutes=[0] * num_steps,
+        day_type=[1] * num_steps,
+        indoor_dry_bulb_temperature=[20.0] * num_steps,
+        non_shiftable_load=[1.0] * num_steps,
+        dhw_demand=[0.0] * num_steps,
+        cooling_demand=[0.0] * num_steps,
+        heating_demand=[0.0] * num_steps,
+        solar_generation=[0.0] * num_steps,
+        seconds_per_time_step=seconds_per_time_step,
+        time_step_ratios=[],
+    )
+
+    assert sim.time_step_ratios[0] == pytest.approx(1.0)
+    assert sim.dataset_seconds_per_time_step == pytest.approx(15.0)
+
+
 def test_energy_simulation_ratio_subhour_control_from_hourly_dataset():
     seconds_per_time_step = 900  # 15 minutes control step
     num_steps = 4
@@ -226,6 +274,24 @@ def test_env_supports_subhour_seconds_per_time_step():
     zeros = [np.zeros(env.action_space[0].shape[0], dtype='float32')]
     env.step(zeros)
     env.close()
+
+
+def test_subhour_ev_charger_reward_observation_uses_physical_hours():
+    env = CityLearnEnv(
+        'tests/data/minute_ev_demo/schema.json',
+        central_agent=True,
+        episode_time_steps=8,
+        random_seed=0,
+    )
+
+    try:
+        env.reset(seed=0)
+        observations = env.buildings[0].observations(include_all=True, normalize=False)
+        charger = observations['electric_vehicles_chargers_dict']['charger_1_1']
+
+        assert charger['hours_until_departure'] == pytest.approx(4 * 900 / 3600)
+    finally:
+        env.close()
 
 
 def test_env_prints_explicit_notice_when_dataset_resolution_is_converted(capsys):

@@ -81,6 +81,68 @@ def test_core_bundle_adds_canonical_features_and_metadata():
         env.close()
 
 
+def test_core_bundle_adds_ev_charging_flexibility_features():
+    env = CityLearnEnv(_schema_with_bundles(core=True), interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)
+
+    try:
+        obs, _ = env.reset(seed=0)
+        charger_features = env.entity_specs["tables"]["charger"]["features"]
+        charger_meta = env.entity_specs["tables"]["charger"]["feature_metadata"]
+        expected_features = [
+            "hours_until_departure",
+            "time_until_departure_ratio",
+            "energy_to_required_soc_kwh",
+            "required_average_power_kw",
+            "avg_power_to_departure_kw",
+            "charging_slack_kw",
+            "charging_priority_ratio",
+        ]
+
+        for feature in expected_features:
+            assert feature in charger_features
+            assert charger_meta[feature]["bundle"] == "entity_core_electrical"
+            assert charger_meta[feature]["legacy"] is False
+
+        assert charger_meta["hours_until_departure"]["unit"] == "h"
+        assert charger_meta["required_average_power_kw"]["unit"] == "kw"
+        assert charger_meta["charging_slack_kw"]["unit"] == "kw"
+        assert charger_meta["charging_priority_ratio"]["unit"] == "ratio"
+
+        connected_col = charger_features.index("connected_state")
+        connected_rows = np.flatnonzero(obs["tables"]["charger"][:, connected_col] == 1.0)
+        assert len(connected_rows) > 0
+        row = int(connected_rows[0])
+
+        def value(name: str) -> float:
+            return float(obs["tables"]["charger"][row, charger_features.index(name)])
+
+        step_hours = env.seconds_per_time_step / 3600.0
+        departure_steps = value("connected_ev_departure_time_step")
+        hours = value("hours_until_departure")
+        required_soc = value("connected_ev_required_soc_departure")
+        current_soc = value("connected_ev_soc")
+        capacity = value("connected_ev_battery_capacity_kwh")
+        max_charging_power = value("max_charging_power_kw")
+        expected_energy = max((required_soc - current_soc) * max(capacity, 0.0), 0.0)
+        expected_required_power = expected_energy / max(hours, 1.0e-6) if expected_energy > 0.0 else 0.0
+        if expected_energy <= 0.0:
+            expected_priority = 0.0
+        elif hours <= 0.0 or max_charging_power <= 0.0:
+            expected_priority = 1.0
+        else:
+            expected_priority = np.clip(expected_required_power / max(max_charging_power, 1.0e-6), 0.0, 1.0)
+
+        assert hours == pytest.approx(departure_steps * step_hours)
+        assert value("time_until_departure_ratio") == pytest.approx(np.clip(hours / 24.0, 0.0, 1.0))
+        assert value("energy_to_required_soc_kwh") == pytest.approx(expected_energy)
+        assert value("required_average_power_kw") == pytest.approx(expected_required_power)
+        assert value("avg_power_to_departure_kw") == pytest.approx(expected_required_power)
+        assert value("charging_slack_kw") == pytest.approx(max_charging_power - expected_required_power)
+        assert value("charging_priority_ratio") == pytest.approx(expected_priority)
+    finally:
+        env.close()
+
+
 def test_temporal_bundle_toggle_changes_presence_of_temporal_features():
     off_env = CityLearnEnv(_schema_with_bundles(temporal=False), interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)
     on_env = CityLearnEnv(_schema_with_bundles(temporal=True), interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)

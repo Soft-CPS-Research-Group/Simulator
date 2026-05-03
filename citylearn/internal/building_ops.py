@@ -214,7 +214,9 @@ class BuildingOpsService:
                 previous_battery_soc = connected_car.battery.initial_soc if endogenous_t == 0 else connected_car.battery.soc[endogenous_t - 1]
 
                 required_soc = charger.charger_simulation.electric_vehicle_required_soc_departure[t]
-                hours_until_departure = charger.charger_simulation.electric_vehicle_departure_time[t]
+                departure_steps = charger.charger_simulation.electric_vehicle_departure_time[t]
+                step_hours = building.seconds_per_time_step / 3600.0
+                hours_until_departure = max(float(departure_steps), 0.0) * step_hours
 
                 battery_capacity = connected_car.battery.capacity
                 min_capacity = (1 - connected_car.battery.depth_of_discharge) * battery_capacity

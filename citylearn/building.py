@@ -1412,7 +1412,8 @@ class Building(Environment):
             'hour': range(1, 25),
             'day_type': range(1, 8),
             'month': range(1, 13),
-            'minutes': range(1, 61)
+            'minutes': range(1, 61),
+            'seconds': range(0, 60),
         }
 
     def apply_actions(self,
