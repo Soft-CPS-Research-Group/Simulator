@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.loading &mdash; CityLearn 0.3.2 documentation</title>
+  <title>citylearn.internal.loading &mdash; CityLearn 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -105,11 +105,11 @@
     <span class="n">EnergySimulation</span><span class="p">,</span>
     <span class="n">LogisticRegressionOccupantParameters</span><span class="p">,</span>
     <span class="n">Pricing</span><span class="p">,</span>
-    <span class="n">WashingMachineSimulation</span><span class="p">,</span>
+    <span class="n">DeferrableApplianceSimulation</span><span class="p">,</span>
     <span class="n">Weather</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.electric_vehicle</span><span class="w"> </span><span class="kn">import</span> <span class="n">ElectricVehicle</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.energy_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Battery</span><span class="p">,</span> <span class="n">PV</span><span class="p">,</span> <span class="n">WashingMachine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.energy_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Battery</span><span class="p">,</span> <span class="n">DeferrableAppliance</span><span class="p">,</span> <span class="n">PV</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.reward_function</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiBuildingRewardFunction</span><span class="p">,</span> <span class="n">RewardFunction</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_bool</span>
 
@@ -139,7 +139,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_charger_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_washing_machine_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_deferrable_appliance_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="nd">@staticmethod</span>
@@ -210,18 +210,24 @@
             <span class="k">if</span> <span class="s2">&quot;electric_vehicle_&quot;</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;shared_in_central_agent&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="p">}</span>
 
-        <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;washing_machine_observations_helper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;observations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;washing_machine_&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">}</span>
-        <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;washing_machine_actions_helper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;washing_machine&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">}</span>
+        <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;deferrable_appliance_observations_helper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;observations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;deferrable_appliance_&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;deferrable_appliance_actions_helper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;deferrable_appliance&quot;</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;deferrable_appliance_&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
 
         <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;observations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;observations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;chargers_observations_helper&#39;</span><span class="p">])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;washing_machine_observations_helper&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;chargers_observations_helper&#39;</span><span class="p">])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;deferrable_appliance_observations_helper&#39;</span><span class="p">])</span>
         <span class="p">}</span>
         <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;actions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;actions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;chargers_actions_helper&#39;</span><span class="p">])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;washing_machine_actions_helper&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;chargers_actions_helper&#39;</span><span class="p">])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;deferrable_appliance_actions_helper&#39;</span><span class="p">])</span>
         <span class="p">}</span>
 
         <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;shared_observations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -231,7 +237,7 @@
                 <span class="n">k</span>
                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;observations&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;electric_vehicle_&quot;</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="s2">&quot;washing_machine&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">k</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;deferrable_appliance_&quot;</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="n">parse_bool</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;shared_in_central_agent&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;observations.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">.shared_in_central_agent&#39;</span><span class="p">)</span>
             <span class="p">]</span>
         <span class="p">)</span>
@@ -253,7 +259,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">simulation_time_steps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_charger_windows</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_washing_machine_windows</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_deferrable_appliance_windows</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">dynamic_mode</span><span class="p">:</span>
@@ -263,7 +269,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_washing_machine_windows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dynamic_washing_machine_windows</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_deferrable_appliance_windows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dynamic_deferrable_appliance_windows</span><span class="p">(</span>
                 <span class="n">schema</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span><span class="p">,</span>
@@ -629,19 +635,19 @@
                 <span class="p">)</span>
                 <span class="n">chargers_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">charger_object</span><span class="p">)</span>
 
-        <span class="n">washing_machines_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;washing_machines&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;washing_machines&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">washing_machine_schemas</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;washing_machines&#39;</span><span class="p">]</span>
+        <span class="n">deferrable_appliances_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;deferrable_appliances&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;deferrable_appliances&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">deferrable_appliance_schemas</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;deferrable_appliances&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">washing_machine_schemas</span> <span class="o">=</span> <span class="n">building_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;washing_machines&#39;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">deferrable_appliance_schemas</span> <span class="o">=</span> <span class="n">building_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;deferrable_appliances&#39;</span><span class="p">,</span> <span class="p">{})</span>
 
-        <span class="k">for</span> <span class="n">washing_machine_name</span><span class="p">,</span> <span class="n">washing_machine_schema</span> <span class="ow">in</span> <span class="n">washing_machine_schemas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">washing_machines_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">load_washing_machine</span><span class="p">(</span>
-                    <span class="n">washing_machine_name</span><span class="p">,</span>
+        <span class="k">for</span> <span class="n">appliance_name</span><span class="p">,</span> <span class="n">appliance_schema</span> <span class="ow">in</span> <span class="n">deferrable_appliance_schemas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">deferrable_appliances_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">load_deferrable_appliance</span><span class="p">(</span>
+                    <span class="n">appliance_name</span><span class="p">,</span>
                     <span class="n">building_name</span><span class="p">,</span>
                     <span class="n">schema</span><span class="p">,</span>
-                    <span class="n">washing_machine_schema</span><span class="p">,</span>
+                    <span class="n">appliance_schema</span><span class="p">,</span>
                     <span class="n">episode_tracker</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -650,7 +656,7 @@
             <span class="n">schema</span><span class="p">,</span>
             <span class="n">building_schema</span><span class="p">,</span>
             <span class="n">chargers_list</span><span class="p">,</span>
-            <span class="n">washing_machines_list</span><span class="p">,</span>
+            <span class="n">deferrable_appliances_list</span><span class="p">,</span>
             <span class="n">index</span><span class="p">,</span>
             <span class="n">energy_simulation</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -658,7 +664,7 @@
 
         <span class="n">building</span><span class="p">:</span> <span class="n">Building</span> <span class="o">=</span> <span class="n">building_constructor</span><span class="p">(</span>
             <span class="n">energy_simulation</span><span class="o">=</span><span class="n">energy_simulation</span><span class="p">,</span>
-            <span class="n">washing_machines</span><span class="o">=</span><span class="n">washing_machines_list</span><span class="p">,</span>
+            <span class="n">deferrable_appliances</span><span class="o">=</span><span class="n">deferrable_appliances_list</span><span class="p">,</span>
             <span class="n">electric_vehicle_chargers</span><span class="o">=</span><span class="n">chargers_list</span><span class="p">,</span>
             <span class="n">weather</span><span class="o">=</span><span class="n">weather</span><span class="p">,</span>
             <span class="n">observation_metadata</span><span class="o">=</span><span class="n">observation_metadata</span><span class="p">,</span>
@@ -683,7 +689,6 @@
             <span class="s1">&#39;cooling_storage&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;autosizer&#39;</span><span class="p">:</span> <span class="n">building</span><span class="o">.</span><span class="n">autosize_cooling_storage</span><span class="p">},</span>
             <span class="s1">&#39;heating_storage&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;autosizer&#39;</span><span class="p">:</span> <span class="n">building</span><span class="o">.</span><span class="n">autosize_heating_storage</span><span class="p">},</span>
             <span class="s1">&#39;electrical_storage&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;autosizer&#39;</span><span class="p">:</span> <span class="n">building</span><span class="o">.</span><span class="n">autosize_electrical_storage</span><span class="p">},</span>
-            <span class="s1">&#39;washing_machine&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;autosizer&#39;</span><span class="p">:</span> <span class="n">building</span><span class="o">.</span><span class="n">autosize_electrical_storage</span><span class="p">},</span>
             <span class="s1">&#39;pv&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;autosizer&#39;</span><span class="p">:</span> <span class="n">building</span><span class="o">.</span><span class="n">autosize_pv</span><span class="p">},</span>
         <span class="p">}</span>
         <span class="n">solar_generation</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;solar_generation&#39;</span><span class="p">)</span>
@@ -757,7 +762,7 @@
         <span class="n">schema</span><span class="p">,</span>
         <span class="n">building_schema</span><span class="p">,</span>
         <span class="n">chargers_list</span><span class="p">,</span>
-        <span class="n">washing_machines_list</span><span class="p">,</span>
+        <span class="n">deferrable_appliances_list</span><span class="p">,</span>
         <span class="n">index</span><span class="p">,</span>
         <span class="n">energy_simulation</span><span class="p">:</span> <span class="n">EnergySimulation</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -777,9 +782,9 @@
             <span class="n">k</span><span class="p">:</span> <span class="n">parse_bool</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;observations.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">.active&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;chargers_observations_helper&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
-        <span class="n">washing_machine_observations_metadata_helper</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">deferrable_appliance_observations_metadata_helper</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">k</span><span class="p">:</span> <span class="n">parse_bool</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;observations.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">.active&#39;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;washing_machine_observations_helper&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;deferrable_appliance_observations_helper&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;active_observations&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -787,7 +792,7 @@
             <span class="n">active_observations</span> <span class="o">=</span> <span class="n">active_observations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active_observations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">active_observations</span>
             <span class="n">observation_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">active_observations</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">observation_metadata</span><span class="p">}</span>
             <span class="n">chargers_observations_metadata_helper</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">active_observations</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">chargers_observations_metadata_helper</span><span class="p">}</span>
-            <span class="n">washing_machine_observations_metadata_helper</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">active_observations</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">washing_machine_observations_metadata_helper</span><span class="p">}</span>
+            <span class="n">deferrable_appliance_observations_metadata_helper</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">active_observations</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">deferrable_appliance_observations_metadata_helper</span><span class="p">}</span>
 
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;inactive_observations&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">inactive_observations</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;inactive_observations&#39;</span><span class="p">]</span>
@@ -805,9 +810,9 @@
             <span class="n">k</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">inactive_observations</span> <span class="k">else</span> <span class="n">chargers_observations_metadata_helper</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">chargers_observations_metadata_helper</span>
         <span class="p">}</span>
-        <span class="n">washing_machine_observations_metadata_helper</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">k</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">inactive_observations</span> <span class="k">else</span> <span class="n">washing_machine_observations_metadata_helper</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">washing_machine_observations_metadata_helper</span>
+        <span class="n">deferrable_appliance_observations_metadata_helper</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">inactive_observations</span> <span class="k">else</span> <span class="n">deferrable_appliance_observations_metadata_helper</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">deferrable_appliance_observations_metadata_helper</span>
         <span class="p">}</span>
 
         <span class="n">action_metadata</span> <span class="o">=</span> <span class="p">{</span>
@@ -818,9 +823,9 @@
             <span class="n">k</span><span class="p">:</span> <span class="n">parse_bool</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;actions.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">.active&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;chargers_actions_helper&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
-        <span class="n">washing_machine_actions_metadata_helper</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">deferrable_appliance_actions_metadata_helper</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">k</span><span class="p">:</span> <span class="n">parse_bool</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;actions.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">.active&#39;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;washing_machine_actions_helper&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;deferrable_appliance_actions_helper&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;active_actions&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -828,7 +833,7 @@
             <span class="n">active_actions</span> <span class="o">=</span> <span class="n">active_actions</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active_actions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">active_actions</span>
             <span class="n">action_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">active_actions</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">action_metadata</span><span class="p">}</span>
             <span class="n">chargers_actions_metadata_helper</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">active_actions</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">chargers_actions_metadata_helper</span><span class="p">}</span>
-            <span class="n">washing_machine_actions_metadata_helper</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">active_actions</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">washing_machine_actions_metadata_helper</span><span class="p">}</span>
+            <span class="n">deferrable_appliance_actions_metadata_helper</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">active_actions</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">deferrable_appliance_actions_metadata_helper</span><span class="p">}</span>
 
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;inactive_actions&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">inactive_actions</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;inactive_actions&#39;</span><span class="p">]</span>
@@ -840,7 +845,7 @@
 
         <span class="n">action_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">inactive_actions</span> <span class="k">else</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">action_metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="n">chargers_actions_metadata_helper</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">inactive_actions</span> <span class="k">else</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">chargers_actions_metadata_helper</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-        <span class="n">washing_machine_actions_metadata_helper</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">inactive_actions</span> <span class="k">else</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">washing_machine_actions_metadata_helper</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">deferrable_appliance_actions_metadata_helper</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">inactive_actions</span> <span class="k">else</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">deferrable_appliance_actions_metadata_helper</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chargers_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="n">chargers_list</span><span class="p">:</span>
@@ -873,17 +878,15 @@
                 <span class="k">if</span> <span class="n">chargers_actions_metadata_helper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;electric_vehicle_storage&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
                     <span class="n">action_metadata</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;electric_vehicle_storage_</span><span class="si">{</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">washing_machines_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">washing_machine</span> <span class="ow">in</span> <span class="n">washing_machines_list</span><span class="p">:</span>
-                <span class="n">washing_machine_name</span> <span class="o">=</span> <span class="n">washing_machine</span><span class="o">.</span><span class="n">name</span>
-                <span class="k">if</span> <span class="n">washing_machine_observations_metadata_helper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;washing_machine_start_time_step&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-                    <span class="n">observation_metadata</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">washing_machine_name</span><span class="si">}</span><span class="s1">_start_time_step&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">deferrable_appliances_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="n">deferrable_appliances_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">helper_name</span><span class="p">,</span> <span class="n">active</span> <span class="ow">in</span> <span class="n">deferrable_appliance_observations_metadata_helper</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">active</span><span class="p">:</span>
+                        <span class="n">feature_name</span> <span class="o">=</span> <span class="n">helper_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">observation_metadata</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;deferrable_appliance_</span><span class="si">{</span><span class="n">appliance</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">feature_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
-                <span class="k">if</span> <span class="n">washing_machine_observations_metadata_helper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;washing_machine_end_time_step&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-                    <span class="n">observation_metadata</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">washing_machine_name</span><span class="si">}</span><span class="s1">_end_time_step&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-
-                <span class="k">if</span> <span class="n">washing_machine_actions_metadata_helper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;washing_machine&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-                    <span class="n">action_metadata</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">washing_machine_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">deferrable_appliance_actions_metadata_helper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                    <span class="n">action_metadata</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;deferrable_appliance_</span><span class="si">{</span><span class="n">appliance</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="n">observation_metadata</span><span class="p">,</span> <span class="n">action_metadata</span></div>
 
@@ -936,42 +939,63 @@
         <span class="k">return</span> <span class="n">electric_vehicle</span></div>
 
 
-<div class="viewcode-block" id="CityLearnLoadingService.load_washing_machine">
-<a class="viewcode-back" href="../../../api/citylearn.internal.loading.html#citylearn.internal.loading.CityLearnLoadingService.load_washing_machine">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_washing_machine</span><span class="p">(</span>
+<div class="viewcode-block" id="CityLearnLoadingService.load_deferrable_appliance">
+<a class="viewcode-back" href="../../../api/citylearn.internal.loading.html#citylearn.internal.loading.CityLearnLoadingService.load_deferrable_appliance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_deferrable_appliance</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">washing_machine_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">appliance_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">building_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-        <span class="n">washing_machine_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">appliance_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">episode_tracker</span><span class="p">:</span> <span class="n">EpisodeTracker</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WashingMachine</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load simulation data and initialize a `WashingMachine` instance.&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DeferrableAppliance</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load sparse profile/schedule data and initialize a deferrable appliance.&quot;&quot;&quot;</span>
 
-        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">washing_machine_schema</span><span class="p">[</span><span class="s1">&#39;washing_machine_energy_simulation&#39;</span><span class="p">])</span>
+        <span class="n">profiles_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">appliance_schema</span><span class="p">[</span><span class="s1">&#39;cycle_profiles_file&#39;</span><span class="p">])</span>
+        <span class="n">schedule_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;root_directory&#39;</span><span class="p">],</span> <span class="n">appliance_schema</span><span class="p">[</span><span class="s1">&#39;flexibility_schedule_file&#39;</span><span class="p">])</span>
 
-        <span class="n">washing_machine_simulation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_simulation_dataframe</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
-        <span class="n">washing_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_washing_machine_windows</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">building_name</span><span class="p">,</span> <span class="n">washing_machine_name</span><span class="p">))</span>
-        <span class="n">expected_rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_dynamic_expected_rows&#39;</span><span class="p">,</span> <span class="n">episode_tracker</span><span class="o">.</span><span class="n">simulation_time_steps</span><span class="p">))</span>
-        <span class="n">washing_machine_simulation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_dynamic_timeseries_dataframe</span><span class="p">(</span>
-            <span class="n">washing_machine_simulation</span><span class="p">,</span>
-            <span class="n">expected_rows</span><span class="o">=</span><span class="n">expected_rows</span><span class="p">,</span>
-            <span class="n">window</span><span class="o">=</span><span class="n">washing_window</span><span class="p">,</span>
-            <span class="n">source_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;buildings.</span><span class="si">{</span><span class="n">building_name</span><span class="si">}</span><span class="s1">.washing_machines.</span><span class="si">{</span><span class="n">washing_machine_name</span><span class="si">}</span><span class="s1">.washing_machine_energy_simulation&#39;</span><span class="p">,</span>
+        <span class="n">profiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dataframe</span><span class="p">(</span><span class="n">profiles_file</span><span class="p">)</span>
+        <span class="n">schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dataframe</span><span class="p">(</span><span class="n">schedule_file</span><span class="p">)</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_deferrable_appliance_windows</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">building_name</span><span class="p">,</span> <span class="n">appliance_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_mode</span> <span class="ow">and</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">schedule</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">window</span>
+            <span class="n">schedule</span> <span class="o">=</span> <span class="n">schedule</span><span class="p">[</span>
+                <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">schedule</span><span class="p">[</span><span class="s1">&#39;deadline_time_step&#39;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">))</span>
+                <span class="o">&amp;</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">schedule</span><span class="p">[</span><span class="s1">&#39;earliest_start_time_step&#39;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">end</span><span class="p">))</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">source_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;buildings.</span><span class="si">{</span><span class="n">building_name</span><span class="si">}</span><span class="s1">.deferrable_appliances.</span><span class="si">{</span><span class="n">appliance_name</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">simulation</span> <span class="o">=</span> <span class="n">DeferrableApplianceSimulation</span><span class="o">.</span><span class="n">from_dataframes</span><span class="p">(</span>
+            <span class="n">cycle_profiles</span><span class="o">=</span><span class="n">profiles</span><span class="p">,</span>
+            <span class="n">flexibility_schedule</span><span class="o">=</span><span class="n">schedule</span><span class="p">,</span>
+            <span class="n">source_label</span><span class="o">=</span><span class="n">source_label</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">washing_machine_simulation</span> <span class="o">=</span> <span class="n">WashingMachineSimulation</span><span class="p">(</span><span class="o">*</span><span class="n">washing_machine_simulation</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">washing_machine_simulation</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
+        <span class="n">appliance_type</span> <span class="o">=</span> <span class="n">appliance_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;citylearn.energy_model.DeferrableAppliance&#39;</span><span class="p">)</span>
+        <span class="n">appliance_module</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">appliance_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">appliance_class_name</span> <span class="o">=</span> <span class="n">appliance_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">appliance_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">appliance_module</span><span class="p">),</span> <span class="n">appliance_class_name</span><span class="p">)</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">appliance_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;attributes&#39;</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{})</span>
 
-        <span class="n">washing_machine</span> <span class="o">=</span> <span class="n">WashingMachine</span><span class="p">(</span>
-            <span class="n">washing_machine_simulation</span><span class="o">=</span><span class="n">washing_machine_simulation</span><span class="p">,</span>
+        <span class="n">appliance</span> <span class="o">=</span> <span class="n">appliance_class</span><span class="p">(</span>
+            <span class="n">deferrable_appliance_simulation</span><span class="o">=</span><span class="n">simulation</span><span class="p">,</span>
             <span class="n">episode_tracker</span><span class="o">=</span><span class="n">episode_tracker</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">washing_machine_name</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">appliance_name</span><span class="p">,</span>
             <span class="n">seconds_per_time_step</span><span class="o">=</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;seconds_per_time_step&#39;</span><span class="p">],</span>
             <span class="n">random_seed</span><span class="o">=</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;random_seed&#39;</span><span class="p">],</span>
+            <span class="o">**</span><span class="n">attributes</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">washing_machine</span></div>
+        <span class="k">return</span> <span class="n">appliance</span></div>
+
+
+<div class="viewcode-block" id="CityLearnLoadingService.load_washing_machine">
+<a class="viewcode-back" href="../../../api/citylearn.internal.loading.html#citylearn.internal.loading.CityLearnLoadingService.load_washing_machine">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_washing_machine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Legacy &#39;washing_machines&#39; schemas are no longer supported. &quot;</span>
+            <span class="s2">&quot;Use &#39;deferrable_appliances&#39; with cycle_profiles_file and flexibility_schedule_file.&quot;</span>
+        <span class="p">)</span></div>
 
 
     <span class="nd">@staticmethod</span>
@@ -1076,6 +1100,11 @@
             <span class="k">return</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_batches</span><span class="p">(</span><span class="n">batches</span><span class="p">)</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_format</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_parquet_timeseries_dataframe</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_shared_timeseries</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1219,7 +1248,7 @@
         <span class="k">return</span> <span class="n">windows</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_build_dynamic_washing_machine_windows</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_dynamic_deferrable_appliance_windows</span><span class="p">(</span>
         <span class="n">schema</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
         <span class="n">member_windows</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
         <span class="n">expected_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -1238,9 +1267,9 @@
             <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="n">washing_machines</span> <span class="o">=</span> <span class="p">(</span><span class="n">member_schema</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;washing_machines&#39;</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">washing_machine_id</span> <span class="ow">in</span> <span class="n">washing_machines</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">windows</span><span class="p">[(</span><span class="nb">str</span><span class="p">(</span><span class="n">member_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">washing_machine_id</span><span class="p">))]</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+            <span class="n">appliances</span> <span class="o">=</span> <span class="p">(</span><span class="n">member_schema</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;deferrable_appliances&#39;</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">appliance_id</span> <span class="ow">in</span> <span class="n">appliances</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">windows</span><span class="p">[(</span><span class="nb">str</span><span class="p">(</span><span class="n">member_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">appliance_id</span><span class="p">))]</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">windows</span>
 

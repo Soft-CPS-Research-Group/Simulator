@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.data module &mdash; CityLearn 0.3.2 documentation</title>
+  <title>citylearn.data module &mdash; CityLearn 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../_static/documentation_options.js?v=6c02275b"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -231,7 +231,7 @@ Defaults to -0.1 when not present.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.data.DataSet.DEFAULT_CACHE_DIRECTORY">
-<span class="sig-name descname"><span class="pre">DEFAULT_CACHE_DIRECTORY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/runner/.cache/citylearn/v0.3.2'</span></em><a class="headerlink" href="#citylearn.data.DataSet.DEFAULT_CACHE_DIRECTORY" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">DEFAULT_CACHE_DIRECTORY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/runner/.cache/citylearn/v0.4.0'</span></em><a class="headerlink" href="#citylearn.data.DataSet.DEFAULT_CACHE_DIRECTORY" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -276,7 +276,7 @@ Defaults to -0.1 when not present.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.data.DataSet.REPOSITORY_TAG">
-<span class="sig-name descname"><span class="pre">REPOSITORY_TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'v0.3.2'</span></em><a class="headerlink" href="#citylearn.data.DataSet.REPOSITORY_TAG" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">REPOSITORY_TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'v0.4.0'</span></em><a class="headerlink" href="#citylearn.data.DataSet.REPOSITORY_TAG" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -385,6 +385,35 @@ Defaults to -0.1 when not present.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="citylearn.data.DataSet.tag">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#citylearn.data.DataSet.tag" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="citylearn.data.DeferrableApplianceSimulation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">citylearn.data.</span></span><span class="sig-name descname"><span class="pre">DeferrableApplianceSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cycle_profiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flexibility_schedule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/data.html#DeferrableApplianceSimulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.data.DeferrableApplianceSimulation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Sparse deferrable-appliance cycle catalogue and flexibility schedule.</p>
+<p>Cycle profile energy values are always interpreted as kWh per simulation step.
+Schedule time fields are global simulation time-step indices.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.data.DeferrableApplianceSimulation.PROFILE_REQUIRED_COLUMNS">
+<span class="sig-name descname"><span class="pre">PROFILE_REQUIRED_COLUMNS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'duration_steps',</span> <span class="pre">'load_profile',</span> <span class="pre">'profile_id',</span> <span class="pre">'total_energy_kwh'}</span></em><a class="headerlink" href="#citylearn.data.DeferrableApplianceSimulation.PROFILE_REQUIRED_COLUMNS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.data.DeferrableApplianceSimulation.SCHEDULE_REQUIRED_COLUMNS">
+<span class="sig-name descname"><span class="pre">SCHEDULE_REQUIRED_COLUMNS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'cycle_id',</span> <span class="pre">'deadline_time_step',</span> <span class="pre">'earliest_start_time_step',</span> <span class="pre">'latest_start_time_step',</span> <span class="pre">'must_run',</span> <span class="pre">'priority',</span> <span class="pre">'profile_id'}</span></em><a class="headerlink" href="#citylearn.data.DeferrableApplianceSimulation.SCHEDULE_REQUIRED_COLUMNS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.data.DeferrableApplianceSimulation.from_dataframes">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dataframes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cycle_profiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flexibility_schedule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#citylearn.data.DeferrableApplianceSimulation" title="citylearn.data.DeferrableApplianceSimulation"><span class="pre">DeferrableApplianceSimulation</span></a></span></span><a class="reference internal" href="../_modules/citylearn/data.html#DeferrableApplianceSimulation.from_dataframes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.data.DeferrableApplianceSimulation.from_dataframes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.data.DeferrableApplianceSimulation.parse_load_profile">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_load_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/citylearn/data.html#DeferrableApplianceSimulation.parse_load_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.data.DeferrableApplianceSimulation.parse_load_profile" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

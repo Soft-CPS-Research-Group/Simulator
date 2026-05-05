@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.entity_interface module &mdash; CityLearn 0.3.2 documentation</title>
+  <title>citylearn.internal.entity_interface module &mdash; CityLearn 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../_static/documentation_options.js?v=6c02275b"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -168,6 +168,11 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.DEFERRABLE_APPLIANCE_FEATURES">
+<span class="sig-name descname"><span class="pre">DEFERRABLE_APPLIANCE_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['pending',</span> <span class="pre">'running',</span> <span class="pre">'can_start',</span> <span class="pre">'deadline_missed',</span> <span class="pre">'earliest_start_time_step',</span> <span class="pre">'latest_start_time_step',</span> <span class="pre">'deadline_time_step',</span> <span class="pre">'hours_until_latest_start',</span> <span class="pre">'hours_until_deadline',</span> <span class="pre">'slack_steps',</span> <span class="pre">'slack_ratio',</span> <span class="pre">'urgency_ratio',</span> <span class="pre">'cycle_duration_steps',</span> <span class="pre">'cycle_energy_kwh',</span> <span class="pre">'remaining_energy_kwh',</span> <span class="pre">'current_step_energy_kwh',</span> <span class="pre">'priority']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.DEFERRABLE_APPLIANCE_FEATURES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.EXTRA_CHARGER_FEATURES">
 <span class="sig-name descname"><span class="pre">EXTRA_CHARGER_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['commanded_power_kw',</span> <span class="pre">'applied_power_kw',</span> <span class="pre">'applied_energy_kwh_step',</span> <span class="pre">'hours_until_departure',</span> <span class="pre">'time_until_departure_ratio',</span> <span class="pre">'energy_to_required_soc_kwh',</span> <span class="pre">'required_average_power_kw',</span> <span class="pre">'avg_power_to_departure_kw',</span> <span class="pre">'charging_slack_kw',</span> <span class="pre">'charging_priority_ratio']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.EXTRA_CHARGER_FEATURES" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -259,6 +264,38 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.specs">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">specs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.specs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.DeferrableApplianceRef">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">citylearn.internal.entity_interface.</span></span><span class="sig-name descname"><span class="pre">DeferrableApplianceRef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">building_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">building_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appliance_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/internal/entity_interface.html#DeferrableApplianceRef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.internal.entity_interface.DeferrableApplianceRef" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Resolved deferrable appliance location inside the environment.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.DeferrableApplianceRef.appliance_id">
+<span class="sig-name descname"><span class="pre">appliance_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.DeferrableApplianceRef.appliance_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.DeferrableApplianceRef.building_index">
+<span class="sig-name descname"><span class="pre">building_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.DeferrableApplianceRef.building_index" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.DeferrableApplianceRef.building_name">
+<span class="sig-name descname"><span class="pre">building_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.DeferrableApplianceRef.building_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.DeferrableApplianceRef.global_id">
+<span class="sig-name descname"><span class="pre">global_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.DeferrableApplianceRef.global_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.DeferrableApplianceRef.row">
+<span class="sig-name descname"><span class="pre">row</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.DeferrableApplianceRef.row" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model &mdash; CityLearn 0.3.2 documentation</title>
+  <title>citylearn.energy_model &mdash; CityLearn 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../../_static/documentation_options.js?v=6c02275b"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -89,7 +89,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="k">try</span><span class="p">:</span>
@@ -97,7 +97,7 @@
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>  <span class="c1"># pragma: no cover - optional dependency</span>
     <span class="n">Pvwattsv8</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">EpisodeTracker</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSet</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">,</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="n">WashingMachineSimulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSet</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">,</span> <span class="n">DeferrableApplianceSimulation</span><span class="p">,</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="n">WashingMachineSimulation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">power_kw_to_energy_kwh</span><span class="p">,</span> <span class="n">to_dataset_resolution_energy</span>
 <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
 
@@ -1522,6 +1522,336 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_efficiency_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_efficiency_history</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_capacity_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capacity_history</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span></div>
 </div>
+
+
+<div class="viewcode-block" id="DeferrableAppliance">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DeferrableAppliance</span><span class="p">(</span><span class="n">ElectricDevice</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic deferrable appliance with sparse cycle requests and fixed kWh/step profiles.&quot;&quot;&quot;</span>
+
+    <span class="n">SENTINEL_TIME_STEP</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">deferrable_appliance_simulation</span><span class="p">:</span> <span class="n">DeferrableApplianceSimulation</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">trigger_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span> <span class="o">=</span> <span class="n">deferrable_appliance_simulation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trigger_threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trigger_threshold</span> <span class="ow">or</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_completion_time_steps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_missed_time_steps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_cancelled_time_steps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deferrable_appliance_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DeferrableApplianceSimulation</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__deferrable_appliance_simulation</span>
+
+    <span class="nd">@deferrable_appliance_simulation</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deferrable_appliance_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DeferrableApplianceSimulation</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__deferrable_appliance_simulation</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span>
+
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__name</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">past_action_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cycle_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DeferrableAppliance.reset">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_completion_time_steps</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_missed_time_steps</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_cancelled_time_steps</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">episode_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="p">,</span> <span class="s1">&#39;episode_start_time_step&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span><span class="o">.</span><span class="n">flexibility_schedule</span><span class="p">:</span>
+            <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;latest_start_time_step&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">episode_start</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;expired_before_episode&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;pending&#39;</span></div>
+
+
+<div class="viewcode-block" id="DeferrableAppliance.next_time_step">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.next_time_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">next_time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">next_time_step</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_cycle_states</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DeferrableAppliance.start_cycle">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.start_cycle">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the next pending cycle when the action is above threshold and the request is feasible.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">action_value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_cycle_states</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">action_value</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_threshold</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_pending_cycle</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cycle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">current_global</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_can_start_cycle</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="n">current_global</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">current_global</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;latest_start_time_step&#39;</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_mark_missed</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="n">current_global</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;running&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_global</span>
+
+        <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">energy_kwh</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;load_profile&#39;</span><span class="p">]):</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">+</span> <span class="n">offset</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">:</span>
+                <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="mf">1.0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ElectricDevice__electricity_consumption</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">energy_kwh</span><span class="p">)</span> <span class="o">/</span> <span class="n">ratio</span></div>
+
+
+<div class="viewcode-block" id="DeferrableAppliance.cancel_pending_and_running">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.cancel_pending_and_running">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cancel_pending_and_running</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">global_time_step</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cancel future service after a dynamic topology removal.&quot;&quot;&quot;</span>
+
+        <span class="n">current_global</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span> <span class="k">if</span> <span class="n">global_time_step</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">global_time_step</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span><span class="o">.</span><span class="n">flexibility_schedule</span><span class="p">:</span>
+            <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;pending&#39;</span><span class="p">,</span> <span class="s1">&#39;running&#39;</span><span class="p">}:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;cancelled&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_cancelled_time_steps</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_global</span>
+
+        <span class="n">local_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ElectricDevice__electricity_consumption</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">local_step</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ElectricDevice__electricity_consumption</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ElectricDevice__electricity_consumption</span><span class="p">[</span><span class="n">local_step</span><span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span></div>
+
+
+<div class="viewcode-block" id="DeferrableAppliance.observations">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.observations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">observations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_cycle_states</span><span class="p">()</span>
+        <span class="n">cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_or_next_cycle</span><span class="p">()</span>
+        <span class="n">current_global</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span>
+        <span class="n">step_hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3600.0</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cycle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;pending&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;running&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;can_start&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;deadline_missed&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;earliest_start_time_step&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">SENTINEL_TIME_STEP</span><span class="p">,</span>
+                <span class="s1">&#39;latest_start_time_step&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">SENTINEL_TIME_STEP</span><span class="p">,</span>
+                <span class="s1">&#39;deadline_time_step&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">SENTINEL_TIME_STEP</span><span class="p">,</span>
+                <span class="s1">&#39;hours_until_latest_start&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+                <span class="s1">&#39;hours_until_deadline&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+                <span class="s1">&#39;slack_steps&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+                <span class="s1">&#39;slack_ratio&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+                <span class="s1">&#39;urgency_ratio&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+                <span class="s1">&#39;cycle_duration_steps&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;cycle_energy_kwh&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;remaining_energy_kwh&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;current_step_energy_kwh&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;priority&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">,</span> <span class="s1">&#39;pending&#39;</span><span class="p">)</span>
+        <span class="n">running</span> <span class="o">=</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span>
+        <span class="n">pending</span> <span class="o">=</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;pending&#39;</span>
+        <span class="n">missed</span> <span class="o">=</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;missed&#39;</span>
+        <span class="n">latest</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;latest_start_time_step&#39;</span><span class="p">])</span>
+        <span class="n">earliest</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;earliest_start_time_step&#39;</span><span class="p">])</span>
+        <span class="n">deadline</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;deadline_time_step&#39;</span><span class="p">])</span>
+        <span class="n">slack_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">latest</span> <span class="o">-</span> <span class="n">current_global</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">pending</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">window_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">latest</span> <span class="o">-</span> <span class="n">earliest</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">slack_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">slack_steps</span> <span class="o">/</span> <span class="n">window_steps</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">pending</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">current_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle_energy</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span>
+        <span class="n">remaining_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_remaining_cycle_energy</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;pending&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">pending</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s1">&#39;running&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">running</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s1">&#39;can_start&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_can_start_cycle</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="n">current_global</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s1">&#39;deadline_missed&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">missed</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s1">&#39;earliest_start_time_step&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">earliest</span><span class="p">),</span>
+            <span class="s1">&#39;latest_start_time_step&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">latest</span><span class="p">),</span>
+            <span class="s1">&#39;deadline_time_step&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">deadline</span><span class="p">),</span>
+            <span class="s1">&#39;hours_until_latest_start&#39;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">latest</span> <span class="o">-</span> <span class="n">current_global</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">step_hours</span> <span class="k">if</span> <span class="n">pending</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s1">&#39;hours_until_deadline&#39;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">deadline</span> <span class="o">-</span> <span class="n">current_global</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">step_hours</span> <span class="k">if</span> <span class="n">pending</span> <span class="ow">or</span> <span class="n">running</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s1">&#39;slack_steps&#39;</span><span class="p">:</span> <span class="n">slack_steps</span><span class="p">,</span>
+            <span class="s1">&#39;slack_ratio&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">slack_ratio</span><span class="p">),</span>
+            <span class="s1">&#39;urgency_ratio&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">slack_ratio</span><span class="p">)</span> <span class="k">if</span> <span class="n">pending</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s1">&#39;cycle_duration_steps&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;cycle_energy_kwh&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;total_energy_kwh&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;remaining_energy_kwh&#39;</span><span class="p">:</span> <span class="n">remaining_energy</span><span class="p">,</span>
+            <span class="s1">&#39;current_step_energy_kwh&#39;</span><span class="p">:</span> <span class="n">current_energy</span><span class="p">,</span>
+            <span class="s1">&#39;priority&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;priority&#39;</span><span class="p">]),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="DeferrableAppliance.service_summary">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.service_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">service_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_running_cycles_at_current_step</span><span class="p">()</span>
+        <span class="n">completed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">missed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">served</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">unserved</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">delays</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span><span class="o">.</span><span class="n">flexibility_schedule</span><span class="p">:</span>
+            <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;completed&#39;</span><span class="p">:</span>
+                <span class="n">completed</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">served</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;total_energy_kwh&#39;</span><span class="p">])</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">delays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;earliest_start_time_step&#39;</span><span class="p">]),</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;missed&#39;</span><span class="p">:</span>
+                <span class="n">missed</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">unserved</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;total_energy_kwh&#39;</span><span class="p">])</span>
+
+        <span class="n">requested</span> <span class="o">=</span> <span class="n">completed</span> <span class="o">+</span> <span class="n">missed</span>
+        <span class="n">step_hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3600.0</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;completed_cycles&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">completed</span><span class="p">),</span>
+            <span class="s1">&#39;missed_cycles&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">missed</span><span class="p">),</span>
+            <span class="s1">&#39;service_level_ratio&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">completed</span> <span class="o">/</span> <span class="n">requested</span><span class="p">)</span> <span class="k">if</span> <span class="n">requested</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="s1">&#39;served_energy_kwh&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">served</span><span class="p">),</span>
+            <span class="s1">&#39;unserved_energy_kwh&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">unserved</span><span class="p">),</span>
+            <span class="s1">&#39;average_start_delay_hours&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span> <span class="o">*</span> <span class="n">step_hours</span><span class="p">)</span> <span class="k">if</span> <span class="n">delays</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="DeferrableAppliance.as_dict">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="p">(),</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">service_summary</span><span class="p">(),</span>
+        <span class="p">}</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_current_global_time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">episode_start_time_step</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="p">,</span> <span class="s1">&#39;episode_start_time_step&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">episode_start_time_step</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">)):</span>
+            <span class="n">episode_start_time_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">episode_start_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_next_pending_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span><span class="o">.</span><span class="n">flexibility_schedule</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;pending&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">cycle</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_current_or_next_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="k">for</span> <span class="n">state_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;running&#39;</span><span class="p">,</span> <span class="s1">&#39;pending&#39;</span><span class="p">,</span> <span class="s1">&#39;missed&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span><span class="o">.</span><span class="n">flexibility_schedule</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">state_name</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">cycle</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_can_start_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">current_global</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="s1">&#39;pending&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;earliest_start_time_step&#39;</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">current_global</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;latest_start_time_step&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">current_global</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;deadline_time_step&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_cycle_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current_global</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span><span class="o">.</span><span class="n">flexibility_schedule</span><span class="p">:</span>
+            <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">current_global</span> <span class="o">&gt;</span> <span class="n">start</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;completed&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_completion_time_steps</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_global</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;pending&#39;</span> <span class="ow">and</span> <span class="n">current_global</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;latest_start_time_step&#39;</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_mark_missed</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="n">current_global</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mark_missed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">current_global</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;pending&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;missed&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_missed_time_steps</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_global</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finalize_running_cycles_at_current_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close cycles whose last energy step has already been reached.&quot;&quot;&quot;</span>
+
+        <span class="n">current_global</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span><span class="o">.</span><span class="n">flexibility_schedule</span><span class="p">:</span>
+            <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">current_global</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;completed&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_completion_time_steps</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_current_cycle_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">profile</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;load_profile&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">offset</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">profile</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">profile</span><span class="p">[</span><span class="n">offset</span><span class="p">])</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_remaining_cycle_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+        <span class="n">profile</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;load_profile&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;pending&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;total_energy_kwh&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mf">0.0</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">offset</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">profile</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">profile</span><span class="p">[</span><span class="n">offset</span><span class="p">:]))</span>
+        <span class="k">return</span> <span class="mf">0.0</span></div>
+
 
 
 <div class="viewcode-block" id="WashingMachine">

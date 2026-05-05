@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.building &mdash; CityLearn 0.3.2 documentation</title>
+  <title>citylearn.building &mdash; CityLearn 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../../_static/documentation_options.js?v=6c02275b"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -98,7 +98,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">CarbonIntensity</span><span class="p">,</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="n">Pricing</span><span class="p">,</span> <span class="n">TOLERANCE</span><span class="p">,</span> <span class="n">Weather</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dynamics</span><span class="p">,</span> <span class="n">LSTMDynamics</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.electric_vehicle_charger</span><span class="w"> </span><span class="kn">import</span> <span class="n">Charger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.energy_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Battery</span><span class="p">,</span> <span class="n">ElectricDevice</span><span class="p">,</span> <span class="n">ElectricHeater</span><span class="p">,</span> <span class="n">HeatPump</span><span class="p">,</span> <span class="n">PV</span><span class="p">,</span> <span class="n">StorageDevice</span><span class="p">,</span> <span class="n">StorageTank</span><span class="p">,</span> <span class="n">WashingMachine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.energy_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Battery</span><span class="p">,</span> <span class="n">DeferrableAppliance</span><span class="p">,</span> <span class="n">ElectricDevice</span><span class="p">,</span> <span class="n">ElectricHeater</span><span class="p">,</span> <span class="n">HeatPump</span><span class="p">,</span> <span class="n">PV</span><span class="p">,</span> <span class="n">StorageDevice</span><span class="p">,</span> <span class="n">StorageTank</span><span class="p">,</span> <span class="n">WashingMachine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.building_ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">BuildingOpsService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.units</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">normalized_capacity_action_to_energy_kwh</span><span class="p">,</span>
@@ -190,7 +190,9 @@
         <span class="n">maximum_temperature_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">observation_space_limit_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">demand_observation_limit_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">simulate_power_outage</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">stochastic_power_outage</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">stochastic_power_outage_model</span><span class="p">:</span> <span class="n">PowerOutage</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">electric_vehicle_chargers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Charger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">time_step_ratio</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">washing_machines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">WashingMachine</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
+        <span class="n">electric_vehicle_chargers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Charger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">time_step_ratio</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">deferrable_appliances</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DeferrableAppliance</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">washing_machines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">WashingMachine</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
     <span class="p">):</span>
         <span class="n">charging_constraints</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;charging_constraints&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">electrical_service</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;electrical_service&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -215,7 +217,7 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_action_based_time_step_hours_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span> <span class="o">/</span> <span class="mi">3600</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stochastic_power_outage_model</span> <span class="o">=</span> <span class="n">stochastic_power_outage_model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span> <span class="o">=</span> <span class="n">washing_machines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliances</span> <span class="o">=</span> <span class="n">deferrable_appliances</span> <span class="k">if</span> <span class="n">deferrable_appliances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">washing_machines</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span> <span class="o">=</span> <span class="n">electric_vehicle_chargers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">energy_simulation</span> <span class="o">=</span> <span class="n">energy_simulation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weather</span> <span class="o">=</span> <span class="n">weather</span>
@@ -360,10 +362,16 @@
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_electrical_storage_phase_connection&#39;</span><span class="p">,</span> <span class="s1">&#39;L1&#39;</span><span class="p">)</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">washing_machines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">WashingMachine</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Electric Vehicle Chargers associated with the building for charging connected eletric vehicles.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deferrable_appliances</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">DeferrableAppliance</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deferrable appliances associated with the building.&quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__washing_machines</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__deferrable_appliances</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">washing_machines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">DeferrableAppliance</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backward-compatible alias for deferrable appliances.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliances</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -594,10 +602,16 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chargers_electricity_consumption</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">washing_machines_electricity_consumption</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Electricity consumption of chargers time series, in [kWh].&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deferrable_appliances_electricity_consumption</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Electricity consumption of deferrable appliances time series, in [kWh].&quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__washing_machines_electricity_consumption</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__deferrable_appliances_electricity_consumption</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">washing_machines_electricity_consumption</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backward-compatible alias for deferrable appliance electricity consumption.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliances_electricity_consumption</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_from_cooling_device_to_cooling_storage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -875,9 +889,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__electric_vehicle_chargers</span> <span class="o">=</span> <span class="n">electric_vehicle_chargers</span> <span class="k">if</span> <span class="n">electric_vehicle_chargers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_charger_lookup</span><span class="p">()</span>
 
+    <span class="nd">@deferrable_appliances</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deferrable_appliances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deferrable_appliances</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DeferrableAppliance</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__deferrable_appliances</span> <span class="o">=</span> <span class="n">deferrable_appliances</span> <span class="k">if</span> <span class="n">deferrable_appliances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+
     <span class="nd">@washing_machines</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">washing_machines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">washing_machines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">WashingMachine</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__washing_machines</span> <span class="o">=</span> <span class="n">washing_machines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliances</span> <span class="o">=</span> <span class="n">washing_machines</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_charger_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">chargers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__electric_vehicle_chargers</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_Building__electric_vehicle_chargers&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">[]</span>
@@ -1463,16 +1481,24 @@
         <span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="Building.update_deferrable_appliance_observations">
+<a class="viewcode-back" href="../../api/citylearn.building.html#citylearn.building.Building.update_deferrable_appliance_observations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_deferrable_appliance_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">,</span> <span class="n">valid_observations</span><span class="p">,</span> <span class="n">deferrable_appliances</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compatibility wrapper for deferrable-appliance observation service.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ops_service</span><span class="o">.</span><span class="n">update_deferrable_appliance_observations</span><span class="p">(</span>
+            <span class="n">observations</span><span class="p">,</span>
+            <span class="n">valid_observations</span><span class="p">,</span>
+            <span class="n">deferrable_appliances</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="Building.update_washing_machine_observations">
 <a class="viewcode-back" href="../../api/citylearn.building.html#citylearn.building.Building.update_washing_machine_observations">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_washing_machine_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">,</span> <span class="n">valid_observations</span><span class="p">,</span> <span class="n">washing_machines</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compatibility wrapper for washing-machine observation service.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backward-compatible wrapper for old washing-machine integrations.&quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ops_service</span><span class="o">.</span><span class="n">update_washing_machine_observations</span><span class="p">(</span>
-            <span class="n">observations</span><span class="p">,</span>
-            <span class="n">valid_observations</span><span class="p">,</span>
-            <span class="n">washing_machines</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_deferrable_appliance_observations</span><span class="p">(</span><span class="n">observations</span><span class="p">,</span> <span class="n">valid_observations</span><span class="p">,</span> <span class="n">washing_machines</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_observations_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
@@ -1529,7 +1555,8 @@
         <span class="n">cooling_or_heating_device_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">cooling_device_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">heating_device_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">cooling_storage_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">heating_storage_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">dhw_storage_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">electrical_storage_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">washing_machine_actions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dhw_storage_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">electrical_storage_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">deferrable_appliance_actions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">washing_machine_actions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">electric_vehicle_storage_actions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Update cooling and heating demand for next timestep and charge/discharge storage devices.&quot;&quot;&quot;</span>
@@ -1542,7 +1569,7 @@
             <span class="n">heating_storage_action</span><span class="o">=</span><span class="n">heating_storage_action</span><span class="p">,</span>
             <span class="n">dhw_storage_action</span><span class="o">=</span><span class="n">dhw_storage_action</span><span class="p">,</span>
             <span class="n">electrical_storage_action</span><span class="o">=</span><span class="n">electrical_storage_action</span><span class="p">,</span>
-            <span class="n">washing_machine_actions</span><span class="o">=</span><span class="n">washing_machine_actions</span><span class="p">,</span>
+            <span class="n">deferrable_appliance_actions</span><span class="o">=</span><span class="n">deferrable_appliance_actions</span> <span class="k">if</span> <span class="n">deferrable_appliance_actions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">washing_machine_actions</span><span class="p">,</span>
             <span class="n">electric_vehicle_storage_actions</span><span class="o">=</span><span class="n">electric_vehicle_storage_actions</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -1967,15 +1994,14 @@
                             <span class="n">low_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
                             <span class="n">high_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
 
-            <span class="k">elif</span> <span class="s1">&#39;washing_machine&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">washing_machine</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">washing_machine</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_start_time_step&#39;</span><span class="p">:</span>
-                            <span class="n">low_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-                            <span class="n">high_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">24</span>
-                        <span class="k">elif</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">washing_machine</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_end_time_step&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
-                            <span class="n">low_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-                            <span class="n">high_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">24</span>
+            <span class="k">elif</span> <span class="s1">&#39;deferrable_appliance&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">low_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+                <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_ratio&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;pending&#39;</span><span class="p">,</span> <span class="s1">&#39;running&#39;</span><span class="p">,</span> <span class="s1">&#39;can_start&#39;</span><span class="p">,</span> <span class="s1">&#39;deadline_missed&#39;</span><span class="p">)):</span>
+                    <span class="n">high_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="k">elif</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_kwh&#39;</span><span class="p">):</span>
+                    <span class="n">high_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0e6</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">high_limit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">simulation_time_steps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dhw_device_efficiency&#39;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dhw_device</span><span class="p">,</span> <span class="n">HeatPump</span><span class="p">):</span>
                     <span class="n">cop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dhw_device</span><span class="o">.</span><span class="n">get_cop</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;outdoor_dry_bulb_temperature&#39;</span><span class="p">],</span> <span class="n">heating</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2186,12 +2212,9 @@
                             <span class="n">high_limit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  <span class="c1"># For discharging limit</span>
                             <span class="n">low_limit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">discharging_limit</span><span class="p">)</span>  <span class="c1"># For charging limit</span>
             
-            <span class="k">elif</span> <span class="s1">&#39;washing_machine&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
-                <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">wm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">wm</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span>
-                            <span class="n">low_limit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
-                            <span class="n">high_limit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>                
+            <span class="k">elif</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance_&#39;</span><span class="p">):</span>
+                <span class="n">low_limit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">high_limit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="s1">&#39;storage&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;electrical_storage&#39;</span><span class="p">:</span>
@@ -2527,9 +2550,8 @@
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span><span class="p">:</span>
                 <span class="n">c</span><span class="o">.</span><span class="n">next_time_step</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">wm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span><span class="p">:</span>
-                <span class="n">wm</span><span class="o">.</span><span class="n">next_time_step</span><span class="p">()</span>        
+        <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliances</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">appliance</span><span class="o">.</span><span class="n">next_time_step</span><span class="p">()</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">next_time_step</span><span class="p">()</span></div>
 
@@ -2557,9 +2579,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">pass</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">wm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span><span class="p">:</span>
-                <span class="n">wm</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>      
+        <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliances</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">appliance</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
         <span class="c1"># variable reset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_dynamic_variables</span><span class="p">()</span>
@@ -2576,7 +2597,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__net_electricity_consumption_cost</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__power_outage_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_power_outage_signal</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__chargers_electricity_consumption</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__washing_machines_electricity_consumption</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__deferrable_appliances_electricity_consumption</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_default_charging_headroom</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_charging_constraint_histories</span><span class="p">()</span></div>
 
@@ -2641,11 +2662,11 @@
         <span class="n">set_data_window</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">carbon_intensity</span><span class="p">,</span> <span class="n">start_time_step</span><span class="p">,</span> <span class="n">end_time_step</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span> <span class="ow">or</span> <span class="p">[]:</span>
-            <span class="n">set_data_window</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_simulation</span><span class="p">,</span> <span class="n">start_time_step</span><span class="p">,</span> <span class="n">end_time_step</span><span class="p">)</span>
+            <span class="n">set_data_window</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_simulation</span><span class="p">,</span> <span class="n">start_time_step</span><span class="p">,</span> <span class="n">end_time_step</span><span class="p">)</span></div>
 
-        <span class="k">for</span> <span class="n">washing_machine</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span> <span class="ow">or</span> <span class="p">[]:</span>
-            <span class="n">set_data_window</span><span class="p">(</span><span class="n">washing_machine</span><span class="o">.</span><span class="n">washing_machine_simulation</span><span class="p">,</span> <span class="n">start_time_step</span><span class="p">,</span> <span class="n">end_time_step</span><span class="p">)</span></div>
 
+        <span class="c1"># Deferrable appliance schedules use global time-step indices and are sparse,</span>
+        <span class="c1"># so no dense data-window adjustment is needed here.</span>
 
 <div class="viewcode-block" id="Building.update_variables">
 <a class="viewcode-back" href="../../api/citylearn.building.html#citylearn.building.Building.update_variables">[docs]</a>
@@ -2716,16 +2737,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__chargers_electricity_consumption</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">building_chargers_total_electricity_consumption</span>
 
-        <span class="n">building_washing_machines_total_electricity_consumption</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">building_deferrable_appliances_total_electricity_consumption</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliances</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">building_deferrable_appliances_total_electricity_consumption</span> <span class="o">+=</span> <span class="n">appliance</span><span class="o">.</span><span class="n">electricity_consumption</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">wm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">washing_machines</span><span class="p">:</span>
-                <span class="n">building_washing_machines_total_electricity_consumption</span> <span class="o">=</span> \
-                    <span class="n">building_washing_machines_total_electricity_consumption</span> <span class="o">+</span> <span class="n">wm</span><span class="o">.</span><span class="n">electricity_consumption</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">pass</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">__washing_machines_electricity_consumption</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">building_washing_machines_total_electricity_consumption</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__deferrable_appliances_electricity_consumption</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">building_deferrable_appliances_total_electricity_consumption</span>
 
         <span class="c1"># net electricity consumption</span>
         <span class="n">net_electricity_consumption</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -2738,7 +2754,7 @@
                                                     <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrical_storage</span><span class="o">.</span><span class="n">electricity_consumption</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> \
                                                         <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar_generation</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> \
                                                             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chargers_electricity_consumption</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> \
-                                                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__washing_machines_electricity_consumption</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span>
+                                                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__deferrable_appliances_electricity_consumption</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">pass</span>
 

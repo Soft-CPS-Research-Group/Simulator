@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 0.3.2 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../../_static/documentation_options.js?v=6c02275b"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -102,9 +102,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">EpisodeTracker</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.building</span><span class="w"> </span><span class="kn">import</span> <span class="n">Building</span><span class="p">,</span> <span class="n">DynamicsBuilding</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.cost_function</span><span class="w"> </span><span class="kn">import</span> <span class="n">CostFunction</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">CarbonIntensity</span><span class="p">,</span> <span class="n">DataSet</span><span class="p">,</span> <span class="n">OfflineDataError</span><span class="p">,</span> <span class="n">ChargerSimulation</span><span class="p">,</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="n">LogisticRegressionOccupantParameters</span><span class="p">,</span> <span class="n">Pricing</span><span class="p">,</span> <span class="n">WashingMachineSimulation</span><span class="p">,</span> <span class="n">Weather</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">CarbonIntensity</span><span class="p">,</span> <span class="n">DataSet</span><span class="p">,</span> <span class="n">OfflineDataError</span><span class="p">,</span> <span class="n">ChargerSimulation</span><span class="p">,</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="n">LogisticRegressionOccupantParameters</span><span class="p">,</span> <span class="n">Pricing</span><span class="p">,</span> <span class="n">Weather</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.electric_vehicle</span><span class="w"> </span><span class="kn">import</span> <span class="n">ElectricVehicle</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.energy_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Battery</span><span class="p">,</span> <span class="n">PV</span><span class="p">,</span> <span class="n">WashingMachine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.energy_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Battery</span><span class="p">,</span> <span class="n">DeferrableAppliance</span><span class="p">,</span> <span class="n">PV</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.exporter</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpisodeExporter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.kpi</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnKPIService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.loading</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnLoadingService</span>
@@ -1667,14 +1667,14 @@
 
 <div class="viewcode-block" id="CityLearnEnv.process_metadata">
 <a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.process_metadata">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">process_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">building_schema</span><span class="p">,</span> <span class="n">chargers_list</span><span class="p">,</span> <span class="n">washing_machines_list</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">energy_simulation</span><span class="p">:</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">building_schema</span><span class="p">,</span> <span class="n">chargers_list</span><span class="p">,</span> <span class="n">deferrable_appliances_list</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">energy_simulation</span><span class="p">:</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compatibility wrapper for metadata processing service.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loading_service</span><span class="o">.</span><span class="n">process_metadata</span><span class="p">(</span>
             <span class="n">schema</span><span class="p">,</span>
             <span class="n">building_schema</span><span class="p">,</span>
             <span class="n">chargers_list</span><span class="p">,</span>
-            <span class="n">washing_machines_list</span><span class="p">,</span>
+            <span class="n">deferrable_appliances_list</span><span class="p">,</span>
             <span class="n">index</span><span class="p">,</span>
             <span class="n">energy_simulation</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -1692,21 +1692,26 @@
             <span class="n">time_step_ratio</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load_washing_machine</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_deferrable_appliance</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">washing_machine_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">appliance_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">building_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-        <span class="n">washing_machine_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">appliance_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">episode_tracker</span><span class="p">:</span> <span class="n">EpisodeTracker</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WashingMachine</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compatibility wrapper for washing machine loading service.&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DeferrableAppliance</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compatibility wrapper for deferrable appliance loading service.&quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loading_service</span><span class="o">.</span><span class="n">load_washing_machine</span><span class="p">(</span>
-            <span class="n">washing_machine_name</span><span class="p">,</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loading_service</span><span class="o">.</span><span class="n">load_deferrable_appliance</span><span class="p">(</span>
+            <span class="n">appliance_name</span><span class="p">,</span>
+            <span class="n">building_name</span><span class="p">,</span>
             <span class="n">schema</span><span class="p">,</span>
-            <span class="n">washing_machine_schema</span><span class="p">,</span>
+            <span class="n">appliance_schema</span><span class="p">,</span>
             <span class="n">episode_tracker</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_washing_machine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loading_service</span><span class="o">.</span><span class="n">load_washing_machine</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

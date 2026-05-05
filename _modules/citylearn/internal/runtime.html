@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.runtime &mdash; CityLearn 0.3.2 documentation</title>
+  <title>citylearn.internal.runtime &mdash; CityLearn 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -317,22 +317,22 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_building</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">):</span>
             <span class="n">action_dict</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">electric_vehicle_actions</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="n">washing_machine_actions</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">deferrable_appliance_actions</span> <span class="o">=</span> <span class="p">{}</span>
 
             <span class="k">for</span> <span class="n">action_name</span><span class="p">,</span> <span class="n">action</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">active_actions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">building_actions</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
                 <span class="k">if</span> <span class="s1">&#39;electric_vehicle_storage&#39;</span> <span class="ow">in</span> <span class="n">action_name</span><span class="p">:</span>
                     <span class="n">charger_id</span> <span class="o">=</span> <span class="n">action_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;electric_vehicle_storage_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
                     <span class="n">electric_vehicle_actions</span><span class="p">[</span><span class="n">charger_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
-                <span class="k">elif</span> <span class="s1">&#39;washing_machine&#39;</span> <span class="ow">in</span> <span class="n">action_name</span><span class="p">:</span>
-                    <span class="n">washing_machine_actions</span><span class="p">[</span><span class="n">action_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
+                <span class="k">elif</span> <span class="n">action_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance_&#39;</span><span class="p">):</span>
+                    <span class="n">deferrable_appliance_actions</span><span class="p">[</span><span class="n">action_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">action_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">action_name</span><span class="si">}</span><span class="s1">_action&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
 
             <span class="k">if</span> <span class="n">electric_vehicle_actions</span><span class="p">:</span>
                 <span class="n">action_dict</span><span class="p">[</span><span class="s1">&#39;electric_vehicle_storage_actions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">electric_vehicle_actions</span>
 
-            <span class="k">if</span> <span class="n">washing_machine_actions</span><span class="p">:</span>
-                <span class="n">action_dict</span><span class="p">[</span><span class="s1">&#39;washing_machine_actions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">washing_machine_actions</span>
+            <span class="k">if</span> <span class="n">deferrable_appliance_actions</span><span class="p">:</span>
+                <span class="n">action_dict</span><span class="p">[</span><span class="s1">&#39;deferrable_appliance_actions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deferrable_appliance_actions</span>
 
             <span class="n">parsed_actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action_dict</span><span class="p">)</span>
 
