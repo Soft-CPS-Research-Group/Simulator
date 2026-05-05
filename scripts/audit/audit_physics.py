@@ -219,6 +219,9 @@ def _desired_audit_action(action_name: str, step_index: int) -> float:
     if name in {"cooling_storage", "heating_storage", "dhw_storage"}:
         return 0.15 if phase in {0, 1, 2} else -0.10
 
+    if name == "start":
+        return 1.0 if phase == 0 else 0.0
+
     return 0.0
 
 
@@ -229,35 +232,33 @@ def _build_audit_action(env, step_index: int) -> Tuple[Any, bool, str]:
     if interface == "entity":
         space = env.action_space
         try:
-            building_space = space["tables"]["building"]
-            charger_space = space["tables"]["charger"]
+            table_spaces = space["tables"]
         except Exception as exc:
-            return None, False, f"Entity action space missing tables/building/charger: {exc}"
+            return None, False, f"Entity action space missing tables mapping: {exc}"
 
-        building = np.zeros(building_space.shape, dtype=np.float32)
-        charger = np.zeros(charger_space.shape, dtype=np.float32)
         specs = getattr(env, "entity_specs", {})
         action_specs = specs.get("actions", {}) if isinstance(specs, Mapping) else {}
-        building_features = (
-            action_specs.get("building", {}).get("features", [])
-            if isinstance(action_specs.get("building", {}), Mapping)
-            else []
-        )
-        charger_features = (
-            action_specs.get("charger", {}).get("features", [])
-            if isinstance(action_specs.get("charger", {}), Mapping)
-            else []
-        )
+        action_tables = {}
 
-        for col, feature in enumerate(building_features):
-            if col < building.shape[1]:
-                building[:, col] = _desired_audit_action(str(feature), step_index)
+        for table_name, table_space in table_spaces.items():
+            table = np.zeros(table_space.shape, dtype=np.float32)
+            table_action_specs = action_specs.get(table_name, {})
+            features = (
+                table_action_specs.get("features", [])
+                if isinstance(table_action_specs, Mapping)
+                else []
+            )
 
-        for col, feature in enumerate(charger_features):
-            if col < charger.shape[1]:
-                charger[:, col] = _desired_audit_action(str(feature), step_index)
+            for col, feature in enumerate(features):
+                if col < table.shape[1]:
+                    desired = _desired_audit_action(str(feature), step_index)
+                    low = getattr(table_space, "low", np.full(table_space.shape, -np.inf, dtype=np.float32))
+                    high = getattr(table_space, "high", np.full(table_space.shape, np.inf, dtype=np.float32))
+                    table[:, col] = np.clip(desired, low[:, col], high[:, col])
 
-        action = {"tables": {"building": building, "charger": charger}}
+            action_tables[table_name] = table
+
+        action = {"tables": action_tables}
         if hasattr(space, "contains") and not bool(space.contains(action)):
             return action, False, "Entity action does not satisfy env.action_space.contains(action)."
         return action, True, ""
@@ -433,7 +434,7 @@ def _check_net_balance(env, settled_time_step: int) -> Tuple[bool, List[str], in
                 + float(building.electrical_storage_electricity_consumption[t])
                 + float(building.solar_generation[t])
                 + float(building.chargers_electricity_consumption[t])
-                + float(building.washing_machines_electricity_consumption[t])
+                + float(building.deferrable_appliances_electricity_consumption[t])
             )
         except Exception as exc:
             errors.append(f"{name} net balance unavailable at t={t}: {exc}")

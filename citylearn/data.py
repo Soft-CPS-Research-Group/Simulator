@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from platformdirs import user_cache_dir
 import shutil
-from typing import Any, Iterable, Mapping, List, Optional, Union
+from typing import Any, Dict, Iterable, Mapping, List, Optional, Union
 import numpy as np
 import pandas as pd
 import requests
@@ -969,6 +969,211 @@ class ChargerSimulation(TimeSeriesData):
             ),
             estimated_soc_arrival_arr
         ).astype('float32')
+
+class DeferrableApplianceSimulation:
+    """Sparse deferrable-appliance cycle catalogue and flexibility schedule.
+
+    Cycle profile energy values are always interpreted as kWh per simulation step.
+    Schedule time fields are global simulation time-step indices.
+    """
+
+    PROFILE_REQUIRED_COLUMNS = {
+        'profile_id',
+        'duration_steps',
+        'total_energy_kwh',
+        'load_profile',
+    }
+    SCHEDULE_REQUIRED_COLUMNS = {
+        'cycle_id',
+        'profile_id',
+        'earliest_start_time_step',
+        'latest_start_time_step',
+        'deadline_time_step',
+        'priority',
+        'must_run',
+    }
+
+    def __init__(
+        self,
+        *,
+        cycle_profiles: Mapping[str, Mapping[str, Any]],
+        flexibility_schedule: Iterable[Mapping[str, Any]],
+        source_label: str = None,
+    ):
+        self.source_label = source_label or 'deferrable_appliance'
+        self.cycle_profiles = dict(cycle_profiles)
+        self.flexibility_schedule = list(flexibility_schedule)
+        self._validate_non_overlapping_schedule()
+
+    @classmethod
+    def from_dataframes(
+        cls,
+        *,
+        cycle_profiles: pd.DataFrame,
+        flexibility_schedule: pd.DataFrame,
+        source_label: str = None,
+    ) -> 'DeferrableApplianceSimulation':
+        source_label = source_label or 'deferrable_appliance'
+        missing_profiles = cls.PROFILE_REQUIRED_COLUMNS.difference(set(cycle_profiles.columns))
+        if missing_profiles:
+            raise ValueError(f'{source_label}.cycle_profiles is missing columns: {sorted(missing_profiles)}.')
+
+        missing_schedule = cls.SCHEDULE_REQUIRED_COLUMNS.difference(set(flexibility_schedule.columns))
+        if missing_schedule:
+            raise ValueError(f'{source_label}.flexibility_schedule is missing columns: {sorted(missing_schedule)}.')
+
+        profiles: Dict[str, Mapping[str, Any]] = {}
+        for row_index, row in cycle_profiles.iterrows():
+            profile_id = str(row['profile_id']).strip()
+            if profile_id == '' or profile_id.lower() == 'nan':
+                raise ValueError(f'{source_label}.cycle_profiles[{row_index}].profile_id is required.')
+            if profile_id in profiles:
+                raise ValueError(f"{source_label}.cycle_profiles contains duplicate profile_id '{profile_id}'.")
+
+            load_profile = cls.parse_load_profile(row['load_profile'])
+            if load_profile.size == 0:
+                raise ValueError(f"{source_label}.cycle_profiles profile '{profile_id}' has an empty load_profile.")
+
+            try:
+                duration_steps = int(row['duration_steps'])
+            except Exception as exc:
+                raise ValueError(f"{source_label}.cycle_profiles profile '{profile_id}' duration_steps must be an integer.") from exc
+
+            if duration_steps <= 0:
+                raise ValueError(f"{source_label}.cycle_profiles profile '{profile_id}' duration_steps must be > 0.")
+            if duration_steps != int(load_profile.size):
+                raise ValueError(
+                    f"{source_label}.cycle_profiles profile '{profile_id}' duration_steps={duration_steps} "
+                    f"does not match load_profile length={load_profile.size}."
+                )
+
+            try:
+                total_energy = float(row['total_energy_kwh'])
+            except Exception as exc:
+                raise ValueError(f"{source_label}.cycle_profiles profile '{profile_id}' total_energy_kwh must be numeric.") from exc
+
+            if not np.isfinite(total_energy) or total_energy < 0.0:
+                raise ValueError(f"{source_label}.cycle_profiles profile '{profile_id}' total_energy_kwh must be finite and >= 0.")
+
+            profile_sum = float(np.sum(load_profile))
+            if abs(profile_sum - total_energy) > max(1.0e-6, 1.0e-5 * max(abs(total_energy), 1.0)):
+                raise ValueError(
+                    f"{source_label}.cycle_profiles profile '{profile_id}' total_energy_kwh={total_energy} "
+                    f"does not match load_profile sum={profile_sum}."
+                )
+
+            profiles[profile_id] = {
+                'profile_id': profile_id,
+                'duration_steps': duration_steps,
+                'total_energy_kwh': total_energy,
+                'load_profile': load_profile.astype('float32'),
+            }
+
+        schedule = []
+        seen_cycle_ids = set()
+        for row_index, row in flexibility_schedule.iterrows():
+            cycle_id = str(row['cycle_id']).strip()
+            if cycle_id == '' or cycle_id.lower() == 'nan':
+                raise ValueError(f'{source_label}.flexibility_schedule[{row_index}].cycle_id is required.')
+            if cycle_id in seen_cycle_ids:
+                raise ValueError(f"{source_label}.flexibility_schedule contains duplicate cycle_id '{cycle_id}'.")
+            seen_cycle_ids.add(cycle_id)
+
+            profile_id = str(row['profile_id']).strip()
+            if profile_id not in profiles:
+                raise ValueError(
+                    f"{source_label}.flexibility_schedule cycle '{cycle_id}' references unknown profile_id '{profile_id}'."
+                )
+            profile = profiles[profile_id]
+
+            try:
+                earliest = int(row['earliest_start_time_step'])
+                latest = int(row['latest_start_time_step'])
+                deadline = int(row['deadline_time_step'])
+            except Exception as exc:
+                raise ValueError(
+                    f"{source_label}.flexibility_schedule cycle '{cycle_id}' time-step fields must be integers."
+                ) from exc
+
+            if earliest < 0 or latest < 0 or deadline < 0:
+                raise ValueError(f"{source_label}.flexibility_schedule cycle '{cycle_id}' time-step fields must be >= 0.")
+            if earliest > latest:
+                raise ValueError(
+                    f"{source_label}.flexibility_schedule cycle '{cycle_id}' earliest_start_time_step "
+                    f"cannot be greater than latest_start_time_step."
+                )
+            if latest + int(profile['duration_steps']) - 1 > deadline:
+                raise ValueError(
+                    f"{source_label}.flexibility_schedule cycle '{cycle_id}' cannot finish by deadline when "
+                    f"started at latest_start_time_step."
+                )
+
+            try:
+                priority = float(row['priority'])
+            except Exception as exc:
+                raise ValueError(f"{source_label}.flexibility_schedule cycle '{cycle_id}' priority must be numeric.") from exc
+            if not np.isfinite(priority):
+                raise ValueError(f"{source_label}.flexibility_schedule cycle '{cycle_id}' priority must be finite.")
+
+            schedule.append({
+                'cycle_id': cycle_id,
+                'profile_id': profile_id,
+                'earliest_start_time_step': earliest,
+                'latest_start_time_step': latest,
+                'deadline_time_step': deadline,
+                'priority': float(np.clip(priority, 0.0, 1.0)),
+                'must_run': parse_bool(row['must_run'], default=True, path=f'{source_label}.flexibility_schedule.{cycle_id}.must_run'),
+                'duration_steps': int(profile['duration_steps']),
+                'total_energy_kwh': float(profile['total_energy_kwh']),
+                'load_profile': profile['load_profile'],
+            })
+
+        schedule.sort(key=lambda item: (item['earliest_start_time_step'], item['latest_start_time_step'], item['cycle_id']))
+        return cls(cycle_profiles=profiles, flexibility_schedule=schedule, source_label=source_label)
+
+    @staticmethod
+    def parse_load_profile(profile) -> np.ndarray:
+        if profile is None:
+            return np.array([], dtype='float32')
+
+        if isinstance(profile, (list, tuple, np.ndarray)):
+            try:
+                values = np.array(profile, dtype='float32').flatten()
+            except (TypeError, ValueError):
+                return np.array([], dtype='float32')
+        else:
+            text = str(profile).strip()
+            if text == '' or text.lower() in {'nan', 'none'} or text == '-1':
+                return np.array([], dtype='float32')
+            try:
+                parsed = ast.literal_eval(text)
+            except (SyntaxError, ValueError):
+                return np.array([], dtype='float32')
+            if np.isscalar(parsed):
+                parsed = [parsed]
+            try:
+                values = np.array(parsed, dtype='float32').flatten()
+            except (TypeError, ValueError):
+                return np.array([], dtype='float32')
+
+        if values.size == 0:
+            return np.array([], dtype='float32')
+
+        values = values[np.isfinite(values)]
+        if values.size == 0 or np.any(values < 0.0):
+            return np.array([], dtype='float32')
+
+        return values.astype('float32')
+
+    def _validate_non_overlapping_schedule(self):
+        previous = None
+        for cycle in self.flexibility_schedule:
+            if previous is not None and int(cycle['earliest_start_time_step']) <= int(previous['deadline_time_step']):
+                raise ValueError(
+                    f"{self.source_label}.flexibility_schedule has overlapping cycles for one appliance: "
+                    f"'{previous['cycle_id']}' and '{cycle['cycle_id']}'."
+                )
+            previous = cycle
 
 class WashingMachineSimulation(TimeSeriesData):
     """Washing Machine Simulation data class.

@@ -14,40 +14,85 @@ from citylearn.citylearn import CityLearnEnv
 
 
 SOURCE_DATASET = Path(__file__).resolve().parent / "data/minute_ev_demo"
+DEFERRABLE_OBSERVATIONS = [
+    "deferrable_appliance_pending",
+    "deferrable_appliance_running",
+    "deferrable_appliance_can_start",
+    "deferrable_appliance_deadline_missed",
+    "deferrable_appliance_earliest_start_time_step",
+    "deferrable_appliance_latest_start_time_step",
+    "deferrable_appliance_deadline_time_step",
+    "deferrable_appliance_hours_until_latest_start",
+    "deferrable_appliance_hours_until_deadline",
+    "deferrable_appliance_slack_steps",
+    "deferrable_appliance_slack_ratio",
+    "deferrable_appliance_urgency_ratio",
+    "deferrable_appliance_cycle_duration_steps",
+    "deferrable_appliance_cycle_energy_kwh",
+    "deferrable_appliance_remaining_energy_kwh",
+    "deferrable_appliance_current_step_energy_kwh",
+    "deferrable_appliance_priority",
+]
 
 
 def _copy_minute_dataset(tmp_path: Path) -> Path:
     dataset_dir = tmp_path / "minute_ev_demo"
     shutil.copytree(SOURCE_DATASET, dataset_dir)
 
-    washing_machine = pd.DataFrame(
-        {
-            "day_type": [1] * 8,
-            "hour": list(range(8)),
-            "wm_start_time_step": [-1, -1, 2, 2, 4, 4, -1, -1],
-            "wm_end_time_step": [-1, -1, 3, 3, 5, 5, -1, -1],
-            "load_profile": ["-1", "-1", "[0.1, 0.2]", "[0.1, 0.2]", "[0.3]", "[0.3]", "-1", "-1"],
-        }
-    )
-    washing_machine.to_csv(dataset_dir / "washing_machine_1.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "profile_id": "quick",
+                "duration_steps": 2,
+                "total_energy_kwh": 0.3,
+                "load_profile": "[0.1,0.2]",
+            },
+            {
+                "profile_id": "short",
+                "duration_steps": 1,
+                "total_energy_kwh": 0.3,
+                "load_profile": "[0.3]",
+            },
+        ]
+    ).to_csv(dataset_dir / "deferrable_appliance_1_cycle_profiles.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "cycle_id": "cycle_1",
+                "profile_id": "quick",
+                "earliest_start_time_step": 2,
+                "latest_start_time_step": 3,
+                "deadline_time_step": 4,
+                "priority": 0.7,
+                "must_run": True,
+            },
+            {
+                "cycle_id": "cycle_2",
+                "profile_id": "short",
+                "earliest_start_time_step": 5,
+                "latest_start_time_step": 5,
+                "deadline_time_step": 5,
+                "priority": 1.0,
+                "must_run": True,
+            },
+        ]
+    ).to_csv(dataset_dir / "deferrable_appliance_1_flexibility_schedule.csv", index=False)
 
     schema_path = dataset_dir / "schema.json"
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     schema["root_directory"] = str(dataset_dir)
-    schema["observations"]["washing_machine_start_time_step"] = {
-        "active": True,
-        "shared_in_central_agent": True,
-    }
-    schema["observations"]["washing_machine_end_time_step"] = {
-        "active": True,
-        "shared_in_central_agent": True,
-    }
-    schema["actions"]["washing_machine"] = {"active": True}
-    schema["buildings"]["Building_1"]["washing_machines"] = {
-        "washing_machine_1": {
-            "type": "citylearn.energy_model.WashingMachine",
+    for observation in DEFERRABLE_OBSERVATIONS:
+        schema["observations"][observation] = {
+            "active": True,
+            "shared_in_central_agent": True,
+        }
+    schema["actions"]["deferrable_appliance"] = {"active": True}
+    schema["buildings"]["Building_1"]["deferrable_appliances"] = {
+        "deferrable_appliance_1": {
+            "type": "citylearn.energy_model.DeferrableAppliance",
             "autosize": False,
-            "washing_machine_energy_simulation": "washing_machine_1.csv",
+            "cycle_profiles_file": "deferrable_appliance_1_cycle_profiles.csv",
+            "flexibility_schedule_file": "deferrable_appliance_1_flexibility_schedule.csv",
         }
     }
     schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
@@ -74,10 +119,9 @@ def _convert_schema_sources_to_parquet(schema_path: Path) -> Path:
         for charger in (building.get("chargers") or {}).values():
             charger["charger_simulation"] = convert(charger["charger_simulation"])
 
-        for washing_machine in (building.get("washing_machines") or {}).values():
-            washing_machine["washing_machine_energy_simulation"] = convert(
-                washing_machine["washing_machine_energy_simulation"]
-            )
+        for appliance in (building.get("deferrable_appliances") or {}).values():
+            appliance["cycle_profiles_file"] = convert(appliance["cycle_profiles_file"])
+            appliance["flexibility_schedule_file"] = convert(appliance["flexibility_schedule_file"])
 
     parquet_schema_path = dataset_dir / "schema_parquet.json"
     parquet_schema_path.write_text(json.dumps(converted, indent=2), encoding="utf-8")
@@ -111,9 +155,8 @@ def _rollout_trace(schema_path: Path):
         raw_charger_rows = len(
             building.electric_vehicle_chargers[0].charger_simulation.__dict__["_electric_vehicle_charger_state"]
         )
-        raw_washing_rows = len(
-            building.washing_machines[0].washing_machine_simulation.__dict__["_wm_start_time_step"]
-        )
+        raw_profile_rows = len(building.deferrable_appliances[0].deferrable_appliance_simulation.cycle_profiles)
+        raw_schedule_rows = len(building.deferrable_appliances[0].deferrable_appliance_simulation.flexibility_schedule)
 
         trace = {
             "reset_observations": np.asarray(observations[0], dtype="float64"),
@@ -123,14 +166,15 @@ def _rollout_trace(schema_path: Path):
                 raw_pricing_rows,
                 raw_carbon_rows,
                 raw_charger_rows,
-                raw_washing_rows,
+                raw_profile_rows,
+                raw_schedule_rows,
             ),
             "episode_starts": [env.episode_tracker.episode_start_time_step],
             "net": [],
             "cost": [],
             "emission": [],
             "charger_state": [],
-            "washing_start": [],
+            "deferrable_earliest_start": [],
         }
 
         for _ in range(2):
@@ -142,8 +186,8 @@ def _rollout_trace(schema_path: Path):
             trace["charger_state"].append(
                 float(building.electric_vehicle_chargers[0].charger_simulation.electric_vehicle_charger_state[t])
             )
-            trace["washing_start"].append(
-                int(building.washing_machines[0].washing_machine_simulation.wm_start_time_step[t])
+            trace["deferrable_earliest_start"].append(
+                int(building.deferrable_appliances[0].observations()["earliest_start_time_step"])
             )
 
         env.reset(seed=0)
@@ -160,7 +204,7 @@ def test_windowed_loader_reads_only_simulation_window_and_parquet_matches_csv(tm
     csv_trace = _rollout_trace(csv_schema_path)
     parquet_trace = _rollout_trace(parquet_schema_path)
 
-    assert csv_trace["raw_rows"] == (5, 5, 5, 5, 5, 5)
+    assert csv_trace["raw_rows"] == (5, 5, 5, 5, 5, 2, 2)
     assert parquet_trace["raw_rows"] == csv_trace["raw_rows"]
     assert parquet_trace["episode_starts"] == csv_trace["episode_starts"]
     np.testing.assert_allclose(parquet_trace["reset_observations"], csv_trace["reset_observations"])
@@ -168,7 +212,7 @@ def test_windowed_loader_reads_only_simulation_window_and_parquet_matches_csv(tm
     np.testing.assert_allclose(parquet_trace["cost"], csv_trace["cost"])
     np.testing.assert_allclose(parquet_trace["emission"], csv_trace["emission"])
     assert parquet_trace["charger_state"] == pytest.approx(csv_trace["charger_state"])
-    assert parquet_trace["washing_start"] == csv_trace["washing_start"]
+    assert parquet_trace["deferrable_earliest_start"] == csv_trace["deferrable_earliest_start"]
 
 
 def test_shared_weather_pricing_and_carbon_sources_are_cached_between_buildings(tmp_path: Path):
@@ -179,7 +223,7 @@ def test_shared_weather_pricing_and_carbon_sources_are_cached_between_buildings(
     schema["buildings"]["Building_2"] = copy.deepcopy(schema["buildings"]["Building_1"])
     schema["buildings"]["Building_2"]["energy_simulation"] = "Building_2.csv"
     schema["buildings"]["Building_2"].pop("chargers", None)
-    schema["buildings"]["Building_2"].pop("washing_machines", None)
+    schema["buildings"]["Building_2"].pop("deferrable_appliances", None)
     pd.read_csv(dataset_dir / "Building_1.csv").to_csv(dataset_dir / "Building_2.csv", index=False)
     schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
 

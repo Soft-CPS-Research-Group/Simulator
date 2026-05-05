@@ -506,7 +506,7 @@ class BasicElectricVehicleRBC_ReferenceController(BasicRBC): #change the name
                         value = 1
                         action_map[n][hour] = value
 
-                elif "washing_machine" in n:
+                elif "deferrable_appliance" in n:
                     for hour in Building.get_periodic_observation_metadata()['hour']:
                         value = 1
                         action_map[n][hour] = value        

@@ -15,23 +15,24 @@ def _zero_entity_actions(env: CityLearnEnv):
     tables = env.action_space["tables"]
     return {
         "tables": {
-            "building": np.zeros(tables["building"].shape, dtype="float32"),
-            "charger": np.zeros(tables["charger"].shape, dtype="float32"),
+            name: np.zeros(space.shape, dtype="float32")
+            for name, space in tables.items()
+            if name in {"building", "charger", "deferrable_appliance"}
         }
     }
 
 
 def _entity_storage_action(env: CityLearnEnv, value: float):
     tables = env.action_space["tables"]
-    building = np.zeros(tables["building"].shape, dtype="float32")
-    charger = np.zeros(tables["charger"].shape, dtype="float32")
+    payload = _zero_entity_actions(env)
+    building = payload["tables"]["building"]
     features = env.entity_specs["actions"]["building"]["features"]
 
     if "electrical_storage" not in features:
         pytest.skip("Dataset does not expose electrical_storage action in entity mode.")
 
     building[0, features.index("electrical_storage")] = value
-    return {"tables": {"building": building, "charger": charger}}
+    return payload
 
 
 def test_entity_interface_shapes_and_specs_are_consistent():

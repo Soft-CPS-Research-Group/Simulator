@@ -42,6 +42,17 @@ class PVRef:
     global_id: str
 
 
+@dataclass(frozen=True)
+class DeferrableApplianceRef:
+    """Resolved deferrable appliance location inside the environment."""
+
+    row: int
+    building_index: int
+    building_name: str
+    appliance_id: str
+    global_id: str
+
+
 class CityLearnEntityInterfaceService:
     """Build and parse canonical entity payloads."""
 
@@ -110,6 +121,25 @@ class CityLearnEntityInterfaceService:
         "generation_power_kw",
         "generation_energy_kwh_step",
         "installed_power_kw",
+    ]
+    DEFERRABLE_APPLIANCE_FEATURES = [
+        "pending",
+        "running",
+        "can_start",
+        "deadline_missed",
+        "earliest_start_time_step",
+        "latest_start_time_step",
+        "deadline_time_step",
+        "hours_until_latest_start",
+        "hours_until_deadline",
+        "slack_steps",
+        "slack_ratio",
+        "urgency_ratio",
+        "cycle_duration_steps",
+        "cycle_energy_kwh",
+        "remaining_energy_kwh",
+        "current_step_energy_kwh",
+        "priority",
     ]
     CORE_BUILDING_EXTRA_FEATURES = [
         "net_power_kw",
@@ -216,6 +246,7 @@ class CityLearnEntityInterfaceService:
         self._ev_obs.fill(0.0)
         self._storage_obs.fill(0.0)
         self._pv_obs.fill(0.0)
+        self._deferrable_appliance_obs.fill(0.0)
 
         building_feature_maps: List[Mapping[str, float]] = []
         building_electrical_metrics: List[Mapping[str, float]] = []
@@ -436,6 +467,15 @@ class CityLearnEntityInterfaceService:
                 for col, feature_name in enumerate(self._pv_features):
                     self._pv_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
 
+        for ref in self._deferrable_appliance_refs:
+            building = env.buildings[ref.building_index]
+            appliance = self._deferrable_appliance_by_building_and_id.get((ref.building_index, ref.appliance_id))
+            if appliance is None:
+                continue
+            values = appliance.observations()
+            for col, feature_name in enumerate(self._deferrable_appliance_features):
+                self._deferrable_appliance_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
+
         self._charger_to_ev_connected.fill(-1)
         self._charger_to_ev_connected_mask.fill(0.0)
         self._charger_to_ev_incoming.fill(-1)
@@ -464,12 +504,14 @@ class CityLearnEntityInterfaceService:
                 "ev": self._ev_obs.copy(),
                 "storage": self._storage_obs.copy(),
                 "pv": self._pv_obs.copy(),
+                "deferrable_appliance": self._deferrable_appliance_obs.copy(),
             },
             "edges": {
                 "district_to_building": self._district_to_building.copy(),
                 "building_to_charger": self._building_to_charger.copy(),
                 "building_to_storage": self._building_to_storage.copy(),
                 "building_to_pv": self._building_to_pv.copy(),
+                "building_to_deferrable_appliance": self._building_to_deferrable_appliance.copy(),
                 "charger_to_ev_connected": self._charger_to_ev_connected.copy(),
                 "charger_to_ev_connected_mask": self._charger_to_ev_connected_mask.copy(),
                 "charger_to_ev_incoming": self._charger_to_ev_incoming.copy(),
@@ -501,10 +543,16 @@ class CityLearnEntityInterfaceService:
         tables = actions.get("tables", actions)
         building_table = tables.get("building")
         charger_table = tables.get("charger")
+        deferrable_appliance_table = tables.get("deferrable_appliance")
 
         building_table = self._to_2d_array(building_table, rows=len(self._building_ids), cols=len(self._building_action_features))
         charger_table = self._to_2d_array(charger_table, rows=len(self._charger_refs), cols=len(self._charger_action_features))
-        building_overrides, charger_overrides = self._resolve_map_overrides(actions)
+        deferrable_appliance_table = self._to_2d_array(
+            deferrable_appliance_table,
+            rows=len(self._deferrable_appliance_refs),
+            cols=len(self._deferrable_appliance_action_features),
+        )
+        building_overrides, charger_overrides, deferrable_appliance_overrides = self._resolve_map_overrides(actions)
 
         vectors: List[List[float]] = []
         for building_idx, building in enumerate(self.env.buildings):
@@ -530,9 +578,17 @@ class CityLearnEntityInterfaceService:
                         if isinstance(charger_payload, Mapping) and "electric_vehicle_storage" in charger_payload:
                             value = self._safe_scalar(charger_payload["electric_vehicle_storage"], float(value))
 
-                elif "washing_machine" in action_name and isinstance(per_building_map, Mapping):
-                    if action_name in per_building_map:
-                        value = self._safe_scalar(per_building_map[action_name])
+                elif action_name.startswith("deferrable_appliance_"):
+                    row = self._deferrable_appliance_row_by_action_name.get((building_idx, action_name))
+                    if row is not None and row >= 0 and deferrable_appliance_table is not None and deferrable_appliance_table.shape[1] > 0:
+                        value = deferrable_appliance_table[row, 0]
+                    ref = self._deferrable_appliance_refs[row] if row is not None and row >= 0 else None
+                    if ref is not None:
+                        payload = deferrable_appliance_overrides.get(ref.global_id, {})
+                        if isinstance(payload, Mapping) and "start" in payload:
+                            value = self._safe_scalar(payload["start"], float(value))
+                    if isinstance(per_building_map, Mapping) and action_name in per_building_map:
+                        value = self._safe_scalar(per_building_map[action_name], float(value))
 
                 value = float(np.clip(value, low, high))
                 building_values.append(value)
@@ -541,18 +597,22 @@ class CityLearnEntityInterfaceService:
 
         return self._map_vectors_to_action_dicts(vectors)
 
-    def _resolve_map_overrides(self, actions: Mapping[str, Any]) -> Tuple[Mapping[str, Mapping[str, Any]], Mapping[str, Mapping[str, Any]]]:
+    def _resolve_map_overrides(self, actions: Mapping[str, Any]) -> Tuple[Mapping[str, Mapping[str, Any]], Mapping[str, Mapping[str, Any]], Mapping[str, Mapping[str, Any]]]:
         raw_map = actions.get("map")
         if raw_map is None:
             raw_map = {}
             legacy_building_map = actions.get("building") or {}
             legacy_charger_map = actions.get("charger") or {}
+            legacy_deferrable_map = actions.get("deferrable_appliance") or {}
             if isinstance(legacy_building_map, Mapping):
                 for key, payload in legacy_building_map.items():
                     raw_map[f"building:{key}"] = payload
             if isinstance(legacy_charger_map, Mapping):
                 for key, payload in legacy_charger_map.items():
                     raw_map[f"charger:{key}"] = payload
+            if isinstance(legacy_deferrable_map, Mapping):
+                for key, payload in legacy_deferrable_map.items():
+                    raw_map[f"deferrable_appliance:{key}"] = payload
 
         if not isinstance(raw_map, Mapping):
             raise AssertionError("Entity action 'map' must be a mapping keyed by canonical entity ids.")
@@ -560,8 +620,11 @@ class CityLearnEntityInterfaceService:
         building_ids = set(self._building_ids)
         charger_global_ids = {ref.global_id for ref in self._charger_refs}
         charger_raw_to_global = {ref.charger_id: ref.global_id for ref in self._charger_refs}
+        deferrable_global_ids = {ref.global_id for ref in self._deferrable_appliance_refs}
+        deferrable_raw_to_global = {ref.appliance_id: ref.global_id for ref in self._deferrable_appliance_refs}
         building_overrides: Dict[str, Mapping[str, Any]] = {}
         charger_overrides: Dict[str, Mapping[str, Any]] = {}
+        deferrable_appliance_overrides: Dict[str, Mapping[str, Any]] = {}
 
         for raw_id, payload in raw_map.items():
             if not isinstance(payload, Mapping):
@@ -577,6 +640,10 @@ class CityLearnEntityInterfaceService:
                     entity_kind, entity_id = "charger", raw_key
                 elif raw_key in charger_raw_to_global:
                     entity_kind, entity_id = "charger", charger_raw_to_global[raw_key]
+                elif raw_key in deferrable_global_ids:
+                    entity_kind, entity_id = "deferrable_appliance", raw_key
+                elif raw_key in deferrable_raw_to_global:
+                    entity_kind, entity_id = "deferrable_appliance", deferrable_raw_to_global[raw_key]
                 else:
                     raise AssertionError(f"Unknown entity id '{raw_key}' in action map.")
 
@@ -594,10 +661,18 @@ class CityLearnEntityInterfaceService:
                 charger_overrides[entity_id] = dict(payload)
                 continue
 
+            if entity_kind == "deferrable_appliance":
+                if entity_id in deferrable_raw_to_global:
+                    entity_id = deferrable_raw_to_global[entity_id]
+                if entity_id not in deferrable_global_ids:
+                    raise AssertionError(f"Unknown deferrable_appliance id '{entity_id}' in action map.")
+                deferrable_appliance_overrides[entity_id] = dict(payload)
+                continue
+
             raise AssertionError(f"Unknown entity kind '{entity_kind}' in action map id '{raw_key}'.")
 
-        self._validate_override_keys(building_overrides, charger_overrides)
-        return building_overrides, charger_overrides
+        self._validate_override_keys(building_overrides, charger_overrides, deferrable_appliance_overrides)
+        return building_overrides, charger_overrides, deferrable_appliance_overrides
 
     @staticmethod
     def _split_map_id(raw_key: str) -> Tuple[Optional[str], Optional[str]]:
@@ -614,6 +689,7 @@ class CityLearnEntityInterfaceService:
         self,
         building_overrides: Mapping[str, Mapping[str, Any]],
         charger_overrides: Mapping[str, Mapping[str, Any]],
+        deferrable_appliance_overrides: Mapping[str, Mapping[str, Any]],
     ):
         for building in self.env.buildings:
             payload = building_overrides.get(building.name, {})
@@ -630,6 +706,13 @@ class CityLearnEntityInterfaceService:
             if unknown:
                 raise AssertionError(
                     f"Unknown charger action keys for '{charger_global_id}': {sorted(unknown)}."
+                )
+
+        for appliance_global_id, payload in deferrable_appliance_overrides.items():
+            unknown = [key for key in payload.keys() if key != "start"]
+            if unknown:
+                raise AssertionError(
+                    f"Unknown deferrable_appliance action keys for '{appliance_global_id}': {sorted(unknown)}."
                 )
 
     def _parse_flat_like(self, actions: Any) -> List[List[float]]:
@@ -697,21 +780,21 @@ class CityLearnEntityInterfaceService:
         for i, _building in enumerate(self.env.buildings):
             action_dict = {}
             electric_vehicle_actions = {}
-            washing_machine_actions = {}
+            deferrable_appliance_actions = {}
 
             for action_name, action in zip(active_actions[i], vectors[i]):
                 if "electric_vehicle_storage" in action_name:
                     charger_id = action_name.replace("electric_vehicle_storage_", "")
                     electric_vehicle_actions[charger_id] = action
-                elif "washing_machine" in action_name:
-                    washing_machine_actions[action_name] = action
+                elif action_name.startswith("deferrable_appliance_"):
+                    deferrable_appliance_actions[action_name] = action
                 else:
                     action_dict[f"{action_name}_action"] = action
 
             if electric_vehicle_actions:
                 action_dict["electric_vehicle_storage_actions"] = electric_vehicle_actions
-            if washing_machine_actions:
-                action_dict["washing_machine_actions"] = washing_machine_actions
+            if deferrable_appliance_actions:
+                action_dict["deferrable_appliance_actions"] = deferrable_appliance_actions
 
             parsed_actions.append(action_dict)
 
@@ -770,7 +853,7 @@ class CityLearnEntityInterfaceService:
             return "kw"
         if key.endswith("_kw"):
             return "kw"
-        if key.endswith("_hours") or key in {"hours_until_departure"}:
+        if key.endswith("_hours") or key.startswith("hours_until_") or key in {"hours_until_departure"}:
             return "h"
         if key.endswith("_kwh_step"):
             return "kwh_step"
@@ -820,8 +903,8 @@ class CityLearnEntityInterfaceService:
         heating = self._safe_index(building.heating_electricity_consumption, endogenous_t, 0.0)
         dhw = self._safe_index(building.dhw_electricity_consumption, endogenous_t, 0.0)
         non_shiftable = self._safe_index(building.non_shiftable_load_electricity_consumption, endogenous_t, 0.0)
-        washing = self._safe_index(building.washing_machines_electricity_consumption, endogenous_t, 0.0)
-        load_energy = max(cooling + heating + dhw + non_shiftable + washing + ev_energy, 0.0)
+        deferrable = self._safe_index(building.deferrable_appliances_electricity_consumption, endogenous_t, 0.0)
+        load_energy = max(cooling + heating + dhw + non_shiftable + deferrable + ev_energy, 0.0)
 
         constraint_state = getattr(building, "_charging_constraints_state", {}) or {}
         building_headroom = constraint_state.get("building_headroom_kw")
@@ -1030,12 +1113,38 @@ class CityLearnEntityInterfaceService:
             )
             pv_row += 1
 
+        self._deferrable_appliance_refs: List[DeferrableApplianceRef] = []
+        deferrable_row = 0
+        for b_idx, building in enumerate(env.buildings):
+            for appliance in building.deferrable_appliances or []:
+                global_id = f"{building.name}/{appliance.name}"
+                self._deferrable_appliance_refs.append(
+                    DeferrableApplianceRef(
+                        row=deferrable_row,
+                        building_index=b_idx,
+                        building_name=building.name,
+                        appliance_id=appliance.name,
+                        global_id=global_id,
+                    )
+                )
+                deferrable_row += 1
+
         self._charger_row_by_global_id = {ref.global_id: ref.row for ref in self._charger_refs}
         self._charger_row_by_raw_id = {ref.charger_id: ref.row for ref in self._charger_refs}
         self._charger_row_by_building_and_raw_id = {
             (ref.building_index, ref.charger_id): ref.row for ref in self._charger_refs
         }
         self._charger_row_by_ev_action_name = {}
+        self._deferrable_appliance_by_building_and_id = {}
+        for b_idx, building in enumerate(env.buildings):
+            for appliance in building.deferrable_appliances or []:
+                self._deferrable_appliance_by_building_and_id[(b_idx, appliance.name)] = appliance
+        self._deferrable_appliance_row_by_global_id = {ref.global_id: ref.row for ref in self._deferrable_appliance_refs}
+        self._deferrable_appliance_row_by_raw_id = {ref.appliance_id: ref.row for ref in self._deferrable_appliance_refs}
+        self._deferrable_appliance_row_by_building_and_raw_id = {
+            (ref.building_index, ref.appliance_id): ref.row for ref in self._deferrable_appliance_refs
+        }
+        self._deferrable_appliance_row_by_action_name = {}
 
         shared = set(env.shared_observations)
         self._district_features = []
@@ -1059,6 +1168,7 @@ class CityLearnEntityInterfaceService:
             "ev": {},
             "storage": {},
             "pv": {},
+            "deferrable_appliance": {},
         }
         self._table_feature_legacy: Dict[str, Dict[str, bool]] = {
             "district": {},
@@ -1067,6 +1177,7 @@ class CityLearnEntityInterfaceService:
             "ev": {},
             "storage": {},
             "pv": {},
+            "deferrable_appliance": {},
         }
 
         for name in self._district_features:
@@ -1145,8 +1256,14 @@ class CityLearnEntityInterfaceService:
             self._table_feature_bundle["pv"][name] = self.CORE_BUNDLE
             self._table_feature_legacy["pv"][name] = False
 
+        self._deferrable_appliance_features = list(self.DEFERRABLE_APPLIANCE_FEATURES)
+        for name in self._deferrable_appliance_features:
+            self._table_feature_bundle["deferrable_appliance"][name] = self.CORE_BUNDLE
+            self._table_feature_legacy["deferrable_appliance"][name] = False
+
         self._building_action_features = []
         self._charger_action_features = []
+        self._deferrable_appliance_action_features = []
         for b_idx, building in enumerate(env.buildings):
             for action_name in building.active_actions:
                 if action_name.startswith("electric_vehicle_storage_"):
@@ -1158,13 +1275,21 @@ class CityLearnEntityInterfaceService:
                         self._charger_row_by_ev_action_name[(b_idx, action_name)] = resolved_row
                     if "electric_vehicle_storage" not in self._charger_action_features:
                         self._charger_action_features.append("electric_vehicle_storage")
-                elif "washing_machine" in action_name:
-                    continue
+                elif action_name.startswith("deferrable_appliance_"):
+                    appliance_id = action_name.replace("deferrable_appliance_", "", 1)
+                    resolved_row = self._deferrable_appliance_row_by_building_and_raw_id.get((b_idx, appliance_id))
+                    if resolved_row is None:
+                        resolved_row = self._deferrable_appliance_row_by_raw_id.get(appliance_id)
+                    if resolved_row is not None:
+                        self._deferrable_appliance_row_by_action_name[(b_idx, action_name)] = resolved_row
+                    if "start" not in self._deferrable_appliance_action_features:
+                        self._deferrable_appliance_action_features.append("start")
                 elif action_name not in self._building_action_features:
                     self._building_action_features.append(action_name)
 
         self._building_action_col_by_name = {name: i for i, name in enumerate(self._building_action_features)}
         self._charger_action_col_by_name = {name: i for i, name in enumerate(self._charger_action_features)}
+        self._deferrable_appliance_action_col_by_name = {name: i for i, name in enumerate(self._deferrable_appliance_action_features)}
 
         self._district_obs = np.zeros((1, len(self._district_features)), dtype=np.float32)
         self._building_obs = np.zeros((len(self._building_ids), len(self._building_features)), dtype=np.float32)
@@ -1172,6 +1297,7 @@ class CityLearnEntityInterfaceService:
         self._ev_obs = np.zeros((len(self._ev_ids), len(self._ev_features)), dtype=np.float32)
         self._storage_obs = np.zeros((len(self._storage_refs), len(self._storage_features)), dtype=np.float32)
         self._pv_obs = np.zeros((len(self._pv_refs), len(self._pv_features)), dtype=np.float32)
+        self._deferrable_appliance_obs = np.zeros((len(self._deferrable_appliance_refs), len(self._deferrable_appliance_features)), dtype=np.float32)
 
         self._district_to_building = np.zeros((len(self._building_ids), 2), dtype=np.int32)
         if len(self._building_ids) > 0:
@@ -1189,6 +1315,10 @@ class CityLearnEntityInterfaceService:
         for ref in self._pv_refs:
             self._building_to_pv[ref.row] = np.array([ref.building_index, ref.row], dtype=np.int32)
 
+        self._building_to_deferrable_appliance = np.full((len(self._deferrable_appliance_refs), 2), -1, dtype=np.int32)
+        for ref in self._deferrable_appliance_refs:
+            self._building_to_deferrable_appliance[ref.row] = np.array([ref.building_index, ref.row], dtype=np.int32)
+
         self._charger_to_ev_connected = np.full((len(self._charger_refs), 2), -1, dtype=np.int32)
         self._charger_to_ev_connected_mask = np.zeros((len(self._charger_refs),), dtype=np.float32)
         self._charger_to_ev_incoming = np.full((len(self._charger_refs), 2), -1, dtype=np.int32)
@@ -1201,6 +1331,7 @@ class CityLearnEntityInterfaceService:
         ev_low, ev_high = self._ev_observation_bounds()
         storage_low, storage_high = self._storage_observation_bounds()
         pv_low, pv_high = self._pv_observation_bounds()
+        deferrable_appliance_low, deferrable_appliance_high = self._deferrable_appliance_observation_bounds()
 
         self._observation_space = spaces.Dict(
             {
@@ -1212,6 +1343,7 @@ class CityLearnEntityInterfaceService:
                         "ev": spaces.Box(low=ev_low, high=ev_high, dtype=np.float32),
                         "storage": spaces.Box(low=storage_low, high=storage_high, dtype=np.float32),
                         "pv": spaces.Box(low=pv_low, high=pv_high, dtype=np.float32),
+                        "deferrable_appliance": spaces.Box(low=deferrable_appliance_low, high=deferrable_appliance_high, dtype=np.float32),
                     }
                 ),
                 "edges": spaces.Dict(
@@ -1243,6 +1375,14 @@ class CityLearnEntityInterfaceService:
                                 [[max(len(self._building_ids) - 1, 0), max(len(self._pv_refs) - 1, 0)]],
                                 dtype=np.int32,
                             ).repeat(len(self._pv_refs), axis=0),
+                            dtype=np.int32,
+                        ),
+                        "building_to_deferrable_appliance": spaces.Box(
+                            low=np.full((len(self._deferrable_appliance_refs), 2), -1, dtype=np.int32),
+                            high=np.array(
+                                [[max(len(self._building_ids) - 1, 0), max(len(self._deferrable_appliance_refs) - 1, 0)]],
+                                dtype=np.int32,
+                            ).repeat(len(self._deferrable_appliance_refs), axis=0),
                             dtype=np.int32,
                         ),
                         "charger_to_ev_connected": spaces.Box(
@@ -1278,12 +1418,18 @@ class CityLearnEntityInterfaceService:
 
         building_action_low, building_action_high = self._building_action_bounds()
         charger_action_low, charger_action_high = self._charger_action_bounds()
+        deferrable_appliance_action_low, deferrable_appliance_action_high = self._deferrable_appliance_action_bounds()
         self._action_space = spaces.Dict(
             {
                 "tables": spaces.Dict(
                     {
                         "building": spaces.Box(low=building_action_low, high=building_action_high, dtype=np.float32),
                         "charger": spaces.Box(low=charger_action_low, high=charger_action_high, dtype=np.float32),
+                        "deferrable_appliance": spaces.Box(
+                            low=deferrable_appliance_action_low,
+                            high=deferrable_appliance_action_high,
+                            dtype=np.float32,
+                        ),
                     }
                 )
             }
@@ -1338,6 +1484,11 @@ class CityLearnEntityInterfaceService:
                 "ev": _table_spec("ev", self._ev_ids, self._ev_features),
                 "storage": _table_spec("storage", [ref.global_id for ref in self._storage_refs], self._storage_features),
                 "pv": _table_spec("pv", [ref.global_id for ref in self._pv_refs], self._pv_features),
+                "deferrable_appliance": _table_spec(
+                    "deferrable_appliance",
+                    [ref.global_id for ref in self._deferrable_appliance_refs],
+                    self._deferrable_appliance_features,
+                ),
             },
             "actions": {
                 "building": {
@@ -1349,6 +1500,11 @@ class CityLearnEntityInterfaceService:
                     "ids": [ref.global_id for ref in self._charger_refs],
                     "features": list(self._charger_action_features),
                     "units": _units_for(self._charger_action_features),
+                },
+                "deferrable_appliance": {
+                    "ids": [ref.global_id for ref in self._deferrable_appliance_refs],
+                    "features": list(self._deferrable_appliance_action_features),
+                    "units": _units_for(self._deferrable_appliance_action_features),
                 },
             },
             "edges": {
@@ -1368,6 +1524,10 @@ class CityLearnEntityInterfaceService:
                     "source": "building",
                     "target": "pv",
                 },
+                "building_to_deferrable_appliance": {
+                    "source": "building",
+                    "target": "deferrable_appliance",
+                },
                 "charger_to_ev_connected": {
                     "source": "charger",
                     "target": "ev",
@@ -1386,6 +1546,7 @@ class CityLearnEntityInterfaceService:
                     "charger": [ref.global_id for ref in self._charger_refs],
                     "storage": [ref.global_id for ref in self._storage_refs],
                     "pv": [ref.global_id for ref in self._pv_refs],
+                    "deferrable_appliance": [ref.global_id for ref in self._deferrable_appliance_refs],
                 },
                 "lifecycle_fields": ["born_at", "removed_at", "active"],
                 "member_lifecycle": getattr(self.env, "topology_member_lifecycle", {}),
@@ -1614,6 +1775,50 @@ class CityLearnEntityInterfaceService:
                     low[row, col], high[row, col] = self._default_bounds_for_feature(feature)
         return low, high
 
+    def _deferrable_appliance_observation_bounds(self):
+        rows = len(self._deferrable_appliance_refs)
+        cols = len(self._deferrable_appliance_features)
+        low = np.full((rows, cols), -1.0e6, dtype=np.float32)
+        high = np.full((rows, cols), 1.0e6, dtype=np.float32)
+        if rows == 0:
+            return low, high
+
+        max_time_step = float(max(self.env.time_steps, 1))
+        max_energy = 1.0
+        max_duration = 1.0
+        for ref in self._deferrable_appliance_refs:
+            appliance = self._deferrable_appliance_by_building_and_id.get((ref.building_index, ref.appliance_id))
+            if appliance is None:
+                continue
+            for cycle in appliance.deferrable_appliance_simulation.flexibility_schedule:
+                max_energy = max(max_energy, float(cycle.get('total_energy_kwh', 0.0)))
+                max_duration = max(max_duration, float(cycle.get('duration_steps', 0.0)))
+
+        bounds = {
+            "pending": (0.0, 1.0),
+            "running": (0.0, 1.0),
+            "can_start": (0.0, 1.0),
+            "deadline_missed": (0.0, 1.0),
+            "earliest_start_time_step": (-1.0, max_time_step),
+            "latest_start_time_step": (-1.0, max_time_step),
+            "deadline_time_step": (-1.0, max_time_step),
+            "hours_until_latest_start": (-1.0, max_time_step * self._step_hours()),
+            "hours_until_deadline": (-1.0, max_time_step * self._step_hours()),
+            "slack_steps": (-1.0, max_time_step),
+            "slack_ratio": (-1.0, 1.0),
+            "urgency_ratio": (-1.0, 1.0),
+            "cycle_duration_steps": (0.0, max_duration),
+            "cycle_energy_kwh": (0.0, max_energy),
+            "remaining_energy_kwh": (0.0, max_energy),
+            "current_step_energy_kwh": (0.0, max_energy),
+            "priority": (0.0, 1.0),
+        }
+        for j, feature in enumerate(self._deferrable_appliance_features):
+            feature_low, feature_high = bounds.get(feature, self._default_bounds_for_feature(feature))
+            low[:, j] = feature_low
+            high[:, j] = feature_high
+        return low, high
+
     def _building_action_bounds(self):
         rows = len(self._building_ids)
         cols = len(self._building_action_features)
@@ -1640,6 +1845,25 @@ class CityLearnEntityInterfaceService:
             building = self.env.buildings[ref.building_index]
             for action_name, a_low, a_high in zip(building.active_actions, building.action_space.low, building.action_space.high):
                 expected = f"electric_vehicle_storage_{ref.charger_id}"
+                if action_name == expected:
+                    low[ref.row, 0] = float(a_low)
+                    high[ref.row, 0] = float(a_high)
+                    break
+
+        return low, high
+
+    def _deferrable_appliance_action_bounds(self):
+        rows = len(self._deferrable_appliance_refs)
+        cols = len(self._deferrable_appliance_action_features)
+        low = np.zeros((rows, cols), dtype=np.float32)
+        high = np.zeros((rows, cols), dtype=np.float32)
+        if cols == 0:
+            return low, high
+
+        for ref in self._deferrable_appliance_refs:
+            building = self.env.buildings[ref.building_index]
+            expected = f"deferrable_appliance_{ref.appliance_id}"
+            for action_name, a_low, a_high in zip(building.active_actions, building.action_space.low, building.action_space.high):
                 if action_name == expected:
                     low[ref.row, 0] = float(a_low)
                     high[ref.row, 0] = float(a_high)
@@ -1710,7 +1934,7 @@ class CityLearnEntityInterfaceService:
             key.startswith("electric_vehicle_charger_")
             or key.startswith("connected_electric_vehicle_at_charger_")
             or key.startswith("incoming_electric_vehicle_at_charger_")
-            or "washing_machine" in key
+            or key.startswith("deferrable_appliance_")
         )
 
     @staticmethod

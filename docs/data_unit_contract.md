@@ -46,6 +46,8 @@ gerar o dataset já na mesma resolução do schema.
 | PV | `nominal_power` | `kW` |
 | Carregador EV | `max_charging_power`, `max_discharging_power` | `kW` |
 | Veículo elétrico | bateria `capacity` | `kWh` |
+| Appliance deferível | ciclo `load_profile` | `kWh/step` |
+| Appliance deferível | ciclo `total_energy_kwh` | `kWh` |
 | Limites de rede/fase/contrato | limites de potência | `kW` |
 
 Dentro de um passo, qualquer limite em `kW` é comparado contra energia através de:
@@ -75,6 +77,11 @@ Regras práticas:
   manter em `kW`.
 - Timestamps de EVs: converter tempos absolutos para os passos inteiros usados na
   simulação de carregadores.
+- Timestamps de appliances deferíveis: `earliest_start_time_step`,
+  `latest_start_time_step` e `deadline_time_step` são índices globais do dataset,
+  não índices relativos à janela de episódio. Se uma simulação começa no passo
+  10_000, um pedido com `earliest_start_time_step = 10_020` fica disponível 20
+  passos depois do início do episódio.
 - CSVs de carregadores EV: `electric_vehicle_departure_time` e
   `electric_vehicle_estimated_arrival_time` são contagens de passos até ao evento,
   não horas absolutas do dia. Ao converter de 1h para 15s, um valor `12` passa para
@@ -117,6 +124,51 @@ load_kwh_step = 55.0 * 15 / 3600 = 0.2291667
 Este valor pequeno está correto fisicamente. Se a interface do agente precisar de
 valores em `kW` ou normalizados, essa conversão deve acontecer na camada de
 observações do agente, não no balanço energético interno.
+
+## Appliances deferíveis
+
+O formato oficial para cargas deferíveis usa dois ficheiros por appliance:
+
+- `cycle_profiles_file`: catálogo físico de ciclos.
+- `flexibility_schedule_file`: pedidos de flexibilidade que apontam para o
+  catálogo por `profile_id`.
+
+O `cycle_profiles_file` contém:
+
+| Campo | Unidade/Tipo | Notas |
+| --- | --- | --- |
+| `profile_id` | identificador | Chave estável do perfil físico. |
+| `duration_steps` | passos | Deve bater certo com o comprimento de `load_profile`. |
+| `total_energy_kwh` | `kWh` | Deve bater certo com a soma de `load_profile`. |
+| `load_profile` | lista de `kWh/step` | Energia consumida em cada passo do ciclo. |
+
+O `flexibility_schedule_file` contém:
+
+| Campo | Unidade/Tipo | Notas |
+| --- | --- | --- |
+| `cycle_id` | identificador | Pedido/ocorrência único. |
+| `profile_id` | identificador | Referência para o catálogo. |
+| `earliest_start_time_step` | passo global | Primeiro passo em que o ciclo pode iniciar. |
+| `latest_start_time_step` | passo global | Último passo em que o agente pode iniciar. |
+| `deadline_time_step` | passo global | Último passo em que o ciclo deve estar completo. |
+| `priority` | razão `[0, 1]` | Prioridade/urgência externa do pedido. |
+| `must_run` | booleano | Contrato de serviço do pedido. |
+
+A ação RL é binária/contínua simples: `start`. Se a ação passar o threshold, o
+simulador tenta iniciar o próximo ciclo pendente. O ciclo só inicia dentro da
+janela `[earliest_start_time_step, latest_start_time_step]` e se couber antes de
+`deadline_time_step`. Se passar o `latest_start_time_step` sem início válido, o
+ciclo é marcado como falhado.
+
+Se dados reais chegarem como potência por ciclo (`kW`), o conversor deve gerar o
+`load_profile` em energia:
+
+```text
+cycle_step_kwh = cycle_step_kw * seconds_per_time_step / 3600
+```
+
+Não repetir o `load_profile` por timestep no dataset. Repetição temporal deve
+ficar no `flexibility_schedule_file`, apontando para o mesmo `profile_id`.
 
 Na interface entity, a flexibilidade EV deve ser consumida preferencialmente em
 features físicas/normalizadas derivadas:

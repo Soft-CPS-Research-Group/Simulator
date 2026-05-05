@@ -15,9 +15,9 @@ import random
 from citylearn.base import Environment, EpisodeTracker
 from citylearn.building import Building, DynamicsBuilding
 from citylearn.cost_function import CostFunction
-from citylearn.data import CarbonIntensity, DataSet, OfflineDataError, ChargerSimulation, EnergySimulation, LogisticRegressionOccupantParameters, Pricing, WashingMachineSimulation, Weather
+from citylearn.data import CarbonIntensity, DataSet, OfflineDataError, ChargerSimulation, EnergySimulation, LogisticRegressionOccupantParameters, Pricing, Weather
 from citylearn.electric_vehicle import ElectricVehicle
-from citylearn.energy_model import Battery, PV, WashingMachine
+from citylearn.energy_model import Battery, DeferrableAppliance, PV
 from citylearn.exporter import EpisodeExporter
 from citylearn.internal.kpi import CityLearnKPIService
 from citylearn.internal.loading import CityLearnLoadingService
@@ -1531,14 +1531,14 @@ class CityLearnEnv(Environment, Env):
             **kwargs,
         )
 
-    def process_metadata(self, schema, building_schema, chargers_list, washing_machines_list, index, energy_simulation: EnergySimulation, **kwargs):
+    def process_metadata(self, schema, building_schema, chargers_list, deferrable_appliances_list, index, energy_simulation: EnergySimulation, **kwargs):
         """Compatibility wrapper for metadata processing service."""
 
         return self._loading_service.process_metadata(
             schema,
             building_schema,
             chargers_list,
-            washing_machines_list,
+            deferrable_appliances_list,
             index,
             energy_simulation,
             **kwargs,
@@ -1555,21 +1555,26 @@ class CityLearnEnv(Environment, Env):
             time_step_ratio,
         )
 
-    def _load_washing_machine(
+    def _load_deferrable_appliance(
         self,
-        washing_machine_name: str,
+        appliance_name: str,
+        building_name: str,
         schema: dict,
-        washing_machine_schema: dict,
+        appliance_schema: dict,
         episode_tracker: EpisodeTracker
-    ) -> WashingMachine:
-        """Compatibility wrapper for washing machine loading service."""
+    ) -> DeferrableAppliance:
+        """Compatibility wrapper for deferrable appliance loading service."""
 
-        return self._loading_service.load_washing_machine(
-            washing_machine_name,
+        return self._loading_service.load_deferrable_appliance(
+            appliance_name,
+            building_name,
             schema,
-            washing_machine_schema,
+            appliance_schema,
             episode_tracker,
         )
+
+    def _load_washing_machine(self, *args, **kwargs):
+        return self._loading_service.load_washing_machine(*args, **kwargs)
 
     def __str__(self) -> str:
         """

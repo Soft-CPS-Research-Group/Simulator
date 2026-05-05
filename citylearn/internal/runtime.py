@@ -223,22 +223,22 @@ class CityLearnRuntimeService:
         for i, _building in enumerate(env.buildings):
             action_dict = {}
             electric_vehicle_actions = {}
-            washing_machine_actions = {}
+            deferrable_appliance_actions = {}
 
             for action_name, action in zip(active_actions[i], building_actions[i]):
                 if 'electric_vehicle_storage' in action_name:
                     charger_id = action_name.replace('electric_vehicle_storage_', '')
                     electric_vehicle_actions[charger_id] = action
-                elif 'washing_machine' in action_name:
-                    washing_machine_actions[action_name] = action
+                elif action_name.startswith('deferrable_appliance_'):
+                    deferrable_appliance_actions[action_name] = action
                 else:
                     action_dict[f'{action_name}_action'] = action
 
             if electric_vehicle_actions:
                 action_dict['electric_vehicle_storage_actions'] = electric_vehicle_actions
 
-            if washing_machine_actions:
-                action_dict['washing_machine_actions'] = washing_machine_actions
+            if deferrable_appliance_actions:
+                action_dict['deferrable_appliance_actions'] = deferrable_appliance_actions
 
             parsed_actions.append(action_dict)
 

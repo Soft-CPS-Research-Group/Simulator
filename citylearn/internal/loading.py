@@ -18,11 +18,11 @@ from citylearn.data import (
     EnergySimulation,
     LogisticRegressionOccupantParameters,
     Pricing,
-    WashingMachineSimulation,
+    DeferrableApplianceSimulation,
     Weather,
 )
 from citylearn.electric_vehicle import ElectricVehicle
-from citylearn.energy_model import Battery, PV, WashingMachine
+from citylearn.energy_model import Battery, DeferrableAppliance, PV
 from citylearn.reward_function import MultiBuildingRewardFunction, RewardFunction
 from citylearn.utilities import parse_bool
 
@@ -47,7 +47,7 @@ class CityLearnLoadingService:
         self._dynamic_expected_rows: int = 0
         self._dynamic_member_windows: Dict[str, Tuple[int, int]] = {}
         self._dynamic_charger_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
-        self._dynamic_washing_machine_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
+        self._dynamic_deferrable_appliance_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
         self._shared_timeseries_cache: Dict[Tuple[Any, ...], Any] = {}
 
     @staticmethod
@@ -116,18 +116,24 @@ class CityLearnLoadingService:
             if "electric_vehicle_" in key and value.get("shared_in_central_agent", True)
         }
 
-        schema['washing_machine_observations_helper'] = {key: value for key, value in schema["observations"].items() if "washing_machine_" in key}
-        schema['washing_machine_actions_helper'] = {key: value for key, value in schema["actions"].items() if "washing_machine" in key}
+        schema['deferrable_appliance_observations_helper'] = {
+            key: value for key, value in schema["observations"].items()
+            if key.startswith("deferrable_appliance_")
+        }
+        schema['deferrable_appliance_actions_helper'] = {
+            key: value for key, value in schema["actions"].items()
+            if key == "deferrable_appliance" or key.startswith("deferrable_appliance_")
+        }
 
         schema['observations'] = {
             key: value
             for key, value in schema["observations"].items()
-            if key not in set(schema['chargers_observations_helper']) | set(schema['washing_machine_observations_helper'])
+            if key not in set(schema['chargers_observations_helper']) | set(schema['deferrable_appliance_observations_helper'])
         }
         schema['actions'] = {
             key: value
             for key, value in schema['actions'].items()
-            if key not in set(schema['chargers_actions_helper']) | set(schema['washing_machine_actions_helper'])
+            if key not in set(schema['chargers_actions_helper']) | set(schema['deferrable_appliance_actions_helper'])
         }
 
         schema['shared_observations'] = (
@@ -137,7 +143,7 @@ class CityLearnLoadingService:
                 k
                 for k, v in schema['observations'].items()
                 if not k.startswith("electric_vehicle_")
-                and "washing_machine" not in k
+                and not k.startswith("deferrable_appliance_")
                 and parse_bool(v.get('shared_in_central_agent', False), default=False, path=f'observations.{k}.shared_in_central_agent')
             ]
         )
@@ -159,7 +165,7 @@ class CityLearnLoadingService:
         self._dynamic_expected_rows = int(episode_tracker.simulation_time_steps)
         self._dynamic_member_windows = {}
         self._dynamic_charger_windows = {}
-        self._dynamic_washing_machine_windows = {}
+        self._dynamic_deferrable_appliance_windows = {}
         self._shared_timeseries_cache = {}
 
         if dynamic_mode:
@@ -169,7 +175,7 @@ class CityLearnLoadingService:
                 self._dynamic_member_windows,
                 self._dynamic_expected_rows,
             )
-            self._dynamic_washing_machine_windows = self._build_dynamic_washing_machine_windows(
+            self._dynamic_deferrable_appliance_windows = self._build_dynamic_deferrable_appliance_windows(
                 schema,
                 self._dynamic_member_windows,
                 self._dynamic_expected_rows,
@@ -532,19 +538,19 @@ class CityLearnLoadingService:
                 )
                 chargers_list.append(charger_object)
 
-        washing_machines_list = []
-        if kwargs.get('washing_machines') is not None and len(kwargs['washing_machines']) > 0:
-            washing_machine_schemas = kwargs['washing_machines']
+        deferrable_appliances_list = []
+        if kwargs.get('deferrable_appliances') is not None and len(kwargs['deferrable_appliances']) > 0:
+            deferrable_appliance_schemas = kwargs['deferrable_appliances']
         else:
-            washing_machine_schemas = building_schema.get('washing_machines', {})
+            deferrable_appliance_schemas = building_schema.get('deferrable_appliances', {})
 
-        for washing_machine_name, washing_machine_schema in washing_machine_schemas.items():
-            washing_machines_list.append(
-                self.load_washing_machine(
-                    washing_machine_name,
+        for appliance_name, appliance_schema in deferrable_appliance_schemas.items():
+            deferrable_appliances_list.append(
+                self.load_deferrable_appliance(
+                    appliance_name,
                     building_name,
                     schema,
-                    washing_machine_schema,
+                    appliance_schema,
                     episode_tracker,
                 )
             )
@@ -553,7 +559,7 @@ class CityLearnLoadingService:
             schema,
             building_schema,
             chargers_list,
-            washing_machines_list,
+            deferrable_appliances_list,
             index,
             energy_simulation,
             **kwargs,
@@ -561,7 +567,7 @@ class CityLearnLoadingService:
 
         building: Building = building_constructor(
             energy_simulation=energy_simulation,
-            washing_machines=washing_machines_list,
+            deferrable_appliances=deferrable_appliances_list,
             electric_vehicle_chargers=chargers_list,
             weather=weather,
             observation_metadata=observation_metadata,
@@ -586,7 +592,6 @@ class CityLearnLoadingService:
             'cooling_storage': {'autosizer': building.autosize_cooling_storage},
             'heating_storage': {'autosizer': building.autosize_heating_storage},
             'electrical_storage': {'autosizer': building.autosize_electrical_storage},
-            'washing_machine': {'autosizer': building.autosize_electrical_storage},
             'pv': {'autosizer': building.autosize_pv},
         }
         solar_generation = kwargs.get('solar_generation')
@@ -657,7 +662,7 @@ class CityLearnLoadingService:
         schema,
         building_schema,
         chargers_list,
-        washing_machines_list,
+        deferrable_appliances_list,
         index,
         energy_simulation: EnergySimulation,
         **kwargs,
@@ -677,9 +682,9 @@ class CityLearnLoadingService:
             k: parse_bool(v.get('active', False), default=False, path=f'observations.{k}.active')
             for k, v in schema['chargers_observations_helper'].items()
         }
-        washing_machine_observations_metadata_helper = {
+        deferrable_appliance_observations_metadata_helper = {
             k: parse_bool(v.get('active', False), default=False, path=f'observations.{k}.active')
-            for k, v in schema['washing_machine_observations_helper'].items()
+            for k, v in schema['deferrable_appliance_observations_helper'].items()
         }
 
         if kwargs.get('active_observations') is not None:
@@ -687,7 +692,7 @@ class CityLearnLoadingService:
             active_observations = active_observations[index] if isinstance(active_observations[0], list) else active_observations
             observation_metadata = {k: True if k in active_observations else False for k in observation_metadata}
             chargers_observations_metadata_helper = {k: True if k in active_observations else False for k in chargers_observations_metadata_helper}
-            washing_machine_observations_metadata_helper = {k: True if k in active_observations else False for k in washing_machine_observations_metadata_helper}
+            deferrable_appliance_observations_metadata_helper = {k: True if k in active_observations else False for k in deferrable_appliance_observations_metadata_helper}
 
         if kwargs.get('inactive_observations') is not None:
             inactive_observations = kwargs['inactive_observations']
@@ -705,9 +710,9 @@ class CityLearnLoadingService:
             k: False if k in inactive_observations else chargers_observations_metadata_helper[k]
             for k in chargers_observations_metadata_helper
         }
-        washing_machine_observations_metadata_helper = {
-            k: False if k in inactive_observations else washing_machine_observations_metadata_helper[k]
-            for k in washing_machine_observations_metadata_helper
+        deferrable_appliance_observations_metadata_helper = {
+            k: False if k in inactive_observations else deferrable_appliance_observations_metadata_helper[k]
+            for k in deferrable_appliance_observations_metadata_helper
         }
 
         action_metadata = {
@@ -718,9 +723,9 @@ class CityLearnLoadingService:
             k: parse_bool(v.get('active', False), default=False, path=f'actions.{k}.active')
             for k, v in schema['chargers_actions_helper'].items()
         }
-        washing_machine_actions_metadata_helper = {
+        deferrable_appliance_actions_metadata_helper = {
             k: parse_bool(v.get('active', False), default=False, path=f'actions.{k}.active')
-            for k, v in schema['washing_machine_actions_helper'].items()
+            for k, v in schema['deferrable_appliance_actions_helper'].items()
         }
 
         if kwargs.get('active_actions') is not None:
@@ -728,7 +733,7 @@ class CityLearnLoadingService:
             active_actions = active_actions[index] if isinstance(active_actions[0], list) else active_actions
             action_metadata = {k: True if k in active_actions else False for k in action_metadata}
             chargers_actions_metadata_helper = {k: True if k in active_actions else False for k in chargers_actions_metadata_helper}
-            washing_machine_actions_metadata_helper = {k: True if k in active_actions else False for k in washing_machine_actions_metadata_helper}
+            deferrable_appliance_actions_metadata_helper = {k: True if k in active_actions else False for k in deferrable_appliance_actions_metadata_helper}
 
         if kwargs.get('inactive_actions') is not None:
             inactive_actions = kwargs['inactive_actions']
@@ -740,7 +745,7 @@ class CityLearnLoadingService:
 
         action_metadata = {k: False if k in inactive_actions else v for k, v in action_metadata.items()}
         chargers_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in chargers_actions_metadata_helper.items()}
-        washing_machine_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in washing_machine_actions_metadata_helper.items()}
+        deferrable_appliance_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in deferrable_appliance_actions_metadata_helper.items()}
 
         if len(chargers_list) > 0:
             for charger in chargers_list:
@@ -773,17 +778,15 @@ class CityLearnLoadingService:
                 if chargers_actions_metadata_helper.get('electric_vehicle_storage', False):
                     action_metadata[f'electric_vehicle_storage_{charger.charger_id}'] = True
 
-        if len(washing_machines_list) > 0:
-            for washing_machine in washing_machines_list:
-                washing_machine_name = washing_machine.name
-                if washing_machine_observations_metadata_helper.get('washing_machine_start_time_step', False):
-                    observation_metadata[f'{washing_machine_name}_start_time_step'] = True
+        if len(deferrable_appliances_list) > 0:
+            for appliance in deferrable_appliances_list:
+                for helper_name, active in deferrable_appliance_observations_metadata_helper.items():
+                    if active:
+                        feature_name = helper_name.replace('deferrable_appliance_', '', 1)
+                        observation_metadata[f'deferrable_appliance_{appliance.name}_{feature_name}'] = True
 
-                if washing_machine_observations_metadata_helper.get('washing_machine_end_time_step', False):
-                    observation_metadata[f'{washing_machine_name}_end_time_step'] = True
-
-                if washing_machine_actions_metadata_helper.get('washing_machine', False):
-                    action_metadata[f'{washing_machine_name}'] = True
+                if deferrable_appliance_actions_metadata_helper.get('deferrable_appliance', False):
+                    action_metadata[f'deferrable_appliance_{appliance.name}'] = True
 
         return observation_metadata, action_metadata
 
@@ -832,40 +835,58 @@ class CityLearnLoadingService:
 
         return electric_vehicle
 
-    def load_washing_machine(
+    def load_deferrable_appliance(
         self,
-        washing_machine_name: str,
+        appliance_name: str,
         building_name: str,
         schema: dict,
-        washing_machine_schema: dict,
+        appliance_schema: dict,
         episode_tracker: EpisodeTracker,
-    ) -> WashingMachine:
-        """Load simulation data and initialize a `WashingMachine` instance."""
+    ) -> DeferrableAppliance:
+        """Load sparse profile/schedule data and initialize a deferrable appliance."""
 
-        file_path = os.path.join(schema['root_directory'], washing_machine_schema['washing_machine_energy_simulation'])
+        profiles_file = os.path.join(schema['root_directory'], appliance_schema['cycle_profiles_file'])
+        schedule_file = os.path.join(schema['root_directory'], appliance_schema['flexibility_schedule_file'])
 
-        washing_machine_simulation = self._read_simulation_dataframe(schema, file_path)
-        washing_window = self._dynamic_washing_machine_windows.get((building_name, washing_machine_name))
-        expected_rows = int(getattr(self, '_dynamic_expected_rows', episode_tracker.simulation_time_steps))
-        washing_machine_simulation = self._align_dynamic_timeseries_dataframe(
-            washing_machine_simulation,
-            expected_rows=expected_rows,
-            window=washing_window,
-            source_label=f'buildings.{building_name}.washing_machines.{washing_machine_name}.washing_machine_energy_simulation',
+        profiles = self._read_dataframe(profiles_file)
+        schedule = self._read_dataframe(schedule_file)
+        window = self._dynamic_deferrable_appliance_windows.get((building_name, appliance_name))
+        if self._dynamic_mode and window is not None and not schedule.empty:
+            start, end = window
+            schedule = schedule[
+                (pd.to_numeric(schedule['deadline_time_step'], errors='coerce') >= int(start))
+                & (pd.to_numeric(schedule['earliest_start_time_step'], errors='coerce') < int(end))
+            ].reset_index(drop=True)
+
+        source_label = f'buildings.{building_name}.deferrable_appliances.{appliance_name}'
+        simulation = DeferrableApplianceSimulation.from_dataframes(
+            cycle_profiles=profiles,
+            flexibility_schedule=schedule,
+            source_label=source_label,
         )
 
-        washing_machine_simulation = WashingMachineSimulation(*washing_machine_simulation.values.T)
-        self._set_time_step_offset(washing_machine_simulation, schema['simulation_start_time_step'])
+        appliance_type = appliance_schema.get('type', 'citylearn.energy_model.DeferrableAppliance')
+        appliance_module = '.'.join(appliance_type.split('.')[0:-1])
+        appliance_class_name = appliance_type.split('.')[-1]
+        appliance_class = getattr(importlib.import_module(appliance_module), appliance_class_name)
+        attributes = dict(appliance_schema.get('attributes', {}) or {})
 
-        washing_machine = WashingMachine(
-            washing_machine_simulation=washing_machine_simulation,
+        appliance = appliance_class(
+            deferrable_appliance_simulation=simulation,
             episode_tracker=episode_tracker,
-            name=washing_machine_name,
+            name=appliance_name,
             seconds_per_time_step=schema['seconds_per_time_step'],
             random_seed=schema['random_seed'],
+            **attributes,
         )
 
-        return washing_machine
+        return appliance
+
+    def load_washing_machine(self, *args, **kwargs):
+        raise ValueError(
+            "Legacy 'washing_machines' schemas are no longer supported. "
+            "Use 'deferrable_appliances' with cycle_profiles_file and flexibility_schedule_file."
+        )
 
     @staticmethod
     def _set_time_step_offset(time_series_data: Any, offset: int):
@@ -969,6 +990,11 @@ class CityLearnLoadingService:
             return pa.Table.from_arrays(arrays, names=schema.names).to_pandas()
 
         return pa.Table.from_batches(batches).to_pandas()
+
+    def _read_dataframe(self, filepath: Union[str, os.PathLike]) -> pd.DataFrame:
+        if self._file_format(filepath) == 'parquet':
+            return self._read_parquet_timeseries_dataframe(filepath)
+        return pd.read_csv(filepath)
 
     def _load_shared_timeseries(
         self,
@@ -1112,7 +1138,7 @@ class CityLearnLoadingService:
         return windows
 
     @staticmethod
-    def _build_dynamic_washing_machine_windows(
+    def _build_dynamic_deferrable_appliance_windows(
         schema: Mapping[str, Any],
         member_windows: Mapping[str, Tuple[int, int]],
         expected_rows: int,
@@ -1131,9 +1157,9 @@ class CityLearnLoadingService:
             if end <= start:
                 continue
 
-            washing_machines = (member_schema or {}).get('washing_machines', {}) or {}
-            for washing_machine_id in washing_machines.keys():
-                windows[(str(member_id), str(washing_machine_id))] = (start, end)
+            appliances = (member_schema or {}).get('deferrable_appliances', {}) or {}
+            for appliance_id in appliances.keys():
+                windows[(str(member_id), str(appliance_id))] = (start, end)
 
         return windows
 

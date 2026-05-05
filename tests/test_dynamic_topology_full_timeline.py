@@ -116,8 +116,9 @@ def _zero_entity_actions(env: CityLearnEnv):
     tables = env.action_space["tables"]
     return {
         "tables": {
-            "building": np.zeros(tables["building"].shape, dtype="float32"),
-            "charger": np.zeros(tables["charger"].shape, dtype="float32"),
+            name: np.zeros(space.shape, dtype="float32")
+            for name, space in tables.items()
+            if name in {"building", "charger", "deferrable_appliance"}
         }
     }
 

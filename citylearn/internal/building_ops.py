@@ -53,10 +53,10 @@ class BuildingOpsService:
             include_all=include_all,
         )
 
-        observations = self.update_washing_machine_observations(
+        observations = self.update_deferrable_appliance_observations(
             observations,
             valid_observations,
-            building.washing_machines,
+            building.deferrable_appliances,
         )
 
         unknown_observations = set(observations.keys()).difference(set(valid_observations))
@@ -169,26 +169,22 @@ class BuildingOpsService:
 
         return observations
 
+    def update_deferrable_appliance_observations(self, observations, valid_observations, deferrable_appliances):
+        """Update flat observations for each deferrable appliance."""
+
+        for appliance in deferrable_appliances or []:
+            appliance_observations = appliance.observations()
+            for name, value in appliance_observations.items():
+                key = f'deferrable_appliance_{appliance.name}_{name}'
+                if key in valid_observations:
+                    observations[key] = value
+
+        return observations
+
     def update_washing_machine_observations(self, observations, valid_observations, washing_machines):
-        """Update observations for each washing machine."""
+        """Backward-compatible wrapper for old washing-machine integrations."""
 
-        for washing_machine in washing_machines:
-            washing_machine_name = washing_machine.name
-            washing_machine_observations = washing_machine.observations()
-
-            start_key = f'{washing_machine_name}_start_time_step'
-            if start_key in valid_observations:
-                observations[start_key] = next(
-                    (value for key, value in washing_machine_observations.items() if '_start_time_step' in key),
-                    -1,
-                )
-
-            end_key = f'{washing_machine_name}_end_time_step'
-            if end_key in valid_observations:
-                observations[end_key] = next(
-                    (value for key, value in washing_machine_observations.items() if '_end_time_step' in key),
-                    -1,
-                )
+        return self.update_deferrable_appliance_observations(observations, valid_observations, washing_machines)
         return observations
 
     def get_observations_data(self, include_all: bool = False) -> Mapping[str, Union[float, int]]:
@@ -197,7 +193,7 @@ class BuildingOpsService:
         building = self.building
 
         electric_vehicle_chargers_dict = {}
-        washing_machines_dict = {}
+        deferrable_appliances_dict = {}
         t = building.time_step
         endogenous_t = t if include_all else max(t - 1, 0)
 
@@ -248,24 +244,8 @@ class BuildingOpsService:
                     'max_discharging_power': charger.max_discharging_power,
                 }
 
-        for washing_machine in building.washing_machines or []:
-            washing_machine_name = washing_machine.name
-
-            def _safe(arr, idx, default):
-                try:
-                    return arr[idx]
-                except Exception:
-                    return default
-
-            start_time_step = _safe(washing_machine.washing_machine_simulation.wm_start_time_step, t, -1)
-            end_time_step = _safe(washing_machine.washing_machine_simulation.wm_end_time_step, t, -1)
-            load_profile = _safe(washing_machine.washing_machine_simulation.load_profile, t, 0.0)
-
-            washing_machines_dict[washing_machine_name] = {
-                'wm_start_time_step': start_time_step,
-                'wm_end_time_step': end_time_step,
-                'load_profile': load_profile,
-            }
+        for appliance in building.deferrable_appliances or []:
+            deferrable_appliances_dict[appliance.name] = dict(appliance.observations())
 
         observations = {}
         for key, series in building._energy_simulation_observation_sources:
@@ -303,7 +283,8 @@ class BuildingOpsService:
             'heating_storage_electricity_consumption': building.heating_storage_electricity_consumption[endogenous_t],
             'dhw_storage_electricity_consumption': building.dhw_storage_electricity_consumption[endogenous_t],
             'electrical_storage_electricity_consumption': building.electrical_storage_electricity_consumption[endogenous_t],
-            'washing_machine_electricity_consumption': building.washing_machines_electricity_consumption[endogenous_t],
+            'deferrable_appliance_electricity_consumption': building.deferrable_appliances_electricity_consumption[endogenous_t],
+            'washing_machine_electricity_consumption': building.deferrable_appliances_electricity_consumption[endogenous_t],
             'cooling_device_efficiency': building.cooling_device.get_cop(building.weather.outdoor_dry_bulb_temperature[t], heating=False),
             'heating_device_efficiency': building.heating_device.get_cop(building.weather.outdoor_dry_bulb_temperature[t], heating=True)
             if isinstance(building.heating_device, HeatPump) else building.heating_device.efficiency,
@@ -317,7 +298,8 @@ class BuildingOpsService:
             'occupant_count': building.energy_simulation.occupant_count[t],
             'power_outage': building.power_outage_signal[t],
             'electric_vehicles_chargers_dict': electric_vehicle_chargers_dict,
-            'washing_machines_dict': washing_machines_dict,
+            'deferrable_appliances_dict': deferrable_appliances_dict,
+            'washing_machines_dict': deferrable_appliances_dict,
         })
 
         if (
@@ -356,6 +338,7 @@ class BuildingOpsService:
         heating_storage_action: float = None,
         dhw_storage_action: float = None,
         electrical_storage_action: float = None,
+        deferrable_appliance_actions: dict = None,
         washing_machine_actions: dict = None,
         electric_vehicle_storage_actions: dict = None,
     ):
@@ -418,17 +401,21 @@ class BuildingOpsService:
                         electric_vehicle_priority_list.append(action_key)
             priority_list = priority_list + electric_vehicle_priority_list
 
-        if washing_machine_actions is not None:
-            washing_machine_priority_list = []
-            for washing_machine_name, action in washing_machine_actions.items():
-                action_key = f'{washing_machine_name}'
+        if deferrable_appliance_actions is None:
+            deferrable_appliance_actions = washing_machine_actions
+
+        if deferrable_appliance_actions is not None:
+            deferrable_appliance_priority_list = []
+            for action_name, action in deferrable_appliance_actions.items():
+                action_key = f'{action_name}'
                 if action_key not in building.active_actions:
                     raise ValueError('This action should not be applied. Verify')
-                for washing_machine in building.washing_machines:
-                    if washing_machine.name == washing_machine_name:
-                        actions[action_key] = (washing_machine.start_cycle, (action,))
-                        washing_machine_priority_list.append(action_key)
-            priority_list = priority_list + washing_machine_priority_list
+                appliance_name = action_key.replace('deferrable_appliance_', '', 1)
+                for appliance in building.deferrable_appliances:
+                    if appliance.name == appliance_name or action_key == appliance.name:
+                        actions[action_key] = (appliance.start_cycle, (action,))
+                        deferrable_appliance_priority_list.append(action_key)
+            priority_list = priority_list + deferrable_appliance_priority_list
 
         if electrical_storage_action < 0.0:
             key = 'electrical_storage'
@@ -558,12 +545,12 @@ class BuildingOpsService:
         )
         non_shiftable_kw = self._control_step_energy_to_power_kw(non_shiftable_energy)
         solar_kw = self._control_step_energy_to_power_kw(self._safe_index(building.solar_generation, t, 0.0))
-        washing_kw = sum(
-            self._control_step_energy_to_power_kw(self._safe_index(wm.electricity_consumption, t, 0.0))
-            for wm in building.washing_machines or []
+        deferrable_kw = sum(
+            self._control_step_energy_to_power_kw(self._safe_index(appliance.electricity_consumption, t, 0.0))
+            for appliance in building.deferrable_appliances or []
         )
 
-        base_total_kw = cooling_kw + heating_kw + dhw_kw + non_shiftable_kw + solar_kw + washing_kw
+        base_total_kw = cooling_kw + heating_kw + dhw_kw + non_shiftable_kw + solar_kw + deferrable_kw
         base_phase_kw = self._split_unassigned_power(base_total_kw)
 
         return float(base_total_kw), base_phase_kw

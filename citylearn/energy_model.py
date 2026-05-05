@@ -2,7 +2,7 @@ import ast
 import logging
 import math
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Tuple, Union
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 try:
@@ -10,7 +10,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - optional dependency
     Pvwattsv8 = None
 from citylearn.base import Environment, EpisodeTracker
-from citylearn.data import DataSet, ZERO_DIVISION_PLACEHOLDER, EnergySimulation, WashingMachineSimulation
+from citylearn.data import DataSet, ZERO_DIVISION_PLACEHOLDER, DeferrableApplianceSimulation, EnergySimulation, WashingMachineSimulation
 from citylearn.internal.units import power_kw_to_energy_kwh, to_dataset_resolution_energy
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -1313,6 +1313,312 @@ class Battery(StorageDevice, ElectricDevice):
         super().reset()
         self._efficiency_history = self._efficiency_history[0:1]
         self._capacity_history = self._capacity_history[0:1]
+
+class DeferrableAppliance(ElectricDevice):
+    """Generic deferrable appliance with sparse cycle requests and fixed kWh/step profiles."""
+
+    SENTINEL_TIME_STEP = -1.0
+
+    def __init__(
+        self,
+        deferrable_appliance_simulation: DeferrableApplianceSimulation,
+        name: str = None,
+        trigger_threshold: float = 0.0,
+        **kwargs,
+    ):
+        self.deferrable_appliance_simulation = deferrable_appliance_simulation
+        self.name = name
+        self.trigger_threshold = float(trigger_threshold or 0.0)
+        self.__past_action_values = None
+        self.__cycle_state: Dict[str, str] = {}
+        self.__cycle_start_time_steps: Dict[str, int] = {}
+        self.__cycle_completion_time_steps: Dict[str, int] = {}
+        self.__cycle_missed_time_steps: Dict[str, int] = {}
+        self.__cycle_cancelled_time_steps: Dict[str, int] = {}
+        super().__init__(**kwargs)
+
+    @property
+    def deferrable_appliance_simulation(self) -> DeferrableApplianceSimulation:
+        return self.__deferrable_appliance_simulation
+
+    @deferrable_appliance_simulation.setter
+    def deferrable_appliance_simulation(self, value: DeferrableApplianceSimulation):
+        self.__deferrable_appliance_simulation = value
+
+    @property
+    def name(self) -> str:
+        return self.__name
+
+    @name.setter
+    def name(self, value: str):
+        self.__name = value
+
+    @property
+    def past_action_values(self) -> np.ndarray:
+        return self.__past_action_values
+
+    @property
+    def cycle_state(self) -> Mapping[str, str]:
+        return dict(self.__cycle_state)
+
+    def reset(self):
+        super().reset()
+        self.__past_action_values = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.__cycle_state = {}
+        self.__cycle_start_time_steps = {}
+        self.__cycle_completion_time_steps = {}
+        self.__cycle_missed_time_steps = {}
+        self.__cycle_cancelled_time_steps = {}
+
+        episode_start = int(getattr(self.episode_tracker, 'episode_start_time_step', 0) or 0)
+        for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
+            cycle_id = cycle['cycle_id']
+            if int(cycle['latest_start_time_step']) < episode_start:
+                self.__cycle_state[cycle_id] = 'expired_before_episode'
+            else:
+                self.__cycle_state[cycle_id] = 'pending'
+
+    def next_time_step(self):
+        super().next_time_step()
+        self._update_cycle_states()
+
+    def start_cycle(self, action_value: float):
+        """Start the next pending cycle when the action is above threshold and the request is feasible."""
+
+        if self.__past_action_values is None:
+            self.__past_action_values = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+
+        self.__past_action_values[self.time_step] = float(action_value)
+        self._update_cycle_states()
+
+        if float(action_value) <= self.trigger_threshold:
+            return
+
+        cycle = self._next_pending_cycle()
+        if cycle is None:
+            return
+
+        current_global = self._current_global_time_step()
+        if not self._can_start_cycle(cycle, current_global):
+            if current_global > int(cycle['latest_start_time_step']):
+                self._mark_missed(cycle, current_global)
+            return
+
+        cycle_id = cycle['cycle_id']
+        self.__cycle_state[cycle_id] = 'running'
+        self.__cycle_start_time_steps[cycle_id] = current_global
+
+        for offset, energy_kwh in enumerate(cycle['load_profile']):
+            step = self.time_step + offset
+            if 0 <= step < self.episode_tracker.episode_time_steps:
+                ratio = self.time_step_ratio if self.time_step_ratio not in (None, 0) else 1.0
+                self._ElectricDevice__electricity_consumption[step] += float(energy_kwh) / ratio
+
+    def cancel_pending_and_running(self, global_time_step: Optional[int] = None):
+        """Cancel future service after a dynamic topology removal."""
+
+        current_global = self._current_global_time_step() if global_time_step is None else int(global_time_step)
+        for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
+            cycle_id = cycle['cycle_id']
+            if self.__cycle_state.get(cycle_id) in {'pending', 'running'}:
+                self.__cycle_state[cycle_id] = 'cancelled'
+                self.__cycle_cancelled_time_steps[cycle_id] = current_global
+
+        local_step = int(self.time_step)
+        if self._ElectricDevice__electricity_consumption is not None and local_step < len(self._ElectricDevice__electricity_consumption):
+            self._ElectricDevice__electricity_consumption[local_step:] = 0.0
+
+    def observations(self) -> Mapping[str, float]:
+        self._update_cycle_states()
+        cycle = self._current_or_next_cycle()
+        current_global = self._current_global_time_step()
+        step_hours = max(float(self.seconds_per_time_step) / 3600.0, 1.0e-6)
+
+        if cycle is None:
+            return {
+                'pending': 0.0,
+                'running': 0.0,
+                'can_start': 0.0,
+                'deadline_missed': 0.0,
+                'earliest_start_time_step': self.SENTINEL_TIME_STEP,
+                'latest_start_time_step': self.SENTINEL_TIME_STEP,
+                'deadline_time_step': self.SENTINEL_TIME_STEP,
+                'hours_until_latest_start': -1.0,
+                'hours_until_deadline': -1.0,
+                'slack_steps': -1.0,
+                'slack_ratio': -1.0,
+                'urgency_ratio': -1.0,
+                'cycle_duration_steps': 0.0,
+                'cycle_energy_kwh': 0.0,
+                'remaining_energy_kwh': 0.0,
+                'current_step_energy_kwh': 0.0,
+                'priority': 0.0,
+            }
+
+        cycle_id = cycle['cycle_id']
+        state = self.__cycle_state.get(cycle_id, 'pending')
+        running = state == 'running'
+        pending = state == 'pending'
+        missed = state == 'missed'
+        latest = int(cycle['latest_start_time_step'])
+        earliest = int(cycle['earliest_start_time_step'])
+        deadline = int(cycle['deadline_time_step'])
+        slack_steps = max(float(latest - current_global), 0.0) if pending else 0.0
+        window_steps = max(float(latest - earliest), 1.0)
+        slack_ratio = np.clip(slack_steps / window_steps, 0.0, 1.0) if pending else 0.0
+        current_energy = self._current_cycle_energy(cycle)
+        remaining_energy = self._remaining_cycle_energy(cycle)
+
+        return {
+            'pending': 1.0 if pending else 0.0,
+            'running': 1.0 if running else 0.0,
+            'can_start': 1.0 if self._can_start_cycle(cycle, current_global) else 0.0,
+            'deadline_missed': 1.0 if missed else 0.0,
+            'earliest_start_time_step': float(earliest),
+            'latest_start_time_step': float(latest),
+            'deadline_time_step': float(deadline),
+            'hours_until_latest_start': max(float(latest - current_global), 0.0) * step_hours if pending else 0.0,
+            'hours_until_deadline': max(float(deadline - current_global), 0.0) * step_hours if pending or running else 0.0,
+            'slack_steps': slack_steps,
+            'slack_ratio': float(slack_ratio),
+            'urgency_ratio': float(1.0 - slack_ratio) if pending else 0.0,
+            'cycle_duration_steps': float(cycle['duration_steps']),
+            'cycle_energy_kwh': float(cycle['total_energy_kwh']),
+            'remaining_energy_kwh': remaining_energy,
+            'current_step_energy_kwh': current_energy,
+            'priority': float(cycle['priority']),
+        }
+
+    def service_summary(self) -> Mapping[str, float]:
+        self._finalize_running_cycles_at_current_step()
+        completed = 0
+        missed = 0
+        served = 0.0
+        unserved = 0.0
+        delays = []
+
+        for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
+            cycle_id = cycle['cycle_id']
+            state = self.__cycle_state.get(cycle_id)
+            if state == 'completed':
+                completed += 1
+                served += float(cycle['total_energy_kwh'])
+                start = self.__cycle_start_time_steps.get(cycle_id)
+                if start is not None:
+                    delays.append(max(int(start) - int(cycle['earliest_start_time_step']), 0))
+            elif state == 'missed':
+                missed += 1
+                unserved += float(cycle['total_energy_kwh'])
+
+        requested = completed + missed
+        step_hours = max(float(self.seconds_per_time_step) / 3600.0, 1.0e-6)
+        return {
+            'completed_cycles': float(completed),
+            'missed_cycles': float(missed),
+            'service_level_ratio': float(completed / requested) if requested > 0 else 1.0,
+            'served_energy_kwh': float(served),
+            'unserved_energy_kwh': float(unserved),
+            'average_start_delay_hours': float(np.mean(delays) * step_hours) if delays else 0.0,
+        }
+
+    def as_dict(self) -> dict:
+        return {
+            'name': self.name,
+            **self.observations(),
+            **self.service_summary(),
+        }
+
+    def _current_global_time_step(self) -> int:
+        episode_start_time_step = getattr(self.episode_tracker, 'episode_start_time_step', 0)
+        if not isinstance(episode_start_time_step, (int, float, np.integer, np.floating)):
+            episode_start_time_step = 0
+        return int(episode_start_time_step) + int(self.time_step)
+
+    def _next_pending_cycle(self) -> Optional[Mapping[str, Any]]:
+        for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
+            if self.__cycle_state.get(cycle['cycle_id']) == 'pending':
+                return cycle
+        return None
+
+    def _current_or_next_cycle(self) -> Optional[Mapping[str, Any]]:
+        for state_name in ('running', 'pending', 'missed'):
+            for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
+                if self.__cycle_state.get(cycle['cycle_id']) == state_name:
+                    return cycle
+        return None
+
+    def _can_start_cycle(self, cycle: Mapping[str, Any], current_global: int) -> bool:
+        if self.__cycle_state.get(cycle['cycle_id']) != 'pending':
+            return False
+        if not int(cycle['earliest_start_time_step']) <= current_global <= int(cycle['latest_start_time_step']):
+            return False
+        if current_global + int(cycle['duration_steps']) - 1 > int(cycle['deadline_time_step']):
+            return False
+        if self.time_step + int(cycle['duration_steps']) > int(self.episode_tracker.episode_time_steps):
+            return False
+        return True
+
+    def _update_cycle_states(self):
+        current_global = self._current_global_time_step()
+        for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
+            cycle_id = cycle['cycle_id']
+            state = self.__cycle_state.get(cycle_id)
+            if state == 'running':
+                start = self.__cycle_start_time_steps.get(cycle_id)
+                if start is not None and current_global > start + int(cycle['duration_steps']) - 1:
+                    self.__cycle_state[cycle_id] = 'completed'
+                    self.__cycle_completion_time_steps[cycle_id] = current_global - 1
+            elif state == 'pending' and current_global > int(cycle['latest_start_time_step']):
+                self._mark_missed(cycle, current_global)
+
+    def _mark_missed(self, cycle: Mapping[str, Any], current_global: int):
+        cycle_id = cycle['cycle_id']
+        if self.__cycle_state.get(cycle_id) == 'pending':
+            self.__cycle_state[cycle_id] = 'missed'
+            self.__cycle_missed_time_steps[cycle_id] = int(current_global)
+
+    def _finalize_running_cycles_at_current_step(self):
+        """Close cycles whose last energy step has already been reached."""
+
+        current_global = self._current_global_time_step()
+        for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
+            cycle_id = cycle['cycle_id']
+            if self.__cycle_state.get(cycle_id) != 'running':
+                continue
+
+            start = self.__cycle_start_time_steps.get(cycle_id)
+            if start is not None and current_global >= int(start) + int(cycle['duration_steps']) - 1:
+                self.__cycle_state[cycle_id] = 'completed'
+                self.__cycle_completion_time_steps[cycle_id] = int(start) + int(cycle['duration_steps']) - 1
+
+    def _current_cycle_energy(self, cycle: Mapping[str, Any]) -> float:
+        cycle_id = cycle['cycle_id']
+        if self.__cycle_state.get(cycle_id) != 'running':
+            return 0.0
+        start = self.__cycle_start_time_steps.get(cycle_id)
+        if start is None:
+            return 0.0
+        offset = self._current_global_time_step() - int(start)
+        profile = cycle['load_profile']
+        if 0 <= offset < len(profile):
+            return float(profile[offset])
+        return 0.0
+
+    def _remaining_cycle_energy(self, cycle: Mapping[str, Any]) -> float:
+        cycle_id = cycle['cycle_id']
+        state = self.__cycle_state.get(cycle_id)
+        profile = cycle['load_profile']
+        if state == 'pending':
+            return float(cycle['total_energy_kwh'])
+        if state == 'running':
+            start = self.__cycle_start_time_steps.get(cycle_id)
+            if start is None:
+                return 0.0
+            offset = max(self._current_global_time_step() - int(start), 0)
+            if offset < len(profile):
+                return float(np.sum(profile[offset:]))
+        return 0.0
+
 
 class WashingMachine(ElectricDevice):
     """Represents a smart washing machine controlled via time-varying load profiles (kWh over time) instead of predefined fixed cycles."""

@@ -484,8 +484,8 @@ class EpisodeExporter:
             for charger in getattr(building, 'electric_vehicle_chargers', []) or []:
                 _record(charger)
 
-            for washing_machine in getattr(building, 'washing_machines', []) or []:
-                _record(washing_machine)
+            for appliance in getattr(building, 'deferrable_appliances', []) or []:
+                _record(appliance)
 
         for ev in ev_iterable:
             _record(ev)

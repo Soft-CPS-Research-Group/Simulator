@@ -189,19 +189,6 @@
     "incoming_electric_vehicle_at_charger_estimated_arrival_time": {
       "active": true,
       "shared_in_central_agent": true
-    },
-    "washing_machine_start_time_step": {
-      "active": false,
-      "shared_in_central_agent": true
-    },
-    "washing_machine_end_time_step": {
-      "active": false,
-      "shared_in_central_agent": true
-    },
-    "washing_machine_load_profile": {
-      "active": false,
-      "stochaicity:": "0.0",
-      "shared_in_central_agent": true
     }
   },
   "actions": {
@@ -219,9 +206,6 @@
     },
     "electric_vehicle_storage": {
       "active": true
-    },
-    "washing_machine": {
-      "active": false
     }
   },
   "observation_bundles": {

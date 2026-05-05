@@ -61,7 +61,7 @@ class CityLearnPhysicsInvariantService:
             + self._safe_index(building.electrical_storage.electricity_consumption, t, 0.0)
             + self._safe_index(building.solar_generation, t, 0.0)
             + self._safe_index(building.chargers_electricity_consumption, t, 0.0)
-            + self._safe_index(building.washing_machines_electricity_consumption, t, 0.0)
+            + self._safe_index(building.deferrable_appliances_electricity_consumption, t, 0.0)
         )
 
         assert abs(net - terms) <= self.ENERGY_EPS, (
@@ -147,4 +147,3 @@ class CityLearnPhysicsInvariantService:
                 continue
             yielded.add(ev_id)
             yield ev
-

@@ -40,8 +40,9 @@ def _zero_entity_actions(env: CityLearnEnv):
     tables = env.action_space["tables"]
     return {
         "tables": {
-            "building": np.zeros(tables["building"].shape, dtype="float32"),
-            "charger": np.zeros(tables["charger"].shape, dtype="float32"),
+            name: np.zeros(space.shape, dtype="float32")
+            for name, space in tables.items()
+            if name in {"building", "charger", "deferrable_appliance"}
         }
     }
 
@@ -133,7 +134,7 @@ def test_hybrid_action_tables_plus_map_precedence_and_unknown_ids_validation():
         building_idx = 0
         non_ev_actions = [
             name for name in building.active_actions
-            if not name.startswith("electric_vehicle_storage_") and "washing_machine" not in name
+            if not name.startswith("electric_vehicle_storage_") and "deferrable_appliance" not in name
         ]
         if not non_ev_actions:
             pytest.skip("No non-EV building actions available in this scenario.")
@@ -191,6 +192,53 @@ def test_removed_charger_action_id_is_invalid_after_topology_removal():
         env.close()
 
 
+def test_dynamic_deferrable_appliance_add_start_and_remove_cancels_future_consumption():
+    schema = _load_schema()
+    schema["topology_events"] = [
+        {
+            "id": "evt_add_deferrable_b2",
+            "time_step": 1,
+            "operation": "add_asset",
+            "target_member_id": "Building_2",
+            "target_asset_type": "deferrable_appliance",
+            "target_asset_id": "dyn_washer",
+            "source_member_id": "Building_1",
+            "source_asset_id": "washing_machine_1",
+        },
+        {
+            "id": "evt_remove_deferrable_b2",
+            "time_step": 2,
+            "operation": "remove_asset",
+            "target_member_id": "Building_2",
+            "target_asset_type": "deferrable_appliance",
+            "target_asset_id": "dyn_washer",
+        },
+    ]
+    env = CityLearnEnv(schema, interface="entity", topology_mode="dynamic", episode_time_steps=5, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        initial_count = len(env.entity_specs["tables"]["deferrable_appliance"]["ids"])
+
+        env.step(_zero_entity_actions(env))
+        assert len(env.entity_specs["tables"]["deferrable_appliance"]["ids"]) == initial_count + 1
+        assert any(row_id.endswith("/dyn_washer") for row_id in env.entity_specs["tables"]["deferrable_appliance"]["ids"])
+
+        payload = _zero_entity_actions(env)
+        payload["map"] = {"deferrable_appliance:dyn_washer": {"start": 1.0}}
+        env.step(payload)
+
+        building_2 = env.buildings[_building_index_by_name(env, "Building_2")]
+        assert all(appliance.name != "dyn_washer" for appliance in building_2.deferrable_appliances)
+        assert not any(row_id.endswith("/dyn_washer") for row_id in env.entity_specs["tables"]["deferrable_appliance"]["ids"])
+        assert building_2.deferrable_appliances_electricity_consumption[1] > 0.0
+
+        if len(building_2.deferrable_appliances_electricity_consumption) > 2:
+            assert building_2.deferrable_appliances_electricity_consumption[2] == pytest.approx(0.0)
+    finally:
+        env.close()
+
+
 def test_dynamic_entity_layout_normalization_and_encoding_contract_stays_consistent():
     env = CityLearnEnv(_load_schema(), interface="entity", topology_mode="dynamic", episode_time_steps=16, random_seed=0)
 
@@ -206,14 +254,16 @@ def test_dynamic_entity_layout_normalization_and_encoding_contract_stays_consist
             assert obs["tables"]["storage"].shape == space["tables"]["storage"].shape
             assert obs["tables"]["ev"].shape == space["tables"]["ev"].shape
             assert obs["tables"]["pv"].shape == space["tables"]["pv"].shape
+            assert obs["tables"]["deferrable_appliance"].shape == space["tables"]["deferrable_appliance"].shape
 
             assert obs["tables"]["building"].shape[0] == len(spec["tables"]["building"]["ids"])
             assert obs["tables"]["charger"].shape[0] == len(spec["tables"]["charger"]["ids"])
             assert obs["tables"]["storage"].shape[0] == len(spec["tables"]["storage"]["ids"])
             assert obs["tables"]["pv"].shape[0] == len(spec["tables"]["pv"]["ids"])
+            assert obs["tables"]["deferrable_appliance"].shape[0] == len(spec["tables"]["deferrable_appliance"]["ids"])
 
             # Numerical stability contract for dynamic layouts: no NaN/inf while topology changes.
-            for table_name in ("district", "building", "charger", "ev", "storage", "pv"):
+            for table_name in ("district", "building", "charger", "ev", "storage", "pv", "deferrable_appliance"):
                 assert np.all(np.isfinite(obs["tables"][table_name]))
 
             # Phase encodings must remain binary during topology mutations.
@@ -228,6 +278,7 @@ def test_dynamic_entity_layout_normalization_and_encoding_contract_stays_consist
             c_count = obs["tables"]["charger"].shape[0]
             s_count = obs["tables"]["storage"].shape[0]
             p_count = obs["tables"]["pv"].shape[0]
+            d_count = obs["tables"]["deferrable_appliance"].shape[0]
 
             if c_count > 0:
                 building_to_charger = obs["edges"]["building_to_charger"]
@@ -243,6 +294,10 @@ def test_dynamic_entity_layout_normalization_and_encoding_contract_stays_consist
                 building_to_pv = obs["edges"]["building_to_pv"]
                 assert np.all((building_to_pv[:, 0] >= 0) & (building_to_pv[:, 0] < max(b_count, 1)))
                 assert np.all((building_to_pv[:, 1] >= 0) & (building_to_pv[:, 1] < max(p_count, 1)))
+            if d_count > 0:
+                building_to_deferrable = obs["edges"]["building_to_deferrable_appliance"]
+                assert np.all((building_to_deferrable[:, 0] >= 0) & (building_to_deferrable[:, 0] < max(b_count, 1)))
+                assert np.all((building_to_deferrable[:, 1] >= 0) & (building_to_deferrable[:, 1] < max(d_count, 1)))
 
             obs, *_ = env.step(_zero_entity_actions(env))
     finally:

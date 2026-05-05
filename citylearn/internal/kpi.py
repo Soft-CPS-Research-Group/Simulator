@@ -1271,6 +1271,63 @@ class CityLearnKPIService:
             self._metric('equity_bpr_asset_poor_over_rich', equity_bpr, 'District', 'district'),
         ])
 
+        district_deferrable = {
+            'completed_cycles': 0.0,
+            'missed_cycles': 0.0,
+            'served_energy_kwh': 0.0,
+            'unserved_energy_kwh': 0.0,
+        }
+        delay_weighted_sum = 0.0
+        delay_weight = 0.0
+        for building in kpi_buildings:
+            building_summary = {
+                'completed_cycles': 0.0,
+                'missed_cycles': 0.0,
+                'served_energy_kwh': 0.0,
+                'unserved_energy_kwh': 0.0,
+            }
+            building_delay_weighted_sum = 0.0
+            building_delay_weight = 0.0
+            for appliance in getattr(building, 'deferrable_appliances', []) or []:
+                summary = appliance.service_summary()
+                completed = self._to_scalar(summary.get('completed_cycles'), 0.0)
+                missed = self._to_scalar(summary.get('missed_cycles'), 0.0)
+                for key in building_summary:
+                    building_summary[key] += self._to_scalar(summary.get(key), 0.0)
+                if completed > 0.0:
+                    delay = self._to_scalar(summary.get('average_start_delay_hours'), 0.0)
+                    building_delay_weighted_sum += delay * completed
+                    building_delay_weight += completed
+
+            requested = building_summary['completed_cycles'] + building_summary['missed_cycles']
+            service_level = None if requested <= 0.0 else building_summary['completed_cycles'] / requested
+            avg_delay = 0.0 if building_delay_weight <= 0.0 else building_delay_weighted_sum / building_delay_weight
+            extended_building_rows.extend([
+                self._metric('deferrable_appliance_completed_cycles_count', building_summary['completed_cycles'], building.name, 'building'),
+                self._metric('deferrable_appliance_missed_cycles_count', building_summary['missed_cycles'], building.name, 'building'),
+                self._metric('deferrable_appliance_service_level_ratio', service_level, building.name, 'building'),
+                self._metric('deferrable_appliance_served_energy_total_kwh', building_summary['served_energy_kwh'], building.name, 'building'),
+                self._metric('deferrable_appliance_unserved_energy_total_kwh', building_summary['unserved_energy_kwh'], building.name, 'building'),
+                self._metric('deferrable_appliance_average_start_delay_hours', avg_delay, building.name, 'building'),
+            ])
+
+            for key in district_deferrable:
+                district_deferrable[key] += building_summary[key]
+            delay_weighted_sum += building_delay_weighted_sum
+            delay_weight += building_delay_weight
+
+        district_requested = district_deferrable['completed_cycles'] + district_deferrable['missed_cycles']
+        district_service_level = None if district_requested <= 0.0 else district_deferrable['completed_cycles'] / district_requested
+        district_avg_delay = 0.0 if delay_weight <= 0.0 else delay_weighted_sum / delay_weight
+        extended_district_rows.extend([
+            self._metric('deferrable_appliance_completed_cycles_count', district_deferrable['completed_cycles'], 'District', 'district'),
+            self._metric('deferrable_appliance_missed_cycles_count', district_deferrable['missed_cycles'], 'District', 'district'),
+            self._metric('deferrable_appliance_service_level_ratio', district_service_level, 'District', 'district'),
+            self._metric('deferrable_appliance_served_energy_total_kwh', district_deferrable['served_energy_kwh'], 'District', 'district'),
+            self._metric('deferrable_appliance_unserved_energy_total_kwh', district_deferrable['unserved_energy_kwh'], 'District', 'district'),
+            self._metric('deferrable_appliance_average_start_delay_hours', district_avg_delay, 'District', 'district'),
+        ])
+
         extended_building = pd.DataFrame(extended_building_rows)
         extended_district = pd.DataFrame(extended_district_rows)
 
@@ -1468,6 +1525,12 @@ class CityLearnKPIService:
             ('equity_cr20_benefit', 'equity', 'distribution', 'top20_benefit', None, 'ratio'),
             ('equity_losers_percent', 'equity', 'distribution', 'losers', None, 'percent'),
             ('equity_bpr_asset_poor_over_rich', 'equity', 'distribution', 'bpr_asset_poor_over_rich', None, 'ratio'),
+            ('deferrable_appliance_completed_cycles_count', 'deferrable_appliance', 'service', 'completed_cycles', None, 'count'),
+            ('deferrable_appliance_missed_cycles_count', 'deferrable_appliance', 'service', 'missed_cycles', None, 'count'),
+            ('deferrable_appliance_service_level_ratio', 'deferrable_appliance', 'service', 'service_level', None, 'ratio'),
+            ('deferrable_appliance_served_energy_total_kwh', 'deferrable_appliance', 'service', 'served_energy_total', None, 'kwh'),
+            ('deferrable_appliance_unserved_energy_total_kwh', 'deferrable_appliance', 'service', 'unserved_energy_total', None, 'kwh'),
+            ('deferrable_appliance_average_start_delay_hours', 'deferrable_appliance', 'service', 'average_start_delay', None, 'hours'),
         ]
         for old_name, family, subfamily, metric, variant, unit in extended_map:
             map_from(extended_df, old_name, family, subfamily, metric, variant, unit)

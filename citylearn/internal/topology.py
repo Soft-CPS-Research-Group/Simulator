@@ -4,7 +4,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set
 
-from citylearn.energy_model import Battery, PV
+from citylearn.energy_model import Battery, DeferrableAppliance, PV
 from citylearn.utilities import parse_bool
 
 if TYPE_CHECKING:
@@ -22,6 +22,7 @@ SUPPORTED_OPERATIONS = {
 }
 SUPPORTED_ASSET_TYPES = {
     'charger',
+    'deferrable_appliance',
     'pv',
     'electrical_storage',
 }
@@ -313,8 +314,8 @@ class CityLearnTopologyService:
         for charger in building.electric_vehicle_chargers or []:
             charger.time_step = time_step
 
-        for washing_machine in building.washing_machines or []:
-            washing_machine.time_step = time_step
+        for appliance in building.deferrable_appliances or []:
+            appliance.time_step = time_step
 
     @staticmethod
     def _set_ev_time_step(ev: ElectricVehicle, time_step: int):
@@ -339,10 +340,10 @@ class CityLearnTopologyService:
             charger.random_seed = env.random_seed
             charger.time_step_ratio = building.time_step_ratio
 
-        for washing_machine in building.washing_machines or []:
-            washing_machine.episode_tracker = env.episode_tracker
-            washing_machine.random_seed = env.random_seed
-            washing_machine.time_step_ratio = building.time_step_ratio
+        for appliance in building.deferrable_appliances or []:
+            appliance.episode_tracker = env.episode_tracker
+            appliance.random_seed = env.random_seed
+            appliance.time_step_ratio = building.time_step_ratio
 
     def _collect_active_ev_ids(self, buildings: Iterable[Building]) -> Set[str]:
         active_ev_ids: Set[str] = set()
@@ -468,18 +469,18 @@ class CityLearnTopologyService:
             kwargs['electrical_storage_action'] = 0.0
 
         ev_actions: Dict[str, float] = {}
-        washing_actions: Dict[str, float] = {}
+        deferrable_actions: Dict[str, float] = {}
         for action_name in active_actions:
             if action_name.startswith('electric_vehicle_storage_'):
                 charger_id = action_name.replace('electric_vehicle_storage_', '')
                 ev_actions[charger_id] = 0.0
-            elif 'washing_machine' in action_name:
-                washing_actions[action_name] = 0.0
+            elif action_name.startswith('deferrable_appliance_'):
+                deferrable_actions[action_name] = 0.0
 
         if ev_actions:
             kwargs['electric_vehicle_storage_actions'] = ev_actions
-        if washing_actions:
-            kwargs['washing_machine_actions'] = washing_actions
+        if deferrable_actions:
+            kwargs['deferrable_appliance_actions'] = deferrable_actions
 
         return kwargs
 
@@ -504,6 +505,9 @@ class CityLearnTopologyService:
 
         if asset_type == 'charger':
             return self._add_charger_asset(building, event, time_step)
+
+        if asset_type == 'deferrable_appliance':
+            return self._add_deferrable_appliance_asset(building, event, time_step)
 
         if asset_type == 'pv':
             source_building = self._resolve_source_building(event)
@@ -547,6 +551,29 @@ class CityLearnTopologyService:
 
             building.electric_vehicle_chargers = remaining
             self._sync_charger_metadata(building)
+            self._refresh_building_after_mutation(building)
+            self._set_building_time_step(building, time_step)
+            self._topology_version += 1
+            return True
+
+        if asset_type == 'deferrable_appliance':
+            appliance_id = event.target_asset_id
+            if appliance_id is None:
+                raise ValueError('remove_asset for deferrable_appliance requires target_asset_id.')
+
+            appliances = list(building.deferrable_appliances or [])
+            removed = [appliance for appliance in appliances if appliance.name == appliance_id]
+            remaining = [appliance for appliance in appliances if appliance.name != appliance_id]
+
+            if len(remaining) == len(appliances):
+                return False
+
+            for appliance in removed:
+                if hasattr(appliance, 'cancel_pending_and_running'):
+                    appliance.cancel_pending_and_running(int(time_step))
+
+            building.deferrable_appliances = remaining
+            self._sync_deferrable_appliance_metadata(building)
             self._refresh_building_after_mutation(building)
             self._set_building_time_step(building, time_step)
             self._topology_version += 1
@@ -603,6 +630,36 @@ class CityLearnTopologyService:
         self._topology_version += 1
         return True
 
+    def _add_deferrable_appliance_asset(self, building: Building, event: TopologyEvent, time_step: int) -> bool:
+        target_asset_id = event.target_asset_id
+        if target_asset_id is None:
+            raise ValueError('add_asset for deferrable_appliance requires target_asset_id.')
+
+        if any(appliance.name == target_asset_id for appliance in building.deferrable_appliances or []):
+            return False
+
+        source_building = self._resolve_source_building(event)
+        source_asset_id = event.source_asset_id if event.source_asset_id is not None else target_asset_id
+        source_appliance = self._resolve_source_deferrable_appliance(source_building, source_asset_id)
+        cloned: DeferrableAppliance = deepcopy(source_appliance)
+        cloned.name = target_asset_id
+        self._apply_object_overrides(cloned, event.overrides)
+        cloned.episode_tracker = building.episode_tracker
+        cloned.random_seed = building.random_seed
+        cloned.time_step_ratio = building.time_step_ratio
+        cloned.reset()
+        cloned.time_step = time_step
+
+        appliances = list(building.deferrable_appliances or [])
+        appliances.append(cloned)
+        building.deferrable_appliances = appliances
+        self._sync_deferrable_appliance_metadata(building)
+        self._refresh_building_after_mutation(building)
+        self._set_building_time_step(building, time_step)
+
+        self._topology_version += 1
+        return True
+
     def _resolve_target_building(self, event: TopologyEvent) -> Building:
         member_id = event.target_member_id
         if member_id is None:
@@ -640,6 +697,17 @@ class CityLearnTopologyService:
 
         raise ValueError(f"Source charger '{source_asset_id}' was not found in member '{source_building.name}'.")
 
+    @staticmethod
+    def _resolve_source_deferrable_appliance(source_building: Building, source_asset_id: str):
+        if source_asset_id is None:
+            raise ValueError('source_asset_id is required for deferrable_appliance add_asset operations.')
+
+        for appliance in source_building.deferrable_appliances or []:
+            if appliance.name == source_asset_id:
+                return appliance
+
+        raise ValueError(f"Source deferrable appliance '{source_asset_id}' was not found in member '{source_building.name}'.")
+
     def _refresh_building_after_mutation(self, building: Building):
         self._bind_building_runtime_context(building)
 
@@ -659,6 +727,7 @@ class CityLearnTopologyService:
 
     def _sync_dynamic_asset_metadata(self, building: Building):
         self._sync_charger_metadata(building)
+        self._sync_deferrable_appliance_metadata(building)
         self._sync_electrical_storage_metadata(building)
 
     def _sync_charger_metadata(self, building: Building):
@@ -708,6 +777,40 @@ class CityLearnTopologyService:
             if self._charger_action_enabled:
                 building.action_metadata[f'electric_vehicle_storage_{charger_id}'] = True
 
+    def _sync_deferrable_appliance_metadata(self, building: Building):
+        if not hasattr(building, 'observation_metadata') or not hasattr(building, 'action_metadata'):
+            return
+
+        for key in list(building.observation_metadata.keys()):
+            if key.startswith('deferrable_appliance_'):
+                building.observation_metadata[key] = False
+
+        for key in list(building.action_metadata.keys()):
+            if key.startswith('deferrable_appliance_'):
+                building.action_metadata[key] = False
+
+        schema = self.env.schema if isinstance(getattr(self.env, 'schema', None), Mapping) else {}
+        helper_observations = {
+            key: parse_bool(value.get('active', False), default=False, path=f'observations.{key}.active')
+            for key, value in (schema.get('deferrable_appliance_observations_helper', {}) or {}).items()
+        }
+        if not helper_observations:
+            helper_observations = {
+                key: parse_bool(value.get('active', False), default=False, path=f'observations.{key}.active')
+                for key, value in (schema.get('observations', {}) or {}).items()
+                if str(key).startswith('deferrable_appliance_')
+            }
+        action_enabled = self._is_schema_action_active('deferrable_appliance')
+
+        for appliance in building.deferrable_appliances or []:
+            for helper_name, enabled in helper_observations.items():
+                if enabled:
+                    feature_name = helper_name.replace('deferrable_appliance_', '', 1)
+                    building.observation_metadata[f'deferrable_appliance_{appliance.name}_{feature_name}'] = True
+
+            if action_enabled:
+                building.action_metadata[f'deferrable_appliance_{appliance.name}'] = True
+
     def _sync_electrical_storage_metadata(self, building: Building):
         has_storage = self._has_electrical_storage_asset(building)
         action_enabled = self._is_schema_action_active('electrical_storage')
@@ -753,7 +856,7 @@ class CityLearnTopologyService:
             return
 
         for key, value in overrides.items():
-            if key in {'name', 'chargers', 'electrical_storage', 'pv'}:
+            if key in {'name', 'chargers', 'deferrable_appliances', 'electrical_storage', 'pv'}:
                 continue
             if hasattr(building, key):
                 try:

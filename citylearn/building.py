@@ -11,7 +11,7 @@ from citylearn.base import Environment, EpisodeTracker
 from citylearn.data import CarbonIntensity, EnergySimulation, Pricing, TOLERANCE, Weather, ZERO_DIVISION_PLACEHOLDER
 from citylearn.dynamics import Dynamics, LSTMDynamics
 from citylearn.electric_vehicle_charger import Charger
-from citylearn.energy_model import Battery, ElectricDevice, ElectricHeater, HeatPump, PV, StorageDevice, StorageTank, WashingMachine
+from citylearn.energy_model import Battery, DeferrableAppliance, ElectricDevice, ElectricHeater, HeatPump, PV, StorageDevice, StorageTank, WashingMachine
 from citylearn.internal.building_ops import BuildingOpsService
 from citylearn.internal.units import (
     normalized_capacity_action_to_energy_kwh,
@@ -101,7 +101,9 @@ class Building(Environment):
         maximum_temperature_delta: float = None, observation_space_limit_delta: float = None,
         demand_observation_limit_factor: float = None, simulate_power_outage: bool = None,
         stochastic_power_outage: bool = None, stochastic_power_outage_model: PowerOutage = None,
-        electric_vehicle_chargers: List[Charger] = None, time_step_ratio: int = None, washing_machines: List[WashingMachine] = None, **kwargs: Any
+        electric_vehicle_chargers: List[Charger] = None, time_step_ratio: int = None,
+        deferrable_appliances: List[DeferrableAppliance] = None, washing_machines: List[WashingMachine] = None,
+        **kwargs: Any
     ):
         charging_constraints = kwargs.pop('charging_constraints', None)
         electrical_service = kwargs.pop('electrical_service', None)
@@ -126,7 +128,7 @@ class Building(Environment):
         )
         self.algorithm_action_based_time_step_hours_ratio = self.seconds_per_time_step / 3600
         self.stochastic_power_outage_model = stochastic_power_outage_model
-        self.washing_machines = washing_machines
+        self.deferrable_appliances = deferrable_appliances if deferrable_appliances is not None else washing_machines
         self.electric_vehicle_chargers = electric_vehicle_chargers
         self.energy_simulation = energy_simulation
         self.weather = weather
@@ -271,10 +273,16 @@ class Building(Environment):
         return getattr(self, '_electrical_storage_phase_connection', 'L1')
     
     @property
-    def washing_machines(self) -> List[WashingMachine]:
-        """Electric Vehicle Chargers associated with the building for charging connected eletric vehicles."""
+    def deferrable_appliances(self) -> List[DeferrableAppliance]:
+        """Deferrable appliances associated with the building."""
 
-        return self.__washing_machines
+        return self.__deferrable_appliances
+
+    @property
+    def washing_machines(self) -> List[DeferrableAppliance]:
+        """Backward-compatible alias for deferrable appliances."""
+
+        return self.deferrable_appliances
 
     @property
     def name(self) -> str:
@@ -505,10 +513,16 @@ class Building(Environment):
         return self.__chargers_electricity_consumption[:self.time_step + 1]
     
     @property
-    def washing_machines_electricity_consumption(self) -> np.ndarray:
-        """Electricity consumption of chargers time series, in [kWh]."""
+    def deferrable_appliances_electricity_consumption(self) -> np.ndarray:
+        """Electricity consumption of deferrable appliances time series, in [kWh]."""
 
-        return self.__washing_machines_electricity_consumption[:self.time_step + 1]
+        return self.__deferrable_appliances_electricity_consumption[:self.time_step + 1]
+
+    @property
+    def washing_machines_electricity_consumption(self) -> np.ndarray:
+        """Backward-compatible alias for deferrable appliance electricity consumption."""
+
+        return self.deferrable_appliances_electricity_consumption
 
     @property
     def energy_from_cooling_device_to_cooling_storage(self) -> np.ndarray:
@@ -786,9 +800,13 @@ class Building(Environment):
         self.__electric_vehicle_chargers = electric_vehicle_chargers if electric_vehicle_chargers is not None else []
         self._update_charger_lookup()
 
+    @deferrable_appliances.setter
+    def deferrable_appliances(self, deferrable_appliances: List[DeferrableAppliance]):
+        self.__deferrable_appliances = deferrable_appliances if deferrable_appliances is not None else []
+
     @washing_machines.setter
     def washing_machines(self, washing_machines: List[WashingMachine]):
-        self.__washing_machines = washing_machines
+        self.deferrable_appliances = washing_machines
 
     def _update_charger_lookup(self):
         chargers = self.__electric_vehicle_chargers if hasattr(self, '_Building__electric_vehicle_chargers') else []
@@ -1362,14 +1380,19 @@ class Building(Environment):
             include_all=include_all,
         )
 
-    def update_washing_machine_observations(self, observations, valid_observations, washing_machines):
-        """Compatibility wrapper for washing-machine observation service."""
+    def update_deferrable_appliance_observations(self, observations, valid_observations, deferrable_appliances):
+        """Compatibility wrapper for deferrable-appliance observation service."""
 
-        return self._ops_service.update_washing_machine_observations(
+        return self._ops_service.update_deferrable_appliance_observations(
             observations,
             valid_observations,
-            washing_machines,
+            deferrable_appliances,
         )
+
+    def update_washing_machine_observations(self, observations, valid_observations, washing_machines):
+        """Backward-compatible wrapper for old washing-machine integrations."""
+
+        return self.update_deferrable_appliance_observations(observations, valid_observations, washing_machines)
 
     def _get_observations_data(self, include_all: bool = False) -> Mapping[str, Union[float, int]]:
         """Compatibility wrapper for base observation data service."""
@@ -1420,7 +1443,8 @@ class Building(Environment):
         cooling_or_heating_device_action: float = None,
         cooling_device_action: float = None, heating_device_action: float = None,
         cooling_storage_action: float = None, heating_storage_action: float = None,
-        dhw_storage_action: float = None, electrical_storage_action: float = None, washing_machine_actions: dict = None,
+        dhw_storage_action: float = None, electrical_storage_action: float = None,
+        deferrable_appliance_actions: dict = None, washing_machine_actions: dict = None,
         electric_vehicle_storage_actions: dict = None,
     ):
         r"""Update cooling and heating demand for next timestep and charge/discharge storage devices."""
@@ -1433,7 +1457,7 @@ class Building(Environment):
             heating_storage_action=heating_storage_action,
             dhw_storage_action=dhw_storage_action,
             electrical_storage_action=electrical_storage_action,
-            washing_machine_actions=washing_machine_actions,
+            deferrable_appliance_actions=deferrable_appliance_actions if deferrable_appliance_actions is not None else washing_machine_actions,
             electric_vehicle_storage_actions=electric_vehicle_storage_actions,
         )
 
@@ -1822,15 +1846,14 @@ class Building(Environment):
                             low_limit[key] = -1
                             high_limit[key] = 100
 
-            elif 'washing_machine' in key:
-                if self.washing_machines is not None:
-                    for washing_machine in self.washing_machines:
-                        if key == f'{washing_machine.name}_start_time_step':
-                            low_limit[key] = -1
-                            high_limit[key] = 24
-                        elif f'{washing_machine.name}_end_time_step' in key:
-                            low_limit[key] = -1
-                            high_limit[key] = 24
+            elif 'deferrable_appliance' in key:
+                low_limit[key] = -1.0
+                if key.endswith('_ratio') or key.endswith(('pending', 'running', 'can_start', 'deadline_missed')):
+                    high_limit[key] = 1.0
+                elif key.endswith('_kwh'):
+                    high_limit[key] = 1.0e6
+                else:
+                    high_limit[key] = max(self.episode_tracker.simulation_time_steps, 1)
             elif key in ['dhw_device_efficiency']:
                 if isinstance(self.dhw_device, HeatPump):
                     cop = self.dhw_device.get_cop(data['outdoor_dry_bulb_temperature'], heating=True)
@@ -2038,12 +2061,9 @@ class Building(Environment):
                             high_limit.append(1.0)  # For discharging limit
                             low_limit.append(discharging_limit)  # For charging limit
             
-            elif 'washing_machine' in key:
-                if(self.washing_machines is not None):
-                    for wm in self.washing_machines:
-                        if key == f'{wm.name}':
-                            low_limit.append(0.0)
-                            high_limit.append(1.0)                
+            elif key.startswith('deferrable_appliance_'):
+                low_limit.append(0.0)
+                high_limit.append(1.0)
 
             elif 'storage' in key:
                 if key == 'electrical_storage':
@@ -2352,9 +2372,8 @@ class Building(Environment):
             for c in self.electric_vehicle_chargers:
                 c.next_time_step()
 
-        if self.washing_machines is not None and len(self.washing_machines) != 0:
-            for wm in self.washing_machines:
-                wm.next_time_step()        
+        for appliance in self.deferrable_appliances or []:
+            appliance.next_time_step()
 
         super().next_time_step()
 
@@ -2379,9 +2398,8 @@ class Building(Environment):
         else:
             pass
 
-        if self.washing_machines is not None and len(self.washing_machines) != 0:
-            for wm in self.washing_machines:
-                wm.reset()      
+        for appliance in self.deferrable_appliances or []:
+            appliance.reset()
 
         # variable reset
         self.reset_dynamic_variables()
@@ -2398,7 +2416,7 @@ class Building(Environment):
         self.__net_electricity_consumption_cost = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.__power_outage_signal = self.reset_power_outage_signal()
         self.__chargers_electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
-        self.__washing_machines_electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.__deferrable_appliances_electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self._set_default_charging_headroom()
         self._reset_charging_constraint_histories()
 
@@ -2456,8 +2474,8 @@ class Building(Environment):
         for charger in self.electric_vehicle_chargers or []:
             set_data_window(charger.charger_simulation, start_time_step, end_time_step)
 
-        for washing_machine in self.washing_machines or []:
-            set_data_window(washing_machine.washing_machine_simulation, start_time_step, end_time_step)
+        # Deferrable appliance schedules use global time-step indices and are sparse,
+        # so no dense data-window adjustment is needed here.
 
     def update_variables(self):
         """Update cooling, heating, dhw and net electricity consumption as well as net electricity consumption cost and carbon emissions."""
@@ -2526,16 +2544,11 @@ class Building(Environment):
 
         self.__chargers_electricity_consumption[self.time_step] = building_chargers_total_electricity_consumption
 
-        building_washing_machines_total_electricity_consumption = 0
+        building_deferrable_appliances_total_electricity_consumption = 0.0
+        for appliance in self.deferrable_appliances or []:
+            building_deferrable_appliances_total_electricity_consumption += appliance.electricity_consumption[self.time_step]
 
-        if self.washing_machines is not None and len(self.washing_machines) != 0:
-            for wm in self.washing_machines:
-                building_washing_machines_total_electricity_consumption = \
-                    building_washing_machines_total_electricity_consumption + wm.electricity_consumption[self.time_step]
-        else:
-            pass
-
-        self.__washing_machines_electricity_consumption[self.time_step] = building_washing_machines_total_electricity_consumption
+        self.__deferrable_appliances_electricity_consumption[self.time_step] = building_deferrable_appliances_total_electricity_consumption
 
         # net electricity consumption
         net_electricity_consumption = 0.0
@@ -2548,7 +2561,7 @@ class Building(Environment):
                                                     + self.electrical_storage.electricity_consumption[self.time_step] \
                                                         + self.solar_generation[self.time_step] \
                                                             + self.__chargers_electricity_consumption[self.time_step] \
-                                                                + self.__washing_machines_electricity_consumption[self.time_step]
+                                                                + self.__deferrable_appliances_electricity_consumption[self.time_step]
         else:
             pass
 
