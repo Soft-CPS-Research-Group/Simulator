@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import numpy as np
@@ -9,6 +10,10 @@ from citylearn.citylearn import CityLearnEnv
 
 
 SCHEMA = Path(__file__).resolve().parents[1] / "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json"
+ELECTRICAL_SERVICE_SCHEMA = (
+    Path(__file__).resolve().parents[1]
+    / "data/datasets/citylearn_three_phase_electrical_service_demo/schema.json"
+)
 
 
 def _zero_entity_actions(env: CityLearnEnv):
@@ -102,6 +107,72 @@ def test_entity_interface_includes_ev_and_charger_tables_and_edges():
         assert observations["tables"]["pv"].shape[0] == expected_pv
         assert observations["edges"]["building_to_charger"].shape[0] == expected_chargers
         assert observations["edges"]["building_to_pv"].shape[0] == expected_pv
+    finally:
+        env.close()
+
+
+def test_entity_interface_keeps_charger_phase_connection_on_charger_table():
+    env = CityLearnEnv(
+        str(ELECTRICAL_SERVICE_SCHEMA),
+        interface="entity",
+        central_agent=False,
+        episode_time_steps=6,
+        random_seed=0,
+    )
+
+    try:
+        observations, _ = env.reset()
+        specs = env.entity_specs
+        building_features = specs["tables"]["building"]["features"]
+        charger_features = specs["tables"]["charger"]["features"]
+
+        assert not any(name.startswith("charging_phase_one_hot_") for name in building_features)
+        assert not any("charger_15_" in name for name in building_features)
+
+        phase_features = [name for name in charger_features if name.startswith("phase_connection_")]
+        assert phase_features
+
+        charger_ids = specs["tables"]["charger"]["ids"]
+        charger_15_rows = [
+            idx for idx, charger_id in enumerate(charger_ids)
+            if charger_id.startswith("Building_15/")
+        ]
+        assert charger_15_rows
+
+        phase_cols = [charger_features.index(name) for name in phase_features]
+        for row in charger_15_rows:
+            assert observations["tables"]["charger"][row, phase_cols].sum() == pytest.approx(1.0)
+    finally:
+        env.close()
+
+
+def test_entity_interface_marks_all_phase_charger_connections():
+    schema = json.loads(ELECTRICAL_SERVICE_SCHEMA.read_text(encoding="utf-8"))
+    schema["root_directory"] = str(ELECTRICAL_SERVICE_SCHEMA.parent)
+    schema["buildings"]["Building_15"]["chargers"]["charger_15_1"]["attributes"]["phase_connection"] = "all_phases"
+
+    env = CityLearnEnv(
+        schema,
+        interface="entity",
+        central_agent=False,
+        episode_time_steps=6,
+        random_seed=0,
+    )
+
+    try:
+        observations, _ = env.reset()
+        specs = env.entity_specs
+        charger_features = specs["tables"]["charger"]["features"]
+        charger_ids = specs["tables"]["charger"]["ids"]
+
+        row = charger_ids.index("Building_15/charger_15_1")
+        phase_cols = [
+            charger_features.index("phase_connection_L1"),
+            charger_features.index("phase_connection_L2"),
+            charger_features.index("phase_connection_L3"),
+        ]
+
+        assert observations["tables"]["charger"][row, phase_cols].tolist() == [1.0, 1.0, 1.0]
     finally:
         env.close()
 

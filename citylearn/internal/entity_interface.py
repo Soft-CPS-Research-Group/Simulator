@@ -369,6 +369,9 @@ class CityLearnEntityInterfaceService:
                 "max_charging_power_kw": max_charging_power,
                 "max_discharging_power_kw": max_discharging_power,
             }
+            assigned_phase = getattr(env.buildings[ref.building_index], "_charger_phase_map", {}).get(ref.charger_id)
+            for phase_name, feature_name in zip(self._charger_phase_names, self._charger_phase_features):
+                values[feature_name] = 1.0 if assigned_phase in {phase_name, "all_phases"} else 0.0
             if core_bundle_enabled:
                 values.update(
                     {
@@ -1134,6 +1137,14 @@ class CityLearnEntityInterfaceService:
         self._charger_row_by_building_and_raw_id = {
             (ref.building_index, ref.charger_id): ref.row for ref in self._charger_refs
         }
+        self._charger_phase_names: List[str] = []
+        for building in env.buildings:
+            if not getattr(building, "_include_phase_encoding", False):
+                continue
+            for phase_name in getattr(building, "_phase_encoding_phase_names", []) or []:
+                phase_name = str(phase_name)
+                if phase_name not in self._charger_phase_names:
+                    self._charger_phase_names.append(phase_name)
         self._charger_row_by_ev_action_name = {}
         self._deferrable_appliance_by_building_and_id = {}
         for b_idx, building in enumerate(env.buildings):
@@ -1230,6 +1241,11 @@ class CityLearnEntityInterfaceService:
             for name in self.EXTRA_CHARGER_FEATURES:
                 self._table_feature_bundle["charger"][name] = self.CORE_BUNDLE
                 self._table_feature_legacy["charger"][name] = False
+        self._charger_phase_features = [f"phase_connection_{phase_name}" for phase_name in self._charger_phase_names]
+        self._append_unique(self._charger_features, self._charger_phase_features)
+        for name in self._charger_phase_features:
+            self._table_feature_bundle["charger"][name] = self.CORE_BUNDLE
+            self._table_feature_legacy["charger"][name] = False
 
         self._ev_features = list(self.LEGACY_EV_FEATURES)
         for name in self.LEGACY_EV_FEATURES:
@@ -1934,6 +1950,7 @@ class CityLearnEntityInterfaceService:
             key.startswith("electric_vehicle_charger_")
             or key.startswith("connected_electric_vehicle_at_charger_")
             or key.startswith("incoming_electric_vehicle_at_charger_")
+            or key.startswith("charging_phase_one_hot_")
             or key.startswith("deferrable_appliance_")
         )
 
