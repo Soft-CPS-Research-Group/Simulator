@@ -44,12 +44,27 @@
       "units": [
         "scalar"
       ]
+    },
+    "deferrable_appliance": {
+      "features": [
+        "start"
+      ],
+      "ids": [
+        "Building_1/washing_machine_1"
+      ],
+      "units": [
+        "scalar"
+      ]
     }
   },
   "edges": {
     "building_to_charger": {
       "source": "building",
       "target": "charger"
+    },
+    "building_to_deferrable_appliance": {
+      "source": "building",
+      "target": "deferrable_appliance"
     },
     "building_to_pv": {
       "source": "building",
@@ -91,6 +106,9 @@
     "simulator_applies_normalization": false
   },
   "observation_bundles": {
+    "entity_base": {
+      "active": true
+    },
     "entity_community_operational": {
       "active": false
     },
@@ -162,6 +180,11 @@
     },
     "charger": {
       "feature_metadata": {
+        "charger_efficiency_ratio": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "ratio"
+        },
         "connected_ev_battery_capacity_kwh": {
           "bundle": "legacy",
           "legacy": true,
@@ -216,6 +239,16 @@
           "bundle": "legacy",
           "legacy": true,
           "unit": "kw"
+        },
+        "min_charging_power_kw": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kw"
+        },
+        "min_discharging_power_kw": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kw"
         }
       },
       "features": [
@@ -229,7 +262,10 @@
         "incoming_ev_estimated_arrival_time_step",
         "last_charged_kwh",
         "max_charging_power_kw",
-        "max_discharging_power_kw"
+        "max_discharging_power_kw",
+        "min_charging_power_kw",
+        "min_discharging_power_kw",
+        "charger_efficiency_ratio"
       ],
       "ids": [
         "Building_1/charger_1_1",
@@ -251,6 +287,195 @@
         "scalar",
         "time_step",
         "kwh",
+        "kw",
+        "kw",
+        "kw",
+        "kw",
+        "ratio"
+      ]
+    },
+    "deferrable_appliance": {
+      "feature_metadata": {
+        "can_start": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "scalar"
+        },
+        "current_step_energy_kwh": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kwh"
+        },
+        "current_step_power_kw": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kw"
+        },
+        "cycle_average_power_kw": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kw"
+        },
+        "cycle_duration_steps": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "scalar"
+        },
+        "cycle_energy_kwh": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kwh"
+        },
+        "cycle_load_factor_ratio": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "ratio"
+        },
+        "cycle_peak_power_kw": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kw"
+        },
+        "cycle_peak_step_offset_ratio": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "ratio"
+        },
+        "deadline_missed": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "scalar"
+        },
+        "deadline_time_step": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "time_step"
+        },
+        "earliest_start_time_step": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "time_step"
+        },
+        "hours_until_deadline": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "h"
+        },
+        "hours_until_latest_start": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "h"
+        },
+        "latest_start_time_step": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "time_step"
+        },
+        "must_run": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "scalar"
+        },
+        "pending": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "scalar"
+        },
+        "priority": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "scalar"
+        },
+        "remaining_average_power_kw": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kw"
+        },
+        "remaining_duration_steps": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "scalar"
+        },
+        "remaining_energy_kwh": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kwh"
+        },
+        "running": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "scalar"
+        },
+        "slack_ratio": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "ratio"
+        },
+        "slack_steps": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "scalar"
+        },
+        "urgency_ratio": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "ratio"
+        }
+      },
+      "features": [
+        "pending",
+        "running",
+        "can_start",
+        "deadline_missed",
+        "earliest_start_time_step",
+        "latest_start_time_step",
+        "deadline_time_step",
+        "hours_until_latest_start",
+        "hours_until_deadline",
+        "slack_steps",
+        "slack_ratio",
+        "urgency_ratio",
+        "cycle_duration_steps",
+        "cycle_energy_kwh",
+        "remaining_energy_kwh",
+        "current_step_energy_kwh",
+        "priority",
+        "must_run",
+        "cycle_average_power_kw",
+        "cycle_peak_power_kw",
+        "cycle_load_factor_ratio",
+        "cycle_peak_step_offset_ratio",
+        "remaining_duration_steps",
+        "remaining_average_power_kw",
+        "current_step_power_kw"
+      ],
+      "ids": [
+        "Building_1/washing_machine_1"
+      ],
+      "units": [
+        "scalar",
+        "scalar",
+        "scalar",
+        "scalar",
+        "time_step",
+        "time_step",
+        "time_step",
+        "h",
+        "h",
+        "scalar",
+        "ratio",
+        "ratio",
+        "scalar",
+        "kwh",
+        "kwh",
+        "kwh",
+        "scalar",
+        "scalar",
+        "kw",
+        "kw",
+        "ratio",
+        "ratio",
+        "scalar",
         "kw",
         "kw"
       ]
@@ -504,15 +729,35 @@
           "legacy": true,
           "unit": "kwh"
         },
+        "efficiency_ratio": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "ratio"
+        },
         "electricity_consumption_kwh": {
           "bundle": "legacy",
           "legacy": true,
           "unit": "kwh"
         },
+        "min_charge_power_kw": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kw"
+        },
+        "min_discharge_power_kw": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "kw"
+        },
         "nominal_power_kw": {
           "bundle": "legacy",
           "legacy": true,
           "unit": "kw"
+        },
+        "round_trip_efficiency_ratio": {
+          "bundle": "entity_base",
+          "legacy": false,
+          "unit": "ratio"
         },
         "soc": {
           "bundle": "legacy",
@@ -524,7 +769,11 @@
         "soc",
         "capacity_kwh",
         "nominal_power_kw",
-        "electricity_consumption_kwh"
+        "electricity_consumption_kwh",
+        "min_charge_power_kw",
+        "min_discharge_power_kw",
+        "efficiency_ratio",
+        "round_trip_efficiency_ratio"
       ],
       "ids": [
         "Building_1/electrical_storage",
@@ -549,7 +798,11 @@
         "scalar",
         "kwh",
         "kw",
-        "kwh"
+        "kwh",
+        "kw",
+        "kw",
+        "ratio",
+        "ratio"
       ]
     }
   },
@@ -588,6 +841,9 @@
         "Building_12/charger_12_1",
         "Building_15/charger_15_1",
         "Building_15/charger_15_2"
+      ],
+      "deferrable_appliance": [
+        "Building_1/washing_machine_1"
       ],
       "ev": [
         "Electric_Vehicle_1",

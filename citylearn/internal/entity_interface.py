@@ -56,6 +56,7 @@ class DeferrableApplianceRef:
 class CityLearnEntityInterfaceService:
     """Build and parse canonical entity payloads."""
 
+    BASE_BUNDLE = "entity_base"
     CORE_BUNDLE = "entity_core_electrical"
     COMMUNITY_BUNDLE = "entity_community_operational"
     FORECAST_BUNDLE = "entity_forecasts_existing"
@@ -80,6 +81,11 @@ class CityLearnEntityInterfaceService:
         "max_charging_power_kw",
         "max_discharging_power_kw",
     ]
+    BASE_CHARGER_FEATURES = [
+        "min_charging_power_kw",
+        "min_discharging_power_kw",
+        "charger_efficiency_ratio",
+    ]
     EXTRA_CHARGER_FEATURES = [
         "commanded_power_kw",
         "applied_power_kw",
@@ -91,6 +97,12 @@ class CityLearnEntityInterfaceService:
         "avg_power_to_departure_kw",
         "charging_slack_kw",
         "charging_priority_ratio",
+        "charge_efficiency_at_max_ratio",
+        "discharge_efficiency_at_max_ratio",
+        "incoming_ev_required_soc_departure",
+        "incoming_ev_departure_time_step",
+        "incoming_ev_hours_until_departure",
+        "incoming_ev_time_until_departure_ratio",
     ]
     LEGACY_EV_FEATURES = [
         "soc",
@@ -116,11 +128,21 @@ class CityLearnEntityInterfaceService:
         "max_discharge_power_kw",
         "energy_to_full_kwh",
         "energy_available_kwh",
+        "current_efficiency_ratio",
+        "degraded_capacity_kwh",
+        "soc_min_ratio",
+    ]
+    BASE_STORAGE_FEATURES = [
+        "min_charge_power_kw",
+        "min_discharge_power_kw",
+        "efficiency_ratio",
+        "round_trip_efficiency_ratio",
     ]
     PV_FEATURES = [
         "generation_power_kw",
         "generation_energy_kwh_step",
         "installed_power_kw",
+        "generation_capacity_factor_ratio",
     ]
     DEFERRABLE_APPLIANCE_FEATURES = [
         "pending",
@@ -140,6 +162,14 @@ class CityLearnEntityInterfaceService:
         "remaining_energy_kwh",
         "current_step_energy_kwh",
         "priority",
+        "must_run",
+        "cycle_average_power_kw",
+        "cycle_peak_power_kw",
+        "cycle_load_factor_ratio",
+        "cycle_peak_step_offset_ratio",
+        "remaining_duration_steps",
+        "remaining_average_power_kw",
+        "current_step_power_kw",
     ]
     CORE_BUILDING_EXTRA_FEATURES = [
         "net_power_kw",
@@ -157,6 +187,7 @@ class CityLearnEntityInterfaceService:
         "ev_charging_power_kw",
         "ev_charging_energy_kwh_step",
         "electrical_storage_soc_ratio",
+        "charging_total_service_power_kw",
     ]
     COMMUNITY_DISTRICT_EXTRA_FEATURES = [
         "community_net_power_kw",
@@ -323,6 +354,26 @@ class CityLearnEntityInterfaceService:
             departure_steps = self._safe_index(sim.electric_vehicle_departure_time, t, -1.0)
             max_charging_power = self._safe_scalar(charger.max_charging_power, 0.0)
             max_discharging_power = self._safe_scalar(charger.max_discharging_power, 0.0)
+            min_charging_power = self._safe_scalar(getattr(charger, "min_charging_power", 0.0), 0.0)
+            min_discharging_power = self._safe_scalar(getattr(charger, "min_discharging_power", 0.0), 0.0)
+            charger_efficiency = self._safe_scalar(getattr(charger, "efficiency", 1.0), 1.0)
+            charge_efficiency_at_max = (
+                self._safe_scalar(charger.get_efficiency(1.0, True), charger_efficiency)
+                if hasattr(charger, "get_efficiency")
+                else charger_efficiency
+            )
+            discharge_efficiency_at_max = (
+                self._safe_scalar(charger.get_efficiency(1.0, False), charger_efficiency)
+                if hasattr(charger, "get_efficiency")
+                else charger_efficiency
+            )
+            incoming_required_soc = required_soc if incoming else -0.1
+            incoming_departure_steps = departure_steps if incoming else -1.0
+            incoming_hours_until_departure = (
+                incoming_departure_steps * step_hours
+                if incoming and incoming_departure_steps >= 0.0
+                else -1.0
+            )
 
             if connected:
                 connected_ev = charger.connected_electric_vehicle
@@ -368,6 +419,9 @@ class CityLearnEntityInterfaceService:
                 "last_charged_kwh": commanded_energy,
                 "max_charging_power_kw": max_charging_power,
                 "max_discharging_power_kw": max_discharging_power,
+                "min_charging_power_kw": min_charging_power,
+                "min_discharging_power_kw": min_discharging_power,
+                "charger_efficiency_ratio": charger_efficiency,
             }
             assigned_phase = getattr(env.buildings[ref.building_index], "_charger_phase_map", {}).get(ref.charger_id)
             for phase_name, feature_name in zip(self._charger_phase_names, self._charger_phase_features):
@@ -385,6 +439,16 @@ class CityLearnEntityInterfaceService:
                         "avg_power_to_departure_kw": avg_power_to_departure,
                         "charging_slack_kw": charging_slack,
                         "charging_priority_ratio": charging_priority,
+                        "charge_efficiency_at_max_ratio": charge_efficiency_at_max,
+                        "discharge_efficiency_at_max_ratio": discharge_efficiency_at_max,
+                        "incoming_ev_required_soc_departure": incoming_required_soc,
+                        "incoming_ev_departure_time_step": incoming_departure_steps,
+                        "incoming_ev_hours_until_departure": incoming_hours_until_departure,
+                        "incoming_ev_time_until_departure_ratio": (
+                            np.clip(incoming_hours_until_departure / 24.0, 0.0, 1.0)
+                            if incoming and incoming_hours_until_departure >= 0.0
+                            else -1.0
+                        ),
                     }
                 )
             for col, feature_name in enumerate(self._charger_features):
@@ -421,6 +485,15 @@ class CityLearnEntityInterfaceService:
             capacity = self._safe_scalar(getattr(storage, "capacity", 0.0), 0.0)
             nominal_power = self._safe_scalar(getattr(storage, "nominal_power", 0.0), 0.0)
             soc = self._safe_scalar(storage.soc[endogenous_t], 0.0)
+            efficiency_history = getattr(storage, "efficiency_history", None)
+            if efficiency_history is not None and len(efficiency_history) > 0:
+                base_efficiency = self._safe_scalar(efficiency_history[0], 1.0)
+            else:
+                base_efficiency = self._safe_scalar(getattr(storage, "efficiency", 1.0), 1.0)
+            round_trip_efficiency = self._safe_scalar(
+                getattr(storage, "round_trip_efficiency", base_efficiency ** 0.5),
+                base_efficiency ** 0.5,
+            )
             values = {
                 "soc": soc,
                 "capacity_kwh": capacity,
@@ -429,7 +502,14 @@ class CityLearnEntityInterfaceService:
                     building.electrical_storage_electricity_consumption[endogenous_t],
                     0.0,
                 ),
+                "min_charge_power_kw": self._safe_scalar(getattr(storage, "min_charge_power", 0.0), 0.0),
+                "min_discharge_power_kw": self._safe_scalar(getattr(storage, "min_discharge_power", 0.0), 0.0),
+                "efficiency_ratio": base_efficiency,
+                "round_trip_efficiency_ratio": round_trip_efficiency,
             }
+            assigned_storage_phase = getattr(building, "electrical_storage_phase_connection", None)
+            for phase_name, feature_name in zip(self._storage_phase_names, self._storage_phase_features):
+                values[feature_name] = 1.0 if assigned_storage_phase in {phase_name, "all_phases"} else 0.0
             if core_bundle_enabled:
                 depth_of_discharge = self._safe_scalar(getattr(storage, "depth_of_discharge", 1.0), 1.0)
                 soc_min = max(1.0 - depth_of_discharge, 0.0)
@@ -453,6 +533,9 @@ class CityLearnEntityInterfaceService:
                         "max_discharge_power_kw": max_discharge_power,
                         "energy_to_full_kwh": energy_to_full,
                         "energy_available_kwh": energy_available,
+                        "current_efficiency_ratio": self._safe_scalar(getattr(storage, "efficiency", base_efficiency), base_efficiency),
+                        "degraded_capacity_kwh": self._safe_scalar(getattr(storage, "degraded_capacity", capacity), capacity),
+                        "soc_min_ratio": soc_min,
                     }
                 )
             for col, feature_name in enumerate(self._storage_features):
@@ -462,10 +545,13 @@ class CityLearnEntityInterfaceService:
             for ref in self._pv_refs:
                 building = env.buildings[ref.building_index]
                 generation_energy = abs(self._safe_index(building.solar_generation, endogenous_t, 0.0))
+                installed_power = self._safe_scalar(getattr(building.pv, "nominal_power", 0.0), 0.0)
+                generation_power = generation_energy / step_hours
                 values = {
-                    "generation_power_kw": generation_energy / step_hours,
+                    "generation_power_kw": generation_power,
                     "generation_energy_kwh_step": generation_energy,
-                    "installed_power_kw": self._safe_scalar(getattr(building.pv, "nominal_power", 0.0), 0.0),
+                    "installed_power_kw": installed_power,
+                    "generation_capacity_factor_ratio": generation_power / installed_power if installed_power > 0.0 else 0.0,
                 }
                 for col, feature_name in enumerate(self._pv_features):
                     self._pv_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
@@ -914,6 +1000,10 @@ class CityLearnEntityInterfaceService:
         building_export_headroom = constraint_state.get("building_export_headroom_kw")
         phase_headroom = constraint_state.get("phase_headroom_kw") or {}
         phase_export_headroom = constraint_state.get("phase_export_headroom_kw") or {}
+        phase_power = constraint_state.get("phase_power_kw") or {}
+        total_service_power = self._safe_scalar(constraint_state.get("total_power_kw"), np.nan)
+        if not np.isfinite(total_service_power):
+            total_service_power = 0.0
         phase_headroom_sum = sum(
             self._safe_scalar(value, 0.0)
             for value in phase_headroom.values()
@@ -945,12 +1035,18 @@ class CityLearnEntityInterfaceService:
                 endogenous_t,
                 0.0,
             ),
+            "charging_total_service_power_kw": total_service_power,
             "_building_headroom_kw": self._safe_scalar(building_headroom, np.nan),
             "_building_export_headroom_kw": self._safe_scalar(building_export_headroom, np.nan),
             "_phase_headroom_kw": phase_headroom_sum,
             "_phase_export_headroom_kw": phase_export_headroom_sum,
             "_control_time_step": float(control_t),
         }
+        for phase_name in self._phase_names:
+            metrics[f"charging_phase_{phase_name}_power_kw"] = self._safe_scalar(
+                phase_power.get(phase_name, 0.0),
+                0.0,
+            )
         return metrics
 
     def _build_temporal_building_metrics(self, *, building, endogenous_t: int) -> Mapping[str, float]:
@@ -1137,14 +1233,26 @@ class CityLearnEntityInterfaceService:
         self._charger_row_by_building_and_raw_id = {
             (ref.building_index, ref.charger_id): ref.row for ref in self._charger_refs
         }
-        self._charger_phase_names: List[str] = []
+        self._phase_names: List[str] = []
         for building in env.buildings:
             if not getattr(building, "_include_phase_encoding", False):
                 continue
-            for phase_name in getattr(building, "_phase_encoding_phase_names", []) or []:
-                phase_name = str(phase_name)
-                if phase_name not in self._charger_phase_names:
-                    self._charger_phase_names.append(phase_name)
+            phase_names = [
+                str(phase.get("name"))
+                for phase in getattr(building, "_phase_limits", []) or []
+                if isinstance(phase, Mapping) and phase.get("name")
+            ]
+            if not phase_names:
+                phase_names = [
+                    str(phase_name)
+                    for phase_name in getattr(building, "_phase_encoding_phase_names", []) or []
+                    if str(phase_name) not in {"all_phases", "unassigned"}
+                ]
+            for phase_name in phase_names:
+                if phase_name not in self._phase_names:
+                    self._phase_names.append(phase_name)
+        self._charger_phase_names = list(self._phase_names)
+        self._storage_phase_names = list(self._phase_names)
         self._charger_row_by_ev_action_name = {}
         self._deferrable_appliance_by_building_and_id = {}
         for b_idx, building in enumerate(env.buildings):
@@ -1205,6 +1313,13 @@ class CityLearnEntityInterfaceService:
             for name in self.CORE_BUILDING_EXTRA_FEATURES:
                 self._table_feature_bundle["building"][name] = self.CORE_BUNDLE
                 self._table_feature_legacy["building"][name] = False
+            self._building_phase_power_features = [f"charging_phase_{phase_name}_power_kw" for phase_name in self._phase_names]
+            self._append_unique(self._building_features, self._building_phase_power_features)
+            for name in self._building_phase_power_features:
+                self._table_feature_bundle["building"][name] = self.CORE_BUNDLE
+                self._table_feature_legacy["building"][name] = False
+        else:
+            self._building_phase_power_features = []
 
         if self._bundle_enabled(self.TEMPORAL_BUNDLE):
             self._append_unique(self._building_features, self.TEMPORAL_BUILDING_FEATURES)
@@ -1236,6 +1351,10 @@ class CityLearnEntityInterfaceService:
         for name in self.LEGACY_CHARGER_FEATURES:
             self._table_feature_bundle["charger"][name] = "legacy"
             self._table_feature_legacy["charger"][name] = True
+        self._append_unique(self._charger_features, self.BASE_CHARGER_FEATURES)
+        for name in self.BASE_CHARGER_FEATURES:
+            self._table_feature_bundle["charger"][name] = self.BASE_BUNDLE
+            self._table_feature_legacy["charger"][name] = False
         if self._bundle_enabled(self.CORE_BUNDLE):
             self._append_unique(self._charger_features, self.EXTRA_CHARGER_FEATURES)
             for name in self.EXTRA_CHARGER_FEATURES:
@@ -1244,7 +1363,7 @@ class CityLearnEntityInterfaceService:
         self._charger_phase_features = [f"phase_connection_{phase_name}" for phase_name in self._charger_phase_names]
         self._append_unique(self._charger_features, self._charger_phase_features)
         for name in self._charger_phase_features:
-            self._table_feature_bundle["charger"][name] = self.CORE_BUNDLE
+            self._table_feature_bundle["charger"][name] = self.BASE_BUNDLE
             self._table_feature_legacy["charger"][name] = False
 
         self._ev_features = list(self.LEGACY_EV_FEATURES)
@@ -1261,11 +1380,20 @@ class CityLearnEntityInterfaceService:
         for name in self.LEGACY_STORAGE_FEATURES:
             self._table_feature_bundle["storage"][name] = "legacy"
             self._table_feature_legacy["storage"][name] = True
+        self._append_unique(self._storage_features, self.BASE_STORAGE_FEATURES)
+        for name in self.BASE_STORAGE_FEATURES:
+            self._table_feature_bundle["storage"][name] = self.BASE_BUNDLE
+            self._table_feature_legacy["storage"][name] = False
         if self._bundle_enabled(self.CORE_BUNDLE):
             self._append_unique(self._storage_features, self.EXTRA_STORAGE_FEATURES)
             for name in self.EXTRA_STORAGE_FEATURES:
                 self._table_feature_bundle["storage"][name] = self.CORE_BUNDLE
                 self._table_feature_legacy["storage"][name] = False
+        self._storage_phase_features = [f"phase_connection_{phase_name}" for phase_name in self._storage_phase_names]
+        self._append_unique(self._storage_features, self._storage_phase_features)
+        for name in self._storage_phase_features:
+            self._table_feature_bundle["storage"][name] = self.BASE_BUNDLE
+            self._table_feature_legacy["storage"][name] = False
 
         self._pv_features = list(self.PV_FEATURES) if self._bundle_enabled(self.CORE_BUNDLE) else []
         for name in self._pv_features:
@@ -1274,7 +1402,7 @@ class CityLearnEntityInterfaceService:
 
         self._deferrable_appliance_features = list(self.DEFERRABLE_APPLIANCE_FEATURES)
         for name in self._deferrable_appliance_features:
-            self._table_feature_bundle["deferrable_appliance"][name] = self.CORE_BUNDLE
+            self._table_feature_bundle["deferrable_appliance"][name] = self.BASE_BUNDLE
             self._table_feature_legacy["deferrable_appliance"][name] = False
 
         self._building_action_features = []
@@ -1490,8 +1618,11 @@ class CityLearnEntityInterfaceService:
                 },
             },
             "observation_bundles": {
-                bundle_name: {"active": bool(active)}
-                for bundle_name, active in self._observation_bundles.items()
+                self.BASE_BUNDLE: {"active": True},
+                **{
+                    bundle_name: {"active": bool(active)}
+                    for bundle_name, active in self._observation_bundles.items()
+                },
             },
             "tables": {
                 "district": _table_spec("district", ["district_0"], self._district_features),
@@ -1664,13 +1795,25 @@ class CityLearnEntityInterfaceService:
             for building in self.env.buildings
             for charger in (building.electric_vehicle_chargers or [])
         ]
+        min_charging_limits = [
+            self._safe_scalar(getattr(charger, "min_charging_power", 0.0), 0.0)
+            for building in self.env.buildings
+            for charger in (building.electric_vehicle_chargers or [])
+        ]
         discharging_limits = [
             self._safe_scalar(charger.max_discharging_power, 0.0)
             for building in self.env.buildings
             for charger in (building.electric_vehicle_chargers or [])
         ]
+        min_discharging_limits = [
+            self._safe_scalar(getattr(charger, "min_discharging_power", 0.0), 0.0)
+            for building in self.env.buildings
+            for charger in (building.electric_vehicle_chargers or [])
+        ]
         max_charge_kw = max(charging_limits + [0.0])
         max_discharge_kw = max(discharging_limits + [0.0])
+        max_min_charge_kw = max(min_charging_limits + [0.0])
+        max_min_discharge_kw = max(min_discharging_limits + [0.0])
         max_abs_power_kw = max(max_charge_kw, max_discharge_kw, 1.0)
         max_energy_step = max_abs_power_kw * step_hours
         max_theoretical_avg_power = max(max_capacity / max(step_hours, 1.0e-6), max_abs_power_kw, 1.0)
@@ -1687,6 +1830,9 @@ class CityLearnEntityInterfaceService:
             "last_charged_kwh": (-max_energy_step, max_energy_step),
             "max_charging_power_kw": (0.0, max(max_charge_kw, 1.0)),
             "max_discharging_power_kw": (0.0, max(max_discharge_kw, 1.0)),
+            "min_charging_power_kw": (0.0, max(max_min_charge_kw, 1.0)),
+            "min_discharging_power_kw": (0.0, max(max_min_discharge_kw, 1.0)),
+            "charger_efficiency_ratio": (0.0, 1.0),
             "commanded_power_kw": (-max_abs_power_kw, max_abs_power_kw),
             "applied_power_kw": (-max_abs_power_kw, max_abs_power_kw),
             "applied_energy_kwh_step": (-max_energy_step, max_energy_step),
@@ -1697,10 +1843,19 @@ class CityLearnEntityInterfaceService:
             "avg_power_to_departure_kw": (0.0, max_theoretical_avg_power),
             "charging_slack_kw": (-max_theoretical_avg_power, max(max_charge_kw, 1.0)),
             "charging_priority_ratio": (0.0, 1.0),
+            "charge_efficiency_at_max_ratio": (0.0, 1.0),
+            "discharge_efficiency_at_max_ratio": (0.0, 1.0),
+            "incoming_ev_required_soc_departure": (-0.1, 1.0),
+            "incoming_ev_departure_time_step": (-1.0, max_departure),
+            "incoming_ev_hours_until_departure": (-1.0, max_departure * step_hours),
+            "incoming_ev_time_until_departure_ratio": (-1.0, 1.0),
         }
 
         for j, feature in enumerate(self._charger_features):
-            feature_low, feature_high = bounds.get(feature, self._default_bounds_for_feature(feature))
+            if str(feature).startswith("phase_connection_"):
+                feature_low, feature_high = 0.0, 1.0
+            else:
+                feature_low, feature_high = bounds.get(feature, self._default_bounds_for_feature(feature))
             low[:, j] = feature_low
             high[:, j] = feature_high
 
@@ -1758,10 +1913,16 @@ class CityLearnEntityInterfaceService:
                     feature_low, feature_high = 0.0, 1.0
                 elif feature in {"capacity_kwh", "energy_to_full_kwh", "energy_available_kwh"}:
                     feature_low, feature_high = 0.0, max(capacity, 1.0)
-                elif feature in {"nominal_power_kw", "max_charge_power_kw", "max_discharge_power_kw"}:
+                elif feature in {"nominal_power_kw", "max_charge_power_kw", "max_discharge_power_kw", "min_charge_power_kw", "min_discharge_power_kw"}:
                     feature_low, feature_high = 0.0, max(nominal_power, 1.0)
                 elif feature == "electricity_consumption_kwh":
                     feature_low, feature_high = -energy_limit, energy_limit
+                elif feature in {"efficiency_ratio", "round_trip_efficiency_ratio", "current_efficiency_ratio", "soc_min_ratio"}:
+                    feature_low, feature_high = 0.0, 1.0
+                elif feature == "degraded_capacity_kwh":
+                    feature_low, feature_high = 0.0, max(capacity, 1.0)
+                elif str(feature).startswith("phase_connection_"):
+                    feature_low, feature_high = 0.0, 1.0
                 low[row, col] = feature_low
                 high[row, col] = feature_high
 
@@ -1787,6 +1948,14 @@ class CityLearnEntityInterfaceService:
                     low[row, col], high[row, col] = 0.0, max(installed_power * step_hours, 1.0)
                 elif feature == "installed_power_kw":
                     low[row, col], high[row, col] = 0.0, max(installed_power, 1.0)
+                elif feature == "generation_capacity_factor_ratio":
+                    max_generation_power = 0.0
+                    try:
+                        max_generation_power = float(np.nanmax(np.abs(building.solar_generation)) / step_hours)
+                    except Exception:
+                        max_generation_power = installed_power
+                    high_ratio = max_generation_power / installed_power if installed_power > 0.0 else 1.0
+                    low[row, col], high[row, col] = 0.0, max(high_ratio, 1.0)
                 else:
                     low[row, col], high[row, col] = self._default_bounds_for_feature(feature)
         return low, high
@@ -1802,6 +1971,7 @@ class CityLearnEntityInterfaceService:
         max_time_step = float(max(self.env.time_steps, 1))
         max_energy = 1.0
         max_duration = 1.0
+        max_power = 1.0
         for ref in self._deferrable_appliance_refs:
             appliance = self._deferrable_appliance_by_building_and_id.get((ref.building_index, ref.appliance_id))
             if appliance is None:
@@ -1809,6 +1979,9 @@ class CityLearnEntityInterfaceService:
             for cycle in appliance.deferrable_appliance_simulation.flexibility_schedule:
                 max_energy = max(max_energy, float(cycle.get('total_energy_kwh', 0.0)))
                 max_duration = max(max_duration, float(cycle.get('duration_steps', 0.0)))
+                profile = np.array(cycle.get('load_profile', []), dtype='float64')
+                if profile.size > 0:
+                    max_power = max(max_power, float(np.nanmax(profile)) / self._step_hours())
 
         bounds = {
             "pending": (0.0, 1.0),
@@ -1828,6 +2001,14 @@ class CityLearnEntityInterfaceService:
             "remaining_energy_kwh": (0.0, max_energy),
             "current_step_energy_kwh": (0.0, max_energy),
             "priority": (0.0, 1.0),
+            "must_run": (0.0, 1.0),
+            "cycle_average_power_kw": (0.0, max_power),
+            "cycle_peak_power_kw": (0.0, max_power),
+            "cycle_load_factor_ratio": (0.0, 1.0),
+            "cycle_peak_step_offset_ratio": (-1.0, 1.0),
+            "remaining_duration_steps": (0.0, max_duration),
+            "remaining_average_power_kw": (0.0, max_power),
+            "current_step_power_kw": (0.0, max_power),
         }
         for j, feature in enumerate(self._deferrable_appliance_features):
             feature_low, feature_high = bounds.get(feature, self._default_bounds_for_feature(feature))

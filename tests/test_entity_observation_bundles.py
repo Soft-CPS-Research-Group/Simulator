@@ -52,6 +52,7 @@ def test_observation_bundles_default_to_disabled():
     try:
         env.reset(seed=0)
         bundles = env.entity_specs["observation_bundles"]
+        assert bundles["entity_base"]["active"] is True
         assert bundles["entity_core_electrical"]["active"] is False
         assert bundles["entity_community_operational"]["active"] is False
         assert bundles["entity_forecasts_existing"]["active"] is False
@@ -97,6 +98,12 @@ def test_core_bundle_adds_ev_charging_flexibility_features():
             "avg_power_to_departure_kw",
             "charging_slack_kw",
             "charging_priority_ratio",
+            "charge_efficiency_at_max_ratio",
+            "discharge_efficiency_at_max_ratio",
+            "incoming_ev_required_soc_departure",
+            "incoming_ev_departure_time_step",
+            "incoming_ev_hours_until_departure",
+            "incoming_ev_time_until_departure_ratio",
         ]
 
         for feature in expected_features:
@@ -108,6 +115,7 @@ def test_core_bundle_adds_ev_charging_flexibility_features():
         assert charger_meta["required_average_power_kw"]["unit"] == "kw"
         assert charger_meta["charging_slack_kw"]["unit"] == "kw"
         assert charger_meta["charging_priority_ratio"]["unit"] == "ratio"
+        assert charger_meta["charge_efficiency_at_max_ratio"]["unit"] == "ratio"
 
         connected_col = charger_features.index("connected_state")
         connected_rows = np.flatnonzero(obs["tables"]["charger"][:, connected_col] == 1.0)
@@ -140,6 +148,89 @@ def test_core_bundle_adds_ev_charging_flexibility_features():
         assert value("avg_power_to_departure_kw") == pytest.approx(expected_required_power)
         assert value("charging_slack_kw") == pytest.approx(max_charging_power - expected_required_power)
         assert value("charging_priority_ratio") == pytest.approx(expected_priority)
+    finally:
+        env.close()
+
+
+def test_base_entity_features_add_static_asset_capabilities_without_core_bundle():
+    env = CityLearnEnv(_schema_with_bundles(core=False), interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)
+
+    try:
+        obs, _ = env.reset(seed=0)
+        charger_features = env.entity_specs["tables"]["charger"]["features"]
+        charger_meta = env.entity_specs["tables"]["charger"]["feature_metadata"]
+        for feature in ["min_charging_power_kw", "min_discharging_power_kw", "charger_efficiency_ratio"]:
+            assert feature in charger_features
+            assert charger_meta[feature]["bundle"] == "entity_base"
+            assert charger_meta[feature]["legacy"] is False
+
+        first_charger = next(
+            charger
+            for building in env.buildings
+            for charger in (building.electric_vehicle_chargers or [])
+        )
+        charger_row = 0
+        assert obs["tables"]["charger"][charger_row, charger_features.index("min_charging_power_kw")] == pytest.approx(first_charger.min_charging_power)
+        assert obs["tables"]["charger"][charger_row, charger_features.index("min_discharging_power_kw")] == pytest.approx(first_charger.min_discharging_power)
+        assert obs["tables"]["charger"][charger_row, charger_features.index("charger_efficiency_ratio")] == pytest.approx(first_charger.efficiency)
+
+        storage_features = env.entity_specs["tables"]["storage"]["features"]
+        storage_meta = env.entity_specs["tables"]["storage"]["feature_metadata"]
+        for feature in ["min_charge_power_kw", "min_discharge_power_kw", "efficiency_ratio", "round_trip_efficiency_ratio"]:
+            assert feature in storage_features
+            assert storage_meta[feature]["bundle"] == "entity_base"
+            assert storage_meta[feature]["legacy"] is False
+    finally:
+        env.close()
+
+
+def test_core_bundle_exposes_incoming_ev_departure_requirements():
+    env = CityLearnEnv(_schema_with_bundles(core=True), interface="entity", central_agent=True, episode_time_steps=24, random_seed=0)
+
+    try:
+        obs, _ = env.reset(seed=0)
+        charger_features = env.entity_specs["tables"]["charger"]["features"]
+        incoming_col = charger_features.index("incoming_state")
+
+        for _ in range(24):
+            incoming_rows = np.flatnonzero(obs["tables"]["charger"][:, incoming_col] == 1.0)
+            if len(incoming_rows) > 0:
+                row = int(incoming_rows[0])
+                break
+            obs, *_ = env.step(_zero_entity_actions(env))
+        else:
+            pytest.skip("Dataset does not expose an incoming EV in the test window.")
+
+        def value(name: str) -> float:
+            return float(obs["tables"]["charger"][row, charger_features.index(name)])
+
+        step_hours = env.seconds_per_time_step / 3600.0
+        required_soc = value("incoming_ev_required_soc_departure")
+        departure_steps = value("incoming_ev_departure_time_step")
+        hours = value("incoming_ev_hours_until_departure")
+        assert required_soc == pytest.approx(-0.1) or 0.0 <= required_soc <= 1.0
+        if departure_steps < 0.0:
+            assert hours == pytest.approx(-1.0)
+            assert value("incoming_ev_time_until_departure_ratio") == pytest.approx(-1.0)
+        else:
+            assert hours == pytest.approx(departure_steps * step_hours)
+            assert value("incoming_ev_time_until_departure_ratio") == pytest.approx(np.clip(hours / 24.0, 0.0, 1.0))
+    finally:
+        env.close()
+
+
+def test_core_bundle_uses_charger_efficiency_curves_at_max_power():
+    schema = _schema_with_bundles(core=True)
+    attrs = schema["buildings"]["Building_1"]["chargers"]["charger_1_1"]["attributes"]
+    attrs["charge_efficiency_curve"] = [[0.0, 0.80], [1.0, 0.91]]
+    attrs["discharge_efficiency_curve"] = [[0.0, 0.75], [1.0, 0.88]]
+    env = CityLearnEnv(schema, interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)
+
+    try:
+        obs, _ = env.reset(seed=0)
+        features = env.entity_specs["tables"]["charger"]["features"]
+        assert obs["tables"]["charger"][0, features.index("charge_efficiency_at_max_ratio")] == pytest.approx(0.91)
+        assert obs["tables"]["charger"][0, features.index("discharge_efficiency_at_max_ratio")] == pytest.approx(0.88)
     finally:
         env.close()
 
@@ -200,5 +291,34 @@ def test_power_energy_kwh_step_consistency_for_core_metrics():
         power = float(obs["tables"]["district"][0, p_ix])
         energy = float(obs["tables"]["district"][0, e_ix])
         assert energy == pytest.approx(power * step_hours, rel=1.0e-5, abs=1.0e-5)
+    finally:
+        env.close()
+
+
+def test_core_bundle_exposes_storage_pv_and_phase_power_descriptors():
+    schema = _schema_with_bundles(core=True)
+    env = CityLearnEnv(schema, interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)
+
+    try:
+        obs, _ = env.reset(seed=0)
+        storage_features = env.entity_specs["tables"]["storage"]["features"]
+        storage_meta = env.entity_specs["tables"]["storage"]["feature_metadata"]
+        for feature in ["current_efficiency_ratio", "degraded_capacity_kwh", "soc_min_ratio"]:
+            assert feature in storage_features
+            assert storage_meta[feature]["bundle"] == "entity_core_electrical"
+            assert storage_meta[feature]["legacy"] is False
+
+        pv_features = env.entity_specs["tables"]["pv"]["features"]
+        assert "generation_capacity_factor_ratio" in pv_features
+        if obs["tables"]["pv"].shape[0] > 0:
+            row = 0
+            generation_power = float(obs["tables"]["pv"][row, pv_features.index("generation_power_kw")])
+            installed_power = float(obs["tables"]["pv"][row, pv_features.index("installed_power_kw")])
+            capacity_factor = float(obs["tables"]["pv"][row, pv_features.index("generation_capacity_factor_ratio")])
+            expected_capacity_factor = generation_power / installed_power if installed_power > 0.0 else 0.0
+            assert capacity_factor == pytest.approx(expected_capacity_factor)
+
+        building_features = env.entity_specs["tables"]["building"]["features"]
+        assert "charging_total_service_power_kw" in building_features
     finally:
         env.close()

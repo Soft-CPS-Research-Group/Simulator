@@ -1,0 +1,179 @@
+# Releases
+
+This is the operational changelog for the fork. From now on, every version bump should explain what changed, user impact, dataset/schema impact, validation and compatibility risk.
+
+Portuguese version: [pt/releases.md](pt/releases.md).
+
+## Version Policy
+
+| Type | Use when | Example |
+|---|---|---|
+| Patch | Compatible fixes and additive features. | `0.4.1 -> 0.4.2`. |
+| Minor | New major capability or schema/API change. | `0.3.x -> 0.4.0`. |
+| Major | Broad breaking changes. | `0.x -> 1.0`. |
+
+## Release Checklist
+
+1. Update `citylearn/__init__.py`.
+2. Update this file.
+3. Update README when relevant features change.
+4. Update affected reference pages when schema/action/observation/KPI contracts change.
+5. Run validation:
+   - `.venv/bin/pytest -q`
+   - `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`
+   - `.venv/bin/python scripts/audit/audit_physics.py`
+6. Run at least one representative smoke simulation.
+7. Commit and tag.
+8. Publish package when applicable.
+
+## Template
+
+```markdown
+## vX.Y.Z - YYYY-MM-DD
+
+### Summary
+- ...
+
+### Added
+- ...
+
+### Changed
+- ...
+
+### Fixed
+- ...
+
+### Dataset/Schema Impact
+- ...
+
+### Compatibility
+- ...
+
+### Validation
+- `...`: pass
+
+### Migration Notes
+- ...
+```
+
+## v0.4.3 - Documentation Contract and Release Readiness
+
+### Summary
+
+Release focused on making the simulator easier to adopt, audit and integrate by turning the README into a documentation portal and adding bilingual reference documentation.
+
+### Added
+
+| Area | Changes |
+|---|---|
+| README | English default documentation map with Portuguese links. |
+| Running simulations | Install, quickstarts, CLI, `CityLearnEnv` parameters, render/export and validation commands. |
+| Schema | Full schema reference for buildings, devices, PV modes, EVs, chargers, deferrables, topology and community market. |
+| Interfaces | Flat/entity contracts, entity specs, tables, edges and dynamic topology guidance. |
+| Actions | Action names, ranges, physical conversions and entity action payloads. |
+| Observations | Observation dictionary with units, sentinels, bundles, entity tables and edges. |
+| Datasets | CSV/Parquet contract, real-data conversion, 15s guidance and deferrable dataset format. |
+| KPIs | v1/v2 explanation, units, equations and EV/BESS/deferrable/community/phase families. |
+| Features | Simulator capability inventory. |
+| Releases | Release checklist, versioning policy and changelog template. |
+| Portuguese docs | Full Portuguese mirror under `docs/pt/`. |
+
+### Compatibility
+
+No runtime API break is introduced by the documentation work. The release keeps the additive simulator changes documented under `v0.4.2`.
+
+### Validation
+
+| Check | Result |
+|---|---|
+| Local Markdown links | Pass. |
+| `git diff --check` | Pass. |
+| Flat smoke simulation | Pass. |
+| Entity smoke simulation | Pass. |
+| 15s Parquet smoke simulation | Pass. |
+
+## v0.4.2 - Additive Physical Observation Expansion
+
+### Summary
+
+Additive release focused on exposing richer physical observations to algorithms without removing older features.
+
+### Added
+
+| Area | Changes |
+|---|---|
+| Chargers | `min_charging_power_kw`, `min_discharging_power_kw`, `charger_efficiency_ratio`. |
+| Charger core | `charge_efficiency_at_max_ratio`, `discharge_efficiency_at_max_ratio`, incoming EV required/departure/hours/ratio. |
+| Storage | `min_charge_power_kw`, `min_discharge_power_kw`, `efficiency_ratio`, `round_trip_efficiency_ratio`. |
+| Storage core | `current_efficiency_ratio`, `degraded_capacity_kwh`, `soc_min_ratio`. |
+| Storage phases | `phase_connection_L1/L2/L3`. |
+| Deferrables | `must_run`, average/peak/load factor, peak offset, remaining duration/power and current-step power. |
+| Building core | `charging_total_service_power_kw`, `charging_phase_L1/L2/L3_power_kw`. |
+| PV | `generation_capacity_factor_ratio`. |
+
+### Compatibility
+
+Compatible additive change. Existing observations and EV/charger duplication are intentionally preserved.
+
+### Validation
+
+| Command/group | Result |
+|---|---|
+| Focused entity/bundle/deferrable/parquet tests | Pass. |
+| Broader simulator tests | Pass. |
+| Full suite | Pass. |
+| `audit_entity_contract.py --strict` | Pass. |
+| `audit_physics.py` | Pass. |
+
+## v0.4.0 - Normalized Deferrable Appliances
+
+### Summary
+
+Introduced the official `deferrable_appliances` model with a cycle catalog and sparse flexibility schedule, replacing the old washing-machine format.
+
+### Added
+
+| Area | Changes |
+|---|---|
+| Schema | `deferrable_appliances` with `cycle_profiles_file` and `flexibility_schedule_file`. |
+| Model | `DeferrableAppliance` with pending/running/missed/completed states. |
+| Actions | `deferrable_appliance_{id}` in flat mode and `start` in the entity table. |
+| Observations | Pending, running, can_start, deadlines, slack, priority and remaining energy. |
+| KPIs | Completed/missed cycles, service level, served/unserved energy and average delay. |
+| Dynamic topology | Add/remove `deferrable_appliance`. |
+
+### Compatibility
+
+Breaking schema change: `washing_machines` is no longer the official dataset format.
+
+## v0.3.2 - Performance, 15s and Parquet
+
+### Summary
+
+Consolidated sub-hourly support and improved performance for large datasets, especially 15-second datasets.
+
+### Added/Changed
+
+| Area | Changes |
+|---|---|
+| Loader | Windowed CSV and Parquet reads. |
+| Cache | Shared weather/pricing/carbon when the file is identical and `noise_std=0`. |
+| Parquet | 15s datasets can use `.parquet`. |
+| Sub-hourly | Fixtures/tests for 15s, 1min, 5min, 15min and 1h. |
+| PV | `absolute` mode for real datasets in `kWh/step`. |
+| Unit contract | Formal documentation for `kWh/step`, `kW`, prices and emissions. |
+
+## Pre-v0.3 - Initial EVs and Washing Machines
+
+### Summary
+
+Before normalized deferrables, the fork introduced initial EV/charger support and early washing-machine flexibility.
+
+### Added
+
+| Area | Changes |
+|---|---|
+| EVs | EV definitions, charger schedules and connected/incoming observations. |
+| Chargers | Charging/discharging actions and charger schedules. |
+| Washing machines | First flexible appliance model. |
+| Algorithms integration | Initial support for RBC/MADDPG and external algorithm repositories. |

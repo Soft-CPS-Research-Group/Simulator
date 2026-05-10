@@ -1453,6 +1453,14 @@ class DeferrableAppliance(ElectricDevice):
                 'remaining_energy_kwh': 0.0,
                 'current_step_energy_kwh': 0.0,
                 'priority': 0.0,
+                'must_run': 0.0,
+                'cycle_average_power_kw': 0.0,
+                'cycle_peak_power_kw': 0.0,
+                'cycle_load_factor_ratio': 0.0,
+                'cycle_peak_step_offset_ratio': -1.0,
+                'remaining_duration_steps': 0.0,
+                'remaining_average_power_kw': 0.0,
+                'current_step_power_kw': 0.0,
             }
 
         cycle_id = cycle['cycle_id']
@@ -1468,6 +1476,21 @@ class DeferrableAppliance(ElectricDevice):
         slack_ratio = np.clip(slack_steps / window_steps, 0.0, 1.0) if pending else 0.0
         current_energy = self._current_cycle_energy(cycle)
         remaining_energy = self._remaining_cycle_energy(cycle)
+        profile = np.array(cycle['load_profile'], dtype='float64')
+        duration_steps = max(int(cycle['duration_steps']), 0)
+        cycle_duration_hours = max(float(duration_steps) * step_hours, 1.0e-6)
+        cycle_average_power = float(cycle['total_energy_kwh']) / cycle_duration_hours if duration_steps > 0 else 0.0
+        peak_energy = float(np.nanmax(profile)) if profile.size > 0 else 0.0
+        cycle_peak_power = peak_energy / step_hours
+        cycle_load_factor = cycle_average_power / cycle_peak_power if cycle_peak_power > 0.0 else 0.0
+        peak_offset_ratio = (
+            float(int(np.nanargmax(profile))) / max(float(duration_steps - 1), 1.0)
+            if profile.size > 0 and duration_steps > 1
+            else 0.0
+        )
+        remaining_duration_steps = self._remaining_cycle_duration_steps(cycle)
+        remaining_duration_hours = max(float(remaining_duration_steps) * step_hours, 1.0e-6)
+        remaining_average_power = remaining_energy / remaining_duration_hours if remaining_duration_steps > 0 else 0.0
 
         return {
             'pending': 1.0 if pending else 0.0,
@@ -1487,6 +1510,14 @@ class DeferrableAppliance(ElectricDevice):
             'remaining_energy_kwh': remaining_energy,
             'current_step_energy_kwh': current_energy,
             'priority': float(cycle['priority']),
+            'must_run': 1.0 if bool(cycle.get('must_run', False)) else 0.0,
+            'cycle_average_power_kw': cycle_average_power,
+            'cycle_peak_power_kw': cycle_peak_power,
+            'cycle_load_factor_ratio': float(np.clip(cycle_load_factor, 0.0, 1.0)),
+            'cycle_peak_step_offset_ratio': float(np.clip(peak_offset_ratio, 0.0, 1.0)),
+            'remaining_duration_steps': float(remaining_duration_steps),
+            'remaining_average_power_kw': remaining_average_power,
+            'current_step_power_kw': current_energy / step_hours,
         }
 
     def service_summary(self) -> Mapping[str, float]:
@@ -1618,6 +1649,20 @@ class DeferrableAppliance(ElectricDevice):
             if offset < len(profile):
                 return float(np.sum(profile[offset:]))
         return 0.0
+
+    def _remaining_cycle_duration_steps(self, cycle: Mapping[str, Any]) -> int:
+        cycle_id = cycle['cycle_id']
+        state = self.__cycle_state.get(cycle_id)
+        profile = cycle['load_profile']
+        if state == 'pending':
+            return int(cycle['duration_steps'])
+        if state == 'running':
+            start = self.__cycle_start_time_steps.get(cycle_id)
+            if start is None:
+                return 0
+            offset = max(self._current_global_time_step() - int(start), 0)
+            return max(len(profile) - int(offset), 0)
+        return 0
 
 
 class WashingMachine(ElectricDevice):

@@ -9,8 +9,46 @@ CityLearn includes energy models of buildings and distributed energy resources (
 
 ![Citylearn](https://github.com/intelligent-environments-lab/CityLearn/blob/master/assets/images/environment.jpg)
 
+## Documentation Map
+
+This fork extends CityLearn with sub-hourly physics, EVs, deferrable appliances, entity observations, dynamic topology, three-phase electrical service, community KPIs and large-dataset performance work. The documentation is organized as reference pages that are easy to scan by humans and external agents.
+
+Default documentation is in English. Portuguese versions are available under [docs/pt](docs/pt/).
+
+| Page | Portuguese | Use it for |
+|---|---|---|
+| [How to run simulations](docs/running_simulations.md) | [PT](docs/pt/running_simulations.md) | Install, Python quickstart, CLI, every `CityLearnEnv` parameter, render/export and validation commands. |
+| [Schema reference](docs/schema_reference.md) | [PT](docs/pt/schema_reference.md) | Every major schema section: observations, actions, buildings, devices, PV modes, EVs, chargers, deferrables, topology and community market. |
+| [Flat and entity interfaces](docs/interfaces_flat_entity.md) | [PT](docs/pt/interfaces_flat_entity.md) | Difference between vector mode and entity-table mode, payload format, entity specs and dynamic topology semantics. |
+| [Actions reference](docs/actions_reference.md) | [PT](docs/pt/actions_reference.md) | Flat/entity action names, ranges, physical meaning and conversion to energy. |
+| [Observations reference](docs/observations_reference.md) | [PT](docs/pt/observations_reference.md) | Observation dictionary with units, bundles, sentinels, entity tables and edges. |
+| [Dataset reference](docs/dataset_reference.md) | [PT](docs/pt/dataset_reference.md) | Required files/columns, CSV vs Parquet, 15s datasets, real-data conversion from kW to kWh/step. |
+| [KPIs reference](docs/kpis_reference.md) | [PT](docs/pt/kpis_reference.md) | `evaluate()` vs `evaluate_v2()`, KPI units, equations, EV/BESS/deferrable/community/phase KPIs. |
+| [KPI v2 naming tree](docs/KPI_V2_TREE.md) | - | Full naming convention and tree for structured KPI names. |
+| [Data unit contract](docs/data_unit_contract.md) | [PT](docs/pt/data_unit_contract.md) | Formal unit contract for data, power limits and prices/emissions. |
+| [Simulator features](docs/features.md) | [PT](docs/pt/features.md) | Capability inventory, including hidden/less obvious features. |
+| [Releases](docs/releases.md) | [PT](docs/pt/releases.md) | Release policy, changelog template and version history for this fork. |
+
+## Current Capability Snapshot
+
+| Area | Supported |
+|---|---|
+| Time resolution | Hourly and sub-hourly, including 15min, 5min, 1min and 15s fixtures. |
+| Dataset formats | CSV and Parquet with equivalent schema columns. |
+| Real data | Power data can be converted to `kWh/step`; PV supports absolute measured generation. |
+| PV | `per_kw` normalized profile mode and `absolute` measured-energy mode. |
+| EVs | Charger-centric schedules, connected/incoming EVs, SOC requirements, V2G-capable action path. |
+| Deferrable appliances | Normalized cycle catalog plus sparse flexibility schedule. |
+| Interfaces | Flat Gymnasium-style vectors and entity tables/edges for ORL, GraphRL and Transformers. |
+| Dynamic topology | Add/remove buildings and assets during simulation in entity mode. |
+| Three phase | Phase connections, headroom, current phase power, violations and phase KPIs. |
+| Community market | Local settlement, import weights, savings and self-consumption KPIs. |
+| Performance | Windowed loading, shared weather/pricing/carbon cache, Parquet for large 15s datasets. |
+| Validation | Unit tests, golden KPI tests, physics audit and strict entity contract audit. |
+
 ## Installation
-Install latest release in PyPi with `pip`:
+
+Install latest release in PyPI with `pip`:
 ```console
 pip install softcpsrecsimulator
 ```
@@ -23,6 +61,67 @@ pip install "softcpsrecsimulator[pysam]"
 Python import path remains:
 ```python
 from citylearn.citylearn import CityLearnEnv
+```
+
+Optional dependency for Parquet datasets:
+```console
+pip install pyarrow
+```
+
+## Quickstart
+
+```python
+import numpy as np
+from citylearn.citylearn import CityLearnEnv
+
+env = CityLearnEnv(
+    "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json",
+    interface="flat",
+    episode_time_steps=24,
+    render_mode="none",
+)
+
+observations, info = env.reset()
+terminated = truncated = False
+
+while not (terminated or truncated):
+    actions = [np.zeros(space.shape, dtype="float32") for space in env.action_space]
+    observations, reward, terminated, truncated, info = env.step(actions)
+
+kpis = env.evaluate_v2()
+```
+
+Entity interface quickstart:
+
+```python
+from citylearn.citylearn import CityLearnEnv
+
+env = CityLearnEnv(
+    "data/datasets/citylearn_three_phase_dynamic_topology_demo/schema.json",
+    interface="entity",
+    topology_mode="dynamic",
+)
+
+observations, info = env.reset()
+specs = env.entity_specs
+```
+
+## Unit Contract
+
+| Quantity | Unit |
+|---|---|
+| Dataset energy columns | `kWh/step` |
+| PV `generation_mode="absolute"` | `kWh/step` |
+| PV `generation_mode="per_kw"` | `W/kW` profile multiplied by installed power |
+| Power limits and device ratings | `kW` |
+| Prices | currency/kWh |
+| Carbon intensity | kgCO2/kWh |
+| Deferrable cycle `load_profile` | `kWh/step` |
+
+For real power data:
+
+```text
+kWh_per_step = kW * seconds_per_time_step / 3600
 ```
 
 ## Developer Commands
@@ -120,8 +219,27 @@ env = CityLearnEnv(
 )
 ```
 
-## Documentation
-Refer to the [docs](https://intelligent-environments-lab.github.io/CityLearn/).
+## Release Discipline
+
+Every release should update [docs/releases.md](docs/releases.md) and any affected reference page.
+
+| Version type | When to use |
+|---|---|
+| Patch | Additive compatible features, fixes, docs and tests. |
+| Minor | New simulator capability or schema/API change. |
+| Major | Broad breaking changes. |
+
+Recommended pre-release checks:
+
+```console
+.venv/bin/pytest -q
+.venv/bin/python scripts/audit/audit_entity_contract.py --strict
+.venv/bin/python scripts/audit/audit_physics.py
+```
+
+## Upstream Documentation
+
+The original CityLearn documentation remains useful for base concepts and examples: [official docs](https://intelligent-environments-lab.github.io/CityLearn/). This fork's local reference pages above document the additional simulator contracts.
 
 ## CityLearn UI
 

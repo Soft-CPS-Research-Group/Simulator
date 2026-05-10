@@ -32,6 +32,14 @@ DEFERRABLE_OBSERVATIONS = [
     "deferrable_appliance_remaining_energy_kwh",
     "deferrable_appliance_current_step_energy_kwh",
     "deferrable_appliance_priority",
+    "deferrable_appliance_must_run",
+    "deferrable_appliance_cycle_average_power_kw",
+    "deferrable_appliance_cycle_peak_power_kw",
+    "deferrable_appliance_cycle_load_factor_ratio",
+    "deferrable_appliance_cycle_peak_step_offset_ratio",
+    "deferrable_appliance_remaining_duration_steps",
+    "deferrable_appliance_remaining_average_power_kw",
+    "deferrable_appliance_current_step_power_kw",
 ]
 
 

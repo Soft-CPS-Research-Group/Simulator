@@ -30,6 +30,14 @@ DEFERRABLE_OBSERVATIONS = [
     "deferrable_appliance_remaining_energy_kwh",
     "deferrable_appliance_current_step_energy_kwh",
     "deferrable_appliance_priority",
+    "deferrable_appliance_must_run",
+    "deferrable_appliance_cycle_average_power_kw",
+    "deferrable_appliance_cycle_peak_power_kw",
+    "deferrable_appliance_cycle_load_factor_ratio",
+    "deferrable_appliance_cycle_peak_step_offset_ratio",
+    "deferrable_appliance_remaining_duration_steps",
+    "deferrable_appliance_remaining_average_power_kw",
+    "deferrable_appliance_current_step_power_kw",
 ]
 
 
@@ -187,6 +195,20 @@ def test_entity_table_action_edge_and_start(tmp_path: Path):
         assert specs["actions"]["deferrable_appliance"]["features"] == ["start"]
         assert "building_to_deferrable_appliance" in specs["edges"]
         assert observations["tables"]["deferrable_appliance"].shape == (1, len(DEFERRABLE_OBSERVATIONS))
+        features = specs["tables"]["deferrable_appliance"]["features"]
+
+        def value(name: str) -> float:
+            return float(observations["tables"]["deferrable_appliance"][0, features.index(name)])
+
+        step_hours = env.seconds_per_time_step / 3600.0
+        assert value("must_run") == 1.0
+        assert value("cycle_average_power_kw") == pytest.approx(0.3 / (2 * step_hours))
+        assert value("cycle_peak_power_kw") == pytest.approx(0.2 / step_hours)
+        assert value("cycle_load_factor_ratio") == pytest.approx(0.75)
+        assert value("cycle_peak_step_offset_ratio") == pytest.approx(1.0)
+        assert value("remaining_duration_steps") == pytest.approx(2.0)
+        assert value("remaining_average_power_kw") == pytest.approx(0.3 / (2 * step_hours))
+        assert value("current_step_power_kw") == pytest.approx(0.0)
 
         payload = {
             "tables": {

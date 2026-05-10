@@ -70,13 +70,14 @@ def _normalize_table_spec(table_spec: Mapping[str, Any]) -> Dict[str, Any]:
 
 
 def normalize_entity_specs(specs: Mapping[str, Any]) -> Dict[str, Any]:
-    table_order = ["district", "building", "charger", "ev", "storage", "pv"]
-    action_order = ["building", "charger"]
+    table_order = ["district", "building", "charger", "ev", "storage", "pv", "deferrable_appliance"]
+    action_order = ["building", "charger", "deferrable_appliance"]
     edge_order = [
         "district_to_building",
         "building_to_charger",
         "building_to_storage",
         "building_to_pv",
+        "building_to_deferrable_appliance",
         "charger_to_ev_connected",
         "charger_to_ev_incoming",
     ]

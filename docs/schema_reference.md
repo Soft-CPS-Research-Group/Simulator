@@ -1,0 +1,344 @@
+# Schema Reference
+
+This page documents the `schema.json` contract. The schema is the source of truth for buildings, devices, EVs, deferrable appliances, interfaces, observation bundles, dynamic topology and local market configuration.
+
+Portuguese version: [pt/schema_reference.md](pt/schema_reference.md).
+
+## General Rules
+
+| Rule | Contract |
+|---|---|
+| Paths | Relative paths are resolved from `root_directory`; absolute paths are allowed. |
+| Tabular files | CSV and Parquet are interchangeable when columns and units are equivalent. |
+| Energy | Dataset energy series are `kWh/step`. |
+| Power and limits | Power ratings and limits are `kW`. |
+| Prices | Prices are per `kWh`. |
+| Emissions | Carbon intensity is `kgCO2/kWh`. |
+| Timesteps | Windows, deadlines and topology events use global simulation timestep indices. |
+| Legacy washing machines | `washing_machines` and `washing_machine_energy_simulation` are not the official format. Use `deferrable_appliances`. |
+
+## Top-Level Keys
+
+| Key | Type | Required | Purpose |
+|---|---:|---:|---|
+| `root_directory` | string | yes | Base folder for dataset files. |
+| `random_seed` | int/null | no | Global random seed. |
+| `central_agent` | bool | yes | Single controller or one agent per building. |
+| `seconds_per_time_step` | number | yes | Physical duration of each step. |
+| `simulation_start_time_step` | int | yes | First global timestep. |
+| `simulation_end_time_step` | int | yes | Last global timestep. |
+| `episode_time_steps` | int/list/null | no | Episode length or explicit episode windows. |
+| `rolling_episode_split` | bool/null | no | Sequential episode windows. |
+| `random_episode_split` | bool/null | no | Random episode windows. |
+| `reward_function` | object/string | yes | Reward class and kwargs. |
+| `observations` | object | yes | Flat observation catalog and flags. |
+| `actions` | object | yes | Flat action catalog and flags. |
+| `buildings` | object | yes | Building definitions. |
+| `agent` | object/string | no | CLI agent configuration. |
+| `electric_vehicles_def` | object | if EVs exist | EV catalog. |
+| `interface` | `flat`/`entity` | no | Environment I/O mode. |
+| `observation_bundles` | object | no | Additional entity observation bundles. |
+| `topology_mode` | `static`/`dynamic` | no | Enables topology events. |
+| `topology_events` | list | if dynamic | Add/remove events. |
+| `community_market` | object | no | Local market and market KPIs. |
+| `render_mode` | string | no | `none`, `during` or `end`. |
+| `export_kpis_on_episode_end` | bool | no | Export KPIs at episode end. |
+| `start_date` | string | no | Base date for render/export. |
+| `debug_timing` | bool | no | Runtime timing logs. |
+| `check_observation_limits` | bool | no | Validate observation bounds. |
+| `physics_invariant_checks` | bool | no | Runtime physical invariant checks. |
+| `metrics_log_interval` | int | no | Runtime metric log cadence. |
+
+## `observations`
+
+```json
+"hour": {
+  "active": true,
+  "shared_in_central_agent": true
+}
+```
+
+| Field | Type | Default | Purpose |
+|---|---:|---:|---|
+| `active` | bool | `false` | Enables the flat observation. |
+| `shared_in_central_agent` | bool | `false` | Includes a common observation once in central-agent vectors. |
+
+Observation names with prefix `electric_vehicle_` are expanded per charger. Names with prefix `deferrable_appliance_` are expanded per deferrable appliance.
+
+## `actions`
+
+```json
+"electrical_storage": {
+  "active": true
+}
+```
+
+| Field | Type | Default | Purpose |
+|---|---:|---:|---|
+| `active` | bool | `false` | Enables the action. |
+
+`electric_vehicle_storage` expands to `electric_vehicle_storage_{charger_id}`. `deferrable_appliance` expands to `deferrable_appliance_{appliance_id}`.
+
+## `observation_bundles`
+
+Entity-only configuration:
+
+```json
+"observation_bundles": {
+  "entity_core_electrical": true,
+  "entity_community_operational": true,
+  "entity_forecasts_existing": false,
+  "entity_temporal_derived": true
+}
+```
+
+| Bundle | Default | Adds |
+|---|---:|---|
+| `entity_base` | always on | Essential charger, storage, phase and deferrable features. |
+| `entity_core_electrical` | `false` | Power, step energy, PV, BESS, EV, efficiency and building electrical metrics. |
+| `entity_community_operational` | `false` | District/community aggregates, headroom, counts and topology version. |
+| `entity_forecasts_existing` | `false` | Forecasts already present in the dataset. |
+| `entity_temporal_derived` | `false` | Short lags and rolling means. |
+
+## `buildings`
+
+```json
+"buildings": {
+  "Building_1": {
+    "include": true,
+    "type": "citylearn.building.Building",
+    "energy_simulation": "Building_1.csv",
+    "weather": "weather.parquet",
+    "pricing": "pricing.csv",
+    "carbon_intensity": "carbon.csv"
+  }
+}
+```
+
+| Key | Type | Required | Purpose |
+|---|---:|---:|---|
+| `include` | bool | no | Include the building initially. In dynamic topology it may start inactive. |
+| `type` | string | no | Building class path, e.g. `citylearn.building.Building`. |
+| `energy_simulation` | string | yes | Main load, calendar and PV input file. |
+| `weather` | string/object | yes | Weather file. |
+| `pricing` | string/object | yes | Pricing file. |
+| `carbon_intensity` | string/object | no | Carbon intensity file. |
+| `inactive_observations` | list | no | Disable observations for this building. |
+| `inactive_actions` | list | no | Disable actions for this building. |
+| `cooling_device`, `heating_device`, `dhw_device` | object | HVAC datasets | End-use devices. |
+| `cooling_storage`, `heating_storage`, `dhw_storage` | object | HVAC datasets | Thermal storages. |
+| `electrical_storage` | object | no | Building BESS. |
+| `pv` | object | no | Building PV. |
+| `chargers` | object | no | EV chargers. |
+| `deferrable_appliances` | object | no | Normalized deferrable appliances. |
+| `charging_constraints` | object | no | Building/phase charging limits. |
+| `electrical_service` | object | no | Import/export service limits. |
+| `equity_group` | string | no | Group used by equity KPIs. |
+| `dynamics` | object | no | Indoor temperature dynamics model. |
+| `occupant` | object | no | Occupant interaction model. |
+| `power_outage` | object | no | Outage configuration. |
+| `set_point_hold_time_steps` | int | no | Hold time for occupant interaction. |
+
+## Device Sections
+
+Common shape:
+
+```json
+"electrical_storage": {
+  "type": "citylearn.energy_model.Battery",
+  "attributes": {
+    "capacity": 50.0,
+    "nominal_power": 25.0,
+    "depth_of_discharge": 0.9
+  },
+  "autosize": false,
+  "autosize_attributes": {}
+}
+```
+
+| Field | Type | Purpose |
+|---|---:|---|
+| `type` | string | Python class path. |
+| `attributes` | object | Constructor kwargs. |
+| `autosize` | bool | Calls the building autosizer when available. |
+| `autosize_attributes` | object | Autosizer kwargs. |
+
+Common classes:
+
+| Class | Main attributes |
+|---|---|
+| `citylearn.energy_model.HeatPump` | `nominal_power`, `efficiency`, `target_heating_temperature`, `target_cooling_temperature`. |
+| `citylearn.energy_model.ElectricHeater` | `nominal_power`, `efficiency`. |
+| `citylearn.energy_model.StorageTank` | `capacity`, `efficiency`, `loss_coefficient`, `initial_soc`, `max_output_power`, `max_input_power`. |
+| `citylearn.energy_model.Battery` | `capacity`, `nominal_power`, `capacity_loss_coefficient`, `power_efficiency_curve`, `capacity_power_curve`, `depth_of_discharge`. |
+| `citylearn.energy_model.PV` | `nominal_power`, `generation_mode`. |
+
+## PV
+
+```json
+"pv": {
+  "type": "citylearn.energy_model.PV",
+  "attributes": {
+    "nominal_power": 120.0,
+    "generation_mode": "absolute"
+  }
+}
+```
+
+| `generation_mode` | Aliases | Interprets `energy_simulation.solar_generation` as | Formula |
+|---|---|---|---|
+| `per_kw` | `profile`, `w_per_kw` | Normalized profile per installed kW in `W/kW`. | `generation_kwh = nominal_power * value / 1000`. |
+| `absolute` | `absolute_kwh`, `kwh`, `kwh_step`, `energy` | Absolute generation already in `kWh/step`. | `generation_kwh = value`. |
+
+Use `absolute` for real measured generation or converter-generated energy series. Use `per_kw` for normalized PV profiles.
+
+## Chargers
+
+```json
+"chargers": {
+  "AC001": {
+    "type": "citylearn.electric_vehicle_charger.Charger",
+    "charger_simulation": "chargers/AC001.parquet",
+    "attributes": {
+      "max_charging_power": 7.4,
+      "min_charging_power": 1.4,
+      "max_discharging_power": 0.0,
+      "min_discharging_power": 0.0,
+      "efficiency": 0.95,
+      "phase_connection": "L1"
+    }
+  }
+}
+```
+
+| Field | Unit | Purpose |
+|---|---:|---|
+| `charger_simulation` | path | Charger schedule file. |
+| `max_charging_power` | kW | Charging upper limit. |
+| `min_charging_power` | kW | Technical minimum charging power. |
+| `max_discharging_power` | kW | V2G upper limit. |
+| `min_discharging_power` | kW | Technical minimum V2G power. |
+| `efficiency` | ratio | Fixed/default efficiency. |
+| `charge_efficiency_curve` | ratio vs normalized power | Optional charging efficiency curve. |
+| `discharge_efficiency_curve` | ratio vs normalized power | Optional discharging efficiency curve. |
+| `phase_connection` | `L1`, `L2`, `L3`, `all_phases` | Electrical phase assignment. |
+
+## EV Definitions
+
+```json
+"electric_vehicles_def": {
+  "EV_1": {
+    "type": "citylearn.electric_vehicle.ElectricVehicle",
+    "include": true,
+    "battery": {
+      "attributes": {
+        "capacity": 60.0,
+        "nominal_power": 50.0,
+        "initial_soc": 0.4,
+        "depth_of_discharge": 0.9
+      }
+    }
+  }
+}
+```
+
+| Field | Purpose |
+|---|---|
+| `type` | EV class path. |
+| `include` | Include the EV in the initial pool. |
+| `battery.attributes` | `Battery` kwargs. |
+
+## Deferrable Appliances
+
+```json
+"deferrable_appliances": {
+  "washer_1": {
+    "type": "citylearn.energy_model.DeferrableAppliance",
+    "cycle_profiles_file": "deferrables/washer_profiles.csv",
+    "flexibility_schedule_file": "deferrables/washer_schedule.csv",
+    "attributes": {
+      "trigger_threshold": 0.0
+    }
+  }
+}
+```
+
+| Field | Required | Purpose |
+|---|---:|---|
+| `type` | no | Appliance class. Default: `citylearn.energy_model.DeferrableAppliance`. |
+| `cycle_profiles_file` | yes | Physical cycle profile catalog. |
+| `flexibility_schedule_file` | yes | Flexibility requests/windows. |
+| `attributes.trigger_threshold` | no | Start action threshold. |
+
+## Dynamic Topology
+
+`topology_mode="dynamic"` requires `interface="entity"`.
+
+```json
+"topology_events": [
+  {
+    "id": "add_pv_b2_t100",
+    "time_step": 100,
+    "operation": "add_asset",
+    "target_member_id": "Building_2",
+    "target_asset_type": "pv",
+    "target_asset_id": "pv_1",
+    "source_member_id": "Building_1",
+    "source_asset_id": "pv_1",
+    "overrides": {"nominal_power": 80.0}
+  }
+]
+```
+
+| Field | Type | Purpose |
+|---|---:|---|
+| `id` | string | Event ID. |
+| `time_step` | int | Global timestep where the event is applied. |
+| `operation` | enum | `add_member`, `remove_member`, `add_asset`, `remove_asset`. |
+| `target_member_id` | string | Target building. |
+| `target_asset_type` | enum | `charger`, `deferrable_appliance`, `pv`, `electrical_storage`. |
+| `target_asset_id` | string | Target asset. |
+| `source_member_id` | string | Source building for cloning. |
+| `source_asset_id` | string | Source asset for cloning. |
+| `overrides` | object | Attributes applied after cloning. |
+
+Removing a deferrable appliance cancels pending/running cycles and clears future consumption. Removing PV creates a zero PV. Removing storage creates a zero BESS.
+
+## Community Market
+
+```json
+"community_market": {
+  "enabled": true,
+  "local_price_ratio_to_grid_import": 0.8,
+  "grid_export_price": 0.0,
+  "import_member_weights": {
+    "Building_1": 1.0,
+    "Building_2": 2.0
+  },
+  "kpis": {
+    "community_local_traded_enabled": true,
+    "community_self_consumption_enabled": true
+  }
+}
+```
+
+| Field | Default | Purpose |
+|---|---:|---|
+| `enabled` | `false` | Enables local settlement. |
+| `local_price_ratio_to_grid_import` | `0.8` | Local price relative to grid import price. |
+| `intra_community_sell_ratio` | alias | Legacy name for the same ratio. |
+| `grid_export_price` | `0.0` | Grid export price. |
+| `import_member_weights` | `{}` | Weights for allocating local energy among importers. |
+| `kpis.community_local_traded_enabled` | `true` | Enables local traded energy KPI. |
+| `kpis.community_self_consumption_enabled` | `true` | Enables local import-share KPI. |
+
+## Important Combinations
+
+| Case | Configuration |
+|---|---|
+| Classic flat training | Omit `interface` or use `interface="flat"`; static topology. |
+| Entity/GNN/Transformer | `interface="entity"` plus desired observation bundles. |
+| Dynamic topology | `interface="entity"`, `topology_mode="dynamic"`, `topology_events`. |
+| Real PV measurements | `pv.attributes.generation_mode="absolute"`. |
+| 15-second data | `seconds_per_time_step=15` and files already at that cadence. |
+| Large datasets | Prefer Parquet paths with the same columns. |

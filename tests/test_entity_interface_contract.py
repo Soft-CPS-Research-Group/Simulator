@@ -57,7 +57,7 @@ def test_entity_interface_shapes_and_specs_are_consistent():
         assert observations["tables"]["ev"].shape[1] == len(specs["tables"]["ev"]["features"])
         assert observations["tables"]["storage"].shape[1] == len(specs["tables"]["storage"]["features"])
         assert observations["tables"]["pv"].shape[1] == len(specs["tables"]["pv"]["features"])
-        for table_name in ("district", "building", "charger", "ev", "storage", "pv"):
+        for table_name in ("district", "building", "charger", "ev", "storage", "pv", "deferrable_appliance"):
             feature_metadata = specs["tables"][table_name]["feature_metadata"]
             for feature in specs["tables"][table_name]["features"]:
                 assert feature in feature_metadata
@@ -131,6 +131,9 @@ def test_entity_interface_keeps_charger_phase_connection_on_charger_table():
 
         phase_features = [name for name in charger_features if name.startswith("phase_connection_")]
         assert phase_features
+        for feature in phase_features:
+            assert specs["tables"]["charger"]["feature_metadata"][feature]["bundle"] == "entity_base"
+            assert specs["tables"]["charger"]["feature_metadata"][feature]["legacy"] is False
 
         charger_ids = specs["tables"]["charger"]["ids"]
         charger_15_rows = [
@@ -165,6 +168,7 @@ def test_entity_interface_marks_all_phase_charger_connections():
         charger_features = specs["tables"]["charger"]["features"]
         charger_ids = specs["tables"]["charger"]["ids"]
 
+        assert "phase_connection_all_phases" not in charger_features
         row = charger_ids.index("Building_15/charger_15_1")
         phase_cols = [
             charger_features.index("phase_connection_L1"),
@@ -173,6 +177,52 @@ def test_entity_interface_marks_all_phase_charger_connections():
         ]
 
         assert observations["tables"]["charger"][row, phase_cols].tolist() == [1.0, 1.0, 1.0]
+    finally:
+        env.close()
+
+
+def test_entity_interface_exposes_three_phase_power_and_storage_phase_connection():
+    schema = json.loads(ELECTRICAL_SERVICE_SCHEMA.read_text(encoding="utf-8"))
+    schema["root_directory"] = str(ELECTRICAL_SERVICE_SCHEMA.parent)
+    schema["observation_bundles"] = {"entity_core_electrical": {"active": True}}
+
+    env = CityLearnEnv(
+        schema,
+        interface="entity",
+        central_agent=False,
+        episode_time_steps=6,
+        random_seed=0,
+    )
+
+    try:
+        observations, _ = env.reset(seed=0)
+        specs = env.entity_specs
+
+        building_features = specs["tables"]["building"]["features"]
+        expected_phase_power_features = [
+            "charging_phase_L1_power_kw",
+            "charging_phase_L2_power_kw",
+            "charging_phase_L3_power_kw",
+        ]
+        assert "charging_total_service_power_kw" in building_features
+        for feature in expected_phase_power_features:
+            assert feature in building_features
+            assert specs["tables"]["building"]["feature_metadata"][feature]["bundle"] == "entity_core_electrical"
+
+        storage_features = specs["tables"]["storage"]["features"]
+        storage_phase_features = [
+            "phase_connection_L1",
+            "phase_connection_L2",
+            "phase_connection_L3",
+        ]
+        for feature in storage_phase_features:
+            assert feature in storage_features
+            assert specs["tables"]["storage"]["feature_metadata"][feature]["bundle"] == "entity_base"
+
+        storage_ids = specs["tables"]["storage"]["ids"]
+        assert storage_ids
+        phase_cols = [storage_features.index(name) for name in storage_phase_features]
+        assert observations["tables"]["storage"][0, phase_cols].sum() >= 1.0
     finally:
         env.close()
 
