@@ -4,6 +4,8 @@ This is the operational changelog for the fork. From now on, every version bump 
 
 Portuguese version: [pt/releases.md](pt/releases.md).
 
+Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
+
 ## Version Policy
 
 | Type | Use when | Example |
@@ -30,6 +32,8 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 ```markdown
 ## vX.Y.Z - YYYY-MM-DD
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
 
 ### Summary
 - ...
@@ -58,6 +62,8 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 ## v0.4.3 - Documentation Contract and Release Readiness
 
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
 ### Summary
 
 Release focused on making the simulator easier to adopt, audit and integrate by turning the README into a documentation portal and adding bilingual reference documentation.
@@ -76,6 +82,8 @@ Release focused on making the simulator easier to adopt, audit and integrate by 
 | KPIs | v1/v2 explanation, units, equations and EV/BESS/deferrable/community/phase families. |
 | Features | Simulator capability inventory. |
 | Releases | Release checklist, versioning policy and changelog template. |
+| Developer guide | Tests, audits, performance checks and internal architecture. |
+| Publishing guide | PyPI release workflow and local build checks. |
 | Portuguese docs | Full Portuguese mirror under `docs/pt/`. |
 
 ### Compatibility
@@ -93,6 +101,8 @@ No runtime API break is introduced by the documentation work. The release keeps 
 | 15s Parquet smoke simulation | Pass. |
 
 ## v0.4.2 - Additive Physical Observation Expansion
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
 
 ### Summary
 
@@ -127,6 +137,8 @@ Compatible additive change. Existing observations and EV/charger duplication are
 
 ## v0.4.0 - Normalized Deferrable Appliances
 
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
 ### Summary
 
 Introduced the official `deferrable_appliances` model with a cycle catalog and sparse flexibility schedule, replacing the old washing-machine format.
@@ -148,6 +160,8 @@ Breaking schema change: `washing_machines` is no longer the official dataset for
 
 ## v0.3.2 - Performance, 15s and Parquet
 
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
 ### Summary
 
 Consolidated sub-hourly support and improved performance for large datasets, especially 15-second datasets.
@@ -164,6 +178,8 @@ Consolidated sub-hourly support and improved performance for large datasets, esp
 | Unit contract | Formal documentation for `kWh/step`, `kW`, prices and emissions. |
 
 ## Pre-v0.3 - Initial EVs and Washing Machines
+
+Fork owner: [@calofonseca](https://github.com/calofonseca).
 
 ### Summary
 

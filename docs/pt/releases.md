@@ -2,6 +2,8 @@
 
 Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bump deve explicar o que mudou, o impacto para utilizadores, impacto para datasets, testes corridos e risco de compatibilidade.
 
+Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
+
 ## Politica de Versao
 
 | Tipo | Quando usar | Exemplo |
@@ -28,6 +30,8 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 ```markdown
 ## vX.Y.Z - YYYY-MM-DD
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
 
 ### Summary
 - ...
@@ -56,6 +60,8 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 ## v0.4.3 - Contrato de Documentacao e Preparacao de Release
 
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
 ### Summary
 
 Release focada em tornar o simulador mais facil de adotar, auditar e integrar, transformando o README num portal de documentacao e adicionando documentacao bilingue.
@@ -74,6 +80,8 @@ Release focada em tornar o simulador mais facil de adotar, auditar e integrar, t
 | KPIs | Explicacao v1/v2, unidades, equacoes e familias EV/BESS/deferrable/community/fases. |
 | Features | Inventario de capacidades do simulador. |
 | Releases | Checklist, politica de versao e template de changelog. |
+| Developer guide | Testes, auditorias, checks de performance e arquitetura interna. |
+| Publishing guide | Workflow PyPI e checks locais de build. |
 | Docs PT | Mirror completo em portugues em `docs/pt/`. |
 
 ### Compatibility
@@ -91,6 +99,8 @@ Nao introduz breaking changes de runtime. A release mantem as mudancas aditivas 
 | Smoke simulation 15s Parquet | Pass. |
 
 ## v0.4.2 - Expansao Aditiva de Observacoes Fisicas
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
 
 ### Summary
 
@@ -125,6 +135,8 @@ Compatibilidade aditiva. Observacoes antigas e duplicacoes EV/charger foram mant
 
 ## v0.4.0 - Deferrable Appliances Normalizados
 
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
 ### Summary
 
 Introduziu o modelo oficial de `deferrable_appliances` com catalogo de ciclos e schedule de flexibilidade, substituindo o formato antigo de washing machines.
@@ -146,6 +158,8 @@ Breaking change de schema: `washing_machines` deixou de ser o formato oficial.
 
 ## v0.3.2 - Performance, 15s e Parquet
 
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
 ### Summary
 
 Consolidou suporte sub-horario e melhorou performance para datasets grandes, especialmente 15 segundos.
@@ -162,6 +176,8 @@ Consolidou suporte sub-horario e melhorou performance para datasets grandes, esp
 | Unit contract | Documentacao formal de kWh/step, kW, preco e emissoes. |
 
 ## Pre-v0.3 - EVs e Washing Machines Iniciais
+
+Fork owner: [@calofonseca](https://github.com/calofonseca).
 
 ### Summary
 

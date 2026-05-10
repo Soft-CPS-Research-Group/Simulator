@@ -14,3 +14,5 @@ Esta pasta contem a versao portuguesa das paginas de referencia principais. A do
 | [kpis_reference.md](kpis_reference.md) | KPIs v1/v2, unidades e familias. |
 | [features.md](features.md) | Funcionalidades do simulador. |
 | [releases.md](releases.md) | Politica de releases e changelog operacional. |
+| [developer_guide.md](developer_guide.md) | Testes, auditorias, performance e arquitetura interna. |
+| [publishing.md](publishing.md) | Workflow de publicacao, PyPI, tags e checks locais. |
