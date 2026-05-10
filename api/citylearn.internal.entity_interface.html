@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.entity_interface module &mdash; CityLearn 0.4.0 documentation</title>
+  <title>citylearn.internal.entity_interface module &mdash; CityLearn 0.4.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=6c02275b"></script>
+      <script src="../_static/documentation_options.js?v=5bfaad31"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -143,6 +143,21 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Build and parse canonical entity payloads.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.BASE_BUNDLE">
+<span class="sig-name descname"><span class="pre">BASE_BUNDLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'entity_base'</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.BASE_BUNDLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.BASE_CHARGER_FEATURES">
+<span class="sig-name descname"><span class="pre">BASE_CHARGER_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['min_charging_power_kw',</span> <span class="pre">'min_discharging_power_kw',</span> <span class="pre">'charger_efficiency_ratio']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.BASE_CHARGER_FEATURES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.BASE_STORAGE_FEATURES">
+<span class="sig-name descname"><span class="pre">BASE_STORAGE_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['min_charge_power_kw',</span> <span class="pre">'min_discharge_power_kw',</span> <span class="pre">'efficiency_ratio',</span> <span class="pre">'round_trip_efficiency_ratio']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.BASE_STORAGE_FEATURES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.COMMUNITY_BUNDLE">
 <span class="sig-name descname"><span class="pre">COMMUNITY_BUNDLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'entity_community_operational'</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.COMMUNITY_BUNDLE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -154,7 +169,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.CORE_BUILDING_EXTRA_FEATURES">
-<span class="sig-name descname"><span class="pre">CORE_BUILDING_EXTRA_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['net_power_kw',</span> <span class="pre">'net_energy_kwh_step',</span> <span class="pre">'import_power_kw',</span> <span class="pre">'import_energy_kwh_step',</span> <span class="pre">'export_power_kw',</span> <span class="pre">'export_energy_kwh_step',</span> <span class="pre">'load_power_kw',</span> <span class="pre">'load_energy_kwh_step',</span> <span class="pre">'pv_power_kw',</span> <span class="pre">'pv_energy_kwh_step',</span> <span class="pre">'bess_power_kw',</span> <span class="pre">'bess_energy_kwh_step',</span> <span class="pre">'ev_charging_power_kw',</span> <span class="pre">'ev_charging_energy_kwh_step',</span> <span class="pre">'electrical_storage_soc_ratio']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.CORE_BUILDING_EXTRA_FEATURES" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CORE_BUILDING_EXTRA_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['net_power_kw',</span> <span class="pre">'net_energy_kwh_step',</span> <span class="pre">'import_power_kw',</span> <span class="pre">'import_energy_kwh_step',</span> <span class="pre">'export_power_kw',</span> <span class="pre">'export_energy_kwh_step',</span> <span class="pre">'load_power_kw',</span> <span class="pre">'load_energy_kwh_step',</span> <span class="pre">'pv_power_kw',</span> <span class="pre">'pv_energy_kwh_step',</span> <span class="pre">'bess_power_kw',</span> <span class="pre">'bess_energy_kwh_step',</span> <span class="pre">'ev_charging_power_kw',</span> <span class="pre">'ev_charging_energy_kwh_step',</span> <span class="pre">'electrical_storage_soc_ratio',</span> <span class="pre">'charging_total_service_power_kw']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.CORE_BUILDING_EXTRA_FEATURES" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -169,12 +184,12 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.DEFERRABLE_APPLIANCE_FEATURES">
-<span class="sig-name descname"><span class="pre">DEFERRABLE_APPLIANCE_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['pending',</span> <span class="pre">'running',</span> <span class="pre">'can_start',</span> <span class="pre">'deadline_missed',</span> <span class="pre">'earliest_start_time_step',</span> <span class="pre">'latest_start_time_step',</span> <span class="pre">'deadline_time_step',</span> <span class="pre">'hours_until_latest_start',</span> <span class="pre">'hours_until_deadline',</span> <span class="pre">'slack_steps',</span> <span class="pre">'slack_ratio',</span> <span class="pre">'urgency_ratio',</span> <span class="pre">'cycle_duration_steps',</span> <span class="pre">'cycle_energy_kwh',</span> <span class="pre">'remaining_energy_kwh',</span> <span class="pre">'current_step_energy_kwh',</span> <span class="pre">'priority']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.DEFERRABLE_APPLIANCE_FEATURES" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">DEFERRABLE_APPLIANCE_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['pending',</span> <span class="pre">'running',</span> <span class="pre">'can_start',</span> <span class="pre">'deadline_missed',</span> <span class="pre">'earliest_start_time_step',</span> <span class="pre">'latest_start_time_step',</span> <span class="pre">'deadline_time_step',</span> <span class="pre">'hours_until_latest_start',</span> <span class="pre">'hours_until_deadline',</span> <span class="pre">'slack_steps',</span> <span class="pre">'slack_ratio',</span> <span class="pre">'urgency_ratio',</span> <span class="pre">'cycle_duration_steps',</span> <span class="pre">'cycle_energy_kwh',</span> <span class="pre">'remaining_energy_kwh',</span> <span class="pre">'current_step_energy_kwh',</span> <span class="pre">'priority',</span> <span class="pre">'must_run',</span> <span class="pre">'cycle_average_power_kw',</span> <span class="pre">'cycle_peak_power_kw',</span> <span class="pre">'cycle_load_factor_ratio',</span> <span class="pre">'cycle_peak_step_offset_ratio',</span> <span class="pre">'remaining_duration_steps',</span> <span class="pre">'remaining_average_power_kw',</span> <span class="pre">'current_step_power_kw']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.DEFERRABLE_APPLIANCE_FEATURES" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.EXTRA_CHARGER_FEATURES">
-<span class="sig-name descname"><span class="pre">EXTRA_CHARGER_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['commanded_power_kw',</span> <span class="pre">'applied_power_kw',</span> <span class="pre">'applied_energy_kwh_step',</span> <span class="pre">'hours_until_departure',</span> <span class="pre">'time_until_departure_ratio',</span> <span class="pre">'energy_to_required_soc_kwh',</span> <span class="pre">'required_average_power_kw',</span> <span class="pre">'avg_power_to_departure_kw',</span> <span class="pre">'charging_slack_kw',</span> <span class="pre">'charging_priority_ratio']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.EXTRA_CHARGER_FEATURES" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">EXTRA_CHARGER_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['commanded_power_kw',</span> <span class="pre">'applied_power_kw',</span> <span class="pre">'applied_energy_kwh_step',</span> <span class="pre">'hours_until_departure',</span> <span class="pre">'time_until_departure_ratio',</span> <span class="pre">'energy_to_required_soc_kwh',</span> <span class="pre">'required_average_power_kw',</span> <span class="pre">'avg_power_to_departure_kw',</span> <span class="pre">'charging_slack_kw',</span> <span class="pre">'charging_priority_ratio',</span> <span class="pre">'charge_efficiency_at_max_ratio',</span> <span class="pre">'discharge_efficiency_at_max_ratio',</span> <span class="pre">'incoming_ev_required_soc_departure',</span> <span class="pre">'incoming_ev_departure_time_step',</span> <span class="pre">'incoming_ev_hours_until_departure',</span> <span class="pre">'incoming_ev_time_until_departure_ratio']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.EXTRA_CHARGER_FEATURES" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -184,7 +199,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.EXTRA_STORAGE_FEATURES">
-<span class="sig-name descname"><span class="pre">EXTRA_STORAGE_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['electrical_storage_soc_ratio',</span> <span class="pre">'max_charge_power_kw',</span> <span class="pre">'max_discharge_power_kw',</span> <span class="pre">'energy_to_full_kwh',</span> <span class="pre">'energy_available_kwh']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.EXTRA_STORAGE_FEATURES" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">EXTRA_STORAGE_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['electrical_storage_soc_ratio',</span> <span class="pre">'max_charge_power_kw',</span> <span class="pre">'max_discharge_power_kw',</span> <span class="pre">'energy_to_full_kwh',</span> <span class="pre">'energy_available_kwh',</span> <span class="pre">'current_efficiency_ratio',</span> <span class="pre">'degraded_capacity_kwh',</span> <span class="pre">'soc_min_ratio']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.EXTRA_STORAGE_FEATURES" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -209,7 +224,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.internal.entity_interface.CityLearnEntityInterfaceService.PV_FEATURES">
-<span class="sig-name descname"><span class="pre">PV_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['generation_power_kw',</span> <span class="pre">'generation_energy_kwh_step',</span> <span class="pre">'installed_power_kw']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.PV_FEATURES" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">PV_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['generation_power_kw',</span> <span class="pre">'generation_energy_kwh_step',</span> <span class="pre">'installed_power_kw',</span> <span class="pre">'generation_capacity_factor_ratio']</span></em><a class="headerlink" href="#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.PV_FEATURES" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

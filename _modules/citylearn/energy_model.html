@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model &mdash; CityLearn 0.4.0 documentation</title>
+  <title>citylearn.energy_model &mdash; CityLearn 0.4.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=6c02275b"></script>
+      <script src="../../_static/documentation_options.js?v=5bfaad31"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1679,6 +1679,14 @@
                 <span class="s1">&#39;remaining_energy_kwh&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
                 <span class="s1">&#39;current_step_energy_kwh&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
                 <span class="s1">&#39;priority&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;must_run&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;cycle_average_power_kw&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;cycle_peak_power_kw&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;cycle_load_factor_ratio&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;cycle_peak_step_offset_ratio&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+                <span class="s1">&#39;remaining_duration_steps&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;remaining_average_power_kw&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;current_step_power_kw&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
             <span class="p">}</span>
 
         <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
@@ -1694,6 +1702,21 @@
         <span class="n">slack_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">slack_steps</span> <span class="o">/</span> <span class="n">window_steps</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">pending</span> <span class="k">else</span> <span class="mf">0.0</span>
         <span class="n">current_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle_energy</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span>
         <span class="n">remaining_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_remaining_cycle_energy</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span>
+        <span class="n">profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;load_profile&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">duration_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">]),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">cycle_duration_hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">duration_steps</span><span class="p">)</span> <span class="o">*</span> <span class="n">step_hours</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">)</span>
+        <span class="n">cycle_average_power</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;total_energy_kwh&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">cycle_duration_hours</span> <span class="k">if</span> <span class="n">duration_steps</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">peak_energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">profile</span><span class="p">))</span> <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">cycle_peak_power</span> <span class="o">=</span> <span class="n">peak_energy</span> <span class="o">/</span> <span class="n">step_hours</span>
+        <span class="n">cycle_load_factor</span> <span class="o">=</span> <span class="n">cycle_average_power</span> <span class="o">/</span> <span class="n">cycle_peak_power</span> <span class="k">if</span> <span class="n">cycle_peak_power</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">peak_offset_ratio</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="n">profile</span><span class="p">)))</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">duration_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">duration_steps</span> <span class="o">&gt;</span> <span class="mi">1</span>
+            <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="p">)</span>
+        <span class="n">remaining_duration_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_remaining_cycle_duration_steps</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span>
+        <span class="n">remaining_duration_hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">remaining_duration_steps</span><span class="p">)</span> <span class="o">*</span> <span class="n">step_hours</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">)</span>
+        <span class="n">remaining_average_power</span> <span class="o">=</span> <span class="n">remaining_energy</span> <span class="o">/</span> <span class="n">remaining_duration_hours</span> <span class="k">if</span> <span class="n">remaining_duration_steps</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">&#39;pending&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">pending</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -1713,6 +1736,14 @@
             <span class="s1">&#39;remaining_energy_kwh&#39;</span><span class="p">:</span> <span class="n">remaining_energy</span><span class="p">,</span>
             <span class="s1">&#39;current_step_energy_kwh&#39;</span><span class="p">:</span> <span class="n">current_energy</span><span class="p">,</span>
             <span class="s1">&#39;priority&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;priority&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;must_run&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cycle</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;must_run&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s1">&#39;cycle_average_power_kw&#39;</span><span class="p">:</span> <span class="n">cycle_average_power</span><span class="p">,</span>
+            <span class="s1">&#39;cycle_peak_power_kw&#39;</span><span class="p">:</span> <span class="n">cycle_peak_power</span><span class="p">,</span>
+            <span class="s1">&#39;cycle_load_factor_ratio&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cycle_load_factor</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)),</span>
+            <span class="s1">&#39;cycle_peak_step_offset_ratio&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">peak_offset_ratio</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)),</span>
+            <span class="s1">&#39;remaining_duration_steps&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">remaining_duration_steps</span><span class="p">),</span>
+            <span class="s1">&#39;remaining_average_power_kw&#39;</span><span class="p">:</span> <span class="n">remaining_average_power</span><span class="p">,</span>
+            <span class="s1">&#39;current_step_power_kw&#39;</span><span class="p">:</span> <span class="n">current_energy</span> <span class="o">/</span> <span class="n">step_hours</span><span class="p">,</span>
         <span class="p">}</span></div>
 
 
@@ -1850,7 +1881,21 @@
             <span class="n">offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">offset</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">profile</span><span class="p">):</span>
                 <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">profile</span><span class="p">[</span><span class="n">offset</span><span class="p">:]))</span>
-        <span class="k">return</span> <span class="mf">0.0</span></div>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_remaining_cycle_duration_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+        <span class="n">profile</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;load_profile&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;pending&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
 
 
 
