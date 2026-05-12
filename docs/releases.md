@@ -60,6 +60,46 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.5.0 - Action-Asset Consistency Hardening (Breaking)
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Breaking release that removes silent action/device mismatches for storage control and enforces strict topology-mode compatibility for dynamic schemas.
+
+### Changed
+
+| Area | Change |
+|---|---|
+| Topology mode validation | Schemas that declare dynamic topology (`topology_mode: dynamic` or `topology_events`) now reject `topology_mode='static'` at initialization. |
+| Static consistency | In static mode, if `electrical_storage` action is active for a building without an effective storage asset and without `inactive_actions` opt-out, initialization now fails fast. |
+| Dynamic action exposure | Dynamic metadata synchronization now keeps `inactive_actions` precedence for `electrical_storage`, EV charger actions and deferrable appliance actions. |
+
+### Dataset/Schema Impact
+
+- Dynamic datasets must be executed with `topology_mode='dynamic'` and `interface='entity'`.
+- Static datasets with `actions.electrical_storage.active=true` must either:
+  - declare an effective `electrical_storage` asset for participating buildings, or
+  - explicitly opt-out per building via `inactive_actions: ["electrical_storage"]`.
+
+### Compatibility
+
+Breaking behavior change by design:
+- no more silent fallback for static storage-action inconsistencies;
+- no more running dynamic-topology schemas in static mode.
+
+### Validation
+
+| Command/group | Result |
+|---|---|
+| `tests/test_dynamic_topology_entity_mode.py` targeted consistency tests | Pass. |
+
+### Migration Notes
+
+- If you previously ran dynamic schemas in static mode, update runtime configs to `topology_mode='dynamic'` and `interface='entity'`.
+- If static runs now fail with storage consistency errors, fix schema intent explicitly (declare storage or set per-building `inactive_actions`).
+
 ## v0.4.3 - Documentation Contract and Release Readiness
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

@@ -58,6 +58,46 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.5.0 - Hardening de Consistencia Acao-Asset (Breaking)
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Release breaking que remove mismatches silenciosos entre acoes e devices para controlo de storage e impoe compatibilidade estrita entre schema dinamico e modo de topologia.
+
+### Changed
+
+| Area | Mudancas |
+|---|---|
+| Validacao de topology mode | Schemas que declaram topologia dinamica (`topology_mode: dynamic` ou `topology_events`) passam a rejeitar `topology_mode='static'` no arranque. |
+| Consistencia em static | Em modo static, se `electrical_storage` estiver ativa para building sem storage efetivo e sem opt-out em `inactive_actions`, o arranque falha de forma explicita. |
+| Exposicao de acoes em dynamic | A sincronizacao dinamica agora mantem precedencia de `inactive_actions` para `electrical_storage`, acoes de chargers EV e acoes de deferrables. |
+
+### Dataset/Schema Impact
+
+- Datasets dinamicos devem correr com `topology_mode='dynamic'` e `interface='entity'`.
+- Em datasets static com `actions.electrical_storage.active=true`, cada building deve:
+  - declarar um `electrical_storage` efetivo, ou
+  - fazer opt-out explicito com `inactive_actions: ["electrical_storage"]`.
+
+### Compatibility
+
+Breaking change intencional:
+- deixa de existir fallback silencioso para inconsistencias storage-action em static;
+- deixa de ser permitido correr schemas dinamicos em static.
+
+### Validation
+
+| Comando | Resultado |
+|---|---|
+| `tests/test_dynamic_topology_entity_mode.py` com testes direcionados de consistencia | Pass. |
+
+### Migration Notes
+
+- Se antes corrias schemas dinamicos em static, atualiza configuracoes para `topology_mode='dynamic'` e `interface='entity'`.
+- Se um run static falhar com erro de consistencia de storage, explicita a intencao no schema (declarar storage ou usar `inactive_actions` por building).
+
 ## v0.4.3 - Contrato de Documentacao e Preparacao de Release
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

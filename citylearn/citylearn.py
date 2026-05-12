@@ -184,8 +184,6 @@ class CityLearnEnv(Environment, Env):
         self.interface = interface if interface is not None else schema_interface
         schema_topology_mode = self.schema.get('topology_mode') if isinstance(self.schema, dict) else None
         self.topology_mode = topology_mode if topology_mode is not None else schema_topology_mode
-        if self.topology_mode == 'dynamic' and self.interface != 'entity':
-            raise ValueError("topology_mode='dynamic' requires interface='entity'.")
         self.community_market_enabled = False
         self.community_market_sell_ratio = 0.8
         self.community_market_grid_export_price = 0.0
@@ -1023,6 +1021,18 @@ class CityLearnEnv(Environment, Env):
 
         return pd.DataFrame([b.power_outage_signal for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()[:self.time_step + 1]
 
+    @staticmethod
+    def _schema_declares_dynamic_topology(schema: Any) -> bool:
+        if not isinstance(schema, Mapping):
+            return False
+
+        schema_mode = str(schema.get('topology_mode', '')).strip().lower()
+        if schema_mode == 'dynamic':
+            return True
+
+        events = schema.get('topology_events', [])
+        return isinstance(events, list) and any(isinstance(event, Mapping) for event in events)
+
     @schema.setter
     def schema(self, schema: Union[str, Path, Mapping[str, Any]]):
         dataset = DataSet(offline=self.offline)
@@ -1140,6 +1150,12 @@ class CityLearnEnv(Environment, Env):
             raise ValueError("topology_mode must be one of {'static', 'dynamic'}.")
         if mode == 'dynamic' and getattr(self, '_CityLearnEnv__interface', 'flat') != 'entity':
             raise ValueError("topology_mode='dynamic' requires interface='entity'.")
+        schema = getattr(self, '_CityLearnEnv__schema', None)
+        if mode == 'static' and self._schema_declares_dynamic_topology(schema):
+            raise ValueError(
+                "Schema declares dynamic topology (topology_mode='dynamic' or topology_events are defined). "
+                "Use topology_mode='dynamic' with interface='entity'."
+            )
         self.__topology_mode = mode
 
     @Environment.random_seed.setter

@@ -747,6 +747,11 @@ class CityLearnTopologyService:
             if key.startswith('electric_vehicle_storage_'):
                 building.action_metadata[key] = False
 
+        global_charger_action_inactive = self._is_action_inactive_for_building(
+            building,
+            'electric_vehicle_storage',
+        )
+
         for charger in building.electric_vehicle_chargers or []:
             charger_id = charger.charger_id
 
@@ -774,7 +779,10 @@ class CityLearnTopologyService:
             if self._charger_observation_flags.get('incoming_electric_vehicle_at_charger_estimated_soc_arrival', False):
                 building.observation_metadata[f'incoming_electric_vehicle_at_charger_{charger_id}_estimated_soc_arrival'] = True
 
-            if self._charger_action_enabled:
+            if self._charger_action_enabled and not global_charger_action_inactive and not self._is_action_inactive_for_building(
+                building,
+                f'electric_vehicle_storage_{charger_id}',
+            ):
                 building.action_metadata[f'electric_vehicle_storage_{charger_id}'] = True
 
     def _sync_deferrable_appliance_metadata(self, building: Building):
@@ -801,6 +809,7 @@ class CityLearnTopologyService:
                 if str(key).startswith('deferrable_appliance_')
             }
         action_enabled = self._is_schema_action_active('deferrable_appliance')
+        global_action_inactive = self._is_action_inactive_for_building(building, 'deferrable_appliance')
 
         for appliance in building.deferrable_appliances or []:
             for helper_name, enabled in helper_observations.items():
@@ -808,15 +817,19 @@ class CityLearnTopologyService:
                     feature_name = helper_name.replace('deferrable_appliance_', '', 1)
                     building.observation_metadata[f'deferrable_appliance_{appliance.name}_{feature_name}'] = True
 
-            if action_enabled:
+            if action_enabled and not global_action_inactive and not self._is_action_inactive_for_building(
+                building,
+                f'deferrable_appliance_{appliance.name}',
+            ):
                 building.action_metadata[f'deferrable_appliance_{appliance.name}'] = True
 
     def _sync_electrical_storage_metadata(self, building: Building):
         has_storage = self._has_electrical_storage_asset(building)
         action_enabled = self._is_schema_action_active('electrical_storage')
+        action_inactive = self._is_action_inactive_for_building(building, 'electrical_storage')
 
         if 'electrical_storage' in building.action_metadata:
-            building.action_metadata['electrical_storage'] = bool(has_storage and action_enabled)
+            building.action_metadata['electrical_storage'] = bool(has_storage and action_enabled and not action_inactive)
 
         if 'electrical_storage_soc' in building.observation_metadata:
             building.observation_metadata['electrical_storage_soc'] = bool(
@@ -837,6 +850,23 @@ class CityLearnTopologyService:
         capacity = getattr(battery, 'capacity', 0.0)
         nominal_power = getattr(battery, 'nominal_power', 0.0)
         return float(capacity) > 0.0 and float(nominal_power) > 0.0
+
+    def _declared_inactive_actions(self, building: Building) -> Set[str]:
+        cached = getattr(building, '_declared_inactive_actions', None)
+        if isinstance(cached, (set, list, tuple)):
+            return {str(value) for value in cached}
+
+        schema = self.env.schema if isinstance(getattr(self.env, 'schema', None), Mapping) else {}
+        building_schema = (schema.get('buildings', {}) or {}).get(getattr(building, 'name', ''), {})
+        raw = (building_schema or {}).get('inactive_actions')
+        if raw is None:
+            return set()
+        if not isinstance(raw, (list, tuple, set)):
+            raw = [raw]
+        return {str(value) for value in raw}
+
+    def _is_action_inactive_for_building(self, building: Building, action_name: str) -> bool:
+        return str(action_name) in self._declared_inactive_actions(building)
 
     @staticmethod
     def _apply_object_overrides(obj: Any, overrides: Mapping[str, Any]):

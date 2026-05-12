@@ -16,6 +16,7 @@ from citylearn.citylearn import CityLearnEnv, EvaluationCondition
 
 
 SCHEMA_PATH = Path(__file__).resolve().parents[1] / "data/datasets/citylearn_three_phase_dynamic_topology_demo/schema.json"
+STATIC_SCHEMA_PATH = Path(__file__).resolve().parent / "data/minute_ev_demo/schema.json"
 
 
 def _load_schema(*, tie_first_two_events: bool = False) -> Mapping[str, Any]:
@@ -33,6 +34,12 @@ def _load_schema(*, tie_first_two_events: bool = False) -> Mapping[str, Any]:
         schema["topology_events"][0]["time_step"] = 2
         schema["topology_events"][1]["time_step"] = 2
 
+    return schema
+
+
+def _load_static_schema() -> Mapping[str, Any]:
+    schema = json.loads(STATIC_SCHEMA_PATH.read_text())
+    schema["root_directory"] = str(STATIC_SCHEMA_PATH.parent)
     return schema
 
 
@@ -63,6 +70,37 @@ def test_dynamic_mode_requires_entity_interface():
             interface="flat",
             topology_mode="dynamic",
             episode_time_steps=8,
+            random_seed=0,
+        )
+
+
+def test_dynamic_schema_cannot_run_with_static_topology_mode():
+    schema = _load_schema()
+    schema.pop("topology_mode", None)
+
+    with pytest.raises(ValueError, match="Schema declares dynamic topology"):
+        CityLearnEnv(
+            schema,
+            interface="entity",
+            topology_mode="static",
+            episode_time_steps=8,
+            random_seed=0,
+        )
+
+
+def test_static_mode_fails_fast_when_storage_action_enabled_without_storage_asset():
+    schema = _load_static_schema()
+    building = schema["buildings"]["Building_1"]
+    building.pop("electrical_storage", None)
+    building["inactive_actions"] = []
+    schema["actions"]["electrical_storage"]["active"] = True
+
+    with pytest.raises(ValueError, match="Schema/action inconsistency in static topology"):
+        CityLearnEnv(
+            schema,
+            interface="flat",
+            topology_mode="static",
+            episode_time_steps=3,
             random_seed=0,
         )
 
@@ -120,6 +158,32 @@ def test_dynamic_shape_changes_and_action_availability_expand_and_shrink():
 
         _step_until(env, 9)  # remove member
         assert "Building_18" not in [b.name for b in env.buildings]
+    finally:
+        env.close()
+
+
+def test_dynamic_inactive_actions_keep_storage_action_disabled_after_add_asset():
+    schema = _load_schema()
+    building_3 = schema["buildings"]["Building_3"]
+    inactive = list(building_3.get("inactive_actions", []))
+    if "electrical_storage" not in inactive:
+        inactive.append("electrical_storage")
+    building_3["inactive_actions"] = inactive
+
+    env = CityLearnEnv(schema, interface="entity", topology_mode="dynamic", episode_time_steps=16, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        b3_idx = _building_index_by_name(env, "Building_3")
+
+        _step_until(env, 8)  # add battery to Building_3
+        assert "Building_3/electrical_storage" in env.entity_specs["tables"]["storage"]["ids"]
+        assert "electrical_storage" not in env.buildings[b3_idx].active_actions
+
+        payload = _zero_entity_actions(env)
+        payload["map"] = {"building:Building_3": {"electrical_storage": 0.2}}
+        with pytest.raises(AssertionError, match="Unknown building action keys"):
+            env._entity_service.parse_actions(payload)
     finally:
         env.close()
 

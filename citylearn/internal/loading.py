@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import hashlib
 import importlib
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -262,6 +262,9 @@ class CityLearnLoadingService:
 
         for i, building_name in enumerate(buildings_to_include):
             buildings.append(self.load_building(i, building_name, schema, episode_tracker, pv_sizing_data, battery_sizing_data, **kwargs))
+
+        if not dynamic_mode:
+            self._validate_static_action_asset_consistency(buildings)
 
         electric_vehicles: List[ElectricVehicle] = []
         if kwargs.get('electric_vehicles_def') is not None and len(kwargs['electric_vehicles_def']) > 0:
@@ -555,6 +558,7 @@ class CityLearnLoadingService:
                 )
             )
 
+        declared_inactive_actions = self._resolve_inactive_actions(index, building_schema, kwargs)
         observation_metadata, action_metadata = self.process_metadata(
             schema,
             building_schema,
@@ -583,6 +587,7 @@ class CityLearnLoadingService:
             stochastic_power_outage_model=stochastic_power_outage_model,
             **building_kwargs,
         )
+        building._declared_inactive_actions = set(declared_inactive_actions)
 
         device_metadata = {
             'cooling_device': {'autosizer': building.autosize_cooling_device},
@@ -735,13 +740,7 @@ class CityLearnLoadingService:
             chargers_actions_metadata_helper = {k: True if k in active_actions else False for k in chargers_actions_metadata_helper}
             deferrable_appliance_actions_metadata_helper = {k: True if k in active_actions else False for k in deferrable_appliance_actions_metadata_helper}
 
-        if kwargs.get('inactive_actions') is not None:
-            inactive_actions = kwargs['inactive_actions']
-            inactive_actions = inactive_actions[index] if isinstance(inactive_actions[0], list) else inactive_actions
-        elif building_schema.get('inactive_actions') is not None:
-            inactive_actions = building_schema['inactive_actions']
-        else:
-            inactive_actions = []
+        inactive_actions = self._resolve_inactive_actions(index, building_schema, kwargs)
 
         action_metadata = {k: False if k in inactive_actions else v for k, v in action_metadata.items()}
         chargers_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in chargers_actions_metadata_helper.items()}
@@ -1046,6 +1045,74 @@ class CityLearnLoadingService:
             )
         )
         return events
+
+    @staticmethod
+    def _normalize_action_tokens(values: Any) -> List[str]:
+        if values is None:
+            return []
+        if not isinstance(values, (list, tuple, set)):
+            values = [values]
+        return [str(value) for value in values]
+
+    def _resolve_inactive_actions(
+        self,
+        index: int,
+        building_schema: Mapping[str, Any],
+        kwargs: Mapping[str, Any],
+    ) -> List[str]:
+        inactive_actions_override = kwargs.get('inactive_actions')
+        if inactive_actions_override is not None:
+            if isinstance(inactive_actions_override, list) and len(inactive_actions_override) > 0 and isinstance(inactive_actions_override[0], list):
+                if index < len(inactive_actions_override):
+                    inactive_actions_override = inactive_actions_override[index]
+                else:
+                    inactive_actions_override = []
+            return self._normalize_action_tokens(inactive_actions_override)
+
+        inactive_actions_schema = None if building_schema is None else building_schema.get('inactive_actions')
+        return self._normalize_action_tokens(inactive_actions_schema)
+
+    @staticmethod
+    def _building_has_electrical_storage_asset(building: Building) -> bool:
+        battery = getattr(building, 'electrical_storage', None)
+        if battery is None:
+            return False
+        capacity = float(getattr(battery, 'capacity', 0.0) or 0.0)
+        nominal_power = float(getattr(battery, 'nominal_power', 0.0) or 0.0)
+        return capacity > 0.0 and nominal_power > 0.0
+
+    def _declared_inactive_actions_for_building(self, building: Building) -> Set[str]:
+        declared = getattr(building, '_declared_inactive_actions', None)
+        if isinstance(declared, (set, list, tuple)):
+            return {str(value) for value in declared}
+
+        schema = self.env.schema if isinstance(getattr(self.env, 'schema', None), Mapping) else {}
+        building_schema = (schema.get('buildings', {}) or {}).get(getattr(building, 'name', ''), {})
+        return set(self._normalize_action_tokens((building_schema or {}).get('inactive_actions')))
+
+    def _validate_static_action_asset_consistency(self, buildings: List[Building]) -> None:
+        inconsistent: List[str] = []
+
+        for building in buildings:
+            action_enabled = bool(getattr(building, 'action_metadata', {}).get('electrical_storage', False))
+            if not action_enabled:
+                continue
+
+            if self._building_has_electrical_storage_asset(building):
+                continue
+
+            if 'electrical_storage' in self._declared_inactive_actions_for_building(building):
+                continue
+
+            inconsistent.append(str(getattr(building, 'name', '<unknown>')))
+
+        if inconsistent:
+            joined = ', '.join(inconsistent)
+            raise ValueError(
+                'Schema/action inconsistency in static topology: electrical_storage action is active '
+                f'for building(s) without electrical_storage asset declaration or positive capacity/power: {joined}. '
+                "Fix by declaring electrical_storage for those buildings or adding 'electrical_storage' to each building's inactive_actions."
+            )
 
     def _build_dynamic_member_windows(
         self,
