@@ -432,11 +432,11 @@
         }
       },
       "deferrable_appliances": {
-        "washing_machine_1": {
+        "deferrable_appliance_1": {
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
-          "cycle_profiles_file": "washing_machine_1_cycle_profiles.csv",
-          "flexibility_schedule_file": "washing_machine_1_flexibility_schedule.csv"
+          "cycle_profiles_file": "deferrable_appliance_1_cycle_profiles.csv",
+          "flexibility_schedule_file": "deferrable_appliance_1_flexibility_schedule.csv"
         }
       }
     },

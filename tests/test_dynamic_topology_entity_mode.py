@@ -267,7 +267,7 @@ def test_dynamic_deferrable_appliance_add_start_and_remove_cancels_future_consum
             "target_asset_type": "deferrable_appliance",
             "target_asset_id": "dyn_washer",
             "source_member_id": "Building_1",
-            "source_asset_id": "washing_machine_1",
+            "source_asset_id": "deferrable_appliance_1",
         },
         {
             "id": "evt_remove_deferrable_b2",
