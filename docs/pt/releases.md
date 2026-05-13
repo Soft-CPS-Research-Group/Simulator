@@ -64,7 +64,14 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 
 ### Summary
 
-Release breaking que remove mismatches silenciosos entre acoes e devices para controlo de storage e impoe compatibilidade estrita entre schema dinamico e modo de topologia.
+Release breaking que remove mismatches silenciosos entre acoes e devices para controlo de storage, impoe compatibilidade estrita entre schema dinamico e modo de topologia e consolida o contrato publico de datasets deferrable.
+
+### Added
+
+| Area | Mudancas |
+|---|---|
+| Datasets 15s Parquet | Foram adicionados e versionados os datasets de 15 segundos em parquet `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet` e `citylearn_three_phase_electrical_service_demo_15s_parquet`. |
+| Normalizacao de naming em datasets | Migracao de ficheiros/IDs legacy `washing_machine_*` para `deferrable_appliance_*` em `citylearn_three_phase_electrical_service_demo`, `citylearn_three_phase_dynamic_topology_demo` e `citylearn_challenge_2022_phase_all_plus_evs`. |
 
 ### Changed
 
@@ -80,6 +87,8 @@ Release breaking que remove mismatches silenciosos entre acoes e devices para co
 - Em datasets static com `actions.electrical_storage.active=true`, cada building deve:
   - declarar um `electrical_storage` efetivo, ou
   - fazer opt-out explicito com `inactive_actions: ["electrical_storage"]`.
+- O naming oficial de deferrables nos datasets fornecidos passa a ser `deferrable_appliance_*`; o naming legacy `washing_machine_*` foi removido de `data/datasets`.
+- Os schemas 15 segundos em parquet passam a ser artefactos oficiais versionados para uso direto em smoke/regression.
 
 ### Compatibility
 
@@ -92,6 +101,10 @@ Breaking change intencional:
 | Comando | Resultado |
 |---|---|
 | `tests/test_dynamic_topology_entity_mode.py` com testes direcionados de consistencia | Pass. |
+| `.venv/bin/pytest -q tests/test_dynamic_topology_entity_mode.py tests/test_dynamic_topology_assets_only_dataset.py` | Pass (`15 passed`). |
+| `.venv/bin/pytest -q tests/test_dynamic_topology_entity_mode.py tests/test_15_second_power_fixture.py tests/test_dataset_loader_window_parquet.py` | Pass (`17 passed`). |
+| Smoke 15s (`CityLearnEnv` reset + step) para variantes CSV e parquet de dynamic-assets-only e electrical-service | Pass (`4/4`). |
+| Smoke do catalogo completo com carregamento por janela (`31` schemas) | `27` pass; `4` falhas conhecidas pre-existentes de sizing HVAC fora do ambito da migracao EV/deferrable. |
 
 ### Migration Notes
 
