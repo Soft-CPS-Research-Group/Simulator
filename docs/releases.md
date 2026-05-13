@@ -60,6 +60,46 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.5.1 - Deferrable Start Command Hardening
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release focused on making deferrable appliance control safer for RL training by treating start actions as explicit ON/OFF commands and avoiding accidental early starts from small positive continuous actions.
+
+### Changed
+
+| Area | Change |
+|---|---|
+| Deferrable action semantics | `DeferrableAppliance.trigger_threshold` default changed from `0.0` to `0.5`. |
+| Start command robustness | Non-finite values (`nan`, `inf`) are treated as OFF and do not start cycles. |
+| Controller contract | Documentation now states binary start intent (`0` off, `1` on) and recommends using `deferrable_appliance_can_start` as readiness signal. |
+
+### Dataset/Schema Impact
+
+- No schema structure change.
+- Existing optional `attributes.trigger_threshold` remains supported.
+- Schemas that relied on implicit default `0.0` now use safer default `0.5` unless explicitly overridden.
+
+### Compatibility
+
+Behavioral patch change:
+- with default settings, low positive deferrable actions no longer trigger starts.
+- to preserve legacy behavior, set `deferrable_appliances.<id>.attributes.trigger_threshold: 0.0`.
+
+### Validation
+
+| Command/group | Result |
+|---|---|
+| `.venv/bin/pytest -q tests/unit/test_deferrable_appliance.py tests/test_deferrable_appliance_integration.py` | Pass (`10 passed`). |
+| `.venv/bin/pytest -q tests/test_dynamic_topology_entity_mode.py -k deferrable` | Pass (`1 passed`, `13 deselected`). |
+
+### Migration Notes
+
+- If a controller previously emitted arbitrary continuous values in `[0, 1]`, map intent explicitly to ON/OFF (for example, `0.0` or `1.0`).
+- If you intentionally need old permissive behavior, configure `trigger_threshold=0.0` per deferrable appliance.
+
 ## v0.5.0 - Action-Asset Consistency Hardening (Breaking)
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

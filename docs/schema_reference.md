@@ -257,7 +257,7 @@ Use `absolute` for real measured generation or converter-generated energy series
     "cycle_profiles_file": "deferrables/washer_profiles.csv",
     "flexibility_schedule_file": "deferrables/washer_schedule.csv",
     "attributes": {
-      "trigger_threshold": 0.0
+      "trigger_threshold": 0.5
     }
   }
 }
@@ -268,7 +268,7 @@ Use `absolute` for real measured generation or converter-generated energy series
 | `type` | no | Appliance class. Default: `citylearn.energy_model.DeferrableAppliance`. |
 | `cycle_profiles_file` | yes | Physical cycle profile catalog. |
 | `flexibility_schedule_file` | yes | Flexibility requests/windows. |
-| `attributes.trigger_threshold` | no | Start action threshold. |
+| `attributes.trigger_threshold` | no | Start action threshold (default `0.5`; `action > threshold` is interpreted as ON). |
 
 ## Dynamic Topology
 

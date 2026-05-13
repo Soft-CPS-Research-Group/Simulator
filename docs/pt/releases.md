@@ -58,6 +58,46 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.5.1 - Hardening do Comando de Start dos Deferrables
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release focada em tornar o controlo de deferrable appliances mais seguro para treino RL, tratando a acao de start como comando ON/OFF explicito e evitando arranques precoces causados por valores continuos pequenos e positivos.
+
+### Changed
+
+| Area | Mudancas |
+|---|---|
+| Semantica da acao deferrable | O default de `DeferrableAppliance.trigger_threshold` passou de `0.0` para `0.5`. |
+| Robustez do comando | Valores nao finitos (`nan`, `inf`) passam a OFF e nao arrancam ciclos. |
+| Contrato para controladores | A documentacao passa a explicitar intencao binaria (`0` off, `1` on) e recomenda usar `deferrable_appliance_can_start` como sinal de disponibilidade. |
+
+### Dataset/Schema Impact
+
+- Sem mudanca estrutural de schema.
+- `attributes.trigger_threshold` continua suportado.
+- Schemas que dependiam do default implicito `0.0` passam a usar default mais seguro `0.5`, exceto quando houver override explicito.
+
+### Compatibility
+
+Mudanca comportamental de patch:
+- com configuracao default, acoes positivas pequenas deixam de arrancar ciclos.
+- para manter comportamento legacy, configurar `deferrable_appliances.<id>.attributes.trigger_threshold: 0.0`.
+
+### Validation
+
+| Comando | Resultado |
+|---|---|
+| `.venv/bin/pytest -q tests/unit/test_deferrable_appliance.py tests/test_deferrable_appliance_integration.py` | Pass (`10 passed`). |
+| `.venv/bin/pytest -q tests/test_dynamic_topology_entity_mode.py -k deferrable` | Pass (`1 passed`, `13 deselected`). |
+
+### Migration Notes
+
+- Se o controlador emitia valores continuos arbitrarios em `[0, 1]`, mapear agora para ON/OFF explicito (por exemplo, `0.0` ou `1.0`).
+- Se precisares intencionalmente do comportamento antigo mais permissivo, configura `trigger_threshold=0.0` por appliance.
+
 ## v0.5.0 - Hardening de Consistencia Acao-Asset (Breaking)
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

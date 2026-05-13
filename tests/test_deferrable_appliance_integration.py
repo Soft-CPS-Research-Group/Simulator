@@ -90,6 +90,16 @@ def _zero_flat_actions(env: CityLearnEnv):
     return [np.zeros(space.shape, dtype="float32") for space in env.action_space]
 
 
+def _zero_entity_payload(env: CityLearnEnv):
+    return {
+        "tables": {
+            name: np.zeros(space.shape, dtype="float32")
+            for name, space in env.action_space["tables"].items()
+            if name in {"building", "charger", "deferrable_appliance"}
+        }
+    }
+
+
 def _kpi_value(df, *, level, name, cost_function):
     row = df[(df["level"] == level) & (df["name"] == name) & (df["cost_function"] == cost_function)]
     assert len(row) == 1
@@ -221,5 +231,34 @@ def test_entity_table_action_edge_and_start(tmp_path: Path):
         env.step(payload)
 
         assert env.buildings[0].deferrable_appliances_electricity_consumption[0] == pytest.approx(0.1)
+    finally:
+        env.close()
+
+
+def test_entity_deferrable_start_command_is_binary_and_uses_can_start(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=1)
+    env = CityLearnEnv(str(schema_path), interface="entity", central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        observations, _ = env.reset(seed=0)
+        specs = env.entity_specs
+        features = specs["tables"]["deferrable_appliance"]["features"]
+        can_start_ix = features.index("can_start")
+
+        def can_start(obs):
+            return float(obs["tables"]["deferrable_appliance"][0, can_start_ix])
+
+        assert can_start(observations) == 1.0
+
+        payload = _zero_entity_payload(env)
+        payload["tables"]["deferrable_appliance"][0, 0] = 0.5
+        observations, *_ = env.step(payload)
+        assert env.buildings[0].deferrable_appliances_electricity_consumption[0] == pytest.approx(0.0)
+        assert can_start(observations) == 1.0
+
+        payload = _zero_entity_payload(env)
+        payload["tables"]["deferrable_appliance"][0, 0] = 1.0
+        env.step(payload)
+        assert env.buildings[0].deferrable_appliances_electricity_consumption[1] == pytest.approx(0.1)
     finally:
         env.close()

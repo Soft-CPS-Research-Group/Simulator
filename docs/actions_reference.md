@@ -11,7 +11,7 @@ Portuguese version: [pt/actions_reference.md](pt/actions_reference.md).
 | Bounds | Read from `env.action_space` and `env.action_names`. |
 | Storage actions | Positive charges, negative discharges. |
 | EV charger actions | Positive charges the EV, negative discharges/V2G if enabled. |
-| Deferrable actions | `action > trigger_threshold` attempts to start the next pending cycle. |
+| Deferrable actions | Binary start command. `action > trigger_threshold` attempts to start the next pending cycle (`trigger_threshold` default: `0.5`). |
 | Internal energy | Applied step energy is `kWh/step`. |
 | Power limits | Device ratings and service limits are `kW`. |
 | Constraints | Charging/electrical service constraints may clip actions before application. |
@@ -28,7 +28,7 @@ Portuguese version: [pt/actions_reference.md](pt/actions_reference.md).
 | `dhw_storage` | `[-limit, limit]` | building | Charge/discharge domestic hot water storage. |
 | `electrical_storage` | `[-1, 1]` | building | Controls the building BESS. |
 | `electric_vehicle_storage_{charger_id}` | `[-1, 1]` or `[0, 1]` | charger | Controls the EV connected to a charger. Negative bound depends on `max_discharging_power`. |
-| `deferrable_appliance_{appliance_id}` | `[0, 1]` | appliance | Attempts to start the next feasible cycle. |
+| `deferrable_appliance_{appliance_id}` | `[0, 1]` | appliance | Binary start command (`0` off, `1` on) for the next feasible cycle. |
 
 ## Physical Conversion
 
@@ -54,12 +54,14 @@ A cycle starts only when all conditions hold:
 | Condition | Rule |
 |---|---|
 | Pending cycle | A cycle with state `pending` exists. |
-| Action threshold | `action > trigger_threshold`. |
+| Action threshold | `action > trigger_threshold` (default `0.5`). |
 | Start window | `earliest_start_time_step <= current_global_time_step <= latest_start_time_step`. |
 | Deadline | `current + duration_steps - 1 <= deadline_time_step`. |
 | Episode window | The full cycle fits inside the current episode. |
 
 If the agent tries too late, the start is rejected. If `latest_start_time_step` passes with no valid start, the cycle is marked as missed.
+
+Controller recommendation: use `deferrable_appliance_can_start` as the readiness signal and emit `1.0` only when a start is intended.
 
 ## Entity Actions
 

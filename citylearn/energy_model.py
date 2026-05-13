@@ -1323,12 +1323,22 @@ class DeferrableAppliance(ElectricDevice):
         self,
         deferrable_appliance_simulation: DeferrableApplianceSimulation,
         name: str = None,
-        trigger_threshold: float = 0.0,
+        trigger_threshold: float = 0.5,
         **kwargs,
     ):
         self.deferrable_appliance_simulation = deferrable_appliance_simulation
         self.name = name
-        self.trigger_threshold = float(trigger_threshold or 0.0)
+        default_trigger_threshold = 0.5
+        if trigger_threshold is None:
+            threshold = default_trigger_threshold
+        else:
+            try:
+                threshold = float(trigger_threshold)
+            except (TypeError, ValueError):
+                threshold = default_trigger_threshold
+        if not np.isfinite(threshold):
+            threshold = default_trigger_threshold
+        self.trigger_threshold = float(np.clip(threshold, 0.0, 1.0))
         self.__past_action_values = None
         self.__cycle_state: Dict[str, str] = {}
         self.__cycle_start_time_steps: Dict[str, int] = {}
@@ -1383,15 +1393,21 @@ class DeferrableAppliance(ElectricDevice):
         self._update_cycle_states()
 
     def start_cycle(self, action_value: float):
-        """Start the next pending cycle when the action is above threshold and the request is feasible."""
+        """Start next pending cycle when the ON command is active and the request is feasible."""
 
         if self.__past_action_values is None:
             self.__past_action_values = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
 
-        self.__past_action_values[self.time_step] = float(action_value)
+        try:
+            action_scalar = float(action_value)
+        except (TypeError, ValueError):
+            action_scalar = 0.0
+        if not np.isfinite(action_scalar):
+            action_scalar = 0.0
+        self.__past_action_values[self.time_step] = action_scalar
         self._update_cycle_states()
 
-        if float(action_value) <= self.trigger_threshold:
+        if not self._is_start_command(action_scalar):
             return
 
         cycle = self._next_pending_cycle()
@@ -1588,6 +1604,15 @@ class DeferrableAppliance(ElectricDevice):
         if self.time_step + int(cycle['duration_steps']) > int(self.episode_tracker.episode_time_steps):
             return False
         return True
+
+    def _is_start_command(self, action_value: float) -> bool:
+        try:
+            action_scalar = float(action_value)
+        except (TypeError, ValueError):
+            return False
+        if not np.isfinite(action_scalar):
+            return False
+        return action_scalar > self.trigger_threshold
 
     def _update_cycle_states(self):
         current_global = self._current_global_time_step()

@@ -49,7 +49,7 @@ def _simulation(
     )
 
 
-def _appliance(simulation=None, episode_time_steps=8, seconds_per_time_step=3600):
+def _appliance(simulation=None, episode_time_steps=8, seconds_per_time_step=3600, trigger_threshold=None):
     tracker = EpisodeTracker(0, episode_time_steps - 1)
     tracker.next_episode(
         episode_time_steps,
@@ -63,6 +63,7 @@ def _appliance(simulation=None, episode_time_steps=8, seconds_per_time_step=3600
         episode_tracker=tracker,
         seconds_per_time_step=seconds_per_time_step,
         nominal_power=2.0,
+        **({} if trigger_threshold is None else {"trigger_threshold": trigger_threshold}),
     )
     appliance.reset()
     return appliance
@@ -152,6 +153,29 @@ def test_valid_start_applies_cycle_energy_in_kwh_per_step_and_completes():
     assert summary["service_level_ratio"] == 1.0
 
 
+def test_default_trigger_threshold_is_binary_and_rejects_small_actions():
+    appliance = _appliance(_simulation(profile=[0.2], earliest=0, latest=0), episode_time_steps=3)
+
+    assert appliance.trigger_threshold == pytest.approx(0.5)
+    assert appliance.observations()["can_start"] == 1.0
+
+    appliance.start_cycle(0.5)
+    assert appliance.cycle_state["cycle_1"] == "pending"
+    np.testing.assert_allclose(appliance.electricity_consumption[:2], [0.0, 0.0])
+
+    appliance.start_cycle(0.5001)
+    assert appliance.cycle_state["cycle_1"] == "running"
+    np.testing.assert_allclose(appliance.electricity_consumption[:2], [0.2, 0.0], atol=1e-9)
+
+
+def test_non_finite_start_action_is_treated_as_off():
+    appliance = _appliance(_simulation(profile=[0.2], earliest=0, latest=0), episode_time_steps=3)
+
+    appliance.start_cycle(np.nan)
+    assert appliance.cycle_state["cycle_1"] == "pending"
+    np.testing.assert_allclose(appliance.electricity_consumption[:2], [0.0, 0.0])
+
+
 def test_start_before_window_or_too_late_is_rejected_and_missed():
     appliance = _appliance(_simulation(profile=[0.3], earliest=2, latest=2))
 
@@ -182,4 +206,3 @@ def test_15_second_cycle_keeps_small_kwh_values_exact():
     obs = appliance.observations()
     assert obs["cycle_energy_kwh"] == pytest.approx(0.003)
     assert obs["hours_until_deadline"] == pytest.approx(15 / 3600)
-

@@ -9,7 +9,7 @@ Todas as acoes sao normalizadas para uma faixa simples no agente. O simulador co
 | Bounds | Vem de `env.action_space` e `env.action_names`. |
 | Storage actions | Valores positivos carregam, negativos descarregam. |
 | EV charger actions | Positivo carrega EV, negativo descarrega/V2G se permitido. |
-| Deferrable actions | `action > trigger_threshold` tenta iniciar o proximo ciclo. |
+| Deferrable actions | Comando binario de start. `action > trigger_threshold` tenta iniciar o proximo ciclo pendente (`trigger_threshold` default: `0.5`). |
 | Unidades fisicas internas | A energia aplicada no step e `kWh/step`. Limites de potencia sao `kW`. |
 | Constraints | Charging/electrical service podem cortar a acao antes da aplicacao. |
 
@@ -25,7 +25,7 @@ Todas as acoes sao normalizadas para uma faixa simples no agente. O simulador co
 | `dhw_storage` | `[-limit, limit]` | building | Carrega/descarrega storage DHW. |
 | `electrical_storage` | `[-1, 1]` | building | Controla BESS. |
 | `electric_vehicle_storage_{charger_id}` | `[-1, 1]` ou `[0, 1]` | charger | Controla EV ligado ao charger. Limite negativo depende de `max_discharging_power`. |
-| `deferrable_appliance_{appliance_id}` | `[0, 1]` | appliance | Tenta iniciar ciclo pendente. |
+| `deferrable_appliance_{appliance_id}` | `[0, 1]` | appliance | Comando binario (`0` off, `1` on) para iniciar o proximo ciclo elegivel. |
 
 ### Conversao de BESS
 
@@ -55,12 +55,14 @@ O appliance so inicia se:
 | Condicao | Regra |
 |---|---|
 | Ciclo pendente | Existe um ciclo com estado `pending`. |
-| Acao | `action > trigger_threshold`. |
+| Acao | `action > trigger_threshold` (default `0.5`). |
 | Janela | `earliest_start_time_step <= current_global_time_step <= latest_start_time_step`. |
 | Deadline | `current + duration_steps - 1 <= deadline_time_step`. |
 | Episodio | O ciclo cabe dentro do episodio atual. |
 
 Se passar `latest_start_time_step` sem start valido, o ciclo fica `missed`. Se nao houver ciclo pendente, a acao nao tem efeito.
+
+Recomendacao para controladores: usar `deferrable_appliance_can_start` como sinal de disponibilidade e enviar `1.0` apenas quando pretende arrancar.
 
 ## Entity Actions
 

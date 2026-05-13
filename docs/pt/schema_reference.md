@@ -263,7 +263,7 @@ Usa `absolute` quando o dataset vem de medicao real ou de conversor externo ja e
     "cycle_profiles_file": "deferrables/washer_profiles.csv",
     "flexibility_schedule_file": "deferrables/washer_schedule.csv",
     "attributes": {
-      "trigger_threshold": 0.0
+      "trigger_threshold": 0.5
     }
   }
 }
@@ -274,7 +274,7 @@ Usa `absolute` quando o dataset vem de medicao real ou de conversor externo ja e
 | `type` | nao | Classe appliance. Default: `citylearn.energy_model.DeferrableAppliance`. |
 | `cycle_profiles_file` | sim | Catalogo de perfis fisicos dos ciclos. |
 | `flexibility_schedule_file` | sim | Pedidos/janelas de flexibilidade. |
-| `attributes.trigger_threshold` | nao | Acao acima deste valor tenta iniciar ciclo. |
+| `attributes.trigger_threshold` | nao | Threshold de start (default `0.5`; `action > threshold` e interpretado como ON). |
 
 ## Dynamic Topology
 
