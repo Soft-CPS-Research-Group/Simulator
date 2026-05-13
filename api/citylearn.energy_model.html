@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model module &mdash; CityLearn 0.5.0 documentation</title>
+  <title>citylearn.energy_model module &mdash; CityLearn 0.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/documentation_options.js?v=b9afe91b"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -344,7 +344,7 @@ bypassing restrictions such as efficiency losses, power limits, and degradation.
 
 <dl class="py class">
 <dt class="sig sig-object py" id="citylearn.energy_model.DeferrableAppliance">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">citylearn.energy_model.</span></span><span class="sig-name descname"><span class="pre">DeferrableAppliance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deferrable_appliance_simulation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="citylearn.data.html#citylearn.data.DeferrableApplianceSimulation" title="citylearn.data.DeferrableApplianceSimulation"><span class="pre">DeferrableApplianceSimulation</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#DeferrableAppliance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.DeferrableAppliance" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">citylearn.energy_model.</span></span><span class="sig-name descname"><span class="pre">DeferrableAppliance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deferrable_appliance_simulation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="citylearn.data.html#citylearn.data.DeferrableApplianceSimulation" title="citylearn.data.DeferrableApplianceSimulation"><span class="pre">DeferrableApplianceSimulation</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#DeferrableAppliance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.DeferrableAppliance" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#citylearn.energy_model.ElectricDevice" title="citylearn.energy_model.ElectricDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">ElectricDevice</span></code></a></p>
 <p>Generic deferrable appliance with sparse cycle requests and fixed kWh/step profiles.</p>
 <dl class="py attribute">
@@ -410,7 +410,7 @@ bypassing restrictions such as efficiency losses, power limits, and degradation.
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.DeferrableAppliance.start_cycle">
 <span class="sig-name descname"><span class="pre">start_cycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#DeferrableAppliance.start_cycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.DeferrableAppliance.start_cycle" title="Link to this definition"></a></dt>
-<dd><p>Start the next pending cycle when the action is above threshold and the request is feasible.</p>
+<dd><p>Start next pending cycle when the ON command is active and the request is feasible.</p>
 </dd></dl>
 
 </dd></dl>

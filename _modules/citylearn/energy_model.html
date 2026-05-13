@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model &mdash; CityLearn 0.5.0 documentation</title>
+  <title>citylearn.energy_model &mdash; CityLearn 0.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../_static/documentation_options.js?v=b9afe91b"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1535,12 +1535,22 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">deferrable_appliance_simulation</span><span class="p">:</span> <span class="n">DeferrableApplianceSimulation</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">trigger_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">trigger_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span> <span class="o">=</span> <span class="n">deferrable_appliance_simulation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trigger_threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trigger_threshold</span> <span class="ow">or</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">default_trigger_threshold</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="k">if</span> <span class="n">trigger_threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">default_trigger_threshold</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trigger_threshold</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                <span class="n">threshold</span> <span class="o">=</span> <span class="n">default_trigger_threshold</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">threshold</span><span class="p">):</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">default_trigger_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trigger_threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1603,15 +1613,21 @@
 <div class="viewcode-block" id="DeferrableAppliance.start_cycle">
 <a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.start_cycle">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">start_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the next pending cycle when the action is above threshold and the request is feasible.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start next pending cycle when the ON command is active and the request is feasible.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">action_value</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">action_scalar</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">action_value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">action_scalar</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">action_scalar</span><span class="p">):</span>
+            <span class="n">action_scalar</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">action_scalar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_cycle_states</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">action_value</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_threshold</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_start_command</span><span class="p">(</span><span class="n">action_scalar</span><span class="p">):</span>
             <span class="k">return</span>
 
         <span class="n">cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_pending_cycle</span><span class="p">()</span>
@@ -1821,6 +1837,15 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_start_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">action_scalar</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">action_value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">action_scalar</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">action_scalar</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_threshold</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_cycle_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">current_global</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span>
