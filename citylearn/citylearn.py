@@ -139,6 +139,10 @@ class CityLearnEnv(Environment, Env):
     export_kpis_on_episode_end: bool, optional
         Whether to automatically export ``exported_kpis.csv`` when an episode terminates.
         If not provided, defaults to the effective rendering setting (enabled when rendering is enabled).
+    ev_departure_within_tolerance: float, optional
+        Symmetric SOC target accuracy tolerance used by EV departure within-tolerance KPIs. Defaults to ``0.05``.
+    ev_departure_service_tolerance: float, optional
+        Lower SOC service tolerance used by EV departure minimum-acceptable KPIs. Defaults to ``0.05``.
     **kwargs : dict
         Other keyword arguments used to initialize super classes.
 
@@ -172,6 +176,8 @@ class CityLearnEnv(Environment, Env):
         check_observation_limits = kwargs.pop('check_observation_limits', None)
         physics_invariant_checks = kwargs.pop('physics_invariant_checks', None)
         metrics_log_interval = kwargs.pop('metrics_log_interval', None)
+        ev_departure_within_tolerance = kwargs.pop('ev_departure_within_tolerance', None)
+        ev_departure_service_tolerance = kwargs.pop('ev_departure_service_tolerance', None)
         kw_render_mode = kwargs.pop('render_mode', None)
         requested_render_mode = render_mode if kw_render_mode is None else kw_render_mode
         requested_render_mode = 'none' if requested_render_mode is None else str(requested_render_mode).lower()
@@ -226,6 +232,18 @@ class CityLearnEnv(Environment, Env):
             path='physics_invariant_checks',
         )
         self.metrics_log_interval = int(self.schema.get('metrics_log_interval', 0) if metrics_log_interval is None else metrics_log_interval)
+        self.ev_departure_within_tolerance = self._parse_non_negative_float(
+            self.schema.get('ev_departure_within_tolerance', CityLearnKPIService.EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT)
+            if ev_departure_within_tolerance is None else ev_departure_within_tolerance,
+            default=CityLearnKPIService.EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT,
+            path='ev_departure_within_tolerance',
+        )
+        self.ev_departure_service_tolerance = self._parse_non_negative_float(
+            self.schema.get('ev_departure_service_tolerance', CityLearnKPIService.EV_DEPARTURE_SERVICE_TOLERANCE_DEFAULT)
+            if ev_departure_service_tolerance is None else ev_departure_service_tolerance,
+            default=CityLearnKPIService.EV_DEPARTURE_SERVICE_TOLERANCE_DEFAULT,
+            path='ev_departure_service_tolerance',
+        )
         self._observations_cache: List[List[float]] = None
         self._observations_cache_time_step: int = -1
         self._render_start_date = self._parse_render_start_date(start_date if start_date is not None else schema_start_date)
@@ -1033,6 +1051,21 @@ class CityLearnEnv(Environment, Env):
         events = schema.get('topology_events', [])
         return isinstance(events, list) and any(isinstance(event, Mapping) for event in events)
 
+    @staticmethod
+    def _parse_non_negative_float(value: Any, *, default: float, path: str) -> float:
+        if value is None:
+            return float(default)
+
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f'{path} must be a non-negative finite number.') from exc
+
+        if not np.isfinite(parsed) or parsed < 0.0:
+            raise ValueError(f'{path} must be a non-negative finite number.')
+
+        return parsed
+
     @schema.setter
     def schema(self, schema: Union[str, Path, Mapping[str, Any]]):
         dataset = DataSet(offline=self.offline)
@@ -1180,6 +1213,8 @@ class CityLearnEnv(Environment, Env):
             'topology_version': self.topology_version,
             'topology_event_log': self.topology_event_log,
             'physics_invariant_checks': bool(getattr(self, 'physics_invariant_checks', False)),
+            'ev_departure_within_tolerance': self.ev_departure_within_tolerance,
+            'ev_departure_service_tolerance': self.ev_departure_service_tolerance,
             'reward_function': self.reward_function.__class__.__name__,
             'central_agent': self.central_agent,
             'shared_observations': self.shared_observations,

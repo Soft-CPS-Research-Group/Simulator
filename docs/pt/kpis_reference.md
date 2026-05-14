@@ -85,11 +85,25 @@ Safe division devolve `None`/placeholder quando o denominador nao e fisicamente 
 |---|---:|---|
 | departure count | count | Numero de departures observadas. |
 | departure met count | count | Departures em que SOC requerido foi cumprido. |
-| departure within tolerance count | count | Departures dentro da tolerancia configurada. |
+| departure minimum acceptable count | count | Departures em que o SOC e pelo menos `target_soc - ev_departure_service_tolerance`. |
+| departure within tolerance count | count | Departures dentro da tolerancia simetrica configurada. |
 | departure success ratio | ratio | `met / departures`. |
-| departure SOC deficit mean | ratio | Deficit medio de SOC quando falha. |
+| departure minimum acceptable ratio | ratio | `minimum_acceptable / departures`. Este e o KPI principal de conforto/servico EV. |
+| departure within tolerance ratio | ratio | `within_symmetric_tolerance / departures`. |
+| departure SOC deficit mean | ratio | Deficit medio nao-negativo de SOC por departure. |
+| departure shortfall beyond tolerance mean | ratio | Deficit medio abaixo de `target_soc - ev_departure_service_tolerance`. |
+| departure SOC surplus mean | ratio | Excesso medio nao-negativo de SOC por departure. |
+| departure SOC absolute error mean | ratio | Erro absoluto medio de SOC face ao target pedido. |
+| departure tolerance | ratio | Tolerancia de servico configurada para o minimo aceitavel no departure. |
 | charge total | kWh | Energia carregada em EVs. |
 | V2G export total | kWh | Energia exportada por EVs. |
+
+Semantica das tolerancias EV no departure:
+
+- `ev_departure_success_rate` mede cumprimento estrito: `actual_soc >= target_soc`.
+- `ev_departure_min_acceptable_rate` mede servico minimo: `actual_soc >= target_soc - ev_departure_service_tolerance`.
+- `ev_departure_within_tolerance_rate` mede proximidade simetrica ao target: `abs(actual_soc - target_soc) <= ev_departure_within_tolerance`.
+- As duas tolerancias fazem default para `0.05`.
 
 ## KPIs BESS
 

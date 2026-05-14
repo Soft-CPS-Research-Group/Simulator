@@ -58,6 +58,51 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.5.2 - KPIs EV de Servico no Departure
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release que separa cumprimento estrito do target SOC, servico minimo aceitavel para o utilizador e accuracy simetrica face ao target no departure EV.
+
+### Added
+
+- Configuracao ambiente/schema `ev_departure_service_tolerance`, default `0.05`.
+- KPIs por building e district para departures EV com minimo aceitavel.
+- KPIs por building e district para shortfall de SOC alem da tolerancia de servico.
+- Diagnosticos EV de SOC surplus, erro absoluto e tolerancia configurada.
+
+### Changed
+
+- Nomes e semantica dos KPIs EV existentes de success, within-tolerance e deficit ficam preservados.
+- `ev_departure_within_tolerance` continua a ser a tolerancia simetrica de proximidade ao target.
+
+### Dataset/Schema Impact
+
+- Schemas existentes continuam validos.
+- Nova chave top-level opcional: `ev_departure_service_tolerance`.
+- A chave opcional `ev_departure_within_tolerance` configura a tolerancia simetrica de accuracy.
+
+### Compatibility
+
+- Release aditiva e compativel.
+- Consumidores que enumeram todos os nomes KPI v2 devem aceitar as novas linhas EV em `evaluate_v2()` e `exported_kpis.csv`.
+
+### Validation
+
+- `.venv/bin/python -m pytest -q tests/test_kpi_v2.py -q`: pass
+- `.venv/bin/python -m pytest -q tests/test_kpi_golden.py -q`: pass
+- `.venv/bin/python -m pytest -q tests/unit/test_export_logic.py tests/unit/test_ui_export_contract.py -q`: pass
+- `.venv/bin/python -m pytest -q --ignore=scripts/manual`: pass (`276 passed`)
+- `.venv/bin/python -m compileall -q citylearn tests/test_kpi_v2.py`: pass
+
+### Migration Notes
+
+- Usar `*_ev_performance_departure_min_acceptable_ratio` como KPI principal de conforto/servico EV.
+- Usar `*_ev_performance_departure_success_ratio` para cumprimento estrito do target.
+- Usar `*_ev_performance_departure_within_tolerance_ratio` e erro absoluto para accuracy/eficiencia.
+
 ## v0.5.1 - Hardening do Comando de Start dos Deferrables
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

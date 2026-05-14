@@ -107,10 +107,16 @@ Community market (conditional):
 ### `ev`
 - `district_ev_events_departure_count`
 - `district_ev_events_departure_met_count`
+- `district_ev_events_departure_min_acceptable_count`
 - `district_ev_events_departure_within_tolerance_count`
 - `district_ev_performance_departure_success_ratio`
+- `district_ev_performance_departure_min_acceptable_ratio`
 - `district_ev_performance_departure_within_tolerance_ratio`
 - `district_ev_performance_departure_soc_deficit_mean_ratio`
+- `district_ev_performance_departure_shortfall_beyond_tolerance_mean_ratio`
+- `district_ev_performance_departure_soc_surplus_mean_ratio`
+- `district_ev_performance_departure_soc_absolute_error_mean_ratio`
+- `district_ev_performance_departure_tolerance_ratio`
 - `district_ev_total_charge_kwh`
 - `district_ev_total_v2g_export_kwh`
 
@@ -165,6 +171,8 @@ Main pattern examples:
 - `building_energy_grid_total_import_control_kwh`
 - `building_solar_self_consumption_total_generation_kwh`
 - `building_equity_benefit_relative_percent`
+- `building_ev_events_departure_min_acceptable_count`
+- `building_ev_performance_departure_min_acceptable_ratio`
 - `building_ev_events_departure_within_tolerance_count`
 - `building_ev_performance_departure_within_tolerance_ratio`
 
@@ -196,17 +204,37 @@ These are different KPIs and should not be merged.
 
 ---
 
-## EV Tolerance KPI (±5%)
+## EV Departure SOC KPIs
 
+Default tolerances are `0.05`.
+
+Strict target fulfillment:
+- KPI (count): `*_ev_events_departure_met_count`
+- KPI (ratio): `*_ev_performance_departure_success_ratio`
+- Condition: `soc_departure >= soc_target_departure`
+
+Minimum acceptable user service:
+- KPI (count): `*_ev_events_departure_min_acceptable_count`
+- KPI (ratio): `*_ev_performance_departure_min_acceptable_ratio`
+- Condition: `soc_departure >= soc_target_departure - ev_departure_service_tolerance`
+- Shortfall KPI: `*_ev_performance_departure_shortfall_beyond_tolerance_mean_ratio`
+
+Symmetric target accuracy:
 - KPI (count): `*_ev_events_departure_within_tolerance_count`
 - KPI (ratio): `*_ev_performance_departure_within_tolerance_ratio`
-- Condition per departure event:
-  - `abs(soc_departure - soc_target_departure) <= 0.05`
-- Meaning:
-  - counts/ratio of departures where SOC is within ±5 percentage points of target.
-- Relation with strict success:
-  - `departure_within_tolerance_count <= departure_count`
-  - `departure_met_count` and `departure_within_tolerance_count` are not ordered in general.
+- Condition: `abs(soc_departure - soc_target_departure) <= ev_departure_within_tolerance`
+
+Error diagnostics:
+- `*_ev_performance_departure_soc_deficit_mean_ratio`
+- `*_ev_performance_departure_soc_surplus_mean_ratio`
+- `*_ev_performance_departure_soc_absolute_error_mean_ratio`
+- `*_ev_performance_departure_tolerance_ratio`
+
+Relation between counts:
+- `departure_min_acceptable_count <= departure_count`
+- `departure_within_tolerance_count <= departure_count`
+- `departure_met_count <= departure_min_acceptable_count`
+- `departure_met_count` and `departure_within_tolerance_count` are not ordered in general.
 
 ---
 

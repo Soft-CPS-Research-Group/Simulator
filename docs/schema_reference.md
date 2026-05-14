@@ -41,6 +41,8 @@ Portuguese version: [pt/schema_reference.md](pt/schema_reference.md).
 | `topology_mode` | `static`/`dynamic` | no | Enables topology events. |
 | `topology_events` | list | if dynamic | Add/remove events. |
 | `community_market` | object | no | Local market and market KPIs. |
+| `ev_departure_within_tolerance` | float | no | Symmetric departure SOC accuracy tolerance, default `0.05`. |
+| `ev_departure_service_tolerance` | float | no | Lower departure SOC service tolerance for minimum acceptable EV service, default `0.05`. |
 | `render_mode` | string | no | `none`, `during` or `end`. |
 | `export_kpis_on_episode_end` | bool | no | Export KPIs at episode end. |
 | `start_date` | string | no | Base date for render/export. |

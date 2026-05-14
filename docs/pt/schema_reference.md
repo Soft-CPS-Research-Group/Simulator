@@ -39,6 +39,8 @@ Esta pagina documenta o contrato do `schema.json`. O schema e a fonte oficial pa
 | `topology_mode` | `static`/`dynamic` | nao | Ativa eventos dinamicos. |
 | `topology_events` | list | se dynamic | Eventos add/remove. |
 | `community_market` | object | nao | Mercado local e KPIs associados. |
+| `ev_departure_within_tolerance` | float | nao | Tolerancia simetrica de accuracy do SOC no departure, default `0.05`. |
+| `ev_departure_service_tolerance` | float | nao | Tolerancia inferior de servico EV minimo no departure, default `0.05`. |
 | `render_mode` | string | nao | `none`, `during`, `end`. |
 | `export_kpis_on_episode_end` | bool | nao | Export de KPIs no fim do episodio. |
 | `start_date` | string | nao | Data base de render/export. |

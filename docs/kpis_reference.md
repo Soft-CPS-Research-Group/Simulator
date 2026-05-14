@@ -87,11 +87,25 @@ Safe division returns `None` or a safe placeholder when the denominator is not p
 |---|---:|---|
 | departure count | count | Number of EV departures observed. |
 | departure met count | count | Departures where required SOC was met. |
-| departure within tolerance count | count | Departures within configured tolerance. |
+| departure minimum acceptable count | count | Departures where SOC is at least `target_soc - ev_departure_service_tolerance`. |
+| departure within tolerance count | count | Departures within the configured symmetric target tolerance. |
 | departure success ratio | ratio | `met / departures`. |
-| departure SOC deficit mean | ratio | Mean SOC deficit on failures. |
+| departure minimum acceptable ratio | ratio | `minimum_acceptable / departures`. This is the main user-service comfort KPI. |
+| departure within tolerance ratio | ratio | `within_symmetric_tolerance / departures`. |
+| departure SOC deficit mean | ratio | Mean non-negative SOC deficit over departures. |
+| departure shortfall beyond tolerance mean | ratio | Mean deficit below `target_soc - ev_departure_service_tolerance`. |
+| departure SOC surplus mean | ratio | Mean non-negative SOC surplus over departures. |
+| departure SOC absolute error mean | ratio | Mean absolute SOC error to the requested target. |
+| departure tolerance | ratio | Configured service tolerance used for minimum acceptable departure SOC. |
 | charge total | kWh | Energy charged into EVs. |
 | V2G export total | kWh | Energy exported by EVs. |
+
+EV departure tolerance semantics:
+
+- `ev_departure_success_rate` is strict target fulfillment: `actual_soc >= target_soc`.
+- `ev_departure_min_acceptable_rate` is minimum service fulfillment: `actual_soc >= target_soc - ev_departure_service_tolerance`.
+- `ev_departure_within_tolerance_rate` is symmetric target accuracy: `abs(actual_soc - target_soc) <= ev_departure_within_tolerance`.
+- Both tolerance settings default to `0.05`.
 
 ## BESS KPIs
 

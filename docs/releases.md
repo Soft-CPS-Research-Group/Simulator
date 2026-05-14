@@ -60,6 +60,51 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.5.2 - EV Departure Service KPIs
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release that separates EV departure target fulfillment, minimum acceptable user service and symmetric SOC target accuracy.
+
+### Added
+
+- `ev_departure_service_tolerance` environment/schema setting, default `0.05`.
+- Building and district KPIs for minimum acceptable EV departures.
+- Building and district KPIs for SOC shortfall beyond service tolerance.
+- EV departure SOC surplus, absolute error and configured tolerance diagnostics.
+
+### Changed
+
+- Existing EV departure success, within-tolerance and deficit KPI names and semantics are preserved.
+- `ev_departure_within_tolerance` remains the symmetric proximity tolerance.
+
+### Dataset/Schema Impact
+
+- Existing schemas remain valid.
+- New optional top-level schema key: `ev_departure_service_tolerance`.
+- Existing optional top-level key `ev_departure_within_tolerance` can configure symmetric target accuracy tolerance.
+
+### Compatibility
+
+- Backward compatible additive KPI release.
+- Consumers that enumerate all v2 KPI names should allow the new EV rows in `evaluate_v2()` and `exported_kpis.csv`.
+
+### Validation
+
+- `.venv/bin/python -m pytest -q tests/test_kpi_v2.py -q`: pass
+- `.venv/bin/python -m pytest -q tests/test_kpi_golden.py -q`: pass
+- `.venv/bin/python -m pytest -q tests/unit/test_export_logic.py tests/unit/test_ui_export_contract.py -q`: pass
+- `.venv/bin/python -m pytest -q --ignore=scripts/manual`: pass (`276 passed`)
+- `.venv/bin/python -m compileall -q citylearn tests/test_kpi_v2.py`: pass
+
+### Migration Notes
+
+- Use `*_ev_performance_departure_min_acceptable_ratio` as the primary user-comfort EV departure KPI.
+- Use `*_ev_performance_departure_success_ratio` for strict target fulfillment.
+- Use `*_ev_performance_departure_within_tolerance_ratio` and absolute error for target accuracy and efficiency analysis.
+
 ## v0.5.1 - Deferrable Start Command Hardening
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

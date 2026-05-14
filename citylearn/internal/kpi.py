@@ -16,6 +16,8 @@ class CityLearnKPIService:
     """Internal KPI/evaluation service for `CityLearnEnv`."""
 
     EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT = 0.05
+    EV_DEPARTURE_SERVICE_TOLERANCE_DEFAULT = 0.05
+    EV_DEPARTURE_EPS = 1.0e-6
     LEGACY_COST_FUNCTIONS = {
         'all_time_peak_average',
         'annual_normalized_unserved_energy_total',
@@ -106,6 +108,24 @@ class CityLearnKPIService:
             return None
 
         return float(target)
+
+    def _ev_departure_within_tolerance(self) -> float:
+        return max(
+            self._to_scalar(
+                getattr(self.env, 'ev_departure_within_tolerance', self.EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT),
+                self.EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT,
+            ),
+            0.0,
+        )
+
+    def _ev_departure_service_tolerance(self) -> float:
+        return max(
+            self._to_scalar(
+                getattr(self.env, 'ev_departure_service_tolerance', self.EV_DEPARTURE_SERVICE_TOLERANCE_DEFAULT),
+                self.EV_DEPARTURE_SERVICE_TOLERANCE_DEFAULT,
+            ),
+            0.0,
+        )
 
     @staticmethod
     def _metric(cost_function: str, value, name: str, level: str) -> Dict[str, object]:
@@ -215,32 +235,41 @@ class CityLearnKPIService:
         upper = int(max(building.time_step, 0))
         t_start = int(max(t_start, 0))
         t_final = upper if t_final is None else int(min(max(t_final, 0), upper))
+        within_tolerance = self._ev_departure_within_tolerance()
+        service_tolerance = self._ev_departure_service_tolerance()
         if t_final < t_start:
             return {
                 'departures_total': 0.0,
                 'departures_met': 0.0,
+                'departures_min_acceptable': 0.0,
                 'departures_within_tolerance': 0.0,
                 'departure_deficit_sum': 0.0,
+                'departure_shortfall_beyond_tolerance_sum': 0.0,
+                'departure_surplus_sum': 0.0,
+                'departure_absolute_error_sum': 0.0,
                 'ev_departure_success_rate': None,
+                'ev_departure_min_acceptable_rate': None,
                 'ev_departure_within_tolerance_rate': None,
                 'ev_departure_soc_deficit_mean': None,
+                'ev_departure_shortfall_beyond_tolerance_mean': None,
+                'ev_departure_soc_surplus_mean': None,
+                'ev_departure_soc_absolute_error_mean': None,
+                'ev_departure_tolerance_ratio': service_tolerance,
                 'ev_charge_total_kwh': 0.0,
                 'ev_v2g_export_total_kwh': 0.0,
             }
 
         departures_total = 0
         departures_met = 0
+        departures_min_acceptable = 0
         departures_within_tolerance = 0
         departure_deficit_sum = 0.0
+        departure_shortfall_beyond_tolerance_sum = 0.0
+        departure_surplus_sum = 0.0
+        departure_absolute_error_sum = 0.0
         charge_total_kwh = 0.0
         v2g_export_total_kwh = 0.0
-        tolerance = max(
-            self._to_scalar(
-                getattr(self.env, 'ev_departure_within_tolerance', self.EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT),
-                self.EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT,
-            ),
-            0.0,
-        )
+        eps = self.EV_DEPARTURE_EPS
 
         for charger in building.electric_vehicle_chargers or []:
             consumption = np.array(charger.electricity_consumption[t_start:t_final + 1], dtype='float64')
@@ -278,25 +307,47 @@ class CityLearnKPIService:
                     continue
 
                 departures_total += 1
-                if abs(actual_soc - target_soc) <= tolerance + 1e-6:
-                    departures_within_tolerance += 1
                 deficit = max(target_soc - actual_soc, 0.0)
+                surplus = max(actual_soc - target_soc, 0.0)
+                absolute_error = abs(actual_soc - target_soc)
+                shortfall_beyond_tolerance = max(target_soc - service_tolerance - actual_soc, 0.0)
+
+                if absolute_error <= within_tolerance + eps:
+                    departures_within_tolerance += 1
+                if actual_soc + service_tolerance + eps >= target_soc:
+                    departures_min_acceptable += 1
                 departure_deficit_sum += deficit
-                if deficit <= 1e-6:
+                departure_surplus_sum += surplus
+                departure_absolute_error_sum += absolute_error
+                departure_shortfall_beyond_tolerance_sum += shortfall_beyond_tolerance
+                if deficit <= eps:
                     departures_met += 1
 
         success_rate = None if departures_total == 0 else departures_met / departures_total
+        min_acceptable_rate = None if departures_total == 0 else departures_min_acceptable / departures_total
         within_tolerance_rate = None if departures_total == 0 else departures_within_tolerance / departures_total
         deficit_mean = None if departures_total == 0 else departure_deficit_sum / departures_total
+        shortfall_beyond_tolerance_mean = None if departures_total == 0 else departure_shortfall_beyond_tolerance_sum / departures_total
+        surplus_mean = None if departures_total == 0 else departure_surplus_sum / departures_total
+        absolute_error_mean = None if departures_total == 0 else departure_absolute_error_sum / departures_total
 
         return {
             'departures_total': float(departures_total),
             'departures_met': float(departures_met),
+            'departures_min_acceptable': float(departures_min_acceptable),
             'departures_within_tolerance': float(departures_within_tolerance),
             'departure_deficit_sum': float(departure_deficit_sum),
+            'departure_shortfall_beyond_tolerance_sum': float(departure_shortfall_beyond_tolerance_sum),
+            'departure_surplus_sum': float(departure_surplus_sum),
+            'departure_absolute_error_sum': float(departure_absolute_error_sum),
             'ev_departure_success_rate': success_rate,
+            'ev_departure_min_acceptable_rate': min_acceptable_rate,
             'ev_departure_within_tolerance_rate': within_tolerance_rate,
             'ev_departure_soc_deficit_mean': deficit_mean,
+            'ev_departure_shortfall_beyond_tolerance_mean': shortfall_beyond_tolerance_mean,
+            'ev_departure_soc_surplus_mean': surplus_mean,
+            'ev_departure_soc_absolute_error_mean': absolute_error_mean,
+            'ev_departure_tolerance_ratio': service_tolerance,
             'ev_charge_total_kwh': float(charge_total_kwh),
             'ev_v2g_export_total_kwh': float(v2g_export_total_kwh),
         }
@@ -730,8 +781,12 @@ class CityLearnKPIService:
 
         ev_departures_total = 0.0
         ev_departures_met = 0.0
+        ev_departures_min_acceptable = 0.0
         ev_departures_within_tolerance = 0.0
         ev_deficit_sum = 0.0
+        ev_shortfall_beyond_tolerance_sum = 0.0
+        ev_surplus_sum = 0.0
+        ev_absolute_error_sum = 0.0
         ev_charge_total = 0.0
         ev_v2g_total = 0.0
 
@@ -975,17 +1030,27 @@ class CityLearnKPIService:
             extended_building_rows.extend([
                 self._metric('ev_departure_events_count', ev_metrics['departures_total'], building.name, 'building'),
                 self._metric('ev_departure_met_events_count', ev_metrics['departures_met'], building.name, 'building'),
+                self._metric('ev_departure_min_acceptable_events_count', ev_metrics['departures_min_acceptable'], building.name, 'building'),
                 self._metric('ev_departure_within_tolerance_events_count', ev_metrics['departures_within_tolerance'], building.name, 'building'),
                 self._metric('ev_departure_success_rate', ev_metrics['ev_departure_success_rate'], building.name, 'building'),
+                self._metric('ev_departure_min_acceptable_rate', ev_metrics['ev_departure_min_acceptable_rate'], building.name, 'building'),
                 self._metric('ev_departure_within_tolerance_rate', ev_metrics['ev_departure_within_tolerance_rate'], building.name, 'building'),
                 self._metric('ev_departure_soc_deficit_mean', ev_metrics['ev_departure_soc_deficit_mean'], building.name, 'building'),
+                self._metric('ev_departure_shortfall_beyond_tolerance_mean', ev_metrics['ev_departure_shortfall_beyond_tolerance_mean'], building.name, 'building'),
+                self._metric('ev_departure_soc_surplus_mean', ev_metrics['ev_departure_soc_surplus_mean'], building.name, 'building'),
+                self._metric('ev_departure_soc_absolute_error_mean', ev_metrics['ev_departure_soc_absolute_error_mean'], building.name, 'building'),
+                self._metric('ev_departure_tolerance_ratio', ev_metrics['ev_departure_tolerance_ratio'], building.name, 'building'),
                 self._metric('ev_charge_total_kwh', ev_metrics['ev_charge_total_kwh'], building.name, 'building'),
                 self._metric('ev_v2g_export_total_kwh', ev_metrics['ev_v2g_export_total_kwh'], building.name, 'building'),
             ])
             ev_departures_total += ev_metrics['departures_total']
             ev_departures_met += ev_metrics['departures_met']
+            ev_departures_min_acceptable += ev_metrics['departures_min_acceptable']
             ev_departures_within_tolerance += ev_metrics['departures_within_tolerance']
             ev_deficit_sum += ev_metrics['departure_deficit_sum']
+            ev_shortfall_beyond_tolerance_sum += ev_metrics['departure_shortfall_beyond_tolerance_sum']
+            ev_surplus_sum += ev_metrics['departure_surplus_sum']
+            ev_absolute_error_sum += ev_metrics['departure_absolute_error_sum']
             ev_charge_total += ev_metrics['ev_charge_total_kwh']
             ev_v2g_total += ev_metrics['ev_v2g_export_total_kwh']
 
@@ -1127,15 +1192,25 @@ class CityLearnKPIService:
         ]
 
         ev_success_rate = None if ev_departures_total <= 0.0 else ev_departures_met / ev_departures_total
+        ev_min_acceptable_rate = None if ev_departures_total <= 0.0 else ev_departures_min_acceptable / ev_departures_total
         ev_within_tolerance_rate = None if ev_departures_total <= 0.0 else ev_departures_within_tolerance / ev_departures_total
         ev_deficit_mean = None if ev_departures_total <= 0.0 else ev_deficit_sum / ev_departures_total
+        ev_shortfall_beyond_tolerance_mean = None if ev_departures_total <= 0.0 else ev_shortfall_beyond_tolerance_sum / ev_departures_total
+        ev_surplus_mean = None if ev_departures_total <= 0.0 else ev_surplus_sum / ev_departures_total
+        ev_absolute_error_mean = None if ev_departures_total <= 0.0 else ev_absolute_error_sum / ev_departures_total
         extended_district_rows.extend([
             self._metric('ev_departure_events_count', ev_departures_total, 'District', 'district'),
             self._metric('ev_departure_met_events_count', ev_departures_met, 'District', 'district'),
+            self._metric('ev_departure_min_acceptable_events_count', ev_departures_min_acceptable, 'District', 'district'),
             self._metric('ev_departure_within_tolerance_events_count', ev_departures_within_tolerance, 'District', 'district'),
             self._metric('ev_departure_success_rate', ev_success_rate, 'District', 'district'),
+            self._metric('ev_departure_min_acceptable_rate', ev_min_acceptable_rate, 'District', 'district'),
             self._metric('ev_departure_within_tolerance_rate', ev_within_tolerance_rate, 'District', 'district'),
             self._metric('ev_departure_soc_deficit_mean', ev_deficit_mean, 'District', 'district'),
+            self._metric('ev_departure_shortfall_beyond_tolerance_mean', ev_shortfall_beyond_tolerance_mean, 'District', 'district'),
+            self._metric('ev_departure_soc_surplus_mean', ev_surplus_mean, 'District', 'district'),
+            self._metric('ev_departure_soc_absolute_error_mean', ev_absolute_error_mean, 'District', 'district'),
+            self._metric('ev_departure_tolerance_ratio', self._ev_departure_service_tolerance(), 'District', 'district'),
             self._metric('ev_charge_total_kwh', ev_charge_total, 'District', 'district'),
             self._metric('ev_v2g_export_total_kwh', ev_v2g_total, 'District', 'district'),
         ])
@@ -1506,10 +1581,16 @@ class CityLearnKPIService:
             ('pv_self_consumption_ratio', 'solar_self_consumption', 'ratio', 'self_consumption', None, 'ratio'),
             ('ev_departure_events_count', 'ev', 'events', 'departure', None, 'count'),
             ('ev_departure_met_events_count', 'ev', 'events', 'departure_met', None, 'count'),
+            ('ev_departure_min_acceptable_events_count', 'ev', 'events', 'departure_min_acceptable', None, 'count'),
             ('ev_departure_within_tolerance_events_count', 'ev', 'events', 'departure_within_tolerance', None, 'count'),
             ('ev_departure_success_rate', 'ev', 'performance', 'departure_success', None, 'ratio'),
+            ('ev_departure_min_acceptable_rate', 'ev', 'performance', 'departure_min_acceptable', None, 'ratio'),
             ('ev_departure_within_tolerance_rate', 'ev', 'performance', 'departure_within_tolerance', None, 'ratio'),
             ('ev_departure_soc_deficit_mean', 'ev', 'performance', 'departure_soc_deficit_mean', None, 'ratio'),
+            ('ev_departure_shortfall_beyond_tolerance_mean', 'ev', 'performance', 'departure_shortfall_beyond_tolerance_mean', None, 'ratio'),
+            ('ev_departure_soc_surplus_mean', 'ev', 'performance', 'departure_soc_surplus_mean', None, 'ratio'),
+            ('ev_departure_soc_absolute_error_mean', 'ev', 'performance', 'departure_soc_absolute_error_mean', None, 'ratio'),
+            ('ev_departure_tolerance_ratio', 'ev', 'performance', 'departure_tolerance', None, 'ratio'),
             ('ev_charge_total_kwh', 'ev', 'total', 'charge', None, 'kwh'),
             ('ev_v2g_export_total_kwh', 'ev', 'total', 'v2g_export', None, 'kwh'),
             ('bess_charge_total_kwh', 'battery', 'total', 'charge', None, 'kwh'),
