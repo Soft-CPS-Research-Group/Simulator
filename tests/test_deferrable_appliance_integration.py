@@ -155,6 +155,80 @@ def test_flat_start_action_consumption_and_service_kpis_are_golden(tmp_path: Pat
         env.close()
 
 
+def test_deferrable_start_reduces_ev_headroom_in_electrical_service_constraints(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=0)
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    building_schema = schema["buildings"]["Building_1"]
+    building_schema["electrical_service"] = {
+        "mode": "single_phase",
+        "limits": {"total": {"import_kw": 5.2, "export_kw": 8.0}},
+        "observations": {"headroom": True, "violation": True},
+    }
+    schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        action_names = env.action_names[0]
+        actions = np.zeros(len(action_names), dtype="float32")
+        actions[action_names.index("deferrable_appliance_washer_1")] = 1.0
+        ev_action_name = next(name for name in action_names if name.startswith("electric_vehicle_storage_"))
+        actions[action_names.index(ev_action_name)] = 1.0
+
+        env.step([actions])
+
+        building = env.buildings[0]
+        charger = building.electric_vehicle_chargers[0]
+        state = building._charging_constraints_state
+
+        assert building.deferrable_appliances_electricity_consumption[0] == pytest.approx(0.1)
+        assert state["total_power_kw"] <= 5.2 + 1e-6
+        assert building._charging_constraint_last_penalty_kwh == pytest.approx(0.0, abs=1e-6)
+        assert charger.past_charging_action_values_kwh[0] == pytest.approx(0.0, abs=1e-6)
+    finally:
+        env.close()
+
+
+def test_outage_blocks_ev_charge_and_deferrable_without_local_surplus(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=0)
+    dataset_dir = schema_path.parent
+    building_csv = dataset_dir / "Building_1.csv"
+    df = pd.read_csv(building_csv)
+    df["power_outage"] = 1
+    df["solar_generation"] = 0.0
+    df["non_shiftable_load"] = 0.0
+    df["cooling_demand"] = 0.0
+    df["heating_demand"] = 0.0
+    df["dhw_demand"] = 0.0
+    df.to_csv(building_csv, index=False)
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["physics_invariant_checks"] = True
+    schema["buildings"]["Building_1"]["power_outage"] = {"simulate_power_outage": True}
+    schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        action_names = env.action_names[0]
+        actions = np.zeros(len(action_names), dtype="float32")
+        actions[action_names.index("deferrable_appliance_washer_1")] = 1.0
+        ev_action_name = next(name for name in action_names if name.startswith("electric_vehicle_storage_"))
+        actions[action_names.index(ev_action_name)] = 1.0
+
+        env.step([actions])
+
+        building = env.buildings[0]
+        charger = building.electric_vehicle_chargers[0]
+        assert building.deferrable_appliances_electricity_consumption[0] == pytest.approx(0.0)
+        assert charger.past_charging_action_values_kwh[0] == pytest.approx(0.0)
+        assert charger.electricity_consumption[0] == pytest.approx(0.0)
+    finally:
+        env.close()
+
+
 def test_missed_cycle_service_kpis_are_golden(tmp_path: Path):
     schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=1, latest=1)
     env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=4, random_seed=0)

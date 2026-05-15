@@ -116,7 +116,7 @@ citylearn simulate data/datasets/my_dataset/schema.json evaluate
 | Option | Example | Purpose |
 |---|---|---|
 | `schema` | dataset name or `schema.json` path | Dataset to run. |
-| `-a`, `--agent_name` | `citylearn.agents.base.BaselineAgent` | Agent class path. |
+| `-a`, `--agent_name` | `citylearn.agents.baseline.BusinessAsUsualAgent` | Agent class path. |
 | `-ke`, `--env_kwargs` | `'{"interface":"entity"}'` | JSON kwargs for `CityLearnEnv`. |
 | `-ka`, `--agent_kwargs` | `'{"x":1}'` | JSON kwargs for the agent. |
 | `-w`, `--wrappers` | wrapper class paths | Gymnasium wrappers. |

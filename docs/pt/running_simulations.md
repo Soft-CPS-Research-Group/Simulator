@@ -115,7 +115,7 @@ citylearn simulate data/datasets/my_dataset/schema.json evaluate
 | Opcao CLI | Exemplo | O que faz |
 |---|---|---|
 | `schema` | `citylearn_challenge_2020_climate_zone_2` ou path | Dataset ou ficheiro de schema. |
-| `-a`, `--agent_name` | `citylearn.agents.base.BaselineAgent` | Classe do agente. |
+| `-a`, `--agent_name` | `citylearn.agents.baseline.BusinessAsUsualAgent` | Classe do agente. |
 | `-ke`, `--env_kwargs` | `'{"interface":"entity"}'` | JSON com kwargs de `CityLearnEnv`. |
 | `-ka`, `--agent_kwargs` | `'{"some_arg":1}'` | JSON passado ao agente. |
 | `-w`, `--wrappers` | `citylearn.wrappers.ClippedObservationWrapper` | Wrappers Gymnasium. |

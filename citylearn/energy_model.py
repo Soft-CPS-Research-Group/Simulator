@@ -773,9 +773,20 @@ class StorageDevice(Device):
     @time_step_ratio.setter
     def time_step_ratio(self, time_step_ratio: float):
         time_step_ratio = self._get_property_value(time_step_ratio, 1.0)
-  
-        self.__time_step_ratio = time_step_ratio    
 
+        self.__time_step_ratio = time_step_ratio
+
+    def next_time_step(self):
+        try:
+            previous_soc = self.__soc[self.time_step] if self.time_step < len(self.__soc) else np.nan
+        except AttributeError:
+            previous_soc = np.nan
+
+        super().next_time_step()
+
+        if np.isfinite(previous_soc) and self.time_step < len(self.__soc):
+            next_soc = float(np.clip(previous_soc * (1.0 - self.loss_coefficient), 0.0, 1.0))
+            self.__soc[self.time_step] = next_soc
 
     def get_metadata(self) -> Mapping[str, Any]:
         return {
@@ -1446,6 +1457,23 @@ class DeferrableAppliance(ElectricDevice):
             if 0 <= step < self.episode_tracker.episode_time_steps:
                 ratio = self.time_step_ratio if self.time_step_ratio not in (None, 0) else 1.0
                 self._ElectricDevice__electricity_consumption[step] += float(energy_kwh) / ratio
+
+    def preview_start_energy_kwh(self, action_value: float) -> float:
+        """Return current-step energy that would be added if ``action_value`` starts a cycle."""
+
+        self._update_cycle_states()
+        if not self._is_start_command(action_value):
+            return 0.0
+
+        cycle = self._next_pending_cycle()
+        if cycle is None:
+            return 0.0
+
+        if not self._can_start_cycle(cycle, self._current_global_time_step()):
+            return 0.0
+
+        profile = cycle['load_profile']
+        return float(profile[0]) if len(profile) > 0 else 0.0
 
     def cancel_pending_and_running(self, global_time_step: Optional[int] = None):
         """Cancel future service after a dynamic topology removal."""

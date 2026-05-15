@@ -247,7 +247,7 @@ class Agent(Environment):
         self.__actions = [[[]] for _ in self.action_space]
 
 class BaselineAgent(Agent):
-    r"""Agent class for business-as-usual simulation where the storage systems and heat pumps are not controlled.
+    r"""Passive no-control baseline where active control actions are disabled.
 
     This agent will provide results for when there is no storage for load shifting and no heat pump partial load. 
     The storage actions prescribed will be 0.0 and the heat pump will have no action, i.e. `None`, causing it to 
@@ -257,8 +257,8 @@ class BaselineAgent(Agent):
     will be set to have no active actions. This means that you must initialize a new `env` if you want to simulate
     with a new agent type. 
     
-    This agent class is best used to establish a baseline simulation that can then be compared 
-    to RBC, RLC, or MPC control algorithms.
+    Use :class:`citylearn.agents.baseline.BusinessAsUsualAgent` for the native operational
+    business-as-usual baseline that charges EVs, starts deferrables, and controls BESS.
 
     Parameters
     ----------

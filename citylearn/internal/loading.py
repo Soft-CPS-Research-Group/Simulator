@@ -77,7 +77,8 @@ class CityLearnLoadingService:
             f"dataset_seconds_per_time_step={dataset_seconds}, "
             f"seconds_per_time_step={schema_seconds}, "
             f"time_step_ratio={ratio:g}. "
-            "Runtime energy quantities are converted with time_step_ratio; power limits/actions still use seconds_per_time_step. "
+            "No automatic resampling is performed. Keep schema seconds_per_time_step aligned with the dataset unless "
+            "you intentionally want runtime energy conversion through time_step_ratio. "
             f"source={source}"
         )
 
@@ -817,16 +818,29 @@ class CityLearnLoadingService:
         else:
             loss_coefficient = float(loss_coefficient)
 
+        battery_kwargs = {
+            'capacity': capacity,
+            'nominal_power': nominal_power,
+            'initial_soc': initial_soc,
+            'loss_coefficient': loss_coefficient,
+            'seconds_per_time_step': schema['seconds_per_time_step'],
+            'time_step_ratio': time_step_ratio,
+            'random_seed': schema['random_seed'],
+            'episode_tracker': episode_tracker,
+            'depth_of_discharge': depth_of_discharge,
+        }
+
+        for attribute in [
+            'efficiency',
+            'capacity_loss_coefficient',
+            'power_efficiency_curve',
+            'capacity_power_curve',
+        ]:
+            if attribute in attrs:
+                battery_kwargs[attribute] = attrs[attribute]
+
         battery = Battery(
-            capacity=capacity,
-            nominal_power=nominal_power,
-            initial_soc=initial_soc,
-            loss_coefficient=loss_coefficient,
-            seconds_per_time_step=schema['seconds_per_time_step'],
-            time_step_ratio=time_step_ratio,
-            random_seed=schema['random_seed'],
-            episode_tracker=episode_tracker,
-            depth_of_discharge=depth_of_discharge,
+            **battery_kwargs,
         )
 
         electric_vehicle_type = 'citylearn.citylearn.ElectricVehicle' if electric_vehicle_schema.get('type', None) is None else electric_vehicle_schema['type']

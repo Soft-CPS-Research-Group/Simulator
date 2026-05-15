@@ -21,6 +21,7 @@ from citylearn.energy_model import Battery, DeferrableAppliance, PV
 from citylearn.exporter import EpisodeExporter
 from citylearn.internal.kpi import CityLearnKPIService
 from citylearn.internal.loading import CityLearnLoadingService
+from citylearn.internal.baseline import CityLearnBusinessAsUsualBaselineService
 from citylearn.internal.physics_invariants import CityLearnPhysicsInvariantService
 from citylearn.internal.runtime import CityLearnRuntimeService
 from citylearn.internal.entity_interface import CityLearnEntityInterfaceService
@@ -267,6 +268,7 @@ class CityLearnEnv(Environment, Env):
         self._loading_service = CityLearnLoadingService(self)
         self._runtime_service = CityLearnRuntimeService(self)
         self._kpi_service = CityLearnKPIService(self)
+        self._business_as_usual_baseline_service = CityLearnBusinessAsUsualBaselineService(self)
         self._physics_invariant_service = CityLearnPhysicsInvariantService(self)
         self._entity_service = CityLearnEntityInterfaceService(self)
         self._topology_service = CityLearnTopologyService(self)
@@ -1312,16 +1314,28 @@ class CityLearnEnv(Environment, Env):
             dynamics_building_cls=DynamicsBuilding,
         )
 
-    def evaluate_v2(self, control_condition: EvaluationCondition = None, baseline_condition: EvaluationCondition = None, comfort_band: float = None) -> pd.DataFrame:
+    def evaluate_v2(
+        self,
+        control_condition: EvaluationCondition = None,
+        baseline_condition: EvaluationCondition = None,
+        comfort_band: float = None,
+        include_business_as_usual: bool = True,
+    ) -> pd.DataFrame:
         r"""Evaluate v2 cost functions at current time step."""
 
         return self._kpi_service.evaluate_v2(
             control_condition=control_condition,
             baseline_condition=baseline_condition,
             comfort_band=comfort_band,
+            include_business_as_usual=include_business_as_usual,
             evaluation_condition_cls=EvaluationCondition,
             dynamics_building_cls=DynamicsBuilding,
         )
+
+    def run_business_as_usual_baseline(self, force: bool = False):
+        """Run or return the cached native business-as-usual baseline."""
+
+        return self._business_as_usual_baseline_service.run(force=force)
 
     def next_time_step(self):
         r"""Advance all buildings to next `time_step`."""
@@ -1338,10 +1352,21 @@ class CityLearnEnv(Environment, Env):
 
         return self._runtime_service.simulate_unconnected_ev_soc()
 
-    def export_final_kpis(self, model: 'Agent' = None, filepath: str = "exported_kpis.csv"):
+    def export_final_kpis(
+        self,
+        model: 'Agent' = None,
+        filepath: str = "exported_kpis.csv",
+        include_business_as_usual: bool = True,
+        export_business_as_usual_timeseries: bool = True,
+    ):
         """Export episode KPIs to csv."""
 
-        return self._episode_exporter.export_final_kpis(model=model, filepath=filepath)
+        return self._episode_exporter.export_final_kpis(
+            model=model,
+            filepath=filepath,
+            include_business_as_usual=include_business_as_usual,
+            export_business_as_usual_timeseries=export_business_as_usual_timeseries,
+        )
 
     def render(self):
         """Render current state of the environment to CSV outputs."""
@@ -1415,6 +1440,8 @@ class CityLearnEnv(Environment, Env):
         # object reset
         super().reset()
         self._final_kpis_exported = False
+        if hasattr(self, '_business_as_usual_baseline_service'):
+            self._business_as_usual_baseline_service.clear()
 
         # update seed
         if seed is not None:

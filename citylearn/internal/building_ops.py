@@ -369,9 +369,13 @@ class BuildingOpsService:
         dhw_storage_action = 0.0 if 'dhw_storage' not in building.active_actions else dhw_storage_action
         electrical_storage_action = 0.0 if 'electrical_storage' not in building.active_actions else electrical_storage_action
 
+        if deferrable_appliance_actions is None:
+            deferrable_appliance_actions = washing_machine_actions
+
         electric_vehicle_storage_actions, electrical_storage_action = self.apply_charging_constraints_to_actions(
             electric_vehicle_storage_actions,
             electrical_storage_action,
+            deferrable_appliance_actions,
         )
 
         actions = {
@@ -400,9 +404,6 @@ class BuildingOpsService:
                         actions[action_key] = (charger.update_connected_electric_vehicle_soc, (action,))
                         electric_vehicle_priority_list.append(action_key)
             priority_list = priority_list + electric_vehicle_priority_list
-
-        if deferrable_appliance_actions is None:
-            deferrable_appliance_actions = washing_machine_actions
 
         if deferrable_appliance_actions is not None:
             deferrable_appliance_priority_list = []
@@ -434,6 +435,7 @@ class BuildingOpsService:
 
         for key in priority_list:
             func, args = actions[key]
+            args = self._limit_outage_control_action(key, func, args)
 
             try:
                 func(*args)
@@ -464,6 +466,41 @@ class BuildingOpsService:
 
     def _control_step_energy_to_power_kw(self, energy_kwh: float) -> float:
         return energy_kwh_to_power_kw(energy_kwh, self.building.seconds_per_time_step)
+
+    def _limit_outage_control_action(self, action_key: str, func, args: Tuple) -> Tuple:
+        building = self.building
+        if not building.power_outage or not args:
+            return args
+
+        action = self._safe_scalar(args[0], 0.0)
+
+        if action_key.startswith('electric_vehicle_storage_'):
+            charger = getattr(func, '__self__', None)
+            if charger is None or action <= 0.0:
+                return (0.0,)
+
+            available_energy_kwh = max(self._safe_scalar(building.downward_electrical_flexibility, 0.0), 0.0)
+            available_power_kw = self._control_step_energy_to_power_kw(available_energy_kwh)
+            requested_power_kw = max(self._charger_requested_power_kw(charger, action), 0.0)
+            target_power_kw = min(requested_power_kw, available_power_kw)
+            return (self._charger_action_from_power_kw(charger, target_power_kw),)
+
+        if action_key.startswith('deferrable_appliance_'):
+            appliance = getattr(func, '__self__', None)
+            if appliance is None:
+                return (0.0,)
+
+            required_energy_kwh = self._safe_scalar(appliance.preview_start_energy_kwh(action), 0.0)
+            if required_energy_kwh <= 0.0:
+                return args
+
+            available_energy_kwh = max(self._safe_scalar(building.downward_electrical_flexibility, 0.0), 0.0)
+            if required_energy_kwh <= available_energy_kwh + 1.0e-9:
+                return args
+
+            return (0.0,)
+
+        return args
 
     def _current_phase_names(self):
         building = self.building
@@ -500,7 +537,26 @@ class BuildingOpsService:
 
         return self._split_unassigned_power(power_kw)
 
-    def _estimate_non_controllable_base_power(self) -> Tuple[float, Dict[str, float]]:
+    def _prospective_deferrable_start_power_kw(self, deferrable_appliance_actions: Optional[Mapping[str, float]]) -> float:
+        if not deferrable_appliance_actions:
+            return 0.0
+
+        building = self.building
+        prospective_energy_kwh = 0.0
+
+        for action_name, action in deferrable_appliance_actions.items():
+            appliance_name = str(action_name).replace('deferrable_appliance_', '', 1)
+            for appliance in building.deferrable_appliances or []:
+                if appliance.name == appliance_name or action_name == appliance.name:
+                    prospective_energy_kwh += self._safe_scalar(appliance.preview_start_energy_kwh(action), 0.0)
+                    break
+
+        return self._control_step_energy_to_power_kw(prospective_energy_kwh)
+
+    def _estimate_non_controllable_base_power(
+        self,
+        deferrable_appliance_actions: Optional[Mapping[str, float]] = None,
+    ) -> Tuple[float, Dict[str, float]]:
         building = self.building
         t = building.time_step
         phase_names = self._current_phase_names()
@@ -549,6 +605,7 @@ class BuildingOpsService:
             self._control_step_energy_to_power_kw(self._safe_index(appliance.electricity_consumption, t, 0.0))
             for appliance in building.deferrable_appliances or []
         )
+        deferrable_kw += self._prospective_deferrable_start_power_kw(deferrable_appliance_actions)
 
         base_total_kw = cooling_kw + heating_kw + dhw_kw + non_shiftable_kw + solar_kw + deferrable_kw
         base_phase_kw = self._split_unassigned_power(base_total_kw)
@@ -808,10 +865,11 @@ class BuildingOpsService:
         self,
         actions: Optional[Mapping[str, float]],
         electrical_storage_action: Optional[float],
+        deferrable_appliance_actions: Optional[Mapping[str, float]] = None,
     ) -> Tuple[Optional[Mapping[str, float]], Optional[float]]:
         building = self.building
         phase_names = self._current_phase_names()
-        base_total_kw, base_phase_kw = self._estimate_non_controllable_base_power()
+        base_total_kw, base_phase_kw = self._estimate_non_controllable_base_power(deferrable_appliance_actions)
         base_phase_kw = {phase: base_phase_kw.get(phase, 0.0) for phase in phase_names}
 
         controls = {}
@@ -954,6 +1012,7 @@ class BuildingOpsService:
         self,
         actions: Optional[Mapping[str, float]],
         electrical_storage_action: Optional[float] = None,
+        deferrable_appliance_actions: Optional[Mapping[str, float]] = None,
     ) -> Tuple[Optional[Mapping[str, float]], Optional[float]]:
         """Apply configured electrical constraints and return adjusted EV/storage actions."""
 
@@ -966,7 +1025,11 @@ class BuildingOpsService:
             return actions, electrical_storage_action
 
         if getattr(building, '_electrical_service_enabled', False):
-            return self._apply_electrical_service_constraints(actions, electrical_storage_action)
+            return self._apply_electrical_service_constraints(
+                actions,
+                electrical_storage_action,
+                deferrable_appliance_actions,
+            )
 
         adjusted_actions = self._apply_legacy_charging_constraints(actions)
         return adjusted_actions, electrical_storage_action

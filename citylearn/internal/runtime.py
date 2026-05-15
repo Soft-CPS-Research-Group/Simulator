@@ -315,11 +315,6 @@ class CityLearnRuntimeService:
                 if isinstance(candidate, (float, np.floating)) and not np.isnan(candidate) and 0.0 <= candidate <= 1.0:
                     soc_value = float(candidate)
 
-            if soc_value is None and 0 <= step < len(simulation.electric_vehicle_required_soc_departure):
-                fallback = simulation.electric_vehicle_required_soc_departure[step]
-                if isinstance(fallback, (float, np.floating)) and not np.isnan(fallback) and 0.0 <= fallback <= 1.0:
-                    soc_value = float(fallback)
-
             return soc_value
 
         for building in env.buildings:

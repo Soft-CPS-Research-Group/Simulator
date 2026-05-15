@@ -35,9 +35,9 @@ level_family_subfamily_metric_variant_unit
 |---|---|
 | `level` | `building`, `district`. |
 | `family` | `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`. |
-| `subfamily` | `total`, `daily_average`, `ratio_to_baseline`, `shape_quality`, `service`. |
+| `subfamily` | `total`, `daily_average`, `ratio_to_baseline`, `ratio_to_business_as_usual`, `shape_quality`, `service`. |
 | `metric` | `import`, `export`, `charge`, `completed_cycles`. |
-| `variant` | `control`, `baseline`, `delta`, `total`, `average`, `l1`. |
+| `variant` | `control`, `baseline`, `business_as_usual`, `delta`, `delta_to_business_as_usual`, `total`, `average`, `l1`. |
 | `unit` | `eur`, `kwh`, `ratio`, etc. |
 
 Examples:
@@ -45,7 +45,9 @@ Examples:
 | KPI | Meaning |
 |---|---|
 | `district_cost_total_control_eur` | Total control cost. |
+| `district_cost_total_business_as_usual_eur` | Total native business-as-usual baseline cost. |
 | `building_energy_grid_total_import_control_kwh` | Building import energy. |
+| `building_energy_grid_ratio_to_business_as_usual_import_total_ratio` | Building import relative to the native business-as-usual baseline. |
 | `district_energy_grid_shape_quality_ramping_average_to_baseline_ratio` | Ramping relative to baseline. |
 | `district_solar_self_consumption_ratio_self_consumption_ratio` | District solar self-consumption ratio. |
 | `building_deferrable_appliance_service_completed_cycles_count` | Completed deferrable cycles. |
@@ -61,6 +63,8 @@ total_net_exchange_kwh = sum(net_t)
 daily_average_x = total_x / simulated_days
 delta_x = control_x - baseline_x
 ratio_to_baseline_x = control_x / baseline_x
+delta_to_business_as_usual_x = control_x - business_as_usual_x
+ratio_to_business_as_usual_x = control_x / business_as_usual_x
 self_consumption = (solar_generation_total - export_total) / solar_generation_total
 ```
 
@@ -70,9 +74,9 @@ Safe division returns `None` or a safe placeholder when the denominator is not p
 
 | Family | Level | Measures |
 |---|---|---|
-| `cost` | building, district | Cost control/baseline/delta/ratio. |
+| `cost` | building, district | Cost control/baseline/business-as-usual/delta/ratio. |
 | `energy_grid` | building, district | Import, export, net exchange and shape quality. |
-| `emissions` | building, district | Emissions control/baseline/delta/ratio. |
+| `emissions` | building, district | Emissions control/baseline/business-as-usual/delta/ratio. |
 | `solar_self_consumption` | building, district | Generation, export and self-consumption. |
 | `ev` | building, district | Departures, success rate, deficits, charge and V2G. |
 | `battery` | building, district | Charge, discharge, throughput, cycles, capacity fade. |

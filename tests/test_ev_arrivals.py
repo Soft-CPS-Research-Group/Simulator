@@ -1,8 +1,10 @@
+import json
 import numpy as np
 import pandas as pd
 import pytest
 
 from glob import glob
+from pathlib import Path
 
 pytest.importorskip("gymnasium")
 
@@ -10,6 +12,7 @@ from citylearn.citylearn import CityLearnEnv
 
 
 SCHEMA_PATH = "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json"
+MINUTE_SCHEMA_PATH = Path("tests/data/minute_ev_demo/schema.json")
 
 
 def _zero_actions(env: CityLearnEnv):
@@ -74,18 +77,131 @@ def test_ev_soc_matches_dataset_on_arrival(from_state: int):
             estimated_soc = float(candidate_value)
 
     if estimated_soc is None:
-        fallback_index = step if step < len(sim.electric_vehicle_required_soc_departure) else step - 1
-        fallback_value = sim.electric_vehicle_required_soc_departure[fallback_index]
-        assert (
-            isinstance(fallback_value, (float, np.floating))
-            and not np.isnan(fallback_value)
-            and fallback_value >= 0
-        ), "Expected fallback SOC from required departure."
-        expected_soc = float(fallback_value)
-    else:
-        expected_soc = estimated_soc
+        expected_soc = float(ev.battery.soc[step - 1])
+        required_soc = float(sim.electric_vehicle_required_soc_departure[step])
+        assert float(ev.battery.soc[env.time_step]) == pytest.approx(expected_soc, abs=1e-6)
+        if not np.isclose(expected_soc, required_soc):
+            assert float(ev.battery.soc[env.time_step]) != pytest.approx(required_soc, abs=1e-6)
+        return
+
+    expected_soc = estimated_soc
 
     assert pytest.approx(expected_soc, abs=1e-6) == float(ev.battery.soc[env.time_step])
+
+
+def test_connected_ev_without_arrival_soc_uses_initial_soc_on_reset():
+    env = CityLearnEnv(str(MINUTE_SCHEMA_PATH), central_agent=True, random_seed=0)
+    env.reset()
+
+    ev = env.electric_vehicles[0]
+    charger = env.buildings[0].electric_vehicle_chargers[0]
+
+    assert charger.connected_electric_vehicle is ev
+    assert charger.charger_simulation.electric_vehicle_required_soc_departure[0] == pytest.approx(0.8)
+    assert ev.battery.initial_soc == pytest.approx(0.4)
+    assert float(ev.battery.soc[0]) == pytest.approx(ev.battery.initial_soc)
+
+
+def test_ev_battery_schema_attributes_are_loaded(tmp_path):
+    schema = json.loads(MINUTE_SCHEMA_PATH.read_text())
+    schema["root_directory"] = str(MINUTE_SCHEMA_PATH.parent.resolve())
+
+    attrs = schema["electric_vehicles_def"]["Electric_Vehicle_1"]["battery"]["attributes"]
+    attrs.update(
+        {
+            "efficiency": 1.0,
+            "capacity_loss_coefficient": 0.0,
+            "power_efficiency_curve": [[0.0, 1.0], [1.0, 1.0]],
+            "capacity_power_curve": [[0.0, 1.0], [1.0, 1.0]],
+        }
+    )
+
+    schema_path = tmp_path / "schema.json"
+    schema_path.write_text(json.dumps(schema))
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, random_seed=0)
+    env.reset()
+
+    battery = env.electric_vehicles[0].battery
+    assert battery.efficiency == pytest.approx(1.0)
+    assert battery.capacity_loss_coefficient == pytest.approx(0.0)
+    assert np.allclose(battery.power_efficiency_curve, np.array([[0.0, 1.0], [1.0, 1.0]]).T)
+    assert np.allclose(battery.capacity_power_curve, np.array([[0.0, 1.0], [1.0, 1.0]]).T)
+
+
+def test_connected_ev_soc_carries_forward_to_current_observations():
+    env = CityLearnEnv(str(MINUTE_SCHEMA_PATH), central_agent=True, random_seed=0)
+    env.reset()
+
+    charger = env.buildings[0].electric_vehicle_chargers[0]
+    ev = charger.connected_electric_vehicle
+    initial_soc = float(ev.battery.soc[env.time_step])
+
+    env.step(_zero_actions(env))
+
+    assert charger.connected_electric_vehicle is ev
+    assert float(ev.battery.soc[env.time_step]) == pytest.approx(initial_soc)
+
+    observations = env.buildings[0].observations(
+        include_all=True,
+        normalize=False,
+        periodic_normalization=False,
+        check_limits=True,
+    )
+    soc_key = f"connected_electric_vehicle_at_charger_{charger.charger_id}_soc"
+    assert observations[soc_key] == pytest.approx(initial_soc)
+
+
+def test_static_battery_soc_carries_forward_to_current_observations(tmp_path):
+    schema = json.loads(MINUTE_SCHEMA_PATH.read_text())
+    schema["root_directory"] = str(MINUTE_SCHEMA_PATH.parent.resolve())
+    schema["buildings"]["Building_1"]["electrical_storage"]["attributes"]["loss_coefficient"] = 0.0
+
+    schema_path = tmp_path / "schema.json"
+    schema_path.write_text(json.dumps(schema))
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, random_seed=0)
+    env.reset()
+
+    building = env.buildings[0]
+    initial_soc = float(building.electrical_storage.soc[env.time_step])
+
+    env.step(_zero_actions(env))
+
+    assert float(building.electrical_storage.soc[env.time_step]) == pytest.approx(initial_soc)
+    observations = building.observations(
+        include_all=True,
+        normalize=False,
+        periodic_normalization=False,
+        check_limits=True,
+    )
+    assert observations["electrical_storage_soc"] == pytest.approx(initial_soc)
+
+
+def test_storage_observation_bounds_are_scaled_to_control_step_energy(tmp_path):
+    schema = json.loads(MINUTE_SCHEMA_PATH.read_text())
+    schema["root_directory"] = str(MINUTE_SCHEMA_PATH.parent.resolve())
+    schema["observations"]["electrical_storage_electricity_consumption"] = {
+        "active": True,
+        "shared_in_central_agent": False,
+    }
+
+    schema_path = tmp_path / "schema.json"
+    schema_path.write_text(json.dumps(schema))
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, random_seed=0)
+    env.reset()
+
+    building = env.buildings[0]
+    low, high = building.estimate_observation_space_limits(
+        include_all=True,
+        periodic_normalization=False,
+    )
+    expected_limit = building.electrical_storage.nominal_power * building.seconds_per_time_step / 3600.0
+    delta = building.observation_space_limit_delta
+
+    assert low["electrical_storage_electricity_consumption"] == pytest.approx(-expected_limit - delta)
+    assert high["electrical_storage_electricity_consumption"] == pytest.approx(expected_limit + delta)
 
 
 def test_ev_kpi_evaluation_with_evs_and_chargers():

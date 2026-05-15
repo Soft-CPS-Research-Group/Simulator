@@ -58,6 +58,115 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.0 - Baseline Business-As-Usual Nativa
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Adiciona uma baseline operacional business-as-usual nativa, separada da baseline contrafactual atual dos KPIs. A nova referencia BAU modela comportamento normal do dia a dia: EVs ligados carregam para 100%, deferrables arrancam assim que possivel, e baterias estacionarias fazem autoconsumo PV simples.
+
+### Added
+
+- `citylearn.agents.baseline.BusinessAsUsualAgent`, sem dependencia do repo externo `Algorithms`.
+- Simulacao sidecar lazy/cacheada em `CityLearnEnv.run_business_as_usual_baseline(force=False)`.
+- Linhas `evaluate_v2(include_business_as_usual=True)` para totais, deltas e ratios BAU em custo, emissoes, import/export/net exchange, EVs, BESS, deferrables e shape-quality distrital.
+- `exported_data_business_as_usual_ep{episode}.csv`, uma serie temporal compacta para auditar BAU por building e distrito.
+- Cobertura unit/integration para comportamento BAU em EV, deferrables, BESS, KPI, export e CLI.
+
+### Changed
+
+- `citylearn simulate` passa a usar `citylearn.agents.baseline.BusinessAsUsualAgent` por defeito.
+- `export_final_kpis(...)` passa a incluir KPIs BAU e a exportar a serie temporal BAU por defeito.
+- A documentacao de `BaselineAgent` passa a descreve-lo como baseline legacy passiva/no-control.
+
+### Dataset/Schema Impact
+
+- Sem migracao de schema e sem novas chaves no schema.
+- BAU usa a mesma janela de dataset/schema, buildings/EVs selecionados e timestep fisico do ambiente avaliado.
+
+### Compatibility
+
+- Minor release com mudancas comportamentais intencionais nos defaults de simulacao, KPI e export.
+- Mudanca comportamental no CLI: simulacoes sem `--agent_name` passam a correr BAU operacional em vez do `BaselineAgent` passivo/no-control.
+- Os nomes KPI v2 existentes com `baseline` sao preservados; BAU usa os novos nomes `business_as_usual`, `delta_to_business_as_usual` e `ratio_to_business_as_usual`.
+- `evaluate_v2(include_business_as_usual=False)` e `export_final_kpis(include_business_as_usual=False)` preservam o shape antigo e evitam o custo da simulacao sidecar.
+
+### Validation
+
+- `.venv/bin/python -m pytest tests/unit/test_business_as_usual_baseline.py -q`: pass (`9 passed`)
+- `.venv/bin/python -m pytest tests/test_kpi_v2.py tests/unit/test_ui_export_contract.py tests/unit/test_rendering_behaviour.py -q`: pass (`43 passed`)
+- `.venv/bin/python -m pytest tests/test_deferrable_appliance_integration.py tests/test_ev_arrivals.py tests/unit/test_electric_vehicle.py tests/unit/test_battery.py -q`: pass (`41 passed`)
+- `.venv/bin/python -m pytest -q --ignore=scripts/manual`: pass (`308 passed`)
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass (`16 passed`)
+- `.venv/bin/python scripts/manual/demo_ev_rbc.py`: pass
+- `../Algorithms/.venv/bin/python -m pytest tests/test_rbc_agent.py tests/test_baseline_policies.py tests/test_benchmark_agents.py tests/test_wrapper_action_clipping.py tests/test_entity_adapter.py tests/test_wrapper_entity_mode.py -q`: pass (`45 passed`)
+- `git diff --check`: pass
+
+### Migration Notes
+
+- Usar `citylearn.agents.base.BaselineAgent` explicitamente se for necessario o comportamento CLI antigo passivo/no-control.
+- Consumidores que enumeram nomes KPI v2 devem aceitar as novas linhas BAU em `evaluate_v2()` e `exported_kpis.csv`.
+
+## v0.5.4 - Semantica Fisica EV/BESS/Deferrables e Hardening de Outage
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release da auditoria profunda ao simulador, focada em tornar EVs, baterias estacionarias, deferrable appliances, outages, sinais raw de dataset e bounds de observacao fisicamente consistentes em timesteps desde segundos ate horas.
+
+### Added
+
+- Invariante runtime de balanco local em outage, que valida que as cargas locais durante outage nao excedem as fontes locais.
+- Testes de regressao para precos/carbon raw, bloqueio de EV/deferrables sem surplus local em outage, e bounds de storage em kWh por control step.
+- Snapshots do contrato entity atualizados para o naming normalizado `deferrable_appliance_*`.
+
+### Changed
+
+- Mismatch entre timestep do dataset e `seconds_per_time_step` continua responsabilidade do utilizador: o simulador imprime aviso explicito de conversao de unidades, mas nao faz resampling automatico.
+- Series de pricing e carbon intensity preservam os valores raw do dataset em vez de fazer clipping para `[0, 1]`; precos negativos de eletricidade sao suportados.
+- Bounds de observacao para consumo eletrico de devices e storage usam agora kWh por control step, nao kW nominal.
+- Starts de deferrable appliances entram no calculo de headroom do electrical service antes de escalar acoes EV/BESS.
+- Durante power outages, charging EV e starts deferrable ficam limitados ao surplus local disponivel. EV discharge e bloqueado no caminho de outage porque o modelo atual nao encaminha descarga EV para alimentar cargas locais do building.
+
+### Fixed
+
+- Arrival EV ja nao faz fallback para required departure SOC quando falta current/arrival SOC; o SOC existente da bateria e carregado para a frente.
+- Atributos do schema da bateria EV, como efficiency, degradation e power curves, passam a ser carregados na bateria EV real.
+- SOC de EV e bateria estacionaria passa a ser carregado para a frente nas observacoes do timestep atual quando nao ha energia pedida.
+- Carry-forward da BESS estacionaria aplica standby loss de forma consistente pelo caminho comum de storage.
+- KPIs de normalized unserved energy ignoram surplus como unserved negativo, mascaram steps sem outage nos KPIs de outage, e devolvem zero em vez de NaN quando o denominador de expected energy e zero.
+
+### Dataset/Schema Impact
+
+- Sem migracao obrigatoria de schema.
+- Autores de dataset continuam responsaveis por alinhar `seconds_per_time_step` com a cadencia dos dados ou por usar `time_step_ratio` intencionalmente.
+- Algoritmos que assumiam pricing ou carbon intensity codificados em `[0, 1]` devem normalizar externamente.
+- Bounds Gym de observacao podem mudar para observacoes de consumo eletrico em runs sub-hourly e multi-hour, porque agora os bounds usam kWh por step.
+
+### Compatibility
+
+- Patch compativel para schemas validos.
+- Mudanca comportamental para comandos fisicamente impossiveis em outage: cargas EV/deferrable ja nao podem consumir energia da rede indisponivel durante outages.
+- Mudanca comportamental para datasets com precos negativos ou valores acima de um: os valores raw passam a ser expostos a algoritmos e KPIs.
+
+### Validation
+
+- `.venv/bin/python -m pytest -q --ignore=scripts/manual`: pass (`299 passed`)
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass (`16 passed`)
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/manual/demo_ev_rbc.py`: pass
+- `../Algorithms/.venv/bin/python -m pytest tests/test_rbc_agent.py tests/test_baseline_policies.py tests/test_benchmark_agents.py tests/test_wrapper_action_clipping.py tests/test_entity_adapter.py tests/test_wrapper_entity_mode.py -q`: pass (`45 passed`)
+- `git diff --check`: pass
+
+### Migration Notes
+
+- Manter normalizacao de pricing/carbon no layer de algoritmo/preprocessamento, nao no simulador.
+- Em experiencias de outage, usar storage estacionario/PV como fontes locais; EV discharge nao deve ser tratado como V2B ate esse routing existir explicitamente.
+- Rever agentes treinados que dependam dos bounds antigos dimensionados em kW ou de sinais de mercado clipados.
+
 ## v0.5.3 - Hardening de Fisica Sub-Hour em Storage/EV
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

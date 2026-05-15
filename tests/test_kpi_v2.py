@@ -104,6 +104,23 @@ def _kpi_value(df: pd.DataFrame, name: str, cost_function: str):
     return rows["value"].iloc[0]
 
 
+def test_normalized_unserved_energy_clips_surplus_and_zero_denominator():
+    assert CostFunction.normalized_unserved_energy([0.0, 0.0], [1.0, 0.0]) == [0.0, 0.0]
+
+    values = CostFunction.normalized_unserved_energy([1.0, 1.0], [2.0, 0.5])
+    assert values == pytest.approx([0.0, 0.25])
+
+
+def test_normalized_unserved_energy_masks_non_outage_steps():
+    values = CostFunction.normalized_unserved_energy(
+        [1.0, 1.0],
+        [0.0, 0.0],
+        power_outage=[0, 1],
+    )
+
+    assert values == pytest.approx([0.0, 1.0])
+
+
 def _build_two_building_market_schema(tmp_path: Path) -> Path:
     dataset_dir = tmp_path / "market_dataset"
     dataset_dir.mkdir(parents=True, exist_ok=True)

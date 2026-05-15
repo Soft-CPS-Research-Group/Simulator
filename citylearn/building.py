@@ -1751,6 +1751,10 @@ class Building(Environment):
         total_charger_power_kw += sum(getattr(charger, 'max_discharging_power', 0.0) or 0.0 for charger in self.electric_vehicle_chargers)
         total_storage_power_kw = float(getattr(self.electrical_storage, 'nominal_power', 0.0) or 0.0)
         max_violation_energy = power_kw_to_energy_kwh(total_charger_power_kw + total_storage_power_kw, self.seconds_per_time_step)
+        cooling_device_energy_limit = power_kw_to_energy_kwh(self.cooling_device.nominal_power, self.seconds_per_time_step)
+        heating_device_energy_limit = power_kw_to_energy_kwh(self.heating_device.nominal_power, self.seconds_per_time_step)
+        dhw_device_energy_limit = power_kw_to_energy_kwh(self.dhw_device.nominal_power, self.seconds_per_time_step)
+        electrical_storage_energy_limit = power_kw_to_energy_kwh(self.electrical_storage.nominal_power, self.seconds_per_time_step)
 
         for key in observation_names:
             if key.startswith('charging_phase_one_hot_'):
@@ -1766,21 +1770,21 @@ class Building(Environment):
             if key == 'net_electricity_consumption':
                 # assumes devices and storages have been sized
                 low_limits = data['non_shiftable_load'] - (
-                    + self.electrical_storage.nominal_power
+                    + electrical_storage_energy_limit
                     + data['solar_generation']
                 )
                 high_limits = data['non_shiftable_load'] \
-                    + self.cooling_device.nominal_power \
-                        + self.heating_device.nominal_power \
-                            + self.dhw_device.nominal_power \
-                                + self.electrical_storage.nominal_power \
+                    + cooling_device_energy_limit \
+                        + heating_device_energy_limit \
+                            + dhw_device_energy_limit \
+                                + electrical_storage_energy_limit \
                                     - data['solar_generation']
                 low_limit[key] = min(low_limits.min(), 0.0)
                 high_limit[key] = high_limits.max()
 
             elif key == 'net_electricity_consumption_without_storage':
-                low_limit[key] = min(low_limit['net_electricity_consumption'] + self.electrical_storage.nominal_power, 0.0)
-                high_limit[key] = high_limit['net_electricity_consumption'] - self.electrical_storage.nominal_power
+                low_limit[key] = min(low_limit['net_electricity_consumption'] + electrical_storage_energy_limit, 0.0)
+                high_limit[key] = high_limit['net_electricity_consumption'] - electrical_storage_energy_limit
 
             elif key == 'net_electricity_consumption_without_storage_and_partial_load':
                 low_limit[key] = low_limit['net_electricity_consumption_without_storage']
@@ -1789,9 +1793,9 @@ class Building(Environment):
             elif key == 'net_electricity_consumption_without_storage_and_partial_load_and_pv':
                 low_limit[key] = 0.0
                 high_limits = data['non_shiftable_load'] \
-                                + self.cooling_device.nominal_power \
-                                    + self.heating_device.nominal_power \
-                                        + self.dhw_device.nominal_power
+                                + cooling_device_energy_limit \
+                                    + heating_device_energy_limit \
+                                        + dhw_device_energy_limit
                 high_limit[key] = high_limits.max()
 
             elif key in ['cooling_storage_soc', 'heating_storage_soc', 'dhw_storage_soc',
@@ -1883,15 +1887,15 @@ class Building(Environment):
 
             elif key == 'cooling_electricity_consumption':
                 low_limit[key] = 0.0
-                high_limit[key] = self.cooling_device.nominal_power
+                high_limit[key] = cooling_device_energy_limit
 
             elif key == 'heating_electricity_consumption':
                 low_limit[key] = 0.0
-                high_limit[key] = self.heating_device.nominal_power
+                high_limit[key] = heating_device_energy_limit
 
             elif key == 'dhw_electricity_consumption':
                 low_limit[key] = 0.0
-                high_limit[key] = self.dhw_device.nominal_power
+                high_limit[key] = dhw_device_energy_limit
 
             elif key == 'cooling_storage_electricity_consumption':
                 demand = self.energy_simulation.__getattr__(
@@ -1901,7 +1905,7 @@ class Building(Environment):
                 )
                 electricity_consumption = self.cooling_device.get_input_power(demand, data['outdoor_dry_bulb_temperature'], False)
                 low_limit[key] = -max(electricity_consumption)
-                high_limit[key] = self.cooling_device.nominal_power
+                high_limit[key] = cooling_device_energy_limit
 
             elif key == 'heating_storage_electricity_consumption':
                 demand = self.energy_simulation.__getattr__(
@@ -1912,7 +1916,7 @@ class Building(Environment):
                 electricity_consumption = self.heating_device.get_input_power(demand, data['outdoor_dry_bulb_temperature'], True) \
                     if isinstance(self.heating_device, HeatPump) else self.heating_device.get_input_power(demand)
                 low_limit[key] = -max(electricity_consumption)
-                high_limit[key] = self.heating_device.nominal_power
+                high_limit[key] = heating_device_energy_limit
 
             elif key == 'dhw_storage_electricity_consumption':
                 demand = self.energy_simulation.__getattr__(
@@ -1923,11 +1927,11 @@ class Building(Environment):
                 electricity_consumption = self.dhw_device.get_input_power(demand, data['outdoor_dry_bulb_temperature'], True) \
                     if isinstance(self.dhw_device, HeatPump) else self.dhw_device.get_input_power(demand)
                 low_limit[key] = -max(electricity_consumption)
-                high_limit[key] = self.dhw_device.nominal_power
+                high_limit[key] = dhw_device_energy_limit
 
             elif key == 'electrical_storage_electricity_consumption':
-                low_limit[key] = -self.electrical_storage.nominal_power
-                high_limit[key] = self.electrical_storage.nominal_power
+                low_limit[key] = -electrical_storage_energy_limit
+                high_limit[key] = electrical_storage_energy_limit
 
             elif key == 'power_outage':
                 low_limit[key] = 0.0

@@ -1449,11 +1449,307 @@ class CityLearnKPIService:
         legacy = all_metrics[all_metrics['cost_function'].isin(self.LEGACY_COST_FUNCTIONS)].copy()
         return legacy.reset_index(drop=True)
 
+    def _add_business_as_usual_records(
+        self,
+        records: Dict[Tuple[str, str, str], Dict[str, object]],
+        v2,
+        simulated_days: float,
+        *,
+        evaluation_condition_cls,
+        dynamics_building_cls,
+    ):
+        env = self.env
+        result = env.run_business_as_usual_baseline()
+        bau_df = result.kpis_v2
+        if bau_df.empty:
+            return
+
+        bau_lookup = {
+            (str(row['level']), str(row['name']), str(row['cost_function'])): row['value']
+            for _, row in bau_df.iterrows()
+        }
+
+        def put(level: str, name: str, cost_function: str, value):
+            records[(level, name, cost_function)] = {
+                'cost_function': cost_function,
+                'value': value,
+                'name': name,
+                'level': level,
+            }
+
+        def current(level: str, name: str, cost_function: str):
+            return records.get((level, name, cost_function), {}).get('value')
+
+        def bau(level: str, name: str, cost_function: str):
+            return bau_lookup.get((level, name, cost_function))
+
+        def finite_delta(a, b):
+            a = self._to_scalar(a, np.nan)
+            b = self._to_scalar(b, np.nan)
+            return None if not (np.isfinite(a) and np.isfinite(b)) else float(a - b)
+
+        def add_total_daily_ratio(
+            level: str,
+            name: str,
+            *,
+            family: str,
+            total_subfamily: str,
+            control_total_metric: str,
+            bau_total_metric: str,
+            delta_total_metric: str,
+            daily_subfamily: str,
+            control_daily_metric: str,
+            bau_daily_metric: str,
+            delta_daily_metric: str,
+            ratio_metric: str,
+            unit: str,
+            control_variant: Optional[str] = None,
+            bau_variant: Optional[str] = None,
+            delta_variant: Optional[str] = None,
+        ):
+            control_total_key = v2(level, family, total_subfamily, control_total_metric, control_variant, unit)
+            bau_total = bau(level, name, control_total_key)
+            control_total = current(level, name, control_total_key)
+            put(level, name, v2(level, family, total_subfamily, bau_total_metric, bau_variant, unit), bau_total)
+            put(
+                level,
+                name,
+                v2(level, family, total_subfamily, delta_total_metric, delta_variant, unit),
+                finite_delta(control_total, bau_total),
+            )
+            put(
+                level,
+                name,
+                v2(level, family, 'ratio_to_business_as_usual', ratio_metric, None, 'ratio'),
+                self._safe_div(control_total, bau_total),
+            )
+
+            control_daily_key = v2(level, family, daily_subfamily, control_daily_metric, control_variant, unit)
+            bau_daily = bau(level, name, control_daily_key)
+            control_daily = current(level, name, control_daily_key)
+            put(level, name, v2(level, family, daily_subfamily, bau_daily_metric, bau_variant, unit), bau_daily)
+            put(
+                level,
+                name,
+                v2(level, family, daily_subfamily, delta_daily_metric, delta_variant, unit),
+                finite_delta(control_daily, bau_daily),
+            )
+
+        def add_plain_metric(
+            level: str,
+            name: str,
+            *,
+            family: str,
+            subfamily: str,
+            metric: str,
+            unit: str,
+            current_key: str,
+            ratio_metric: str,
+        ):
+            bau_value = bau(level, name, current_key)
+            control_value = current(level, name, current_key)
+            put(level, name, v2(level, family, subfamily, metric, 'business_as_usual', unit), bau_value)
+            put(
+                level,
+                name,
+                v2(level, family, subfamily, metric, 'delta_to_business_as_usual', unit),
+                finite_delta(control_value, bau_value),
+            )
+            put(
+                level,
+                name,
+                v2(level, family, 'ratio_to_business_as_usual', ratio_metric, None, 'ratio'),
+                self._safe_div(control_value, bau_value),
+            )
+
+        names_by_level = {}
+        for level, name, _ in records.keys():
+            names_by_level.setdefault(level, set()).add(name)
+
+        for level, names in names_by_level.items():
+            for name in names:
+                add_total_daily_ratio(
+                    level,
+                    name,
+                    family='cost',
+                    total_subfamily='total',
+                    control_total_metric='control',
+                    bau_total_metric='business_as_usual',
+                    delta_total_metric='delta_to_business_as_usual',
+                    daily_subfamily='daily_average',
+                    control_daily_metric='control',
+                    bau_daily_metric='business_as_usual',
+                    delta_daily_metric='delta_to_business_as_usual',
+                    ratio_metric='total',
+                    unit='eur',
+                )
+                add_total_daily_ratio(
+                    level,
+                    name,
+                    family='emissions',
+                    total_subfamily='total',
+                    control_total_metric='control',
+                    bau_total_metric='business_as_usual',
+                    delta_total_metric='delta_to_business_as_usual',
+                    daily_subfamily='daily_average',
+                    control_daily_metric='control',
+                    bau_daily_metric='business_as_usual',
+                    delta_daily_metric='delta_to_business_as_usual',
+                    ratio_metric='total',
+                    unit='kgco2',
+                )
+
+                for metric, ratio_metric in [
+                    ('import', 'import_total'),
+                    ('export', 'export_total'),
+                    ('net_exchange', 'net_exchange_total'),
+                ]:
+                    add_total_daily_ratio(
+                        level,
+                        name,
+                        family='energy_grid',
+                        total_subfamily='total',
+                        control_total_metric=metric,
+                        bau_total_metric=metric,
+                        delta_total_metric=metric,
+                        daily_subfamily='daily_average',
+                        control_daily_metric=metric,
+                        bau_daily_metric=metric,
+                        delta_daily_metric=metric,
+                        ratio_metric=ratio_metric,
+                        unit='kwh',
+                        control_variant='control',
+                        bau_variant='business_as_usual',
+                        delta_variant='delta_to_business_as_usual',
+                    )
+
+                for metric, unit in [
+                    ('charge', 'kwh'),
+                    ('v2g_export', 'kwh'),
+                ]:
+                    add_plain_metric(
+                        level,
+                        name,
+                        family='ev',
+                        subfamily='total',
+                        metric=metric,
+                        unit=unit,
+                        current_key=v2(level, 'ev', 'total', metric, None, unit),
+                        ratio_metric=f'{metric}_total',
+                    )
+
+                for metric, unit in [
+                    ('charge', 'kwh'),
+                    ('discharge', 'kwh'),
+                    ('throughput', 'kwh'),
+                    ('equivalent_full_cycles', 'count'),
+                    ('capacity_fade', 'ratio'),
+                ]:
+                    subfamily = 'health' if metric in {'equivalent_full_cycles', 'capacity_fade'} else 'total'
+                    add_plain_metric(
+                        level,
+                        name,
+                        family='battery',
+                        subfamily=subfamily,
+                        metric=metric,
+                        unit=unit,
+                        current_key=v2(level, 'battery', subfamily, metric, None, unit),
+                        ratio_metric=metric,
+                    )
+
+                for metric, unit in [
+                    ('completed_cycles', 'count'),
+                    ('missed_cycles', 'count'),
+                    ('service_level', 'ratio'),
+                    ('served_energy_total', 'kwh'),
+                    ('unserved_energy_total', 'kwh'),
+                    ('average_start_delay', 'hours'),
+                ]:
+                    add_plain_metric(
+                        level,
+                        name,
+                        family='deferrable_appliance',
+                        subfamily='service',
+                        metric=metric,
+                        unit=unit,
+                        current_key=v2(level, 'deferrable_appliance', 'service', metric, None, unit),
+                        ratio_metric=metric,
+                    )
+
+        self._add_business_as_usual_shape_records(records, result.env, v2, simulated_days)
+
+    def _add_business_as_usual_shape_records(
+        self,
+        records: Dict[Tuple[str, str, str], Dict[str, object]],
+        bau_env: "CityLearnEnv",
+        v2,
+        simulated_days: float,
+    ):
+        env = self.env
+        daily_steps = self._window_steps(24.0 * 3600.0, env.seconds_per_time_step)
+        monthly_steps = self._window_steps(730.0 * 3600.0, env.seconds_per_time_step)
+        current_net = np.array(env.net_electricity_consumption, dtype='float64')
+        bau_net = np.array(bau_env.net_electricity_consumption, dtype='float64')
+
+        def cost_last(values: np.ndarray, fn, **kwargs):
+            if values.size == 0:
+                return 0.0
+            return self._to_scalar(fn(values, **kwargs)[-1], 0.0)
+
+        metrics = [
+            ('ramping_average', cost_last(current_net, CostFunction.ramping), cost_last(bau_net, CostFunction.ramping), 'kwh'),
+            (
+                'load_factor_penalty_daily_average',
+                cost_last(current_net, CostFunction.one_minus_load_factor, window=daily_steps),
+                cost_last(bau_net, CostFunction.one_minus_load_factor, window=daily_steps),
+                'ratio',
+            ),
+            (
+                'load_factor_penalty_monthly_average',
+                cost_last(current_net, CostFunction.one_minus_load_factor, window=monthly_steps),
+                cost_last(bau_net, CostFunction.one_minus_load_factor, window=monthly_steps),
+                'ratio',
+            ),
+            (
+                'peak_daily_average',
+                cost_last(current_net, CostFunction.peak, window=daily_steps),
+                cost_last(bau_net, CostFunction.peak, window=daily_steps),
+                'kwh',
+            ),
+            (
+                'peak_all_time_average',
+                cost_last(current_net, CostFunction.peak, window=max(int(getattr(env, 'time_steps', 1)), 1)),
+                cost_last(bau_net, CostFunction.peak, window=max(int(getattr(bau_env, 'time_steps', 1)), 1)),
+                'kwh',
+            ),
+        ]
+
+        for metric, control_value, bau_value, unit in metrics:
+            records[('district', 'District', v2('district', 'energy_grid', 'shape_quality', metric, 'business_as_usual', unit))] = {
+                'cost_function': v2('district', 'energy_grid', 'shape_quality', metric, 'business_as_usual', unit),
+                'value': bau_value,
+                'name': 'District',
+                'level': 'district',
+            }
+            records[('district', 'District', v2('district', 'energy_grid', 'shape_quality', metric, 'delta_to_business_as_usual', unit))] = {
+                'cost_function': v2('district', 'energy_grid', 'shape_quality', metric, 'delta_to_business_as_usual', unit),
+                'value': control_value - bau_value,
+                'name': 'District',
+                'level': 'district',
+            }
+            records[('district', 'District', v2('district', 'energy_grid', 'shape_quality', f'{metric}_to_business_as_usual', None, 'ratio'))] = {
+                'cost_function': v2('district', 'energy_grid', 'shape_quality', f'{metric}_to_business_as_usual', None, 'ratio'),
+                'value': self._safe_div(control_value, bau_value),
+                'name': 'District',
+                'level': 'district',
+            }
+
     def evaluate_v2(
         self,
         control_condition=None,
         baseline_condition=None,
         comfort_band: float = None,
+        include_business_as_usual: bool = True,
         *,
         evaluation_condition_cls,
         dynamics_building_cls,
@@ -1813,6 +2109,15 @@ class CityLearnKPIService:
         put('district', 'District', v2('district', 'equity', 'distribution', 'top20_benefit', None, 'ratio'), equity_distribution['equity_cr20_benefit'])
         put('district', 'District', v2('district', 'equity', 'distribution', 'losers', None, 'percent'), equity_distribution['equity_losers_percent'])
         put('district', 'District', v2('district', 'equity', 'distribution', 'bpr_asset_poor_over_rich', None, 'ratio'), equity_bpr)
+
+        if include_business_as_usual and not bool(getattr(env, '_business_as_usual_sidecar', False)):
+            self._add_business_as_usual_records(
+                records,
+                v2,
+                simulated_days,
+                evaluation_condition_cls=evaluation_condition_cls,
+                dynamics_building_cls=dynamics_building_cls,
+            )
 
         output = pd.DataFrame(list(records.values()))
         if output.empty:

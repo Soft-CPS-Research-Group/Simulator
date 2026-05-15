@@ -33,9 +33,9 @@ level_family_subfamily_metric_variant_unit
 |---|---|
 | `level` | `building`, `district`. |
 | `family` | `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`. |
-| `subfamily` | `total`, `daily_average`, `ratio_to_baseline`, `shape_quality`, `service`. |
+| `subfamily` | `total`, `daily_average`, `ratio_to_baseline`, `ratio_to_business_as_usual`, `shape_quality`, `service`. |
 | `metric` | `import`, `export`, `charge`, `completed_cycles`. |
-| `variant` | `control`, `baseline`, `delta`, `total`, `average`, `l1`. |
+| `variant` | `control`, `baseline`, `business_as_usual`, `delta`, `delta_to_business_as_usual`, `total`, `average`, `l1`. |
 | `unit` | `eur`, `kwh`, `ratio`, etc. |
 
 Exemplos:
@@ -43,7 +43,9 @@ Exemplos:
 | KPI | Significado |
 |---|---|
 | `district_cost_total_control_eur` | Custo total do controlo. |
+| `district_cost_total_business_as_usual_eur` | Custo total da baseline nativa business-as-usual. |
 | `building_energy_grid_total_import_control_kwh` | Import total do building. |
+| `building_energy_grid_ratio_to_business_as_usual_import_total_ratio` | Import do building relativo a baseline nativa business-as-usual. |
 | `district_energy_grid_shape_quality_ramping_average_to_baseline_ratio` | Ramping medio relativo ao baseline. |
 | `district_solar_self_consumption_ratio_self_consumption_ratio` | Self-consumption solar do distrito. |
 | `building_deferrable_appliance_service_completed_cycles_count` | Ciclos deferiveis completados. |
@@ -59,6 +61,8 @@ total_net_exchange_kwh = sum(net_t)
 daily_average_x = total_x / simulated_days
 delta_x = control_x - baseline_x
 ratio_to_baseline_x = control_x / baseline_x
+delta_to_business_as_usual_x = control_x - business_as_usual_x
+ratio_to_business_as_usual_x = control_x / business_as_usual_x
 self_consumption = (solar_generation_total - export_total) / solar_generation_total
 ```
 
@@ -68,9 +72,9 @@ Safe division devolve `None`/placeholder quando o denominador nao e fisicamente 
 
 | Familia | Nivel | O que mede |
 |---|---|---|
-| `cost` | building, district | Custo control/baseline/delta/ratio. |
+| `cost` | building, district | Custo control/baseline/business-as-usual/delta/ratio. |
 | `energy_grid` | building, district | Import, export, net exchange e shape quality. |
-| `emissions` | building, district | Emissoes control/baseline/delta/ratio. |
+| `emissions` | building, district | Emissoes control/baseline/business-as-usual/delta/ratio. |
 | `solar_self_consumption` | building, district | Geracao, export e self-consumption. |
 | `ev` | building, district | Departures, success rate, deficits, charge e V2G. |
 | `battery` | building, district | Charge, discharge, throughput, cycles, capacity fade. |

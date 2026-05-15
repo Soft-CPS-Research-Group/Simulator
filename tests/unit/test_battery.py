@@ -110,6 +110,27 @@ class TestBattery(unittest.TestCase):
         self.assertEqual(self.battery.capacity_history[0], 100.0)
         self.assertEqual(self.battery.degraded_capacity, 100.0)  # Initial value should equal capacity
 
+    def test_next_time_step_carries_soc_with_standby_loss_without_energy_balance(self):
+        battery = Battery(
+            capacity=10.0,
+            nominal_power=5.0,
+            initial_soc=0.5,
+            efficiency=1.0,
+            loss_coefficient=0.1,
+            capacity_loss_coefficient=0.0,
+            power_efficiency_curve=[[0.0, 1.0], [1.0, 1.0]],
+            capacity_power_curve=[[0.0, 1.0], [1.0, 1.0]],
+            seconds_per_time_step=3600,
+        )
+        battery.episode_tracker = MagicMock()
+        battery.episode_tracker.episode_time_steps = 3
+        battery.reset()
+
+        battery.next_time_step()
+
+        self.assertAlmostEqual(float(battery.soc[1]), 0.45)
+        self.assertAlmostEqual(float(battery.energy_balance[1]), 0.0)
+
     def test_property_setters(self):
         """Test property setters update values correctly"""
         self.battery.capacity = 150.0

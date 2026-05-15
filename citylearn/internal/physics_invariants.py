@@ -44,6 +44,7 @@ class CityLearnPhysicsInvariantService:
         t = int(max(time_step, 0))
         for building in self.env.buildings:
             self._assert_building_energy_balance(building, t)
+            self._assert_outage_local_balance(building, t)
             self._assert_soc_bounds(building, t)
             self._assert_storage_power_bounds(building, t)
             self._assert_charger_power_bounds(building, t)
@@ -67,6 +68,35 @@ class CityLearnPhysicsInvariantService:
         assert abs(net - terms) <= self.ENERGY_EPS, (
             f"Net energy balance mismatch for '{building.name}' at t={t}: "
             f"net={net:.6f} kWh, terms={terms:.6f} kWh."
+        )
+
+    def _assert_outage_local_balance(self, building, t: int):
+        outage_signal = self._safe_index(getattr(building, "power_outage_signal", []), t, 0.0)
+        if not bool(getattr(building, "simulate_power_outage", False)) or outage_signal < 1.0:
+            return
+
+        solar_generation = self._safe_index(building.solar_generation, t, 0.0)
+        storage_energy = self._safe_index(building.electrical_storage.electricity_consumption, t, 0.0)
+        charger_energy = self._safe_index(building.chargers_electricity_consumption, t, 0.0)
+
+        local_sources = (
+            max(-solar_generation, 0.0)
+            + max(-storage_energy, 0.0)
+            + max(-charger_energy, 0.0)
+        )
+        local_loads = (
+            self._safe_index(building.cooling_device.electricity_consumption, t, 0.0)
+            + self._safe_index(building.heating_device.electricity_consumption, t, 0.0)
+            + self._safe_index(building.dhw_device.electricity_consumption, t, 0.0)
+            + self._safe_index(building.non_shiftable_load_device.electricity_consumption, t, 0.0)
+            + max(storage_energy, 0.0)
+            + max(charger_energy, 0.0)
+            + self._safe_index(building.deferrable_appliances_electricity_consumption, t, 0.0)
+        )
+
+        assert local_loads <= local_sources + self.ENERGY_EPS, (
+            f"Outage local energy balance violated for '{building.name}' at t={t}: "
+            f"loads={local_loads:.6f} kWh, local_sources={local_sources:.6f} kWh."
         )
 
     def _assert_soc_bounds(self, building, t: int):

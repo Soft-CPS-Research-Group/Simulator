@@ -50,7 +50,7 @@
         "start"
       ],
       "ids": [
-        "Building_1/washing_machine_1"
+        "Building_1/deferrable_appliance_1"
       ],
       "units": [
         "scalar"
@@ -450,7 +450,7 @@
         "current_step_power_kw"
       ],
       "ids": [
-        "Building_1/washing_machine_1"
+        "Building_1/deferrable_appliance_1"
       ],
       "units": [
         "scalar",
@@ -843,7 +843,7 @@
         "Building_15/charger_15_2"
       ],
       "deferrable_appliance": [
-        "Building_1/washing_machine_1"
+        "Building_1/deferrable_appliance_1"
       ],
       "ev": [
         "Electric_Vehicle_1",

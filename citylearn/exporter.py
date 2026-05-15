@@ -106,7 +106,13 @@ class EpisodeExporter:
             "CityLearnEnv start_date must be a date, datetime, or ISO format string."
         )
 
-    def export_final_kpis(self, model: "Agent" = None, filepath: str = "exported_kpis.csv"):
+    def export_final_kpis(
+        self,
+        model: "Agent" = None,
+        filepath: str = "exported_kpis.csv",
+        include_business_as_usual: bool = True,
+        export_business_as_usual_timeseries: bool = True,
+    ):
         """Export episode KPIs to csv."""
 
         env = self.env
@@ -114,16 +120,93 @@ class EpisodeExporter:
         file_path = os.path.join(env.new_folder_path, filepath)
 
         if model is not None and getattr(model, 'env', None) is not None:
-            kpis = model.env.evaluate_v2()
+            kpis = model.env.evaluate_v2(include_business_as_usual=include_business_as_usual)
+            export_env = model.env.unwrapped
         else:
-            kpis = env.evaluate_v2()
+            kpis = env.evaluate_v2(include_business_as_usual=include_business_as_usual)
+            export_env = env
 
         kpis = kpis.pivot(index='cost_function', columns='name', values='value').round(3)
         kpis = kpis.fillna('')
         kpis = kpis.reset_index()
         kpis = kpis.rename(columns={'cost_function': 'KPI'})
         kpis.to_csv(file_path, index=False, encoding='utf-8')
+        if include_business_as_usual and export_business_as_usual_timeseries:
+            self.export_business_as_usual_timeseries(export_env)
         env._final_kpis_exported = True
+
+    def export_business_as_usual_timeseries(self, source_env: "CityLearnEnv" = None):
+        """Export a compact time-series audit for the business-as-usual baseline."""
+
+        env = self.env
+        source_env = env if source_env is None else source_env
+        result = source_env.run_business_as_usual_baseline()
+        baseline_env = result.env
+        episode_num = source_env.episode_tracker.episode
+        final_index = int(result.time_step)
+        rows = []
+
+        for t in range(final_index + 1):
+            for building in baseline_env.buildings:
+                rows.append(self._business_as_usual_building_row(building, t))
+
+            rows.append(self._business_as_usual_district_row(baseline_env, t))
+
+        filename = f"exported_data_business_as_usual_ep{episode_num}.csv"
+        file_path = Path(env.new_folder_path) / filename
+        if file_path.exists():
+            file_path.unlink()
+        self.write_render_rows(filename, rows)
+
+    def _business_as_usual_building_row(self, building, time_step: int) -> Dict[str, Any]:
+        battery = getattr(building, 'electrical_storage', None)
+        chargers = getattr(building, 'electric_vehicle_chargers', []) or []
+        appliances = getattr(building, 'deferrable_appliances', []) or []
+        return {
+            'time_step': time_step,
+            'name': building.name,
+            'level': 'building',
+            'net_electricity_consumption_kwh': self._series_value(building.net_electricity_consumption, time_step),
+            'net_electricity_consumption_cost': self._series_value(building.net_electricity_consumption_cost, time_step),
+            'net_electricity_consumption_emission_kgco2': self._series_value(building.net_electricity_consumption_emission, time_step),
+            'solar_generation_kwh': self._series_value(building.solar_generation, time_step),
+            'bess_electricity_consumption_kwh': self._series_value(
+                getattr(battery, 'electricity_consumption', []),
+                time_step,
+            ),
+            'bess_soc': self._series_value(getattr(battery, 'soc', []), time_step),
+            'ev_charger_electricity_consumption_kwh': sum(
+                self._series_value(getattr(charger, 'electricity_consumption', []), time_step)
+                for charger in chargers
+            ),
+            'deferrable_appliance_electricity_consumption_kwh': sum(
+                self._series_value(getattr(appliance, 'electricity_consumption', []), time_step)
+                for appliance in appliances
+            ),
+        }
+
+    def _business_as_usual_district_row(self, baseline_env: "CityLearnEnv", time_step: int) -> Dict[str, Any]:
+        rows = [self._business_as_usual_building_row(building, time_step) for building in baseline_env.buildings]
+        return {
+            'time_step': time_step,
+            'name': 'District',
+            'level': 'district',
+            'net_electricity_consumption_kwh': self._series_value(baseline_env.net_electricity_consumption, time_step),
+            'net_electricity_consumption_cost': self._series_value(baseline_env.net_electricity_consumption_cost, time_step),
+            'net_electricity_consumption_emission_kgco2': self._series_value(baseline_env.net_electricity_consumption_emission, time_step),
+            'solar_generation_kwh': self._series_value(baseline_env.solar_generation, time_step),
+            'bess_electricity_consumption_kwh': sum(row['bess_electricity_consumption_kwh'] for row in rows),
+            'bess_soc': '',
+            'ev_charger_electricity_consumption_kwh': sum(row['ev_charger_electricity_consumption_kwh'] for row in rows),
+            'deferrable_appliance_electricity_consumption_kwh': sum(row['deferrable_appliance_electricity_consumption_kwh'] for row in rows),
+        }
+
+    @staticmethod
+    def _series_value(values, index: int):
+        try:
+            return float(values[min(max(int(index), 0), len(values) - 1)])
+        except Exception:
+            return ''
 
     def render(self):
         """Render one time step to CSV outputs."""
