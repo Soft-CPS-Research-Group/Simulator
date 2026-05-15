@@ -1641,6 +1641,7 @@ class Building(Environment):
             Normalized charging or discharging action (range [-1, 1]).
         """
 
+        action = float(np.clip(action, -1.0, 1.0))
         energy = normalized_power_action_to_energy_kwh(
             action,
             self.electrical_storage.nominal_power,

@@ -799,19 +799,29 @@ class CityLearnLoadingService:
     ) -> ElectricVehicle:
         """Initialize and return an electric vehicle model."""
 
-        capacity = electric_vehicle_schema['battery']['attributes']['capacity']
-        nominal_power = electric_vehicle_schema['battery']['attributes']['nominal_power']
-        initial_soc = electric_vehicle_schema['battery']['attributes'].get('initial_soc')
+        attrs = electric_vehicle_schema['battery']['attributes']
+        capacity = attrs['capacity']
+        nominal_power = attrs['nominal_power']
+        initial_soc = attrs.get('initial_soc')
         if initial_soc is None:
             seed_source = f"{schema['random_seed']}:{electric_vehicle_name}:initial_soc"
             deterministic_seed = int(hashlib.md5(seed_source.encode('utf-8')).hexdigest()[:8], 16)
             initial_soc = float(np.random.RandomState(deterministic_seed).uniform(0.0, 1.0))
-        depth_of_discharge = electric_vehicle_schema['battery']['attributes'].get('depth_of_discharge', 0.10)
+        depth_of_discharge = attrs.get('depth_of_discharge', 0.10)
+        loss_coefficient = attrs.get('loss_coefficient', 0.0)
+
+        if loss_coefficient is None:
+            loss_coefficient = 0.0
+        elif isinstance(loss_coefficient, (list, tuple)):
+            loss_coefficient = tuple(float(value) for value in loss_coefficient)
+        else:
+            loss_coefficient = float(loss_coefficient)
 
         battery = Battery(
             capacity=capacity,
             nominal_power=nominal_power,
             initial_soc=initial_soc,
+            loss_coefficient=loss_coefficient,
             seconds_per_time_step=schema['seconds_per_time_step'],
             time_step_ratio=time_step_ratio,
             random_seed=schema['random_seed'],

@@ -250,6 +250,13 @@ Use `absolute` for real measured generation or converter-generated energy series
 | `include` | Include the EV in the initial pool. |
 | `battery.attributes` | `Battery` kwargs. |
 
+EV battery standby loss is intentionally isolated from stationary storage defaults:
+
+- Missing or `null` `battery.attributes.loss_coefficient` defaults to `0.0` for EVs.
+- Explicit EV `loss_coefficient` values are interpreted as hourly loss ratios.
+- All `StorageDevice` implementations, including stationary `Battery` and `StorageTank`, convert hourly `loss_coefficient` values to effective per-step loss with `loss_coefficient * seconds_per_time_step / 3600`.
+- Stationary storage default parameter ranges are unchanged.
+
 ## Deferrable Appliances
 
 ```json

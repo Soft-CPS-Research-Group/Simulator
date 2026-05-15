@@ -60,6 +60,49 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.5.3 - Storage/EV Sub-Hour Physics Hardening
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release that fixes storage timestep physics for sub-hour and multi-hour datasets, and prevents EV batteries from inheriting implicit stationary-storage standby loss when EV schemas do not explicitly configure `loss_coefficient`.
+
+### Fixed
+
+- EV batteries now default to `loss_coefficient=0.0` when `electric_vehicles_def.*.battery.attributes.loss_coefficient` is missing or `null`.
+- `StorageDevice.loss_coefficient` is now interpreted as an hourly loss ratio and converted to effective per-step loss with `loss_coefficient * seconds_per_time_step / 3600`.
+- `Battery.charge(...)` now enforces charge/discharge power limits in physical kWh per control step instead of treating kWh commands as kW.
+- `Battery` efficiency curves now use average power over the physical step, not raw step energy.
+- `StorageTank` now preserves the constructor `time_step_ratio`; previously the base `Device` init could overwrite it.
+- Stationary BESS actions are clipped to `[-1, 1]` before conversion to physical kWh.
+- Native sub-hour datasets, including 15-second datasets, no longer lose EV SOC artificially over thousands of connected steps because of the stationary storage default.
+
+### Dataset/Schema Impact
+
+- Existing EV schemas remain valid.
+- EV `battery.attributes.loss_coefficient` is optional and should usually be omitted.
+- If EV `loss_coefficient` is provided, it is a per-hour loss ratio. The storage model converts it to effective loss per physical step.
+- Stationary storage default parameter ranges are unchanged, but `loss_coefficient` now has physical hourly semantics across native sub-hour, hourly and multi-hour timesteps.
+
+### Compatibility
+
+- Backward compatible for schemas that do not set EV `loss_coefficient`.
+- EV schemas that explicitly set `loss_coefficient` now receive timestep-correct hourly semantics; this is intentional for sub-hour correctness.
+- Observations, rewards and EV departure KPI names are unchanged.
+- Stationary storage simulations that explicitly relied on the old ratio-based standby loss behavior in non-hourly datasets will see corrected physical losses.
+
+### Validation
+
+- `.venv/bin/python -m pytest -q tests/unit/test_subhour_scaling.py tests/unit/test_battery.py tests/unit/test_electric_vehicle_charger.py tests/test_ev_soc_behavior.py tests/unit/test_physics_units_refactor.py tests/unit/test_physics_invariants.py tests/test_kpi_v2.py tests/test_kpi_golden.py tests/unit/test_deferrable_appliance.py tests/test_deferrable_appliance_integration.py`: pass (`113 passed`)
+- `.venv/bin/python -m pytest -q --ignore=scripts/manual`: pass (`286 passed`)
+
+### Migration Notes
+
+- Do not configure EV `loss_coefficient` unless standby loss is intentionally needed.
+- For EVs, use an hourly loss ratio if the field is configured; the simulator handles sub-hour scaling.
+- For stationary storage, keep existing hourly `loss_coefficient` values. The simulator now scales those values by the actual timestep duration.
+
 ## v0.5.2 - EV Departure Service KPIs
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

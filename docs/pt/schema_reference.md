@@ -256,6 +256,13 @@ Usa `absolute` quando o dataset vem de medicao real ou de conversor externo ja e
 | `include` | Inclui EV no pool inicial. |
 | `battery.attributes` | Kwargs de `Battery`. |
 
+O standby loss das baterias EV fica isolado dos defaults de storage estacionario:
+
+- `battery.attributes.loss_coefficient` ausente ou `null` usa default `0.0` em EVs.
+- Valores EV explicitos de `loss_coefficient` sao interpretados como ratios de perda horaria.
+- Todas as implementacoes de `StorageDevice`, incluindo `Battery` estacionaria e `StorageTank`, convertem valores horarios de `loss_coefficient` para perda efetiva por step com `loss_coefficient * seconds_per_time_step / 3600`.
+- Os ranges default de parametros de storage estacionario ficam inalterados.
+
 ## Deferrable Appliances
 
 ```json

@@ -695,8 +695,7 @@ class StorageDevice(Device):
         self.capacity = capacity
         self.loss_coefficient = loss_coefficient
         self.initial_soc = initial_soc
-        self.time_step_ratio=time_step_ratio
-        super().__init__(efficiency = efficiency, **kwargs)
+        super().__init__(efficiency=efficiency, time_step_ratio=time_step_ratio, **kwargs)
 
     @property
     def capacity(self) -> float:
@@ -712,9 +711,10 @@ class StorageDevice(Device):
 
     @property
     def loss_coefficient(self) -> float:
-        r"""Standby hourly losses."""
+        r"""Effective standby loss ratio for the active physical timestep."""
 
-        return self.__loss_coefficient * self.time_step_ratio
+        step_hours = max(float(self.seconds_per_time_step) / 3600.0, 0.0)
+        return self.__loss_coefficient * step_hours
     
     @property
     def initial_soc(self) -> float:
@@ -1105,22 +1105,39 @@ class Battery(StorageDevice, ElectricDevice):
         energy : float
             Energy to charge if (+) or discharge if (-) in [kWh].
         """
-        action_energy = energy
+        # Public control paths pass dataset-resolution kWh; physical limits are per control step.
+        ratio = self.time_step_ratio if self.time_step_ratio not in (None, 0) else 1.0
+        requested_energy = float(energy) * ratio
+        step_hours = max(float(self.seconds_per_time_step) / 3600.0, 1.0e-12)
 
-        if energy >= 0:
-            energy_wrt_degrade = self.degraded_capacity - self.energy_init
-            max_input_power = self.get_max_input_power()
-            energy = min(max_input_power, self.available_nominal_power, energy_wrt_degrade, energy)
-            self.efficiency = self.get_current_efficiency(min(action_energy, max_input_power))
+        if requested_energy >= 0:
+            max_input_power = max(float(self.get_max_input_power()), 0.0)
+            max_input_energy = power_kw_to_energy_kwh(max_input_power, self.seconds_per_time_step)
+            limited_energy = min(requested_energy, max_input_energy)
+
+            for _ in range(2):
+                self.efficiency = self.get_current_efficiency(abs(limited_energy) / step_hours)
+                energy_wrt_degrade = max(self.degraded_capacity - self.energy_init, 0.0)
+                capacity_limited_energy = energy_wrt_degrade / max(self.round_trip_efficiency, ZERO_DIVISION_PLACEHOLDER)
+                limited_energy = min(requested_energy, max_input_energy, capacity_limited_energy)
+
+            energy = limited_energy / ratio
 
         else:
-            soc_limit_wrt_dod = 1.0 - self.depth_of_discharge
-            soc_init = self.soc[self.time_step - 1] if self.time_step > 0 else self.soc[self.time_step]
-            soc_difference = soc_init - soc_limit_wrt_dod
-            energy_limit_wrt_dod = max(soc_difference * self.capacity * self.round_trip_efficiency, 0.0) * -1
-            max_output_power = self.get_max_output_power()
-            energy = max(-max_output_power, energy_limit_wrt_dod, energy)
-            self.efficiency = self.get_current_efficiency(min(abs(action_energy), max_output_power))
+            max_output_power = max(float(self.get_max_output_power()), 0.0)
+            max_output_energy = power_kw_to_energy_kwh(max_output_power, self.seconds_per_time_step)
+            requested_output = abs(requested_energy)
+            limited_output = min(requested_output, max_output_energy)
+
+            for _ in range(2):
+                self.efficiency = self.get_current_efficiency(limited_output / step_hours)
+                soc_limit_wrt_dod = 1.0 - self.depth_of_discharge
+                soc_init = self.soc[self.time_step - 1] if self.time_step > 0 else self.soc[self.time_step]
+                soc_difference = max(soc_init - soc_limit_wrt_dod, 0.0)
+                dod_limited_output = soc_difference * self.capacity * self.round_trip_efficiency
+                limited_output = min(requested_output, max_output_energy, dod_limited_output)
+
+            energy = -limited_output / ratio
 
         super().charge(energy)
         degraded_capacity = max(self.degraded_capacity - self.degrade(), 0.0)
@@ -1162,7 +1179,7 @@ class Battery(StorageDevice, ElectricDevice):
         
         return max_output_power
 
-    def get_current_efficiency(self, energy: float) -> float:
+    def get_current_efficiency(self, power: float) -> float:
         r"""Get technical efficiency while considering `power_efficiency_curve` limitations.
 
         Returns
@@ -1171,11 +1188,11 @@ class Battery(StorageDevice, ElectricDevice):
             Technical efficiency.
         """
 
-        # Calculating the maximum power rate at which the battery can be charged or discharged
-        energy_normalized = np.abs(energy)/max(self.nominal_power, ZERO_DIVISION_PLACEHOLDER)
-        idx = max(0, np.argmax(energy_normalized <= self.power_efficiency_curve[0]) - 1)
+        # Efficiency curves are defined on normalized average power, not kWh per step.
+        power_normalized = np.clip(np.abs(power)/max(self.nominal_power, ZERO_DIVISION_PLACEHOLDER), 0.0, 1.0)
+        idx = max(0, np.argmax(power_normalized <= self.power_efficiency_curve[0]) - 1)
         efficiency = self.power_efficiency_curve[1][idx]\
-            + (energy_normalized - self.power_efficiency_curve[0][idx]
+            + (power_normalized - self.power_efficiency_curve[0][idx]
             )*(self.power_efficiency_curve[1][idx + 1] - self.power_efficiency_curve[1][idx]
             )/(self.power_efficiency_curve[0][idx + 1] - self.power_efficiency_curve[0][idx])
 
