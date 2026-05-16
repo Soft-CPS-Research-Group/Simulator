@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.kpi &mdash; CityLearn 0.6.4 documentation</title>
+  <title>citylearn.internal.kpi &mdash; CityLearn 0.6.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=73d9a94e"></script>
+      <script src="../../../_static/documentation_options.js?v=d7a12d57"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -206,6 +206,255 @@
 
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_safe_sequence_value</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">sequence</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">default</span>
+            <span class="k">return</span> <span class="n">sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">default</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_normal_ev_id</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;nan&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_interp_curve</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">default</span>
+
+        <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+
+        <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">finite</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">finite</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">default</span>
+
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[</span><span class="n">finite</span><span class="p">]</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">ys</span><span class="p">[</span><span class="n">finite</span><span class="p">]</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">ys</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ev_connected_interval_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">departure_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">ev_ids</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="s1">&#39;electric_vehicle_id&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">current_ev_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal_ev_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_safe_sequence_value</span><span class="p">(</span><span class="n">ev_ids</span><span class="p">,</span> <span class="n">departure_index</span><span class="p">))</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">departure_index</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">previous_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">previous_state</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">previous_ev_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal_ev_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_safe_sequence_value</span><span class="p">(</span><span class="n">ev_ids</span><span class="p">,</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">current_ev_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">previous_ev_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">previous_ev_id</span> <span class="o">!=</span> <span class="n">current_ev_id</span>
+            <span class="p">):</span>
+                <span class="k">break</span>
+
+            <span class="n">start</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">start</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ev_arrival_soc_for_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">interval_start</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="n">estimated_soc_arrival</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="s1">&#39;electric_vehicle_estimated_soc_arrival&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">ev_ids</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="s1">&#39;electric_vehicle_id&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">current_ev_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal_ev_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_safe_sequence_value</span><span class="p">(</span><span class="n">ev_ids</span><span class="p">,</span> <span class="n">interval_start</span><span class="p">))</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">interval_start</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">previous_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="n">interval_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="n">previous_ev_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal_ev_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_safe_sequence_value</span><span class="p">(</span><span class="n">ev_ids</span><span class="p">,</span> <span class="n">interval_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">previous_state</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span>
+                    <span class="n">current_ev_id</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="ow">or</span> <span class="n">previous_ev_id</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="ow">or</span> <span class="n">previous_ev_id</span> <span class="o">==</span> <span class="n">current_ev_id</span>
+                <span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_safe_sequence_value</span><span class="p">(</span><span class="n">estimated_soc_arrival</span><span class="p">,</span> <span class="n">interval_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_safe_sequence_value</span><span class="p">(</span><span class="n">estimated_soc_arrival</span><span class="p">,</span> <span class="n">interval_start</span><span class="p">))</span>
+
+        <span class="n">battery</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="s1">&#39;battery&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">battery_soc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;soc&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">interval_start</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;initial_soc&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_safe_sequence_value</span><span class="p">(</span><span class="n">battery_soc</span><span class="p">,</span> <span class="n">interval_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_safe_sequence_value</span><span class="p">(</span><span class="n">battery_soc</span><span class="p">,</span> <span class="n">interval_start</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+            <span class="n">soc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_soc_target</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">soc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">soc</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ev_battery_max_input_power_kw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">battery</span><span class="p">,</span> <span class="n">charger_power_kw</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">soc</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">charger_power_kw</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">charger_power_kw</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">nominal_power_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;nominal_power&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">nominal_power_kw</span><span class="p">)</span> <span class="ow">or</span> <span class="n">nominal_power_kw</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">charger_power_kw</span>
+
+        <span class="n">multiplier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_curve</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;capacity_power_curve&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">soc</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">multiplier</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">multiplier</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">multiplier</span><span class="p">)</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">multiplier</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">charger_power_kw</span><span class="p">,</span> <span class="n">nominal_power_kw</span> <span class="o">*</span> <span class="n">multiplier</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ev_battery_charge_round_trip_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">battery</span><span class="p">,</span> <span class="n">power_kw</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">nominal_power_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;nominal_power&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">normalized_power</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">power_kw</span><span class="p">)</span> <span class="o">/</span> <span class="n">nominal_power_kw</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">nominal_power_kw</span><span class="p">)</span> <span class="ow">and</span> <span class="n">nominal_power_kw</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+            <span class="k">else</span> <span class="mf">1.0</span>
+        <span class="p">)</span>
+        <span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_curve</span><span class="p">(</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;power_efficiency_curve&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">normalized_power</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">efficiency</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">efficiency</span><span class="p">):</span>
+            <span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;efficiency&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">efficiency</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">efficiency</span><span class="p">):</span>
+            <span class="n">round_trip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;round_trip_efficiency&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">round_trip</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">round_trip</span><span class="p">)</span> <span class="k">else</span> <span class="mf">1.0</span>
+
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">efficiency</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ev_charger_charge_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charger</span><span class="p">,</span> <span class="n">power_kw</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_power_kw</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">normalized_power</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">power_kw</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">max_power_kw</span><span class="p">),</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">)</span>
+        <span class="n">get_efficiency</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="s1">&#39;get_efficiency&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">get_efficiency</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">get_efficiency</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">normalized_power</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="kc">True</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="s1">&#39;efficiency&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ev_departure_threshold_feasible</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">charger</span><span class="p">,</span>
+        <span class="n">sim</span><span class="p">,</span>
+        <span class="n">ev</span><span class="p">,</span>
+        <span class="n">states</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">departure_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">threshold_soc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether a departure threshold was reachable with max charging.</span>
+
+<span class="sd">        Missing charger/battery/arrival data is treated as feasible to preserve</span>
+<span class="sd">        existing KPI semantics for legacy datasets that cannot support this audit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">threshold_soc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_soc_target</span><span class="p">(</span><span class="n">threshold_soc</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">threshold_soc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">threshold_soc</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">battery</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="s1">&#39;battery&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">battery</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">capacity_kwh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;capacity&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">charger_power_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="s1">&#39;max_charging_power&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">capacity_kwh</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">capacity_kwh</span> <span class="o">&lt;=</span> <span class="mf">0.0</span>
+            <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">charger_power_kw</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">charger_power_kw</span> <span class="o">&lt;</span> <span class="mf">0.0</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">interval_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_connected_interval_start</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">departure_index</span><span class="p">)</span>
+        <span class="n">arrival_soc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_arrival_soc_for_interval</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">interval_start</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">arrival_soc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">arrival_soc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span> <span class="o">&gt;=</span> <span class="n">threshold_soc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">seconds_per_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span>
+            <span class="nb">getattr</span><span class="p">(</span>
+                <span class="n">charger</span><span class="p">,</span>
+                <span class="s1">&#39;seconds_per_time_step&#39;</span><span class="p">,</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">&#39;seconds_per_time_step&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;seconds_per_time_step&#39;</span><span class="p">,</span> <span class="mf">3600.0</span><span class="p">)),</span>
+            <span class="p">),</span>
+            <span class="mf">3600.0</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">step_hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">seconds_per_time_step</span> <span class="o">/</span> <span class="mf">3600.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">step_hours</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">arrival_soc</span><span class="p">)</span>
+        <span class="n">connected_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">departure_index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">interval_start</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">connected_steps</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">soc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span> <span class="o">&gt;=</span> <span class="n">threshold_soc</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="n">power_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_battery_max_input_power_kw</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="n">charger_power_kw</span><span class="p">,</span> <span class="n">soc</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">power_kw</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">charger_efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_charger_charge_efficiency</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="n">power_kw</span><span class="p">,</span> <span class="n">charger_power_kw</span><span class="p">)</span>
+            <span class="n">battery_round_trip_efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_battery_charge_round_trip_efficiency</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="n">power_kw</span><span class="p">)</span>
+            <span class="n">delta_soc</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">power_kw</span>
+                <span class="o">*</span> <span class="n">step_hours</span>
+                <span class="o">*</span> <span class="n">charger_efficiency</span>
+                <span class="o">*</span> <span class="n">battery_round_trip_efficiency</span>
+                <span class="o">/</span> <span class="n">capacity_kwh</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">delta_soc</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">soc</span> <span class="o">+</span> <span class="n">delta_soc</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">soc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span> <span class="o">&gt;=</span> <span class="n">threshold_soc</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_ev_departure_within_tolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span>
@@ -340,6 +589,15 @@
                 <span class="s1">&#39;departures_met&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
                 <span class="s1">&#39;departures_min_acceptable&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
                 <span class="s1">&#39;departures_within_tolerance&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;departures_target_feasible&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;departures_target_infeasible&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;departures_min_acceptable_feasible&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;departures_min_acceptable_infeasible&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;departures_within_tolerance_feasible&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;departures_within_tolerance_infeasible&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;_departures_met_target_feasible&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;_departures_min_acceptable_feasible_met&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="s1">&#39;_departures_within_tolerance_feasible_met&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
                 <span class="s1">&#39;departure_deficit_sum&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
                 <span class="s1">&#39;departure_shortfall_beyond_tolerance_sum&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
                 <span class="s1">&#39;departure_surplus_sum&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -347,6 +605,9 @@
                 <span class="s1">&#39;ev_departure_success_rate&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s1">&#39;ev_departure_min_acceptable_rate&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s1">&#39;ev_departure_within_tolerance_rate&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;ev_departure_success_feasible_rate&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;ev_departure_min_acceptable_feasible_rate&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;ev_departure_within_tolerance_feasible_rate&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s1">&#39;ev_departure_soc_deficit_mean&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s1">&#39;ev_departure_shortfall_beyond_tolerance_mean&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s1">&#39;ev_departure_soc_surplus_mean&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
@@ -360,6 +621,15 @@
         <span class="n">departures_met</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">departures_min_acceptable</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">departures_within_tolerance</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">departures_target_feasible</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">departures_target_infeasible</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">departures_min_acceptable_feasible</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">departures_min_acceptable_infeasible</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">departures_within_tolerance_feasible</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">departures_within_tolerance_infeasible</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">departures_met_target_feasible</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">departures_min_acceptable_feasible_met</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">departures_within_tolerance_feasible_met</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">departure_deficit_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">departure_shortfall_beyond_tolerance_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">departure_surplus_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -408,6 +678,32 @@
                 <span class="n">surplus</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">actual_soc</span> <span class="o">-</span> <span class="n">target_soc</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
                 <span class="n">absolute_error</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">actual_soc</span> <span class="o">-</span> <span class="n">target_soc</span><span class="p">)</span>
                 <span class="n">shortfall_beyond_tolerance</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">target_soc</span> <span class="o">-</span> <span class="n">service_tolerance</span> <span class="o">-</span> <span class="n">actual_soc</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">min_acceptable_threshold</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">target_soc</span> <span class="o">-</span> <span class="n">service_tolerance</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">within_tolerance_threshold</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">target_soc</span> <span class="o">-</span> <span class="n">within_tolerance</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">target_feasible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_departure_threshold_feasible</span><span class="p">(</span>
+                    <span class="n">charger</span><span class="p">,</span>
+                    <span class="n">sim</span><span class="p">,</span>
+                    <span class="n">ev</span><span class="p">,</span>
+                    <span class="n">states</span><span class="p">,</span>
+                    <span class="n">t</span><span class="p">,</span>
+                    <span class="n">target_soc</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">min_acceptable_feasible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_departure_threshold_feasible</span><span class="p">(</span>
+                    <span class="n">charger</span><span class="p">,</span>
+                    <span class="n">sim</span><span class="p">,</span>
+                    <span class="n">ev</span><span class="p">,</span>
+                    <span class="n">states</span><span class="p">,</span>
+                    <span class="n">t</span><span class="p">,</span>
+                    <span class="n">min_acceptable_threshold</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">within_tolerance_feasible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_departure_threshold_feasible</span><span class="p">(</span>
+                    <span class="n">charger</span><span class="p">,</span>
+                    <span class="n">sim</span><span class="p">,</span>
+                    <span class="n">ev</span><span class="p">,</span>
+                    <span class="n">states</span><span class="p">,</span>
+                    <span class="n">t</span><span class="p">,</span>
+                    <span class="n">within_tolerance_threshold</span><span class="p">,</span>
+                <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">absolute_error</span> <span class="o">&lt;=</span> <span class="n">within_tolerance</span> <span class="o">+</span> <span class="n">eps</span><span class="p">:</span>
                     <span class="n">departures_within_tolerance</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -420,9 +716,39 @@
                 <span class="k">if</span> <span class="n">deficit</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">:</span>
                     <span class="n">departures_met</span> <span class="o">+=</span> <span class="mi">1</span>
 
+                <span class="k">if</span> <span class="n">target_feasible</span><span class="p">:</span>
+                    <span class="n">departures_target_feasible</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">deficit</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">:</span>
+                        <span class="n">departures_met_target_feasible</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">departures_target_infeasible</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">min_acceptable_feasible</span><span class="p">:</span>
+                    <span class="n">departures_min_acceptable_feasible</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">actual_soc</span> <span class="o">+</span> <span class="n">service_tolerance</span> <span class="o">+</span> <span class="n">eps</span> <span class="o">&gt;=</span> <span class="n">target_soc</span><span class="p">:</span>
+                        <span class="n">departures_min_acceptable_feasible_met</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">departures_min_acceptable_infeasible</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">within_tolerance_feasible</span><span class="p">:</span>
+                    <span class="n">departures_within_tolerance_feasible</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">absolute_error</span> <span class="o">&lt;=</span> <span class="n">within_tolerance</span> <span class="o">+</span> <span class="n">eps</span><span class="p">:</span>
+                        <span class="n">departures_within_tolerance_feasible_met</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">departures_within_tolerance_infeasible</span> <span class="o">+=</span> <span class="mi">1</span>
+
         <span class="n">success_rate</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">departures_total</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">departures_met</span> <span class="o">/</span> <span class="n">departures_total</span>
         <span class="n">min_acceptable_rate</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">departures_total</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">departures_min_acceptable</span> <span class="o">/</span> <span class="n">departures_total</span>
         <span class="n">within_tolerance_rate</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">departures_total</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">departures_within_tolerance</span> <span class="o">/</span> <span class="n">departures_total</span>
+        <span class="n">success_feasible_rate</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">departures_target_feasible</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">departures_met_target_feasible</span> <span class="o">/</span> <span class="n">departures_target_feasible</span>
+        <span class="n">min_acceptable_feasible_rate</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">None</span> <span class="k">if</span> <span class="n">departures_min_acceptable_feasible</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="n">departures_min_acceptable_feasible_met</span> <span class="o">/</span> <span class="n">departures_min_acceptable_feasible</span>
+        <span class="p">)</span>
+        <span class="n">within_tolerance_feasible_rate</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">None</span> <span class="k">if</span> <span class="n">departures_within_tolerance_feasible</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="n">departures_within_tolerance_feasible_met</span> <span class="o">/</span> <span class="n">departures_within_tolerance_feasible</span>
+        <span class="p">)</span>
         <span class="n">deficit_mean</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">departures_total</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">departure_deficit_sum</span> <span class="o">/</span> <span class="n">departures_total</span>
         <span class="n">shortfall_beyond_tolerance_mean</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">departures_total</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">departure_shortfall_beyond_tolerance_sum</span> <span class="o">/</span> <span class="n">departures_total</span>
         <span class="n">surplus_mean</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">departures_total</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">departure_surplus_sum</span> <span class="o">/</span> <span class="n">departures_total</span>
@@ -433,6 +759,15 @@
             <span class="s1">&#39;departures_met&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_met</span><span class="p">),</span>
             <span class="s1">&#39;departures_min_acceptable&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_min_acceptable</span><span class="p">),</span>
             <span class="s1">&#39;departures_within_tolerance&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_within_tolerance</span><span class="p">),</span>
+            <span class="s1">&#39;departures_target_feasible&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_target_feasible</span><span class="p">),</span>
+            <span class="s1">&#39;departures_target_infeasible&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_target_infeasible</span><span class="p">),</span>
+            <span class="s1">&#39;departures_min_acceptable_feasible&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_min_acceptable_feasible</span><span class="p">),</span>
+            <span class="s1">&#39;departures_min_acceptable_infeasible&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_min_acceptable_infeasible</span><span class="p">),</span>
+            <span class="s1">&#39;departures_within_tolerance_feasible&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_within_tolerance_feasible</span><span class="p">),</span>
+            <span class="s1">&#39;departures_within_tolerance_infeasible&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_within_tolerance_infeasible</span><span class="p">),</span>
+            <span class="s1">&#39;_departures_met_target_feasible&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_met_target_feasible</span><span class="p">),</span>
+            <span class="s1">&#39;_departures_min_acceptable_feasible_met&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_min_acceptable_feasible_met</span><span class="p">),</span>
+            <span class="s1">&#39;_departures_within_tolerance_feasible_met&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departures_within_tolerance_feasible_met</span><span class="p">),</span>
             <span class="s1">&#39;departure_deficit_sum&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departure_deficit_sum</span><span class="p">),</span>
             <span class="s1">&#39;departure_shortfall_beyond_tolerance_sum&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departure_shortfall_beyond_tolerance_sum</span><span class="p">),</span>
             <span class="s1">&#39;departure_surplus_sum&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">departure_surplus_sum</span><span class="p">),</span>
@@ -440,6 +775,9 @@
             <span class="s1">&#39;ev_departure_success_rate&#39;</span><span class="p">:</span> <span class="n">success_rate</span><span class="p">,</span>
             <span class="s1">&#39;ev_departure_min_acceptable_rate&#39;</span><span class="p">:</span> <span class="n">min_acceptable_rate</span><span class="p">,</span>
             <span class="s1">&#39;ev_departure_within_tolerance_rate&#39;</span><span class="p">:</span> <span class="n">within_tolerance_rate</span><span class="p">,</span>
+            <span class="s1">&#39;ev_departure_success_feasible_rate&#39;</span><span class="p">:</span> <span class="n">success_feasible_rate</span><span class="p">,</span>
+            <span class="s1">&#39;ev_departure_min_acceptable_feasible_rate&#39;</span><span class="p">:</span> <span class="n">min_acceptable_feasible_rate</span><span class="p">,</span>
+            <span class="s1">&#39;ev_departure_within_tolerance_feasible_rate&#39;</span><span class="p">:</span> <span class="n">within_tolerance_feasible_rate</span><span class="p">,</span>
             <span class="s1">&#39;ev_departure_soc_deficit_mean&#39;</span><span class="p">:</span> <span class="n">deficit_mean</span><span class="p">,</span>
             <span class="s1">&#39;ev_departure_shortfall_beyond_tolerance_mean&#39;</span><span class="p">:</span> <span class="n">shortfall_beyond_tolerance_mean</span><span class="p">,</span>
             <span class="s1">&#39;ev_departure_soc_surplus_mean&#39;</span><span class="p">:</span> <span class="n">surplus_mean</span><span class="p">,</span>
@@ -882,6 +1220,15 @@
         <span class="n">ev_departures_met</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">ev_departures_min_acceptable</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">ev_departures_within_tolerance</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ev_departures_target_feasible</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ev_departures_target_infeasible</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ev_departures_min_acceptable_feasible</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ev_departures_min_acceptable_infeasible</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ev_departures_within_tolerance_feasible</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ev_departures_within_tolerance_infeasible</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ev_departures_met_target_feasible</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ev_departures_min_acceptable_feasible_met</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ev_departures_within_tolerance_feasible_met</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">ev_deficit_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">ev_shortfall_beyond_tolerance_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">ev_surplus_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -1132,9 +1479,18 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_met_events_count&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_met&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_events_count&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_min_acceptable&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_events_count&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_within_tolerance&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_target_feasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_target_feasible&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_target_infeasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_target_infeasible&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_feasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_min_acceptable_feasible&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_infeasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_min_acceptable_infeasible&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_feasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_within_tolerance_feasible&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_infeasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_within_tolerance_infeasible&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_success_rate&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;ev_departure_success_rate&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_rate&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;ev_departure_min_acceptable_rate&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_rate&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;ev_departure_within_tolerance_rate&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_success_feasible_rate&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;ev_departure_success_feasible_rate&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_feasible_rate&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;ev_departure_min_acceptable_feasible_rate&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_feasible_rate&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;ev_departure_within_tolerance_feasible_rate&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_soc_deficit_mean&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;ev_departure_soc_deficit_mean&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_shortfall_beyond_tolerance_mean&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;ev_departure_shortfall_beyond_tolerance_mean&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_soc_surplus_mean&#39;</span><span class="p">,</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;ev_departure_soc_surplus_mean&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
@@ -1147,6 +1503,15 @@
             <span class="n">ev_departures_met</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_met&#39;</span><span class="p">]</span>
             <span class="n">ev_departures_min_acceptable</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_min_acceptable&#39;</span><span class="p">]</span>
             <span class="n">ev_departures_within_tolerance</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_within_tolerance&#39;</span><span class="p">]</span>
+            <span class="n">ev_departures_target_feasible</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_target_feasible&#39;</span><span class="p">]</span>
+            <span class="n">ev_departures_target_infeasible</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_target_infeasible&#39;</span><span class="p">]</span>
+            <span class="n">ev_departures_min_acceptable_feasible</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_min_acceptable_feasible&#39;</span><span class="p">]</span>
+            <span class="n">ev_departures_min_acceptable_infeasible</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_min_acceptable_infeasible&#39;</span><span class="p">]</span>
+            <span class="n">ev_departures_within_tolerance_feasible</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_within_tolerance_feasible&#39;</span><span class="p">]</span>
+            <span class="n">ev_departures_within_tolerance_infeasible</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departures_within_tolerance_infeasible&#39;</span><span class="p">]</span>
+            <span class="n">ev_departures_met_target_feasible</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;_departures_met_target_feasible&#39;</span><span class="p">]</span>
+            <span class="n">ev_departures_min_acceptable_feasible_met</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;_departures_min_acceptable_feasible_met&#39;</span><span class="p">]</span>
+            <span class="n">ev_departures_within_tolerance_feasible_met</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;_departures_within_tolerance_feasible_met&#39;</span><span class="p">]</span>
             <span class="n">ev_deficit_sum</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departure_deficit_sum&#39;</span><span class="p">]</span>
             <span class="n">ev_shortfall_beyond_tolerance_sum</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departure_shortfall_beyond_tolerance_sum&#39;</span><span class="p">]</span>
             <span class="n">ev_surplus_sum</span> <span class="o">+=</span> <span class="n">ev_metrics</span><span class="p">[</span><span class="s1">&#39;departure_surplus_sum&#39;</span><span class="p">]</span>
@@ -1294,6 +1659,18 @@
         <span class="n">ev_success_rate</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ev_departures_total</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="n">ev_departures_met</span> <span class="o">/</span> <span class="n">ev_departures_total</span>
         <span class="n">ev_min_acceptable_rate</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ev_departures_total</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="n">ev_departures_min_acceptable</span> <span class="o">/</span> <span class="n">ev_departures_total</span>
         <span class="n">ev_within_tolerance_rate</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ev_departures_total</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="n">ev_departures_within_tolerance</span> <span class="o">/</span> <span class="n">ev_departures_total</span>
+        <span class="n">ev_success_feasible_rate</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">None</span> <span class="k">if</span> <span class="n">ev_departures_target_feasible</span> <span class="o">&lt;=</span> <span class="mf">0.0</span>
+            <span class="k">else</span> <span class="n">ev_departures_met_target_feasible</span> <span class="o">/</span> <span class="n">ev_departures_target_feasible</span>
+        <span class="p">)</span>
+        <span class="n">ev_min_acceptable_feasible_rate</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">None</span> <span class="k">if</span> <span class="n">ev_departures_min_acceptable_feasible</span> <span class="o">&lt;=</span> <span class="mf">0.0</span>
+            <span class="k">else</span> <span class="n">ev_departures_min_acceptable_feasible_met</span> <span class="o">/</span> <span class="n">ev_departures_min_acceptable_feasible</span>
+        <span class="p">)</span>
+        <span class="n">ev_within_tolerance_feasible_rate</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">None</span> <span class="k">if</span> <span class="n">ev_departures_within_tolerance_feasible</span> <span class="o">&lt;=</span> <span class="mf">0.0</span>
+            <span class="k">else</span> <span class="n">ev_departures_within_tolerance_feasible_met</span> <span class="o">/</span> <span class="n">ev_departures_within_tolerance_feasible</span>
+        <span class="p">)</span>
         <span class="n">ev_deficit_mean</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ev_departures_total</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="n">ev_deficit_sum</span> <span class="o">/</span> <span class="n">ev_departures_total</span>
         <span class="n">ev_shortfall_beyond_tolerance_mean</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ev_departures_total</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="n">ev_shortfall_beyond_tolerance_sum</span> <span class="o">/</span> <span class="n">ev_departures_total</span>
         <span class="n">ev_surplus_mean</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ev_departures_total</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="n">ev_surplus_sum</span> <span class="o">/</span> <span class="n">ev_departures_total</span>
@@ -1303,9 +1680,18 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_met_events_count&#39;</span><span class="p">,</span> <span class="n">ev_departures_met</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_events_count&#39;</span><span class="p">,</span> <span class="n">ev_departures_min_acceptable</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_events_count&#39;</span><span class="p">,</span> <span class="n">ev_departures_within_tolerance</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_target_feasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_departures_target_feasible</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_target_infeasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_departures_target_infeasible</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_feasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_departures_min_acceptable_feasible</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_infeasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_departures_min_acceptable_infeasible</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_feasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_departures_within_tolerance_feasible</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_infeasible_events_count&#39;</span><span class="p">,</span> <span class="n">ev_departures_within_tolerance_infeasible</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_success_rate&#39;</span><span class="p">,</span> <span class="n">ev_success_rate</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_rate&#39;</span><span class="p">,</span> <span class="n">ev_min_acceptable_rate</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_rate&#39;</span><span class="p">,</span> <span class="n">ev_within_tolerance_rate</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_success_feasible_rate&#39;</span><span class="p">,</span> <span class="n">ev_success_feasible_rate</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_feasible_rate&#39;</span><span class="p">,</span> <span class="n">ev_min_acceptable_feasible_rate</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_feasible_rate&#39;</span><span class="p">,</span> <span class="n">ev_within_tolerance_feasible_rate</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_soc_deficit_mean&#39;</span><span class="p">,</span> <span class="n">ev_deficit_mean</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_shortfall_beyond_tolerance_mean&#39;</span><span class="p">,</span> <span class="n">ev_shortfall_beyond_tolerance_mean</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;ev_departure_soc_surplus_mean&#39;</span><span class="p">,</span> <span class="n">ev_surplus_mean</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
@@ -1994,9 +2380,18 @@
             <span class="p">(</span><span class="s1">&#39;ev_departure_met_events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_met&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_min_acceptable&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_within_tolerance&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ev_departure_target_feasible_events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_target_feasible&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ev_departure_target_infeasible_events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_target_infeasible&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_feasible_events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_min_acceptable_feasible&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_infeasible_events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_min_acceptable_infeasible&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_feasible_events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_within_tolerance_feasible&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_infeasible_events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_within_tolerance_infeasible&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;ev_departure_success_rate&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_success&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_rate&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_min_acceptable&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_rate&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_within_tolerance&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ev_departure_success_feasible_rate&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_success&#39;</span><span class="p">,</span> <span class="s1">&#39;feasible&#39;</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ev_departure_min_acceptable_feasible_rate&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_min_acceptable&#39;</span><span class="p">,</span> <span class="s1">&#39;feasible&#39;</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ev_departure_within_tolerance_feasible_rate&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_within_tolerance&#39;</span><span class="p">,</span> <span class="s1">&#39;feasible&#39;</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;ev_departure_soc_deficit_mean&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_soc_deficit_mean&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;ev_departure_shortfall_beyond_tolerance_mean&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_shortfall_beyond_tolerance_mean&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;ev_departure_soc_surplus_mean&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">,</span> <span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;departure_soc_surplus_mean&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
