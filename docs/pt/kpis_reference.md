@@ -91,9 +91,15 @@ Safe division devolve `None`/placeholder quando o denominador nao e fisicamente 
 | departure met count | count | Departures em que SOC requerido foi cumprido. |
 | departure minimum acceptable count | count | Departures em que o SOC e pelo menos `target_soc - ev_departure_service_tolerance`. |
 | departure within tolerance count | count | Departures dentro da tolerancia simetrica configurada. |
+| departure target feasible/infeasible count | count | Departures em que o target SOC estrito era/nao era alcancavel carregando sempre na potencia maxima durante o intervalo ligado. |
+| departure minimum acceptable feasible/infeasible count | count | Departures em que o SOC minimo aceitavel era/nao era alcancavel carregando sempre na potencia maxima. |
+| departure within tolerance feasible/infeasible count | count | Departures em que o limite inferior da banda de tolerancia simetrica era/nao era alcancavel carregando sempre na potencia maxima. |
 | departure success ratio | ratio | `met / departures`. |
 | departure minimum acceptable ratio | ratio | `minimum_acceptable / departures`. Este e o KPI principal de conforto/servico EV. |
 | departure within tolerance ratio | ratio | `within_symmetric_tolerance / departures`. |
+| departure success feasible ratio | ratio | Cumprimento estrito apenas sobre departures em que o target estrito era fisicamente alcancavel. |
+| departure minimum acceptable feasible ratio | ratio | Cumprimento do servico minimo apenas sobre departures em que o minimo era fisicamente alcancavel. Este e o KPI principal de qualidade do controlador. |
+| departure within tolerance feasible ratio | ratio | Accuracy simetrica apenas sobre departures em que a banda de tolerancia era fisicamente alcancavel. |
 | departure SOC deficit mean | ratio | Deficit medio nao-negativo de SOC por departure. |
 | departure shortfall beyond tolerance mean | ratio | Deficit medio abaixo de `target_soc - ev_departure_service_tolerance`. |
 | departure SOC surplus mean | ratio | Excesso medio nao-negativo de SOC por departure. |
@@ -107,6 +113,8 @@ Semantica das tolerancias EV no departure:
 - `ev_departure_success_rate` mede cumprimento estrito: `actual_soc >= target_soc`.
 - `ev_departure_min_acceptable_rate` mede servico minimo: `actual_soc >= target_soc - ev_departure_service_tolerance`.
 - `ev_departure_within_tolerance_rate` mede proximidade simetrica ao target: `abs(actual_soc - target_soc) <= ev_departure_within_tolerance`.
+- As variantes `*_feasible_rate` usam os mesmos numeradores, mas excluem departures em que esse limiar nao era fisicamente alcancavel desde o SOC de chegada, carregando sempre na potencia maxima do charger/bateria durante o intervalo ligado.
+- Os contadores de feasibility sao diagnosticos da qualidade/cenario do schedule; se faltarem dados de charger, bateria ou SOC de chegada, o departure e tratado como feasible para preservar comportamento legacy.
 - As duas tolerancias fazem default para `0.05`.
 
 ## KPIs BESS

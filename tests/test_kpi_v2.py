@@ -82,6 +82,42 @@ def _fake_departure_charger(actual_soc: float, target_soc: float = 0.80, *, char
     )
 
 
+def _fake_feasibility_departure_charger(
+    actual_soc: float,
+    target_soc: float = 0.80,
+    *,
+    arrival_soc: float = 0.20,
+    capacity_kwh: float = 10.0,
+    max_charging_power_kw: float = 10.0,
+    charger_id: str = "fake_feasibility_charger",
+):
+    ev = SimpleNamespace(
+        battery=SimpleNamespace(
+            soc=[float(actual_soc), float(actual_soc)],
+            initial_soc=float(arrival_soc),
+            capacity=float(capacity_kwh),
+            nominal_power=float(max_charging_power_kw),
+            seconds_per_time_step=3600,
+            capacity_power_curve=np.array([[0.0, 1.0], [1.0, 1.0]], dtype="float64"),
+            power_efficiency_curve=np.array([[0.0, 1.0], [1.0, 1.0]], dtype="float64"),
+        )
+    )
+    return SimpleNamespace(
+        charger_id=charger_id,
+        max_charging_power=float(max_charging_power_kw),
+        efficiency=1.0,
+        seconds_per_time_step=3600,
+        electricity_consumption=np.zeros(2, dtype="float64"),
+        charger_simulation=SimpleNamespace(
+            electric_vehicle_charger_state=np.array([1.0, 0.0], dtype="float64"),
+            electric_vehicle_id=np.array(["EV_1", "EV_1"]),
+            electric_vehicle_required_soc_departure=np.array([float(target_soc), float(target_soc)], dtype="float64"),
+            electric_vehicle_estimated_soc_arrival=np.array([float(arrival_soc), -0.1], dtype="float64"),
+        ),
+        past_connected_evs=[ev, None],
+    )
+
+
 def _fake_ev_building(actual_socs: list[float], *, name: str = "Building_1"):
     return SimpleNamespace(
         name=name,
@@ -445,8 +481,10 @@ def test_kpi_v2_adds_domain_and_market_metrics(tmp_path: Path):
             "building_cost_total_control_eur",
             "building_cost_daily_average_control_eur",
             "building_ev_events_departure_within_tolerance_count",
+            "building_ev_events_departure_target_infeasible_count",
             "building_ev_performance_departure_success_ratio",
             "building_ev_performance_departure_within_tolerance_ratio",
+            "building_ev_performance_departure_success_feasible_ratio",
             "building_battery_total_throughput_kwh",
             "building_solar_self_consumption_total_generation_kwh",
             "building_solar_self_consumption_daily_average_export_kwh",
@@ -493,6 +531,48 @@ def test_ev_departure_service_threshold_cases(
     assert metrics["ev_departure_soc_deficit_mean"] == pytest.approx(max(0.80 - actual_soc, 0.0), abs=1e-9)
     assert metrics["ev_departure_soc_surplus_mean"] == pytest.approx(max(actual_soc - 0.80, 0.0), abs=1e-9)
     assert metrics["ev_departure_soc_absolute_error_mean"] == pytest.approx(abs(actual_soc - 0.80), abs=1e-9)
+
+
+def test_ev_departure_feasible_rates_exclude_physically_unreachable_targets():
+    service = CityLearnKPIService(
+        SimpleNamespace(
+            ev_departure_within_tolerance=0.05,
+            ev_departure_service_tolerance=0.05,
+            seconds_per_time_step=3600,
+        )
+    )
+    building = SimpleNamespace(
+        name="Building_1",
+        time_step=1,
+        electric_vehicle_chargers=[
+            _fake_feasibility_departure_charger(
+                actual_soc=0.70,
+                arrival_soc=0.20,
+                capacity_kwh=10.0,
+                max_charging_power_kw=10.0,
+                charger_id="feasible_but_failed",
+            ),
+            _fake_feasibility_departure_charger(
+                actual_soc=0.21,
+                arrival_soc=0.20,
+                capacity_kwh=100.0,
+                max_charging_power_kw=1.0,
+                charger_id="target_unreachable",
+            ),
+        ],
+    )
+
+    metrics = service._compute_ev_metrics(building)
+
+    assert metrics["departures_total"] == 2.0
+    assert metrics["departures_met"] == 0.0
+    assert metrics["ev_departure_success_rate"] == pytest.approx(0.0)
+    assert metrics["departures_target_feasible"] == pytest.approx(1.0)
+    assert metrics["departures_target_infeasible"] == pytest.approx(1.0)
+    assert metrics["ev_departure_success_feasible_rate"] == pytest.approx(0.0)
+    assert metrics["departures_min_acceptable_feasible"] == pytest.approx(1.0)
+    assert metrics["departures_min_acceptable_infeasible"] == pytest.approx(1.0)
+    assert metrics["ev_departure_min_acceptable_feasible_rate"] == pytest.approx(0.0)
 
 
 def test_ev_departure_service_tolerance_is_configurable_from_schema_and_kwargs(tmp_path: Path):

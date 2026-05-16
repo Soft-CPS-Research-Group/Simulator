@@ -58,6 +58,48 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.5 - KPIs EV Fair por Feasibility no Departure
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release que separa resultados EV brutos no departure de resultados justos para avaliar o controlador quando o SOC pedido era fisicamente impossivel durante o intervalo ligado.
+
+### Added
+
+- Contadores de feasibility para departures EV em que o target estrito, o limiar minimo aceitavel ou o limite inferior da tolerancia simetrica eram/nao eram alcancaveis carregando sempre na potencia maxima do charger/bateria.
+- Racios EV feasible-only:
+  - `*_ev_performance_departure_success_feasible_ratio`
+  - `*_ev_performance_departure_min_acceptable_feasible_ratio`
+  - `*_ev_performance_departure_within_tolerance_feasible_ratio`
+
+### Changed
+
+- Os racios EV existentes continuam brutos sobre todos os departures validos.
+- O KPI recomendado para qualidade do controlador passa a ser `*_ev_performance_departure_min_acceptable_feasible_ratio`; usar racios brutos mais contadores infeasible para perceber experiencia do utilizador e feasibility do schedule.
+
+### Dataset/Schema Impact
+
+- Sem alteracoes de schema. A feasibility usa o schedule do charger, capacidade da bateria EV, potencia do charger e SOC de chegada ja existentes.
+- Se faltarem dados de charger, bateria ou SOC de chegada, o departure e tratado como feasible para compatibilidade.
+
+### Compatibility
+
+- Linhas KPI aditivas em `evaluate_v2()` e exports. Nomes e semantica dos KPIs existentes ficam preservados.
+
+### Validation
+
+- `.venv/bin/python -m pytest tests/test_kpi_v2.py -q`: pass (`28 passed`)
+- `.venv/bin/python -m pytest tests/test_kpi_golden.py tests/unit/test_subhour_scaling.py::test_15_second_charge_immediately_meets_ev_departure_kpis -q`: pass (`11 passed`)
+- `.venv/bin/python -m pytest tests/test_ev_arrivals.py::test_ev_kpi_evaluation_with_evs_and_chargers -q`: pass (`1 passed`)
+- `.venv/bin/python -m compileall citylearn/internal/kpi.py`: pass
+
+### Migration Notes
+
+- Avaliar servico do controlador com `*_ev_performance_departure_min_acceptable_feasible_ratio`.
+- Usar `*_ev_events_departure_*_infeasible_count` como diagnostico do cenario/dados, nao como falha do controlador.
+
 ## v0.6.4 - Fixes de Auditoria de Readiness
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

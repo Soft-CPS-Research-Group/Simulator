@@ -117,6 +117,255 @@ class CityLearnKPIService:
 
         return float(target)
 
+    @staticmethod
+    def _safe_sequence_value(sequence, index: int, default=None):
+        if sequence is None or index is None or index < 0:
+            return default
+
+        try:
+            if index >= len(sequence):
+                return default
+            return sequence[index]
+        except (TypeError, IndexError):
+            return default
+
+    @staticmethod
+    def _normal_ev_id(value) -> Optional[str]:
+        if not isinstance(value, str):
+            return None
+
+        value = value.strip()
+        if value == '' or value.lower() == 'nan':
+            return None
+
+        return value
+
+    @staticmethod
+    def _interp_curve(curve, x: float, default: Optional[float] = None) -> Optional[float]:
+        try:
+            arr = np.array(curve, dtype='float64')
+        except (TypeError, ValueError):
+            return default
+
+        if arr.ndim != 2:
+            return default
+
+        if arr.shape[0] != 2 and arr.shape[1] == 2:
+            arr = arr.T
+
+        if arr.shape[0] != 2:
+            return default
+
+        xs = arr[0]
+        ys = arr[1]
+        finite = np.isfinite(xs) & np.isfinite(ys)
+
+        if not np.any(finite):
+            return default
+
+        xs = xs[finite]
+        ys = ys[finite]
+        order = np.argsort(xs)
+        xs = xs[order]
+        ys = ys[order]
+
+        return float(np.interp(float(x), xs, ys))
+
+    def _ev_connected_interval_start(self, sim, states: np.ndarray, departure_index: int) -> int:
+        ev_ids = getattr(sim, 'electric_vehicle_id', None)
+        current_ev_id = self._normal_ev_id(self._safe_sequence_value(ev_ids, departure_index))
+        start = int(departure_index)
+
+        while start > 0:
+            previous_state = self._to_scalar(states[start - 1], np.nan)
+
+            if previous_state != 1:
+                break
+
+            previous_ev_id = self._normal_ev_id(self._safe_sequence_value(ev_ids, start - 1))
+
+            if (
+                current_ev_id is not None
+                and previous_ev_id is not None
+                and previous_ev_id != current_ev_id
+            ):
+                break
+
+            start -= 1
+
+        return start
+
+    def _ev_arrival_soc_for_interval(self, sim, ev, states: np.ndarray, interval_start: int) -> Optional[float]:
+        estimated_soc_arrival = getattr(sim, 'electric_vehicle_estimated_soc_arrival', None)
+        ev_ids = getattr(sim, 'electric_vehicle_id', None)
+        current_ev_id = self._normal_ev_id(self._safe_sequence_value(ev_ids, interval_start))
+        candidates = []
+
+        if interval_start > 0:
+            previous_state = self._to_scalar(states[interval_start - 1], np.nan)
+            previous_ev_id = self._normal_ev_id(self._safe_sequence_value(ev_ids, interval_start - 1))
+
+            if (
+                previous_state in (2, 3)
+                and (
+                    current_ev_id is None
+                    or previous_ev_id is None
+                    or previous_ev_id == current_ev_id
+                )
+            ):
+                candidates.append(self._safe_sequence_value(estimated_soc_arrival, interval_start - 1))
+
+        candidates.append(self._safe_sequence_value(estimated_soc_arrival, interval_start))
+
+        battery = getattr(ev, 'battery', None)
+        battery_soc = getattr(battery, 'soc', None)
+
+        if interval_start == 0:
+            candidates.append(getattr(battery, 'initial_soc', None))
+        else:
+            candidates.append(self._safe_sequence_value(battery_soc, interval_start - 1))
+
+        candidates.append(self._safe_sequence_value(battery_soc, interval_start))
+
+        for candidate in candidates:
+            soc = self._normalize_soc_target(candidate)
+            if soc is not None:
+                return soc
+
+        return None
+
+    def _ev_battery_max_input_power_kw(self, battery, charger_power_kw: float, soc: float) -> float:
+        charger_power_kw = max(float(charger_power_kw), 0.0)
+        nominal_power_kw = self._to_scalar(getattr(battery, 'nominal_power', np.nan), np.nan)
+
+        if not np.isfinite(nominal_power_kw) or nominal_power_kw <= 0.0:
+            return charger_power_kw
+
+        multiplier = self._interp_curve(getattr(battery, 'capacity_power_curve', None), soc, default=1.0)
+        multiplier = 1.0 if multiplier is None or not np.isfinite(multiplier) else max(float(multiplier), 0.0)
+        return min(charger_power_kw, nominal_power_kw * multiplier)
+
+    def _ev_battery_charge_round_trip_efficiency(self, battery, power_kw: float) -> float:
+        nominal_power_kw = self._to_scalar(getattr(battery, 'nominal_power', np.nan), np.nan)
+        normalized_power = (
+            float(power_kw) / nominal_power_kw
+            if np.isfinite(nominal_power_kw) and nominal_power_kw > 0.0
+            else 1.0
+        )
+        efficiency = self._interp_curve(
+            getattr(battery, 'power_efficiency_curve', None),
+            np.clip(normalized_power, 0.0, 1.0),
+            default=None,
+        )
+
+        if efficiency is None or not np.isfinite(efficiency):
+            efficiency = self._to_scalar(getattr(battery, 'efficiency', np.nan), np.nan)
+
+        if efficiency is None or not np.isfinite(efficiency):
+            round_trip = self._to_scalar(getattr(battery, 'round_trip_efficiency', np.nan), np.nan)
+            return float(np.clip(round_trip, 0.0, 1.0)) if np.isfinite(round_trip) else 1.0
+
+        return float(np.sqrt(np.clip(efficiency, 0.0, 1.0)))
+
+    def _ev_charger_charge_efficiency(self, charger, power_kw: float, max_power_kw: float) -> float:
+        normalized_power = float(power_kw) / max(float(max_power_kw), ZERO_DIVISION_PLACEHOLDER)
+        get_efficiency = getattr(charger, 'get_efficiency', None)
+
+        if callable(get_efficiency):
+            try:
+                return float(np.clip(get_efficiency(np.clip(normalized_power, 0.0, 1.0), True), 0.0, 1.0))
+            except (TypeError, ValueError):
+                pass
+
+        return float(np.clip(self._to_scalar(getattr(charger, 'efficiency', 1.0), 1.0), 0.0, 1.0))
+
+    def _ev_departure_threshold_feasible(
+        self,
+        charger,
+        sim,
+        ev,
+        states: np.ndarray,
+        departure_index: int,
+        threshold_soc: float,
+    ) -> bool:
+        """Return whether a departure threshold was reachable with max charging.
+
+        Missing charger/battery/arrival data is treated as feasible to preserve
+        existing KPI semantics for legacy datasets that cannot support this audit.
+        """
+
+        threshold_soc = self._normalize_soc_target(threshold_soc)
+
+        if threshold_soc is None or threshold_soc <= 0.0:
+            return True
+
+        battery = getattr(ev, 'battery', None)
+
+        if battery is None:
+            return True
+
+        capacity_kwh = self._to_scalar(getattr(battery, 'capacity', np.nan), np.nan)
+        charger_power_kw = self._to_scalar(getattr(charger, 'max_charging_power', np.nan), np.nan)
+
+        if (
+            not np.isfinite(capacity_kwh)
+            or capacity_kwh <= 0.0
+            or not np.isfinite(charger_power_kw)
+            or charger_power_kw < 0.0
+        ):
+            return True
+
+        interval_start = self._ev_connected_interval_start(sim, states, departure_index)
+        arrival_soc = self._ev_arrival_soc_for_interval(sim, ev, states, interval_start)
+
+        if arrival_soc is None:
+            return True
+
+        if arrival_soc + self.EV_DEPARTURE_EPS >= threshold_soc:
+            return True
+
+        seconds_per_time_step = self._to_scalar(
+            getattr(
+                charger,
+                'seconds_per_time_step',
+                getattr(battery, 'seconds_per_time_step', getattr(self.env, 'seconds_per_time_step', 3600.0)),
+            ),
+            3600.0,
+        )
+        step_hours = max(seconds_per_time_step / 3600.0, 0.0)
+
+        if step_hours <= 0.0:
+            return True
+
+        soc = float(arrival_soc)
+        connected_steps = max(int(departure_index) - int(interval_start) + 1, 0)
+
+        for _ in range(connected_steps):
+            if soc + self.EV_DEPARTURE_EPS >= threshold_soc:
+                return True
+
+            power_kw = self._ev_battery_max_input_power_kw(battery, charger_power_kw, soc)
+
+            if power_kw <= self.EV_DEPARTURE_EPS:
+                break
+
+            charger_efficiency = self._ev_charger_charge_efficiency(charger, power_kw, charger_power_kw)
+            battery_round_trip_efficiency = self._ev_battery_charge_round_trip_efficiency(battery, power_kw)
+            delta_soc = (
+                power_kw
+                * step_hours
+                * charger_efficiency
+                * battery_round_trip_efficiency
+                / capacity_kwh
+            )
+
+            if delta_soc <= self.EV_DEPARTURE_EPS:
+                break
+
+            soc = float(np.clip(soc + delta_soc, 0.0, 1.0))
+
+        return bool(soc + self.EV_DEPARTURE_EPS >= threshold_soc)
+
     def _ev_departure_within_tolerance(self) -> float:
         return max(
             self._to_scalar(
@@ -251,6 +500,15 @@ class CityLearnKPIService:
                 'departures_met': 0.0,
                 'departures_min_acceptable': 0.0,
                 'departures_within_tolerance': 0.0,
+                'departures_target_feasible': 0.0,
+                'departures_target_infeasible': 0.0,
+                'departures_min_acceptable_feasible': 0.0,
+                'departures_min_acceptable_infeasible': 0.0,
+                'departures_within_tolerance_feasible': 0.0,
+                'departures_within_tolerance_infeasible': 0.0,
+                '_departures_met_target_feasible': 0.0,
+                '_departures_min_acceptable_feasible_met': 0.0,
+                '_departures_within_tolerance_feasible_met': 0.0,
                 'departure_deficit_sum': 0.0,
                 'departure_shortfall_beyond_tolerance_sum': 0.0,
                 'departure_surplus_sum': 0.0,
@@ -258,6 +516,9 @@ class CityLearnKPIService:
                 'ev_departure_success_rate': None,
                 'ev_departure_min_acceptable_rate': None,
                 'ev_departure_within_tolerance_rate': None,
+                'ev_departure_success_feasible_rate': None,
+                'ev_departure_min_acceptable_feasible_rate': None,
+                'ev_departure_within_tolerance_feasible_rate': None,
                 'ev_departure_soc_deficit_mean': None,
                 'ev_departure_shortfall_beyond_tolerance_mean': None,
                 'ev_departure_soc_surplus_mean': None,
@@ -271,6 +532,15 @@ class CityLearnKPIService:
         departures_met = 0
         departures_min_acceptable = 0
         departures_within_tolerance = 0
+        departures_target_feasible = 0
+        departures_target_infeasible = 0
+        departures_min_acceptable_feasible = 0
+        departures_min_acceptable_infeasible = 0
+        departures_within_tolerance_feasible = 0
+        departures_within_tolerance_infeasible = 0
+        departures_met_target_feasible = 0
+        departures_min_acceptable_feasible_met = 0
+        departures_within_tolerance_feasible_met = 0
         departure_deficit_sum = 0.0
         departure_shortfall_beyond_tolerance_sum = 0.0
         departure_surplus_sum = 0.0
@@ -319,6 +589,32 @@ class CityLearnKPIService:
                 surplus = max(actual_soc - target_soc, 0.0)
                 absolute_error = abs(actual_soc - target_soc)
                 shortfall_beyond_tolerance = max(target_soc - service_tolerance - actual_soc, 0.0)
+                min_acceptable_threshold = max(target_soc - service_tolerance, 0.0)
+                within_tolerance_threshold = max(target_soc - within_tolerance, 0.0)
+                target_feasible = self._ev_departure_threshold_feasible(
+                    charger,
+                    sim,
+                    ev,
+                    states,
+                    t,
+                    target_soc,
+                )
+                min_acceptable_feasible = self._ev_departure_threshold_feasible(
+                    charger,
+                    sim,
+                    ev,
+                    states,
+                    t,
+                    min_acceptable_threshold,
+                )
+                within_tolerance_feasible = self._ev_departure_threshold_feasible(
+                    charger,
+                    sim,
+                    ev,
+                    states,
+                    t,
+                    within_tolerance_threshold,
+                )
 
                 if absolute_error <= within_tolerance + eps:
                     departures_within_tolerance += 1
@@ -331,9 +627,39 @@ class CityLearnKPIService:
                 if deficit <= eps:
                     departures_met += 1
 
+                if target_feasible:
+                    departures_target_feasible += 1
+                    if deficit <= eps:
+                        departures_met_target_feasible += 1
+                else:
+                    departures_target_infeasible += 1
+
+                if min_acceptable_feasible:
+                    departures_min_acceptable_feasible += 1
+                    if actual_soc + service_tolerance + eps >= target_soc:
+                        departures_min_acceptable_feasible_met += 1
+                else:
+                    departures_min_acceptable_infeasible += 1
+
+                if within_tolerance_feasible:
+                    departures_within_tolerance_feasible += 1
+                    if absolute_error <= within_tolerance + eps:
+                        departures_within_tolerance_feasible_met += 1
+                else:
+                    departures_within_tolerance_infeasible += 1
+
         success_rate = None if departures_total == 0 else departures_met / departures_total
         min_acceptable_rate = None if departures_total == 0 else departures_min_acceptable / departures_total
         within_tolerance_rate = None if departures_total == 0 else departures_within_tolerance / departures_total
+        success_feasible_rate = None if departures_target_feasible == 0 else departures_met_target_feasible / departures_target_feasible
+        min_acceptable_feasible_rate = (
+            None if departures_min_acceptable_feasible == 0
+            else departures_min_acceptable_feasible_met / departures_min_acceptable_feasible
+        )
+        within_tolerance_feasible_rate = (
+            None if departures_within_tolerance_feasible == 0
+            else departures_within_tolerance_feasible_met / departures_within_tolerance_feasible
+        )
         deficit_mean = None if departures_total == 0 else departure_deficit_sum / departures_total
         shortfall_beyond_tolerance_mean = None if departures_total == 0 else departure_shortfall_beyond_tolerance_sum / departures_total
         surplus_mean = None if departures_total == 0 else departure_surplus_sum / departures_total
@@ -344,6 +670,15 @@ class CityLearnKPIService:
             'departures_met': float(departures_met),
             'departures_min_acceptable': float(departures_min_acceptable),
             'departures_within_tolerance': float(departures_within_tolerance),
+            'departures_target_feasible': float(departures_target_feasible),
+            'departures_target_infeasible': float(departures_target_infeasible),
+            'departures_min_acceptable_feasible': float(departures_min_acceptable_feasible),
+            'departures_min_acceptable_infeasible': float(departures_min_acceptable_infeasible),
+            'departures_within_tolerance_feasible': float(departures_within_tolerance_feasible),
+            'departures_within_tolerance_infeasible': float(departures_within_tolerance_infeasible),
+            '_departures_met_target_feasible': float(departures_met_target_feasible),
+            '_departures_min_acceptable_feasible_met': float(departures_min_acceptable_feasible_met),
+            '_departures_within_tolerance_feasible_met': float(departures_within_tolerance_feasible_met),
             'departure_deficit_sum': float(departure_deficit_sum),
             'departure_shortfall_beyond_tolerance_sum': float(departure_shortfall_beyond_tolerance_sum),
             'departure_surplus_sum': float(departure_surplus_sum),
@@ -351,6 +686,9 @@ class CityLearnKPIService:
             'ev_departure_success_rate': success_rate,
             'ev_departure_min_acceptable_rate': min_acceptable_rate,
             'ev_departure_within_tolerance_rate': within_tolerance_rate,
+            'ev_departure_success_feasible_rate': success_feasible_rate,
+            'ev_departure_min_acceptable_feasible_rate': min_acceptable_feasible_rate,
+            'ev_departure_within_tolerance_feasible_rate': within_tolerance_feasible_rate,
             'ev_departure_soc_deficit_mean': deficit_mean,
             'ev_departure_shortfall_beyond_tolerance_mean': shortfall_beyond_tolerance_mean,
             'ev_departure_soc_surplus_mean': surplus_mean,
@@ -791,6 +1129,15 @@ class CityLearnKPIService:
         ev_departures_met = 0.0
         ev_departures_min_acceptable = 0.0
         ev_departures_within_tolerance = 0.0
+        ev_departures_target_feasible = 0.0
+        ev_departures_target_infeasible = 0.0
+        ev_departures_min_acceptable_feasible = 0.0
+        ev_departures_min_acceptable_infeasible = 0.0
+        ev_departures_within_tolerance_feasible = 0.0
+        ev_departures_within_tolerance_infeasible = 0.0
+        ev_departures_met_target_feasible = 0.0
+        ev_departures_min_acceptable_feasible_met = 0.0
+        ev_departures_within_tolerance_feasible_met = 0.0
         ev_deficit_sum = 0.0
         ev_shortfall_beyond_tolerance_sum = 0.0
         ev_surplus_sum = 0.0
@@ -1041,9 +1388,18 @@ class CityLearnKPIService:
                 self._metric('ev_departure_met_events_count', ev_metrics['departures_met'], building.name, 'building'),
                 self._metric('ev_departure_min_acceptable_events_count', ev_metrics['departures_min_acceptable'], building.name, 'building'),
                 self._metric('ev_departure_within_tolerance_events_count', ev_metrics['departures_within_tolerance'], building.name, 'building'),
+                self._metric('ev_departure_target_feasible_events_count', ev_metrics['departures_target_feasible'], building.name, 'building'),
+                self._metric('ev_departure_target_infeasible_events_count', ev_metrics['departures_target_infeasible'], building.name, 'building'),
+                self._metric('ev_departure_min_acceptable_feasible_events_count', ev_metrics['departures_min_acceptable_feasible'], building.name, 'building'),
+                self._metric('ev_departure_min_acceptable_infeasible_events_count', ev_metrics['departures_min_acceptable_infeasible'], building.name, 'building'),
+                self._metric('ev_departure_within_tolerance_feasible_events_count', ev_metrics['departures_within_tolerance_feasible'], building.name, 'building'),
+                self._metric('ev_departure_within_tolerance_infeasible_events_count', ev_metrics['departures_within_tolerance_infeasible'], building.name, 'building'),
                 self._metric('ev_departure_success_rate', ev_metrics['ev_departure_success_rate'], building.name, 'building'),
                 self._metric('ev_departure_min_acceptable_rate', ev_metrics['ev_departure_min_acceptable_rate'], building.name, 'building'),
                 self._metric('ev_departure_within_tolerance_rate', ev_metrics['ev_departure_within_tolerance_rate'], building.name, 'building'),
+                self._metric('ev_departure_success_feasible_rate', ev_metrics['ev_departure_success_feasible_rate'], building.name, 'building'),
+                self._metric('ev_departure_min_acceptable_feasible_rate', ev_metrics['ev_departure_min_acceptable_feasible_rate'], building.name, 'building'),
+                self._metric('ev_departure_within_tolerance_feasible_rate', ev_metrics['ev_departure_within_tolerance_feasible_rate'], building.name, 'building'),
                 self._metric('ev_departure_soc_deficit_mean', ev_metrics['ev_departure_soc_deficit_mean'], building.name, 'building'),
                 self._metric('ev_departure_shortfall_beyond_tolerance_mean', ev_metrics['ev_departure_shortfall_beyond_tolerance_mean'], building.name, 'building'),
                 self._metric('ev_departure_soc_surplus_mean', ev_metrics['ev_departure_soc_surplus_mean'], building.name, 'building'),
@@ -1056,6 +1412,15 @@ class CityLearnKPIService:
             ev_departures_met += ev_metrics['departures_met']
             ev_departures_min_acceptable += ev_metrics['departures_min_acceptable']
             ev_departures_within_tolerance += ev_metrics['departures_within_tolerance']
+            ev_departures_target_feasible += ev_metrics['departures_target_feasible']
+            ev_departures_target_infeasible += ev_metrics['departures_target_infeasible']
+            ev_departures_min_acceptable_feasible += ev_metrics['departures_min_acceptable_feasible']
+            ev_departures_min_acceptable_infeasible += ev_metrics['departures_min_acceptable_infeasible']
+            ev_departures_within_tolerance_feasible += ev_metrics['departures_within_tolerance_feasible']
+            ev_departures_within_tolerance_infeasible += ev_metrics['departures_within_tolerance_infeasible']
+            ev_departures_met_target_feasible += ev_metrics['_departures_met_target_feasible']
+            ev_departures_min_acceptable_feasible_met += ev_metrics['_departures_min_acceptable_feasible_met']
+            ev_departures_within_tolerance_feasible_met += ev_metrics['_departures_within_tolerance_feasible_met']
             ev_deficit_sum += ev_metrics['departure_deficit_sum']
             ev_shortfall_beyond_tolerance_sum += ev_metrics['departure_shortfall_beyond_tolerance_sum']
             ev_surplus_sum += ev_metrics['departure_surplus_sum']
@@ -1203,6 +1568,18 @@ class CityLearnKPIService:
         ev_success_rate = None if ev_departures_total <= 0.0 else ev_departures_met / ev_departures_total
         ev_min_acceptable_rate = None if ev_departures_total <= 0.0 else ev_departures_min_acceptable / ev_departures_total
         ev_within_tolerance_rate = None if ev_departures_total <= 0.0 else ev_departures_within_tolerance / ev_departures_total
+        ev_success_feasible_rate = (
+            None if ev_departures_target_feasible <= 0.0
+            else ev_departures_met_target_feasible / ev_departures_target_feasible
+        )
+        ev_min_acceptable_feasible_rate = (
+            None if ev_departures_min_acceptable_feasible <= 0.0
+            else ev_departures_min_acceptable_feasible_met / ev_departures_min_acceptable_feasible
+        )
+        ev_within_tolerance_feasible_rate = (
+            None if ev_departures_within_tolerance_feasible <= 0.0
+            else ev_departures_within_tolerance_feasible_met / ev_departures_within_tolerance_feasible
+        )
         ev_deficit_mean = None if ev_departures_total <= 0.0 else ev_deficit_sum / ev_departures_total
         ev_shortfall_beyond_tolerance_mean = None if ev_departures_total <= 0.0 else ev_shortfall_beyond_tolerance_sum / ev_departures_total
         ev_surplus_mean = None if ev_departures_total <= 0.0 else ev_surplus_sum / ev_departures_total
@@ -1212,9 +1589,18 @@ class CityLearnKPIService:
             self._metric('ev_departure_met_events_count', ev_departures_met, 'District', 'district'),
             self._metric('ev_departure_min_acceptable_events_count', ev_departures_min_acceptable, 'District', 'district'),
             self._metric('ev_departure_within_tolerance_events_count', ev_departures_within_tolerance, 'District', 'district'),
+            self._metric('ev_departure_target_feasible_events_count', ev_departures_target_feasible, 'District', 'district'),
+            self._metric('ev_departure_target_infeasible_events_count', ev_departures_target_infeasible, 'District', 'district'),
+            self._metric('ev_departure_min_acceptable_feasible_events_count', ev_departures_min_acceptable_feasible, 'District', 'district'),
+            self._metric('ev_departure_min_acceptable_infeasible_events_count', ev_departures_min_acceptable_infeasible, 'District', 'district'),
+            self._metric('ev_departure_within_tolerance_feasible_events_count', ev_departures_within_tolerance_feasible, 'District', 'district'),
+            self._metric('ev_departure_within_tolerance_infeasible_events_count', ev_departures_within_tolerance_infeasible, 'District', 'district'),
             self._metric('ev_departure_success_rate', ev_success_rate, 'District', 'district'),
             self._metric('ev_departure_min_acceptable_rate', ev_min_acceptable_rate, 'District', 'district'),
             self._metric('ev_departure_within_tolerance_rate', ev_within_tolerance_rate, 'District', 'district'),
+            self._metric('ev_departure_success_feasible_rate', ev_success_feasible_rate, 'District', 'district'),
+            self._metric('ev_departure_min_acceptable_feasible_rate', ev_min_acceptable_feasible_rate, 'District', 'district'),
+            self._metric('ev_departure_within_tolerance_feasible_rate', ev_within_tolerance_feasible_rate, 'District', 'district'),
             self._metric('ev_departure_soc_deficit_mean', ev_deficit_mean, 'District', 'district'),
             self._metric('ev_departure_shortfall_beyond_tolerance_mean', ev_shortfall_beyond_tolerance_mean, 'District', 'district'),
             self._metric('ev_departure_soc_surplus_mean', ev_surplus_mean, 'District', 'district'),
@@ -1897,9 +2283,18 @@ class CityLearnKPIService:
             ('ev_departure_met_events_count', 'ev', 'events', 'departure_met', None, 'count'),
             ('ev_departure_min_acceptable_events_count', 'ev', 'events', 'departure_min_acceptable', None, 'count'),
             ('ev_departure_within_tolerance_events_count', 'ev', 'events', 'departure_within_tolerance', None, 'count'),
+            ('ev_departure_target_feasible_events_count', 'ev', 'events', 'departure_target_feasible', None, 'count'),
+            ('ev_departure_target_infeasible_events_count', 'ev', 'events', 'departure_target_infeasible', None, 'count'),
+            ('ev_departure_min_acceptable_feasible_events_count', 'ev', 'events', 'departure_min_acceptable_feasible', None, 'count'),
+            ('ev_departure_min_acceptable_infeasible_events_count', 'ev', 'events', 'departure_min_acceptable_infeasible', None, 'count'),
+            ('ev_departure_within_tolerance_feasible_events_count', 'ev', 'events', 'departure_within_tolerance_feasible', None, 'count'),
+            ('ev_departure_within_tolerance_infeasible_events_count', 'ev', 'events', 'departure_within_tolerance_infeasible', None, 'count'),
             ('ev_departure_success_rate', 'ev', 'performance', 'departure_success', None, 'ratio'),
             ('ev_departure_min_acceptable_rate', 'ev', 'performance', 'departure_min_acceptable', None, 'ratio'),
             ('ev_departure_within_tolerance_rate', 'ev', 'performance', 'departure_within_tolerance', None, 'ratio'),
+            ('ev_departure_success_feasible_rate', 'ev', 'performance', 'departure_success', 'feasible', 'ratio'),
+            ('ev_departure_min_acceptable_feasible_rate', 'ev', 'performance', 'departure_min_acceptable', 'feasible', 'ratio'),
+            ('ev_departure_within_tolerance_feasible_rate', 'ev', 'performance', 'departure_within_tolerance', 'feasible', 'ratio'),
             ('ev_departure_soc_deficit_mean', 'ev', 'performance', 'departure_soc_deficit_mean', None, 'ratio'),
             ('ev_departure_shortfall_beyond_tolerance_mean', 'ev', 'performance', 'departure_shortfall_beyond_tolerance_mean', None, 'ratio'),
             ('ev_departure_soc_surplus_mean', 'ev', 'performance', 'departure_soc_surplus_mean', None, 'ratio'),

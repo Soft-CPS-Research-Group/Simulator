@@ -109,9 +109,18 @@ Community market (conditional):
 - `district_ev_events_departure_met_count`
 - `district_ev_events_departure_min_acceptable_count`
 - `district_ev_events_departure_within_tolerance_count`
+- `district_ev_events_departure_target_feasible_count`
+- `district_ev_events_departure_target_infeasible_count`
+- `district_ev_events_departure_min_acceptable_feasible_count`
+- `district_ev_events_departure_min_acceptable_infeasible_count`
+- `district_ev_events_departure_within_tolerance_feasible_count`
+- `district_ev_events_departure_within_tolerance_infeasible_count`
 - `district_ev_performance_departure_success_ratio`
 - `district_ev_performance_departure_min_acceptable_ratio`
 - `district_ev_performance_departure_within_tolerance_ratio`
+- `district_ev_performance_departure_success_feasible_ratio`
+- `district_ev_performance_departure_min_acceptable_feasible_ratio`
+- `district_ev_performance_departure_within_tolerance_feasible_ratio`
 - `district_ev_performance_departure_soc_deficit_mean_ratio`
 - `district_ev_performance_departure_shortfall_beyond_tolerance_mean_ratio`
 - `district_ev_performance_departure_soc_surplus_mean_ratio`
@@ -175,6 +184,8 @@ Main pattern examples:
 - `building_ev_performance_departure_min_acceptable_ratio`
 - `building_ev_events_departure_within_tolerance_count`
 - `building_ev_performance_departure_within_tolerance_ratio`
+- `building_ev_events_departure_target_infeasible_count`
+- `building_ev_performance_departure_min_acceptable_feasible_ratio`
 
 ---
 
@@ -212,17 +223,31 @@ Strict target fulfillment:
 - KPI (count): `*_ev_events_departure_met_count`
 - KPI (ratio): `*_ev_performance_departure_success_ratio`
 - Condition: `soc_departure >= soc_target_departure`
+- Feasible KPI (ratio): `*_ev_performance_departure_success_feasible_ratio`
+- Feasibility counts:
+  - `*_ev_events_departure_target_feasible_count`
+  - `*_ev_events_departure_target_infeasible_count`
 
 Minimum acceptable user service:
 - KPI (count): `*_ev_events_departure_min_acceptable_count`
 - KPI (ratio): `*_ev_performance_departure_min_acceptable_ratio`
 - Condition: `soc_departure >= soc_target_departure - ev_departure_service_tolerance`
 - Shortfall KPI: `*_ev_performance_departure_shortfall_beyond_tolerance_mean_ratio`
+- Feasible KPI (ratio): `*_ev_performance_departure_min_acceptable_feasible_ratio`
+- Feasibility counts:
+  - `*_ev_events_departure_min_acceptable_feasible_count`
+  - `*_ev_events_departure_min_acceptable_infeasible_count`
 
 Symmetric target accuracy:
 - KPI (count): `*_ev_events_departure_within_tolerance_count`
 - KPI (ratio): `*_ev_performance_departure_within_tolerance_ratio`
 - Condition: `abs(soc_departure - soc_target_departure) <= ev_departure_within_tolerance`
+- Feasible KPI (ratio): `*_ev_performance_departure_within_tolerance_feasible_ratio`
+- Feasibility counts:
+  - `*_ev_events_departure_within_tolerance_feasible_count`
+  - `*_ev_events_departure_within_tolerance_infeasible_count`
+
+Feasible ratios exclude departures where the relevant threshold could not be reached from arrival SOC by charging at maximum charger/battery power during the connected interval. Missing charger, battery or arrival-SOC data is treated as feasible for backward compatibility.
 
 Error diagnostics:
 - `*_ev_performance_departure_soc_deficit_mean_ratio`
@@ -233,6 +258,7 @@ Error diagnostics:
 Relation between counts:
 - `departure_min_acceptable_count <= departure_count`
 - `departure_within_tolerance_count <= departure_count`
+- `departure_*_feasible_count + departure_*_infeasible_count = departure_count`
 - `departure_met_count <= departure_min_acceptable_count`
 - `departure_met_count` and `departure_within_tolerance_count` are not ordered in general.
 

@@ -60,6 +60,48 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.5 - Fair EV Departure Feasibility KPIs
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release that separates raw EV departure outcomes from controller-fair outcomes when the requested SOC was physically unreachable during the connected interval.
+
+### Added
+
+- Feasibility counters for EV departures whose strict target, minimum acceptable service threshold or within-tolerance lower bound could/could not be reached by charging at maximum charger/battery power.
+- Feasible-only EV departure KPI ratios:
+  - `*_ev_performance_departure_success_feasible_ratio`
+  - `*_ev_performance_departure_min_acceptable_feasible_ratio`
+  - `*_ev_performance_departure_within_tolerance_feasible_ratio`
+
+### Changed
+
+- Existing EV departure ratios remain raw over all valid departures.
+- The recommended controller-quality KPI is now `*_ev_performance_departure_min_acceptable_feasible_ratio`; use raw ratios plus infeasible counts to understand user experience and schedule feasibility.
+
+### Dataset/Schema Impact
+
+- No schema changes. Feasibility uses existing charger schedule, EV battery capacity, charger power and arrival SOC fields.
+- Missing charger, battery or arrival-SOC data is treated as feasible for backward compatibility.
+
+### Compatibility
+
+- Additive KPI rows in `evaluate_v2()` and exports. Existing KPI names and semantics are preserved.
+
+### Validation
+
+- `.venv/bin/python -m pytest tests/test_kpi_v2.py -q`: pass (`28 passed`)
+- `.venv/bin/python -m pytest tests/test_kpi_golden.py tests/unit/test_subhour_scaling.py::test_15_second_charge_immediately_meets_ev_departure_kpis -q`: pass (`11 passed`)
+- `.venv/bin/python -m pytest tests/test_ev_arrivals.py::test_ev_kpi_evaluation_with_evs_and_chargers -q`: pass (`1 passed`)
+- `.venv/bin/python -m compileall citylearn/internal/kpi.py`: pass
+
+### Migration Notes
+
+- Score controller service with `*_ev_performance_departure_min_acceptable_feasible_ratio`.
+- Use `*_ev_events_departure_*_infeasible_count` as a scenario/data diagnostic, not as controller failure.
+
 ## v0.6.4 - Readiness Audit Fixes
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
