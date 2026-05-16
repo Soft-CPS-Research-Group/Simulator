@@ -1358,6 +1358,7 @@ class CityLearnEnv(Environment, Env):
         filepath: str = "exported_kpis.csv",
         include_business_as_usual: bool = True,
         export_business_as_usual_timeseries: bool = True,
+        kpi_round_decimals: int = None,
     ):
         """Export episode KPIs to csv."""
 
@@ -1366,6 +1367,7 @@ class CityLearnEnv(Environment, Env):
             filepath=filepath,
             include_business_as_usual=include_business_as_usual,
             export_business_as_usual_timeseries=export_business_as_usual_timeseries,
+            kpi_round_decimals=kpi_round_decimals,
         )
 
     def render(self):

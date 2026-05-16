@@ -60,6 +60,62 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.3 - Physics, Bounds and Dynamic Topology Hardening
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release from the second deep audit of EVs, stationary BESS, deferrable appliances, observations, KPIs and dynamic topology exports.
+
+### Changed
+
+- Observation bounds now account for real EV/deferrable schedules, sub-hour profiles and zero-based minute values.
+- Dynamic topology KPI/export paths use per-timestep active membership for buildings, chargers, stationary storage and deferrable appliances.
+- KPI daily averages for dynamic buildings use each building's active window instead of the global episode window.
+- Peak and ramping BAU shape metrics are reported on power values in kW rather than raw kWh/step.
+- KPI CSV export preserves raw KPI precision by default; rounding is opt-in.
+
+### Fixed
+
+- Stationary BESS standby loss is applied once per timestep and cannot push SOC below the physical DoD minimum.
+- BESS discharge during outages is limited to local load that can actually be served.
+- Initial outage loads are clipped to available local PV/BESS supply instead of triggering a negative-flexibility assertion.
+- EV required/arrival SOC inputs accept both fractions and percentages while preserving negative missing-value sentinels.
+- Deferrable `can_start` and action constraints validate the full multi-step profile against outages and electrical-service headroom.
+- Deferrable cycle profiles above `nominal_power` are rejected.
+- Community-market settled, counterfactual and savings KPIs are exposed through the v2/export KPI contract.
+- Dynamic phase peaks are accumulated on the aligned district timeline instead of truncated building-local windows.
+
+### Dataset/Schema Impact
+
+- No schema migration required.
+- Minute observations now use `0..59`, matching normal clock semantics.
+- Observation-space bounds may be wider for long EV/deferrable schedules and sub-hour appliance profiles.
+
+### Compatibility
+
+- Compatible patch for valid schemas.
+- Invalid battery efficiencies above `1.0`, invalid DoD values and impossible deferrable power profiles now fail fast.
+- Exported KPI precision may include more decimals unless `kpi_round_decimals` is provided.
+
+### Validation
+
+- `.venv/bin/python -m compileall -q citylearn`: pass
+- `.venv/bin/python -m pytest -q`: pass
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py --max-scenarios 32`: pass (`16 passed`)
+- `.venv/bin/python scripts/manual/demo_ev_rbc.py`: pass
+- `.venv/bin/python scripts/manual/demo_ev_rbc_export_minutes.py`: pass
+- `.venv/bin/python scripts/manual/demo_charging_constraints_export_end.py`: pass
+- Dynamic topology entity smoke with zero actions and BAU KPI evaluation: pass (`95 steps`, `2937 KPI rows`)
+- `git diff --check`: pass
+
+### Migration Notes
+
+- Algorithms that hard-code minute bounds as `1..61` should switch to `0..59`.
+- Consumers that expect rounded exported KPIs should pass `kpi_round_decimals=3`.
+
 ## v0.6.0 - Native Business-As-Usual Baseline
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

@@ -125,6 +125,13 @@ def test_pv_per_kw_generation_mode_remains_default():
     np.testing.assert_array_equal(generation, np.array([0.0, 25.0, 50.0], dtype=np.float32))
 
 
+def test_pv_per_kw_generation_mode_scales_with_active_timestep():
+    pv = PV(nominal_power=50.0, seconds_per_time_step=900)
+    generation = pv.get_generation(np.array([0.0, 500.0, 1000.0], dtype=np.float32))
+
+    np.testing.assert_array_equal(generation, np.array([0.0, 6.25, 12.5], dtype=np.float32))
+
+
 def test_schema_can_load_absolute_pv_generation_mode():
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
     schema["root_directory"] = str(SCHEMA.parent)

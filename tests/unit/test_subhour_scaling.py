@@ -658,6 +658,55 @@ def test_ev_loader_scales_explicit_hourly_loss_for_native_15_second_schema(tmp_p
         env.close()
 
 
+def test_15_second_ev_time_observation_bounds_use_step_counts(tmp_path):
+    schema_path = _write_15_second_ev_schema(tmp_path, steps=240)
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["observations"]["connected_electric_vehicle_at_charger_departure_time"] = {
+        "active": True,
+        "shared_in_central_agent": False,
+    }
+    schema["observations"]["incoming_electric_vehicle_at_charger_estimated_arrival_time"] = {
+        "active": True,
+        "shared_in_central_agent": False,
+    }
+    schema_path.write_text(json.dumps(schema), encoding="utf-8")
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=240, random_seed=0)
+
+    try:
+        building = env.buildings[0]
+        _, high = building.estimate_observation_space_limits(include_all=True, periodic_normalization=False)
+        departure_key = "connected_electric_vehicle_at_charger_charger_1_1_departure_time"
+        arrival_key = "incoming_electric_vehicle_at_charger_charger_1_1_estimated_arrival_time"
+
+        assert departure_key in high
+        assert arrival_key in high
+        assert high[departure_key] >= 239
+        assert high[arrival_key] >= 239
+    finally:
+        env.close()
+
+
+def test_zero_minute_is_inside_periodic_minute_bounds(tmp_path):
+    schema_path = _write_15_second_ev_schema(tmp_path, steps=16)
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=16, random_seed=0)
+
+    try:
+        metadata = env.buildings[0].get_periodic_observation_metadata()
+        assert 0 in metadata["minutes"]
+        assert 59 in metadata["minutes"]
+        assert 60 not in metadata["minutes"]
+
+        low, high = env.buildings[0].estimate_observation_space_limits(
+            include_all=True,
+            periodic_normalization=True,
+        )
+        assert "minutes_sin" in low
+        assert "minutes_cos" in high
+    finally:
+        env.close()
+
+
 def test_15_second_connected_ev_zero_action_does_not_lose_soc_from_default_loss(tmp_path):
     schema_path = _write_15_second_ev_schema(tmp_path, steps=120, initial_soc=0.6, target_soc=0.8)
     env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=120, random_seed=0)

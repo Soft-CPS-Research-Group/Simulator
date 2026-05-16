@@ -9,6 +9,7 @@ from pathlib import Path
 pytest.importorskip("gymnasium")
 
 from citylearn.citylearn import CityLearnEnv
+from citylearn.data import ChargerSimulation
 
 
 SCHEMA_PATH = "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json"
@@ -100,6 +101,29 @@ def test_connected_ev_without_arrival_soc_uses_initial_soc_on_reset():
     assert charger.charger_simulation.electric_vehicle_required_soc_departure[0] == pytest.approx(0.8)
     assert ev.battery.initial_soc == pytest.approx(0.4)
     assert float(ev.battery.soc[0]) == pytest.approx(ev.battery.initial_soc)
+
+
+def test_charger_simulation_soc_fields_accept_fraction_and_percent_units():
+    simulation = ChargerSimulation(
+        electric_vehicle_charger_state=[1, 1, 2, 2, 3],
+        electric_vehicle_id=["EV"] * 5,
+        electric_vehicle_departure_time=[1, 1, -1, -1, -1],
+        electric_vehicle_required_soc_departure=[0.8, 80.0, np.nan, -0.1, 150.0],
+        electric_vehicle_estimated_arrival_time=[-1, -1, 1, 1, -1],
+        electric_vehicle_estimated_soc_arrival=[0.4, 40.0, np.nan, -0.1, 125.0],
+        noise_std=0.0,
+    )
+
+    np.testing.assert_allclose(
+        simulation.electric_vehicle_required_soc_departure,
+        [0.8, 0.8, -0.1, -0.1, 1.0],
+        atol=1.0e-6,
+    )
+    np.testing.assert_allclose(
+        simulation.electric_vehicle_estimated_soc_arrival,
+        [0.4, 0.4, -0.1, -0.1, 1.0],
+        atol=1.0e-6,
+    )
 
 
 def test_ev_battery_schema_attributes_are_loaded(tmp_path):
@@ -246,3 +270,8 @@ def test_ev_current_soc_overrides_arrival_estimate_when_present():
     connected_ev = target_charger.connected_electric_vehicle
     assert connected_ev is not None, "Expected EV to be connected at the transition step."
     assert float(connected_ev.battery.soc[env.time_step]) == pytest.approx(forced_soc, abs=1e-6)
+
+
+def test_negative_soc_sentinels_remain_missing_values():
+    values = ChargerSimulation.normalize_soc_series([-1.0, -0.1, np.nan, 0.0, 1.0, 80.0, 150.0])
+    assert values.tolist() == pytest.approx([-0.1, -0.1, -0.1, 0.0, 1.0, 0.8, 1.0])

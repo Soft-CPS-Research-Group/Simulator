@@ -173,11 +173,24 @@ class BuildingOpsService:
         """Update flat observations for each deferrable appliance."""
 
         for appliance in deferrable_appliances or []:
-            appliance_observations = appliance.observations()
+            appliance_observations = self.deferrable_appliance_observations(appliance)
             for name, value in appliance_observations.items():
                 key = f'deferrable_appliance_{appliance.name}_{name}'
                 if key in valid_observations:
                     observations[key] = value
+
+        return observations
+
+    def deferrable_appliance_observations(self, appliance) -> Mapping[str, float]:
+        """Return deferrable observations with feasibility-aware start readiness."""
+
+        observations = dict(appliance.observations())
+        if self._safe_scalar(observations.get('can_start', 0.0), 0.0) <= 0.0:
+            return observations
+
+        profile = self._deferrable_start_profile_kwh(appliance, 1.0)
+        if profile.size <= 0 or not self._deferrable_profile_feasible(profile):
+            observations['can_start'] = 0.0
 
         return observations
 
@@ -371,6 +384,8 @@ class BuildingOpsService:
 
         if deferrable_appliance_actions is None:
             deferrable_appliance_actions = washing_machine_actions
+        if deferrable_appliance_actions is not None:
+            deferrable_appliance_actions = self._apply_deferrable_profile_constraints(deferrable_appliance_actions)
 
         electric_vehicle_storage_actions, electrical_storage_action = self.apply_charging_constraints_to_actions(
             electric_vehicle_storage_actions,
@@ -469,10 +484,23 @@ class BuildingOpsService:
 
     def _limit_outage_control_action(self, action_key: str, func, args: Tuple) -> Tuple:
         building = self.building
-        if not building.power_outage or not args:
+        if not args:
             return args
 
         action = self._safe_scalar(args[0], 0.0)
+
+        if action_key.startswith('deferrable_appliance_'):
+            appliance = getattr(func, '__self__', None)
+            if appliance is None:
+                return (0.0,)
+
+            profile = self._deferrable_start_profile_kwh(appliance, action)
+            if profile.size <= 0:
+                return args
+            return args if self._deferrable_profile_feasible(profile) else (0.0,)
+
+        if not building.power_outage:
+            return args
 
         if action_key.startswith('electric_vehicle_storage_'):
             charger = getattr(func, '__self__', None)
@@ -484,22 +512,6 @@ class BuildingOpsService:
             requested_power_kw = max(self._charger_requested_power_kw(charger, action), 0.0)
             target_power_kw = min(requested_power_kw, available_power_kw)
             return (self._charger_action_from_power_kw(charger, target_power_kw),)
-
-        if action_key.startswith('deferrable_appliance_'):
-            appliance = getattr(func, '__self__', None)
-            if appliance is None:
-                return (0.0,)
-
-            required_energy_kwh = self._safe_scalar(appliance.preview_start_energy_kwh(action), 0.0)
-            if required_energy_kwh <= 0.0:
-                return args
-
-            available_energy_kwh = max(self._safe_scalar(building.downward_electrical_flexibility, 0.0), 0.0)
-            if required_energy_kwh <= available_energy_kwh + 1.0e-9:
-                return args
-
-            return (0.0,)
-
         return args
 
     def _current_phase_names(self):
@@ -537,6 +549,175 @@ class BuildingOpsService:
 
         return self._split_unassigned_power(power_kw)
 
+    def _find_deferrable_appliance(self, action_name: str):
+        appliance_name = str(action_name).replace('deferrable_appliance_', '', 1)
+        for appliance in self.building.deferrable_appliances or []:
+            if appliance.name == appliance_name or action_name == appliance.name:
+                return appliance
+        return None
+
+    def _deferrable_start_profile_kwh(self, appliance, action: float) -> np.ndarray:
+        preview_profile = getattr(appliance, 'preview_start_profile_kwh', None)
+        if callable(preview_profile):
+            return np.array(preview_profile(action), dtype='float64')
+
+        energy = self._safe_scalar(appliance.preview_start_energy_kwh(action), 0.0)
+        return np.array([energy], dtype='float64') if energy > 0.0 else np.zeros(0, dtype='float64')
+
+    def _apply_deferrable_profile_constraints(self, actions: Mapping[str, float]) -> Mapping[str, float]:
+        adjusted = dict(actions)
+        reserved_energy_by_step: Dict[int, float] = {}
+
+        for action_name, action in actions.items():
+            appliance = self._find_deferrable_appliance(action_name)
+            if appliance is None:
+                continue
+
+            profile = self._deferrable_start_profile_kwh(appliance, action)
+            if profile.size <= 0:
+                continue
+
+            if self._deferrable_profile_feasible(profile, reserved_energy_by_step=reserved_energy_by_step):
+                current_step = int(self.building.time_step)
+                for offset, energy_kwh in enumerate(profile):
+                    step = current_step + offset
+                    reserved_energy_by_step[step] = reserved_energy_by_step.get(step, 0.0) + float(energy_kwh)
+            else:
+                adjusted[action_name] = 0.0
+
+        return adjusted
+
+    def _power_outage_at_step(self, step: int) -> bool:
+        building = self.building
+        if not getattr(building, 'simulate_power_outage', False):
+            return False
+        signal = getattr(building, '_Building__power_outage_signal', None)
+        if signal is None:
+            signal = getattr(building.energy_simulation, 'power_outage', [])
+        return bool(self._safe_index(signal, step, 0.0))
+
+    def _solar_generation_energy_at_step(self, step: int) -> float:
+        building = self.building
+        solar_generation = getattr(building, '_Building__solar_generation', None)
+        if solar_generation is not None:
+            return self._safe_index(solar_generation, step, 0.0)
+
+        raw_generation = self._safe_index(getattr(building.energy_simulation, 'solar_generation', []), step, 0.0)
+        converted = building._pv_generation_to_control_step([raw_generation])
+        return -self._safe_index(converted, 0, 0.0)
+
+    def _building_series_value(self, private_name: str, public_name: str, step: int, default: float = 0.0) -> float:
+        values = getattr(self.building, f'_Building__{private_name}', None)
+        if values is None:
+            values = getattr(self.building, public_name, [])
+        return self._safe_index(values, step, default)
+
+    def _estimate_base_power_at_step(self, step: int) -> Tuple[float, Dict[str, float]]:
+        building = self.building
+        phase_names = self._current_phase_names()
+        temperature = self._safe_index(building.weather.outdoor_dry_bulb_temperature, step, 0.0)
+
+        cooling_demand = self._dataset_energy_to_control_step(
+            self._building_series_value('energy_from_cooling_device', 'energy_from_cooling_device', step, 0.0)
+        ) + self._safe_index(building.cooling_storage.energy_balance, step, 0.0)
+        cooling_energy = self._safe_scalar(
+            building.cooling_device.get_input_power(cooling_demand, temperature, heating=False),
+            0.0,
+        )
+        cooling_kw = self._control_step_energy_to_power_kw(cooling_energy)
+
+        heating_demand = self._dataset_energy_to_control_step(
+            self._building_series_value('energy_from_heating_device', 'energy_from_heating_device', step, 0.0)
+        ) + self._safe_index(building.heating_storage.energy_balance, step, 0.0)
+        if isinstance(building.heating_device, HeatPump):
+            heating_energy = self._safe_scalar(
+                building.heating_device.get_input_power(heating_demand, temperature, heating=True),
+                0.0,
+            )
+        else:
+            heating_energy = self._safe_scalar(building.heating_device.get_input_power(heating_demand), 0.0)
+        heating_kw = self._control_step_energy_to_power_kw(heating_energy)
+
+        dhw_demand = self._dataset_energy_to_control_step(
+            self._building_series_value('energy_from_dhw_device', 'energy_from_dhw_device', step, 0.0)
+        ) + self._safe_index(building.dhw_storage.energy_balance, step, 0.0)
+        if isinstance(building.dhw_device, HeatPump):
+            dhw_energy = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand, temperature, heating=True), 0.0)
+        else:
+            dhw_energy = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand), 0.0)
+        dhw_kw = self._control_step_energy_to_power_kw(dhw_energy)
+
+        non_shiftable_energy = self._dataset_energy_to_control_step(
+            self._building_series_value('energy_to_non_shiftable_load', 'energy_to_non_shiftable_load', step, 0.0)
+        )
+        non_shiftable_kw = self._control_step_energy_to_power_kw(non_shiftable_energy)
+        solar_kw = self._control_step_energy_to_power_kw(self._solar_generation_energy_at_step(step))
+        deferrable_kw = sum(
+            self._control_step_energy_to_power_kw(self._safe_index(appliance.electricity_consumption, step, 0.0))
+            for appliance in building.deferrable_appliances or []
+        )
+
+        base_total_kw = cooling_kw + heating_kw + dhw_kw + non_shiftable_kw + solar_kw + deferrable_kw
+        return float(base_total_kw), {phase: value for phase, value in self._split_unassigned_power(base_total_kw).items() if phase in phase_names}
+
+    def _electrical_service_allows(self, total_kw: float, phase_kw: Mapping[str, float]) -> bool:
+        building = self.building
+        if not getattr(building, '_electrical_service_enabled', False):
+            return True
+
+        total_limits = building._electrical_service_limits.get('total', {})
+        import_limit = self._safe_scalar(total_limits.get('import_kw'), np.nan)
+        export_limit = self._safe_scalar(total_limits.get('export_kw'), np.nan)
+        tolerance = 1.0e-6
+        if np.isfinite(import_limit) and total_kw > import_limit + tolerance:
+            return False
+        if np.isfinite(export_limit) and -total_kw > export_limit + tolerance:
+            return False
+
+        per_phase_limits = building._electrical_service_limits.get('per_phase', {})
+        for phase_name in self._current_phase_names():
+            phase_total = self._safe_scalar(phase_kw.get(phase_name, 0.0), 0.0)
+            phase_limits = per_phase_limits.get(phase_name, {})
+            phase_import_limit = self._safe_scalar(phase_limits.get('import_kw'), np.nan)
+            phase_export_limit = self._safe_scalar(phase_limits.get('export_kw'), np.nan)
+            if np.isfinite(phase_import_limit) and phase_total > phase_import_limit + tolerance:
+                return False
+            if np.isfinite(phase_export_limit) and -phase_total > phase_export_limit + tolerance:
+                return False
+
+        return True
+
+    def _deferrable_profile_feasible(
+        self,
+        profile_kwh: np.ndarray,
+        reserved_energy_by_step: Optional[Mapping[int, float]] = None,
+    ) -> bool:
+        reserved_energy_by_step = reserved_energy_by_step or {}
+        current_step = int(self.building.time_step)
+        episode_steps = int(getattr(self.building.episode_tracker, 'episode_time_steps', 0) or 0)
+
+        for offset, energy_kwh in enumerate(profile_kwh):
+            step = current_step + offset
+            if step >= episode_steps:
+                return False
+
+            total_extra_energy = float(energy_kwh) + float(reserved_energy_by_step.get(step, 0.0))
+            total_extra_kw = self._control_step_energy_to_power_kw(total_extra_energy)
+            base_total_kw, base_phase_kw = self._estimate_base_power_at_step(step)
+            extra_phase_kw = self._split_unassigned_power(total_extra_kw)
+            total_kw = base_total_kw + total_extra_kw
+            phase_kw = {
+                phase: base_phase_kw.get(phase, 0.0) + extra_phase_kw.get(phase, 0.0)
+                for phase in self._current_phase_names()
+            }
+
+            if self._power_outage_at_step(step) and total_kw > 1.0e-9:
+                return False
+            if not self._electrical_service_allows(total_kw, phase_kw):
+                return False
+
+        return True
+
     def _prospective_deferrable_start_power_kw(self, deferrable_appliance_actions: Optional[Mapping[str, float]]) -> float:
         if not deferrable_appliance_actions:
             return 0.0
@@ -545,11 +726,9 @@ class BuildingOpsService:
         prospective_energy_kwh = 0.0
 
         for action_name, action in deferrable_appliance_actions.items():
-            appliance_name = str(action_name).replace('deferrable_appliance_', '', 1)
-            for appliance in building.deferrable_appliances or []:
-                if appliance.name == appliance_name or action_name == appliance.name:
-                    prospective_energy_kwh += self._safe_scalar(appliance.preview_start_energy_kwh(action), 0.0)
-                    break
+            appliance = self._find_deferrable_appliance(action_name)
+            if appliance is not None:
+                prospective_energy_kwh += self._safe_scalar(appliance.preview_start_energy_kwh(action), 0.0)
 
         return self._control_step_energy_to_power_kw(prospective_energy_kwh)
 
@@ -616,14 +795,22 @@ class BuildingOpsService:
         if action is None:
             return 0.0
 
+        charger_request = getattr(charger, 'get_requested_power_kw', None)
+        if callable(charger_request):
+            return self._safe_scalar(charger_request(action), 0.0)
+
         action = self._safe_scalar(action, 0.0)
         action = float(np.clip(action, -1.0, 1.0))
         if action > 0.0:
             max_power = self._safe_scalar(getattr(charger, 'max_charging_power', 0.0), 0.0)
-            return action * max_power if max_power > 0.0 else 0.0
+            min_power = self._safe_scalar(getattr(charger, 'min_charging_power', 0.0), 0.0)
+            request = action * max_power if max_power > 0.0 else 0.0
+            return request if request >= min(min_power, max_power) else 0.0
         if action < 0.0:
             max_power = self._safe_scalar(getattr(charger, 'max_discharging_power', 0.0), 0.0)
-            return -abs(action) * max_power if max_power > 0.0 else 0.0
+            min_power = self._safe_scalar(getattr(charger, 'min_discharging_power', 0.0), 0.0)
+            request = abs(action) * max_power if max_power > 0.0 else 0.0
+            return -request if request >= min(min_power, max_power) else 0.0
         return 0.0
 
     def _charger_action_from_power_kw(self, charger, target_power_kw: float) -> float:
@@ -761,10 +948,10 @@ class BuildingOpsService:
             charger = building._charger_lookup.get(charger_id)
             if charger is None:
                 continue
-            max_power = getattr(charger, 'max_charging_power', 0.0) or 0.0
-            if max_power <= 0.0:
+            requested_power = max(self._charger_requested_power_kw(charger, action), 0.0)
+            if requested_power <= 0.0:
                 continue
-            positive_requests[charger_id] = action * max_power
+            positive_requests[charger_id] = requested_power
             scales[charger_id] = 1.0
 
         violation_kw = 0.0

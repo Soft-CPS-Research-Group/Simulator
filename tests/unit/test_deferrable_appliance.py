@@ -49,7 +49,13 @@ def _simulation(
     )
 
 
-def _appliance(simulation=None, episode_time_steps=8, seconds_per_time_step=3600, trigger_threshold=None):
+def _appliance(
+    simulation=None,
+    episode_time_steps=8,
+    seconds_per_time_step=3600,
+    trigger_threshold=None,
+    nominal_power=2.0,
+):
     tracker = EpisodeTracker(0, episode_time_steps - 1)
     tracker.next_episode(
         episode_time_steps,
@@ -62,7 +68,7 @@ def _appliance(simulation=None, episode_time_steps=8, seconds_per_time_step=3600
         name="washer_1",
         episode_tracker=tracker,
         seconds_per_time_step=seconds_per_time_step,
-        nominal_power=2.0,
+        nominal_power=nominal_power,
         **({} if trigger_threshold is None else {"trigger_threshold": trigger_threshold}),
     )
     appliance.reset()
@@ -168,6 +174,17 @@ def test_default_trigger_threshold_is_binary_and_rejects_small_actions():
     np.testing.assert_allclose(appliance.electricity_consumption[:2], [0.2, 0.0], atol=1e-9)
 
 
+def test_cycle_cannot_start_if_it_would_finish_on_terminal_index():
+    appliance = _appliance(_simulation(profile=[0.1, 0.2], earliest=0, latest=0), episode_time_steps=2)
+
+    assert appliance.observations()["can_start"] == 0.0
+
+    appliance.start_cycle(1.0)
+
+    assert appliance.cycle_state["cycle_1"] == "pending"
+    np.testing.assert_allclose(appliance.electricity_consumption, np.zeros(2))
+
+
 def test_non_finite_start_action_is_treated_as_off():
     appliance = _appliance(_simulation(profile=[0.2], earliest=0, latest=0), episode_time_steps=3)
 
@@ -206,3 +223,13 @@ def test_15_second_cycle_keeps_small_kwh_values_exact():
     obs = appliance.observations()
     assert obs["cycle_energy_kwh"] == pytest.approx(0.003)
     assert obs["hours_until_deadline"] == pytest.approx(15 / 3600)
+
+
+def test_15_second_profile_peak_cannot_exceed_nominal_power():
+    with pytest.raises(ValueError, match="peak power"):
+        _appliance(
+            _simulation(profile=[0.1], earliest=0, latest=0),
+            episode_time_steps=3,
+            seconds_per_time_step=15,
+            nominal_power=2.0,
+        )

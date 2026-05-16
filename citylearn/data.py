@@ -948,27 +948,43 @@ class ChargerSimulation(TimeSeriesData):
             np.isnan(arrival_time_arr), default_time_value, arrival_time_arr
         ).astype('int32')
 
-        required_soc_arr = np.array(electric_vehicle_required_soc_departure, dtype='float32')
-        required_soc_arr = np.where(np.isnan(required_soc_arr), default_soc_value, required_soc_arr)
-        self.electric_vehicle_required_soc_departure = np.where(
-            required_soc_arr != default_soc_value,
-            np.clip(
-                required_soc_arr / 100 + (NoiseUtils.generate_gaussian_noise(required_soc_arr, self.noise_std) / 100),
-                0, 1
-            ),
-            required_soc_arr
-        ).astype('float32')
+        self.electric_vehicle_required_soc_departure = self.normalize_soc_series(
+            electric_vehicle_required_soc_departure,
+            default_soc_value=default_soc_value,
+            noise_std=self.noise_std,
+        )
 
-        estimated_soc_arrival_arr = np.array(electric_vehicle_estimated_soc_arrival, dtype='float32')
-        estimated_soc_arrival_arr = np.where(np.isnan(estimated_soc_arrival_arr), default_soc_value, estimated_soc_arrival_arr)
-        self.electric_vehicle_estimated_soc_arrival = np.where(
-            estimated_soc_arrival_arr != default_soc_value,
-            np.clip(
-                estimated_soc_arrival_arr / 100 + (NoiseUtils.generate_gaussian_noise(estimated_soc_arrival_arr, self.noise_std) / 100),
-                0, 1
-            ),
-            estimated_soc_arrival_arr
-        ).astype('float32')
+        self.electric_vehicle_estimated_soc_arrival = self.normalize_soc_series(
+            electric_vehicle_estimated_soc_arrival,
+            default_soc_value=default_soc_value,
+            noise_std=self.noise_std,
+        )
+
+    @staticmethod
+    def normalize_soc_series(
+        values: Iterable[float],
+        default_soc_value: float = -0.1,
+        noise_std: float = 0.0,
+    ) -> np.ndarray:
+        """Normalize SOC inputs that may be fractions or percentages."""
+
+        raw = np.array(values, dtype='float32')
+        raw = np.where(np.isnan(raw), default_soc_value, raw)
+        normalized = np.full(raw.shape, float(default_soc_value), dtype='float32')
+
+        valid = (raw != default_soc_value) & (raw >= 0.0)
+        fraction = valid & (raw >= 0.0) & (raw <= 1.0)
+        percent = valid & (raw > 1.0)
+
+        normalized[fraction] = raw[fraction]
+        normalized[percent] = raw[percent] / 100.0
+
+        if noise_std and np.any(valid):
+            noise = NoiseUtils.generate_gaussian_noise(normalized, noise_std) / 100.0
+            normalized[valid] = normalized[valid] + noise[valid]
+
+        normalized[valid] = np.clip(normalized[valid], 0.0, 1.0)
+        return normalized.astype('float32')
 
 class DeferrableApplianceSimulation:
     """Sparse deferrable-appliance cycle catalogue and flexibility schedule.

@@ -58,6 +58,62 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.3 - Hardening de Fisica, Bounds e Topologia Dinamica
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release da segunda auditoria profunda a EVs, BESS estacionaria, deferrable appliances, observacoes, KPIs e exports com topologia dinamica.
+
+### Changed
+
+- Bounds de observacao passam a considerar schedules reais de EV/deferrables, perfis sub-hour e minutos zero-based.
+- Caminhos de KPI/export em topologia dinamica usam membership ativo por timestep para buildings, chargers, storage estacionario e deferrable appliances.
+- Medias diarias de KPI para buildings dinamicos usam a janela ativa de cada building, nao a janela global do episodio.
+- KPIs BAU de peak e ramping passam a usar potencia em kW em vez de kWh/step bruto.
+- Export CSV de KPIs preserva precisao raw por defeito; arredondamento passa a ser opt-in.
+
+### Fixed
+
+- Standby loss da BESS estacionaria e aplicada uma vez por timestep e nao pode empurrar SOC abaixo do minimo fisico de DoD.
+- Descarga da BESS em outage fica limitada a carga local que pode ser servida de facto.
+- Cargas iniciais em outage sao clipped a oferta local PV/BESS em vez de dispararem assert de flexibilidade negativa.
+- SOC required/arrival de EV aceita fracoes e percentagens, preservando sentinels negativos de missing value.
+- `can_start` e constraints de acoes deferrable validam o perfil multi-step inteiro contra outages e headroom do electrical service.
+- Perfis de ciclo deferrable acima de `nominal_power` sao rejeitados.
+- KPIs de mercado comunitario settled, counterfactual e savings ficam expostos no contrato KPI v2/export.
+- Peaks por fase em topologia dinamica sao acumulados numa timeline distrital alinhada em vez de janelas locais truncadas.
+
+### Dataset/Schema Impact
+
+- Sem migracao de schema obrigatoria.
+- Observacoes de minuto passam a usar `0..59`, alinhado com semantica normal de relogio.
+- Bounds de observation space podem ficar mais largos para schedules EV/deferrable longos e perfis sub-hour.
+
+### Compatibility
+
+- Patch compativel para schemas validos.
+- Battery efficiencies acima de `1.0`, DoD invalido e perfis deferrable fisicamente impossiveis passam a falhar cedo.
+- Exported KPIs podem sair com mais casas decimais salvo uso explicito de `kpi_round_decimals`.
+
+### Validation
+
+- `.venv/bin/python -m compileall -q citylearn`: pass
+- `.venv/bin/python -m pytest -q`: pass
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py --max-scenarios 32`: pass (`16 passed`)
+- `.venv/bin/python scripts/manual/demo_ev_rbc.py`: pass
+- `.venv/bin/python scripts/manual/demo_ev_rbc_export_minutes.py`: pass
+- `.venv/bin/python scripts/manual/demo_charging_constraints_export_end.py`: pass
+- Smoke de topologia dinamica entity com acoes zero e avaliacao BAU KPI: pass (`95 steps`, `2937 KPI rows`)
+- `git diff --check`: pass
+
+### Migration Notes
+
+- Algoritmos que tenham bounds de minuto hard-coded como `1..61` devem passar para `0..59`.
+- Consumidores que esperem KPIs exportados arredondados devem chamar `kpi_round_decimals=3`.
+
 ## v0.6.0 - Baseline Business-As-Usual Nativa
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

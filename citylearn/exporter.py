@@ -6,7 +6,7 @@ import datetime
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Mapping, Optional, TYPE_CHECKING, Union
 
 import numpy as np
 
@@ -26,8 +26,8 @@ class EpisodeExporter:
     def __init__(self, env: "CityLearnEnv"):
         self.env = env
 
-    def _buildings_for_time_step(self, time_step: int):
-        env = self.env
+    def _buildings_for_time_step(self, time_step: int, env: "CityLearnEnv" = None):
+        env = self.env if env is None else env
         if getattr(env, 'topology_mode', 'static') != 'dynamic':
             return list(env.buildings)
 
@@ -42,8 +42,8 @@ class EpisodeExporter:
             if member_id in topology_service.member_pool
         ]
 
-    def _electric_vehicles_for_time_step(self, time_step: int):
-        env = self.env
+    def _electric_vehicles_for_time_step(self, time_step: int, env: "CityLearnEnv" = None):
+        env = self.env if env is None else env
         if getattr(env, 'topology_mode', 'static') != 'dynamic':
             return list(env.electric_vehicles)
 
@@ -58,8 +58,8 @@ class EpisodeExporter:
             if ev_id in topology_service.ev_pool
         ]
 
-    def _chargers_for_time_step(self, building, time_step: int):
-        env = self.env
+    def _chargers_for_time_step(self, building, time_step: int, env: "CityLearnEnv" = None):
+        env = self.env if env is None else env
         if getattr(env, 'topology_mode', 'static') != 'dynamic':
             return list(building.electric_vehicle_chargers or [])
 
@@ -70,8 +70,8 @@ class EpisodeExporter:
         charger_map = topology_service.active_chargers_at(time_step, building.name)
         return list(charger_map.values())
 
-    def _electrical_storage_for_time_step(self, building, time_step: int):
-        env = self.env
+    def _electrical_storage_for_time_step(self, building, time_step: int, env: "CityLearnEnv" = None):
+        env = self.env if env is None else env
         if getattr(env, 'topology_mode', 'static') != 'dynamic':
             return building.electrical_storage
 
@@ -80,6 +80,18 @@ class EpisodeExporter:
             return building.electrical_storage
 
         return topology_service.active_storage_at(time_step, building.name)
+
+    def _deferrable_appliances_for_time_step(self, building, time_step: int, env: "CityLearnEnv" = None):
+        env = self.env if env is None else env
+        if getattr(env, 'topology_mode', 'static') != 'dynamic':
+            return list(building.deferrable_appliances or [])
+
+        topology_service = getattr(env, '_topology_service', None)
+        if topology_service is None or not hasattr(topology_service, 'active_deferrable_appliances_at'):
+            return list(building.deferrable_appliances or [])
+
+        appliance_map = topology_service.active_deferrable_appliances_at(time_step, building.name)
+        return list(appliance_map.values())
 
     @staticmethod
     def parse_render_start_date(start_date: Union[str, datetime.date, datetime.datetime]) -> datetime.date:
@@ -112,6 +124,7 @@ class EpisodeExporter:
         filepath: str = "exported_kpis.csv",
         include_business_as_usual: bool = True,
         export_business_as_usual_timeseries: bool = True,
+        kpi_round_decimals: Optional[int] = None,
     ):
         """Export episode KPIs to csv."""
 
@@ -126,7 +139,9 @@ class EpisodeExporter:
             kpis = env.evaluate_v2(include_business_as_usual=include_business_as_usual)
             export_env = env
 
-        kpis = kpis.pivot(index='cost_function', columns='name', values='value').round(3)
+        kpis = kpis.pivot(index='cost_function', columns='name', values='value')
+        if kpi_round_decimals is not None:
+            kpis = kpis.round(kpi_round_decimals)
         kpis = kpis.fillna('')
         kpis = kpis.reset_index()
         kpis = kpis.rename(columns={'cost_function': 'KPI'})
@@ -147,8 +162,8 @@ class EpisodeExporter:
         rows = []
 
         for t in range(final_index + 1):
-            for building in baseline_env.buildings:
-                rows.append(self._business_as_usual_building_row(building, t))
+            for building in self._buildings_for_time_step(t, baseline_env):
+                rows.append(self._business_as_usual_building_row(building, t, baseline_env))
 
             rows.append(self._business_as_usual_district_row(baseline_env, t))
 
@@ -158,10 +173,10 @@ class EpisodeExporter:
             file_path.unlink()
         self.write_render_rows(filename, rows)
 
-    def _business_as_usual_building_row(self, building, time_step: int) -> Dict[str, Any]:
-        battery = getattr(building, 'electrical_storage', None)
-        chargers = getattr(building, 'electric_vehicle_chargers', []) or []
-        appliances = getattr(building, 'deferrable_appliances', []) or []
+    def _business_as_usual_building_row(self, building, time_step: int, baseline_env: "CityLearnEnv" = None) -> Dict[str, Any]:
+        battery = self._electrical_storage_for_time_step(building, time_step, baseline_env)
+        chargers = self._chargers_for_time_step(building, time_step, baseline_env)
+        appliances = self._deferrable_appliances_for_time_step(building, time_step, baseline_env)
         return {
             'time_step': time_step,
             'name': building.name,
@@ -170,23 +185,26 @@ class EpisodeExporter:
             'net_electricity_consumption_cost': self._series_value(building.net_electricity_consumption_cost, time_step),
             'net_electricity_consumption_emission_kgco2': self._series_value(building.net_electricity_consumption_emission, time_step),
             'solar_generation_kwh': self._series_value(building.solar_generation, time_step),
-            'bess_electricity_consumption_kwh': self._series_value(
+            'bess_electricity_consumption_kwh': self._numeric_series_value(
                 getattr(battery, 'electricity_consumption', []),
                 time_step,
             ),
             'bess_soc': self._series_value(getattr(battery, 'soc', []), time_step),
             'ev_charger_electricity_consumption_kwh': sum(
-                self._series_value(getattr(charger, 'electricity_consumption', []), time_step)
+                self._numeric_series_value(getattr(charger, 'electricity_consumption', []), time_step)
                 for charger in chargers
             ),
             'deferrable_appliance_electricity_consumption_kwh': sum(
-                self._series_value(getattr(appliance, 'electricity_consumption', []), time_step)
+                self._numeric_series_value(getattr(appliance, 'electricity_consumption', []), time_step)
                 for appliance in appliances
             ),
         }
 
     def _business_as_usual_district_row(self, baseline_env: "CityLearnEnv", time_step: int) -> Dict[str, Any]:
-        rows = [self._business_as_usual_building_row(building, time_step) for building in baseline_env.buildings]
+        rows = [
+            self._business_as_usual_building_row(building, time_step, baseline_env)
+            for building in self._buildings_for_time_step(time_step, baseline_env)
+        ]
         return {
             'time_step': time_step,
             'name': 'District',
@@ -207,6 +225,14 @@ class EpisodeExporter:
             return float(values[min(max(int(index), 0), len(values) - 1)])
         except Exception:
             return ''
+
+    @classmethod
+    def _numeric_series_value(cls, values, index: int) -> float:
+        value = cls._series_value(values, index)
+        try:
+            return float(value)
+        except Exception:
+            return 0.0
 
     def render(self):
         """Render one time step to CSV outputs."""

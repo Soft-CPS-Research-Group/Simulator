@@ -561,7 +561,7 @@ class CityLearnEntityInterfaceService:
             appliance = self._deferrable_appliance_by_building_and_id.get((ref.building_index, ref.appliance_id))
             if appliance is None:
                 continue
-            values = appliance.observations()
+            values = building._ops_service.deferrable_appliance_observations(appliance)
             for col, feature_name in enumerate(self._deferrable_appliance_features):
                 self._deferrable_appliance_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
 
@@ -1717,6 +1717,39 @@ class CityLearnEntityInterfaceService:
             return -1.0e6, 1.0e6
         return -1.0e6, 1.0e6
 
+    def _charger_time_high_limit(self) -> float:
+        high = float(max(getattr(self.env, 'time_steps', 0) or 0, 1))
+        for ref in self._charger_refs:
+            building = self.env.buildings[ref.building_index]
+            charger = building._charger_lookup.get(ref.charger_id)
+            simulation = getattr(charger, 'charger_simulation', None)
+            if simulation is None:
+                continue
+            for attribute in (
+                'electric_vehicle_departure_time',
+                'electric_vehicle_estimated_arrival_time',
+            ):
+                raw_values = np.array(getattr(simulation, attribute, []), dtype='float64')
+                values = raw_values[np.isfinite(raw_values) & (raw_values >= 0.0)]
+                if values.size > 0:
+                    high = max(high, float(np.nanmax(values)))
+        return high
+
+    def _deferrable_time_high_limit(self) -> float:
+        high = float(max(getattr(self.env, 'time_steps', 0) or 0, 1))
+        for ref in self._deferrable_appliance_refs:
+            appliance = self._deferrable_appliance_by_building_and_id.get((ref.building_index, ref.appliance_id))
+            simulation = getattr(appliance, 'deferrable_appliance_simulation', None)
+            for cycle in getattr(simulation, 'flexibility_schedule', []) or []:
+                for key in ('earliest_start_time_step', 'latest_start_time_step', 'deadline_time_step'):
+                    try:
+                        value = float(cycle.get(key, -1.0))
+                    except Exception:
+                        value = -1.0
+                    if np.isfinite(value) and value >= 0.0:
+                        high = max(high, value)
+        return high
+
     def _observation_bounds_for_features(self, names: Sequence[str], *, owner: str, per_building: bool = False):
         if owner == "district":
             if len(names) == 0:
@@ -1788,7 +1821,7 @@ class CityLearnEntityInterfaceService:
             return low, high
 
         step_hours = self._step_hours()
-        max_departure = float(self.env.time_steps)
+        max_departure = self._charger_time_high_limit()
         max_capacity = max([self._safe_scalar(ev.battery.capacity, 0.0) for ev in self.env.electric_vehicles] + [0.0])
         charging_limits = [
             self._safe_scalar(charger.max_charging_power, 0.0)
@@ -1968,7 +2001,7 @@ class CityLearnEntityInterfaceService:
         if rows == 0:
             return low, high
 
-        max_time_step = float(max(self.env.time_steps, 1))
+        max_time_step = self._deferrable_time_high_limit()
         max_energy = 1.0
         max_duration = 1.0
         max_power = 1.0
@@ -1979,9 +2012,12 @@ class CityLearnEntityInterfaceService:
             for cycle in appliance.deferrable_appliance_simulation.flexibility_schedule:
                 max_energy = max(max_energy, float(cycle.get('total_energy_kwh', 0.0)))
                 max_duration = max(max_duration, float(cycle.get('duration_steps', 0.0)))
+                for time_key in ('earliest_start_time_step', 'latest_start_time_step', 'deadline_time_step'):
+                    max_time_step = max(max_time_step, float(cycle.get(time_key, -1.0)))
                 profile = np.array(cycle.get('load_profile', []), dtype='float64')
                 if profile.size > 0:
                     max_power = max(max_power, float(np.nanmax(profile)) / self._step_hours())
+        max_power = max_power + 1.0e-6
 
         bounds = {
             "pending": (0.0, 1.0),

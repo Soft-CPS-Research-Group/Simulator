@@ -516,16 +516,11 @@ class CityLearnLoadingService:
                 self._set_time_step_offset(charger_simulation, schema['simulation_start_time_step'])
                 if 'electric_vehicle_current_soc' in charger_simulation_file.columns:
                     current_soc_raw = pd.to_numeric(charger_simulation_file['electric_vehicle_current_soc'], errors='coerce').to_numpy(dtype='float32')
-                    current_soc = np.full(current_soc_raw.shape[0], -0.1, dtype='float32')
-                    valid = ~np.isnan(current_soc_raw)
-
-                    if np.any(valid):
-                        normalized = current_soc_raw[valid]
-                        normalized = np.where(normalized > 1.0, normalized / 100.0, normalized)
-                        normalized = np.clip(normalized, 0.0, 1.0)
-                        current_soc[valid] = normalized.astype('float32')
-
-                    charger_simulation.electric_vehicle_current_soc = current_soc
+                    charger_simulation.electric_vehicle_current_soc = ChargerSimulation.normalize_soc_series(
+                        current_soc_raw,
+                        default_soc_value=-0.1,
+                        noise_std=0.0,
+                    )
 
                 charger_type = charger_config['type']
                 charger_module = '.'.join(charger_type.split('.')[0:-1])
@@ -808,7 +803,7 @@ class CityLearnLoadingService:
             seed_source = f"{schema['random_seed']}:{electric_vehicle_name}:initial_soc"
             deterministic_seed = int(hashlib.md5(seed_source.encode('utf-8')).hexdigest()[:8], 16)
             initial_soc = float(np.random.RandomState(deterministic_seed).uniform(0.0, 1.0))
-        depth_of_discharge = attrs.get('depth_of_discharge', 0.10)
+        depth_of_discharge = attrs.get('depth_of_discharge', 1.0)
         loss_coefficient = attrs.get('loss_coefficient', 0.0)
 
         if loss_coefficient is None:

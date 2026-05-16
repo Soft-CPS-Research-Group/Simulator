@@ -80,6 +80,14 @@ class CityLearnKPIService:
         return (steps * step_seconds) / (24.0 * 3600.0)
 
     @staticmethod
+    def _window_days(t_start: int, t_final: int, seconds_per_time_step: float) -> float:
+        if t_final < t_start:
+            return 0.0
+        steps = max(int(t_final) - int(t_start) + 1, 0)
+        step_seconds = max(float(seconds_per_time_step or 0.0), 1.0)
+        return (steps * step_seconds) / (24.0 * 3600.0)
+
+    @staticmethod
     def _daily_average(total_value: float, simulated_days: float) -> Optional[float]:
         value = CityLearnKPIService._to_scalar(total_value, np.nan)
 
@@ -815,6 +823,7 @@ class CityLearnKPIService:
             t_start, t_end = building_windows.get(building.name, (0, -1))
             if t_end < t_start:
                 continue
+            building_days = self._window_days(t_start, t_end, env.seconds_per_time_step)
 
             if isinstance(building, dynamics_building_cls):
                 building_control_condition = (
@@ -996,33 +1005,33 @@ class CityLearnKPIService:
                 self._metric('electricity_consumption_control_total_kwh', ec_c, building.name, 'building'),
                 self._metric('electricity_consumption_baseline_total_kwh', ec_b, building.name, 'building'),
                 self._metric('electricity_consumption_delta_total_kwh', ec_c - ec_b, building.name, 'building'),
-                self._metric('electricity_consumption_control_daily_average_kwh', self._daily_average(ec_c, simulated_days), building.name, 'building'),
-                self._metric('electricity_consumption_baseline_daily_average_kwh', self._daily_average(ec_b, simulated_days), building.name, 'building'),
-                self._metric('electricity_consumption_delta_daily_average_kwh', self._daily_average(ec_c - ec_b, simulated_days), building.name, 'building'),
+                self._metric('electricity_consumption_control_daily_average_kwh', self._daily_average(ec_c, building_days), building.name, 'building'),
+                self._metric('electricity_consumption_baseline_daily_average_kwh', self._daily_average(ec_b, building_days), building.name, 'building'),
+                self._metric('electricity_consumption_delta_daily_average_kwh', self._daily_average(ec_c - ec_b, building_days), building.name, 'building'),
                 self._metric('electricity_export_control_total_kwh', export_c, building.name, 'building'),
                 self._metric('electricity_export_baseline_total_kwh', export_b, building.name, 'building'),
                 self._metric('electricity_export_delta_total_kwh', export_c - export_b, building.name, 'building'),
-                self._metric('electricity_export_control_daily_average_kwh', self._daily_average(export_c, simulated_days), building.name, 'building'),
-                self._metric('electricity_export_baseline_daily_average_kwh', self._daily_average(export_b, simulated_days), building.name, 'building'),
-                self._metric('electricity_export_delta_daily_average_kwh', self._daily_average(export_c - export_b, simulated_days), building.name, 'building'),
+                self._metric('electricity_export_control_daily_average_kwh', self._daily_average(export_c, building_days), building.name, 'building'),
+                self._metric('electricity_export_baseline_daily_average_kwh', self._daily_average(export_b, building_days), building.name, 'building'),
+                self._metric('electricity_export_delta_daily_average_kwh', self._daily_average(export_c - export_b, building_days), building.name, 'building'),
                 self._metric('zero_net_energy_control_total_kwh', zne_c, building.name, 'building'),
                 self._metric('zero_net_energy_baseline_total_kwh', zne_b, building.name, 'building'),
                 self._metric('zero_net_energy_delta_total_kwh', zne_c - zne_b, building.name, 'building'),
-                self._metric('zero_net_energy_control_daily_average_kwh', self._daily_average(zne_c, simulated_days), building.name, 'building'),
-                self._metric('zero_net_energy_baseline_daily_average_kwh', self._daily_average(zne_b, simulated_days), building.name, 'building'),
-                self._metric('zero_net_energy_delta_daily_average_kwh', self._daily_average(zne_c - zne_b, simulated_days), building.name, 'building'),
+                self._metric('zero_net_energy_control_daily_average_kwh', self._daily_average(zne_c, building_days), building.name, 'building'),
+                self._metric('zero_net_energy_baseline_daily_average_kwh', self._daily_average(zne_b, building_days), building.name, 'building'),
+                self._metric('zero_net_energy_delta_daily_average_kwh', self._daily_average(zne_c - zne_b, building_days), building.name, 'building'),
                 self._metric('carbon_emissions_control_total_kgco2', ce_c, building.name, 'building'),
                 self._metric('carbon_emissions_baseline_total_kgco2', ce_b, building.name, 'building'),
                 self._metric('carbon_emissions_delta_total_kgco2', ce_c - ce_b, building.name, 'building'),
-                self._metric('carbon_emissions_control_daily_average_kgco2', self._daily_average(ce_c, simulated_days), building.name, 'building'),
-                self._metric('carbon_emissions_baseline_daily_average_kgco2', self._daily_average(ce_b, simulated_days), building.name, 'building'),
-                self._metric('carbon_emissions_delta_daily_average_kgco2', self._daily_average(ce_c - ce_b, simulated_days), building.name, 'building'),
+                self._metric('carbon_emissions_control_daily_average_kgco2', self._daily_average(ce_c, building_days), building.name, 'building'),
+                self._metric('carbon_emissions_baseline_daily_average_kgco2', self._daily_average(ce_b, building_days), building.name, 'building'),
+                self._metric('carbon_emissions_delta_daily_average_kgco2', self._daily_average(ce_c - ce_b, building_days), building.name, 'building'),
                 self._metric('cost_control_total_eur', cost_c_raw, building.name, 'building'),
                 self._metric('cost_baseline_total_eur', cost_b_raw, building.name, 'building'),
                 self._metric('cost_delta_total_eur', cost_c_raw - cost_b_raw, building.name, 'building'),
-                self._metric('cost_control_daily_average_eur', self._daily_average(cost_c_raw, simulated_days), building.name, 'building'),
-                self._metric('cost_baseline_daily_average_eur', self._daily_average(cost_b_raw, simulated_days), building.name, 'building'),
-                self._metric('cost_delta_daily_average_eur', self._daily_average(cost_c_raw - cost_b_raw, simulated_days), building.name, 'building'),
+                self._metric('cost_control_daily_average_eur', self._daily_average(cost_c_raw, building_days), building.name, 'building'),
+                self._metric('cost_baseline_daily_average_eur', self._daily_average(cost_b_raw, building_days), building.name, 'building'),
+                self._metric('cost_delta_daily_average_eur', self._daily_average(cost_c_raw - cost_b_raw, building_days), building.name, 'building'),
                 self._metric('equity_relative_benefit_percent', equity_benefit, building.name, 'building'),
             ])
 
@@ -1072,8 +1081,8 @@ class CityLearnKPIService:
             extended_building_rows.extend([
                 self._metric('pv_generation_total_kwh', pv_metrics['pv_generation_total_kwh'], building.name, 'building'),
                 self._metric('pv_export_total_kwh', pv_metrics['pv_export_total_kwh'], building.name, 'building'),
-                self._metric('pv_generation_daily_average_kwh', self._daily_average(pv_metrics['pv_generation_total_kwh'], simulated_days), building.name, 'building'),
-                self._metric('pv_export_daily_average_kwh', self._daily_average(pv_metrics['pv_export_total_kwh'], simulated_days), building.name, 'building'),
+                self._metric('pv_generation_daily_average_kwh', self._daily_average(pv_metrics['pv_generation_total_kwh'], building_days), building.name, 'building'),
+                self._metric('pv_export_daily_average_kwh', self._daily_average(pv_metrics['pv_export_total_kwh'], building_days), building.name, 'building'),
                 self._metric('pv_self_consumption_ratio', pv_metrics['pv_self_consumption_ratio'], building.name, 'building'),
             ])
             pv_generation_total += pv_metrics['pv_generation_total_kwh']
@@ -1242,8 +1251,10 @@ class CityLearnKPIService:
         ])
 
         phase_union = ['L1', 'L2', 'L3']
+        final_t = int(max(getattr(env, 'time_step', 0), 0))
         for phase_name in phase_union:
-            phase_series = None
+            phase_series = np.zeros(final_t + 1, dtype='float64')
+            has_phase_data = False
             for building in kpi_buildings:
                 history_map = getattr(building, '_charging_phase_power_history_kw', {}) or {}
                 if phase_name not in history_map:
@@ -1251,13 +1262,15 @@ class CityLearnKPIService:
                 t_start, t_end = building_windows.get(building.name, (0, -1))
                 if t_end < t_start:
                     continue
-                values = np.array(history_map[phase_name][t_start:t_end + 1], dtype='float64')
-                if phase_series is None:
-                    phase_series = np.zeros_like(values)
-                size = min(len(phase_series), len(values))
-                phase_series[:size] += values[:size]
+                values = np.array(history_map[phase_name], dtype='float64')
+                start = max(int(t_start), 0)
+                end = min(int(t_end), final_t, len(values) - 1)
+                if end < start:
+                    continue
+                phase_series[start:end + 1] += values[start:end + 1]
+                has_phase_data = True
 
-            if phase_series is None:
+            if not has_phase_data:
                 continue
 
             extended_district_rows.append(
@@ -1270,6 +1283,8 @@ class CityLearnKPIService:
         market_by_building, market_district = self._collect_market_totals(building_names)
 
         for building_name in building_names:
+            t_start, t_end = building_windows.get(building_name, (0, -1))
+            building_days = self._window_days(t_start, t_end, env.seconds_per_time_step)
             totals = market_by_building.get(building_name, {})
             local_import = self._to_scalar(totals.get('community_local_import_total_kwh'), 0.0)
             local_export = self._to_scalar(totals.get('community_local_export_total_kwh'), 0.0)
@@ -1283,16 +1298,16 @@ class CityLearnKPIService:
                 self._metric('community_local_export_total_kwh', local_export, building_name, 'building'),
                 self._metric('community_grid_import_after_local_total_kwh', grid_import, building_name, 'building'),
                 self._metric('community_grid_export_after_local_total_kwh', grid_export, building_name, 'building'),
-                self._metric('community_local_import_daily_average_kwh', self._daily_average(local_import, simulated_days), building_name, 'building'),
-                self._metric('community_local_export_daily_average_kwh', self._daily_average(local_export, simulated_days), building_name, 'building'),
-                self._metric('community_grid_import_after_local_daily_average_kwh', self._daily_average(grid_import, simulated_days), building_name, 'building'),
-                self._metric('community_grid_export_after_local_daily_average_kwh', self._daily_average(grid_export, simulated_days), building_name, 'building'),
+                self._metric('community_local_import_daily_average_kwh', self._daily_average(local_import, building_days), building_name, 'building'),
+                self._metric('community_local_export_daily_average_kwh', self._daily_average(local_export, building_days), building_name, 'building'),
+                self._metric('community_grid_import_after_local_daily_average_kwh', self._daily_average(grid_import, building_days), building_name, 'building'),
+                self._metric('community_grid_export_after_local_daily_average_kwh', self._daily_average(grid_export, building_days), building_name, 'building'),
                 self._metric('community_settled_cost_total_eur', totals.get('community_settled_cost_total_eur', 0.0), building_name, 'building'),
                 self._metric('community_counterfactual_cost_total_eur', totals.get('community_counterfactual_cost_total_eur', 0.0), building_name, 'building'),
                 self._metric('community_market_savings_total_eur', totals.get('community_market_savings_total_eur', 0.0), building_name, 'building'),
-                self._metric('community_settled_cost_daily_average_eur', self._daily_average(totals.get('community_settled_cost_total_eur', 0.0), simulated_days), building_name, 'building'),
-                self._metric('community_counterfactual_cost_daily_average_eur', self._daily_average(totals.get('community_counterfactual_cost_total_eur', 0.0), simulated_days), building_name, 'building'),
-                self._metric('community_market_savings_daily_average_eur', self._daily_average(totals.get('community_market_savings_total_eur', 0.0), simulated_days), building_name, 'building'),
+                self._metric('community_settled_cost_daily_average_eur', self._daily_average(totals.get('community_settled_cost_total_eur', 0.0), building_days), building_name, 'building'),
+                self._metric('community_counterfactual_cost_daily_average_eur', self._daily_average(totals.get('community_counterfactual_cost_total_eur', 0.0), building_days), building_name, 'building'),
+                self._metric('community_market_savings_daily_average_eur', self._daily_average(totals.get('community_market_savings_total_eur', 0.0), building_days), building_name, 'building'),
                 self._metric('community_local_share_of_demand', import_share, building_name, 'building'),
                 self._metric('community_local_share_of_export', export_share, building_name, 'building'),
             ])
@@ -1690,6 +1705,9 @@ class CityLearnKPIService:
         monthly_steps = self._window_steps(730.0 * 3600.0, env.seconds_per_time_step)
         current_net = np.array(env.net_electricity_consumption, dtype='float64')
         bau_net = np.array(bau_env.net_electricity_consumption, dtype='float64')
+        step_hours = max(float(env.seconds_per_time_step) / 3600.0, 1.0e-12)
+        current_net_power = current_net / step_hours
+        bau_net_power = bau_net / step_hours
 
         def cost_last(values: np.ndarray, fn, **kwargs):
             if values.size == 0:
@@ -1697,30 +1715,30 @@ class CityLearnKPIService:
             return self._to_scalar(fn(values, **kwargs)[-1], 0.0)
 
         metrics = [
-            ('ramping_average', cost_last(current_net, CostFunction.ramping), cost_last(bau_net, CostFunction.ramping), 'kwh'),
+            ('ramping_average', cost_last(current_net_power, CostFunction.ramping), cost_last(bau_net_power, CostFunction.ramping), 'kw'),
             (
                 'load_factor_penalty_daily_average',
-                cost_last(current_net, CostFunction.one_minus_load_factor, window=daily_steps),
-                cost_last(bau_net, CostFunction.one_minus_load_factor, window=daily_steps),
+                cost_last(current_net_power, CostFunction.one_minus_load_factor, window=daily_steps),
+                cost_last(bau_net_power, CostFunction.one_minus_load_factor, window=daily_steps),
                 'ratio',
             ),
             (
                 'load_factor_penalty_monthly_average',
-                cost_last(current_net, CostFunction.one_minus_load_factor, window=monthly_steps),
-                cost_last(bau_net, CostFunction.one_minus_load_factor, window=monthly_steps),
+                cost_last(current_net_power, CostFunction.one_minus_load_factor, window=monthly_steps),
+                cost_last(bau_net_power, CostFunction.one_minus_load_factor, window=monthly_steps),
                 'ratio',
             ),
             (
                 'peak_daily_average',
-                cost_last(current_net, CostFunction.peak, window=daily_steps),
-                cost_last(bau_net, CostFunction.peak, window=daily_steps),
-                'kwh',
+                cost_last(current_net_power, CostFunction.peak, window=daily_steps),
+                cost_last(bau_net_power, CostFunction.peak, window=daily_steps),
+                'kw',
             ),
             (
                 'peak_all_time_average',
-                cost_last(current_net, CostFunction.peak, window=max(int(getattr(env, 'time_steps', 1)), 1)),
-                cost_last(bau_net, CostFunction.peak, window=max(int(getattr(bau_env, 'time_steps', 1)), 1)),
-                'kwh',
+                cost_last(current_net_power, CostFunction.peak, window=max(int(getattr(env, 'time_steps', 1)), 1)),
+                cost_last(bau_net_power, CostFunction.peak, window=max(int(getattr(bau_env, 'time_steps', 1)), 1)),
+                'kw',
             ),
         ]
 
@@ -1897,6 +1915,22 @@ class CityLearnKPIService:
             ('electrical_service_violation_total_kwh', 'electrical_service_phase', 'violations', 'energy_total', None, 'kwh'),
             ('electrical_service_violation_time_step_count', 'electrical_service_phase', 'violations', 'event', None, 'count'),
             ('phase_imbalance_ratio_average', 'electrical_service_phase', 'imbalance', 'phase_average', None, 'ratio'),
+            ('community_local_import_total_kwh', 'energy_grid', 'community_market', 'local_import', 'total', 'kwh'),
+            ('community_local_export_total_kwh', 'energy_grid', 'community_market', 'local_export', 'total', 'kwh'),
+            ('community_grid_import_after_local_total_kwh', 'energy_grid', 'community_market', 'grid_import_after_local', 'total', 'kwh'),
+            ('community_grid_export_after_local_total_kwh', 'energy_grid', 'community_market', 'grid_export_after_local', 'total', 'kwh'),
+            ('community_local_import_daily_average_kwh', 'energy_grid', 'community_market', 'local_import', 'daily_average', 'kwh'),
+            ('community_local_export_daily_average_kwh', 'energy_grid', 'community_market', 'local_export', 'daily_average', 'kwh'),
+            ('community_grid_import_after_local_daily_average_kwh', 'energy_grid', 'community_market', 'grid_import_after_local', 'daily_average', 'kwh'),
+            ('community_grid_export_after_local_daily_average_kwh', 'energy_grid', 'community_market', 'grid_export_after_local', 'daily_average', 'kwh'),
+            ('community_settled_cost_total_eur', 'cost', 'community_market', 'settled', 'total', 'eur'),
+            ('community_counterfactual_cost_total_eur', 'cost', 'community_market', 'counterfactual', 'total', 'eur'),
+            ('community_market_savings_total_eur', 'cost', 'community_market', 'savings', 'total', 'eur'),
+            ('community_settled_cost_daily_average_eur', 'cost', 'community_market', 'settled', 'daily_average', 'eur'),
+            ('community_counterfactual_cost_daily_average_eur', 'cost', 'community_market', 'counterfactual', 'daily_average', 'eur'),
+            ('community_market_savings_daily_average_eur', 'cost', 'community_market', 'savings', 'daily_average', 'eur'),
+            ('community_local_share_of_demand', 'solar_self_consumption', 'community_market', 'local_share_of_demand', None, 'ratio'),
+            ('community_local_share_of_export', 'solar_self_consumption', 'community_market', 'local_share_of_export', None, 'ratio'),
             ('equity_relative_benefit_percent', 'equity', 'benefit', 'relative', None, 'percent'),
             ('equity_gini_benefit', 'equity', 'distribution', 'gini_benefit', None, 'ratio'),
             ('equity_cr20_benefit', 'equity', 'distribution', 'top20_benefit', None, 'ratio'),
@@ -2064,15 +2098,17 @@ class CityLearnKPIService:
             )
 
         for building_name in building_names:
+            t_start, t_end = building_windows.get(building_name, (0, -1))
+            building_days = self._window_days(t_start, t_end, env.seconds_per_time_step)
             control_total = self._to_scalar(control_cost_totals.get(building_name), 0.0)
             baseline_total = self._to_scalar(baseline_cost_totals.get(building_name), 0.0)
             delta_total = control_total - baseline_total
             put('building', building_name, v2('building', 'cost', 'total', 'control', None, 'eur'), control_total)
             put('building', building_name, v2('building', 'cost', 'total', 'baseline', None, 'eur'), baseline_total)
             put('building', building_name, v2('building', 'cost', 'total', 'delta', None, 'eur'), delta_total)
-            put('building', building_name, v2('building', 'cost', 'daily_average', 'control', None, 'eur'), self._daily_average(control_total, simulated_days))
-            put('building', building_name, v2('building', 'cost', 'daily_average', 'baseline', None, 'eur'), self._daily_average(baseline_total, simulated_days))
-            put('building', building_name, v2('building', 'cost', 'daily_average', 'delta', None, 'eur'), self._daily_average(delta_total, simulated_days))
+            put('building', building_name, v2('building', 'cost', 'daily_average', 'control', None, 'eur'), self._daily_average(control_total, building_days))
+            put('building', building_name, v2('building', 'cost', 'daily_average', 'baseline', None, 'eur'), self._daily_average(baseline_total, building_days))
+            put('building', building_name, v2('building', 'cost', 'daily_average', 'delta', None, 'eur'), self._daily_average(delta_total, building_days))
             put('building', building_name, v2('building', 'cost', 'ratio_to_baseline', 'total', None, 'ratio'), self._safe_div(control_total, baseline_total))
 
         district_delta_total = district_control_total - district_baseline_total

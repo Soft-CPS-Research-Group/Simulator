@@ -66,6 +66,7 @@ class CityLearnTopologyService:
         self._topology_version_history: Dict[int, int] = {}
         self._active_charger_history: Dict[int, Dict[str, Dict[str, Charger]]] = {}
         self._active_storage_history: Dict[int, Dict[str, Optional[Battery]]] = {}
+        self._active_deferrable_appliance_history: Dict[int, Dict[str, Dict[str, DeferrableAppliance]]] = {}
         self._charger_observation_flags = self._collect_charger_observation_flags()
         self._charger_action_enabled = self._is_schema_action_active('electric_vehicle_storage')
 
@@ -157,6 +158,7 @@ class CityLearnTopologyService:
         self._topology_version_history = {}
         self._active_charger_history = {}
         self._active_storage_history = {}
+        self._active_deferrable_appliance_history = {}
 
         self._set_active_views()
         self.apply_events_for_time_step(0)
@@ -224,6 +226,11 @@ class CityLearnTopologyService:
         snapshot = self._history_lookup_reference(self._active_storage_history, time_step, {})
         return snapshot.get(member_id)
 
+    def active_deferrable_appliances_at(self, time_step: int, member_id: str) -> Mapping[str, DeferrableAppliance]:
+        snapshot = self._history_lookup_reference(self._active_deferrable_appliance_history, time_step, {})
+        member_appliances = snapshot.get(member_id, {})
+        return dict(member_appliances)
+
     @staticmethod
     def _history_lookup(history: Mapping[int, Any], time_step: int, default: Any):
         if time_step in history:
@@ -253,6 +260,7 @@ class CityLearnTopologyService:
         self._topology_version_history[int(time_step)] = int(self._topology_version)
         charger_snapshot: Dict[str, Dict[str, Charger]] = {}
         storage_snapshot: Dict[str, Optional[Battery]] = {}
+        deferrable_snapshot: Dict[str, Dict[str, DeferrableAppliance]] = {}
 
         for member_id in self._active_member_ids:
             building = self._member_pool.get(member_id)
@@ -265,9 +273,13 @@ class CityLearnTopologyService:
             storage_snapshot[member_id] = (
                 building.electrical_storage if self._has_electrical_storage_asset(building) else None
             )
+            deferrable_snapshot[member_id] = {
+                appliance.name: appliance for appliance in (building.deferrable_appliances or [])
+            }
 
         self._active_charger_history[int(time_step)] = charger_snapshot
         self._active_storage_history[int(time_step)] = storage_snapshot
+        self._active_deferrable_appliance_history[int(time_step)] = deferrable_snapshot
 
     def _set_active_views(self):
         env = self.env

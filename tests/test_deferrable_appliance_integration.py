@@ -41,17 +41,18 @@ DEFERRABLE_OBSERVATIONS = [
 ]
 
 
-def _schema_with_deferrable_appliance(tmp_path: Path, *, earliest=1, latest=1) -> Path:
+def _schema_with_deferrable_appliance(tmp_path: Path, *, earliest=1, latest=1, profile=None) -> Path:
     dataset_dir = tmp_path / "minute_ev_demo"
     shutil.copytree(SOURCE_DATASET, dataset_dir)
+    profile = [0.1, 0.2] if profile is None else profile
 
     pd.DataFrame(
         [
             {
                 "profile_id": "normal",
-                "duration_steps": 2,
-                "total_energy_kwh": 0.3,
-                "load_profile": "[0.1,0.2]",
+                "duration_steps": len(profile),
+                "total_energy_kwh": sum(profile),
+                "load_profile": json.dumps(profile),
             }
         ]
     ).to_csv(dataset_dir / "washer_cycle_profiles.csv", index=False)
@@ -62,7 +63,7 @@ def _schema_with_deferrable_appliance(tmp_path: Path, *, earliest=1, latest=1) -
                 "profile_id": "normal",
                 "earliest_start_time_step": earliest,
                 "latest_start_time_step": latest,
-                "deadline_time_step": latest + 1,
+                "deadline_time_step": latest + len(profile) - 1,
                 "priority": 0.75,
                 "must_run": True,
             }
@@ -104,6 +105,11 @@ def _kpi_value(df, *, level, name, cost_function):
     row = df[(df["level"] == level) & (df["name"] == name) & (df["cost_function"] == cost_function)]
     assert len(row) == 1
     return float(row["value"].iloc[0])
+
+
+def _flat_observation_value(env: CityLearnEnv, suffix: str) -> float:
+    index = next(i for i, name in enumerate(env.observation_names[0]) if name.endswith(suffix))
+    return float(env.observations[0][index])
 
 
 def test_flat_start_action_consumption_and_service_kpis_are_golden(tmp_path: Path):
@@ -190,6 +196,34 @@ def test_deferrable_start_reduces_ev_headroom_in_electrical_service_constraints(
         env.close()
 
 
+def test_can_start_observation_is_false_when_electrical_service_blocks_cycle(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=0)
+    dataset_dir = schema_path.parent
+    building_csv = dataset_dir / "Building_1.csv"
+    df = pd.read_csv(building_csv)
+    df["non_shiftable_load"] = 0.0
+    df["cooling_demand"] = 0.0
+    df["heating_demand"] = 0.0
+    df["dhw_demand"] = 0.0
+    df["solar_generation"] = 0.0
+    df.to_csv(building_csv, index=False)
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["buildings"]["Building_1"]["electrical_service"] = {
+        "mode": "single_phase",
+        "limits": {"total": {"import_kw": 0.05, "export_kw": 8.0}},
+    }
+    schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        assert _flat_observation_value(env, "washer_1_can_start") == pytest.approx(0.0)
+    finally:
+        env.close()
+
+
 def test_outage_blocks_ev_charge_and_deferrable_without_local_surplus(tmp_path: Path):
     schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=0)
     dataset_dir = schema_path.parent
@@ -212,6 +246,7 @@ def test_outage_blocks_ev_charge_and_deferrable_without_local_surplus(tmp_path: 
 
     try:
         env.reset(seed=0)
+        assert _flat_observation_value(env, "washer_1_can_start") == pytest.approx(0.0)
         action_names = env.action_names[0]
         actions = np.zeros(len(action_names), dtype="float32")
         actions[action_names.index("deferrable_appliance_washer_1")] = 1.0
@@ -225,6 +260,150 @@ def test_outage_blocks_ev_charge_and_deferrable_without_local_surplus(tmp_path: 
         assert building.deferrable_appliances_electricity_consumption[0] == pytest.approx(0.0)
         assert charger.past_charging_action_values_kwh[0] == pytest.approx(0.0)
         assert charger.electricity_consumption[0] == pytest.approx(0.0)
+    finally:
+        env.close()
+
+
+def test_bess_discharge_is_blocked_during_outage_without_local_load(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=0)
+    dataset_dir = schema_path.parent
+    building_csv = dataset_dir / "Building_1.csv"
+    df = pd.read_csv(building_csv)
+    df["power_outage"] = 1
+    df["solar_generation"] = 0.0
+    df["non_shiftable_load"] = 0.0
+    df["cooling_demand"] = 0.0
+    df["heating_demand"] = 0.0
+    df["dhw_demand"] = 0.0
+    df.to_csv(building_csv, index=False)
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["physics_invariant_checks"] = True
+    schema["buildings"]["Building_1"]["power_outage"] = {"simulate_power_outage": True}
+    schema["buildings"]["Building_1"]["electrical_storage"]["attributes"]["initial_soc"] = 1.0
+    schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        action_names = env.action_names[0]
+        actions = np.zeros(len(action_names), dtype="float32")
+        actions[action_names.index("electrical_storage")] = -1.0
+
+        env.step([actions])
+
+        building = env.buildings[0]
+        assert building.electrical_storage.electricity_consumption[0] == pytest.approx(0.0, abs=1e-8)
+        assert building.net_electricity_consumption[0] == pytest.approx(0.0, abs=1e-8)
+    finally:
+        env.close()
+
+
+def test_initial_outage_load_is_clipped_instead_of_asserting(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=0)
+    dataset_dir = schema_path.parent
+    building_csv = dataset_dir / "Building_1.csv"
+    df = pd.read_csv(building_csv)
+    df["power_outage"] = 1
+    df["solar_generation"] = 0.0
+    df["non_shiftable_load"] = 1.2
+    df["cooling_demand"] = 0.0
+    df["heating_demand"] = 0.0
+    df["dhw_demand"] = 0.0
+    df.to_csv(building_csv, index=False)
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["buildings"]["Building_1"]["power_outage"] = {"simulate_power_outage": True}
+    schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        building = env.buildings[0]
+        assert building.non_shiftable_load_device.electricity_consumption[0] == pytest.approx(0.0)
+        assert building.downward_electrical_flexibility == pytest.approx(0.0)
+    finally:
+        env.close()
+
+
+def test_deferrable_start_is_blocked_when_cycle_crosses_future_outage_without_surplus(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=0)
+    dataset_dir = schema_path.parent
+    building_csv = dataset_dir / "Building_1.csv"
+    df = pd.read_csv(building_csv)
+    df["power_outage"] = 0
+    df.loc[1, "power_outage"] = 1
+    df["solar_generation"] = 0.0
+    df["non_shiftable_load"] = 0.0
+    df["cooling_demand"] = 0.0
+    df["heating_demand"] = 0.0
+    df["dhw_demand"] = 0.0
+    df.to_csv(building_csv, index=False)
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["buildings"]["Building_1"]["power_outage"] = {"simulate_power_outage": True}
+    schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        action_names = env.action_names[0]
+        actions = np.zeros(len(action_names), dtype="float32")
+        actions[action_names.index("deferrable_appliance_washer_1")] = 1.0
+
+        env.step([actions])
+
+        building = env.buildings[0]
+        assert building.deferrable_appliances_electricity_consumption[0] == pytest.approx(0.0)
+        assert building.deferrable_appliances_electricity_consumption[1] == pytest.approx(0.0)
+    finally:
+        env.close()
+
+
+def test_flat_deferrable_power_bounds_scale_to_subhour_steps(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=0, profile=[0.1])
+    env = CityLearnEnv(
+        str(schema_path),
+        central_agent=True,
+        episode_time_steps=4,
+        seconds_per_time_step=15,
+        random_seed=0,
+    )
+
+    try:
+        env.reset(seed=0)
+        index = next(i for i, name in enumerate(env.observation_names[0]) if name.endswith("washer_1_cycle_peak_power_kw"))
+        assert env.observation_space[0].high[index] >= env.observations[0][index]
+        assert env.observations[0][index] == pytest.approx(24.0)
+    finally:
+        env.close()
+
+
+def test_entity_absolute_time_bounds_cover_deferrable_and_ev_schedules(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=29, latest=31)
+    env = CityLearnEnv(
+        str(schema_path),
+        interface="entity",
+        central_agent=True,
+        episode_time_steps=8,
+        random_seed=0,
+    )
+
+    try:
+        observations, _ = env.reset(seed=0)
+        deferrable_features = env.entity_specs["tables"]["deferrable_appliance"]["features"]
+        deferrable_space = env.observation_space["tables"]["deferrable_appliance"]
+        deadline_ix = deferrable_features.index("deadline_time_step")
+        assert deferrable_space.high[0, deadline_ix] >= observations["tables"]["deferrable_appliance"][0, deadline_ix]
+
+        charger_features = env.entity_specs["tables"]["charger"]["features"]
+        charger_space = env.observation_space["tables"]["charger"]
+        departure_ix = charger_features.index("connected_ev_departure_time_step")
+        if observations["tables"]["charger"].shape[0] > 0:
+            assert np.all(charger_space.high[:, departure_ix] >= observations["tables"]["charger"][:, departure_ix])
     finally:
         env.close()
 

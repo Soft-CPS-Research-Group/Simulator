@@ -467,6 +467,41 @@ def test_end_mode_exports_respect_dynamic_asset_activity_windows(tmp_path):
         env.close()
 
 
+def test_business_as_usual_export_respects_dynamic_member_history(tmp_path):
+    env = CityLearnEnv(
+        _load_schema(),
+        interface="entity",
+        topology_mode="dynamic",
+        central_agent=True,
+        episode_time_steps=11,
+        random_seed=0,
+        render_directory=tmp_path,
+    )
+
+    try:
+        env.reset(seed=0)
+        while not env.terminated and not env.truncated:
+            env.step(_zero_entity_actions(env))
+
+        env.export_final_kpis(filepath="dynamic_kpis.csv")
+        timeseries_path = Path(env.new_folder_path) / "exported_data_business_as_usual_ep0.csv"
+        assert timeseries_path.is_file()
+
+        with timeseries_path.open(newline="") as handle:
+            rows = list(csv.DictReader(handle))
+
+        building_18_steps = sorted(
+            int(row["time_step"])
+            for row in rows
+            if row["name"] == "Building_18" and row["level"] == "building"
+        )
+        assert building_18_steps
+        assert min(building_18_steps) >= 2
+        assert max(building_18_steps) < 9
+    finally:
+        env.close()
+
+
 def test_dynamic_kpis_for_added_member_use_active_window_only():
     env = CityLearnEnv(_load_schema(), interface="entity", topology_mode="dynamic", episode_time_steps=12, random_seed=0)
 
@@ -481,7 +516,13 @@ def test_dynamic_kpis_for_added_member_use_active_window_only():
             & (kpis["name"] == "Building_18")
             & (kpis["cost_function"] == "building_energy_grid_total_import_control_kwh")
         ]
+        daily_row = kpis[
+            (kpis["level"] == "building")
+            & (kpis["name"] == "Building_18")
+            & (kpis["cost_function"] == "building_energy_grid_daily_average_import_control_kwh")
+        ]
         assert len(row) == 1
+        assert len(daily_row) == 1
 
         building_18 = env._topology_service.member_pool["Building_18"]
         lifecycle = env.topology_member_lifecycle["Building_18"]
@@ -501,7 +542,9 @@ def test_dynamic_kpis_for_added_member_use_active_window_only():
             dtype="float64",
         )[t_start:t_end + 1]
         expected_import = float(np.clip(series, 0.0, None).sum())
+        active_days = ((t_end - t_start + 1) * env.seconds_per_time_step) / (24 * 3600)
 
         assert float(row["value"].iloc[0]) == pytest.approx(expected_import)
+        assert float(daily_row["value"].iloc[0]) == pytest.approx(expected_import / active_days)
     finally:
         env.close()

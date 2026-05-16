@@ -434,8 +434,8 @@ class CityLearnRuntimeService:
                     last_soc = ev.battery.soc[t - 1]
                     drift_std = self._ev_unconnected_drift_std(env.seconds_per_time_step)
                     variability = np.clip(random_state.normal(1.0, drift_std), 0.6, 1.4)
-                    new_soc = np.clip(last_soc * variability, 0.0, 1.0)
-                    ev.battery.force_set_soc(new_soc)
+                    # Exogenous away-from-home movement: driving can reduce SOC, offsite charging can raise it.
+                    ev.battery.force_set_soc(float(np.clip(last_soc * variability, 0.0, 1.0)))
 
     def update_variables(self):
         """Update district aggregate series from current building states."""

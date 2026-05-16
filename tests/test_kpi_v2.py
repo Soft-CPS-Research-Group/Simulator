@@ -597,6 +597,42 @@ def test_exported_kpis_csv_contains_ev_departure_service_metrics(tmp_path: Path)
         env.close()
 
 
+def test_exported_kpis_csv_preserves_small_unrounded_values(tmp_path: Path, monkeypatch):
+    schema_path = _build_two_building_market_schema(tmp_path)
+    env = CityLearnEnv(
+        str(schema_path),
+        central_agent=True,
+        episode_time_steps=2,
+        render_directory=tmp_path,
+        random_seed=0,
+    )
+
+    try:
+        monkeypatch.setattr(
+            env,
+            "evaluate_v2",
+            lambda include_business_as_usual=True: pd.DataFrame(
+                [
+                    {
+                        "cost_function": "district_cost_total_control_eur",
+                        "value": 0.0004,
+                        "name": "District",
+                        "level": "district",
+                    }
+                ]
+            ),
+        )
+
+        env.export_final_kpis(filepath="exported_kpis.csv", include_business_as_usual=False)
+
+        exported = pd.read_csv(Path(env.new_folder_path) / "exported_kpis.csv")
+        row = exported[exported["KPI"] == "district_cost_total_control_eur"]
+        assert len(row) == 1
+        assert float(row["District"].iloc[0]) == pytest.approx(0.0004)
+    finally:
+        env.close()
+
+
 def test_ev_within_tolerance_kpis_are_consistent():
     env = _run_episode(SCHEMA, seconds_per_time_step=60, episode_steps=120)
 
