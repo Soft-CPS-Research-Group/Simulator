@@ -90,6 +90,16 @@ observations, info = env.reset()
 specs = env.entity_specs
 ```
 
+Compact 15s parquet dataset with dynamic asset changes:
+
+```python
+env = CityLearnEnv(
+    "data/datasets/citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet/schema.json",
+    interface="entity",
+    topology_mode="dynamic",
+)
+```
+
 ## Unit Contract
 
 | Quantity | Unit |

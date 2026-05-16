@@ -177,6 +177,7 @@ Para datasets a 15s:
 | EV countdowns | `*_departure_time` e `*_arrival_time` em steps de 15s. |
 | Ficheiros grandes | Preferir Parquet. |
 | Teste antes de treino | Correr smoke episode pequeno e `evaluate_v2()`. |
+| Exemplo compacto com assets dinamicos | `data/datasets/citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet/schema.json` tem 7 dias a 15s com eventos add/remove de chargers, PV e BESS. |
 
 ## Performance e Loader
 

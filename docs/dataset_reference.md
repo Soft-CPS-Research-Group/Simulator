@@ -152,6 +152,7 @@ For real production datasets, `absolute` is the recommended mode.
 | EV countdowns | Express `*_departure_time` and `*_arrival_time` in 15s steps. |
 | Large files | Prefer Parquet. |
 | Pre-training smoke test | Run a short window and call `evaluate_v2()`. |
+| Compact dynamic-assets example | `data/datasets/citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet/schema.json` contains 7 days at 15s with charger, PV and BESS add/remove events. |
 
 ## Performance and Loader Behavior
 
