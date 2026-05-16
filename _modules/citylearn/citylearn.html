@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 0.5.2 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 0.6.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8e576371"></script>
+      <script src="../../_static/documentation_options.js?v=73d9a94e"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -108,6 +108,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.exporter</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpisodeExporter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.kpi</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnKPIService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.loading</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnLoadingService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.baseline</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnBusinessAsUsualBaselineService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.physics_invariants</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnPhysicsInvariantService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.runtime</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnRuntimeService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.entity_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnEntityInterfaceService</span>
@@ -359,6 +360,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_loading_service</span> <span class="o">=</span> <span class="n">CityLearnLoadingService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_service</span> <span class="o">=</span> <span class="n">CityLearnRuntimeService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kpi_service</span> <span class="o">=</span> <span class="n">CityLearnKPIService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_business_as_usual_baseline_service</span> <span class="o">=</span> <span class="n">CityLearnBusinessAsUsualBaselineService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_physics_invariant_service</span> <span class="o">=</span> <span class="n">CityLearnPhysicsInvariantService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span> <span class="o">=</span> <span class="n">CityLearnEntityInterfaceService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_topology_service</span> <span class="o">=</span> <span class="n">CityLearnTopologyService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1421,16 +1423,31 @@
 
 <div class="viewcode-block" id="CityLearnEnv.evaluate_v2">
 <a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.evaluate_v2">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_v2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control_condition</span><span class="p">:</span> <span class="n">EvaluationCondition</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">baseline_condition</span><span class="p">:</span> <span class="n">EvaluationCondition</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">comfort_band</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_v2</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">control_condition</span><span class="p">:</span> <span class="n">EvaluationCondition</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">baseline_condition</span><span class="p">:</span> <span class="n">EvaluationCondition</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">comfort_band</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">include_business_as_usual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate v2 cost functions at current time step.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpi_service</span><span class="o">.</span><span class="n">evaluate_v2</span><span class="p">(</span>
             <span class="n">control_condition</span><span class="o">=</span><span class="n">control_condition</span><span class="p">,</span>
             <span class="n">baseline_condition</span><span class="o">=</span><span class="n">baseline_condition</span><span class="p">,</span>
             <span class="n">comfort_band</span><span class="o">=</span><span class="n">comfort_band</span><span class="p">,</span>
+            <span class="n">include_business_as_usual</span><span class="o">=</span><span class="n">include_business_as_usual</span><span class="p">,</span>
             <span class="n">evaluation_condition_cls</span><span class="o">=</span><span class="n">EvaluationCondition</span><span class="p">,</span>
             <span class="n">dynamics_building_cls</span><span class="o">=</span><span class="n">DynamicsBuilding</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CityLearnEnv.run_business_as_usual_baseline">
+<a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.run_business_as_usual_baseline">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_business_as_usual_baseline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run or return the cached native business-as-usual baseline.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_business_as_usual_baseline_service</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CityLearnEnv.next_time_step">
@@ -1459,10 +1476,23 @@
 
 <div class="viewcode-block" id="CityLearnEnv.export_final_kpis">
 <a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.export_final_kpis">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">export_final_kpis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="s1">&#39;Agent&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exported_kpis.csv&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_final_kpis</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="s1">&#39;Agent&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exported_kpis.csv&quot;</span><span class="p">,</span>
+        <span class="n">include_business_as_usual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">export_business_as_usual_timeseries</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">kpi_round_decimals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Export episode KPIs to csv.&quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_episode_exporter</span><span class="o">.</span><span class="n">export_final_kpis</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_episode_exporter</span><span class="o">.</span><span class="n">export_final_kpis</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+            <span class="n">include_business_as_usual</span><span class="o">=</span><span class="n">include_business_as_usual</span><span class="p">,</span>
+            <span class="n">export_business_as_usual_timeseries</span><span class="o">=</span><span class="n">export_business_as_usual_timeseries</span><span class="p">,</span>
+            <span class="n">kpi_round_decimals</span><span class="o">=</span><span class="n">kpi_round_decimals</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CityLearnEnv.render">
@@ -1542,6 +1572,8 @@
         <span class="c1"># object reset</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_final_kpis_exported</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_business_as_usual_baseline_service&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_business_as_usual_baseline_service</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
         <span class="c1"># update seed</span>
         <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

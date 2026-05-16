@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.loading &mdash; CityLearn 0.5.2 documentation</title>
+  <title>citylearn.internal.loading &mdash; CityLearn 0.6.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8e576371"></script>
+      <script src="../../../_static/documentation_options.js?v=73d9a94e"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -169,7 +169,8 @@
             <span class="sa">f</span><span class="s2">&quot;dataset_seconds_per_time_step=</span><span class="si">{</span><span class="n">dataset_seconds</span><span class="si">}</span><span class="s2">, &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;seconds_per_time_step=</span><span class="si">{</span><span class="n">schema_seconds</span><span class="si">}</span><span class="s2">, &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;time_step_ratio=</span><span class="si">{</span><span class="n">ratio</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">. &quot;</span>
-            <span class="s2">&quot;Runtime energy quantities are converted with time_step_ratio; power limits/actions still use seconds_per_time_step. &quot;</span>
+            <span class="s2">&quot;No automatic resampling is performed. Keep schema seconds_per_time_step aligned with the dataset unless &quot;</span>
+            <span class="s2">&quot;you intentionally want runtime energy conversion through time_step_ratio. &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;source=</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
@@ -612,16 +613,11 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">charger_simulation</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
                 <span class="k">if</span> <span class="s1">&#39;electric_vehicle_current_soc&#39;</span> <span class="ow">in</span> <span class="n">charger_simulation_file</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                     <span class="n">current_soc_raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">charger_simulation_file</span><span class="p">[</span><span class="s1">&#39;electric_vehicle_current_soc&#39;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
-                    <span class="n">current_soc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">current_soc_raw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
-                    <span class="n">valid</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">current_soc_raw</span><span class="p">)</span>
-
-                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">valid</span><span class="p">):</span>
-                        <span class="n">normalized</span> <span class="o">=</span> <span class="n">current_soc_raw</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
-                        <span class="n">normalized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">normalized</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">normalized</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">normalized</span><span class="p">)</span>
-                        <span class="n">normalized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">normalized</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-                        <span class="n">current_soc</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalized</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
-
-                    <span class="n">charger_simulation</span><span class="o">.</span><span class="n">electric_vehicle_current_soc</span> <span class="o">=</span> <span class="n">current_soc</span>
+                    <span class="n">charger_simulation</span><span class="o">.</span><span class="n">electric_vehicle_current_soc</span> <span class="o">=</span> <span class="n">ChargerSimulation</span><span class="o">.</span><span class="n">normalize_soc_series</span><span class="p">(</span>
+                        <span class="n">current_soc_raw</span><span class="p">,</span>
+                        <span class="n">default_soc_value</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span>
+                        <span class="n">noise_std</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                    <span class="p">)</span>
 
                 <span class="n">charger_type</span> <span class="o">=</span> <span class="n">charger_config</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
                 <span class="n">charger_module</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">charger_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -902,24 +898,47 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElectricVehicle</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize and return an electric vehicle model.&quot;&quot;&quot;</span>
 
-        <span class="n">capacity</span> <span class="o">=</span> <span class="n">electric_vehicle_schema</span><span class="p">[</span><span class="s1">&#39;battery&#39;</span><span class="p">][</span><span class="s1">&#39;attributes&#39;</span><span class="p">][</span><span class="s1">&#39;capacity&#39;</span><span class="p">]</span>
-        <span class="n">nominal_power</span> <span class="o">=</span> <span class="n">electric_vehicle_schema</span><span class="p">[</span><span class="s1">&#39;battery&#39;</span><span class="p">][</span><span class="s1">&#39;attributes&#39;</span><span class="p">][</span><span class="s1">&#39;nominal_power&#39;</span><span class="p">]</span>
-        <span class="n">initial_soc</span> <span class="o">=</span> <span class="n">electric_vehicle_schema</span><span class="p">[</span><span class="s1">&#39;battery&#39;</span><span class="p">][</span><span class="s1">&#39;attributes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;initial_soc&#39;</span><span class="p">)</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="n">electric_vehicle_schema</span><span class="p">[</span><span class="s1">&#39;battery&#39;</span><span class="p">][</span><span class="s1">&#39;attributes&#39;</span><span class="p">]</span>
+        <span class="n">capacity</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;capacity&#39;</span><span class="p">]</span>
+        <span class="n">nominal_power</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;nominal_power&#39;</span><span class="p">]</span>
+        <span class="n">initial_soc</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;initial_soc&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">initial_soc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">seed_source</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;random_seed&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">electric_vehicle_name</span><span class="si">}</span><span class="s2">:initial_soc&quot;</span>
             <span class="n">deterministic_seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">seed_source</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">8</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span>
             <span class="n">initial_soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">deterministic_seed</span><span class="p">)</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
-        <span class="n">depth_of_discharge</span> <span class="o">=</span> <span class="n">electric_vehicle_schema</span><span class="p">[</span><span class="s1">&#39;battery&#39;</span><span class="p">][</span><span class="s1">&#39;attributes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;depth_of_discharge&#39;</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">)</span>
+        <span class="n">depth_of_discharge</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;depth_of_discharge&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">loss_coefficient</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;loss_coefficient&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">loss_coefficient</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loss_coefficient</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loss_coefficient</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">loss_coefficient</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">loss_coefficient</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">loss_coefficient</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">loss_coefficient</span><span class="p">)</span>
+
+        <span class="n">battery_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;capacity&#39;</span><span class="p">:</span> <span class="n">capacity</span><span class="p">,</span>
+            <span class="s1">&#39;nominal_power&#39;</span><span class="p">:</span> <span class="n">nominal_power</span><span class="p">,</span>
+            <span class="s1">&#39;initial_soc&#39;</span><span class="p">:</span> <span class="n">initial_soc</span><span class="p">,</span>
+            <span class="s1">&#39;loss_coefficient&#39;</span><span class="p">:</span> <span class="n">loss_coefficient</span><span class="p">,</span>
+            <span class="s1">&#39;seconds_per_time_step&#39;</span><span class="p">:</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;seconds_per_time_step&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;time_step_ratio&#39;</span><span class="p">:</span> <span class="n">time_step_ratio</span><span class="p">,</span>
+            <span class="s1">&#39;random_seed&#39;</span><span class="p">:</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;random_seed&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;episode_tracker&#39;</span><span class="p">:</span> <span class="n">episode_tracker</span><span class="p">,</span>
+            <span class="s1">&#39;depth_of_discharge&#39;</span><span class="p">:</span> <span class="n">depth_of_discharge</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s1">&#39;efficiency&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;capacity_loss_coefficient&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;power_efficiency_curve&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;capacity_power_curve&#39;</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="k">if</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="n">battery_kwargs</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span>
 
         <span class="n">battery</span> <span class="o">=</span> <span class="n">Battery</span><span class="p">(</span>
-            <span class="n">capacity</span><span class="o">=</span><span class="n">capacity</span><span class="p">,</span>
-            <span class="n">nominal_power</span><span class="o">=</span><span class="n">nominal_power</span><span class="p">,</span>
-            <span class="n">initial_soc</span><span class="o">=</span><span class="n">initial_soc</span><span class="p">,</span>
-            <span class="n">seconds_per_time_step</span><span class="o">=</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;seconds_per_time_step&#39;</span><span class="p">],</span>
-            <span class="n">time_step_ratio</span><span class="o">=</span><span class="n">time_step_ratio</span><span class="p">,</span>
-            <span class="n">random_seed</span><span class="o">=</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;random_seed&#39;</span><span class="p">],</span>
-            <span class="n">episode_tracker</span><span class="o">=</span><span class="n">episode_tracker</span><span class="p">,</span>
-            <span class="n">depth_of_discharge</span><span class="o">=</span><span class="n">depth_of_discharge</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">battery_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">electric_vehicle_type</span> <span class="o">=</span> <span class="s1">&#39;citylearn.citylearn.ElectricVehicle&#39;</span> <span class="k">if</span> <span class="n">electric_vehicle_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">electric_vehicle_schema</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>

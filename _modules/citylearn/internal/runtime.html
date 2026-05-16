@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.runtime &mdash; CityLearn 0.5.2 documentation</title>
+  <title>citylearn.internal.runtime &mdash; CityLearn 0.6.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8e576371"></script>
+      <script src="../../../_static/documentation_options.js?v=73d9a94e"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -129,6 +129,8 @@
         <span class="n">actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">building</span><span class="p">,</span> <span class="n">building_actions</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">building</span><span class="o">.</span><span class="n">clear_step_electric_loads_for_action</span><span class="p">()</span>
             <span class="n">building</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="o">**</span><span class="n">building_actions</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">update_variables</span><span class="p">()</span>
@@ -415,11 +417,6 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span> <span class="ow">and</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">candidate</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
                     <span class="n">soc_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">soc_value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">electric_vehicle_required_soc_departure</span><span class="p">):</span>
-                <span class="n">fallback</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">electric_vehicle_required_soc_departure</span><span class="p">[</span><span class="n">step</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fallback</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fallback</span><span class="p">)</span> <span class="ow">and</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">fallback</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
-                    <span class="n">soc_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fallback</span><span class="p">)</span>
-
             <span class="k">return</span> <span class="n">soc_value</span>
 
         <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">:</span>
@@ -542,8 +539,8 @@
                     <span class="n">last_soc</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
                     <span class="n">drift_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_unconnected_drift_std</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span>
                     <span class="n">variability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">random_state</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">drift_std</span><span class="p">),</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
-                    <span class="n">new_soc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">last_soc</span> <span class="o">*</span> <span class="n">variability</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-                    <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">force_set_soc</span><span class="p">(</span><span class="n">new_soc</span><span class="p">)</span></div>
+                    <span class="c1"># Exogenous away-from-home movement: driving can reduce SOC, offsite charging can raise it.</span>
+                    <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">force_set_soc</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">last_soc</span> <span class="o">*</span> <span class="n">variability</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="CityLearnRuntimeService.update_variables">

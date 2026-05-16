@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model module &mdash; CityLearn 0.5.2 documentation</title>
+  <title>citylearn.energy_model module &mdash; CityLearn 0.6.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8e576371"></script>
+      <script src="../_static/documentation_options.js?v=73d9a94e"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -270,7 +270,7 @@ bypassing restrictions such as efficiency losses, power limits, and degradation.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.Battery.get_current_efficiency">
-<span class="sig-name descname"><span class="pre">get_current_efficiency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.get_current_efficiency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.get_current_efficiency" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_current_efficiency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.get_current_efficiency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.get_current_efficiency" title="Link to this definition"></a></dt>
 <dd><p>Get technical efficiency while considering <cite>power_efficiency_curve</cite> limitations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -395,6 +395,18 @@ bypassing restrictions such as efficiency losses, power limits, and degradation.
 <dt class="sig sig-object py" id="citylearn.energy_model.DeferrableAppliance.past_action_values">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">past_action_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#citylearn.energy_model.DeferrableAppliance.past_action_values" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.energy_model.DeferrableAppliance.preview_start_energy_kwh">
+<span class="sig-name descname"><span class="pre">preview_start_energy_kwh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#DeferrableAppliance.preview_start_energy_kwh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.DeferrableAppliance.preview_start_energy_kwh" title="Link to this definition"></a></dt>
+<dd><p>Return current-step energy that would be added if <code class="docutils literal notranslate"><span class="pre">action_value</span></code> starts a cycle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.energy_model.DeferrableAppliance.preview_start_profile_kwh">
+<span class="sig-name descname"><span class="pre">preview_start_profile_kwh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#DeferrableAppliance.preview_start_profile_kwh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.DeferrableAppliance.preview_start_profile_kwh" title="Link to this definition"></a></dt>
+<dd><p>Return the full profile that would be added if <code class="docutils literal notranslate"><span class="pre">action_value</span></code> starts a cycle.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.DeferrableAppliance.reset">
@@ -810,7 +822,7 @@ a building’s PV. If the dataframe is not provided it is read in using
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.PV.get_generation">
 <span class="sig-name descname"><span class="pre">get_generation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inverter_ac_power_per_kw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#PV.get_generation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.PV.get_generation" title="Link to this definition"></a></dt>
-<dd><p>Get solar generation output.</p>
+<dd><p>Get solar generation output in kWh per active time step.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>inverter_ac_power_perk_w</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Iterable</em><em>[</em><em>float</em><em>]</em><em>]</em>) – Inverter AC power output per kW of PV capacity in [W/kW] when
@@ -818,7 +830,7 @@ a building’s PV. If the dataframe is not provided it is read in using
 when <code class="docutils literal notranslate"><span class="pre">generation_mode='absolute'</span></code>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>generation</strong> – Solar generation as single value or time series depending on input parameter types.</p>
+<dd class="field-even"><p><strong>generation</strong> – Solar generation in [kWh/step] as single value or time series depending on input parameter types.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Union[float, Iterable[float]]</p>
@@ -826,7 +838,7 @@ when <code class="docutils literal notranslate"><span class="pre">generation_mod
 </dl>
 <p class="rubric">Notes</p>
 <div class="math notranslate nohighlight">
-\[\textrm{generation} = \frac{\textrm{capacity} \times \textrm{inverter_ac_power_per_w}}{1000}\]</div>
+\[\textrm{generation} = \frac{\textrm{capacity} \times \textrm{inverter_ac_power_per_w}}{1000} \times \Delta t\]</div>
 </dd></dl>
 
 <dl class="py method">
@@ -911,7 +923,7 @@ If discharging, soc = max(0, <cite>soc_init</cite> + energy/<cite>round_trip_eff
 <dl class="py property">
 <dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.energy_init">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">energy_init</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#citylearn.energy_model.StorageDevice.energy_init" title="Link to this definition"></a></dt>
-<dd><p>Latest energy level after accounting for standby hourly lossses in [kWh].</p>
+<dd><p>Latest energy level available at the current time step in [kWh].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -934,7 +946,15 @@ If discharging, soc = max(0, <cite>soc_init</cite> + energy/<cite>round_trip_eff
 <dl class="py property">
 <dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.loss_coefficient">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loss_coefficient</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#citylearn.energy_model.StorageDevice.loss_coefficient" title="Link to this definition"></a></dt>
-<dd><p>Standby hourly losses.</p>
+<dd><p>Effective standby loss ratio for the active physical timestep.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.next_time_step">
+<span class="sig-name descname"><span class="pre">next_time_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#StorageDevice.next_time_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.StorageDevice.next_time_step" title="Link to this definition"></a></dt>
+<dd><p>Advance to next <cite>time_step</cite> value.</p>
+<p class="rubric">Notes</p>
+<p>Override in subclass for custom implementation when advancing to next <cite>time_step</cite>.</p>
 </dd></dl>
 
 <dl class="py method">

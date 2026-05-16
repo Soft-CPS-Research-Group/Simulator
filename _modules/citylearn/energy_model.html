@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model &mdash; CityLearn 0.5.2 documentation</title>
+  <title>citylearn.energy_model &mdash; CityLearn 0.6.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8e576371"></script>
+      <script src="../../_static/documentation_options.js?v=73d9a94e"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -98,7 +98,7 @@
     <span class="n">Pvwattsv8</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">EpisodeTracker</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSet</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">,</span> <span class="n">DeferrableApplianceSimulation</span><span class="p">,</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="n">WashingMachineSimulation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">power_kw_to_energy_kwh</span><span class="p">,</span> <span class="n">to_dataset_resolution_energy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">power_kw_to_energy_kwh</span><span class="p">,</span> <span class="n">seconds_to_hours</span><span class="p">,</span> <span class="n">to_dataset_resolution_energy</span>
 <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
@@ -668,7 +668,7 @@
 <div class="viewcode-block" id="PV.get_generation">
 <a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.PV.get_generation">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inverter_ac_power_per_kw</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get solar generation output.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get solar generation output in kWh per active time step.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -680,18 +680,18 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        generation : Union[float, Iterable[float]]</span>
-<span class="sd">            Solar generation as single value or time series depending on input parameter types.</span>
+<span class="sd">            Solar generation in [kWh/step] as single value or time series depending on input parameter types.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        .. math::</span>
-<span class="sd">            \textrm{generation} = \frac{\textrm{capacity} \times \textrm{inverter_ac_power_per_w}}{1000}</span>
+<span class="sd">            \textrm{generation} = \frac{\textrm{capacity} \times \textrm{inverter_ac_power_per_w}}{1000} \times \Delta t</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generation_mode</span> <span class="o">==</span> <span class="s1">&#39;absolute&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inverter_ac_power_per_kw</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nominal_power</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inverter_ac_power_per_kw</span><span class="p">)</span><span class="o">/</span><span class="mf">1000.0</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nominal_power</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inverter_ac_power_per_kw</span><span class="p">)</span><span class="o">/</span><span class="mf">1000.0</span><span class="o">*</span><span class="n">seconds_to_hours</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PV.get_metadata">
@@ -847,8 +847,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">capacity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_coefficient</span> <span class="o">=</span> <span class="n">loss_coefficient</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_soc</span> <span class="o">=</span> <span class="n">initial_soc</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span><span class="o">=</span><span class="n">time_step_ratio</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">efficiency</span> <span class="o">=</span> <span class="n">efficiency</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">efficiency</span><span class="o">=</span><span class="n">efficiency</span><span class="p">,</span> <span class="n">time_step_ratio</span><span class="o">=</span><span class="n">time_step_ratio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -864,9 +863,10 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">loss_coefficient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Standby hourly losses.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Effective standby loss ratio for the active physical timestep.&quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__loss_coefficient</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span>
+        <span class="n">step_hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3600.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__loss_coefficient</span> <span class="o">*</span> <span class="n">step_hours</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">initial_soc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -882,10 +882,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_init</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Latest energy level after accounting for standby hourly lossses in [kWh].&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_coefficient</span><span class="p">))</span>
-        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_coefficient</span><span class="p">))</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Latest energy level available at the current time step in [kWh].&quot;&quot;&quot;</span>
+        <span class="n">minimum_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_energy</span><span class="p">()</span>
+        <span class="n">initialized</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_StorageDevice__soc_initialized&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">initialized</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">initialized</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">initialized</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">])</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">minimum_energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">minimum_energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -908,6 +915,7 @@
     <span class="nd">@Device</span><span class="o">.</span><span class="n">efficiency</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">efficiency</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_property_value</span><span class="p">(</span><span class="n">efficiency</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">efficiency</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;efficiency must be &lt;= 1.0 for storage devices.&#39;</span>
         <span class="n">Device</span><span class="o">.</span><span class="n">efficiency</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">efficiency</span><span class="p">)</span>
 
     <span class="nd">@loss_coefficient</span><span class="o">.</span><span class="n">setter</span>
@@ -925,8 +933,23 @@
     <span class="nd">@time_step_ratio</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">time_step_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_step_ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="n">time_step_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_property_value</span><span class="p">(</span><span class="n">time_step_ratio</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-  
-        <span class="bp">self</span><span class="o">.</span><span class="n">__time_step_ratio</span> <span class="o">=</span> <span class="n">time_step_ratio</span>    
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__time_step_ratio</span> <span class="o">=</span> <span class="n">time_step_ratio</span>
+
+<div class="viewcode-block" id="StorageDevice.next_time_step">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.next_time_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">next_time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">previous_soc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">previous_soc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">next_time_step</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">previous_soc</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">):</span>
+            <span class="n">next_soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">previous_soc</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_coefficient</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_soc</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_soc</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__soc_initialized</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="StorageDevice.get_metadata">
@@ -960,16 +983,18 @@
         <span class="n">energy_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_init</span>
         <span class="c1"># The initial State Of Charge (SOC) is the previous SOC minus the energy losses</span>
         <span class="n">energy_final</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">energy_init</span> <span class="o">+</span> <span class="n">energy</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">round_trip_efficiency</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span> <span class="k">if</span> <span class="n">energy</span> <span class="o">&gt;=</span> <span class="mi">0</span>\
-            <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">energy_init</span> <span class="o">+</span> <span class="n">energy</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">round_trip_efficiency</span><span class="p">)</span>
+            <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_minimum_energy</span><span class="p">(),</span> <span class="n">energy_init</span> <span class="o">+</span> <span class="n">energy</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">round_trip_efficiency</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_final</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soc_initialized</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__energy_balance</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_energy_balance</span><span class="p">(</span><span class="n">energy_final</span><span class="p">,</span> <span class="n">energy_init</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StorageDevice.force_set_soc">
 <a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.force_set_soc">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">force_set_soc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soc</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">soc</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">soc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soc_initialized</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="StorageDevice.set_energy_balance">
@@ -1000,6 +1025,12 @@
 
         <span class="k">return</span> <span class="n">delta_energy</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">round_trip_efficiency</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_minimum_soc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_minimum_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_soc</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span>
 
 <div class="viewcode-block" id="StorageDevice.autosize">
 <a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.autosize">[docs]</a>
@@ -1038,7 +1069,9 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_soc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_soc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_soc</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soc_initialized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soc_initialized</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__energy_balance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span></div>
 </div>
 
@@ -1223,6 +1256,7 @@
     <span class="nd">@capacity_loss_coefficient</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">capacity_loss_coefficient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity_loss_coefficient</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]):</span>
         <span class="n">capacity_loss_coefficient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_property_value</span><span class="p">(</span><span class="n">capacity_loss_coefficient</span><span class="p">,</span> <span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">capacity_loss_coefficient</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;capacity_loss_coefficient must be &gt;= 0.0 and &lt;= 1.0.&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__capacity_loss_coefficient</span> <span class="o">=</span> <span class="n">capacity_loss_coefficient</span>
 
     <span class="nd">@power_efficiency_curve</span><span class="o">.</span><span class="n">setter</span>
@@ -1260,7 +1294,9 @@
 
     <span class="nd">@depth_of_discharge</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">depth_of_discharge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth_of_discharge</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__depth_of_discharge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_property_value</span><span class="p">(</span><span class="n">depth_of_discharge</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">depth_of_discharge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_property_value</span><span class="p">(</span><span class="n">depth_of_discharge</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">depth_of_discharge</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;depth_of_discharge must be &gt;= 0.0 and &lt;= 1.0.&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__depth_of_discharge</span> <span class="o">=</span> <span class="n">depth_of_discharge</span>
 
     <span class="nd">@time_step_ratio</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">time_step_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_step_ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
@@ -1289,22 +1325,38 @@
 <span class="sd">        energy : float</span>
 <span class="sd">            Energy to charge if (+) or discharge if (-) in [kWh].</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">action_energy</span> <span class="o">=</span> <span class="n">energy</span>
+        <span class="c1"># Public control paths pass dataset-resolution kWh; physical limits are per control step.</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="mf">1.0</span>
+        <span class="n">requested_energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span> <span class="o">*</span> <span class="n">ratio</span>
+        <span class="n">step_hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3600.0</span><span class="p">,</span> <span class="mf">1.0e-12</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">energy</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">energy_wrt_degrade</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degraded_capacity</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_init</span>
-            <span class="n">max_input_power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_max_input_power</span><span class="p">()</span>
-            <span class="n">energy</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_input_power</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_nominal_power</span><span class="p">,</span> <span class="n">energy_wrt_degrade</span><span class="p">,</span> <span class="n">energy</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_efficiency</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">action_energy</span><span class="p">,</span> <span class="n">max_input_power</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">requested_energy</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">max_input_power</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_max_input_power</span><span class="p">()),</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">max_input_energy</span> <span class="o">=</span> <span class="n">power_kw_to_energy_kwh</span><span class="p">(</span><span class="n">max_input_power</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span>
+            <span class="n">limited_energy</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">requested_energy</span><span class="p">,</span> <span class="n">max_input_energy</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_efficiency</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">limited_energy</span><span class="p">)</span> <span class="o">/</span> <span class="n">step_hours</span><span class="p">)</span>
+                <span class="n">energy_wrt_degrade</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degraded_capacity</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_init</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">capacity_limited_energy</span> <span class="o">=</span> <span class="n">energy_wrt_degrade</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">round_trip_efficiency</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">)</span>
+                <span class="n">limited_energy</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">requested_energy</span><span class="p">,</span> <span class="n">max_input_energy</span><span class="p">,</span> <span class="n">capacity_limited_energy</span><span class="p">)</span>
+
+            <span class="n">energy</span> <span class="o">=</span> <span class="n">limited_energy</span> <span class="o">/</span> <span class="n">ratio</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">soc_limit_wrt_dod</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth_of_discharge</span>
-            <span class="n">soc_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span>
-            <span class="n">soc_difference</span> <span class="o">=</span> <span class="n">soc_init</span> <span class="o">-</span> <span class="n">soc_limit_wrt_dod</span>
-            <span class="n">energy_limit_wrt_dod</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">soc_difference</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">round_trip_efficiency</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="n">max_output_power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_max_output_power</span><span class="p">()</span>
-            <span class="n">energy</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="n">max_output_power</span><span class="p">,</span> <span class="n">energy_limit_wrt_dod</span><span class="p">,</span> <span class="n">energy</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_efficiency</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">action_energy</span><span class="p">),</span> <span class="n">max_output_power</span><span class="p">))</span>
+            <span class="n">max_output_power</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_max_output_power</span><span class="p">()),</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">max_output_energy</span> <span class="o">=</span> <span class="n">power_kw_to_energy_kwh</span><span class="p">(</span><span class="n">max_output_power</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span>
+            <span class="n">requested_output</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">requested_energy</span><span class="p">)</span>
+            <span class="n">limited_output</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">requested_output</span><span class="p">,</span> <span class="n">max_output_energy</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_efficiency</span><span class="p">(</span><span class="n">limited_output</span> <span class="o">/</span> <span class="n">step_hours</span><span class="p">)</span>
+                <span class="n">soc_limit_wrt_dod</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth_of_discharge</span>
+                <span class="n">minimum_energy</span> <span class="o">=</span> <span class="n">soc_limit_wrt_dod</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span>
+                <span class="n">dod_limited_output</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_init</span> <span class="o">-</span> <span class="n">minimum_energy</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">round_trip_efficiency</span>
+                <span class="n">limited_output</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">requested_output</span><span class="p">,</span> <span class="n">max_output_energy</span><span class="p">,</span> <span class="n">dod_limited_output</span><span class="p">)</span>
+
+            <span class="n">energy</span> <span class="o">=</span> <span class="o">-</span><span class="n">limited_output</span> <span class="o">/</span> <span class="n">ratio</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">charge</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
         <span class="n">degraded_capacity</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degraded_capacity</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrade</span><span class="p">(),</span> <span class="mf">0.0</span><span class="p">)</span>
@@ -1313,6 +1365,9 @@
         <span class="n">dataset_resolution_balance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_balance</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span><span class="o">/</span><span class="n">ratio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_electricity_consumption</span><span class="p">(</span><span class="n">dataset_resolution_balance</span><span class="p">,</span> <span class="n">enforce_polarity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_minimum_soc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth_of_discharge</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
 
 <div class="viewcode-block" id="Battery.get_max_output_power">
 <a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.Battery.get_max_output_power">[docs]</a>
@@ -1355,7 +1410,7 @@
 
 <div class="viewcode-block" id="Battery.get_current_efficiency">
 <a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.Battery.get_current_efficiency">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_current_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_current_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">power</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get technical efficiency while considering `power_efficiency_curve` limitations.</span>
 
 <span class="sd">        Returns</span>
@@ -1364,11 +1419,11 @@
 <span class="sd">            Technical efficiency.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Calculating the maximum power rate at which the battery can be charged or discharged</span>
-        <span class="n">energy_normalized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nominal_power</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">)</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">energy_normalized</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_efficiency_curve</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Efficiency curves are defined on normalized average power, not kWh per step.</span>
+        <span class="n">power_normalized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">power</span><span class="p">)</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nominal_power</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">power_normalized</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_efficiency_curve</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_efficiency_curve</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>\
-            <span class="o">+</span> <span class="p">(</span><span class="n">energy_normalized</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_efficiency_curve</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">power_normalized</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_efficiency_curve</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
             <span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">power_efficiency_curve</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_efficiency_curve</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
             <span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">power_efficiency_curve</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_efficiency_curve</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">idx</span><span class="p">])</span>
 
@@ -1587,6 +1642,7 @@
 <a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.reset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_cycle_profiles_against_nominal_power</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__past_action_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_start_time_steps</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1639,6 +1695,8 @@
             <span class="k">if</span> <span class="n">current_global</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;latest_start_time_step&#39;</span><span class="p">]):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_mark_missed</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="n">current_global</span><span class="p">)</span>
             <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cycle_respects_nominal_power</span><span class="p">(</span><span class="n">cycle</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="n">cycle_id</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="p">[</span><span class="n">cycle_id</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;running&#39;</span>
@@ -1649,6 +1707,36 @@
             <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">:</span>
                 <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="mf">1.0</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ElectricDevice__electricity_consumption</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">energy_kwh</span><span class="p">)</span> <span class="o">/</span> <span class="n">ratio</span></div>
+
+
+<div class="viewcode-block" id="DeferrableAppliance.preview_start_energy_kwh">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.preview_start_energy_kwh">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">preview_start_energy_kwh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return current-step energy that would be added if ``action_value`` starts a cycle.&quot;&quot;&quot;</span>
+
+        <span class="n">profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preview_start_profile_kwh</span><span class="p">(</span><span class="n">action_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">profile</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span></div>
+
+
+<div class="viewcode-block" id="DeferrableAppliance.preview_start_profile_kwh">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.preview_start_profile_kwh">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">preview_start_profile_kwh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the full profile that would be added if ``action_value`` starts a cycle.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_cycle_states</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_start_command</span><span class="p">(</span><span class="n">action_value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+
+        <span class="n">cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_pending_cycle</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cycle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_can_start_cycle</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cycle_respects_nominal_power</span><span class="p">(</span><span class="n">cycle</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;load_profile&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DeferrableAppliance.cancel_pending_and_running">
@@ -1814,6 +1902,32 @@
             <span class="n">episode_start_time_step</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">episode_start_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cycle_peak_power_kw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cycle</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;load_profile&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="n">step_hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">seconds_to_hours</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">),</span> <span class="mf">1.0e-12</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span> <span class="o">/</span> <span class="n">step_hours</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cycle_respects_nominal_power</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">nominal_power</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;nominal_power&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nominal_power</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cycle_peak_power_kw</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">nominal_power</span> <span class="o">+</span> <span class="mf">1.0e-9</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_cycle_profiles_against_nominal_power</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nominal_power</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;nominal_power&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nominal_power</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span><span class="o">.</span><span class="n">flexibility_schedule</span><span class="p">:</span>
+            <span class="n">peak_power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cycle_peak_power_kw</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">peak_power</span> <span class="o">&gt;</span> <span class="n">nominal_power</span> <span class="o">+</span> <span class="mf">1.0e-9</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Deferrable appliance &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; cycle &#39;</span><span class="si">{</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; peak power &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">peak_power</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2"> kW exceeds nominal_power </span><span class="si">{</span><span class="n">nominal_power</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2"> kW.&quot;</span>
+                <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_next_pending_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
         <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_appliance_simulation</span><span class="o">.</span><span class="n">flexibility_schedule</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cycle_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;cycle_id&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;pending&#39;</span><span class="p">:</span>
@@ -1834,7 +1948,9 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">current_global</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;deadline_time_step&#39;</span><span class="p">]):</span>
             <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">):</span>
+        <span class="c1"># The terminal environment index is not aggregated by Building.step, so a cycle must finish</span>
+        <span class="c1"># before it to avoid writing energy that can never appear in building or district totals.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="s1">&#39;duration_steps&#39;</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 

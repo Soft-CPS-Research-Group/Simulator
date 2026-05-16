@@ -12,6 +12,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   citylearn.internal.baseline
    citylearn.internal.building_ops
    citylearn.internal.entity_interface
    citylearn.internal.kpi

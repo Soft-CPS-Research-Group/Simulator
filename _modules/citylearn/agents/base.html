@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.agents.base &mdash; CityLearn 0.5.2 documentation</title>
+  <title>citylearn.agents.base &mdash; CityLearn 0.6.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8e576371"></script>
+      <script src="../../../_static/documentation_options.js?v=73d9a94e"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -354,7 +354,7 @@
 <div class="viewcode-block" id="BaselineAgent">
 <a class="viewcode-back" href="../../../api/citylearn.agents.base.html#citylearn.agents.base.BaselineAgent">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BaselineAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Agent class for business-as-usual simulation where the storage systems and heat pumps are not controlled.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Passive no-control baseline where active control actions are disabled.</span>
 
 <span class="sd">    This agent will provide results for when there is no storage for load shifting and no heat pump partial load. </span>
 <span class="sd">    The storage actions prescribed will be 0.0 and the heat pump will have no action, i.e. `None`, causing it to </span>
@@ -364,8 +364,8 @@
 <span class="sd">    will be set to have no active actions. This means that you must initialize a new `env` if you want to simulate</span>
 <span class="sd">    with a new agent type. </span>
 <span class="sd">    </span>
-<span class="sd">    This agent class is best used to establish a baseline simulation that can then be compared </span>
-<span class="sd">    to RBC, RLC, or MPC control algorithms.</span>
+<span class="sd">    Use :class:`citylearn.agents.baseline.BusinessAsUsualAgent` for the native operational</span>
+<span class="sd">    business-as-usual baseline that charges EVs, starts deferrables, and controls BESS.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
