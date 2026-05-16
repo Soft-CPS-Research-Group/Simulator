@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 from gymnasium import spaces
 import numpy as np
@@ -1454,6 +1455,17 @@ class Building(Environment):
             electric_vehicle_storage_actions=electric_vehicle_storage_actions,
         )
 
+    def clear_step_electric_loads_for_action(self):
+        """Clear reset-populated electric loads before applying control at the current step."""
+
+        for device in (
+            self.cooling_device,
+            self.heating_device,
+            self.dhw_device,
+            self.non_shiftable_load_device,
+        ):
+            device.set_electricity_consumption(0.0, time_step=self.time_step)
+
     def update_cooling_demand(self, action: float):
         """Update space cooling demand for current time step."""
 
@@ -1813,6 +1825,34 @@ class Building(Environment):
 
         return high + 1.0e-6
 
+    @staticmethod
+    def _series_bound(values: Iterable[float], *, upper: bool, default: float = 0.0) -> float:
+        arr = np.asarray(values)
+        if arr.size == 0:
+            return float(default)
+
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', RuntimeWarning)
+                with np.errstate(all='ignore'):
+                    value = np.nanmax(arr) if upper else np.nanmin(arr)
+        except (TypeError, ValueError):
+            try:
+                numeric = arr.astype('float64')
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore', RuntimeWarning)
+                    with np.errstate(all='ignore'):
+                        value = np.nanmax(numeric) if upper else np.nanmin(numeric)
+            except (TypeError, ValueError):
+                return float(default)
+
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            return float(default)
+
+        return value if np.isfinite(value) else float(default)
+
     def estimate_observation_space_limits(self, include_all: bool = None, periodic_normalization: bool = None) -> Tuple[
         Mapping[str, float], Mapping[str, float]]:
         r"""Get estimate of observation space limits.
@@ -1990,7 +2030,7 @@ class Building(Environment):
 
             elif key == 'comfort_band':
                 low_limit[key] = 0
-                high_limit[key] = max(data[key])
+                high_limit[key] = self._series_bound(data[key], upper=True)
 
             elif key in ['cooling_demand', 'heating_demand', 'dhw_demand']:
                 low_limit[key] = 0.0
@@ -2016,7 +2056,7 @@ class Building(Environment):
                     end_time_step=self.episode_tracker.simulation_end_time_step
                 )
                 electricity_consumption = self.cooling_device.get_input_power(demand, data['outdoor_dry_bulb_temperature'], False)
-                low_limit[key] = -max(electricity_consumption)
+                low_limit[key] = -self._series_bound(electricity_consumption, upper=True)
                 high_limit[key] = cooling_device_energy_limit
 
             elif key == 'heating_storage_electricity_consumption':
@@ -2027,7 +2067,7 @@ class Building(Environment):
                 )
                 electricity_consumption = self.heating_device.get_input_power(demand, data['outdoor_dry_bulb_temperature'], True) \
                     if isinstance(self.heating_device, HeatPump) else self.heating_device.get_input_power(demand)
-                low_limit[key] = -max(electricity_consumption)
+                low_limit[key] = -self._series_bound(electricity_consumption, upper=True)
                 high_limit[key] = heating_device_energy_limit
 
             elif key == 'dhw_storage_electricity_consumption':
@@ -2038,7 +2078,7 @@ class Building(Environment):
                 )
                 electricity_consumption = self.dhw_device.get_input_power(demand, data['outdoor_dry_bulb_temperature'], True) \
                     if isinstance(self.dhw_device, HeatPump) else self.dhw_device.get_input_power(demand)
-                low_limit[key] = -max(electricity_consumption)
+                low_limit[key] = -self._series_bound(electricity_consumption, upper=True)
                 high_limit[key] = dhw_device_energy_limit
 
             elif key == 'electrical_storage_electricity_consumption':
@@ -2054,16 +2094,22 @@ class Building(Environment):
                 cycle_max = max(values) + (1 if min(values) == 0 else 0)
                 pn = PeriodicNormalization(cycle_max)
                 x_sin, x_cos = pn * np.array(values)
-                low_limit[f'{key}_cos'], high_limit[f'{key}_cos'] = min(x_cos), max(x_cos)
-                low_limit[f'{key}_sin'], high_limit[f'{key}_sin'] = min(x_sin), max(x_sin)
+                low_limit[f'{key}_cos'], high_limit[f'{key}_cos'] = (
+                    self._series_bound(x_cos, upper=False),
+                    self._series_bound(x_cos, upper=True),
+                )
+                low_limit[f'{key}_sin'], high_limit[f'{key}_sin'] = (
+                    self._series_bound(x_sin, upper=False),
+                    self._series_bound(x_sin, upper=True),
+                )
 
             elif key == 'occupant_interaction_indoor_dry_bulb_temperature_set_point_delta':
                 # will get set in the overriding  LogisticRegressionOccupantInteractionBuilding._get_observation_space_limits_data
                 pass
 
             else:
-                low_limit[key] = min(data[key])
-                high_limit[key] = max(data[key])
+                low_limit[key] = self._series_bound(data[key], upper=False)
+                high_limit[key] = self._series_bound(data[key], upper=True)
 
         low_limit = {k: v - self.observation_space_limit_delta for k, v in low_limit.items()}
         high_limit = {k: v + self.observation_space_limit_delta for k, v in high_limit.items()}

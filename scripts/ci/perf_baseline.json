@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_utc": "2026-03-11T21:05:17Z",
+    "generated_utc": "2026-05-16T17:14:16Z",
     "schema": "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json",
     "episode_steps": 600,
     "seconds_per_time_step": 60,
@@ -9,34 +9,50 @@
   "cases": {
     "none": {
       "render_mode": "none",
+      "interface": "flat",
       "configured_steps": 600,
       "executed_steps": 599,
       "seconds_per_time_step": 60,
-      "init_s": 3.5692,
-      "reset_s": 0.0051,
-      "rollout_s": 4.0878,
-      "avg_step_ms": 6.8224,
-      "p95_step_ms": 8.6171,
+      "init_s": 0.5709,
+      "reset_s": 0.0303,
+      "rollout_s": 4.6302,
+      "avg_step_ms": 7.7282,
+      "p95_step_ms": 8.174,
       "end_export_s": 0.0
     },
     "end": {
       "render_mode": "end",
+      "interface": "flat",
       "configured_steps": 600,
       "executed_steps": 599,
       "seconds_per_time_step": 60,
-      "init_s": 3.3978,
-      "reset_s": 0.0049,
-      "rollout_s": 4.5983,
-      "avg_step_ms": 7.6747,
-      "p95_step_ms": 7.7274,
-      "end_export_s": 0.3084
+      "init_s": 0.6206,
+      "reset_s": 0.0335,
+      "rollout_s": 13.8877,
+      "avg_step_ms": 23.183,
+      "p95_step_ms": 8.7461,
+      "end_export_s": 0.3274
+    },
+    "entity_none": {
+      "render_mode": "none",
+      "interface": "entity",
+      "configured_steps": 600,
+      "executed_steps": 599,
+      "seconds_per_time_step": 60,
+      "init_s": 0.5998,
+      "reset_s": 0.0333,
+      "rollout_s": 5.0509,
+      "avg_step_ms": 8.4308,
+      "p95_step_ms": 8.9532,
+      "end_export_s": 0.0
     }
   },
   "thresholds": {
     "none_max_ms": 30.0,
     "end_max_ms": 45.0,
     "ratio_max": 2.0,
-    "baseline_regression_ratio": 3.0,
-    "baseline_slack_ms": 10.0
+    "entity_overhead_ratio_max": 1.12,
+    "baseline_regression_ratio": 2.5,
+    "baseline_slack_ms": 5.0
   }
 }

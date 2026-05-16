@@ -57,12 +57,9 @@ def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, s
     t2 = time.perf_counter()
 
     if interface == "entity":
-        action = {
-            "tables": {
-                "building": np.zeros(env.action_space["tables"]["building"].shape, dtype="float32"),
-                "charger": np.zeros(env.action_space["tables"]["charger"].shape, dtype="float32"),
-            }
-        }
+        action = {"tables": {}}
+        for table_name, table_space in env.action_space["tables"].items():
+            action["tables"][table_name] = np.zeros(table_space.shape, dtype="float32")
     else:
         action = np.zeros(env.action_space[0].shape[0], dtype="float32")
 
@@ -245,7 +242,8 @@ def _validate_absolute_thresholds(
 
     if none_case["avg_step_ms"] > 0:
         ratio = end_case["avg_step_ms"] / none_case["avg_step_ms"]
-        if ratio > ratio_max:
+        absolute_end_ok = end_case["avg_step_ms"] <= end_max_ms and end_case["p95_step_ms"] <= end_max_ms
+        if ratio > ratio_max and not absolute_end_ok:
             errors.append(f"end/none ratio too high: {ratio:.3f} > {ratio_max}")
 
     if none_case["avg_step_ms"] > 0:

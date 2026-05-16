@@ -229,6 +229,11 @@ def _run_sac_kpis(schema: Path, episode_steps: int, seed: int) -> Dict[str, Any]
 
     try:
         agent = SAC(env, random_seed=seed)
+        for i, space in enumerate(getattr(agent, "action_space", []) or []):
+            try:
+                space.seed(int(seed) + i)
+            except Exception:
+                pass
         observations, _ = env.reset()
         terminated = env.terminated
         truncated = env.truncated

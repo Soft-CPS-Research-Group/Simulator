@@ -38,6 +38,8 @@ class CityLearnRuntimeService:
         actions = self.parse_actions(actions)
 
         for building, building_actions in zip(env.buildings, actions):
+            if int(env.time_step) == 0:
+                building.clear_step_electric_loads_for_action()
             building.apply_actions(**building_actions)
 
         self.update_variables()

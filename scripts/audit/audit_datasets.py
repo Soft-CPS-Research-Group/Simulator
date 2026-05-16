@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import gc
 import json
 import sys
 import time
@@ -100,7 +101,11 @@ def dataset_root_from_schema(schema: Mapping[str, Any], dataset_dir: Path) -> Pa
         return dataset_dir.resolve()
     root_path = Path(str(root))
     if not root_path.is_absolute():
-        root_path = (dataset_dir / root_path).resolve()
+        repo_relative_path = (REPO_ROOT / root_path).resolve()
+        if repo_relative_path.exists():
+            root_path = repo_relative_path
+        else:
+            root_path = (dataset_dir / root_path).resolve()
     return root_path
 
 
@@ -416,9 +421,18 @@ def build_zero_action(env: Any) -> Any:
         building_features = action_specs.get("building", {}).get("features", [])
         charger_ids = action_specs.get("charger", {}).get("ids", [])
         charger_features = action_specs.get("charger", {}).get("features", [])
+        deferrable_ids = action_specs.get("deferrable_appliance", {}).get("ids", [])
+        deferrable_features = action_specs.get("deferrable_appliance", {}).get("features", [])
         building_table = np.zeros((len(building_ids), len(building_features)), dtype=np.float32)
         charger_table = np.zeros((len(charger_ids), len(charger_features)), dtype=np.float32)
-        return {"tables": {"building": building_table, "charger": charger_table}}
+        deferrable_table = np.zeros((len(deferrable_ids), len(deferrable_features)), dtype=np.float32)
+        return {
+            "tables": {
+                "building": building_table,
+                "charger": charger_table,
+                "deferrable_appliance": deferrable_table,
+            }
+        }
 
     if bool(getattr(env, "central_agent", False)):
         shape = tuple(int(x) for x in env.action_space[0].shape)
@@ -514,6 +528,8 @@ def run_rollout(
                 env.close()
             except Exception:
                 pass
+        env = None
+        gc.collect()
         result["duration_s"] = time.perf_counter() - start
 
     return result

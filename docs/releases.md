@@ -60,6 +60,53 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.4 - Readiness Audit Fixes
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release from the final readiness audit across EVs, stationary BESS, deferrable appliances, observations, actions, KPIs, dynamic topology and all bundled datasets.
+
+### Changed
+
+- Large observation-space bounds now use vectorized finite-safe reductions, improving audit/runtime behavior on 15-second CSV and parquet datasets.
+- Entity-mode smoke actions now cover every advertised action table, including deferrable appliances.
+- Performance regression checks now accept render/export `end` mode when absolute step latency stays inside the configured budget.
+- SAC KPI snapshots are seeded through the agent action spaces for deterministic audit output.
+
+### Fixed
+
+- First-step reset-populated device electricity loads are cleared before applying control actions, preventing false demand-limit failures in neighborhood datasets.
+- Dataset audit schema roots now resolve repository-relative `root_directory` values correctly.
+- Dataset audits release closed environments before continuing, reducing memory retention on large segmented checks.
+
+### Dataset/Schema Impact
+
+- No schema migration required.
+- All bundled dataset schemas were validated through default, flat/entity where feasible, and dynamic probe rollouts.
+
+### Compatibility
+
+- Compatible patch for valid schemas and agents.
+- Audit baselines were refreshed to match the hardened KPI/export contract from v0.6.3 and the first-step physics fix.
+
+### Validation
+
+- `.venv/bin/python -m compileall -q citylearn scripts`: pass
+- `.venv/bin/python -m pytest -q tests/unit/test_subhour_scaling.py tests/test_15_second_power_fixture.py tests/unit/test_physics_units_refactor.py tests/test_dynamic_topology_entity_mode.py tests/test_dataset_loader_window_parquet.py`: pass (`53 passed`)
+- `.venv/bin/python -m pytest -q`: pass (`326 passed`)
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py --max-scenarios 32`: pass (`16 passed`)
+- `.venv/bin/python scripts/audit/audit_performance_results.py --strict`: pass
+- Segmented dataset audit over all bundled schemas: pass (`31 passed`, `0 failed`, `0 timeout`)
+- `.venv/bin/python scripts/ci/perf_smoke.py --episode-steps 240 --seconds 60 --seed 0`: pass
+- `.venv/bin/pip check`: pass
+
+### Migration Notes
+
+- None.
+
 ## v0.6.3 - Physics, Bounds and Dynamic Topology Hardening
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
