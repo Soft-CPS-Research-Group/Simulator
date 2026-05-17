@@ -695,6 +695,9 @@ class Building(Environment):
         is `np.inf`.
         """
 
+        if not self.power_outage:
+            return np.inf
+
         capacity = abs(self.solar_generation[self.time_step]) - (
             self.cooling_device.electricity_consumption[self.time_step]
             + self.heating_device.electricity_consumption[self.time_step]
@@ -702,11 +705,8 @@ class Building(Environment):
             + self.non_shiftable_load_device.electricity_consumption[self.time_step]
             + self.electrical_storage.electricity_consumption[self.time_step]
         )
-        capacity = capacity if self.power_outage else np.inf
 
-        capacity = max(0.0, capacity)
-
-        return capacity
+        return max(0.0, capacity)
 
     @property
     def power_outage(self) -> bool:

@@ -159,19 +159,39 @@ class EpisodeExporter:
         baseline_env = result.env
         episode_num = source_env.episode_tracker.episode
         final_index = int(result.time_step)
-        rows = []
-
-        for t in range(final_index + 1):
-            for building in self._buildings_for_time_step(t, baseline_env):
-                rows.append(self._business_as_usual_building_row(building, t, baseline_env))
-
-            rows.append(self._business_as_usual_district_row(baseline_env, t))
-
         filename = f"exported_data_business_as_usual_ep{episode_num}.csv"
         file_path = Path(env.new_folder_path) / filename
         if file_path.exists():
             file_path.unlink()
-        self.write_render_rows(filename, rows)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        fieldnames = [
+            'time_step',
+            'name',
+            'level',
+            'net_electricity_consumption_kwh',
+            'net_electricity_consumption_cost',
+            'net_electricity_consumption_emission_kgco2',
+            'solar_generation_kwh',
+            'bess_electricity_consumption_kwh',
+            'bess_soc',
+            'ev_charger_electricity_consumption_kwh',
+            'deferrable_appliance_electricity_consumption_kwh',
+        ]
+
+        with file_path.open('w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for t in range(final_index + 1):
+                building_rows = []
+                for building in self._buildings_for_time_step(t, baseline_env):
+                    row = self._business_as_usual_building_row(building, t, baseline_env)
+                    building_rows.append(row)
+                    writer.writerow({field: row.get(field, '') for field in fieldnames})
+
+                row = self._business_as_usual_district_row(baseline_env, t, building_rows)
+                writer.writerow({field: row.get(field, '') for field in fieldnames})
 
     def _business_as_usual_building_row(self, building, time_step: int, baseline_env: "CityLearnEnv" = None) -> Dict[str, Any]:
         battery = self._electrical_storage_for_time_step(building, time_step, baseline_env)
@@ -200,11 +220,18 @@ class EpisodeExporter:
             ),
         }
 
-    def _business_as_usual_district_row(self, baseline_env: "CityLearnEnv", time_step: int) -> Dict[str, Any]:
-        rows = [
-            self._business_as_usual_building_row(building, time_step, baseline_env)
-            for building in self._buildings_for_time_step(time_step, baseline_env)
-        ]
+    def _business_as_usual_district_row(
+        self,
+        baseline_env: "CityLearnEnv",
+        time_step: int,
+        rows: Optional[List[Mapping[str, Any]]] = None,
+    ) -> Dict[str, Any]:
+        if rows is None:
+            rows = [
+                self._business_as_usual_building_row(building, time_step, baseline_env)
+                for building in self._buildings_for_time_step(time_step, baseline_env)
+            ]
+
         return {
             'time_step': time_step,
             'name': 'District',
@@ -212,7 +239,7 @@ class EpisodeExporter:
             'net_electricity_consumption_kwh': self._series_value(baseline_env.net_electricity_consumption, time_step),
             'net_electricity_consumption_cost': self._series_value(baseline_env.net_electricity_consumption_cost, time_step),
             'net_electricity_consumption_emission_kgco2': self._series_value(baseline_env.net_electricity_consumption_emission, time_step),
-            'solar_generation_kwh': self._series_value(baseline_env.solar_generation, time_step),
+            'solar_generation_kwh': sum(row['solar_generation_kwh'] for row in rows),
             'bess_electricity_consumption_kwh': sum(row['bess_electricity_consumption_kwh'] for row in rows),
             'bess_soc': '',
             'ev_charger_electricity_consumption_kwh': sum(row['ev_charger_electricity_consumption_kwh'] for row in rows),

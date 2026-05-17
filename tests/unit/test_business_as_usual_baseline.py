@@ -202,6 +202,42 @@ def test_evaluate_v2_adds_business_as_usual_rows_and_can_disable_them():
         env.close()
 
 
+def test_business_as_usual_fast_rollout_matches_regular_step():
+    regular_env = CityLearnEnv(str(SOURCE_DATASET / "schema.json"), central_agent=True, episode_time_steps=4, random_seed=0)
+    fast_env = CityLearnEnv(str(SOURCE_DATASET / "schema.json"), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        regular_agent = BusinessAsUsualAgent(regular_env)
+        fast_agent = BusinessAsUsualAgent(fast_env)
+        regular_env.reset(seed=0)
+        fast_env.reset(seed=0)
+
+        while not regular_env.terminated:
+            actions = regular_agent.predict([], deterministic=True)
+            regular_env.step(actions)
+
+        while not fast_env.terminated:
+            actions = fast_agent.predict([], deterministic=True)
+            fast_env._runtime_service.step_without_feedback(actions)
+
+        assert fast_env.time_step == regular_env.time_step
+        np.testing.assert_allclose(
+            np.asarray(fast_env.net_electricity_consumption, dtype="float64"),
+            np.asarray(regular_env.net_electricity_consumption, dtype="float64"),
+        )
+
+        regular_kpis = regular_env.evaluate_v2(include_business_as_usual=False).sort_values(
+            ["level", "name", "cost_function"]
+        ).reset_index(drop=True)
+        fast_kpis = fast_env.evaluate_v2(include_business_as_usual=False).sort_values(
+            ["level", "name", "cost_function"]
+        ).reset_index(drop=True)
+        pd.testing.assert_frame_equal(regular_kpis, fast_kpis, check_exact=False, atol=1e-10, rtol=1e-10)
+    finally:
+        regular_env.close()
+        fast_env.close()
+
+
 def test_export_writes_combined_kpis_and_business_as_usual_timeseries(tmp_path: Path):
     env = CityLearnEnv(
         str(SOURCE_DATASET / "schema.json"),
@@ -226,6 +262,10 @@ def test_export_writes_combined_kpis_and_business_as_usual_timeseries(tmp_path: 
         timeseries = pd.read_csv(timeseries_path)
         assert {"time_step", "name", "level", "net_electricity_consumption_kwh"}.issubset(timeseries.columns)
         assert {"Building_1", "District"}.issubset(set(timeseries["name"]))
+        for _, group in timeseries.groupby("time_step"):
+            building_solar = group[group["level"] == "building"]["solar_generation_kwh"].sum()
+            district_solar = group[group["level"] == "district"]["solar_generation_kwh"].iloc[0]
+            assert district_solar == pytest.approx(building_solar)
     finally:
         env.close()
 

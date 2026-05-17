@@ -141,6 +141,43 @@ class CityLearnRuntimeService:
 
         return next_observations, reward, env.terminated, env.truncated, info
 
+    def step_without_feedback(self, actions):
+        """Apply actions and advance state without reward, observation or info output.
+
+        This is used by internal sidecar rollouts whose policy reads state directly
+        from the environment and whose outputs are only evaluated after rollout.
+        """
+
+        env = self.env
+
+        if env.terminated or env.truncated:
+            raise RuntimeError('Episode has already terminated/truncated. Call reset() before calling step() again.')
+
+        env._observations_cache = None
+        env._observations_cache_time_step = -1
+        actions = self.parse_actions(actions)
+
+        for building, building_actions in zip(env.buildings, actions):
+            if int(env.time_step) == 0:
+                building.clear_step_electric_loads_for_action()
+            building.apply_actions(**building_actions)
+
+        self.update_variables()
+        if bool(getattr(env, 'physics_invariant_checks', False)):
+            env._physics_invariant_service.assert_step_invariants(int(env.time_step))
+
+        self.next_time_step()
+
+        if getattr(env, 'topology_mode', 'static') == 'dynamic':
+            topology_changed = env._topology_service.apply_events_for_time_step(int(env.time_step))
+            if topology_changed:
+                self.associate_chargers_to_electric_vehicles()
+                env._refresh_action_cache()
+                env._entity_service.invalidate()
+                env.reward_function.env_metadata = env.get_metadata()
+
+        return env.terminated, env.truncated
+
     def parse_actions(self, actions) -> List[Mapping[str, float]]:
         """Return mapping of action name to action value for each building."""
 
@@ -292,6 +329,7 @@ class CityLearnRuntimeService:
         r"""Associate charger to its corresponding EV based on charger simulation state."""
 
         env = self.env
+        ev_by_name = {ev.name: ev for ev in env.electric_vehicles}
 
         def _resolve_arrival_soc(
             simulation: ChargerSimulation,
@@ -349,34 +387,36 @@ class CityLearnRuntimeService:
                         prev_ev_id = sim.electric_vehicle_id[idx]
 
                 if isinstance(ev_id, str) and ev_id.strip() not in ['', 'nan']:
-                    for ev in env.electric_vehicles:
-                        if ev.name == ev_id:
-                            if state == 1:
-                                # Idempotent behavior: the method may be called again in the same
-                                # time step when topology changed and action/observation layouts are refreshed.
-                                just_connected = False
-                                if charger.connected_electric_vehicle is None:
-                                    charger.plug_car(ev)
-                                    just_connected = True
-                                elif charger.connected_electric_vehicle is not ev:
-                                    raise ValueError(
-                                        f"Charger '{charger.charger_id}' already connected to "
-                                        f"'{charger.connected_electric_vehicle.name}' but dataset requires '{ev.name}' "
-                                        f"at time step {env.time_step}."
-                                    )
-                                is_new_connection = (
-                                    just_connected and (
-                                        prev_state != 1
-                                        or not isinstance(prev_ev_id, str)
-                                        or prev_ev_id != ev_id
-                                    )
-                                )
-                                if is_new_connection:
-                                    soc_value = _resolve_arrival_soc(sim, env.time_step, prev_state, prev_ev_id, ev_id)
-                                    if soc_value is not None:
-                                        ev.battery.force_set_soc(soc_value)
-                            elif state == 2:
-                                charger.associate_incoming_car(ev)
+                    ev = ev_by_name.get(ev_id)
+                    if ev is None:
+                        continue
+
+                    if state == 1:
+                        # Idempotent behavior: the method may be called again in the same
+                        # time step when topology changed and action/observation layouts are refreshed.
+                        just_connected = False
+                        if charger.connected_electric_vehicle is None:
+                            charger.plug_car(ev)
+                            just_connected = True
+                        elif charger.connected_electric_vehicle is not ev:
+                            raise ValueError(
+                                f"Charger '{charger.charger_id}' already connected to "
+                                f"'{charger.connected_electric_vehicle.name}' but dataset requires '{ev.name}' "
+                                f"at time step {env.time_step}."
+                            )
+                        is_new_connection = (
+                            just_connected and (
+                                prev_state != 1
+                                or not isinstance(prev_ev_id, str)
+                                or prev_ev_id != ev_id
+                            )
+                        )
+                        if is_new_connection:
+                            soc_value = _resolve_arrival_soc(sim, env.time_step, prev_state, prev_ev_id, ev_id)
+                            if soc_value is not None:
+                                ev.battery.force_set_soc(soc_value)
+                    elif state == 2:
+                        charger.associate_incoming_car(ev)
 
     def simulate_unconnected_ev_soc(self):
         """Simulate SOC changes for EVs that are not under charger control at t+1."""
@@ -393,59 +433,60 @@ class CityLearnRuntimeService:
         if t + 1 >= env.episode_tracker.episode_time_steps:
             return
 
+        charger_event_by_ev_id = {}
+        for building in env.buildings:
+            for charger in building.electric_vehicle_chargers or []:
+                sim: ChargerSimulation = charger.charger_simulation
+
+                curr_id = sim.electric_vehicle_id[t] if t < len(sim.electric_vehicle_id) else ''
+                next_id = sim.electric_vehicle_id[t + 1] if t + 1 < len(sim.electric_vehicle_id) else ''
+                curr_state = sim.electric_vehicle_charger_state[t] if t < len(sim.electric_vehicle_charger_state) else np.nan
+                next_state = sim.electric_vehicle_charger_state[t + 1] if t + 1 < len(sim.electric_vehicle_charger_state) else np.nan
+
+                if isinstance(curr_id, str) and curr_id == next_id and curr_state == 1:
+                    charger_event_by_ev_id.setdefault(curr_id, ('connected', None))
+                    continue
+
+                if isinstance(curr_id, str) and curr_state == 1:
+                    charger_event_by_ev_id.setdefault(curr_id, ('connected', None))
+
+                is_connecting = (
+                    isinstance(next_id, str)
+                    and next_id.strip() not in {'', 'nan'}
+                    and next_state == 1
+                    and curr_state != 1
+                )
+                if not is_connecting:
+                    continue
+
+                is_incoming = isinstance(curr_id, str) and curr_id == next_id and curr_state == 2
+                soc_index = t if is_incoming else t + 1
+                soc = (
+                    sim.electric_vehicle_estimated_soc_arrival[soc_index]
+                    if soc_index < len(sim.electric_vehicle_estimated_soc_arrival)
+                    else np.nan
+                )
+                charger_event_by_ev_id.setdefault(next_id, ('connecting', soc))
+
         for ev in env.electric_vehicles:
             ev_id = ev.name
-            found_in_charger = False
+            event = charger_event_by_ev_id.get(ev_id)
+            if event is not None:
+                event_type, soc = event
+                try:
+                    soc_value = float(soc)
+                except (TypeError, ValueError):
+                    soc_value = np.nan
+                if event_type == 'connecting' and 0 <= soc_value <= 1:
+                    ev.battery.force_set_soc(soc_value)
+                continue
 
-            for building in env.buildings:
-                for charger in building.electric_vehicle_chargers or []:
-                    sim: ChargerSimulation = charger.charger_simulation
-
-                    curr_id = sim.electric_vehicle_id[t] if t < len(sim.electric_vehicle_id) else ''
-                    next_id = sim.electric_vehicle_id[t + 1] if t + 1 < len(sim.electric_vehicle_id) else ''
-                    curr_state = sim.electric_vehicle_charger_state[t] if t < len(sim.electric_vehicle_charger_state) else np.nan
-                    next_state = sim.electric_vehicle_charger_state[t + 1] if t + 1 < len(sim.electric_vehicle_charger_state) else np.nan
-
-                    currently_connected = isinstance(curr_id, str) and curr_id == ev_id and curr_state == 1
-                    if currently_connected:
-                        found_in_charger = True
-                        break
-
-                    is_connecting = (
-                        isinstance(next_id, str)
-                        and next_id == ev_id
-                        and next_state == 1
-                        and curr_state != 1
-                    )
-                    is_incoming = isinstance(curr_id, str) and curr_id == ev_id and curr_state == 2
-
-                    if is_connecting:
-                        found_in_charger = True
-                        if is_incoming:
-                            if t < len(sim.electric_vehicle_estimated_soc_arrival):
-                                soc = sim.electric_vehicle_estimated_soc_arrival[t]
-                            else:
-                                soc = np.nan
-                        else:
-                            if t + 1 < len(sim.electric_vehicle_estimated_soc_arrival):
-                                soc = sim.electric_vehicle_estimated_soc_arrival[t + 1]
-                            else:
-                                soc = np.nan
-
-                        if 0 <= soc <= 1:
-                            ev.battery.force_set_soc(soc)
-                        break
-
-                if found_in_charger:
-                    break
-
-            if not found_in_charger:
-                if t > 0:
-                    last_soc = ev.battery.soc[t - 1]
-                    drift_std = self._ev_unconnected_drift_std(env.seconds_per_time_step)
-                    variability = np.clip(random_state.normal(1.0, drift_std), 0.6, 1.4)
-                    # Exogenous away-from-home movement: driving can reduce SOC, offsite charging can raise it.
-                    ev.battery.force_set_soc(float(np.clip(last_soc * variability, 0.0, 1.0)))
+            if t > 0:
+                last_soc = ev.battery.soc[t - 1]
+                drift_std = self._ev_unconnected_drift_std(env.seconds_per_time_step)
+                variability = np.clip(random_state.normal(1.0, drift_std), 0.6, 1.4)
+                # Exogenous away-from-home movement: driving can reduce SOC, offsite charging can raise it.
+                ev.battery.force_set_soc(float(np.clip(last_soc * variability, 0.0, 1.0)))
 
     def update_variables(self):
         """Update district aggregate series from current building states."""

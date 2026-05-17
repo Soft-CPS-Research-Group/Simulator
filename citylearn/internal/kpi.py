@@ -586,6 +586,95 @@ class CityLearnKPIService:
         return float(finite.sum())
 
     @staticmethod
+    def _as_float_array(values) -> np.ndarray:
+        try:
+            return np.array(values, dtype='float64').flatten()
+        except (TypeError, ValueError):
+            return np.zeros((0,), dtype='float64')
+
+    @classmethod
+    def _positive_total(cls, values) -> float:
+        series = cls._as_float_array(values)
+        if series.size == 0:
+            return 0.0
+        return cls._sum_finite(np.clip(series, 0.0, None))
+
+    @classmethod
+    def _net_total(cls, values) -> float:
+        return cls._sum_finite(values)
+
+    @classmethod
+    def _ramping_final(cls, values, down_ramp: bool = None, net_export: bool = None) -> float:
+        series = cls._as_float_array(values)
+        if series.size == 0:
+            return 0.0
+
+        down_ramp = False if down_ramp is None else down_ramp
+        net_export = True if net_export is None else net_export
+        ramp = np.empty_like(series, dtype='float64')
+        ramp[0] = np.nan
+        if series.size > 1:
+            ramp[1:] = series[1:] - series[:-1]
+
+        if down_ramp:
+            ramp = np.abs(ramp)
+        else:
+            ramp = np.clip(ramp, 0.0, None)
+
+        if not net_export:
+            ramp = np.where(series < 0.0, 0.0, ramp)
+
+        return cls._sum_finite(ramp)
+
+    @staticmethod
+    def _group_slices(values: np.ndarray, window: int):
+        window = max(int(window), 1)
+        for start in range(0, values.size, window):
+            yield values[start:start + window]
+
+    @classmethod
+    def _nan_mean_preserve_inf(cls, values: np.ndarray) -> float:
+        values = cls._as_float_array(values)
+        valid = values[~np.isnan(values)]
+        if valid.size == 0:
+            return float(np.nan)
+        return float(np.mean(valid))
+
+    @classmethod
+    def _one_minus_load_factor_final(cls, values, window: int = None) -> float:
+        series = cls._as_float_array(values)
+        if series.size == 0:
+            return 0.0
+
+        window = 730 if window is None else window
+        penalties = []
+        for group in cls._group_slices(series, window):
+            finite = group[np.isfinite(group)]
+            if finite.size == 0:
+                penalties.append(np.nan)
+                continue
+            peak = float(np.max(finite))
+            mean = float(np.mean(finite))
+            with np.errstate(divide='ignore', invalid='ignore'):
+                penalties.append(float(1.0 - np.divide(mean, peak)))
+
+        return cls._nan_mean_preserve_inf(np.array(penalties, dtype='float64'))
+
+    @classmethod
+    def _peak_final(cls, values, window: int = None) -> float:
+        series = cls._as_float_array(values)
+        if series.size == 0:
+            return 0.0
+
+        window = 24 if window is None else window
+        peaks = []
+        for group in cls._group_slices(series, window):
+            finite = group[np.isfinite(group)]
+            peaks.append(np.nan if finite.size == 0 else float(np.max(finite)))
+
+        return cls._nan_mean_preserve_inf(np.array(peaks, dtype='float64'))
+
+    @staticmethod
     def _equity_relative_benefit_percent(cost_scenario: float, cost_baseline: float) -> Optional[float]:
         scenario = CityLearnKPIService._to_scalar(cost_scenario, np.nan)
         baseline = CityLearnKPIService._to_scalar(cost_baseline, np.nan)
@@ -1411,12 +1500,12 @@ class CityLearnKPIService:
                 t_start,
                 t_end,
             )
-            ec_c = self._cost_last(net_c_series, CostFunction.electricity_consumption)
-            ec_b = self._cost_last(net_b_series, CostFunction.electricity_consumption)
+            ec_c = self._positive_total(net_c_series)
+            ec_b = self._positive_total(net_b_series)
             export_c = self._sum_finite(np.clip(-net_c_series, 0.0, None))
             export_b = self._sum_finite(np.clip(-net_b_series, 0.0, None))
-            zne_c = self._cost_last(net_c_series, CostFunction.zero_net_energy)
-            zne_b = self._cost_last(net_b_series, CostFunction.zero_net_energy)
+            zne_c = self._net_total(net_c_series)
+            zne_b = self._net_total(net_b_series)
             ce_c_series = self._slice_window(
                 getattr(building, f'net_electricity_consumption_emission{building_control_condition.value}'),
                 t_start,
@@ -1427,9 +1516,9 @@ class CityLearnKPIService:
                 t_start,
                 t_end,
             )
-            ce_c = self._cost_last(ce_c_series, CostFunction.carbon_emissions)
+            ce_c = self._positive_total(ce_c_series)
             ce_b = (
-                self._cost_last(ce_b_series, CostFunction.carbon_emissions)
+                self._positive_total(ce_b_series)
                 if np.sum(self._slice_window(building.carbon_intensity.carbon_intensity, t_start, t_end)) != 0
                 else 0.0
             )
@@ -1443,8 +1532,8 @@ class CityLearnKPIService:
                 t_start,
                 t_end,
             )
-            cost_c_legacy = self._cost_last(control_cost_series, CostFunction.cost)
-            cost_b_legacy = self._cost_last(baseline_cost_series, CostFunction.cost)
+            cost_c_legacy = self._positive_total(control_cost_series)
+            cost_b_legacy = self._positive_total(baseline_cost_series)
             cost_c_raw = self._sum_finite(control_cost_series)
             cost_b_raw = self._sum_finite(baseline_cost_series)
             equity_benefit = self._equity_relative_benefit_percent(cost_c_raw, cost_b_raw)
@@ -1660,16 +1749,18 @@ class CityLearnKPIService:
             if baseline_condition is None else baseline_condition
         )
 
-        ramp_c = CostFunction.ramping(get_net_electricity_consumption(env, env_control_condition))[-1]
-        ramp_b = CostFunction.ramping(get_net_electricity_consumption(env, env_baseline_condition))[-1]
-        dlf_daily_c = CostFunction.one_minus_load_factor(get_net_electricity_consumption(env, env_control_condition), window=daily_steps)[-1]
-        dlf_daily_b = CostFunction.one_minus_load_factor(get_net_electricity_consumption(env, env_baseline_condition), window=daily_steps)[-1]
-        dlf_monthly_c = CostFunction.one_minus_load_factor(get_net_electricity_consumption(env, env_control_condition), window=monthly_steps)[-1]
-        dlf_monthly_b = CostFunction.one_minus_load_factor(get_net_electricity_consumption(env, env_baseline_condition), window=monthly_steps)[-1]
-        peak_daily_c = CostFunction.peak(get_net_electricity_consumption(env, env_control_condition), window=daily_steps)[-1]
-        peak_daily_b = CostFunction.peak(get_net_electricity_consumption(env, env_baseline_condition), window=daily_steps)[-1]
-        peak_all_c = CostFunction.peak(get_net_electricity_consumption(env, env_control_condition), window=env.time_steps)[-1]
-        peak_all_b = CostFunction.peak(get_net_electricity_consumption(env, env_baseline_condition), window=env.time_steps)[-1]
+        net_c_env_series = np.array(get_net_electricity_consumption(env, env_control_condition), dtype='float64')
+        net_b_env_series = np.array(get_net_electricity_consumption(env, env_baseline_condition), dtype='float64')
+        ramp_c = self._ramping_final(net_c_env_series)
+        ramp_b = self._ramping_final(net_b_env_series)
+        dlf_daily_c = self._one_minus_load_factor_final(net_c_env_series, window=daily_steps)
+        dlf_daily_b = self._one_minus_load_factor_final(net_b_env_series, window=daily_steps)
+        dlf_monthly_c = self._one_minus_load_factor_final(net_c_env_series, window=monthly_steps)
+        dlf_monthly_b = self._one_minus_load_factor_final(net_b_env_series, window=monthly_steps)
+        peak_daily_c = self._peak_final(net_c_env_series, window=daily_steps)
+        peak_daily_b = self._peak_final(net_b_env_series, window=daily_steps)
+        peak_all_c = self._peak_final(net_c_env_series, window=env.time_steps)
+        peak_all_b = self._peak_final(net_b_env_series, window=env.time_steps)
 
         legacy_district_base = pd.DataFrame([{
             'cost_function': 'ramping_average',
@@ -1696,16 +1787,14 @@ class CityLearnKPIService:
         legacy_cost_functions = pd.concat([legacy_district, legacy_building], ignore_index=True, sort=False)
 
         # Extended KPI district-level
-        ec_c_env = CostFunction.electricity_consumption(get_net_electricity_consumption(env, env_control_condition))[-1]
-        ec_b_env = CostFunction.electricity_consumption(get_net_electricity_consumption(env, env_baseline_condition))[-1]
-        net_c_env_series = np.array(get_net_electricity_consumption(env, env_control_condition), dtype='float64')
-        net_b_env_series = np.array(get_net_electricity_consumption(env, env_baseline_condition), dtype='float64')
+        ec_c_env = self._positive_total(net_c_env_series)
+        ec_b_env = self._positive_total(net_b_env_series)
         export_c_env = self._sum_finite(np.clip(-net_c_env_series, 0.0, None))
         export_b_env = self._sum_finite(np.clip(-net_b_env_series, 0.0, None))
-        zne_c_env = CostFunction.zero_net_energy(get_net_electricity_consumption(env, env_control_condition))[-1]
-        zne_b_env = CostFunction.zero_net_energy(get_net_electricity_consumption(env, env_baseline_condition))[-1]
-        ce_c_env = CostFunction.carbon_emissions(get_net_electricity_consumption_emission(env, env_control_condition))[-1]
-        ce_b_env = CostFunction.carbon_emissions(get_net_electricity_consumption_emission(env, env_baseline_condition))[-1]
+        zne_c_env = self._net_total(net_c_env_series)
+        zne_b_env = self._net_total(net_b_env_series)
+        ce_c_env = self._positive_total(get_net_electricity_consumption_emission(env, env_control_condition))
+        ce_b_env = self._positive_total(get_net_electricity_consumption_emission(env, env_baseline_condition))
         env_control_cost_series = get_net_electricity_consumption_cost(env, env_control_condition)
         env_baseline_cost_series = get_net_electricity_consumption_cost(env, env_baseline_condition)
         cost_c_env_raw = self._sum_finite(env_control_cost_series)
@@ -2274,35 +2363,30 @@ class CityLearnKPIService:
         current_net_power = current_net / step_hours
         bau_net_power = bau_net / step_hours
 
-        def cost_last(values: np.ndarray, fn, **kwargs):
-            if values.size == 0:
-                return 0.0
-            return self._to_scalar(fn(values, **kwargs)[-1], 0.0)
-
         metrics = [
-            ('ramping_average', cost_last(current_net_power, CostFunction.ramping), cost_last(bau_net_power, CostFunction.ramping), 'kw'),
+            ('ramping_average', self._ramping_final(current_net_power), self._ramping_final(bau_net_power), 'kw'),
             (
                 'load_factor_penalty_daily_average',
-                cost_last(current_net_power, CostFunction.one_minus_load_factor, window=daily_steps),
-                cost_last(bau_net_power, CostFunction.one_minus_load_factor, window=daily_steps),
+                self._one_minus_load_factor_final(current_net_power, window=daily_steps),
+                self._one_minus_load_factor_final(bau_net_power, window=daily_steps),
                 'ratio',
             ),
             (
                 'load_factor_penalty_monthly_average',
-                cost_last(current_net_power, CostFunction.one_minus_load_factor, window=monthly_steps),
-                cost_last(bau_net_power, CostFunction.one_minus_load_factor, window=monthly_steps),
+                self._one_minus_load_factor_final(current_net_power, window=monthly_steps),
+                self._one_minus_load_factor_final(bau_net_power, window=monthly_steps),
                 'ratio',
             ),
             (
                 'peak_daily_average',
-                cost_last(current_net_power, CostFunction.peak, window=daily_steps),
-                cost_last(bau_net_power, CostFunction.peak, window=daily_steps),
+                self._peak_final(current_net_power, window=daily_steps),
+                self._peak_final(bau_net_power, window=daily_steps),
                 'kw',
             ),
             (
                 'peak_all_time_average',
-                cost_last(current_net_power, CostFunction.peak, window=max(int(getattr(env, 'time_steps', 1)), 1)),
-                cost_last(bau_net_power, CostFunction.peak, window=max(int(getattr(bau_env, 'time_steps', 1)), 1)),
+                self._peak_final(current_net_power, window=max(int(getattr(env, 'time_steps', 1)), 1)),
+                self._peak_final(bau_net_power, window=max(int(getattr(bau_env, 'time_steps', 1)), 1)),
                 'kw',
             ),
         ]

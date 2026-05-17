@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -26,6 +26,7 @@ class BusinessAsUsualAgent(Agent):
         deferrable_start_action: float = 1.0,
         **kwargs: Any,
     ):
+        self._building_action_layout_cache: Dict[int, Tuple[Tuple[Any, ...], Dict[str, Any]]] = {}
         self.ev_target_soc = float(np.clip(1.0 if ev_target_soc is None else ev_target_soc, 0.0, 1.0))
         self.storage_min_soc = float(np.clip(0.20 if storage_min_soc is None else storage_min_soc, 0.0, 1.0))
         self.storage_max_soc = float(np.clip(0.90 if storage_max_soc is None else storage_max_soc, 0.0, 1.0))
@@ -58,25 +59,28 @@ class BusinessAsUsualAgent(Agent):
         return actions
 
     def _building_action_vector(self, building) -> List[float]:
-        bounds = list(zip(building.action_space.low, building.action_space.high))
-        preliminary = {}
+        layout = self._building_action_layout(building)
+        active_actions = layout['active_actions']
+        bounds = layout['bounds']
+        preliminary: Dict[str, float] = {}
         ev_requested_kw = 0.0
         deferrable_requested_kw = 0.0
 
-        for action_name, (low, high) in zip(building.active_actions, bounds):
+        for action_name, (low, high) in zip(active_actions, bounds):
             if action_name.startswith('electric_vehicle_storage_'):
-                charger_id = action_name.replace('electric_vehicle_storage_', '', 1)
-                value = self._ev_action(building, charger_id, low, high)
+                charger = layout['charger_by_action'].get(action_name)
+                value = self._ev_action_for_charger(charger, low, high)
                 preliminary[action_name] = value
-                ev_requested_kw += self._charger_requested_kw(building, charger_id, value)
+                ev_requested_kw += self._charger_requested_kw_for_charger(charger, value)
 
             elif action_name.startswith('deferrable_appliance_'):
-                value = self._deferrable_action(building, action_name, low, high)
+                appliance = layout['appliance_by_action'].get(action_name)
+                value = self._deferrable_action_for_appliance(appliance, low, high)
                 preliminary[action_name] = value
-                deferrable_requested_kw += self._deferrable_start_power_kw(building, action_name, value)
+                deferrable_requested_kw += self._deferrable_start_power_kw_for_appliance(building, appliance, value)
 
         actions = []
-        for action_name, (low, high) in zip(building.active_actions, bounds):
+        for action_name, (low, high) in zip(active_actions, bounds):
             if action_name == 'electrical_storage':
                 value = self._storage_action(
                     building,
@@ -94,8 +98,53 @@ class BusinessAsUsualAgent(Agent):
 
         return actions
 
+    def _building_action_layout(self, building) -> Dict[str, Any]:
+        active_actions = tuple(building.active_actions)
+        bounds = tuple(
+            (float(low), float(high))
+            for low, high in zip(building.action_space.low, building.action_space.high)
+        )
+        chargers = tuple((getattr(charger, 'charger_id', None), id(charger)) for charger in getattr(building, 'electric_vehicle_chargers', []) or [])
+        appliances = tuple((getattr(appliance, 'name', None), id(appliance)) for appliance in getattr(building, 'deferrable_appliances', []) or [])
+        key = (active_actions, bounds, chargers, appliances)
+        cache_key = id(building)
+        cached = self._building_action_layout_cache.get(cache_key)
+        if cached is not None and cached[0] == key:
+            return cached[1]
+
+        charger_by_id = {
+            getattr(charger, 'charger_id', None): charger
+            for charger in getattr(building, 'electric_vehicle_chargers', []) or []
+        }
+        appliance_by_name = {
+            getattr(appliance, 'name', None): appliance
+            for appliance in getattr(building, 'deferrable_appliances', []) or []
+        }
+        charger_by_action = {}
+        appliance_by_action = {}
+
+        for action_name in active_actions:
+            if action_name.startswith('electric_vehicle_storage_'):
+                charger_id = action_name.replace('electric_vehicle_storage_', '', 1)
+                charger_by_action[action_name] = charger_by_id.get(charger_id)
+            elif action_name.startswith('deferrable_appliance_'):
+                appliance_name = action_name.replace('deferrable_appliance_', '', 1)
+                appliance_by_action[action_name] = appliance_by_name.get(appliance_name) or appliance_by_name.get(action_name)
+
+        layout = {
+            'active_actions': active_actions,
+            'bounds': bounds,
+            'charger_by_action': charger_by_action,
+            'appliance_by_action': appliance_by_action,
+        }
+        self._building_action_layout_cache[cache_key] = (key, layout)
+        return layout
+
     def _ev_action(self, building, charger_id: str, low: float, high: float) -> float:
         charger = self._charger(building, charger_id)
+        return self._ev_action_for_charger(charger, low, high)
+
+    def _ev_action_for_charger(self, charger, low: float, high: float) -> float:
         ev = None if charger is None else getattr(charger, 'connected_electric_vehicle', None)
 
         if ev is None:
@@ -113,6 +162,9 @@ class BusinessAsUsualAgent(Agent):
 
     def _deferrable_action(self, building, action_name: str, low: float, high: float) -> float:
         appliance = self._deferrable_appliance(building, action_name)
+        return self._deferrable_action_for_appliance(appliance, low, high)
+
+    def _deferrable_action_for_appliance(self, appliance, low: float, high: float) -> float:
         if appliance is None:
             return 0.0
 
@@ -193,20 +245,28 @@ class BusinessAsUsualAgent(Agent):
         return max(abs(self._series_value(building.solar_generation, t)), 0.0) / step_hours
 
     def _charger_requested_kw(self, building, charger_id: str, action: float) -> float:
+        return self._charger_requested_kw_for_charger(self._charger(building, charger_id), action)
+
+    def _charger_requested_kw_for_charger(self, charger, action: float) -> float:
         if action <= 0.0:
             return 0.0
 
-        charger = self._charger(building, charger_id)
         if charger is None:
             return 0.0
 
         return max(action, 0.0) * max(self._safe_scalar(getattr(charger, 'max_charging_power', 0.0), 0.0), 0.0)
 
     def _deferrable_start_power_kw(self, building, action_name: str, action: float) -> float:
+        return self._deferrable_start_power_kw_for_appliance(
+            building,
+            self._deferrable_appliance(building, action_name),
+            action,
+        )
+
+    def _deferrable_start_power_kw_for_appliance(self, building, appliance, action: float) -> float:
         if action <= 0.0:
             return 0.0
 
-        appliance = self._deferrable_appliance(building, action_name)
         if appliance is None:
             return 0.0
 
@@ -275,3 +335,7 @@ class BusinessAsUsualAgent(Agent):
             return float(default)
 
         return scalar
+
+    def reset(self):
+        super().reset()
+        self._building_action_layout_cache.clear()

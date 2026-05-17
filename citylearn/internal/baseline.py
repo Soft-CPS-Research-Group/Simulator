@@ -44,11 +44,11 @@ class CityLearnBusinessAsUsualBaselineService:
 
         baseline_env = self._new_sidecar_env()
         agent = BusinessAsUsualAgent(baseline_env)
-        observations, _ = baseline_env.reset()
+        baseline_env.reset()
 
         while int(baseline_env.time_step) < target_time_step and not (baseline_env.terminated or baseline_env.truncated):
-            actions = agent.predict(observations, deterministic=True)
-            observations, _, _, _, _ = baseline_env.step(actions)
+            actions = agent.predict([], deterministic=True)
+            baseline_env._runtime_service.step_without_feedback(actions)
 
         kpis_v2 = baseline_env.evaluate_v2(include_business_as_usual=False)
         result = BusinessAsUsualBaselineResult(
