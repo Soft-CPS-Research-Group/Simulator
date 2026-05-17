@@ -71,6 +71,7 @@ class CityLearnRuntimeService:
                 env._entity_service.invalidate()
                 env.reward_function.env_metadata = env.get_metadata()
         end_export_time = 0.0
+        final_kpi_export_time = 0.0
         env._maybe_log_periodic_metrics()
 
         if env.terminated:
@@ -122,7 +123,12 @@ class CityLearnRuntimeService:
                     end_export_time = time.perf_counter() - export_start
 
             if env.export_kpis_on_episode_end and not env._final_kpis_exported:
+                if env.debug_timing:
+                    import time
+                    final_kpi_export_start = time.perf_counter()
                 env.export_final_kpis()
+                if env.debug_timing:
+                    final_kpi_export_time = time.perf_counter() - final_kpi_export_start
 
         next_observations = env.observations
         info = dict(env.get_info())
@@ -130,6 +136,8 @@ class CityLearnRuntimeService:
             info['building_observations_retrieval_time'] = building_observations_retrieval_end - building_observations_retrieval_start
             info['partial_render_time'] = partial_render_time
             info['end_export_time'] = end_export_time
+            info['final_kpi_export_time'] = final_kpi_export_time
+            info['terminal_export_time'] = end_export_time + final_kpi_export_time
 
         return next_observations, reward, env.terminated, env.truncated, info
 

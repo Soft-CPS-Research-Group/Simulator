@@ -78,6 +78,7 @@ Patch release que separa resultados EV brutos no departure de resultados justos 
 
 - Os racios EV existentes continuam brutos sobre todos os departures validos.
 - O KPI recomendado para qualidade do controlador passa a ser `*_ev_performance_departure_min_acceptable_feasible_ratio`; usar racios brutos mais contadores infeasible para perceber experiencia do utilizador e feasibility do schedule.
+- O smoke de performance do CI passa a reportar o tempo terminal de export render/KPI/BAU separado da latencia recorrente de step, para `render_mode=end` nao inflacionar `avg_step_ms` enquanto o export continua validado contra a baseline.
 
 ### Dataset/Schema Impact
 
@@ -93,6 +94,8 @@ Patch release que separa resultados EV brutos no departure de resultados justos 
 - `.venv/bin/python -m pytest tests/test_kpi_v2.py -q`: pass (`28 passed`)
 - `.venv/bin/python -m pytest tests/test_kpi_golden.py tests/unit/test_subhour_scaling.py::test_15_second_charge_immediately_meets_ev_departure_kpis -q`: pass (`11 passed`)
 - `.venv/bin/python -m pytest tests/test_ev_arrivals.py::test_ev_kpi_evaluation_with_evs_and_chargers -q`: pass (`1 passed`)
+- `.venv/bin/python -m pytest tests/unit/test_rendering_behaviour.py::test_auto_kpi_export_reports_debug_timing -q`: pass (`1 passed`)
+- `.venv/bin/python scripts/ci/perf_smoke.py --episode-steps 600 --seconds 60 --none-max-ms 30 --end-max-ms 45 --ratio-max 2.0 --entity-overhead-ratio-max 1.08 --baseline-file scripts/ci/perf_baseline.json --baseline-regression-ratio 3.0 --baseline-slack-ms 10.0 --metrics-output /tmp/perf_smoke_report.json`: pass
 - `.venv/bin/python -m compileall citylearn/internal/kpi.py`: pass
 
 ### Migration Notes

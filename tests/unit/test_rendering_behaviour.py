@@ -139,6 +139,44 @@ def test_none_mode_can_auto_export_kpis_when_enabled(tmp_path):
         env.close()
 
 
+def test_auto_kpi_export_reports_debug_timing(tmp_path, monkeypatch):
+    env = CityLearnEnv(
+        str(DATASET),
+        central_agent=True,
+        episode_time_steps=4,
+        render_mode="none",
+        render_directory=tmp_path,
+        export_kpis_on_episode_end=True,
+        debug_timing=True,
+        random_seed=0,
+    )
+    calls = 0
+
+    def _export_final_kpis(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        env._final_kpis_exported = True
+
+    monkeypatch.setattr(env, "export_final_kpis", _export_final_kpis)
+
+    try:
+        env.reset()
+        zeros = [np.zeros(env.action_space[0].shape[0], dtype="float32")]
+        info = {}
+        while not env.terminated:
+            _, _, terminated, truncated, info = env.step(zeros)
+            if terminated or truncated:
+                break
+
+        assert calls == 1
+        assert info["end_export_time"] == pytest.approx(0.0)
+        assert info["final_kpi_export_time"] >= 0.0
+        assert info["terminal_export_time"] == pytest.approx(info["final_kpi_export_time"])
+    finally:
+        _cleanup_env(env)
+        env.close()
+
+
 def test_during_mode_can_disable_auto_kpi_export(tmp_path):
     env = CityLearnEnv(
         str(DATASET),

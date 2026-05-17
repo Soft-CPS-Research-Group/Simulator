@@ -64,7 +64,10 @@ def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, s
         action = np.zeros(env.action_space[0].shape[0], dtype="float32")
 
     step_times = []
+    raw_step_times = []
     end_export_s = 0.0
+    final_kpi_export_s = 0.0
+    terminal_export_s = 0.0
 
     while not env.terminated:
         s0 = time.perf_counter()
@@ -73,8 +76,21 @@ def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, s
         else:
             observations, _, terminated, truncated, info = env.step([action])
         s1 = time.perf_counter()
-        step_times.append(s1 - s0)
-        end_export_s += float(info.get("end_export_time", 0.0))
+        raw_step_time = s1 - s0
+        raw_step_times.append(raw_step_time)
+
+        step_end_export_s = float(info.get("end_export_time", 0.0))
+        step_final_kpi_export_s = float(info.get("final_kpi_export_time", 0.0))
+        step_terminal_export_s = float(
+            info.get("terminal_export_time", step_end_export_s + step_final_kpi_export_s)
+        )
+
+        # Keep step latency focused on recurring control-loop work. The final
+        # step may run render/KPI/BAU exports, which are reported separately.
+        step_times.append(max(0.0, raw_step_time - step_terminal_export_s))
+        end_export_s += step_end_export_s
+        final_kpi_export_s += step_final_kpi_export_s
+        terminal_export_s += step_terminal_export_s
 
         if terminated or truncated:
             break
@@ -84,6 +100,8 @@ def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, s
 
     avg_step_ms = float(np.mean(step_times) * 1000.0) if step_times else 0.0
     p95_step_ms = float(np.percentile(step_times, 95) * 1000.0) if step_times else 0.0
+    raw_avg_step_ms = float(np.mean(raw_step_times) * 1000.0) if raw_step_times else 0.0
+    raw_p95_step_ms = float(np.percentile(raw_step_times, 95) * 1000.0) if raw_step_times else 0.0
 
     return {
         "render_mode": render_mode,
@@ -96,7 +114,11 @@ def run_case(render_mode: str, episode_steps: int, seconds_per_time_step: int, s
         "rollout_s": round(t3 - t2, 4),
         "avg_step_ms": round(avg_step_ms, 4),
         "p95_step_ms": round(p95_step_ms, 4),
+        "raw_avg_step_ms": round(raw_avg_step_ms, 4),
+        "raw_p95_step_ms": round(raw_p95_step_ms, 4),
         "end_export_s": round(end_export_s, 4),
+        "final_kpi_export_s": round(final_kpi_export_s, 4),
+        "terminal_export_s": round(terminal_export_s, 4),
     }
 
 
@@ -203,14 +225,18 @@ def _compare_to_baseline(report: Dict[str, Any], baseline: Dict[str, Any], regre
                 )
 
         if case_name == "end":
-            base_export = float(base.get("end_export_s", 0.0))
-            cur_export = float(cur.get("end_export_s", 0.0))
-            allowed_export = (base_export * regression_ratio) + max(0.5, slack_ms / 10.0)
-            if cur_export > allowed_export:
-                errors.append(
-                    f"end end_export_s regression: {cur_export:.4f} > {allowed_export:.4f} "
-                    f"(baseline={base_export:.4f})"
-                )
+            for metric in ("end_export_s", "terminal_export_s"):
+                if metric not in base or metric not in cur:
+                    continue
+
+                base_export = float(base.get(metric, 0.0))
+                cur_export = float(cur.get(metric, 0.0))
+                allowed_export = (base_export * regression_ratio) + max(0.5, slack_ms / 10.0)
+                if cur_export > allowed_export:
+                    errors.append(
+                        f"end {metric} regression: {cur_export:.4f} > {allowed_export:.4f} "
+                        f"(baseline={base_export:.4f})"
+                    )
 
     return errors
 
