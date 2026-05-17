@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.runtime &mdash; CityLearn 0.6.6 documentation</title>
+  <title>citylearn.internal.runtime &mdash; CityLearn 0.6.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e059a73d"></script>
+      <script src="../../../_static/documentation_options.js?v=44212324"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -233,6 +233,46 @@
         <span class="k">return</span> <span class="n">next_observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
 
 
+<div class="viewcode-block" id="CityLearnRuntimeService.step_without_feedback">
+<a class="viewcode-back" href="../../../api/citylearn.internal.runtime.html#citylearn.internal.runtime.CityLearnRuntimeService.step_without_feedback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step_without_feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply actions and advance state without reward, observation or info output.</span>
+
+<span class="sd">        This is used by internal sidecar rollouts whose policy reads state directly</span>
+<span class="sd">        from the environment and whose outputs are only evaluated after rollout.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
+
+        <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">terminated</span> <span class="ow">or</span> <span class="n">env</span><span class="o">.</span><span class="n">truncated</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Episode has already terminated/truncated. Call reset() before calling step() again.&#39;</span><span class="p">)</span>
+
+        <span class="n">env</span><span class="o">.</span><span class="n">_observations_cache</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">_observations_cache_time_step</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">building</span><span class="p">,</span> <span class="n">building_actions</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">building</span><span class="o">.</span><span class="n">clear_step_electric_loads_for_action</span><span class="p">()</span>
+            <span class="n">building</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="o">**</span><span class="n">building_actions</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_variables</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;physics_invariant_checks&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)):</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">_physics_invariant_service</span><span class="o">.</span><span class="n">assert_step_invariants</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next_time_step</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;topology_mode&#39;</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;dynamic&#39;</span><span class="p">:</span>
+            <span class="n">topology_changed</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">_topology_service</span><span class="o">.</span><span class="n">apply_events_for_time_step</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">topology_changed</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">associate_chargers_to_electric_vehicles</span><span class="p">()</span>
+                <span class="n">env</span><span class="o">.</span><span class="n">_refresh_action_cache</span><span class="p">()</span>
+                <span class="n">env</span><span class="o">.</span><span class="n">_entity_service</span><span class="o">.</span><span class="n">invalidate</span><span class="p">()</span>
+                <span class="n">env</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="n">env_metadata</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">env</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">truncated</span></div>
+
+
 <div class="viewcode-block" id="CityLearnRuntimeService.parse_actions">
 <a class="viewcode-back" href="../../../api/citylearn.internal.runtime.html#citylearn.internal.runtime.CityLearnRuntimeService.parse_actions">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">parse_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
@@ -392,6 +432,7 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Associate charger to its corresponding EV based on charger simulation state.&quot;&quot;&quot;</span>
 
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
+        <span class="n">ev_by_name</span> <span class="o">=</span> <span class="p">{</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">ev</span> <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">electric_vehicles</span><span class="p">}</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_arrival_soc</span><span class="p">(</span>
             <span class="n">simulation</span><span class="p">:</span> <span class="n">ChargerSimulation</span><span class="p">,</span>
@@ -449,34 +490,36 @@
                         <span class="n">prev_ev_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_id</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ev_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ev_id</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;nan&#39;</span><span class="p">]:</span>
-                    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">electric_vehicles</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">ev_id</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                                <span class="c1"># Idempotent behavior: the method may be called again in the same</span>
-                                <span class="c1"># time step when topology changed and action/observation layouts are refreshed.</span>
-                                <span class="n">just_connected</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="k">if</span> <span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                                    <span class="n">charger</span><span class="o">.</span><span class="n">plug_car</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
-                                    <span class="n">just_connected</span> <span class="o">=</span> <span class="kc">True</span>
-                                <span class="k">elif</span> <span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ev</span><span class="p">:</span>
-                                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                                        <span class="sa">f</span><span class="s2">&quot;Charger &#39;</span><span class="si">{</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_id</span><span class="si">}</span><span class="s2">&#39; already connected to &quot;</span>
-                                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; but dataset requires &#39;</span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                                        <span class="sa">f</span><span class="s2">&quot;at time step </span><span class="si">{</span><span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="si">}</span><span class="s2">.&quot;</span>
-                                    <span class="p">)</span>
-                                <span class="n">is_new_connection</span> <span class="o">=</span> <span class="p">(</span>
-                                    <span class="n">just_connected</span> <span class="ow">and</span> <span class="p">(</span>
-                                        <span class="n">prev_state</span> <span class="o">!=</span> <span class="mi">1</span>
-                                        <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prev_ev_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-                                        <span class="ow">or</span> <span class="n">prev_ev_id</span> <span class="o">!=</span> <span class="n">ev_id</span>
-                                    <span class="p">)</span>
-                                <span class="p">)</span>
-                                <span class="k">if</span> <span class="n">is_new_connection</span><span class="p">:</span>
-                                    <span class="n">soc_value</span> <span class="o">=</span> <span class="n">_resolve_arrival_soc</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">,</span> <span class="n">prev_ev_id</span><span class="p">,</span> <span class="n">ev_id</span><span class="p">)</span>
-                                    <span class="k">if</span> <span class="n">soc_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                                        <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">force_set_soc</span><span class="p">(</span><span class="n">soc_value</span><span class="p">)</span>
-                            <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                                <span class="n">charger</span><span class="o">.</span><span class="n">associate_incoming_car</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div>
+                    <span class="n">ev</span> <span class="o">=</span> <span class="n">ev_by_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ev_id</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">ev</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="c1"># Idempotent behavior: the method may be called again in the same</span>
+                        <span class="c1"># time step when topology changed and action/observation layouts are refreshed.</span>
+                        <span class="n">just_connected</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">charger</span><span class="o">.</span><span class="n">plug_car</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
+                            <span class="n">just_connected</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">elif</span> <span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ev</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;Charger &#39;</span><span class="si">{</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_id</span><span class="si">}</span><span class="s2">&#39; already connected to &quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; but dataset requires &#39;</span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;at time step </span><span class="si">{</span><span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="si">}</span><span class="s2">.&quot;</span>
+                            <span class="p">)</span>
+                        <span class="n">is_new_connection</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">just_connected</span> <span class="ow">and</span> <span class="p">(</span>
+                                <span class="n">prev_state</span> <span class="o">!=</span> <span class="mi">1</span>
+                                <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prev_ev_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+                                <span class="ow">or</span> <span class="n">prev_ev_id</span> <span class="o">!=</span> <span class="n">ev_id</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="n">is_new_connection</span><span class="p">:</span>
+                            <span class="n">soc_value</span> <span class="o">=</span> <span class="n">_resolve_arrival_soc</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">,</span> <span class="n">prev_ev_id</span><span class="p">,</span> <span class="n">ev_id</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">soc_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">force_set_soc</span><span class="p">(</span><span class="n">soc_value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">charger</span><span class="o">.</span><span class="n">associate_incoming_car</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CityLearnRuntimeService.simulate_unconnected_ev_soc">
@@ -496,59 +539,60 @@
         <span class="k">if</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="n">env</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">:</span>
             <span class="k">return</span>
 
+        <span class="n">charger_event_by_ev_id</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="n">building</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span> <span class="ow">or</span> <span class="p">[]:</span>
+                <span class="n">sim</span><span class="p">:</span> <span class="n">ChargerSimulation</span> <span class="o">=</span> <span class="n">charger</span><span class="o">.</span><span class="n">charger_simulation</span>
+
+                <span class="n">curr_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_id</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_id</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">next_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_id</span><span class="p">[</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_id</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">curr_state</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_charger_state</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_charger_state</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">next_state</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_charger_state</span><span class="p">[</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_charger_state</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">curr_id</span> <span class="o">==</span> <span class="n">next_id</span> <span class="ow">and</span> <span class="n">curr_state</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">charger_event_by_ev_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">curr_id</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;connected&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">curr_state</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">charger_event_by_ev_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">curr_id</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;connected&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+                <span class="n">is_connecting</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">next_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">next_id</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;nan&#39;</span><span class="p">}</span>
+                    <span class="ow">and</span> <span class="n">next_state</span> <span class="o">==</span> <span class="mi">1</span>
+                    <span class="ow">and</span> <span class="n">curr_state</span> <span class="o">!=</span> <span class="mi">1</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_connecting</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">is_incoming</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">curr_id</span> <span class="o">==</span> <span class="n">next_id</span> <span class="ow">and</span> <span class="n">curr_state</span> <span class="o">==</span> <span class="mi">2</span>
+                <span class="n">soc_index</span> <span class="o">=</span> <span class="n">t</span> <span class="k">if</span> <span class="n">is_incoming</span> <span class="k">else</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">soc</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_estimated_soc_arrival</span><span class="p">[</span><span class="n">soc_index</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">soc_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_estimated_soc_arrival</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="p">)</span>
+                <span class="n">charger_event_by_ev_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">next_id</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;connecting&#39;</span><span class="p">,</span> <span class="n">soc</span><span class="p">))</span>
+
         <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">electric_vehicles</span><span class="p">:</span>
             <span class="n">ev_id</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">name</span>
-            <span class="n">found_in_charger</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">event</span> <span class="o">=</span> <span class="n">charger_event_by_ev_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ev_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">event_type</span><span class="p">,</span> <span class="n">soc</span> <span class="o">=</span> <span class="n">event</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">soc_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">soc</span><span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                    <span class="n">soc_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;connecting&#39;</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">soc_value</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">force_set_soc</span><span class="p">(</span><span class="n">soc_value</span><span class="p">)</span>
+                <span class="k">continue</span>
 
-            <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="n">building</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span> <span class="ow">or</span> <span class="p">[]:</span>
-                    <span class="n">sim</span><span class="p">:</span> <span class="n">ChargerSimulation</span> <span class="o">=</span> <span class="n">charger</span><span class="o">.</span><span class="n">charger_simulation</span>
-
-                    <span class="n">curr_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_id</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_id</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
-                    <span class="n">next_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_id</span><span class="p">[</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_id</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
-                    <span class="n">curr_state</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_charger_state</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_charger_state</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-                    <span class="n">next_state</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_charger_state</span><span class="p">[</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_charger_state</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-                    <span class="n">currently_connected</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">curr_id</span> <span class="o">==</span> <span class="n">ev_id</span> <span class="ow">and</span> <span class="n">curr_state</span> <span class="o">==</span> <span class="mi">1</span>
-                    <span class="k">if</span> <span class="n">currently_connected</span><span class="p">:</span>
-                        <span class="n">found_in_charger</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">break</span>
-
-                    <span class="n">is_connecting</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="nb">isinstance</span><span class="p">(</span><span class="n">next_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-                        <span class="ow">and</span> <span class="n">next_id</span> <span class="o">==</span> <span class="n">ev_id</span>
-                        <span class="ow">and</span> <span class="n">next_state</span> <span class="o">==</span> <span class="mi">1</span>
-                        <span class="ow">and</span> <span class="n">curr_state</span> <span class="o">!=</span> <span class="mi">1</span>
-                    <span class="p">)</span>
-                    <span class="n">is_incoming</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">curr_id</span> <span class="o">==</span> <span class="n">ev_id</span> <span class="ow">and</span> <span class="n">curr_state</span> <span class="o">==</span> <span class="mi">2</span>
-
-                    <span class="k">if</span> <span class="n">is_connecting</span><span class="p">:</span>
-                        <span class="n">found_in_charger</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">if</span> <span class="n">is_incoming</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_estimated_soc_arrival</span><span class="p">):</span>
-                                <span class="n">soc</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_estimated_soc_arrival</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">soc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_estimated_soc_arrival</span><span class="p">):</span>
-                                <span class="n">soc</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_estimated_soc_arrival</span><span class="p">[</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">soc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-                        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">soc</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
-                            <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">force_set_soc</span><span class="p">(</span><span class="n">soc</span><span class="p">)</span>
-                        <span class="k">break</span>
-
-                <span class="k">if</span> <span class="n">found_in_charger</span><span class="p">:</span>
-                    <span class="k">break</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">found_in_charger</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">last_soc</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-                    <span class="n">drift_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_unconnected_drift_std</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span>
-                    <span class="n">variability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">random_state</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">drift_std</span><span class="p">),</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
-                    <span class="c1"># Exogenous away-from-home movement: driving can reduce SOC, offsite charging can raise it.</span>
-                    <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">force_set_soc</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">last_soc</span> <span class="o">*</span> <span class="n">variability</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span></div>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">last_soc</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">drift_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_unconnected_drift_std</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span>
+                <span class="n">variability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">random_state</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">drift_std</span><span class="p">),</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+                <span class="c1"># Exogenous away-from-home movement: driving can reduce SOC, offsite charging can raise it.</span>
+                <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">force_set_soc</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">last_soc</span> <span class="o">*</span> <span class="n">variability</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="CityLearnRuntimeService.update_variables">

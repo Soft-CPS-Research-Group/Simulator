@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.agents.baseline &mdash; CityLearn 0.6.6 documentation</title>
+  <title>citylearn.agents.baseline &mdash; CityLearn 0.6.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e059a73d"></script>
+      <script src="../../../_static/documentation_options.js?v=44212324"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -87,7 +87,7 @@
   <h1>Source code for citylearn.agents.baseline</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -115,6 +115,7 @@
         <span class="n">deferrable_start_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_building_action_layout_cache</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ev_target_soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mf">1.0</span> <span class="k">if</span> <span class="n">ev_target_soc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ev_target_soc</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">storage_min_soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mf">0.20</span> <span class="k">if</span> <span class="n">storage_min_soc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">storage_min_soc</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">storage_max_soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mf">0.90</span> <span class="k">if</span> <span class="n">storage_max_soc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">storage_max_soc</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
@@ -150,25 +151,28 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_building_action_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-        <span class="n">bounds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="n">building</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span><span class="p">))</span>
-        <span class="n">preliminary</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_action_layout</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>
+        <span class="n">active_actions</span> <span class="o">=</span> <span class="n">layout</span><span class="p">[</span><span class="s1">&#39;active_actions&#39;</span><span class="p">]</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">layout</span><span class="p">[</span><span class="s1">&#39;bounds&#39;</span><span class="p">]</span>
+        <span class="n">preliminary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">ev_requested_kw</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">deferrable_requested_kw</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="k">for</span> <span class="n">action_name</span><span class="p">,</span> <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">active_actions</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">action_name</span><span class="p">,</span> <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">active_actions</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">action_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;electric_vehicle_storage_&#39;</span><span class="p">):</span>
-                <span class="n">charger_id</span> <span class="o">=</span> <span class="n">action_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;electric_vehicle_storage_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_action</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">charger_id</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+                <span class="n">charger</span> <span class="o">=</span> <span class="n">layout</span><span class="p">[</span><span class="s1">&#39;charger_by_action&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action_name</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_action_for_charger</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
                 <span class="n">preliminary</span><span class="p">[</span><span class="n">action_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-                <span class="n">ev_requested_kw</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_requested_kw</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">charger_id</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="n">ev_requested_kw</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_requested_kw_for_charger</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">action_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance_&#39;</span><span class="p">):</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_action</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">action_name</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+                <span class="n">appliance</span> <span class="o">=</span> <span class="n">layout</span><span class="p">[</span><span class="s1">&#39;appliance_by_action&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action_name</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_action_for_appliance</span><span class="p">(</span><span class="n">appliance</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
                 <span class="n">preliminary</span><span class="p">[</span><span class="n">action_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-                <span class="n">deferrable_requested_kw</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_start_power_kw</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">action_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="n">deferrable_requested_kw</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_start_power_kw_for_appliance</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">appliance</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">action_name</span><span class="p">,</span> <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">active_actions</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">action_name</span><span class="p">,</span> <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">active_actions</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">action_name</span> <span class="o">==</span> <span class="s1">&#39;electrical_storage&#39;</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage_action</span><span class="p">(</span>
                     <span class="n">building</span><span class="p">,</span>
@@ -186,8 +190,53 @@
 
         <span class="k">return</span> <span class="n">actions</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_building_action_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">active_actions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">active_actions</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">low</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">high</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="n">building</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">chargers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="nb">getattr</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="s1">&#39;charger_id&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">id</span><span class="p">(</span><span class="n">charger</span><span class="p">))</span> <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;electric_vehicle_chargers&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="n">appliances</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="nb">getattr</span><span class="p">(</span><span class="n">appliance</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">id</span><span class="p">(</span><span class="n">appliance</span><span class="p">))</span> <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;deferrable_appliances&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">active_actions</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">chargers</span><span class="p">,</span> <span class="n">appliances</span><span class="p">)</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>
+        <span class="n">cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_action_layout_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cached</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cached</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">charger_by_id</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="s1">&#39;charger_id&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span> <span class="n">charger</span>
+            <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;electric_vehicle_chargers&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="p">}</span>
+        <span class="n">appliance_by_name</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">appliance</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span> <span class="n">appliance</span>
+            <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;deferrable_appliances&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="p">}</span>
+        <span class="n">charger_by_action</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">appliance_by_action</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">action_name</span> <span class="ow">in</span> <span class="n">active_actions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">action_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;electric_vehicle_storage_&#39;</span><span class="p">):</span>
+                <span class="n">charger_id</span> <span class="o">=</span> <span class="n">action_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;electric_vehicle_storage_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">charger_by_action</span><span class="p">[</span><span class="n">action_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">charger_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">charger_id</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">action_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance_&#39;</span><span class="p">):</span>
+                <span class="n">appliance_name</span> <span class="o">=</span> <span class="n">action_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">appliance_by_action</span><span class="p">[</span><span class="n">action_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">appliance_by_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">appliance_name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">appliance_by_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action_name</span><span class="p">)</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;active_actions&#39;</span><span class="p">:</span> <span class="n">active_actions</span><span class="p">,</span>
+            <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">,</span>
+            <span class="s1">&#39;charger_by_action&#39;</span><span class="p">:</span> <span class="n">charger_by_action</span><span class="p">,</span>
+            <span class="s1">&#39;appliance_by_action&#39;</span><span class="p">:</span> <span class="n">appliance_by_action</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_building_action_layout_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">layout</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_ev_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">,</span> <span class="n">charger_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">low</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="n">charger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">charger_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_action_for_charger</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ev_action_for_charger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charger</span><span class="p">,</span> <span class="n">low</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="n">ev</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">charger</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="s1">&#39;connected_electric_vehicle&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ev</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -205,6 +254,9 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_deferrable_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">,</span> <span class="n">action_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">low</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="n">appliance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_appliance</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">action_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_action_for_appliance</span><span class="p">(</span><span class="n">appliance</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_deferrable_action_for_appliance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">appliance</span><span class="p">,</span> <span class="n">low</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">appliance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
 
@@ -285,20 +337,28 @@
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_series_value</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">solar_generation</span><span class="p">,</span> <span class="n">t</span><span class="p">)),</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">step_hours</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_charger_requested_kw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">,</span> <span class="n">charger_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_requested_kw_for_charger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_charger</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">charger_id</span><span class="p">),</span> <span class="n">action</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_charger_requested_kw_for_charger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charger</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">action</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
 
-        <span class="n">charger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">charger_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">charger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
 
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_safe_scalar</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="s1">&#39;max_charging_power&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_deferrable_start_power_kw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">,</span> <span class="n">action_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_start_power_kw_for_appliance</span><span class="p">(</span>
+            <span class="n">building</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_appliance</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">action_name</span><span class="p">),</span>
+            <span class="n">action</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_deferrable_start_power_kw_for_appliance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">,</span> <span class="n">appliance</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">action</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
 
-        <span class="n">appliance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_appliance</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">action_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">appliance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
 
@@ -366,7 +426,14 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">scalar</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">scalar</span></div>
+        <span class="k">return</span> <span class="n">scalar</span>
+
+<div class="viewcode-block" id="BusinessAsUsualAgent.reset">
+<a class="viewcode-back" href="../../../api/citylearn.agents.baseline.html#citylearn.agents.baseline.BusinessAsUsualAgent.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_building_action_layout_cache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+</div>
 
 </pre></div>
 
