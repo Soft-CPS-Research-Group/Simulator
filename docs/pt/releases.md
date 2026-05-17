@@ -58,6 +58,38 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.6 - Feasibility EV com Servico Eletrico
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release que faz os KPIs de feasibility no departure EV usarem os mesmos limites de headroom eletrico que o simulador aplica as acoes de carregamento.
+
+### Fixed
+
+- A feasibility no departure EV passa a considerar headroom total de importacao, headroom por fase, fase do charger, power outages e eficiencia charger/bateria antes de marcar um target estrito, SOC minimo aceitavel ou limite inferior da tolerancia como alcancavel.
+- O Building 15 em cenarios three-phase/electrical-service deixa de ser contado como feasible quando os limites de L1/L2 ou headroom do building tornam o SOC de departure fisicamente impossivel.
+
+### Dataset/Schema Impact
+
+- Sem alteracoes de schema. A feasibility passa a usar a configuracao existente de electrical service, phase connection, headroom, eficiencia do charger e eficiencia da bateria, alem do schedule do charger, capacidade da bateria EV, potencia do charger e SOC de chegada.
+
+### Compatibility
+
+- Nomes de KPI e formato dos exports ficam iguais. So a classificacao feasible/infeasible fica mais estrita quando os limites eletricos ou eficiencia reduzem a potencia fisicamente disponivel para carregar.
+
+### Validation
+
+- `.venv/bin/python -m pytest tests/test_kpi_v2.py -q`: pass (`30 passed`)
+- `.venv/bin/python -m pytest tests/unit/test_charging_constraints.py -q`: pass (`5 passed`)
+- `.venv/bin/python -m pytest tests/test_kpi_golden.py tests/test_charging_constraints_dataset.py tests/test_charging_constraints_e2e.py -q`: pass (`13 passed`)
+- `git diff --check`: pass
+
+### Migration Notes
+
+- Usar os mesmos KPIs EV feasible-only de antes. Em cenarios com headroom apertado por building/fase, alguns departures antes contados como feasible podem agora passar corretamente para infeasible.
+
 ## v0.6.5 - KPIs EV Fair por Feasibility no Departure
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

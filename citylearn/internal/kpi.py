@@ -279,8 +279,177 @@ class CityLearnKPIService:
 
         return float(np.clip(self._to_scalar(getattr(charger, 'efficiency', 1.0), 1.0), 0.0, 1.0))
 
+    @staticmethod
+    def _normalize_phase_connection_label(value) -> Optional[str]:
+        if value is None:
+            return None
+
+        text = str(value).strip()
+        if text == '':
+            return None
+
+        normalized = text.lower().replace('-', '_')
+        aliases = {
+            'l1': 'L1',
+            'phase_1': 'L1',
+            'l2': 'L2',
+            'phase_2': 'L2',
+            'l3': 'L3',
+            'phase_3': 'L3',
+            'all_phases': 'all_phases',
+            'three_phase': 'all_phases',
+        }
+        return aliases.get(normalized, text)
+
+    def _electrical_service_phase_names(self, building) -> List[str]:
+        if getattr(building, '_electrical_service_mode', 'single_phase') == 'three_phase':
+            return ['L1', 'L2', 'L3']
+
+        return ['L1']
+
+    def _split_unassigned_service_power(self, building, power_kw: float) -> Dict[str, float]:
+        phase_names = self._electrical_service_phase_names(building)
+
+        if len(phase_names) == 1:
+            return {'L1': float(power_kw)}
+
+        split_mode = str(getattr(building, '_electrical_service_default_split', 'balanced')).strip().lower()
+        if split_mode in {'l1', 'l2', 'l3'}:
+            return {phase: float(power_kw if phase.lower() == split_mode else 0.0) for phase in phase_names}
+
+        share = float(power_kw) / len(phase_names)
+        return {phase: share for phase in phase_names}
+
+    def _split_service_power_by_connection(
+        self,
+        building,
+        power_kw: float,
+        phase_connection: Optional[str],
+    ) -> Dict[str, float]:
+        phase_names = self._electrical_service_phase_names(building)
+
+        if len(phase_names) == 1:
+            return {'L1': float(power_kw)}
+
+        phase_connection = self._normalize_phase_connection_label(phase_connection)
+        if phase_connection in {'L1', 'L2', 'L3'}:
+            return {phase: float(power_kw if phase == phase_connection else 0.0) for phase in phase_names}
+
+        if phase_connection == 'all_phases':
+            share = float(power_kw) / len(phase_names)
+            return {phase: share for phase in phase_names}
+
+        return self._split_unassigned_service_power(building, power_kw)
+
+    def _ev_power_outage_at_step(self, building, step: int) -> bool:
+        ops_service = getattr(building, '_ops_service', None)
+        outage_at_step = getattr(ops_service, '_power_outage_at_step', None)
+
+        if callable(outage_at_step):
+            try:
+                return bool(outage_at_step(step))
+            except Exception:
+                pass
+
+        signal = getattr(building, 'power_outage_signal', None)
+        if signal is None:
+            energy_simulation = getattr(building, 'energy_simulation', None)
+            signal = getattr(energy_simulation, 'power_outage', None)
+
+        return bool(self._safe_sequence_value(signal, step, 0.0))
+
+    def _estimate_feasibility_base_power_at_step(self, building, step: int) -> Tuple[float, Dict[str, float]]:
+        ops_service = getattr(building, '_ops_service', None)
+        estimate = getattr(ops_service, '_estimate_base_power_at_step', None)
+
+        if callable(estimate):
+            try:
+                total_kw, phase_kw = estimate(step)
+                total_kw = self._to_scalar(total_kw, 0.0)
+                phase_kw = {
+                    phase: self._to_scalar(value, 0.0)
+                    for phase, value in (phase_kw or {}).items()
+                }
+                return total_kw, phase_kw
+            except Exception:
+                pass
+
+        phase_kw = {phase: 0.0 for phase in self._electrical_service_phase_names(building)}
+        return 0.0, phase_kw
+
+    def _ev_constraint_limited_charge_power_kw(
+        self,
+        building,
+        charger,
+        step: int,
+        requested_power_kw: float,
+    ) -> float:
+        requested_power_kw = max(self._to_scalar(requested_power_kw, 0.0), 0.0)
+
+        if requested_power_kw <= self.EV_DEPARTURE_EPS:
+            return 0.0
+
+        if building is None or not getattr(building, '_charging_constraints_enabled', False):
+            return requested_power_kw
+
+        if self._ev_power_outage_at_step(building, step):
+            return 0.0
+
+        if getattr(building, '_electrical_service_enabled', False):
+            base_total_kw, base_phase_kw = self._estimate_feasibility_base_power_at_step(building, step)
+            total_limits = getattr(building, '_electrical_service_limits', {}).get('total', {}) or {}
+            per_phase_limits = getattr(building, '_electrical_service_limits', {}).get('per_phase', {}) or {}
+            cap_kw = requested_power_kw
+
+            import_limit = self._to_scalar(total_limits.get('import_kw'), np.nan)
+            if np.isfinite(import_limit):
+                cap_kw = min(cap_kw, max(import_limit - base_total_kw, 0.0))
+
+            charger_id = getattr(charger, 'charger_id', None)
+            phase_connection = (getattr(building, '_charger_phase_map', {}) or {}).get(
+                charger_id,
+                getattr(charger, 'phase_connection', None),
+            )
+            request_phase_fraction = self._split_service_power_by_connection(building, 1.0, phase_connection)
+
+            for phase_name, fraction in request_phase_fraction.items():
+                fraction = self._to_scalar(fraction, 0.0)
+                if fraction <= self.EV_DEPARTURE_EPS:
+                    continue
+
+                phase_limit = self._to_scalar(
+                    (per_phase_limits.get(phase_name, {}) or {}).get('import_kw'),
+                    np.nan,
+                )
+                if np.isfinite(phase_limit):
+                    phase_base_kw = self._to_scalar(base_phase_kw.get(phase_name, 0.0), 0.0)
+                    cap_kw = min(cap_kw, max((phase_limit - phase_base_kw) / fraction, 0.0))
+
+            return max(min(requested_power_kw, cap_kw), 0.0)
+
+        cap_kw = requested_power_kw
+        building_limit = self._to_scalar(getattr(building, '_building_charger_limit_kw', None), np.nan)
+        if np.isfinite(building_limit):
+            cap_kw = min(cap_kw, max(building_limit, 0.0))
+
+        charger_id = getattr(charger, 'charger_id', None)
+        charger_phase_map = getattr(building, '_charger_phase_map', {}) or {}
+        charger_phase = charger_phase_map.get(charger_id)
+
+        for phase in getattr(building, '_phase_limits', []) or []:
+            chargers = phase.get('chargers', []) or []
+            if charger_id not in chargers and phase.get('name') != charger_phase:
+                continue
+
+            phase_limit = self._to_scalar(phase.get('limit_kw', phase.get('import_kw')), np.nan)
+            if np.isfinite(phase_limit):
+                cap_kw = min(cap_kw, max(phase_limit, 0.0))
+
+        return max(min(requested_power_kw, cap_kw), 0.0)
+
     def _ev_departure_threshold_feasible(
         self,
+        building,
         charger,
         sim,
         ev,
@@ -340,11 +509,18 @@ class CityLearnKPIService:
         soc = float(arrival_soc)
         connected_steps = max(int(departure_index) - int(interval_start) + 1, 0)
 
-        for _ in range(connected_steps):
+        for offset in range(connected_steps):
             if soc + self.EV_DEPARTURE_EPS >= threshold_soc:
                 return True
 
-            power_kw = self._ev_battery_max_input_power_kw(battery, charger_power_kw, soc)
+            step = int(interval_start) + offset
+            battery_limited_power_kw = self._ev_battery_max_input_power_kw(battery, charger_power_kw, soc)
+            power_kw = self._ev_constraint_limited_charge_power_kw(
+                building,
+                charger,
+                step,
+                battery_limited_power_kw,
+            )
 
             if power_kw <= self.EV_DEPARTURE_EPS:
                 break
@@ -592,6 +768,7 @@ class CityLearnKPIService:
                 min_acceptable_threshold = max(target_soc - service_tolerance, 0.0)
                 within_tolerance_threshold = max(target_soc - within_tolerance, 0.0)
                 target_feasible = self._ev_departure_threshold_feasible(
+                    building,
                     charger,
                     sim,
                     ev,
@@ -600,6 +777,7 @@ class CityLearnKPIService:
                     target_soc,
                 )
                 min_acceptable_feasible = self._ev_departure_threshold_feasible(
+                    building,
                     charger,
                     sim,
                     ev,
@@ -608,6 +786,7 @@ class CityLearnKPIService:
                     min_acceptable_threshold,
                 )
                 within_tolerance_feasible = self._ev_departure_threshold_feasible(
+                    building,
                     charger,
                     sim,
                     ev,

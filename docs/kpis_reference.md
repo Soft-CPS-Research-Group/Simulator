@@ -93,9 +93,9 @@ Safe division returns `None` or a safe placeholder when the denominator is not p
 | departure met count | count | Departures where required SOC was met. |
 | departure minimum acceptable count | count | Departures where SOC is at least `target_soc - ev_departure_service_tolerance`. |
 | departure within tolerance count | count | Departures within the configured symmetric target tolerance. |
-| departure target feasible/infeasible count | count | Departures where the strict target SOC was/was not reachable by charging at max power for the connected interval. |
-| departure minimum acceptable feasible/infeasible count | count | Departures where the minimum acceptable SOC was/was not reachable by charging at max power. |
-| departure within tolerance feasible/infeasible count | count | Departures where the lower bound of the symmetric tolerance band was/was not reachable by charging at max power. |
+| departure target feasible/infeasible count | count | Departures where the strict target SOC was/was not reachable by charging at max power for the connected interval, after charger/battery efficiency and configured electrical-service headroom. |
+| departure minimum acceptable feasible/infeasible count | count | Departures where the minimum acceptable SOC was/was not reachable under the same max-power, efficiency and electrical-service constraints. |
+| departure within tolerance feasible/infeasible count | count | Departures where the lower bound of the symmetric tolerance band was/was not reachable under the same max-power, efficiency and electrical-service constraints. |
 | departure success ratio | ratio | `met / departures`. |
 | departure minimum acceptable ratio | ratio | `minimum_acceptable / departures`. This is the main user-service comfort KPI. |
 | departure within tolerance ratio | ratio | `within_symmetric_tolerance / departures`. |
@@ -115,7 +115,7 @@ EV departure tolerance semantics:
 - `ev_departure_success_rate` is strict target fulfillment: `actual_soc >= target_soc`.
 - `ev_departure_min_acceptable_rate` is minimum service fulfillment: `actual_soc >= target_soc - ev_departure_service_tolerance`.
 - `ev_departure_within_tolerance_rate` is symmetric target accuracy: `abs(actual_soc - target_soc) <= ev_departure_within_tolerance`.
-- The `*_feasible_rate` variants use the same numerators but exclude departures where that threshold was not physically reachable from arrival SOC by charging at maximum charger/battery power for the connected interval.
+- The `*_feasible_rate` variants use the same numerators but exclude departures where that threshold was not physically reachable from arrival SOC by charging at maximum charger/battery power for the connected interval, capped by configured building/phase import headroom and charger/battery efficiency.
 - Feasibility counters are scenario-quality diagnostics; missing charger, battery or arrival-SOC data is treated as feasible to preserve legacy dataset behavior.
 - Both tolerance settings default to `0.05`.
 

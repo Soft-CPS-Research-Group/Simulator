@@ -575,6 +575,83 @@ def test_ev_departure_feasible_rates_exclude_physically_unreachable_targets():
     assert metrics["ev_departure_min_acceptable_feasible_rate"] == pytest.approx(0.0)
 
 
+def test_ev_departure_feasibility_respects_electrical_service_phase_headroom():
+    service = CityLearnKPIService(
+        SimpleNamespace(
+            ev_departure_within_tolerance=0.05,
+            ev_departure_service_tolerance=0.05,
+            seconds_per_time_step=3600,
+        )
+    )
+    charger = _fake_feasibility_departure_charger(
+        actual_soc=0.21,
+        arrival_soc=0.20,
+        capacity_kwh=10.0,
+        max_charging_power_kw=11.0,
+        charger_id="charger_15_2",
+    )
+    building = SimpleNamespace(
+        name="Building_15",
+        time_step=1,
+        electric_vehicle_chargers=[charger],
+        _charging_constraints_enabled=True,
+        _electrical_service_enabled=True,
+        _electrical_service_mode="three_phase",
+        _electrical_service_default_split="balanced",
+        _electrical_service_limits={
+            "total": {"import_kw": 100.0, "export_kw": 100.0},
+            "per_phase": {
+                "L1": {"import_kw": 100.0, "export_kw": 100.0},
+                "L2": {"import_kw": 7.0, "export_kw": 100.0},
+                "L3": {"import_kw": 100.0, "export_kw": 100.0},
+            },
+        },
+        _charger_phase_map={"charger_15_2": "L2"},
+        _ops_service=SimpleNamespace(
+            _estimate_base_power_at_step=lambda step: (2.0, {"L1": 0.0, "L2": 2.0, "L3": 0.0}),
+            _power_outage_at_step=lambda step: False,
+        ),
+    )
+
+    metrics = service._compute_ev_metrics(building)
+
+    assert metrics["departures_total"] == 1.0
+    assert metrics["departures_target_feasible"] == pytest.approx(0.0)
+    assert metrics["departures_target_infeasible"] == pytest.approx(1.0)
+    assert metrics["departures_min_acceptable_feasible"] == pytest.approx(0.0)
+    assert metrics["departures_min_acceptable_infeasible"] == pytest.approx(1.0)
+    assert metrics["departures_within_tolerance_feasible"] == pytest.approx(0.0)
+    assert metrics["departures_within_tolerance_infeasible"] == pytest.approx(1.0)
+
+
+def test_ev_departure_feasibility_respects_charger_efficiency():
+    service = CityLearnKPIService(
+        SimpleNamespace(
+            ev_departure_within_tolerance=0.05,
+            ev_departure_service_tolerance=0.05,
+            seconds_per_time_step=3600,
+        )
+    )
+    charger = _fake_feasibility_departure_charger(
+        actual_soc=0.21,
+        arrival_soc=0.20,
+        capacity_kwh=10.0,
+        max_charging_power_kw=10.0,
+    )
+    charger.efficiency = 0.5
+    building = SimpleNamespace(
+        name="Building_1",
+        time_step=1,
+        electric_vehicle_chargers=[charger],
+    )
+
+    metrics = service._compute_ev_metrics(building)
+
+    assert metrics["departures_total"] == 1.0
+    assert metrics["departures_target_feasible"] == pytest.approx(0.0)
+    assert metrics["departures_target_infeasible"] == pytest.approx(1.0)
+
+
 def test_ev_departure_service_tolerance_is_configurable_from_schema_and_kwargs(tmp_path: Path):
     schema_path = _build_two_building_market_schema(tmp_path)
     with open(schema_path, "r", encoding="utf-8") as f:

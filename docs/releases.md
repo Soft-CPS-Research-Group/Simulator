@@ -60,6 +60,38 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.6 - Electrical-Service-Aware EV Feasibility
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release that makes EV departure feasibility KPIs use the same electrical headroom constraints that the simulator applies to charging actions.
+
+### Fixed
+
+- EV departure feasibility now considers configured total import headroom, per-phase import headroom, charger phase assignment, power outages and charger/battery efficiency before marking a strict target, minimum acceptable SOC or within-tolerance lower bound as reachable.
+- Building 15 in three-phase/electrical-service scenarios is no longer overcredited as feasible when L1/L2 phase limits or building headroom make the requested departure SOC physically unreachable.
+
+### Dataset/Schema Impact
+
+- No schema changes. Feasibility now uses existing electrical service, phase connection, headroom, charger efficiency and battery efficiency configuration in addition to charger schedule, EV battery capacity, charger power and arrival SOC fields.
+
+### Compatibility
+
+- KPI names and export shape are unchanged. Only the feasible/infeasible classification becomes stricter when electrical-service limits or efficiency reduce physically available charging power.
+
+### Validation
+
+- `.venv/bin/python -m pytest tests/test_kpi_v2.py -q`: pass (`30 passed`)
+- `.venv/bin/python -m pytest tests/unit/test_charging_constraints.py -q`: pass (`5 passed`)
+- `.venv/bin/python -m pytest tests/test_kpi_golden.py tests/test_charging_constraints_dataset.py tests/test_charging_constraints_e2e.py -q`: pass (`13 passed`)
+- `git diff --check`: pass
+
+### Migration Notes
+
+- Use the same feasible-only EV departure KPIs as before. In scenarios with tight building/phase headroom, some departures previously counted as feasible may now correctly move to infeasible.
+
 ## v0.6.5 - Fair EV Departure Feasibility KPIs
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
