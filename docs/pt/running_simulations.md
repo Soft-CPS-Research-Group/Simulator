@@ -102,6 +102,20 @@ obs, reward, terminated, truncated, info = env.step(action_payload)
 | `physics_invariant_checks` | bool | schema/False | Ativa checks de invariantes fisicos por step. |
 | `metrics_log_interval` | int | schema/0 | Frequencia de logs de metricas runtime. |
 
+## Payload de Observacoes para Reward
+
+O `step()` constroi um payload de observacoes mais pequeno para o reward quando a reward function declara que nomes de observacao precisa. Os rewards built-in ja fazem isto. Rewards externos podem optar por um destes formatos compativeis:
+
+```python
+class MyReward:
+    required_observation_names = ("net_electricity_consumption",)
+
+    def calculate(self, observations):
+        return [-sum(o["net_electricity_consumption"] for o in observations)]
+```
+
+Tambem sao aceites o alias `required_observations` e o metodo `get_required_observation_names()`. Se um reward externo nao declarar requisitos, o CityLearn volta a usar observacoes completas com `include_all` para manter compatibilidade.
+
 ## CLI
 
 ```bash
@@ -139,6 +153,29 @@ citylearn simulate data/datasets/my_dataset/schema.json evaluate
 | `none` | minimo | Sem CSV de render | Treino normal. |
 | `during` | alto | Escreve por step | Debug curto, inspecao em tempo real. |
 | `end` | medio | Bufferiza e escreve no fim | Episodios longos em que queres CSV final. |
+
+KPIs e exports BAU sao por episodio, portanto um loop de treino pode manter export desligado e ligar apenas no ultimo episodio. Se forem precisos CSVs de series temporais normais nesse episodio final, criar o ambiente com `render_mode="end"` e alternar `render_enabled`; para output so de KPIs, deixar render desligado e chamar `export_final_kpis()` manualmente depois do episodio final.
+
+```python
+for episode in range(episodes):
+    last_episode = episode == episodes - 1
+    env.render_enabled = last_episode
+    env.export_kpis_on_episode_end = last_episode
+    observations, info = env.reset()
+    # correr episodio...
+```
+
+`export_final_kpis()` controla o custo BAU separadamente:
+
+| Chamada | Output | Custo BAU sidecar |
+|---|---|---:|
+| `env.export_final_kpis(include_business_as_usual=False)` | So CSV de KPIs | nao |
+| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=False)` | CSV de KPIs com linhas BAU | sim |
+| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=True)` | CSV de KPIs com linhas BAU e CSV de serie temporal BAU | sim |
+
+As series temporais normais do episodio sao controladas por `render_mode`/`render_enabled`, nao por `export_final_kpis()`.
+
+Para escolher exatamente o output do episodio final, manter `export_kpis_on_episode_end=False` e chamar `export_final_kpis()` manualmente depois de o episodio terminar.
 
 ## Comandos de validacao recomendados
 

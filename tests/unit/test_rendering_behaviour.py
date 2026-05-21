@@ -177,6 +177,79 @@ def test_auto_kpi_export_reports_debug_timing(tmp_path, monkeypatch):
         env.close()
 
 
+def test_debug_timing_reports_step_breakdown():
+    env = CityLearnEnv(
+        str(DATASET),
+        central_agent=True,
+        episode_time_steps=3,
+        render_mode="none",
+        debug_timing=True,
+        random_seed=0,
+    )
+
+    try:
+        env.reset()
+        zeros = [np.zeros(env.action_space[0].shape[0], dtype="float32")]
+        _, _, _, _, info = env.step(zeros)
+
+        expected_keys = [
+            "step_total_time",
+            "parse_actions_time",
+            "apply_actions_time",
+            "update_variables_time",
+            "reward_observations_time",
+            "reward_calculation_time",
+            "next_time_step_time",
+            "next_observations_time",
+            "building_observations_retrieval_time",
+        ]
+        for key in expected_keys:
+            assert key in info
+            assert info[key] >= 0.0
+
+        assert info["building_observations_retrieval_time"] == pytest.approx(
+            info["reward_observations_time"]
+        )
+        assert info["step_total_time"] >= info["apply_actions_time"]
+    finally:
+        _cleanup_env(env)
+        env.close()
+
+
+def test_reward_observation_names_attribute_limits_reward_payload():
+    env = CityLearnEnv(
+        str(DATASET),
+        central_agent=True,
+        episode_time_steps=3,
+        render_mode="none",
+        random_seed=0,
+    )
+
+    class _ExternalReward:
+        required_observation_names = ("net_electricity_consumption",)
+
+        def __init__(self):
+            self.keys = None
+
+        def calculate(self, observations):
+            self.keys = [tuple(sorted(o.keys())) for o in observations]
+            return [0.0]
+
+    reward = _ExternalReward()
+
+    try:
+        env.reset()
+        env.reward_function = reward
+        zeros = [np.zeros(env.action_space[0].shape[0], dtype="float32")]
+        env.step(zeros)
+
+        assert reward.keys
+        assert set(reward.keys[0]) == {"net_electricity_consumption"}
+    finally:
+        _cleanup_env(env)
+        env.close()
+
+
 def test_during_mode_can_disable_auto_kpi_export(tmp_path):
     env = CityLearnEnv(
         str(DATASET),

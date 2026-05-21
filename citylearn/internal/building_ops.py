@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, Iterable, Mapping, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -27,6 +27,7 @@ class BuildingOpsService:
         normalize: bool = None,
         periodic_normalization: bool = None,
         check_limits: bool = None,
+        observation_names: Optional[Iterable[str]] = None,
     ) -> Mapping[str, float]:
         """Observations at current time step."""
 
@@ -37,36 +38,38 @@ class BuildingOpsService:
         include_all = False if include_all is None else include_all
         check_limits = False if check_limits is None else check_limits
 
-        data = self.get_observations_data(include_all=include_all)
-
-        if include_all:
+        if observation_names is not None:
+            valid_observations = list(observation_names)
+            data = self.get_observations_data(include_all=include_all, observation_names=valid_observations)
+        elif include_all:
+            data = self.get_observations_data(include_all=include_all)
             valid_observations = list(set(data.keys()) | set(building.active_observations))
         else:
             valid_observations = building.active_observations
+            data = self.get_observations_data(include_all=include_all, observation_names=valid_observations)
 
-        observations = {k: data[k] for k in valid_observations if k in data.keys()}
+        valid_observation_set = set(valid_observations)
+
+        observations = {k: data[k] for k in valid_observations if k in data}
 
         observations = self.update_ev_charger_observations(
             observations,
-            valid_observations,
+            valid_observation_set,
             building.electric_vehicle_chargers,
             include_all=include_all,
         )
 
         observations = self.update_deferrable_appliance_observations(
             observations,
-            valid_observations,
+            valid_observation_set,
             building.deferrable_appliances,
         )
 
         unknown_observations = set(observations.keys()).difference(set(valid_observations))
         assert len(unknown_observations) == 0, f'Unknown observations: {unknown_observations}'
 
-        non_periodic_low_limit, non_periodic_high_limit = building.non_periodic_normalized_observation_space_limits
-        periodic_low_limit, periodic_high_limit = building.periodic_normalized_observation_space_limits
-        periodic_observations = building.get_periodic_observation_metadata()
-
         if check_limits:
+            non_periodic_low_limit, non_periodic_high_limit = building.non_periodic_normalized_observation_space_limits
             for key in building.active_observations:
                 value = observations[key]
                 lower = non_periodic_low_limit[key]
@@ -84,6 +87,7 @@ class BuildingOpsService:
                     LOGGER.debug(f'Observation outside space limit: {report}')
 
         if periodic_normalization:
+            periodic_observations = building.get_periodic_observation_metadata()
             observations_copy = {k: v for k, v in observations.items()}
             observations = {}
             periodic_normalizer = PeriodicNormalization(x_max=0)
@@ -98,6 +102,7 @@ class BuildingOpsService:
                     observations[key] = value
 
         if normalize:
+            periodic_low_limit, periodic_high_limit = building.periodic_normalized_observation_space_limits
             normalizer = Normalize(0.0, 1.0)
 
             for key, value in observations.items():
@@ -126,6 +131,19 @@ class BuildingOpsService:
             capacity_key = f'connected_electric_vehicle_at_charger_{charger_id}_battery_capacity'
             arrival_key = f'incoming_electric_vehicle_at_charger_{charger_id}_estimated_arrival_time'
             soc_arrival_key = f'incoming_electric_vehicle_at_charger_{charger_id}_estimated_soc_arrival'
+            charger_keys = (
+                connected_state_key,
+                incoming_state_key,
+                departure_key,
+                req_soc_key,
+                soc_key,
+                capacity_key,
+                arrival_key,
+                soc_arrival_key,
+            )
+
+            if not any(key in valid_observations for key in charger_keys):
+                continue
 
             state = sim.electric_vehicle_charger_state[t] if t < len(sim.electric_vehicle_charger_state) else np.nan
 
@@ -173,6 +191,10 @@ class BuildingOpsService:
         """Update flat observations for each deferrable appliance."""
 
         for appliance in deferrable_appliances or []:
+            prefix = f'deferrable_appliance_{appliance.name}_'
+            if not any(key.startswith(prefix) for key in valid_observations):
+                continue
+
             appliance_observations = self.deferrable_appliance_observations(appliance)
             for name, value in appliance_observations.items():
                 key = f'deferrable_appliance_{appliance.name}_{name}'
@@ -200,120 +222,157 @@ class BuildingOpsService:
         return self.update_deferrable_appliance_observations(observations, valid_observations, washing_machines)
         return observations
 
-    def get_observations_data(self, include_all: bool = False) -> Mapping[str, Union[float, int]]:
+    def get_observations_data(
+        self,
+        include_all: bool = False,
+        observation_names: Optional[Iterable[str]] = None,
+    ) -> Mapping[str, Union[float, int]]:
         """Build base observation dictionary without normalization."""
 
         building = self.building
+        requested: Optional[Set[str]] = None if observation_names is None else set(observation_names)
+
+        def wants(name: str) -> bool:
+            return requested is None or name in requested
 
         electric_vehicle_chargers_dict = {}
         deferrable_appliances_dict = {}
         t = building.time_step
         endogenous_t = t if include_all else max(t - 1, 0)
 
-        for charger in building.electric_vehicle_chargers or []:
-            charger_id = charger.charger_id
-            connected_car = charger.connected_electric_vehicle
+        if wants('electric_vehicles_chargers_dict'):
+            for charger in building.electric_vehicle_chargers or []:
+                charger_id = charger.charger_id
+                connected_car = charger.connected_electric_vehicle
 
-            if connected_car is not None:
-                last_charged_kwh = 0.0
-                if 0 <= endogenous_t < len(charger.past_charging_action_values_kwh):
-                    last_charged_kwh = float(charger.past_charging_action_values_kwh[endogenous_t])
+                if connected_car is not None:
+                    last_charged_kwh = 0.0
+                    if 0 <= endogenous_t < len(charger.past_charging_action_values_kwh):
+                        last_charged_kwh = float(charger.past_charging_action_values_kwh[endogenous_t])
 
-                battery_soc = connected_car.battery.soc[endogenous_t]
-                previous_battery_soc = connected_car.battery.initial_soc if endogenous_t == 0 else connected_car.battery.soc[endogenous_t - 1]
+                    battery_soc = connected_car.battery.soc[endogenous_t]
+                    previous_battery_soc = connected_car.battery.initial_soc if endogenous_t == 0 else connected_car.battery.soc[endogenous_t - 1]
 
-                required_soc = charger.charger_simulation.electric_vehicle_required_soc_departure[t]
-                departure_steps = charger.charger_simulation.electric_vehicle_departure_time[t]
-                step_hours = building.seconds_per_time_step / 3600.0
-                hours_until_departure = max(float(departure_steps), 0.0) * step_hours
+                    required_soc = charger.charger_simulation.electric_vehicle_required_soc_departure[t]
+                    departure_steps = charger.charger_simulation.electric_vehicle_departure_time[t]
+                    step_hours = building.seconds_per_time_step / 3600.0
+                    hours_until_departure = max(float(departure_steps), 0.0) * step_hours
 
-                battery_capacity = connected_car.battery.capacity
-                min_capacity = (1 - connected_car.battery.depth_of_discharge) * battery_capacity
+                    battery_capacity = connected_car.battery.capacity
+                    min_capacity = (1 - connected_car.battery.depth_of_discharge) * battery_capacity
 
-                electric_vehicle_chargers_dict[charger_id] = {
-                    'connected': True,
-                    'last_charged_kwh': last_charged_kwh,
-                    'previous_battery_soc': previous_battery_soc,
-                    'battery_soc': battery_soc,
-                    'battery_capacity': battery_capacity,
-                    'min_capacity': min_capacity,
-                    'required_soc': required_soc,
-                    'hours_until_departure': hours_until_departure,
-                    'max_charging_power': charger.max_charging_power,
-                    'max_discharging_power': charger.max_discharging_power,
-                }
+                    electric_vehicle_chargers_dict[charger_id] = {
+                        'connected': True,
+                        'last_charged_kwh': last_charged_kwh,
+                        'previous_battery_soc': previous_battery_soc,
+                        'battery_soc': battery_soc,
+                        'battery_capacity': battery_capacity,
+                        'min_capacity': min_capacity,
+                        'required_soc': required_soc,
+                        'hours_until_departure': hours_until_departure,
+                        'max_charging_power': charger.max_charging_power,
+                        'max_discharging_power': charger.max_discharging_power,
+                    }
 
-            else:
-                electric_vehicle_chargers_dict[charger_id] = {
-                    'connected': False,
-                    'last_charged_kwh': 0.0,
-                    'previous_battery_soc': None,
-                    'battery_soc': None,
-                    'battery_capacity': None,
-                    'min_capacity': None,
-                    'required_soc': None,
-                    'hours_until_departure': None,
-                    'max_charging_power': charger.max_charging_power,
-                    'max_discharging_power': charger.max_discharging_power,
-                }
+                else:
+                    electric_vehicle_chargers_dict[charger_id] = {
+                        'connected': False,
+                        'last_charged_kwh': 0.0,
+                        'previous_battery_soc': None,
+                        'battery_soc': None,
+                        'battery_capacity': None,
+                        'min_capacity': None,
+                        'required_soc': None,
+                        'hours_until_departure': None,
+                        'max_charging_power': charger.max_charging_power,
+                        'max_discharging_power': charger.max_discharging_power,
+                    }
 
-        for appliance in building.deferrable_appliances or []:
-            deferrable_appliances_dict[appliance.name] = dict(appliance.observations())
+        if wants('deferrable_appliances_dict') or wants('washing_machines_dict'):
+            for appliance in building.deferrable_appliances or []:
+                deferrable_appliances_dict[appliance.name] = dict(appliance.observations())
 
         observations = {}
         for key, series in building._energy_simulation_observation_sources:
-            if t < len(series):
+            if wants(key) and t < len(series):
                 observations[key] = series[t]
 
         for key, series in building._weather_observation_sources:
-            if t < len(series):
+            if wants(key) and t < len(series):
                 observations[key] = series[t]
 
         for key, series in building._pricing_observation_sources:
-            if t < len(series):
+            if wants(key) and t < len(series):
                 observations[key] = series[t]
 
         for key, series in building._carbon_observation_sources:
-            if t < len(series):
+            if wants(key) and t < len(series):
                 observations[key] = series[t]
 
-        observations.update({
-            'solar_generation': abs(building.solar_generation[t]),
-            **{
-                'cooling_storage_soc': building.cooling_storage.soc[endogenous_t],
-                'heating_storage_soc': building.heating_storage.soc[endogenous_t],
-                'dhw_storage_soc': building.dhw_storage.soc[endogenous_t],
-                'electrical_storage_soc': building.electrical_storage.soc[endogenous_t],
-            },
-            'cooling_demand': building.energy_from_cooling_device[endogenous_t] + abs(min(building.cooling_storage.energy_balance[endogenous_t], 0.0)),
-            'heating_demand': building.energy_from_heating_device[endogenous_t] + abs(min(building.heating_storage.energy_balance[endogenous_t], 0.0)),
-            'dhw_demand': building.energy_from_dhw_device[endogenous_t] + abs(min(building.dhw_storage.energy_balance[endogenous_t], 0.0)),
-            'net_electricity_consumption': building.net_electricity_consumption[endogenous_t],
-            'cooling_electricity_consumption': building.cooling_electricity_consumption[endogenous_t],
-            'heating_electricity_consumption': building.heating_electricity_consumption[endogenous_t],
-            'dhw_electricity_consumption': building.dhw_electricity_consumption[endogenous_t],
-            'cooling_storage_electricity_consumption': building.cooling_storage_electricity_consumption[endogenous_t],
-            'heating_storage_electricity_consumption': building.heating_storage_electricity_consumption[endogenous_t],
-            'dhw_storage_electricity_consumption': building.dhw_storage_electricity_consumption[endogenous_t],
-            'electrical_storage_electricity_consumption': building.electrical_storage_electricity_consumption[endogenous_t],
-            'deferrable_appliance_electricity_consumption': building.deferrable_appliances_electricity_consumption[endogenous_t],
-            'washing_machine_electricity_consumption': building.deferrable_appliances_electricity_consumption[endogenous_t],
-            'cooling_device_efficiency': building.cooling_device.get_cop(building.weather.outdoor_dry_bulb_temperature[t], heating=False),
-            'heating_device_efficiency': building.heating_device.get_cop(building.weather.outdoor_dry_bulb_temperature[t], heating=True)
-            if isinstance(building.heating_device, HeatPump) else building.heating_device.efficiency,
-            'dhw_device_efficiency': building.dhw_device.get_cop(building.weather.outdoor_dry_bulb_temperature[t], heating=True)
-            if isinstance(building.dhw_device, HeatPump) else building.dhw_device.efficiency,
-            'indoor_dry_bulb_temperature_cooling_set_point': building.energy_simulation.indoor_dry_bulb_temperature_cooling_set_point[t],
-            'indoor_dry_bulb_temperature_heating_set_point': building.energy_simulation.indoor_dry_bulb_temperature_heating_set_point[t],
-            'indoor_dry_bulb_temperature_cooling_delta': building.energy_simulation.indoor_dry_bulb_temperature[t] - building.energy_simulation.indoor_dry_bulb_temperature_cooling_set_point[t],
-            'indoor_dry_bulb_temperature_heating_delta': building.energy_simulation.indoor_dry_bulb_temperature[t] - building.energy_simulation.indoor_dry_bulb_temperature_heating_set_point[t],
-            'comfort_band': building.energy_simulation.comfort_band[t],
-            'occupant_count': building.energy_simulation.occupant_count[t],
-            'power_outage': building.power_outage_signal[t],
-            'electric_vehicles_chargers_dict': electric_vehicle_chargers_dict,
-            'deferrable_appliances_dict': deferrable_appliances_dict,
-            'washing_machines_dict': deferrable_appliances_dict,
-        })
+        if wants('solar_generation'):
+            observations['solar_generation'] = abs(building.solar_generation[t])
+        if wants('cooling_storage_soc'):
+            observations['cooling_storage_soc'] = building.cooling_storage.soc[endogenous_t]
+        if wants('heating_storage_soc'):
+            observations['heating_storage_soc'] = building.heating_storage.soc[endogenous_t]
+        if wants('dhw_storage_soc'):
+            observations['dhw_storage_soc'] = building.dhw_storage.soc[endogenous_t]
+        if wants('electrical_storage_soc'):
+            observations['electrical_storage_soc'] = building.electrical_storage.soc[endogenous_t]
+        if wants('cooling_demand'):
+            observations['cooling_demand'] = building.energy_from_cooling_device[endogenous_t] + abs(min(building.cooling_storage.energy_balance[endogenous_t], 0.0))
+        if wants('heating_demand'):
+            observations['heating_demand'] = building.energy_from_heating_device[endogenous_t] + abs(min(building.heating_storage.energy_balance[endogenous_t], 0.0))
+        if wants('dhw_demand'):
+            observations['dhw_demand'] = building.energy_from_dhw_device[endogenous_t] + abs(min(building.dhw_storage.energy_balance[endogenous_t], 0.0))
+        if wants('net_electricity_consumption'):
+            observations['net_electricity_consumption'] = building.net_electricity_consumption[endogenous_t]
+        if wants('cooling_electricity_consumption'):
+            observations['cooling_electricity_consumption'] = building.cooling_electricity_consumption[endogenous_t]
+        if wants('heating_electricity_consumption'):
+            observations['heating_electricity_consumption'] = building.heating_electricity_consumption[endogenous_t]
+        if wants('dhw_electricity_consumption'):
+            observations['dhw_electricity_consumption'] = building.dhw_electricity_consumption[endogenous_t]
+        if wants('cooling_storage_electricity_consumption'):
+            observations['cooling_storage_electricity_consumption'] = building.cooling_storage_electricity_consumption[endogenous_t]
+        if wants('heating_storage_electricity_consumption'):
+            observations['heating_storage_electricity_consumption'] = building.heating_storage_electricity_consumption[endogenous_t]
+        if wants('dhw_storage_electricity_consumption'):
+            observations['dhw_storage_electricity_consumption'] = building.dhw_storage_electricity_consumption[endogenous_t]
+        if wants('electrical_storage_electricity_consumption'):
+            observations['electrical_storage_electricity_consumption'] = building.electrical_storage_electricity_consumption[endogenous_t]
+        if wants('deferrable_appliance_electricity_consumption'):
+            observations['deferrable_appliance_electricity_consumption'] = building.deferrable_appliances_electricity_consumption[endogenous_t]
+        if wants('washing_machine_electricity_consumption'):
+            observations['washing_machine_electricity_consumption'] = building.deferrable_appliances_electricity_consumption[endogenous_t]
+        if wants('cooling_device_efficiency'):
+            observations['cooling_device_efficiency'] = building.cooling_device.get_cop(building.weather.outdoor_dry_bulb_temperature[t], heating=False)
+        if wants('heating_device_efficiency'):
+            observations['heating_device_efficiency'] = building.heating_device.get_cop(building.weather.outdoor_dry_bulb_temperature[t], heating=True) \
+                if isinstance(building.heating_device, HeatPump) else building.heating_device.efficiency
+        if wants('dhw_device_efficiency'):
+            observations['dhw_device_efficiency'] = building.dhw_device.get_cop(building.weather.outdoor_dry_bulb_temperature[t], heating=True) \
+                if isinstance(building.dhw_device, HeatPump) else building.dhw_device.efficiency
+        if wants('indoor_dry_bulb_temperature_cooling_set_point'):
+            observations['indoor_dry_bulb_temperature_cooling_set_point'] = building.energy_simulation.indoor_dry_bulb_temperature_cooling_set_point[t]
+        if wants('indoor_dry_bulb_temperature_heating_set_point'):
+            observations['indoor_dry_bulb_temperature_heating_set_point'] = building.energy_simulation.indoor_dry_bulb_temperature_heating_set_point[t]
+        if wants('indoor_dry_bulb_temperature_cooling_delta'):
+            observations['indoor_dry_bulb_temperature_cooling_delta'] = building.energy_simulation.indoor_dry_bulb_temperature[t] - building.energy_simulation.indoor_dry_bulb_temperature_cooling_set_point[t]
+        if wants('indoor_dry_bulb_temperature_heating_delta'):
+            observations['indoor_dry_bulb_temperature_heating_delta'] = building.energy_simulation.indoor_dry_bulb_temperature[t] - building.energy_simulation.indoor_dry_bulb_temperature_heating_set_point[t]
+        if wants('comfort_band'):
+            observations['comfort_band'] = building.energy_simulation.comfort_band[t]
+        if wants('occupant_count'):
+            observations['occupant_count'] = building.energy_simulation.occupant_count[t]
+        if wants('power_outage'):
+            observations['power_outage'] = building.power_outage_signal[t]
+        if wants('electric_vehicles_chargers_dict'):
+            observations['electric_vehicles_chargers_dict'] = electric_vehicle_chargers_dict
+        if wants('deferrable_appliances_dict'):
+            observations['deferrable_appliances_dict'] = deferrable_appliances_dict
+        if wants('washing_machines_dict'):
+            observations['washing_machines_dict'] = deferrable_appliances_dict
 
         if (
             getattr(building, '_charging_constraints_enabled', False)
@@ -322,23 +381,29 @@ class BuildingOpsService:
         ):
             state = building._charging_constraints_state
             headroom = state.get('building_headroom_kw')
-            if headroom is not None:
+            if headroom is not None and wants('charging_building_headroom_kw'):
                 observations['charging_building_headroom_kw'] = headroom
             export_headroom = state.get('building_export_headroom_kw')
-            if export_headroom is not None:
+            if export_headroom is not None and wants('charging_building_export_headroom_kw'):
                 observations['charging_building_export_headroom_kw'] = export_headroom
             for phase_name, value in (state.get('phase_headroom_kw') or {}).items():
-                if value is not None:
-                    observations[f'charging_phase_{phase_name}_headroom_kw'] = value
+                key = f'charging_phase_{phase_name}_headroom_kw'
+                if value is not None and wants(key):
+                    observations[key] = value
             for phase_name, value in (state.get('phase_export_headroom_kw') or {}).items():
-                if value is not None:
-                    observations[f'charging_phase_{phase_name}_export_headroom_kw'] = value
+                key = f'charging_phase_{phase_name}_export_headroom_kw'
+                if value is not None and wants(key):
+                    observations[key] = value
 
         if getattr(building, '_charging_constraints_enabled', False):
-            if getattr(building, '_expose_charging_violation', False):
+            if getattr(building, '_expose_charging_violation', False) and wants('charging_constraint_violation_kwh'):
                 observations['charging_constraint_violation_kwh'] = building._charging_constraint_last_penalty_kwh
             if getattr(building, '_phase_encoding_observations', None):
-                observations.update(building._phase_encoding_observations)
+                observations.update({
+                    key: value
+                    for key, value in building._phase_encoding_observations.items()
+                    if wants(key)
+                })
 
         return observations
 
@@ -358,40 +423,46 @@ class BuildingOpsService:
         """Update demand and charge/discharge storage devices."""
 
         building = self.building
+        action_cache = self._get_apply_action_cache()
+        active_action_set = action_cache['active_action_set']
 
         if electric_vehicle_storage_actions is not None:
             electric_vehicle_storage_actions = dict(electric_vehicle_storage_actions)
 
-        if 'cooling_or_heating_device' in building.active_actions:
-            assert 'cooling_device' not in building.active_actions and 'heating_device' not in building.active_actions, \
+        if 'cooling_or_heating_device' in active_action_set:
+            assert 'cooling_device' not in active_action_set and 'heating_device' not in active_action_set, \
                 'cooling_device and heating_device actions must be set to False when cooling_or_heating_device is True.' \
                 ' They will be implicitly set based on the polarity of cooling_or_heating_device.'
             cooling_device_action = abs(min(cooling_or_heating_device_action, 0.0))
             heating_device_action = abs(max(cooling_or_heating_device_action, 0.0))
 
         else:
-            assert not ('cooling_device' in building.active_actions and 'heating_device' in building.active_actions), \
+            assert not ('cooling_device' in active_action_set and 'heating_device' in active_action_set), \
                 'cooling_device and heating_device actions cannot both be set to True to avoid both actions having' \
                 ' values > 0.0 in the same time step. Use cooling_or_heating_device action instead to control' \
                 ' both cooling_device and heating_device in a building.'
-            cooling_device_action = np.nan if 'cooling_device' not in building.active_actions else cooling_device_action
-            heating_device_action = np.nan if 'heating_device' not in building.active_actions else heating_device_action
+            cooling_device_action = np.nan if 'cooling_device' not in active_action_set else cooling_device_action
+            heating_device_action = np.nan if 'heating_device' not in active_action_set else heating_device_action
 
-        cooling_storage_action = 0.0 if 'cooling_storage' not in building.active_actions else cooling_storage_action
-        heating_storage_action = 0.0 if 'heating_storage' not in building.active_actions else heating_storage_action
-        dhw_storage_action = 0.0 if 'dhw_storage' not in building.active_actions else dhw_storage_action
-        electrical_storage_action = 0.0 if 'electrical_storage' not in building.active_actions else electrical_storage_action
+        cooling_storage_action = 0.0 if 'cooling_storage' not in active_action_set else cooling_storage_action
+        heating_storage_action = 0.0 if 'heating_storage' not in active_action_set else heating_storage_action
+        dhw_storage_action = 0.0 if 'dhw_storage' not in active_action_set else dhw_storage_action
+        electrical_storage_action = 0.0 if 'electrical_storage' not in active_action_set else electrical_storage_action
 
         if deferrable_appliance_actions is None:
             deferrable_appliance_actions = washing_machine_actions
         if deferrable_appliance_actions is not None:
             deferrable_appliance_actions = self._apply_deferrable_profile_constraints(deferrable_appliance_actions)
 
-        electric_vehicle_storage_actions, electrical_storage_action = self.apply_charging_constraints_to_actions(
-            electric_vehicle_storage_actions,
-            electrical_storage_action,
-            deferrable_appliance_actions,
-        )
+        if building._charging_constraints_enabled:
+            electric_vehicle_storage_actions, electrical_storage_action = self.apply_charging_constraints_to_actions(
+                electric_vehicle_storage_actions,
+                electrical_storage_action,
+                deferrable_appliance_actions,
+            )
+        else:
+            building._charging_constraint_penalty_kwh = 0.0
+            building._charging_constraint_last_penalty_kwh = 0.0
 
         actions = {
             'cooling_demand': (building.update_cooling_demand, (cooling_device_action,)),
@@ -410,27 +481,28 @@ class BuildingOpsService:
 
         if electric_vehicle_storage_actions is not None:
             electric_vehicle_priority_list = []
+            charger_by_id = action_cache['charger_by_id']
             for charger_id, action in electric_vehicle_storage_actions.items():
                 action_key = f'electric_vehicle_storage_{charger_id}'
-                if action_key not in building.active_actions:
+                if action_key not in active_action_set:
                     raise ValueError('This action should not be applied. Verify')
-                for charger in building.electric_vehicle_chargers:
-                    if charger.charger_id == charger_id:
-                        actions[action_key] = (charger.update_connected_electric_vehicle_soc, (action,))
-                        electric_vehicle_priority_list.append(action_key)
+                charger = charger_by_id.get(charger_id)
+                if charger is not None:
+                    actions[action_key] = (charger.update_connected_electric_vehicle_soc, (action,))
+                    electric_vehicle_priority_list.append(action_key)
             priority_list = priority_list + electric_vehicle_priority_list
 
         if deferrable_appliance_actions is not None:
             deferrable_appliance_priority_list = []
+            appliance_by_action = action_cache['deferrable_appliance_by_action']
             for action_name, action in deferrable_appliance_actions.items():
                 action_key = f'{action_name}'
-                if action_key not in building.active_actions:
+                if action_key not in active_action_set:
                     raise ValueError('This action should not be applied. Verify')
-                appliance_name = action_key.replace('deferrable_appliance_', '', 1)
-                for appliance in building.deferrable_appliances:
-                    if appliance.name == appliance_name or action_key == appliance.name:
-                        actions[action_key] = (appliance.start_cycle, (action,))
-                        deferrable_appliance_priority_list.append(action_key)
+                appliance = appliance_by_action.get(action_key)
+                if appliance is not None:
+                    actions[action_key] = (appliance.start_cycle, (action,))
+                    deferrable_appliance_priority_list.append(action_key)
             priority_list = priority_list + deferrable_appliance_priority_list
 
         if electrical_storage_action < 0.0:
@@ -448,14 +520,45 @@ class BuildingOpsService:
                 priority_list[storage_ix] = device
                 priority_list[device_ix] = storage
 
+        limit_control_actions = bool(building.power_outage)
         for key in priority_list:
             func, args = actions[key]
-            args = self._limit_outage_control_action(key, func, args)
+            if args and (limit_control_actions or key.startswith('deferrable_appliance_')):
+                args = self._limit_outage_control_action(key, func, args)
 
             try:
                 func(*args)
             except NotImplementedError:
                 pass
+
+    def _get_apply_action_cache(self) -> Mapping[str, object]:
+        building = self.building
+        active_actions = tuple(building.active_actions)
+        chargers = tuple(building.electric_vehicle_chargers or ())
+        appliances = tuple(building.deferrable_appliances or ())
+        signature = (
+            active_actions,
+            tuple((id(charger), charger.charger_id) for charger in chargers),
+            tuple((id(appliance), appliance.name) for appliance in appliances),
+        )
+        cache = getattr(self, '_apply_action_cache', None)
+
+        if cache is not None and cache.get('signature') == signature:
+            return cache
+
+        appliance_by_action = {}
+        for appliance in appliances:
+            appliance_by_action[appliance.name] = appliance
+            appliance_by_action[f'deferrable_appliance_{appliance.name}'] = appliance
+
+        cache = {
+            'signature': signature,
+            'active_action_set': set(active_actions),
+            'charger_by_id': {charger.charger_id: charger for charger in chargers},
+            'deferrable_appliance_by_action': appliance_by_action,
+        }
+        self._apply_action_cache = cache
+        return cache
 
     def _safe_scalar(self, value, default: float = 0.0) -> float:
         try:
@@ -550,11 +653,7 @@ class BuildingOpsService:
         return self._split_unassigned_power(power_kw)
 
     def _find_deferrable_appliance(self, action_name: str):
-        appliance_name = str(action_name).replace('deferrable_appliance_', '', 1)
-        for appliance in self.building.deferrable_appliances or []:
-            if appliance.name == appliance_name or action_name == appliance.name:
-                return appliance
-        return None
+        return self._get_apply_action_cache()['deferrable_appliance_by_action'].get(str(action_name))
 
     def _deferrable_start_profile_kwh(self, appliance, action: float) -> np.ndarray:
         preview_profile = getattr(appliance, 'preview_start_profile_kwh', None)

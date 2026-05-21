@@ -103,6 +103,20 @@ obs, reward, terminated, truncated, info = env.step(actions)
 | `physics_invariant_checks` | bool | schema/False | Run physical invariant checks at runtime. |
 | `metrics_log_interval` | int | schema/0 | Runtime metric log cadence. |
 
+## Reward Observation Payloads
+
+`step()` builds a smaller reward observation payload when the reward function declares which observation names it needs. Built-in rewards already do this. Custom rewards can opt in with one of these compatible forms:
+
+```python
+class MyReward:
+    required_observation_names = ("net_electricity_consumption",)
+
+    def calculate(self, observations):
+        return [-sum(o["net_electricity_consumption"] for o in observations)]
+```
+
+The alias `required_observations` and method `get_required_observation_names()` are also supported. If a custom reward does not declare requirements, CityLearn falls back to full `include_all` observations for backward compatibility.
+
 ## CLI
 
 ```bash
@@ -140,6 +154,29 @@ citylearn simulate data/datasets/my_dataset/schema.json evaluate
 | `none` | lowest | No render CSV | Training. |
 | `during` | high | Writes rows each step | Short debugging runs. |
 | `end` | medium | Writes full episode at end | Long episodes with final CSV output. |
+
+KPI and BAU exports are episode-scoped, so training loops can keep export disabled and turn it on only for the final episode. If normal time-series CSVs are needed on that final episode, create the environment with `render_mode="end"` and toggle `render_enabled`; for KPI-only output, leave render disabled and call `export_final_kpis()` manually after the final episode.
+
+```python
+for episode in range(episodes):
+    last_episode = episode == episodes - 1
+    env.render_enabled = last_episode
+    env.export_kpis_on_episode_end = last_episode
+    observations, info = env.reset()
+    # run episode...
+```
+
+`export_final_kpis()` controls the BAU cost separately:
+
+| Call | Output | BAU sidecar cost |
+|---|---|---:|
+| `env.export_final_kpis(include_business_as_usual=False)` | KPI CSV only | no |
+| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=False)` | KPI CSV with BAU rows | yes |
+| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=True)` | KPI CSV with BAU rows and BAU timeseries CSV | yes |
+
+Normal episode time series are controlled by `render_mode`/`render_enabled`, not by `export_final_kpis()`.
+
+For exact final-episode choices, keep `export_kpis_on_episode_end=False` and call `export_final_kpis()` yourself after the episode terminates.
 
 ## Recommended Validation
 

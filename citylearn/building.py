@@ -1354,7 +1354,14 @@ class Building(Environment):
             'charger_phase_map': self._charger_phase_map,
         }
 
-    def observations(self, include_all: bool = None, normalize: bool = None, periodic_normalization: bool = None, check_limits: bool = None) -> Mapping[str, float]:
+    def observations(
+        self,
+        include_all: bool = None,
+        normalize: bool = None,
+        periodic_normalization: bool = None,
+        check_limits: bool = None,
+        observation_names: Iterable[str] = None,
+    ) -> Mapping[str, float]:
         r"""Observations at current time step."""
 
         return self._ops_service.observations(
@@ -1362,6 +1369,7 @@ class Building(Environment):
             normalize=normalize,
             periodic_normalization=periodic_normalization,
             check_limits=check_limits,
+            observation_names=observation_names,
         )
 
     def update_ev_charger_observations(self, observations, valid_observations, ev_chargers, include_all: bool = False):

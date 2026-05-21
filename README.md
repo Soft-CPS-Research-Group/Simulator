@@ -49,7 +49,7 @@ Additional reference: [KPI v2 naming tree](docs/KPI_V2_TREE.md).
 | Dynamic topology | Add/remove buildings and assets during simulation in entity mode. |
 | Three phase | Phase connections, headroom, phase power, violations and phase KPIs. |
 | Community market | Local settlement, import weights, savings and self-consumption KPIs. |
-| Performance | Windowed loading, shared weather/pricing/carbon cache and Parquet for large 15s datasets. |
+| Performance | Windowed loading, shared weather/pricing/carbon cache, runtime profiling and Parquet for large 15s datasets. |
 | Validation | Unit tests, golden KPI tests, physics audit and strict entity contract audit. |
 
 ## Quickstart

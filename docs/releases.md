@@ -60,6 +60,62 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.8 - Runtime Profiling and Step Optimizations
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release focused on recurring step latency, BAU/export observability and safer final-episode export control.
+
+### Added
+
+- `scripts/audit/profile_step_breakdown.py` for measuring `step()` component costs such as action application, reward payload assembly, reward calculation and next observations.
+- `scripts/audit/profile_lifecycle.py` for measuring reset, rollout, KPI, render and BAU export costs separately.
+- Reward functions can declare minimal observation payloads through `required_observation_names`, `required_observations` or `get_required_observation_names()`.
+
+### Changed
+
+- Built-in rewards now use reduced observation payloads instead of full `include_all` observations during normal `step()` calls.
+- `Building.observations()` and internal observation assembly can compute only requested fields while preserving full-observation fallback behavior.
+- `apply_actions` skips inactive outage/constraint paths where possible and reuses cached action and asset lookups.
+- Heat pump, storage and battery scalar paths avoid repeated property and NumPy work while preserving physical outputs.
+- Runtime timing now reports finer `info` keys for action application, reward observation assembly, reward calculation, next observations and terminal exports.
+- Docs clarify how to disable render/KPI/BAU export during training episodes and enable only the final episode output.
+
+### Fixed
+
+- No intentional physics changes. A deterministic equivalence check against the pre-optimization code matched 179 steps and 220 physical series with `max_abs_diff=0.0`.
+
+### Dataset/Schema Impact
+
+- No schema or dataset changes.
+
+### Compatibility
+
+- Backward compatible. Custom rewards without declared observation requirements still receive full observation dictionaries.
+- KPI/export APIs are unchanged; callers can still choose BAU KPI rows and BAU timeseries through existing `export_final_kpis()` flags.
+
+### Validation
+
+- `.venv/bin/python -m pytest -q`: pass (`333 passed`, `17 warnings`)
+- `.venv/bin/python -m compileall -q citylearn scripts`: pass
+- `.venv/bin/python -m ruff check citylearn tests scripts/manual scripts/ci scripts/audit --select E9,F821`: pass
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass (`16 passed`)
+- `git diff --check`: pass
+- Physics equivalence against pre-optimization commit: pass (`179 steps`, `220 series`, `max_abs_diff=0.0`)
+- `.venv/bin/python scripts/audit/profile_step_breakdown.py --episode-steps 300 --seconds 60 --agent rbc --interface flat --render-mode none --no-write --table-limit 14`: pass (`3.8973 ms/step`, `apply_actions_time=2.4688 ms`)
+- `.venv/bin/python scripts/audit/profile_lifecycle.py --episode-steps 300 --seconds 60 --skip-exports --no-write`: pass (`3.8735 ms/step`, `evaluate_v2_with_bau_cold=2.2838 s`, `evaluate_v2_with_bau_cached=0.4336 s`)
+- External reward fallback smoke: pass (`5.2452 ms/step` with full reward observations)
+- `.venv/bin/python -m build --outdir /tmp/softcpsrecsimulator-0.6.8-dist`: pass
+- `.venv/bin/python -m twine check /tmp/softcpsrecsimulator-0.6.8-dist/*`: pass
+
+### Migration Notes
+
+- For fastest custom rewards, expose `required_observation_names` with the minimal fields used by `calculate()`.
+- For training runs, keep `render_enabled` and `export_kpis_on_episode_end` disabled except on episodes where CSV output is required.
+
 ## v0.6.6 - Electrical-Service-Aware EV Feasibility
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

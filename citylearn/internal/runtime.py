@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING, Any, List, Mapping, Union
 
 import numpy as np
@@ -29,38 +30,93 @@ class CityLearnRuntimeService:
         """Apply actions, update env variables/reward, then advance time."""
 
         env = self.env
+        debug_timing = bool(getattr(env, 'debug_timing', False))
+        step_start = time.perf_counter() if debug_timing else 0.0
+        timings = {} if debug_timing else None
 
         if env.terminated or env.truncated:
             raise RuntimeError('Episode has already terminated/truncated. Call reset() before calling step() again.')
 
         env._observations_cache = None
         env._observations_cache_time_step = -1
+        timer_start = time.perf_counter() if debug_timing else 0.0
         actions = self.parse_actions(actions)
+        if debug_timing:
+            timings['parse_actions_time'] = time.perf_counter() - timer_start
 
+        timer_start = time.perf_counter() if debug_timing else 0.0
+        clear_step_electric_loads_time = 0.0
+        building_apply_action_times = []
         for building, building_actions in zip(env.buildings, actions):
             if int(env.time_step) == 0:
+                clear_start = time.perf_counter() if debug_timing else 0.0
                 building.clear_step_electric_loads_for_action()
+                if debug_timing:
+                    clear_step_electric_loads_time += time.perf_counter() - clear_start
+            building_start = time.perf_counter() if debug_timing else 0.0
             building.apply_actions(**building_actions)
+            if debug_timing:
+                building_apply_action_times.append(time.perf_counter() - building_start)
+        if debug_timing:
+            timings['apply_actions_time'] = time.perf_counter() - timer_start
+            timings['clear_step_electric_loads_time'] = clear_step_electric_loads_time
+            timings['building_apply_actions_time'] = float(sum(building_apply_action_times))
+            timings['building_apply_actions_mean_time'] = (
+                float(np.mean(building_apply_action_times)) if building_apply_action_times else 0.0
+            )
+            timings['building_apply_actions_max_time'] = (
+                float(np.max(building_apply_action_times)) if building_apply_action_times else 0.0
+            )
 
+        timer_start = time.perf_counter() if debug_timing else 0.0
         self.update_variables()
+        if debug_timing:
+            timings['update_variables_time'] = time.perf_counter() - timer_start
+            timings.update(getattr(env, '_last_update_variables_debug_timing', {}))
+
         if bool(getattr(env, 'physics_invariant_checks', False)):
+            timer_start = time.perf_counter() if debug_timing else 0.0
             env._physics_invariant_service.assert_step_invariants(int(env.time_step))
+            if debug_timing:
+                timings['physics_invariants_time'] = time.perf_counter() - timer_start
+        elif debug_timing:
+            timings['physics_invariants_time'] = 0.0
 
-        if env.debug_timing:
-            import time
-            building_observations_retrieval_start = time.perf_counter()
+        timer_start = time.perf_counter() if debug_timing else 0.0
+        reward_observation_names = self._reward_observation_names()
+        if reward_observation_names is None:
+            reward_observations = [
+                b.observations(include_all=True, normalize=False, periodic_normalization=False) for b in env.buildings
+            ]
+        else:
+            reward_observations = [
+                b.observations(
+                    include_all=True,
+                    normalize=False,
+                    periodic_normalization=False,
+                    observation_names=reward_observation_names,
+                )
+                for b in env.buildings
+            ]
+        if debug_timing:
+            reward_observations_time = time.perf_counter() - timer_start
+            timings['reward_observations_time'] = reward_observations_time
+            timings['building_observations_retrieval_time'] = reward_observations_time
 
-        reward_observations = [
-            b.observations(include_all=True, normalize=False, periodic_normalization=False) for b in env.buildings
-        ]
-        if env.debug_timing:
-            building_observations_retrieval_end = time.perf_counter()
-
+        timer_start = time.perf_counter() if debug_timing else 0.0
         reward = env.reward_function.calculate(observations=reward_observations)
         env.rewards.append(reward)
+        if debug_timing:
+            timings['reward_calculation_time'] = time.perf_counter() - timer_start
 
+        timer_start = time.perf_counter() if debug_timing else 0.0
         partial_render_time = self.next_time_step()
+        if debug_timing:
+            timings['next_time_step_time'] = time.perf_counter() - timer_start
+            timings.update(getattr(env, '_last_next_time_step_debug_timing', {}))
+
         topology_changed = False
+        timer_start = time.perf_counter() if debug_timing else 0.0
         if getattr(env, 'topology_mode', 'static') == 'dynamic':
             topology_changed = env._topology_service.apply_events_for_time_step(int(env.time_step))
             if topology_changed:
@@ -70,11 +126,18 @@ class CityLearnRuntimeService:
                 env._refresh_action_cache()
                 env._entity_service.invalidate()
                 env.reward_function.env_metadata = env.get_metadata()
+        if debug_timing:
+            timings['topology_time'] = time.perf_counter() - timer_start
+
         end_export_time = 0.0
         final_kpi_export_time = 0.0
+        timer_start = time.perf_counter() if debug_timing else 0.0
         env._maybe_log_periodic_metrics()
+        if debug_timing:
+            timings['periodic_metrics_time'] = time.perf_counter() - timer_start
 
         if env.terminated:
+            timer_start = time.perf_counter() if debug_timing else 0.0
             reward_history = env.rewards[1:]
             reward_vectors: List[np.ndarray] = []
             max_len = 1
@@ -113,33 +176,79 @@ class CityLearnRuntimeService:
                 'sum': _to_python(safe_sum),
                 'mean': _to_python(safe_mean),
             })
+            if debug_timing:
+                timings['terminal_reward_summary_time'] = time.perf_counter() - timer_start
+
             if env.render_mode == 'end' and env.render_enabled:
                 final_index = min(env.time_steps - 1, env.time_step - 1) if env.time_step > 0 else 0
-                if env.debug_timing:
-                    import time
+                if debug_timing:
                     export_start = time.perf_counter()
                 env._export_episode_render_data(final_index)
-                if env.debug_timing:
+                if debug_timing:
                     end_export_time = time.perf_counter() - export_start
 
             if env.export_kpis_on_episode_end and not env._final_kpis_exported:
-                if env.debug_timing:
-                    import time
+                if debug_timing:
                     final_kpi_export_start = time.perf_counter()
                 env.export_final_kpis()
-                if env.debug_timing:
+                if debug_timing:
                     final_kpi_export_time = time.perf_counter() - final_kpi_export_start
+        elif debug_timing:
+            timings['terminal_reward_summary_time'] = 0.0
 
+        timer_start = time.perf_counter() if debug_timing else 0.0
         next_observations = env.observations
+        if debug_timing:
+            timings['next_observations_time'] = time.perf_counter() - timer_start
+
+        timer_start = time.perf_counter() if debug_timing else 0.0
         info = dict(env.get_info())
-        if env.debug_timing:
-            info['building_observations_retrieval_time'] = building_observations_retrieval_end - building_observations_retrieval_start
+        if debug_timing:
+            timings['get_info_time'] = time.perf_counter() - timer_start
             info['partial_render_time'] = partial_render_time
             info['end_export_time'] = end_export_time
             info['final_kpi_export_time'] = final_kpi_export_time
             info['terminal_export_time'] = end_export_time + final_kpi_export_time
+            info.update(timings)
+            info['step_total_time'] = time.perf_counter() - step_start
 
         return next_observations, reward, env.terminated, env.truncated, info
+
+    def _reward_observation_names(self):
+        for attribute_name in ('required_observation_names', 'required_observations'):
+            names = getattr(self.env.reward_function, attribute_name, None)
+            if callable(names):
+                names = names()
+            names = self._normalize_reward_observation_names(names)
+            if names is not None:
+                return names
+
+        provider = getattr(self.env.reward_function, 'get_required_observation_names', None)
+        if not callable(provider):
+            return None
+
+        return self._normalize_reward_observation_names(provider())
+
+    @staticmethod
+    def _normalize_reward_observation_names(names):
+        if names is None:
+            return None
+
+        if isinstance(names, str):
+            return (names,)
+
+        if isinstance(names, Mapping):
+            merged = []
+            for value in names.values():
+                if value is None:
+                    return None
+                if isinstance(value, str):
+                    merged.append(value)
+                else:
+                    merged.extend(value)
+            names = merged
+
+        return tuple(dict.fromkeys(names))
 
     def step_without_feedback(self, actions):
         """Apply actions and advance state without reward, observation or info output.
@@ -295,6 +404,8 @@ class CityLearnRuntimeService:
         r"""Advance all buildings to next `time_step`."""
 
         env = self.env
+        debug_timing = bool(getattr(env, 'debug_timing', False))
+        timings = {} if debug_timing else None
         current_step = int(env.time_step)
         last_action_step = max(env.time_steps - 2, 0)
         reached_terminal_transition = current_step >= last_action_step
@@ -302,26 +413,52 @@ class CityLearnRuntimeService:
         partial_render_time = 0.0
         if getattr(env, 'render_enabled', False):
             if env.render_mode == 'during':
-                if env.debug_timing:
-                    import time
+                if debug_timing:
                     render_start = time.perf_counter()
                     env.render()
                     partial_render_time = time.perf_counter() - render_start
                 else:
                     env.render()
+        if debug_timing:
+            timings['next_time_step_render_time'] = partial_render_time
 
         if not reached_terminal_transition:
+            timer_start = time.perf_counter() if debug_timing else 0.0
             for building in env.buildings:
                 building.next_time_step()
+            if debug_timing:
+                timings['next_time_step_buildings_time'] = time.perf_counter() - timer_start
 
+            timer_start = time.perf_counter() if debug_timing else 0.0
             for electric_vehicle in env.electric_vehicles:
                 electric_vehicle.next_time_step()
+            if debug_timing:
+                timings['next_time_step_electric_vehicles_time'] = time.perf_counter() - timer_start
+        elif debug_timing:
+            timings['next_time_step_buildings_time'] = 0.0
+            timings['next_time_step_electric_vehicles_time'] = 0.0
 
+        timer_start = time.perf_counter() if debug_timing else 0.0
         Environment.next_time_step(env)
+        if debug_timing:
+            timings['next_time_step_environment_time'] = time.perf_counter() - timer_start
 
         if not reached_terminal_transition:
+            timer_start = time.perf_counter() if debug_timing else 0.0
             self.simulate_unconnected_ev_soc()
+            if debug_timing:
+                timings['next_time_step_unconnected_ev_soc_time'] = time.perf_counter() - timer_start
+
+            timer_start = time.perf_counter() if debug_timing else 0.0
             self.associate_chargers_to_electric_vehicles()
+            if debug_timing:
+                timings['next_time_step_associate_chargers_time'] = time.perf_counter() - timer_start
+        elif debug_timing:
+            timings['next_time_step_unconnected_ev_soc_time'] = 0.0
+            timings['next_time_step_associate_chargers_time'] = 0.0
+
+        if debug_timing:
+            env._last_next_time_step_debug_timing = timings
 
         return partial_render_time
 
@@ -492,12 +629,30 @@ class CityLearnRuntimeService:
         """Update district aggregate series from current building states."""
 
         env = self.env
+        debug_timing = bool(getattr(env, 'debug_timing', False))
+        timings = {} if debug_timing else None
 
+        timer_start = time.perf_counter() if debug_timing else 0.0
+        building_update_times = []
         for building in env.buildings:
+            building_start = time.perf_counter() if debug_timing else 0.0
             building.update_variables()
+            if debug_timing:
+                building_update_times.append(time.perf_counter() - building_start)
+        if debug_timing:
+            timings['update_variables_buildings_time'] = time.perf_counter() - timer_start
+            timings['building_update_variables_mean_time'] = (
+                float(np.mean(building_update_times)) if building_update_times else 0.0
+            )
+            timings['building_update_variables_max_time'] = (
+                float(np.max(building_update_times)) if building_update_times else 0.0
+            )
 
+        timer_start = time.perf_counter() if debug_timing else 0.0
         if getattr(env, 'community_market_enabled', False):
             self._apply_community_market_settlement()
+        if debug_timing:
+            timings['community_market_settlement_time'] = time.perf_counter() - timer_start
 
         def _set_or_append(lst, value):
             if len(lst) == env.time_step:
@@ -510,6 +665,7 @@ class CityLearnRuntimeService:
                     lst.extend([0.0] * (env.time_step - len(lst)))
                 lst.append(value)
 
+        timer_start = time.perf_counter() if debug_timing else 0.0
         total = sum(building.net_electricity_consumption[env.time_step] for building in env.buildings)
         _set_or_append(env.net_electricity_consumption, total)
 
@@ -518,6 +674,9 @@ class CityLearnRuntimeService:
 
         total_emission = sum(building.net_electricity_consumption_emission[env.time_step] for building in env.buildings)
         _set_or_append(env.net_electricity_consumption_emission, total_emission)
+        if debug_timing:
+            timings['district_aggregate_update_time'] = time.perf_counter() - timer_start
+            env._last_update_variables_debug_timing = timings
 
     @staticmethod
     def _to_scalar(value, default: float = 0.0) -> float:

@@ -53,6 +53,22 @@ CI performance smoke check:
 .venv/bin/python scripts/ci/perf_smoke.py --episode-steps 600 --seconds 60 --baseline-file scripts/ci/perf_baseline.json
 ```
 
+Step/component profiling:
+
+```console
+.venv/bin/python scripts/audit/profile_step_breakdown.py --episode-steps 300 --seconds 60 --agent rbc --interface flat --render-mode none --no-write --table-limit 14
+```
+
+Lifecycle and KPI/BAU profiling:
+
+```console
+.venv/bin/python scripts/audit/profile_lifecycle.py --episode-steps 300 --seconds 60 --skip-exports --no-write
+```
+
+Drop `--skip-exports` when the CSV export paths themselves need to be timed.
+
+For ad hoc code, pass `debug_timing=True` to `CityLearnEnv` and inspect `info` keys such as `apply_actions_time`, `reward_observations_time`, `next_observations_time`, `terminal_export_time` and `step_total_time`.
+
 ## Internal Architecture
 
 Public APIs remain centered on `CityLearnEnv` and `Building`. Internal orchestration is split into service modules under `citylearn/internal`.

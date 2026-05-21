@@ -1,4 +1,4 @@
-from typing import Any, List, Mapping, Tuple, Union
+from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple, Union
 import numpy as np
 from citylearn.building import Building
 from citylearn.data import ZERO_DIVISION_PLACEHOLDER
@@ -62,6 +62,11 @@ class RewardFunction:
 
         pass
 
+    def get_required_observation_names(self) -> Optional[Iterable[str]]:
+        """Return minimal observation names for this reward, or None if unknown."""
+
+        return None
+
     def calculate(self, observations: List[Mapping[str, Union[int, float]]]) -> List[float]:
         r"""Calculates reward.
 
@@ -106,6 +111,17 @@ class MultiBuildingRewardFunction(RewardFunction):
         for rf in self.reward_functions.values():
             rf.reset()
 
+    def get_required_observation_names(self) -> Optional[Iterable[str]]:
+        required: Set[str] = set()
+
+        for rf in self.reward_functions.values():
+            names = rf.get_required_observation_names()
+            if names is None:
+                return None
+            required.update(names)
+
+        return required
+
     @property
     def env_metadata(self):
         return self._env_metadata
@@ -128,6 +144,9 @@ class MARL(RewardFunction):
 
     def __init__(self, env_metadata: Mapping[str, Any]):
         super().__init__(env_metadata)
+
+    def get_required_observation_names(self) -> Optional[Iterable[str]]:
+        return ('net_electricity_consumption',)
 
     def calculate(self, observations: List[Mapping[str, Union[int, float]]]) -> List[float]:
         net_electricity_consumption = [o['net_electricity_consumption'] for o in observations]
@@ -155,6 +174,9 @@ class IndependentSACReward(RewardFunction):
     
     def __init__(self, env_metadata: Mapping[str, Any]):
         super().__init__(env_metadata)
+
+    def get_required_observation_names(self) -> Optional[Iterable[str]]:
+        return ('net_electricity_consumption',)
 
     def calculate(self, observations: List[Mapping[str, Union[int, float]]]) -> List[float]:
         net_electricity_consumption = [o['net_electricity_consumption'] for o in observations]
@@ -185,6 +207,15 @@ class SolarPenaltyReward(RewardFunction):
 
     def __init__(self, env_metadata: Mapping[str, Any]):
         super().__init__(env_metadata)
+
+    def get_required_observation_names(self) -> Optional[Iterable[str]]:
+        return (
+            'net_electricity_consumption',
+            'cooling_storage_soc',
+            'heating_storage_soc',
+            'dhw_storage_soc',
+            'electrical_storage_soc',
+        )
 
     def calculate(self, observations: List[Mapping[str, Union[int, float]]]) -> List[float]:
         reward_list = []
@@ -332,6 +363,17 @@ class ComfortReward(RewardFunction):
             reward = reward_list
 
         return reward
+
+    def get_required_observation_names(self) -> Optional[Iterable[str]]:
+        return (
+            'heating_demand',
+            'cooling_demand',
+            'hvac_mode',
+            'indoor_dry_bulb_temperature',
+            'indoor_dry_bulb_temperature_cooling_set_point',
+            'indoor_dry_bulb_temperature_heating_set_point',
+            'comfort_band',
+        )
     
 class SolarPenaltyAndComfortReward(RewardFunction):
     """Addition of :py:class:`citylearn.reward_function.SolarPenaltyReward` and :py:class:`citylearn.reward_function.ComfortReward`.
@@ -384,6 +426,17 @@ class SolarPenaltyAndComfortReward(RewardFunction):
         reward = reward.sum(axis=0).tolist()
 
         return reward
+
+    def get_required_observation_names(self) -> Optional[Iterable[str]]:
+        required: Set[str] = set()
+
+        for function in self.__functions:
+            names = function.get_required_observation_names()
+            if names is None:
+                return None
+            required.update(names)
+
+        return required
 
 
 class Electric_Vehicles_Reward_Function(MARL):
@@ -442,6 +495,13 @@ class Electric_Vehicles_Reward_Function(MARL):
         self._last_penalty_total = sum(penalty_values) if self.central_agent else penalty_values
         LOGGER.debug(f"Calculated EV reward: {total_reward}")
         return total_reward
+
+    def get_required_observation_names(self) -> Optional[Iterable[str]]:
+        return (
+            'net_electricity_consumption',
+            'electric_vehicles_chargers_dict',
+            'charging_constraint_violation_kwh',
+        )
 
     def calculate_ev_penalty(self, o: Mapping[str, Union[int, float, dict]], current_reward: float) -> float:
 

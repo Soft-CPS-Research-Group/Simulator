@@ -53,6 +53,22 @@ Smoke check de performance para CI:
 .venv/bin/python scripts/ci/perf_smoke.py --episode-steps 600 --seconds 60 --baseline-file scripts/ci/perf_baseline.json
 ```
 
+Profiling de componentes do `step`:
+
+```console
+.venv/bin/python scripts/audit/profile_step_breakdown.py --episode-steps 300 --seconds 60 --agent rbc --interface flat --render-mode none --no-write --table-limit 14
+```
+
+Profiling de lifecycle e KPI/BAU:
+
+```console
+.venv/bin/python scripts/audit/profile_lifecycle.py --episode-steps 300 --seconds 60 --skip-exports --no-write
+```
+
+Remover `--skip-exports` quando for preciso medir tambem os caminhos de export CSV.
+
+Para diagnostico ad hoc, passar `debug_timing=True` ao `CityLearnEnv` e ler chaves do `info` como `apply_actions_time`, `reward_observations_time`, `next_observations_time`, `terminal_export_time` e `step_total_time`.
+
 ## Arquitetura Interna
 
 As APIs publicas continuam centradas em `CityLearnEnv` e `Building`. A orquestracao interna esta separada em modulos de servico em `citylearn/internal`.

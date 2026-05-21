@@ -263,6 +263,26 @@ class HeatPump(ElectricDevice):
         cooling_cop = (`t_target_cooling` + 273.15)*`efficiency`/(outdoor_dry_bulb_temperature - `t_target_cooling`)
         """
 
+        if np.isscalar(outdoor_dry_bulb_temperature):
+            outdoor_temperature = float(outdoor_dry_bulb_temperature)
+
+            if heating:
+                denominator = self.target_heating_temperature - outdoor_temperature
+                cop = np.nan if np.isnan(denominator) else (
+                    np.inf if denominator == 0.0
+                    else self.efficiency*(self.target_heating_temperature + 273.15)/denominator
+                )
+            else:
+                denominator = outdoor_temperature - self.target_cooling_temperature
+                cop = np.nan if np.isnan(denominator) else (
+                    np.inf if denominator == 0.0
+                    else self.efficiency*(self.target_cooling_temperature + 273.15)/denominator
+                )
+
+            if cop < 0 or cop > 20:
+                cop = 20
+            return cop
+
         c_to_k = lambda x: x + 273.15
         outdoor_dry_bulb_temperature = np.array(outdoor_dry_bulb_temperature)
 
@@ -301,11 +321,14 @@ class HeatPump(ElectricDevice):
         """
 
         cop = self.get_cop(outdoor_dry_bulb_temperature, heating)
+        available_nominal_power = self.available_nominal_power
 
-        if max_electric_power is None: 
-            return self.available_nominal_power*cop  
-        else:
-            return np.min([max_electric_power, self.available_nominal_power], axis=0)*cop
+        if max_electric_power is None:
+            return available_nominal_power*cop
+        if np.isscalar(max_electric_power) and np.isscalar(available_nominal_power):
+            return min(max_electric_power, available_nominal_power)*cop
+
+        return np.minimum(max_electric_power, available_nominal_power)*cop
 
     def get_input_power(self, output_power: Union[float, Iterable[float]], outdoor_dry_bulb_temperature: Union[float, Iterable[float]], heating: bool) -> Union[float, Iterable[float]]:
         r"""Return input power.
@@ -807,6 +830,9 @@ class StorageDevice(Device):
         }
 
     def charge(self, energy: float):
+        self._charge(energy)
+
+    def _charge(self, energy: float, energy_init: float = None):
         """Charges or discharges storage with respect to specified energy while considering `capacity` and `soc_init` limitations and, energy losses to the environment quantified by `round_trip_efficiency`.
 
         Parameters
@@ -820,14 +846,18 @@ class StorageDevice(Device):
         If discharging, soc = max(0, `soc_init` + energy/`round_trip_efficiency`)
         """
         energy = energy * self.time_step_ratio
-        energy_init = self.energy_init
+        energy_init = self.energy_init if energy_init is None else energy_init
+        round_trip_efficiency = self.round_trip_efficiency
         # The initial State Of Charge (SOC) is the previous SOC minus the energy losses
-        energy_final = min(energy_init + energy*self.round_trip_efficiency, self.capacity) if energy >= 0\
-            else max(self._minimum_energy(), energy_init + energy/self.round_trip_efficiency)
+        energy_final = min(energy_init + energy*round_trip_efficiency, self.capacity) if energy >= 0\
+            else max(self._minimum_energy(), energy_init + energy/round_trip_efficiency)
 
         self.__soc[self.time_step] = energy_final/max(self.capacity, ZERO_DIVISION_PLACEHOLDER)
         self.__soc_initialized[self.time_step] = True
-        self.__energy_balance[self.time_step] = self.set_energy_balance(energy_final, energy_init)
+        delta_energy = energy_final - energy_init
+        self.__energy_balance[self.time_step] = (
+            delta_energy / round_trip_efficiency if delta_energy >= 0 else delta_energy * round_trip_efficiency
+        )
 
     def force_set_soc(self, soc: float):
         self.__soc[self.time_step] = soc
@@ -1142,22 +1172,24 @@ class Battery(StorageDevice, ElectricDevice):
         ratio = self.time_step_ratio if self.time_step_ratio not in (None, 0) else 1.0
         requested_energy = float(energy) * ratio
         step_hours = max(float(self.seconds_per_time_step) / 3600.0, 1.0e-12)
+        energy_init = self.energy_init
+        degraded_capacity = self.degraded_capacity
 
         if requested_energy >= 0:
-            max_input_power = max(float(self.get_max_input_power()), 0.0)
+            max_input_power = max(float(self.get_max_input_power(energy_init=energy_init)), 0.0)
             max_input_energy = power_kw_to_energy_kwh(max_input_power, self.seconds_per_time_step)
             limited_energy = min(requested_energy, max_input_energy)
 
             for _ in range(2):
                 self.efficiency = self.get_current_efficiency(abs(limited_energy) / step_hours)
-                energy_wrt_degrade = max(self.degraded_capacity - self.energy_init, 0.0)
+                energy_wrt_degrade = max(degraded_capacity - energy_init, 0.0)
                 capacity_limited_energy = energy_wrt_degrade / max(self.round_trip_efficiency, ZERO_DIVISION_PLACEHOLDER)
                 limited_energy = min(requested_energy, max_input_energy, capacity_limited_energy)
 
             energy = limited_energy / ratio
 
         else:
-            max_output_power = max(float(self.get_max_output_power()), 0.0)
+            max_output_power = max(float(self.get_max_output_power(energy_init=energy_init)), 0.0)
             max_output_energy = power_kw_to_energy_kwh(max_output_power, self.seconds_per_time_step)
             requested_output = abs(requested_energy)
             limited_output = min(requested_output, max_output_energy)
@@ -1166,14 +1198,13 @@ class Battery(StorageDevice, ElectricDevice):
                 self.efficiency = self.get_current_efficiency(limited_output / step_hours)
                 soc_limit_wrt_dod = 1.0 - self.depth_of_discharge
                 minimum_energy = soc_limit_wrt_dod * self.capacity
-                dod_limited_output = max(self.energy_init - minimum_energy, 0.0) * self.round_trip_efficiency
+                dod_limited_output = max(energy_init - minimum_energy, 0.0) * self.round_trip_efficiency
                 limited_output = min(requested_output, max_output_energy, dod_limited_output)
 
             energy = -limited_output / ratio
 
-        super().charge(energy)
-        degraded_capacity = max(self.degraded_capacity - self.degrade(), 0.0)
-        self._capacity_history.append(degraded_capacity)
+        super()._charge(energy, energy_init=energy_init)
+        self._capacity_history.append(max(degraded_capacity - self.degrade(), 0.0))
         ratio = self.time_step_ratio if self.time_step_ratio not in (None, 0) else 1.0
         dataset_resolution_balance = self.energy_balance[self.time_step]/ratio
         self.update_electricity_consumption(dataset_resolution_balance, enforce_polarity=False)
@@ -1181,7 +1212,7 @@ class Battery(StorageDevice, ElectricDevice):
     def _minimum_soc(self) -> float:
         return float(np.clip(1.0 - self.depth_of_discharge, 0.0, 1.0))
 
-    def get_max_output_power(self) -> float:
+    def get_max_output_power(self, energy_init: float = None) -> float:
         r"""Get maximum output power while considering `capacity_power_curve` limitations if defined otherwise, returns `nominal_power`.
 
         Returns
@@ -1190,9 +1221,9 @@ class Battery(StorageDevice, ElectricDevice):
             Maximum amount of power that the storage unit can output [kW].
         """
 
-        return self.get_max_input_power()
+        return self.get_max_input_power(energy_init=energy_init)
 
-    def get_max_input_power(self) -> float:
+    def get_max_input_power(self, energy_init: float = None) -> float:
         r"""Get maximum input power while considering `capacity_power_curve` limitations.
 
         Returns
@@ -1202,14 +1233,19 @@ class Battery(StorageDevice, ElectricDevice):
         """
 
         #The initial SOC is the previous SOC minus the energy losses
-        soc = self.energy_init/max(self.capacity, ZERO_DIVISION_PLACEHOLDER)
+        energy_init = self.energy_init if energy_init is None else energy_init
+        soc = energy_init/max(self.capacity, ZERO_DIVISION_PLACEHOLDER)
+        curve_x = self.capacity_power_curve[0]
+        curve_y = self.capacity_power_curve[1]
+        if not np.isfinite(soc):
+            return np.nan
 
         # Calculating the maximum power rate at which the battery can be charged or discharged
-        idx = max(0, np.argmax(soc <= self.capacity_power_curve[0]) - 1)
+        idx = min(len(curve_x) - 2, max(0, int(np.searchsorted(curve_x, soc, side='left')) - 1))
         max_output_power = self.nominal_power*(
-            self.capacity_power_curve[1][idx] 
-            + (self.capacity_power_curve[1][idx+1] - self.capacity_power_curve[1][idx])*(soc - self.capacity_power_curve[0][idx])
-            /(self.capacity_power_curve[0][idx+1] - self.capacity_power_curve[0][idx])
+            curve_y[idx]
+            + (curve_y[idx+1] - curve_y[idx])*(soc - curve_x[idx])
+            /(curve_x[idx+1] - curve_x[idx])
         )
         
         return max_output_power
@@ -1224,12 +1260,16 @@ class Battery(StorageDevice, ElectricDevice):
         """
 
         # Efficiency curves are defined on normalized average power, not kWh per step.
-        power_normalized = np.clip(np.abs(power)/max(self.nominal_power, ZERO_DIVISION_PLACEHOLDER), 0.0, 1.0)
-        idx = max(0, np.argmax(power_normalized <= self.power_efficiency_curve[0]) - 1)
-        efficiency = self.power_efficiency_curve[1][idx]\
-            + (power_normalized - self.power_efficiency_curve[0][idx]
-            )*(self.power_efficiency_curve[1][idx + 1] - self.power_efficiency_curve[1][idx]
-            )/(self.power_efficiency_curve[0][idx + 1] - self.power_efficiency_curve[0][idx])
+        power_normalized = min(max(abs(float(power))/max(self.nominal_power, ZERO_DIVISION_PLACEHOLDER), 0.0), 1.0)
+        curve_x = self.power_efficiency_curve[0]
+        curve_y = self.power_efficiency_curve[1]
+        if not np.isfinite(power_normalized):
+            return np.nan
+        idx = min(len(curve_x) - 2, max(0, int(np.searchsorted(curve_x, power_normalized, side='left')) - 1))
+        efficiency = curve_y[idx]\
+            + (power_normalized - curve_x[idx]
+            )*(curve_y[idx + 1] - curve_y[idx]
+            )/(curve_x[idx + 1] - curve_x[idx])
 
         return efficiency
 
