@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.reward_function &mdash; CityLearn 0.6.7 documentation</title>
+  <title>citylearn.reward_function &mdash; CityLearn 0.6.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=44212324"></script>
+      <script src="../../_static/documentation_options.js?v=ac3b80e6"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -85,7 +85,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for citylearn.reward_function</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.building</span><span class="w"> </span><span class="kn">import</span> <span class="n">Building</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span>
@@ -154,6 +154,14 @@
         <span class="k">pass</span></div>
 
 
+<div class="viewcode-block" id="RewardFunction.get_required_observation_names">
+<a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.RewardFunction.get_required_observation_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_required_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return minimal observation names for this reward, or None if unknown.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
 <div class="viewcode-block" id="RewardFunction.calculate">
 <a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.RewardFunction.calculate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
@@ -210,6 +218,20 @@
             <span class="n">rf</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="MultiBuildingRewardFunction.get_required_observation_names">
+<a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.MultiBuildingRewardFunction.get_required_observation_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_required_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="n">required</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">rf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_functions</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">get_required_observation_names</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">required</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">required</span></div>
+
+
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">env_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env_metadata</span>
@@ -235,6 +257,12 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env_metadata</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MARL.get_required_observation_names">
+<a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.MARL.get_required_observation_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_required_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;net_electricity_consumption&#39;</span><span class="p">,)</span></div>
+
 
 <div class="viewcode-block" id="MARL.calculate">
 <a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.MARL.calculate">[docs]</a>
@@ -268,6 +296,12 @@
     
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env_metadata</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IndependentSACReward.get_required_observation_names">
+<a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.IndependentSACReward.get_required_observation_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_required_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;net_electricity_consumption&#39;</span><span class="p">,)</span></div>
+
 
 <div class="viewcode-block" id="IndependentSACReward.calculate">
 <a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.IndependentSACReward.calculate">[docs]</a>
@@ -304,6 +338,18 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env_metadata</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SolarPenaltyReward.get_required_observation_names">
+<a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.SolarPenaltyReward.get_required_observation_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_required_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="s1">&#39;net_electricity_consumption&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cooling_storage_soc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;heating_storage_soc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;dhw_storage_soc&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;electrical_storage_soc&#39;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="SolarPenaltyReward.calculate">
 <a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.SolarPenaltyReward.calculate">[docs]</a>
@@ -459,6 +505,20 @@
             <span class="n">reward</span> <span class="o">=</span> <span class="n">reward_list</span>
 
         <span class="k">return</span> <span class="n">reward</span></div>
+
+
+<div class="viewcode-block" id="ComfortReward.get_required_observation_names">
+<a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.ComfortReward.get_required_observation_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_required_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="s1">&#39;heating_demand&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cooling_demand&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;hvac_mode&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;indoor_dry_bulb_temperature&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;indoor_dry_bulb_temperature_cooling_set_point&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;indoor_dry_bulb_temperature_heating_set_point&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;comfort_band&#39;</span><span class="p">,</span>
+        <span class="p">)</span></div>
 </div>
 
     
@@ -517,6 +577,20 @@
         <span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">reward</span></div>
+
+
+<div class="viewcode-block" id="SolarPenaltyAndComfortReward.get_required_observation_names">
+<a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.SolarPenaltyAndComfortReward.get_required_observation_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_required_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="n">required</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">function</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__functions</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">function</span><span class="o">.</span><span class="n">get_required_observation_names</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">required</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">required</span></div>
 </div>
 
 
@@ -581,6 +655,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_last_penalty_total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">penalty_values</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">central_agent</span> <span class="k">else</span> <span class="n">penalty_values</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Calculated EV reward: </span><span class="si">{</span><span class="n">total_reward</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">total_reward</span></div>
+
+
+<div class="viewcode-block" id="Electric_Vehicles_Reward_Function.get_required_observation_names">
+<a class="viewcode-back" href="../../api/citylearn.reward_function.html#citylearn.reward_function.Electric_Vehicles_Reward_Function.get_required_observation_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_required_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="s1">&#39;net_electricity_consumption&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;electric_vehicles_chargers_dict&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;charging_constraint_violation_kwh&#39;</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Electric_Vehicles_Reward_Function.calculate_ev_penalty">

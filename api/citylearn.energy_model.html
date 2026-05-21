@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model module &mdash; CityLearn 0.6.7 documentation</title>
+  <title>citylearn.energy_model module &mdash; CityLearn 0.6.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=44212324"></script>
+      <script src="../_static/documentation_options.js?v=ac3b80e6"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -284,7 +284,7 @@ bypassing restrictions such as efficiency losses, power limits, and degradation.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.Battery.get_max_input_power">
-<span class="sig-name descname"><span class="pre">get_max_input_power</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.get_max_input_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.get_max_input_power" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_max_input_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.get_max_input_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.get_max_input_power" title="Link to this definition"></a></dt>
 <dd><p>Get maximum input power while considering <cite>capacity_power_curve</cite> limitations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -298,7 +298,7 @@ bypassing restrictions such as efficiency losses, power limits, and degradation.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.Battery.get_max_output_power">
-<span class="sig-name descname"><span class="pre">get_max_output_power</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.get_max_output_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.get_max_output_power" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_max_output_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.get_max_output_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.get_max_output_power" title="Link to this definition"></a></dt>
 <dd><p>Get maximum output power while considering <cite>capacity_power_curve</cite> limitations if defined otherwise, returns <cite>nominal_power</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -897,16 +897,7 @@ when <code class="docutils literal notranslate"><span class="pre">generation_mod
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.charge">
 <span class="sig-name descname"><span class="pre">charge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#StorageDevice.charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.StorageDevice.charge" title="Link to this definition"></a></dt>
-<dd><p>Charges or discharges storage with respect to specified energy while considering <cite>capacity</cite> and <cite>soc_init</cite> limitations and, energy losses to the environment quantified by <cite>round_trip_efficiency</cite>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>energy</strong> (<em>float</em>) – Energy to charge if (+) or discharge if (-) in [kWh].</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>If charging, soc = min(<cite>soc_init</cite> + energy*`round_trip_efficiency`, <cite>capacity</cite>)
-If discharging, soc = max(0, <cite>soc_init</cite> + energy/<cite>round_trip_efficiency</cite>)</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.efficiency">
