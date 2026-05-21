@@ -393,6 +393,7 @@ def _build_perf_report(
         seed=seed,
         none_max_ms=30.0,
         end_max_ms=45.0,
+        entity_max_ms=30.0,
         ratio_max=2.0,
         entity_overhead_ratio_max=float(entity_overhead_ratio_max),
         baseline_regression_ratio=2.5,
@@ -404,6 +405,7 @@ def _build_perf_report(
         report,
         none_max_ms=ns.none_max_ms,
         end_max_ms=ns.end_max_ms,
+        entity_max_ms=ns.entity_max_ms,
         ratio_max=ns.ratio_max,
         entity_overhead_ratio_max=ns.entity_overhead_ratio_max,
     )

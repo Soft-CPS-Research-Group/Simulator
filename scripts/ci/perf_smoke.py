@@ -130,12 +130,21 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument("--none-max-ms", type=float, default=30.0)
     parser.add_argument("--end-max-ms", type=float, default=45.0)
+    parser.add_argument(
+        "--entity-max-ms",
+        type=float,
+        default=None,
+        help="Allowed entity interface avg/p95 step latency. Defaults to --none-max-ms.",
+    )
     parser.add_argument("--ratio-max", type=float, default=2.0)
     parser.add_argument(
         "--entity-overhead-ratio-max",
         type=float,
         default=1.12,
-        help="Allowed entity(flat-none baseline) avg_step_ms ratio upper bound.",
+        help=(
+            "Allowed entity(flat-none baseline) avg_step_ms ratio upper bound. "
+            "The ratio only fails when the entity absolute latency also exceeds --entity-max-ms."
+        ),
     )
 
     parser.add_argument(
@@ -193,6 +202,7 @@ def _build_report(args: argparse.Namespace, none_case: Dict[str, Any], end_case:
         "thresholds": {
             "none_max_ms": args.none_max_ms,
             "end_max_ms": args.end_max_ms,
+            "entity_max_ms": args.entity_max_ms if args.entity_max_ms is not None else args.none_max_ms,
             "ratio_max": args.ratio_max,
             "entity_overhead_ratio_max": args.entity_overhead_ratio_max,
             "baseline_regression_ratio": args.baseline_regression_ratio,
@@ -206,7 +216,7 @@ def _compare_to_baseline(report: Dict[str, Any], baseline: Dict[str, Any], regre
     baseline_cases = baseline.get("cases", {})
     current_cases = report.get("cases", {})
 
-    for case_name in ("none", "end"):
+    for case_name in ("none", "end", "entity_none"):
         if case_name not in baseline_cases or case_name not in current_cases:
             continue
 
@@ -245,6 +255,7 @@ def _validate_absolute_thresholds(
     report: Dict[str, Any],
     none_max_ms: float,
     end_max_ms: float,
+    entity_max_ms: float,
     ratio_max: float,
     entity_overhead_ratio_max: float,
 ) -> list[str]:
@@ -266,6 +277,11 @@ def _validate_absolute_thresholds(
             f"end avg_step_ms too high: {end_case['avg_step_ms']} > {end_max_ms}"
         )
 
+    if entity_case["avg_step_ms"] > entity_max_ms:
+        errors.append(
+            f"entity avg_step_ms too high: {entity_case['avg_step_ms']} > {entity_max_ms}"
+        )
+
     if none_case["avg_step_ms"] > 0:
         ratio = end_case["avg_step_ms"] / none_case["avg_step_ms"]
         absolute_end_ok = end_case["avg_step_ms"] <= end_max_ms and end_case["p95_step_ms"] <= end_max_ms
@@ -274,7 +290,11 @@ def _validate_absolute_thresholds(
 
     if none_case["avg_step_ms"] > 0:
         entity_ratio = entity_case["avg_step_ms"] / none_case["avg_step_ms"]
-        if entity_ratio > entity_overhead_ratio_max:
+        absolute_entity_ok = (
+            entity_case["avg_step_ms"] <= entity_max_ms
+            and entity_case["p95_step_ms"] <= entity_max_ms
+        )
+        if entity_ratio > entity_overhead_ratio_max and not absolute_entity_ok:
             errors.append(
                 f"entity/flat ratio too high: {entity_ratio:.3f} > {entity_overhead_ratio_max}"
             )
@@ -306,6 +326,7 @@ def main() -> int:
         report,
         none_max_ms=args.none_max_ms,
         end_max_ms=args.end_max_ms,
+        entity_max_ms=args.entity_max_ms if args.entity_max_ms is not None else args.none_max_ms,
         ratio_max=args.ratio_max,
         entity_overhead_ratio_max=args.entity_overhead_ratio_max,
     )
