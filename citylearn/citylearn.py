@@ -1264,6 +1264,22 @@ class CityLearnEnv(Environment, Env):
 
         return self._runtime_service.step(actions)
 
+    def step_many(
+        self,
+        action: Any,
+        repeat_steps: int = 1,
+        stop_on_done: bool = True,
+        return_substeps: bool = False,
+    ) -> Tuple[Any, List[float], bool, bool, dict]:
+        """Apply the same action for multiple internal simulator transitions."""
+
+        return self._runtime_service.step_many(
+            action,
+            repeat_steps=repeat_steps,
+            stop_on_done=stop_on_done,
+            return_substeps=return_substeps,
+        )
+
     def get_info(self) -> Mapping[Any, Any]:
         """Other information to return from the `citylearn.CityLearnEnv.step` function."""
 

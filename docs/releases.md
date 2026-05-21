@@ -60,6 +60,56 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.9 - Macro-Step Action Repeat
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release that adds a simulator-native `step_many()` API for RL action-repeat/macro-step training while preserving internal substep physics and exports.
+
+### Added
+
+- `CityLearnEnv.step_many(action, repeat_steps=..., stop_on_done=True, return_substeps=False)` for repeating a fixed action across multiple internal simulator transitions.
+- Macro-transition metadata in `info`: `executed_steps`, `seconds_per_time_step` and `macro_seconds`.
+- Optional debug payloads when `return_substeps=True`: `substep_rewards`, `substep_infos` and `substep_actions_applied`.
+- Parity tests covering flat mode, entity mode, early termination, reward aggregation and optional substep debug output.
+
+### Changed
+
+- Runtime `step()` now uses a shared internal one-step core so `step_many()` and `step()` execute the same physics/action/reward path.
+- `step_many()` avoids assembling final observations and info on intermediate substeps by default, but still runs constraints, EVs, batteries, deferrables, phase/headroom checks, rewards, KPIs and render/export state at every internal step.
+- Static action layouts parse the repeated action once per macro-step; dynamic topology mode reparses per substep so action layouts can change safely.
+- Running simulation docs now describe action repeat and the `gamma ** executed_steps` discounting pattern for RL algorithms.
+
+### Fixed
+
+- No intentional physics or KPI behavior changes. `step_many()` parity tests compare final observations, accumulated rewards, termination state, time step and KPI outputs against repeated `step()` calls.
+
+### Dataset/Schema Impact
+
+- No schema or dataset changes.
+
+### Compatibility
+
+- Backward compatible. Existing `step()` callers are unchanged.
+- `stop_on_done=False` is accepted for API symmetry, but CityLearn still stops when the episode reaches a terminal/truncated state because the environment cannot advance beyond done without `reset()`.
+
+### Validation
+
+- `.venv/bin/python -m pytest tests/unit/test_step_many.py -q`: pass (`5 passed`)
+- `.venv/bin/python -m pytest tests/unit/test_rendering_behaviour.py tests/test_entity_interface_contract.py tests/unit/test_step_many.py -q`: pass (`33 passed`)
+- `.venv/bin/python -m pytest -q`: pass (`338 passed`, `17 warnings`)
+- `.venv/bin/python -m compileall -q citylearn tests/unit/test_step_many.py`: pass
+- `.venv/bin/python -m ruff check citylearn tests/unit/test_step_many.py --select E9,F821`: pass
+- `git diff --check`: pass
+- Step-many smoke: pass (`step_many` measured `3.3377 ms/internal-step` vs repeated `step()` `3.8041 ms/internal-step`, `1.14x` faster over 200 internal substeps)
+
+### Migration Notes
+
+- RL replay buffers can store `(obs_t, action_t, reward_sum, obs_t_plus_n, done, executed_steps)` and use `gamma ** executed_steps`.
+- Keep `return_substeps=False` for long training runs; enable it only for debugging substep rewards or infos.
+
 ## v0.6.8 - Runtime Profiling and Step Optimizations
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

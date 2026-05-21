@@ -58,6 +58,56 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v0.6.9 - Action Repeat com Macro-Step
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release que adiciona a API nativa `step_many()` para treino RL com action-repeat/macro-step, mantendo fisica interna e exports em substeps.
+
+### Added
+
+- `CityLearnEnv.step_many(action, repeat_steps=..., stop_on_done=True, return_substeps=False)` para repetir uma acao fixa durante varias transicoes internas do simulador.
+- Metadata de transicao macro no `info`: `executed_steps`, `seconds_per_time_step` e `macro_seconds`.
+- Payloads opcionais de debug quando `return_substeps=True`: `substep_rewards`, `substep_infos` e `substep_actions_applied`.
+- Testes de paridade para modo flat, modo entity, fim antecipado de episodio, soma de rewards e debug opcional de substeps.
+
+### Changed
+
+- O runtime de `step()` passa a usar um core interno partilhado para `step_many()` e `step()` executarem o mesmo caminho de fisica/acao/reward.
+- `step_many()` evita montar observacoes finais e infos em substeps intermedios por defeito, mas continua a correr constraints, EVs, baterias, deferrables, fases/headroom, rewards, KPIs e estado de render/export em cada step interno.
+- Layouts estaticos de acao fazem parse da acao repetida uma vez por macro-step; em dynamic topology o parse e repetido por substep para suportar mudancas de layout.
+- A documentacao de simulacoes descreve action repeat e o padrao `gamma ** executed_steps` para algoritmos RL.
+
+### Fixed
+
+- Sem mudancas intencionais de fisica ou KPIs. Os testes de paridade de `step_many()` comparam observacoes finais, rewards acumuladas, estado terminal, timestep e KPIs contra chamadas repetidas a `step()`.
+
+### Dataset/Schema Impact
+
+- Sem alteracoes de schema ou dataset.
+
+### Compatibility
+
+- Patch compativel. Callers existentes de `step()` nao mudam.
+- `stop_on_done=False` e aceite por simetria de API, mas o CityLearn continua a parar quando o episodio chega a terminal/truncated porque o ambiente nao pode avancar depois de done sem `reset()`.
+
+### Validation
+
+- `.venv/bin/python -m pytest tests/unit/test_step_many.py -q`: pass (`5 passed`)
+- `.venv/bin/python -m pytest tests/unit/test_rendering_behaviour.py tests/test_entity_interface_contract.py tests/unit/test_step_many.py -q`: pass (`33 passed`)
+- `.venv/bin/python -m pytest -q`: pass (`338 passed`, `17 warnings`)
+- `.venv/bin/python -m compileall -q citylearn tests/unit/test_step_many.py`: pass
+- `.venv/bin/python -m ruff check citylearn tests/unit/test_step_many.py --select E9,F821`: pass
+- `git diff --check`: pass
+- Smoke de step-many: pass (`step_many` mediu `3.3377 ms/internal-step` vs `step()` repetido `3.8041 ms/internal-step`, `1.14x` mais rapido em 200 substeps internos)
+
+### Migration Notes
+
+- Replay buffers RL podem guardar `(obs_t, action_t, reward_sum, obs_t_plus_n, done, executed_steps)` e usar `gamma ** executed_steps`.
+- Manter `return_substeps=False` em treinos longos; ligar apenas para debug de rewards ou infos por substep.
+
 ## v0.6.8 - Profiling de Runtime e Otimizacoes do Step
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import time
-from typing import TYPE_CHECKING, Any, List, Mapping, Union
+from typing import TYPE_CHECKING, Any, List, Mapping, Optional, Union
 
 import numpy as np
 
@@ -29,8 +30,147 @@ class CityLearnRuntimeService:
     def step(self, actions):
         """Apply actions, update env variables/reward, then advance time."""
 
+        return self._step_once(actions=actions)
+
+    def step_many(
+        self,
+        action,
+        repeat_steps: int = 1,
+        stop_on_done: bool = True,
+        return_substeps: bool = False,
+    ):
+        """Apply one action over multiple internal simulator steps."""
+
         env = self.env
+
+        try:
+            repeat_steps = int(repeat_steps)
+        except (TypeError, ValueError) as exc:
+            raise ValueError('repeat_steps must be an integer >= 1.') from exc
+
+        if repeat_steps < 1:
+            raise ValueError('repeat_steps must be >= 1.')
+
+        if env.terminated or env.truncated:
+            raise RuntimeError('Episode has already terminated/truncated. Call reset() before calling step_many() again.')
+
+        if not stop_on_done:
+            # CityLearn cannot advance after a terminal transition; keep the
+            # argument for API compatibility but still stop on done.
+            stop_on_done = True
+
         debug_timing = bool(getattr(env, 'debug_timing', False))
+        macro_start = time.perf_counter() if debug_timing else 0.0
+        parse_time = 0.0
+        static_action_layout = getattr(env, 'topology_mode', 'static') != 'dynamic'
+        parsed_action = None
+
+        if static_action_layout:
+            parse_start = time.perf_counter() if debug_timing else 0.0
+            parsed_action = self.parse_actions(action)
+            if debug_timing:
+                parse_time = time.perf_counter() - parse_start
+
+        executed_steps = 0
+        reward_total: Optional[np.ndarray] = None
+        substep_rewards = [] if return_substeps else None
+        substep_infos = [] if return_substeps else None
+        substep_actions_applied = [] if return_substeps else None
+        final_observations = None
+        final_info = {}
+
+        for _ in range(repeat_steps):
+            step_parsed_action = parsed_action
+            if step_parsed_action is None:
+                parse_start = time.perf_counter() if debug_timing else 0.0
+                step_parsed_action = self.parse_actions(action)
+                if debug_timing:
+                    parse_time += time.perf_counter() - parse_start
+
+            collect_observations = bool(return_substeps or getattr(env, 'check_observation_limits', False))
+            observations, reward, terminated, truncated, info = self._step_once(
+                parsed_actions=step_parsed_action,
+                collect_observations=collect_observations,
+                collect_info=return_substeps,
+            )
+
+            executed_steps += 1
+            reward_total = self._accumulate_reward(reward_total, reward)
+
+            if return_substeps:
+                substep_rewards.append(reward)
+                substep_infos.append(info)
+                substep_actions_applied.append(deepcopy(step_parsed_action))
+                final_info = info
+
+            if observations is not None:
+                final_observations = observations
+
+            if (terminated or truncated) and stop_on_done:
+                break
+
+        if final_observations is None:
+            final_observations = env.observations
+
+        info = dict(final_info) if return_substeps else dict(env.get_info())
+        seconds_per_time_step = float(env.seconds_per_time_step)
+        macro_seconds = executed_steps * seconds_per_time_step
+        info.update({
+            'executed_steps': executed_steps,
+            'seconds_per_time_step': env.seconds_per_time_step,
+            'macro_seconds': macro_seconds,
+        })
+
+        if return_substeps:
+            info['substep_rewards'] = substep_rewards
+            info['substep_infos'] = substep_infos
+            info['substep_actions_applied'] = substep_actions_applied
+
+        if debug_timing:
+            info['step_many_parse_actions_time'] = parse_time
+            info['step_many_total_time'] = time.perf_counter() - macro_start
+
+        return final_observations, self._reward_total_to_list(reward_total), env.terminated, env.truncated, info
+
+    @staticmethod
+    def _reward_to_array(reward) -> np.ndarray:
+        reward_array = np.asarray(reward, dtype='float64')
+        if reward_array.ndim == 0:
+            return reward_array.reshape(1)
+
+        return reward_array.reshape(-1)
+
+    def _accumulate_reward(self, total: Optional[np.ndarray], reward) -> np.ndarray:
+        reward_array = self._reward_to_array(reward)
+        if total is None:
+            return reward_array.copy()
+
+        if total.shape != reward_array.shape:
+            raise RuntimeError(
+                'Reward vector shape changed during step_many; cannot aggregate macro-step rewards safely.'
+            )
+
+        return total + reward_array
+
+    @staticmethod
+    def _reward_total_to_list(total: Optional[np.ndarray]) -> List[float]:
+        if total is None:
+            return []
+
+        return [float(value) for value in total.tolist()]
+
+    def _step_once(
+        self,
+        actions=None,
+        *,
+        parsed_actions: Optional[List[Mapping[str, float]]] = None,
+        collect_observations: bool = True,
+        collect_info: bool = True,
+    ):
+        """Run one simulator transition with optional final observation/info assembly."""
+
+        env = self.env
+        debug_timing = bool(getattr(env, 'debug_timing', False)) and bool(collect_info)
         step_start = time.perf_counter() if debug_timing else 0.0
         timings = {} if debug_timing else None
 
@@ -40,7 +180,7 @@ class CityLearnRuntimeService:
         env._observations_cache = None
         env._observations_cache_time_step = -1
         timer_start = time.perf_counter() if debug_timing else 0.0
-        actions = self.parse_actions(actions)
+        actions = self.parse_actions(actions) if parsed_actions is None else parsed_actions
         if debug_timing:
             timings['parse_actions_time'] = time.perf_counter() - timer_start
 
@@ -197,12 +337,12 @@ class CityLearnRuntimeService:
             timings['terminal_reward_summary_time'] = 0.0
 
         timer_start = time.perf_counter() if debug_timing else 0.0
-        next_observations = env.observations
+        next_observations = env.observations if collect_observations else None
         if debug_timing:
             timings['next_observations_time'] = time.perf_counter() - timer_start
 
         timer_start = time.perf_counter() if debug_timing else 0.0
-        info = dict(env.get_info())
+        info = dict(env.get_info()) if collect_info else {}
         if debug_timing:
             timings['get_info_time'] = time.perf_counter() - timer_start
             info['partial_render_time'] = partial_render_time

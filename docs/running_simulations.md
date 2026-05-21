@@ -117,6 +117,29 @@ class MyReward:
 
 The alias `required_observations` and method `get_required_observation_names()` are also supported. If a custom reward does not declare requirements, CityLearn falls back to full `include_all` observations for backward compatibility.
 
+## Macro-Steps / Action Repeat
+
+`step_many()` repeats one selected action across multiple internal simulator steps and returns one macro transition for RL replay buffers:
+
+```python
+obs, rewards, terminated, truncated, info = env.step_many(
+    action,
+    repeat_steps=20,
+    stop_on_done=True,
+    return_substeps=False,
+)
+```
+
+The simulator still advances every internal step at `seconds_per_time_step` resolution. Constraints, EV charging/departures, batteries, deferrables, phases/headroom, rewards, KPIs and render/export time series are updated exactly as they are for repeated `step()` calls. The returned observation is only the final observation after the executed substeps, and `rewards` is the per-agent reward sum.
+
+`info["executed_steps"]` is always present so RL code can discount macro transitions correctly:
+
+```python
+gamma_macro = gamma ** info["executed_steps"]
+```
+
+When `return_substeps=True`, `info` also includes `substep_rewards`, `substep_infos` and `substep_actions_applied` for debugging. Keep it disabled in long training runs.
+
 ## CLI
 
 ```bash
