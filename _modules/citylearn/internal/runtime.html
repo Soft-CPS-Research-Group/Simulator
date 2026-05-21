@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.runtime &mdash; CityLearn 0.6.8 documentation</title>
+  <title>citylearn.internal.runtime &mdash; CityLearn 0.6.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=ac3b80e6"></script>
+      <script src="../../../_static/documentation_options.js?v=084304ff"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -87,8 +87,9 @@
   <h1>Source code for citylearn.internal.runtime</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -120,8 +121,151 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply actions, update env variables/reward, then advance time.&quot;&quot;&quot;</span>
 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_once</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="n">actions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CityLearnRuntimeService.step_many">
+<a class="viewcode-back" href="../../../api/citylearn.internal.runtime.html#citylearn.internal.runtime.CityLearnRuntimeService.step_many">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step_many</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">,</span>
+        <span class="n">repeat_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">stop_on_done</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">return_substeps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply one action over multiple internal simulator steps.&quot;&quot;&quot;</span>
+
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">repeat_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">repeat_steps</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;repeat_steps must be an integer &gt;= 1.&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="k">if</span> <span class="n">repeat_steps</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;repeat_steps must be &gt;= 1.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">terminated</span> <span class="ow">or</span> <span class="n">env</span><span class="o">.</span><span class="n">truncated</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Episode has already terminated/truncated. Call reset() before calling step_many() again.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stop_on_done</span><span class="p">:</span>
+            <span class="c1"># CityLearn cannot advance after a terminal transition; keep the</span>
+            <span class="c1"># argument for API compatibility but still stop on done.</span>
+            <span class="n">stop_on_done</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="n">debug_timing</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;debug_timing&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="n">macro_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">parse_time</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">static_action_layout</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;topology_mode&#39;</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;dynamic&#39;</span>
+        <span class="n">parsed_action</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">static_action_layout</span><span class="p">:</span>
+            <span class="n">parse_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
+            <span class="n">parsed_action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_actions</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
+                <span class="n">parse_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">parse_start</span>
+
+        <span class="n">executed_steps</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">reward_total</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">substep_rewards</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">return_substeps</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">substep_infos</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">return_substeps</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">substep_actions_applied</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">return_substeps</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">final_observations</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">final_info</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat_steps</span><span class="p">):</span>
+            <span class="n">step_parsed_action</span> <span class="o">=</span> <span class="n">parsed_action</span>
+            <span class="k">if</span> <span class="n">step_parsed_action</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">parse_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
+                <span class="n">step_parsed_action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_actions</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
+                    <span class="n">parse_time</span> <span class="o">+=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">parse_start</span>
+
+            <span class="n">collect_observations</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">return_substeps</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;check_observation_limits&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+            <span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_once</span><span class="p">(</span>
+                <span class="n">parsed_actions</span><span class="o">=</span><span class="n">step_parsed_action</span><span class="p">,</span>
+                <span class="n">collect_observations</span><span class="o">=</span><span class="n">collect_observations</span><span class="p">,</span>
+                <span class="n">collect_info</span><span class="o">=</span><span class="n">return_substeps</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">executed_steps</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">reward_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accumulate_reward</span><span class="p">(</span><span class="n">reward_total</span><span class="p">,</span> <span class="n">reward</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">return_substeps</span><span class="p">:</span>
+                <span class="n">substep_rewards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
+                <span class="n">substep_infos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+                <span class="n">substep_actions_applied</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">step_parsed_action</span><span class="p">))</span>
+                <span class="n">final_info</span> <span class="o">=</span> <span class="n">info</span>
+
+            <span class="k">if</span> <span class="n">observations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">final_observations</span> <span class="o">=</span> <span class="n">observations</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">terminated</span> <span class="ow">or</span> <span class="n">truncated</span><span class="p">)</span> <span class="ow">and</span> <span class="n">stop_on_done</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">final_observations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">final_observations</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">observations</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">final_info</span><span class="p">)</span> <span class="k">if</span> <span class="n">return_substeps</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get_info</span><span class="p">())</span>
+        <span class="n">seconds_per_time_step</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span>
+        <span class="n">macro_seconds</span> <span class="o">=</span> <span class="n">executed_steps</span> <span class="o">*</span> <span class="n">seconds_per_time_step</span>
+        <span class="n">info</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;executed_steps&#39;</span><span class="p">:</span> <span class="n">executed_steps</span><span class="p">,</span>
+            <span class="s1">&#39;seconds_per_time_step&#39;</span><span class="p">:</span> <span class="n">env</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">,</span>
+            <span class="s1">&#39;macro_seconds&#39;</span><span class="p">:</span> <span class="n">macro_seconds</span><span class="p">,</span>
+        <span class="p">})</span>
+
+        <span class="k">if</span> <span class="n">return_substeps</span><span class="p">:</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;substep_rewards&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">substep_rewards</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;substep_infos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">substep_infos</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;substep_actions_applied&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">substep_actions_applied</span>
+
+        <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;step_many_parse_actions_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parse_time</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;step_many_total_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">macro_start</span>
+
+        <span class="k">return</span> <span class="n">final_observations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reward_total_to_list</span><span class="p">(</span><span class="n">reward_total</span><span class="p">),</span> <span class="n">env</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reward_to_array</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">reward_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">reward</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reward_array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">reward_array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">reward_array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_accumulate_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">reward</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">reward_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reward_to_array</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">reward_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">total</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">reward_array</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s1">&#39;Reward vector shape changed during step_many; cannot aggregate macro-step rewards safely.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">total</span> <span class="o">+</span> <span class="n">reward_array</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reward_total_to_list</span><span class="p">(</span><span class="n">total</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">total</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_step_once</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">parsed_actions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">collect_observations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">collect_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run one simulator transition with optional final observation/info assembly.&quot;&quot;&quot;</span>
+
+        <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
+        <span class="n">debug_timing</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;debug_timing&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="n">collect_info</span><span class="p">)</span>
         <span class="n">step_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
         <span class="n">timings</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="kc">None</span>
 
@@ -131,7 +275,7 @@
         <span class="n">env</span><span class="o">.</span><span class="n">_observations_cache</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">env</span><span class="o">.</span><span class="n">_observations_cache_time_step</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">timer_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
-        <span class="n">actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="k">if</span> <span class="n">parsed_actions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parsed_actions</span>
         <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;parse_actions_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">timer_start</span>
 
@@ -288,12 +432,12 @@
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;terminal_reward_summary_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
         <span class="n">timer_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
-        <span class="n">next_observations</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">observations</span>
+        <span class="n">next_observations</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">observations</span> <span class="k">if</span> <span class="n">collect_observations</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;next_observations_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">timer_start</span>
 
         <span class="n">timer_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
-        <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get_info</span><span class="p">())</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get_info</span><span class="p">())</span> <span class="k">if</span> <span class="n">collect_info</span> <span class="k">else</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;get_info_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">timer_start</span>
             <span class="n">info</span><span class="p">[</span><span class="s1">&#39;partial_render_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial_render_time</span>
@@ -303,8 +447,7 @@
             <span class="n">info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">timings</span><span class="p">)</span>
             <span class="n">info</span><span class="p">[</span><span class="s1">&#39;step_total_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">step_start</span>
 
-        <span class="k">return</span> <span class="n">next_observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
-
+        <span class="k">return</span> <span class="n">next_observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">truncated</span><span class="p">,</span> <span class="n">info</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_reward_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">attribute_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;required_observation_names&#39;</span><span class="p">,</span> <span class="s1">&#39;required_observations&#39;</span><span class="p">):</span>
