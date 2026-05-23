@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import weakref
 from dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
@@ -346,6 +347,7 @@ class CityLearnEntityInterfaceService:
         self._forecast_component_cache: Dict[int, Mapping[str, np.ndarray]] = {}
         self._community_forecast_component_cache: Optional[Mapping[str, np.ndarray]] = None
         self._price_forecast_cache: Optional[np.ndarray] = None
+        self._forecast_stat_summary_cache: Dict[int, Tuple[Any, Mapping[str, np.ndarray]]] = {}
 
     def reset(self):
         """Rebuild specs and reusable buffers for the current episode layout."""
@@ -393,6 +395,8 @@ class CityLearnEntityInterfaceService:
         temporal_bundle_enabled = self._bundle_enabled(self.TEMPORAL_BUNDLE)
         action_feedback_bundle_enabled = self._bundle_enabled(self.ACTION_FEEDBACK_BUNDLE)
         requires_building_electrical_metrics = core_bundle_enabled or community_bundle_enabled
+        if derived_forecast_bundle_enabled:
+            self._prune_forecast_stat_summary_cache()
 
         self._district_obs.fill(0.0)
         self._building_obs.fill(0.0)
@@ -1810,6 +1814,61 @@ class CityLearnEntityInterfaceService:
             return float(array.sum())
         return float(array.mean())
 
+    def _prune_forecast_stat_summary_cache(self) -> None:
+        if not self._forecast_stat_summary_cache:
+            return
+        dead_keys = [
+            key for key, (array_ref, _) in self._forecast_stat_summary_cache.items()
+            if array_ref() is None
+        ]
+        for key in dead_keys:
+            self._forecast_stat_summary_cache.pop(key, None)
+
+    def _forecast_stat_summary(self, values: Sequence[float]) -> Mapping[str, np.ndarray]:
+        array = np.asarray(values, dtype="float64")
+        cache_key = id(array)
+        cached = self._forecast_stat_summary_cache.get(cache_key)
+        if cached is not None:
+            array_ref, summary = cached
+            if array_ref() is array:
+                return summary
+
+        finite = np.isfinite(array)
+        cleaned = np.where(finite, array, 0.0)
+        summary = {
+            "sum_prefix": np.concatenate(([0.0], np.cumsum(cleaned, dtype="float64"))),
+            "count_prefix": np.concatenate(([0], np.cumsum(finite.astype(np.int64)))),
+        }
+        self._forecast_stat_summary_cache[cache_key] = (weakref.ref(array), summary)
+        return summary
+
+    def _forecast_window_stat(
+        self,
+        values: Sequence[float],
+        stat: str,
+        start: int,
+        stop: int,
+        fallback: float = 0.0,
+    ) -> float:
+        if stat not in {"mean", "sum"}:
+            return self._forecast_stat(np.asarray(values, dtype="float64")[start:stop], stat, fallback)
+
+        summary = self._forecast_stat_summary(values)
+        length = int(summary["sum_prefix"].size) - 1
+        start = min(max(int(start), 0), length)
+        stop = min(max(int(stop), start), length)
+        if start >= stop:
+            return float(fallback)
+
+        count = int(summary["count_prefix"][stop] - summary["count_prefix"][start])
+        if count <= 0:
+            return float(fallback)
+
+        total = float(summary["sum_prefix"][stop] - summary["sum_prefix"][start])
+        if stat == "sum":
+            return total
+        return total / float(count)
+
     def _dataset_energy_to_control_step_for_building(self, building, energy_kwh: float) -> float:
         ratio = getattr(building, "time_step_ratio", None)
         ratio = 1.0 if ratio in (None, 0) else float(ratio)
@@ -1820,6 +1879,7 @@ class CityLearnEntityInterfaceService:
         self._forecast_component_cache = {}
         self._community_forecast_component_cache = None
         self._price_forecast_cache = None
+        self._forecast_stat_summary_cache = {}
 
     def _forecast_window(self, time_step: int, window_seconds: float, length: int, *, offset_steps: int = 0):
         if length <= 0:
@@ -2006,13 +2066,13 @@ class CityLearnEntityInterfaceService:
         step_hours = self._step_hours()
         for label, seconds in self.FORECAST_HORIZONS:
             start, stop = self._forecast_window(time_step, seconds, length)
-            metrics[f"forecast_load_mean_next_{label}_kw"] = self._forecast_stat(arrays["load"][start:stop], "mean")
-            metrics[f"forecast_pv_mean_next_{label}_kw"] = self._forecast_stat(arrays["pv"][start:stop], "mean")
-            metrics[f"forecast_net_mean_next_{label}_kw"] = self._forecast_stat(arrays["net"][start:stop], "mean")
-            metrics[f"forecast_import_peak_next_{label}_kw"] = self._forecast_stat(arrays["import"][start:stop], "peak")
-            metrics[f"forecast_export_peak_next_{label}_kw"] = self._forecast_stat(arrays["export"][start:stop], "peak")
-            metrics[f"forecast_headroom_min_next_{label}_kw"] = self._forecast_stat(arrays["headroom"][start:stop], "min")
-            metrics[f"forecast_pv_surplus_sum_next_{label}_kwh"] = self._forecast_stat(arrays["pv_surplus"][start:stop], "sum") * step_hours
+            metrics[f"forecast_load_mean_next_{label}_kw"] = self._forecast_window_stat(arrays["load"], "mean", start, stop)
+            metrics[f"forecast_pv_mean_next_{label}_kw"] = self._forecast_window_stat(arrays["pv"], "mean", start, stop)
+            metrics[f"forecast_net_mean_next_{label}_kw"] = self._forecast_window_stat(arrays["net"], "mean", start, stop)
+            metrics[f"forecast_import_peak_next_{label}_kw"] = self._forecast_window_stat(arrays["import"], "peak", start, stop)
+            metrics[f"forecast_export_peak_next_{label}_kw"] = self._forecast_window_stat(arrays["export"], "peak", start, stop)
+            metrics[f"forecast_headroom_min_next_{label}_kw"] = self._forecast_window_stat(arrays["headroom"], "min", start, stop)
+            metrics[f"forecast_pv_surplus_sum_next_{label}_kwh"] = self._forecast_window_stat(arrays["pv_surplus"], "sum", start, stop) * step_hours
 
         bucket_steps = max(
             int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
@@ -2027,7 +2087,12 @@ class CityLearnEntityInterfaceService:
             )
             bucket_label = f"{bucket:02d}"
             for signal, values in arrays.items():
-                metrics[f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_stat(values[start:stop], "mean")
+                metrics[f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_window_stat(
+                    values,
+                    "mean",
+                    start,
+                    stop,
+                )
         return metrics
 
     def _build_derived_forecast_district_metrics(self, *, time_step: int) -> Mapping[str, float]:
@@ -2042,17 +2107,16 @@ class CityLearnEntityInterfaceService:
 
         for label, seconds in self.FORECAST_HORIZONS:
             start, stop = self._forecast_window(time_step, seconds, length)
-            prices = prices_array[start:stop]
-            metrics[f"forecast_price_min_next_{label}"] = self._forecast_stat(prices, "min")
-            metrics[f"forecast_price_mean_next_{label}"] = self._forecast_stat(prices, "mean")
-            metrics[f"forecast_price_max_next_{label}"] = self._forecast_stat(prices, "max")
-            metrics[f"forecast_community_load_mean_next_{label}_kw"] = self._forecast_stat(community_arrays["load"][start:stop], "mean")
-            metrics[f"forecast_community_pv_mean_next_{label}_kw"] = self._forecast_stat(community_arrays["pv"][start:stop], "mean")
-            metrics[f"forecast_community_net_mean_next_{label}_kw"] = self._forecast_stat(community_arrays["net"][start:stop], "mean")
-            metrics[f"forecast_community_import_peak_next_{label}_kw"] = self._forecast_stat(community_arrays["import"][start:stop], "peak")
-            metrics[f"forecast_community_export_peak_next_{label}_kw"] = self._forecast_stat(community_arrays["export"][start:stop], "peak")
-            metrics[f"forecast_community_headroom_min_next_{label}_kw"] = self._forecast_stat(community_arrays["headroom"][start:stop], "min")
-            metrics[f"forecast_community_pv_surplus_sum_next_{label}_kwh"] = self._forecast_stat(community_arrays["pv_surplus"][start:stop], "sum") * step_hours
+            metrics[f"forecast_price_min_next_{label}"] = self._forecast_window_stat(prices_array, "min", start, stop)
+            metrics[f"forecast_price_mean_next_{label}"] = self._forecast_window_stat(prices_array, "mean", start, stop)
+            metrics[f"forecast_price_max_next_{label}"] = self._forecast_window_stat(prices_array, "max", start, stop)
+            metrics[f"forecast_community_load_mean_next_{label}_kw"] = self._forecast_window_stat(community_arrays["load"], "mean", start, stop)
+            metrics[f"forecast_community_pv_mean_next_{label}_kw"] = self._forecast_window_stat(community_arrays["pv"], "mean", start, stop)
+            metrics[f"forecast_community_net_mean_next_{label}_kw"] = self._forecast_window_stat(community_arrays["net"], "mean", start, stop)
+            metrics[f"forecast_community_import_peak_next_{label}_kw"] = self._forecast_window_stat(community_arrays["import"], "peak", start, stop)
+            metrics[f"forecast_community_export_peak_next_{label}_kw"] = self._forecast_window_stat(community_arrays["export"], "peak", start, stop)
+            metrics[f"forecast_community_headroom_min_next_{label}_kw"] = self._forecast_window_stat(community_arrays["headroom"], "min", start, stop)
+            metrics[f"forecast_community_pv_surplus_sum_next_{label}_kwh"] = self._forecast_window_stat(community_arrays["pv_surplus"], "sum", start, stop) * step_hours
 
         bucket_steps = max(
             int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
@@ -2066,12 +2130,18 @@ class CityLearnEntityInterfaceService:
                 offset_steps=(bucket - 1) * bucket_steps,
             )
             bucket_label = f"{bucket:02d}"
-            prices = prices_array[start:stop]
-            metrics[f"forecast_price_mean_bucket_{bucket_label}_15m"] = self._forecast_stat(prices, "mean")
+            metrics[f"forecast_price_mean_bucket_{bucket_label}_15m"] = self._forecast_window_stat(
+                prices_array,
+                "mean",
+                start,
+                stop,
+            )
             for signal, values in community_arrays.items():
-                metrics[f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_stat(
-                    values[start:stop],
+                metrics[f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_window_stat(
+                    values,
                     "mean",
+                    start,
+                    stop,
                 )
         return metrics
 
