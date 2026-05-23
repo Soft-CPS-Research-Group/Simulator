@@ -58,6 +58,66 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.0.1 - 2026-05-23
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release para o contrato v1 de observacoes entity para RL. Esta release mantem intacto o contrato de schema e fisica da v1.0.0, reduzindo o overhead das observacoes entity quando todos os bundles orientados a RL estao ativos.
+
+### Added
+
+- Nenhum novo contrato publico de observacao, acao, KPI ou dataset.
+
+### Changed
+
+- A geracao de forecasts derivados em entity passa a reutilizar estatisticas precomputadas de horizontes/janelas em vez de recalcular slices futuros equivalentes a cada step.
+- A montagem das observacoes entity evita lookups repetidos de nomes e pede apenas as observacoes base usadas pelas tabelas entity.
+- O bookkeeping de action feedback reutiliza arrays por episodio em vez de redescobrir ou realocar esses arrays repetidamente.
+- O preenchimento de linhas entity e as metricas de action-feedback em janelas curtas usam caminhos em cache/vetorizados sem alterar o contrato de saida.
+
+### Fixed
+
+- Falha de CI lint de typing/import no caminho de preparacao da v1.0.0.
+- O performance smoke passa a medir latencia recorrente de rollout separadamente do trabalho terminal de export/KPI.
+
+### Dataset/Schema Impact
+
+- Sem alteracoes de schema ou conteudo de datasets face a v1.0.0.
+- Os schemas de 15 segundos e `citylearn_challenge_2022_phase_all_plus_evs` continuam com todos os bundles de observacoes entity ativos por default.
+
+### Compatibility
+
+- Patch release compativel.
+- Observacoes flat, nomes de tabelas entity, nomes legacy, dynamic topology, constraints fisicas e formulas de KPI ficam inalterados.
+- Modelos entity de largura fixa nao precisam de mudar feature lists face a v1.0.0.
+
+### Validation
+
+- `.venv/bin/ruff check citylearn tests scripts/manual scripts/ci --select E9,F821`: pass
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py --strict`: pass, `16/16` cenarios
+- `.venv/bin/pytest -q`: pass, `346 passed, 17 warnings`
+- `.venv/bin/python scripts/ci/perf_smoke.py --episode-steps 600 --seconds 60 --none-max-ms 30 --end-max-ms 45 --ratio-max 2.0 --entity-overhead-ratio-max 1.08 --baseline-file scripts/ci/perf_baseline.json --baseline-regression-ratio 3.0 --baseline-slack-ms 10.0`: pass
+- `.venv/bin/python -m build --outdir /tmp/softcpsrecsimulator-1.0.1-dist`: pass
+- `.venv/bin/python -m twine check /tmp/softcpsrecsimulator-1.0.1-dist/*`: pass
+
+### Performance Notes
+
+Benchmark local representativo, 600 steps, `seconds_per_time_step=60`, render desligado:
+
+| Caso | avg ms/step | p95 ms | vs flat |
+|---|---:|---:|---:|
+| flat | 4.7270 | 4.9251 | 1.000x |
+| entity_base | 5.2227 | 5.4199 | 1.105x |
+| entity_all | 14.7545 | 17.5723 | 3.121x |
+
+### Migration Notes
+
+- Sem migracao necessaria face a v1.0.0.
+- Utilizadores devem continuar a refrescar `env.entity_specs` quando mudam datasets ou topology modes.
+
 ## v1.0.0 - Contrato Entity para RL
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
