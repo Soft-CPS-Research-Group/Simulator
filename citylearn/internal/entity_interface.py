@@ -348,11 +348,13 @@ class CityLearnEntityInterfaceService:
         self._community_forecast_component_cache: Optional[Mapping[str, np.ndarray]] = None
         self._price_forecast_cache: Optional[np.ndarray] = None
         self._forecast_stat_summary_cache: Dict[int, Tuple[Any, Mapping[str, np.ndarray]]] = {}
+        self._action_feedback_series_cache: Dict[int, Dict[str, Any]] = {}
 
     def reset(self):
         """Rebuild specs and reusable buffers for the current episode layout."""
 
         self._clear_forecast_component_cache()
+        self._action_feedback_series_cache = {}
         self._build_entity_layout()
         self._build_spaces()
         self._build_specs()
@@ -364,6 +366,7 @@ class CityLearnEntityInterfaceService:
 
         self._initialized = False
         self._clear_forecast_component_cache()
+        self._action_feedback_series_cache = {}
 
     @property
     def observation_space(self) -> spaces.Dict:
@@ -1704,6 +1707,83 @@ class CityLearnEntityInterfaceService:
                 return float((idx - previous) * step_hours)
         return -1.0
 
+    def _action_feedback_series_summary(self, values: Sequence[float], index: int) -> Tuple[Dict[str, Any], int]:
+        try:
+            length = len(values)
+        except Exception:
+            length = 0
+        if length <= 0:
+            return {
+                "values": values,
+                "upto": -1,
+                "sum_prefix": [0.0],
+                "last_nonzero": [],
+                "value_snapshot": [],
+            }, -1
+
+        target = min(max(int(index), 0), length - 1)
+        cache_key = id(values)
+        cached = self._action_feedback_series_cache.get(cache_key)
+        if cached is None or cached.get("values") is not values or int(cached.get("upto", -1)) > target:
+            cached = {
+                "values": values,
+                "upto": -1,
+                "sum_prefix": [0.0],
+                "last_nonzero": [],
+                "value_snapshot": [],
+            }
+            self._action_feedback_series_cache[cache_key] = cached
+
+        upto = int(cached["upto"])
+        if target <= upto:
+            current_value = self._safe_index(values, target, 0.0)
+            if float(cached["value_snapshot"][target]) != current_value:
+                cached["sum_prefix"] = cached["sum_prefix"][: target + 1]
+                cached["last_nonzero"] = cached["last_nonzero"][:target]
+                cached["value_snapshot"] = cached["value_snapshot"][:target]
+                cached["upto"] = target - 1
+                upto = int(cached["upto"])
+
+        sum_prefix = cached["sum_prefix"]
+        last_nonzero = cached["last_nonzero"]
+        value_snapshot = cached["value_snapshot"]
+        last_seen = int(last_nonzero[-1]) if last_nonzero else -1
+        while upto < target:
+            upto += 1
+            value = self._safe_index(values, upto, 0.0)
+            sum_prefix.append(float(sum_prefix[-1]) + value)
+            if abs(value) > 1.0e-9:
+                last_seen = upto
+            last_nonzero.append(last_seen)
+            value_snapshot.append(value)
+
+        cached["upto"] = upto
+        return cached, target
+
+    def _action_feedback_applied_window_metrics(
+        self,
+        values: Sequence[float],
+        index: int,
+        step_hours: float,
+        *,
+        window_seconds: float = 15 * 60,
+    ) -> Tuple[float, float, float]:
+        summary, target = self._action_feedback_series_summary(values, index)
+        if target < 0:
+            return 0.0, 0.0, -1.0
+
+        step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
+        steps = max(int(np.ceil(float(window_seconds) / step_seconds)), 1)
+        start = max(target - steps + 1, 0)
+        stop = target + 1
+        sum_prefix = summary["sum_prefix"]
+        window_energy = float(sum_prefix[stop] - sum_prefix[start])
+        window_count = max(stop - start, 1)
+        mean_power = window_energy / max(float(window_count) * step_hours, 1.0e-12)
+        last_nonzero = int(summary["last_nonzero"][target])
+        time_since = float((target - last_nonzero) * step_hours) if last_nonzero >= 0 else -1.0
+        return window_energy, mean_power, time_since
+
     def _charger_action_feedback_metrics(self, charger, index: int, step_hours: float) -> Mapping[str, float]:
         applied_values = getattr(charger, "electricity_consumption", [])
         requested_action = self._safe_index(getattr(charger, "action_feedback_requested_action_normalized", []), index, 0.0)
@@ -1712,9 +1792,11 @@ class CityLearnEntityInterfaceService:
         limited_power = self._safe_index(getattr(charger, "action_feedback_limited_power_kw", []), index, 0.0)
         applied_energy = self._safe_index(applied_values, index, 0.0)
         applied_power = applied_energy / step_hours
-        window = self._feedback_window_indices(index)
-        window_energy = sum(self._safe_index(applied_values, i, 0.0) for i in window)
-        window_power = [self._safe_index(applied_values, i, 0.0) / step_hours for i in window]
+        window_energy, window_power_mean, time_since_nonzero = self._action_feedback_applied_window_metrics(
+            applied_values,
+            index,
+            step_hours,
+        )
 
         return {
             "last_requested_action_normalized": requested_action,
@@ -1724,8 +1806,8 @@ class CityLearnEntityInterfaceService:
             "last_applied_power_kw": applied_power,
             "last_projection_error_kw": requested_power - applied_power,
             "applied_energy_prev_15m_kwh": window_energy,
-            "applied_power_mean_prev_15m_kw": self._forecast_stat(window_power, "mean"),
-            "time_since_last_nonzero_action_hours": self._time_since_last_nonzero_hours(applied_values, index, step_hours),
+            "applied_power_mean_prev_15m_kw": window_power_mean,
+            "time_since_last_nonzero_action_hours": time_since_nonzero,
             **self._feedback_reason_metrics(charger, index),
         }
 
@@ -1737,9 +1819,11 @@ class CityLearnEntityInterfaceService:
         limited_power = self._safe_index(getattr(building, "action_feedback_electrical_storage_limited_power_kw", []), index, 0.0)
         applied_energy = self._safe_index(applied_values, index, 0.0)
         applied_power = applied_energy / step_hours
-        window = self._feedback_window_indices(index)
-        window_energy = sum(self._safe_index(applied_values, i, 0.0) for i in window)
-        window_power = [self._safe_index(applied_values, i, 0.0) / step_hours for i in window]
+        window_energy, window_power_mean, time_since_nonzero = self._action_feedback_applied_window_metrics(
+            applied_values,
+            index,
+            step_hours,
+        )
 
         metrics = {
             "last_requested_action_normalized": requested_action,
@@ -1749,8 +1833,8 @@ class CityLearnEntityInterfaceService:
             "last_applied_power_kw": applied_power,
             "last_projection_error_kw": requested_power - applied_power,
             "applied_energy_prev_15m_kwh": window_energy,
-            "applied_power_mean_prev_15m_kw": self._forecast_stat(window_power, "mean"),
-            "time_since_last_nonzero_action_hours": self._time_since_last_nonzero_hours(applied_values, index, step_hours),
+            "applied_power_mean_prev_15m_kw": window_power_mean,
+            "time_since_last_nonzero_action_hours": time_since_nonzero,
         }
         for reason in (
             "availability",
@@ -1868,6 +1952,54 @@ class CityLearnEntityInterfaceService:
         if stat == "sum":
             return total
         return total / float(count)
+
+    @staticmethod
+    def _forecast_summary_mean(summary: Mapping[str, np.ndarray], start: int, stop: int, fallback: float = 0.0) -> float:
+        length = int(summary["sum_prefix"].size) - 1
+        start = min(max(int(start), 0), length)
+        stop = min(max(int(stop), start), length)
+        if start >= stop:
+            return float(fallback)
+
+        count = int(summary["count_prefix"][stop] - summary["count_prefix"][start])
+        if count <= 0:
+            return float(fallback)
+
+        total = float(summary["sum_prefix"][stop] - summary["sum_prefix"][start])
+        return total / float(count)
+
+    @staticmethod
+    def _forecast_summary_sum(summary: Mapping[str, np.ndarray], start: int, stop: int, fallback: float = 0.0) -> float:
+        length = int(summary["sum_prefix"].size) - 1
+        start = min(max(int(start), 0), length)
+        stop = min(max(int(stop), start), length)
+        if start >= stop:
+            return float(fallback)
+
+        count = int(summary["count_prefix"][stop] - summary["count_prefix"][start])
+        if count <= 0:
+            return float(fallback)
+
+        return float(summary["sum_prefix"][stop] - summary["sum_prefix"][start])
+
+    @staticmethod
+    def _forecast_summary_means(
+        summary: Mapping[str, np.ndarray],
+        starts: np.ndarray,
+        stops: np.ndarray,
+        fallback: float = 0.0,
+    ) -> np.ndarray:
+        length = int(summary["sum_prefix"].size) - 1
+        starts = np.clip(starts.astype(np.int64, copy=False), 0, length)
+        stops = np.clip(stops.astype(np.int64, copy=False), starts, length)
+        counts = summary["count_prefix"][stops] - summary["count_prefix"][starts]
+        totals = summary["sum_prefix"][stops] - summary["sum_prefix"][starts]
+        return np.divide(
+            totals,
+            counts,
+            out=np.full(totals.shape, float(fallback), dtype="float64"),
+            where=counts > 0,
+        )
 
     def _dataset_energy_to_control_step_for_building(self, building, energy_kwh: float) -> float:
         ratio = getattr(building, "time_step_ratio", None)
@@ -2064,20 +2196,23 @@ class CityLearnEntityInterfaceService:
         arrays = self._building_forecast_arrays(building)
         length = len(arrays["load"])
         step_hours = self._step_hours()
+        summaries = {signal: self._forecast_stat_summary(values) for signal, values in arrays.items()}
         for label, seconds in self.FORECAST_HORIZONS:
             start, stop = self._forecast_window(time_step, seconds, length)
-            metrics[f"forecast_load_mean_next_{label}_kw"] = self._forecast_window_stat(arrays["load"], "mean", start, stop)
-            metrics[f"forecast_pv_mean_next_{label}_kw"] = self._forecast_window_stat(arrays["pv"], "mean", start, stop)
-            metrics[f"forecast_net_mean_next_{label}_kw"] = self._forecast_window_stat(arrays["net"], "mean", start, stop)
+            metrics[f"forecast_load_mean_next_{label}_kw"] = self._forecast_summary_mean(summaries["load"], start, stop)
+            metrics[f"forecast_pv_mean_next_{label}_kw"] = self._forecast_summary_mean(summaries["pv"], start, stop)
+            metrics[f"forecast_net_mean_next_{label}_kw"] = self._forecast_summary_mean(summaries["net"], start, stop)
             metrics[f"forecast_import_peak_next_{label}_kw"] = self._forecast_window_stat(arrays["import"], "peak", start, stop)
             metrics[f"forecast_export_peak_next_{label}_kw"] = self._forecast_window_stat(arrays["export"], "peak", start, stop)
             metrics[f"forecast_headroom_min_next_{label}_kw"] = self._forecast_window_stat(arrays["headroom"], "min", start, stop)
-            metrics[f"forecast_pv_surplus_sum_next_{label}_kwh"] = self._forecast_window_stat(arrays["pv_surplus"], "sum", start, stop) * step_hours
+            metrics[f"forecast_pv_surplus_sum_next_{label}_kwh"] = self._forecast_summary_sum(summaries["pv_surplus"], start, stop) * step_hours
 
         bucket_steps = max(
             int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
             1,
         )
+        bucket_starts = np.empty(self.FORECAST_GRID_BUCKETS, dtype=np.int64)
+        bucket_stops = np.empty(self.FORECAST_GRID_BUCKETS, dtype=np.int64)
         for bucket in range(1, self.FORECAST_GRID_BUCKETS + 1):
             start, stop = self._forecast_window(
                 time_step,
@@ -2085,14 +2220,15 @@ class CityLearnEntityInterfaceService:
                 length,
                 offset_steps=(bucket - 1) * bucket_steps,
             )
-            bucket_label = f"{bucket:02d}"
-            for signal, values in arrays.items():
-                metrics[f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_window_stat(
-                    values,
-                    "mean",
-                    start,
-                    stop,
-                )
+            bucket_starts[bucket - 1] = start
+            bucket_stops[bucket - 1] = stop
+
+        for signal, summary in summaries.items():
+            means = self._forecast_summary_means(summary, bucket_starts, bucket_stops)
+            for bucket, value in enumerate(means, start=1):
+                bucket_label = f"{bucket:02d}"
+                metrics[f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw"] = float(value)
+
         return metrics
 
     def _build_derived_forecast_district_metrics(self, *, time_step: int) -> Mapping[str, float]:
@@ -2104,24 +2240,30 @@ class CityLearnEntityInterfaceService:
         length = len(prices_array)
         step_hours = self._step_hours()
         community_arrays = self._community_forecast_arrays()
+        price_summary = self._forecast_stat_summary(prices_array)
+        community_summaries = {
+            signal: self._forecast_stat_summary(values) for signal, values in community_arrays.items()
+        }
 
         for label, seconds in self.FORECAST_HORIZONS:
             start, stop = self._forecast_window(time_step, seconds, length)
             metrics[f"forecast_price_min_next_{label}"] = self._forecast_window_stat(prices_array, "min", start, stop)
-            metrics[f"forecast_price_mean_next_{label}"] = self._forecast_window_stat(prices_array, "mean", start, stop)
+            metrics[f"forecast_price_mean_next_{label}"] = self._forecast_summary_mean(price_summary, start, stop)
             metrics[f"forecast_price_max_next_{label}"] = self._forecast_window_stat(prices_array, "max", start, stop)
-            metrics[f"forecast_community_load_mean_next_{label}_kw"] = self._forecast_window_stat(community_arrays["load"], "mean", start, stop)
-            metrics[f"forecast_community_pv_mean_next_{label}_kw"] = self._forecast_window_stat(community_arrays["pv"], "mean", start, stop)
-            metrics[f"forecast_community_net_mean_next_{label}_kw"] = self._forecast_window_stat(community_arrays["net"], "mean", start, stop)
+            metrics[f"forecast_community_load_mean_next_{label}_kw"] = self._forecast_summary_mean(community_summaries["load"], start, stop)
+            metrics[f"forecast_community_pv_mean_next_{label}_kw"] = self._forecast_summary_mean(community_summaries["pv"], start, stop)
+            metrics[f"forecast_community_net_mean_next_{label}_kw"] = self._forecast_summary_mean(community_summaries["net"], start, stop)
             metrics[f"forecast_community_import_peak_next_{label}_kw"] = self._forecast_window_stat(community_arrays["import"], "peak", start, stop)
             metrics[f"forecast_community_export_peak_next_{label}_kw"] = self._forecast_window_stat(community_arrays["export"], "peak", start, stop)
             metrics[f"forecast_community_headroom_min_next_{label}_kw"] = self._forecast_window_stat(community_arrays["headroom"], "min", start, stop)
-            metrics[f"forecast_community_pv_surplus_sum_next_{label}_kwh"] = self._forecast_window_stat(community_arrays["pv_surplus"], "sum", start, stop) * step_hours
+            metrics[f"forecast_community_pv_surplus_sum_next_{label}_kwh"] = self._forecast_summary_sum(community_summaries["pv_surplus"], start, stop) * step_hours
 
         bucket_steps = max(
             int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
             1,
         )
+        bucket_starts = np.empty(self.FORECAST_GRID_BUCKETS, dtype=np.int64)
+        bucket_stops = np.empty(self.FORECAST_GRID_BUCKETS, dtype=np.int64)
         for bucket in range(1, self.FORECAST_GRID_BUCKETS + 1):
             start, stop = self._forecast_window(
                 time_step,
@@ -2129,20 +2271,19 @@ class CityLearnEntityInterfaceService:
                 length,
                 offset_steps=(bucket - 1) * bucket_steps,
             )
+            bucket_starts[bucket - 1] = start
+            bucket_stops[bucket - 1] = stop
+
+        price_means = self._forecast_summary_means(price_summary, bucket_starts, bucket_stops)
+        for bucket, value in enumerate(price_means, start=1):
             bucket_label = f"{bucket:02d}"
-            metrics[f"forecast_price_mean_bucket_{bucket_label}_15m"] = self._forecast_window_stat(
-                prices_array,
-                "mean",
-                start,
-                stop,
-            )
-            for signal, values in community_arrays.items():
-                metrics[f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_window_stat(
-                    values,
-                    "mean",
-                    start,
-                    stop,
-                )
+            metrics[f"forecast_price_mean_bucket_{bucket_label}_15m"] = float(value)
+
+        for signal, summary in community_summaries.items():
+            means = self._forecast_summary_means(summary, bucket_starts, bucket_stops)
+            for bucket, value in enumerate(means, start=1):
+                bucket_label = f"{bucket:02d}"
+                metrics[f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw"] = float(value)
         return metrics
 
     def _community_forecast_series(self, indices: Sequence[int]) -> Mapping[str, List[float]]:
