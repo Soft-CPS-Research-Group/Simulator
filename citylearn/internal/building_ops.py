@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Iterable, Mapping, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
 
 import numpy as np
 
