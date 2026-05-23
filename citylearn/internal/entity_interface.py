@@ -417,7 +417,15 @@ class CityLearnEntityInterfaceService:
         for i, building in enumerate(env.buildings):
             # Exogenous signals are read at current t, while endogenous values come from
             # the latest settled transition (max(t-1, 0)) to avoid uninitialized buffers.
-            data = building._get_observations_data(include_all=False)
+            observation_names = (
+                self._first_building_base_observation_names
+                if i == 0
+                else self._building_base_observation_names
+            )
+            data = building._ops_service.get_observations_data(
+                include_all=False,
+                observation_names=observation_names,
+            )
 
             if i == 0:
                 first_building_data = data
@@ -2719,6 +2727,17 @@ class CityLearnEntityInterfaceService:
         self._building_action_col_by_name = {name: i for i, name in enumerate(self._building_action_features)}
         self._charger_action_col_by_name = {name: i for i, name in enumerate(self._charger_action_features)}
         self._deferrable_appliance_action_col_by_name = {name: i for i, name in enumerate(self._deferrable_appliance_action_features)}
+        self._district_base_observation_names = tuple(
+            name for name in self._district_features
+            if self._table_feature_legacy["district"].get(name, False)
+        )
+        self._building_base_observation_names = tuple(
+            name for name in self._building_features
+            if self._table_feature_legacy["building"].get(name, False)
+        )
+        self._first_building_base_observation_names = tuple(
+            dict.fromkeys(self._building_base_observation_names + self._district_base_observation_names)
+        )
 
         self._district_obs = np.zeros((1, len(self._district_features)), dtype=np.float32)
         self._building_obs = np.zeros((len(self._building_ids), len(self._building_features)), dtype=np.float32)

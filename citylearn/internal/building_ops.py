@@ -624,11 +624,22 @@ class BuildingOpsService:
             return float(default)
 
     def _ensure_feedback_array(self, owner, name: str):
-        values = getattr(owner, name, None)
         expected = int(getattr(self.building.episode_tracker, 'episode_time_steps', 0) or 0)
+        cache = getattr(owner, '_action_feedback_array_cache', None)
+        if cache is None:
+            cache = {}
+            setattr(owner, '_action_feedback_array_cache', cache)
+
+        cache_key = (name, expected)
+        values = cache.get(cache_key)
+        if values is not None:
+            return values
+
+        values = getattr(owner, name, None)
         if values is None or len(values) != expected:
             values = np.zeros(expected, dtype='float32')
             setattr(owner, name, values)
+        cache[cache_key] = values
         return values
 
     def _set_feedback_value(self, owner, name: str, value: float):
@@ -1045,7 +1056,6 @@ class BuildingOpsService:
         if not deferrable_appliance_actions:
             return 0.0
 
-        building = self.building
         prospective_energy_kwh = 0.0
 
         for action_name, action in deferrable_appliance_actions.items():
