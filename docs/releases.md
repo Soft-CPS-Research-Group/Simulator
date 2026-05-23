@@ -60,6 +60,49 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.0.2 - 2026-05-23
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release to correct the GitHub Actions performance smoke gate for the v1 entity observation contract. The simulator code, physics behavior, schemas and observation outputs are unchanged from v1.0.1.
+
+### Added
+
+- No new public observation, action, KPI or dataset contract.
+
+### Changed
+
+- The CI performance smoke job now uses an explicit entity latency budget for the all-bundles entity configuration.
+- The entity/flat overhead ratio and baseline regression slack in CI now match the current v1 entity contract and GitHub-hosted runner variance.
+
+### Fixed
+
+- Fixed the `run_tests` CI false failure where entity all-bundles latency on `ubuntu-24.04` exceeded a pre-v1 baseline gate despite the simulator performance being within the optimized v1 envelope.
+
+### Dataset/Schema Impact
+
+- No schema or dataset content changes from v1.0.1.
+
+### Compatibility
+
+- Compatible patch release.
+- Runtime simulator logic, physics constraints, KPI formulas, entity table names and feature contracts are unchanged from v1.0.1.
+
+### Validation
+
+- `.venv/bin/ruff check citylearn tests scripts/manual scripts/ci --select E9,F821`: pass
+- `.venv/bin/pytest tests/unit/test_perf_smoke_thresholds.py -q`: pass
+- `.venv/bin/pytest -q --ignore=scripts/manual`: pass, `346 passed, 17 warnings`
+- `.venv/bin/python scripts/ci/perf_smoke.py --episode-steps 600 --seconds 60 --none-max-ms 30 --end-max-ms 45 --entity-max-ms 50 --ratio-max 2.0 --entity-overhead-ratio-max 3.75 --baseline-file scripts/ci/perf_baseline.json --baseline-regression-ratio 4.5 --baseline-slack-ms 15.0`: pass
+- `.venv/bin/python -m build --outdir /tmp/softcpsrecsimulator-1.0.2-dist`: pass
+- `.venv/bin/python -m twine check /tmp/softcpsrecsimulator-1.0.2-dist/*`: pass
+
+### Migration Notes
+
+- No migration required from v1.0.1.
+
 ## v1.0.1 - 2026-05-23
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

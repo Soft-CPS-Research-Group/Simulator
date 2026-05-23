@@ -58,6 +58,49 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.0.2 - 2026-05-23
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release para corrigir o gate de performance smoke do GitHub Actions para o contrato v1 de observacoes entity. O codigo do simulador, comportamento fisico, schemas e outputs de observacao ficam iguais a v1.0.1.
+
+### Added
+
+- Nenhum novo contrato publico de observacao, acao, KPI ou dataset.
+
+### Changed
+
+- O job de performance smoke em CI passa a usar um limite explicito de latencia entity para a configuracao entity com todos os bundles.
+- O ratio entity/flat e a margem de regressao contra baseline em CI passam a estar alinhados com o contrato entity v1 atual e com a variancia dos runners GitHub-hosted.
+
+### Fixed
+
+- Corrigida a falha falsa do CI `run_tests`, onde a latencia entity all-bundles em `ubuntu-24.04` excedia um gate antigo pre-v1 apesar da performance estar dentro do envelope otimizado v1.
+
+### Dataset/Schema Impact
+
+- Sem alteracoes de schema ou conteudo de datasets face a v1.0.1.
+
+### Compatibility
+
+- Patch release compativel.
+- Logica runtime do simulador, constraints fisicas, formulas KPI, nomes de tabelas entity e contrato de features ficam iguais a v1.0.1.
+
+### Validation
+
+- `.venv/bin/ruff check citylearn tests scripts/manual scripts/ci --select E9,F821`: pass
+- `.venv/bin/pytest tests/unit/test_perf_smoke_thresholds.py -q`: pass
+- `.venv/bin/pytest -q --ignore=scripts/manual`: pass, `346 passed, 17 warnings`
+- `.venv/bin/python scripts/ci/perf_smoke.py --episode-steps 600 --seconds 60 --none-max-ms 30 --end-max-ms 45 --entity-max-ms 50 --ratio-max 2.0 --entity-overhead-ratio-max 3.75 --baseline-file scripts/ci/perf_baseline.json --baseline-regression-ratio 4.5 --baseline-slack-ms 15.0`: pass
+- `.venv/bin/python -m build --outdir /tmp/softcpsrecsimulator-1.0.2-dist`: pass
+- `.venv/bin/python -m twine check /tmp/softcpsrecsimulator-1.0.2-dist/*`: pass
+
+### Migration Notes
+
+- Sem migracao necessaria face a v1.0.1.
+
 ## v1.0.1 - 2026-05-23
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
