@@ -420,6 +420,25 @@ class Charger(Environment):
         self.__electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.__past_charging_action_values_kwh = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.__past_connected_evs = [None] * self.episode_tracker.episode_time_steps
+        self.action_feedback_requested_action_normalized = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_limited_action_normalized = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_requested_power_kw = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_limited_power_kw = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        for reason in (
+            'availability',
+            'power_limit',
+            'soc_limit',
+            'building_headroom',
+            'phase_headroom',
+            'export_headroom',
+            'outage',
+            'deferrable_window',
+        ):
+            setattr(
+                self,
+                f'action_feedback_clip_reason_{reason}',
+                np.zeros(self.episode_tracker.episode_time_steps, dtype='float32'),
+            )
 
     def __str__(self):
         return str(self.as_dict())

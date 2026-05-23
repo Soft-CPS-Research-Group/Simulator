@@ -10,6 +10,8 @@ It is a fork-based project used for research and experimentation on:
 - photovoltaic generation (PV),
 - electrical-service constraints (single/three-phase),
 - local community market settlement and KPI analysis.
+- entity-mode RL observation contracts with derived forecasts, physical deadlines,
+  feasible action capacity and requested/limited/applied action feedback.
 
 ## Project Positioning
 

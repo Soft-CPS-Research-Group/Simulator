@@ -457,8 +457,18 @@ def test_entity_table_action_edge_and_start(tmp_path: Path):
         assert specs["tables"]["deferrable_appliance"]["ids"] == ["Building_1/washer_1"]
         assert specs["actions"]["deferrable_appliance"]["features"] == ["start"]
         assert "building_to_deferrable_appliance" in specs["edges"]
-        assert observations["tables"]["deferrable_appliance"].shape == (1, len(DEFERRABLE_OBSERVATIONS))
         features = specs["tables"]["deferrable_appliance"]["features"]
+        assert observations["tables"]["deferrable_appliance"].shape == (1, len(features))
+        for feature in [
+            "remaining_duration_hours",
+            "cycle_remaining_fraction_ratio",
+            "hours_until_earliest_start",
+            "start_window_width_hours",
+            "start_energy_kwh_step",
+            "start_power_kw",
+            "must_start_now",
+        ]:
+            assert feature in features
 
         def value(name: str) -> float:
             return float(observations["tables"]["deferrable_appliance"][0, features.index(name)])
@@ -470,6 +480,13 @@ def test_entity_table_action_edge_and_start(tmp_path: Path):
         assert value("cycle_load_factor_ratio") == pytest.approx(0.75)
         assert value("cycle_peak_step_offset_ratio") == pytest.approx(1.0)
         assert value("remaining_duration_steps") == pytest.approx(2.0)
+        assert value("remaining_duration_hours") == pytest.approx(2 * step_hours)
+        assert value("cycle_remaining_fraction_ratio") == pytest.approx(1.0)
+        assert value("hours_until_earliest_start") == pytest.approx(0.0)
+        assert value("start_window_width_hours") == pytest.approx(0.0)
+        assert value("start_energy_kwh_step") == pytest.approx(0.1)
+        assert value("start_power_kw") == pytest.approx(0.1 / step_hours)
+        assert value("must_start_now") == pytest.approx(1.0)
         assert value("remaining_average_power_kw") == pytest.approx(0.3 / (2 * step_hours))
         assert value("current_step_power_kw") == pytest.approx(0.0)
 
@@ -484,6 +501,55 @@ def test_entity_table_action_edge_and_start(tmp_path: Path):
         env.step(payload)
 
         assert env.buildings[0].deferrable_appliances_electricity_consumption[0] == pytest.approx(0.1)
+    finally:
+        env.close()
+
+
+def test_entity_action_feedback_for_deferrable_start(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=0, latest=0)
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["observation_bundles"] = {"entity_action_feedback": {"active": True}}
+    schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+    env = CityLearnEnv(str(schema_path), interface="entity", central_agent=True, episode_time_steps=3, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        payload = _zero_entity_payload(env)
+        payload["tables"]["deferrable_appliance"][0, 0] = 1.0
+        observations, *_ = env.step(payload)
+        features = env.entity_specs["tables"]["deferrable_appliance"]["features"]
+
+        def value(name: str) -> float:
+            return float(observations["tables"]["deferrable_appliance"][0, features.index(name)])
+
+        assert value("last_start_requested") == pytest.approx(1.0)
+        assert value("last_start_applied") == pytest.approx(1.0)
+        assert value("start_blocked") == pytest.approx(0.0)
+    finally:
+        env.close()
+
+
+def test_entity_action_feedback_for_blocked_deferrable_start(tmp_path: Path):
+    schema_path = _schema_with_deferrable_appliance(tmp_path, earliest=1, latest=1)
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["observation_bundles"] = {"entity_action_feedback": {"active": True}}
+    schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+    env = CityLearnEnv(str(schema_path), interface="entity", central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        payload = _zero_entity_payload(env)
+        payload["tables"]["deferrable_appliance"][0, 0] = 1.0
+        observations, *_ = env.step(payload)
+        features = env.entity_specs["tables"]["deferrable_appliance"]["features"]
+
+        def value(name: str) -> float:
+            return float(observations["tables"]["deferrable_appliance"][0, features.index(name)])
+
+        assert value("last_start_requested") == pytest.approx(1.0)
+        assert value("last_start_applied") == pytest.approx(0.0)
+        assert value("start_blocked") == pytest.approx(1.0)
+        assert value("clip_reason_deferrable_window") == pytest.approx(1.0)
     finally:
         env.close()
 

@@ -149,9 +149,12 @@ Entity mode returns `tables`, `edges` and `meta`. Feature availability depends o
 | `community_*_power_kw` | `entity_community_operational` | kW | District/community power aggregates. |
 | `community_*_energy_kwh_step` | `entity_community_operational` | kWh/step | District/community step energy aggregates. |
 | `community_*_headroom_kw` | `entity_community_operational` | kW | Import/export headroom aggregates. |
+| `community_flexible_*_capacity_kw`, `community_flexible_*_capacity_kwh_step`, `community_flexible_energy_*_kwh` | `entity_community_operational` | mixed | Aggregate flexible charge/discharge power and energy slack. |
 | `active_buildings_count`, `active_chargers_count`, `active_evs_count` | `entity_community_operational` | count | Active topology counts. |
 | `topology_version` | `entity_community_operational` | count | Current topology version. |
 | `community_net_prev_1_kwh_step`, `community_net_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | District lag features. |
+| `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binary | Calendar features; raw `time_step` remains only in payload `meta`. |
+| `forecast_price_*`, `forecast_community_*` | `entity_forecasts_derived` | mixed | Perfect-simulation future aggregates over 15m/1h/3h/6h/24h and 15-minute buckets to 6h. |
 
 ### `building`
 
@@ -163,8 +166,13 @@ Entity mode returns `tables`, `edges` and `meta`. Feature availability depends o
 | `electrical_storage_soc_ratio` | `entity_core_electrical` | ratio | Building BESS SOC. |
 | `charging_total_service_power_kw` | `entity_core_electrical` | kW | Total charging service power. |
 | `charging_phase_{L}_power_kw` | `entity_core_electrical` | kW | Current charging power by phase. |
+| `pv_surplus_power_kw`, `pv_surplus_energy_kwh_step` | `entity_core_electrical` | kW/kWh | Local PV surplus after non-flex load. |
+| `building_import/export_headroom_kw`, `import/export_phase_headroom_kw` | `entity_core_electrical` | kW | Current local electrical headroom. |
+| `flexible_*_capacity_kw`, `flexible_*_capacity_kwh_step`, `flexible_energy_*_kwh` | `entity_core_electrical` | mixed | Aggregate BESS and connected-EV charge/discharge capability and energy slack. |
 | `net_energy_prev_1_kwh_step`, `net_energy_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | Building lag features. |
 | `import_energy_prev_1_kwh_step`, `export_energy_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Import/export lag features. |
+| `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binary | Calendar features. |
+| `forecast_load/pv/net/import/export/headroom/pv_surplus_*` | `entity_forecasts_derived` | kW/kWh | Building future aggregates and 15-minute bucket means. |
 
 ### `charger`
 
@@ -186,9 +194,16 @@ Entity mode returns `tables`, `edges` and `meta`. Feature availability depends o
 | `hours_until_departure`, `time_until_departure_ratio` | `entity_core_electrical` | hours/ratio | Connected EV time pressure. |
 | `energy_to_required_soc_kwh`, `required_average_power_kw` | `entity_core_electrical` | kWh/kW | Energy and average power required to meet departure SOC. |
 | `charging_slack_kw`, `charging_priority_ratio` | `entity_core_electrical` | kW/ratio | Charging urgency descriptors. |
+| `connected_ev_soc_min_ratio`, `connected_ev_energy_available_kwh`, `connected_ev_energy_to_full_kwh` | `entity_core_electrical` | mixed | Connected EV usable discharge energy and remaining charge headroom. |
+| `can_charge`, `can_discharge`, `available_charge/discharge_power_kw`, `available_charge/discharge_action_normalized` | `entity_core_electrical` | mixed | Current feasible charger action capacity after SOC, availability, outage and headroom limits. |
+| `max_deliverable_energy_until_departure_kwh`, `departure_energy_margin_kwh` | `entity_core_electrical` | kWh | Energy still deliverable by departure under current limits and its margin over required energy. |
+| `departure_feasibility_ratio`, `min_required_action_normalized` | `entity_core_electrical` | ratio | Deadline pressure; values above `1` indicate the target needs more than the current feasible/max action. |
 | `charge_efficiency_at_max_ratio`, `discharge_efficiency_at_max_ratio` | `entity_core_electrical` | ratio | Efficiency curve values at max power. |
 | `incoming_ev_required_soc_departure`, `incoming_ev_departure_time_step` | `entity_core_electrical` | ratio/steps | Incoming EV departure requirement when known. |
 | `incoming_ev_hours_until_departure`, `incoming_ev_time_until_departure_ratio` | `entity_core_electrical` | hours/ratio | Incoming EV time pressure. |
+| `last_requested_*`, `last_limited_*`, `last_applied_power_kw`, `last_projection_error_kw` | `entity_action_feedback` | mixed | Previous raw policy request, post-constraint command and physically applied charger power. |
+| `applied_energy_prev_15m_kwh`, `applied_power_mean_prev_15m_kw`, `time_since_last_nonzero_action_hours` | `entity_action_feedback` | mixed | Short action/application history. |
+| `clip_reason_*` | `entity_action_feedback` | binary | One-hot clipping causes: availability, power/deadband, SOC, building/phase/export headroom, outage or deferrable window. |
 
 ### `ev`
 
@@ -211,7 +226,12 @@ Entity mode returns `tables`, `edges` and `meta`. Feature availability depends o
 | `electrical_storage_soc_ratio` | `entity_core_electrical` | ratio | Canonical BESS SOC. |
 | `max_charge_power_kw`, `max_discharge_power_kw` | `entity_core_electrical` | kW | Current max powers. |
 | `energy_to_full_kwh`, `energy_available_kwh` | `entity_core_electrical` | kWh | Energy headroom and available energy. |
+| `can_charge`, `can_discharge`, `available_charge/discharge_power_kw`, `available_charge/discharge_action_normalized` | `entity_core_electrical` | mixed | Current feasible BESS action capacity after SOC, outage and headroom limits. |
+| `available_charge_energy_kwh_step`, `available_discharge_energy_kwh_step` | `entity_core_electrical` | kWh/step | Feasible BESS energy this step after SOC/headroom/outage limits. |
+| `max_charge_energy_kwh_step`, `max_discharge_energy_kwh_step` | `entity_core_electrical` | kWh/step | Nominal BESS power limit converted to this step duration. |
+| `charge_headroom_ratio`, `discharge_available_ratio`, `usable_soc_ratio` | `entity_core_electrical` | ratio | Normalized BESS charge room, discharge energy and SOC within usable range. |
 | `current_efficiency_ratio`, `degraded_capacity_kwh`, `soc_min_ratio` | `entity_core_electrical` | mixed | Current efficiency, degraded capacity and minimum SOC. |
+| `last_requested_*`, `last_limited_*`, `last_applied_power_kw`, `last_projection_error_kw`, `clip_reason_*` | `entity_action_feedback` | mixed | Previous BESS action request, limited command, applied power and clipping causes. |
 
 ### `pv`
 
@@ -226,7 +246,9 @@ Only present when `entity_core_electrical` is enabled.
 
 ### `deferrable_appliance`
 
-All features are in `entity_base`; see the flat deferrable table above for definitions.
+Base deferrable features are in `entity_base`; see the flat deferrable table above for definitions. Entity deferrables also include `remaining_duration_hours`, `cycle_remaining_fraction_ratio`, `hours_until_earliest_start`, `start_window_width_hours`, `start_energy_kwh_step`, `start_power_kw` and `must_start_now` for RL deadline pressure. With `entity_action_feedback`, deferrables also expose `last_start_requested`, `last_start_applied`, `start_blocked` and `clip_reason_*`.
+
+Derived forecasts use future dataset values as perfect simulator forecasts (`meta.forecast_config.source = "actual_future"`). They are intended as a simulator contract; real-world adapters should populate equivalent fields from real forecasts.
 
 ## Entity Edges
 

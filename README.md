@@ -46,6 +46,7 @@ Additional reference: [KPI v2 naming tree](docs/KPI_V2_TREE.md).
 | EVs | Charger-centric schedules, connected/incoming EVs, SOC requirements and V2G-capable actions. |
 | Deferrables | Normalized cycle catalog plus sparse flexibility schedule. |
 | Interfaces | Flat Gymnasium vectors and entity tables/edges for offline RL, GraphRL and Transformers. |
+| Entity RL observations | Forecast bundles, physical deadline pressure, feasible action capacity and requested/limited/applied action feedback. |
 | Dynamic topology | Add/remove buildings and assets during simulation in entity mode. |
 | Three phase | Phase connections, headroom, phase power, violations and phase KPIs. |
 | Community market | Local settlement, import weights, savings and self-consumption KPIs. |

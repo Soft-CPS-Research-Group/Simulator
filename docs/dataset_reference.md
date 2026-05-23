@@ -89,6 +89,21 @@ Cooling and heating demand cannot both be positive in the same timestep.
 
 For sub-hourly datasets, countdown fields must be expressed in timesteps at the dataset resolution. Example: 1 hour at 15s is 240 steps.
 
+## Entity Observation Bundles in Packaged Datasets
+
+The packaged 15-second entity datasets and `citylearn_challenge_2022_phase_all_plus_evs` opt in to all entity observation bundles:
+
+| Bundle | Purpose |
+|---|---|
+| `entity_core_electrical` | Physical power, energy, SOC and asset capability descriptors. |
+| `entity_community_operational` | Community power, headroom and flexible capacity aggregates. |
+| `entity_forecasts_existing` | Existing dataset `*_predicted_*` observations. |
+| `entity_forecasts_derived` | Simulator-perfect future aggregates and 15-minute bucket grid. |
+| `entity_temporal_derived` | Robust calendar and short lag features. |
+| `entity_action_feedback` | Requested, limited and applied action feedback with clipping reasons. |
+
+Other schemas keep the default-compatible behavior unless they declare `observation_bundles`.
+
 ## Deferrable Appliances
 
 The official format is sparse: a cycle profile catalog plus a flexibility request schedule. Do not repeat the full `load_profile` at every timestep.

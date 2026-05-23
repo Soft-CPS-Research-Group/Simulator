@@ -451,6 +451,13 @@ class BuildingOpsService:
 
         if deferrable_appliance_actions is None:
             deferrable_appliance_actions = washing_machine_actions
+        requested_electric_vehicle_storage_actions = (
+            None if electric_vehicle_storage_actions is None else dict(electric_vehicle_storage_actions)
+        )
+        requested_electrical_storage_action = electrical_storage_action
+        requested_deferrable_appliance_actions = (
+            None if deferrable_appliance_actions is None else dict(deferrable_appliance_actions)
+        )
         if deferrable_appliance_actions is not None:
             deferrable_appliance_actions = self._apply_deferrable_profile_constraints(deferrable_appliance_actions)
 
@@ -463,6 +470,27 @@ class BuildingOpsService:
         else:
             building._charging_constraint_penalty_kwh = 0.0
             building._charging_constraint_last_penalty_kwh = 0.0
+
+        if requested_electric_vehicle_storage_actions is not None:
+            charger_by_id = action_cache['charger_by_id']
+            for charger_id, requested_action in requested_electric_vehicle_storage_actions.items():
+                charger = charger_by_id.get(charger_id)
+                if charger is None:
+                    continue
+                limited_action = (electric_vehicle_storage_actions or {}).get(charger_id, 0.0)
+                self._record_charger_action_feedback(charger, requested_action, limited_action)
+
+        if requested_electrical_storage_action is not None:
+            self._record_storage_action_feedback(requested_electrical_storage_action, electrical_storage_action)
+
+        if requested_deferrable_appliance_actions is not None:
+            appliance_by_action = action_cache['deferrable_appliance_by_action']
+            for action_name, requested_action in requested_deferrable_appliance_actions.items():
+                appliance = appliance_by_action.get(action_name)
+                if appliance is None:
+                    continue
+                limited_action = (deferrable_appliance_actions or {}).get(action_name, 0.0)
+                self._record_deferrable_action_feedback(appliance, requested_action, limited_action)
 
         actions = {
             'cooling_demand': (building.update_cooling_demand, (cooling_device_action,)),
@@ -524,10 +552,28 @@ class BuildingOpsService:
         for key in priority_list:
             func, args = actions[key]
             if args and (limit_control_actions or key.startswith('deferrable_appliance_')):
+                original_args = args
                 args = self._limit_outage_control_action(key, func, args)
+                if args != original_args:
+                    owner = getattr(func, '__self__', None)
+                    if key.startswith('electric_vehicle_storage_') and owner is not None:
+                        requested = self._safe_index(getattr(owner, 'action_feedback_requested_action_normalized', []), building.time_step, 0.0)
+                        self._record_charger_action_feedback(owner, requested, args[0])
+                        self._set_feedback_reason(owner, 'outage')
+                    elif key.startswith('deferrable_appliance_') and owner is not None:
+                        requested = self._safe_index(getattr(owner, 'action_feedback_last_start_requested', []), building.time_step, 0.0)
+                        self._record_deferrable_action_feedback(owner, requested, args[0])
+                        self._set_feedback_reason(owner, 'outage')
 
             try:
                 func(*args)
+                owner = getattr(func, '__self__', None)
+                if key.startswith('electric_vehicle_storage_') and owner is not None:
+                    self._record_charger_post_apply_feedback(owner)
+                elif key == 'electrical_storage':
+                    self._record_storage_post_apply_feedback()
+                elif key.startswith('deferrable_appliance_') and owner is not None:
+                    self._record_deferrable_post_apply_feedback(owner)
             except NotImplementedError:
                 pass
 
@@ -576,6 +622,153 @@ class BuildingOpsService:
             return self._safe_scalar(values[idx], default)
         except Exception:
             return float(default)
+
+    def _ensure_feedback_array(self, owner, name: str):
+        values = getattr(owner, name, None)
+        expected = int(getattr(self.building.episode_tracker, 'episode_time_steps', 0) or 0)
+        if values is None or len(values) != expected:
+            values = np.zeros(expected, dtype='float32')
+            setattr(owner, name, values)
+        return values
+
+    def _set_feedback_value(self, owner, name: str, value: float):
+        t = int(self.building.time_step)
+        values = self._ensure_feedback_array(owner, name)
+        if 0 <= t < len(values):
+            values[t] = self._safe_scalar(value, 0.0)
+
+    def _clear_feedback_reasons(self, owner, prefix: str = 'action_feedback_'):
+        for reason in (
+            'availability',
+            'power_limit',
+            'soc_limit',
+            'building_headroom',
+            'phase_headroom',
+            'export_headroom',
+            'outage',
+            'deferrable_window',
+        ):
+            self._set_feedback_value(owner, f'{prefix}clip_reason_{reason}', 0.0)
+
+    def _set_feedback_reason(self, owner, reason: str, prefix: str = 'action_feedback_'):
+        self._set_feedback_value(owner, f'{prefix}clip_reason_{reason}', 1.0)
+
+    def _constraint_clip_reasons(self, requested_power_kw: float, limited_power_kw: float) -> List[str]:
+        if abs(requested_power_kw - limited_power_kw) <= 1.0e-6:
+            return []
+
+        building = self.building
+        state = getattr(building, '_charging_constraints_state', {}) or {}
+        reasons: List[str] = []
+        building_headroom = self._safe_scalar(state.get('building_headroom_kw'), np.nan)
+        export_headroom = self._safe_scalar(state.get('building_export_headroom_kw'), np.nan)
+        phase_headrooms = [
+            self._safe_scalar(value, np.nan)
+            for value in (state.get('phase_headroom_kw') or {}).values()
+        ]
+        phase_export_headrooms = [
+            self._safe_scalar(value, np.nan)
+            for value in (state.get('phase_export_headroom_kw') or {}).values()
+        ]
+
+        if requested_power_kw > limited_power_kw and np.isfinite(building_headroom) and building_headroom <= 1.0e-6:
+            reasons.append('building_headroom')
+        if requested_power_kw < limited_power_kw and np.isfinite(export_headroom) and export_headroom <= 1.0e-6:
+            reasons.append('export_headroom')
+        if any(np.isfinite(value) and value <= 1.0e-6 for value in phase_headrooms):
+            reasons.append('phase_headroom')
+        if any(np.isfinite(value) and value <= 1.0e-6 for value in phase_export_headrooms):
+            reasons.append('export_headroom')
+        if not reasons:
+            reasons.append('power_limit')
+        return reasons
+
+    def _record_charger_action_feedback(self, charger, requested_action: float, limited_action: float):
+        requested_action = float(np.clip(self._safe_scalar(requested_action, 0.0), -1.0, 1.0))
+        limited_action = float(np.clip(self._safe_scalar(limited_action, 0.0), -1.0, 1.0))
+        requested_power = self._charger_requested_power_kw(charger, requested_action)
+        limited_power = self._charger_requested_power_kw(charger, limited_action)
+
+        self._set_feedback_value(charger, 'action_feedback_requested_action_normalized', requested_action)
+        self._set_feedback_value(charger, 'action_feedback_limited_action_normalized', limited_action)
+        self._set_feedback_value(charger, 'action_feedback_requested_power_kw', requested_power)
+        self._set_feedback_value(charger, 'action_feedback_limited_power_kw', limited_power)
+        self._clear_feedback_reasons(charger)
+
+        if abs(requested_action) > 1.0e-9 and abs(requested_power) <= 1.0e-9:
+            self._set_feedback_reason(charger, 'power_limit')
+        if abs(requested_power) > 1.0e-9 and charger.connected_electric_vehicle is None:
+            self._set_feedback_reason(charger, 'availability')
+        for reason in self._constraint_clip_reasons(requested_power, limited_power):
+            self._set_feedback_reason(charger, reason)
+
+    def _record_charger_post_apply_feedback(self, charger):
+        t = int(self.building.time_step)
+        limited_power = self._safe_index(getattr(charger, 'action_feedback_limited_power_kw', []), t, 0.0)
+        applied_energy = self._safe_index(charger.electricity_consumption, t, 0.0)
+        applied_power = self._control_step_energy_to_power_kw(applied_energy)
+        if abs(limited_power) > 1.0e-6 and abs(applied_power - limited_power) > 1.0e-6:
+            if charger.connected_electric_vehicle is None:
+                self._set_feedback_reason(charger, 'availability')
+            else:
+                self._set_feedback_reason(charger, 'soc_limit')
+
+    def _record_storage_action_feedback(self, requested_action: float, limited_action: float):
+        building = self.building
+        prefix = 'action_feedback_electrical_storage_'
+        requested_action = float(np.clip(self._safe_scalar(requested_action, 0.0), -1.0, 1.0))
+        limited_action = float(np.clip(self._safe_scalar(limited_action, 0.0), -1.0, 1.0))
+        requested_power = self._storage_requested_power_kw(requested_action)
+        limited_power = self._storage_requested_power_kw(limited_action)
+
+        self._set_feedback_value(building, f'{prefix}requested_action_normalized', requested_action)
+        self._set_feedback_value(building, f'{prefix}limited_action_normalized', limited_action)
+        self._set_feedback_value(building, f'{prefix}requested_power_kw', requested_power)
+        self._set_feedback_value(building, f'{prefix}limited_power_kw', limited_power)
+        self._clear_feedback_reasons(building, prefix=prefix)
+        for reason in self._constraint_clip_reasons(requested_power, limited_power):
+            self._set_feedback_reason(building, reason, prefix=prefix)
+
+    def _record_storage_post_apply_feedback(self):
+        building = self.building
+        prefix = 'action_feedback_electrical_storage_'
+        t = int(building.time_step)
+        limited_power = self._safe_index(getattr(building, f'{prefix}limited_power_kw', []), t, 0.0)
+        applied_energy = self._safe_index(building.electrical_storage.electricity_consumption, t, 0.0)
+        applied_power = self._control_step_energy_to_power_kw(applied_energy)
+        if abs(limited_power) > 1.0e-6 and abs(applied_power - limited_power) > 1.0e-6:
+            if building.power_outage and limited_power < 0.0:
+                self._set_feedback_reason(building, 'outage', prefix=prefix)
+            else:
+                self._set_feedback_reason(building, 'soc_limit', prefix=prefix)
+
+    def _record_deferrable_action_feedback(self, appliance, requested_action: float, limited_action: float):
+        requested_action = self._safe_scalar(requested_action, 0.0)
+        limited_action = self._safe_scalar(limited_action, 0.0)
+        requested_start = 1.0 if getattr(appliance, '_is_start_command')(requested_action) else 0.0
+        limited_start = 1.0 if getattr(appliance, '_is_start_command')(limited_action) else 0.0
+        self._set_feedback_value(appliance, 'action_feedback_last_start_requested', requested_start)
+        self._set_feedback_value(appliance, 'action_feedback_last_start_applied', 0.0)
+        self._set_feedback_value(appliance, 'action_feedback_start_blocked', 1.0 if requested_start and not limited_start else 0.0)
+        self._clear_feedback_reasons(appliance)
+
+        if requested_start and not limited_start:
+            reasons = self._deferrable_block_reasons(appliance, requested_action)
+            for reason in reasons:
+                self._set_feedback_reason(appliance, reason)
+
+    def _record_deferrable_post_apply_feedback(self, appliance):
+        t = int(self.building.time_step)
+        requested = self._safe_index(getattr(appliance, 'action_feedback_last_start_requested', []), t, 0.0)
+        if requested <= 0.0:
+            return
+        current_energy = self._safe_index(appliance.electricity_consumption, t, 0.0)
+        applied = 1.0 if current_energy > 1.0e-9 else 0.0
+        self._set_feedback_value(appliance, 'action_feedback_last_start_applied', applied)
+        self._set_feedback_value(appliance, 'action_feedback_start_blocked', 1.0 if applied <= 0.0 else 0.0)
+        if applied <= 0.0:
+            for reason in self._deferrable_block_reasons(appliance, 1.0):
+                self._set_feedback_reason(appliance, reason)
 
     def _dataset_energy_to_control_step(self, energy_kwh: float) -> float:
         ratio = getattr(self.building, 'time_step_ratio', None)
@@ -816,6 +1009,37 @@ class BuildingOpsService:
                 return False
 
         return True
+
+    def _deferrable_block_reasons(self, appliance, action: float) -> List[str]:
+        try:
+            is_start = bool(appliance._is_start_command(action))
+        except Exception:
+            is_start = self._safe_scalar(action, 0.0) > 0.0
+        if not is_start:
+            return []
+
+        observations = {}
+        try:
+            observations = dict(appliance.observations())
+        except Exception:
+            observations = {}
+
+        if self._safe_scalar(observations.get('can_start', 0.0), 0.0) <= 0.0:
+            return ['deferrable_window']
+
+        profile = self._deferrable_start_profile_kwh(appliance, action)
+        if profile.size <= 0:
+            return ['deferrable_window']
+        if self._deferrable_profile_feasible(profile):
+            return []
+
+        current_step = int(self.building.time_step)
+        for offset in range(len(profile)):
+            if self._power_outage_at_step(current_step + offset):
+                return ['outage']
+        if getattr(self.building, '_electrical_service_enabled', False):
+            return ['building_headroom', 'phase_headroom']
+        return ['deferrable_window']
 
     def _prospective_deferrable_start_power_kw(self, deferrable_appliance_actions: Optional[Mapping[str, float]]) -> float:
         if not deferrable_appliance_actions:

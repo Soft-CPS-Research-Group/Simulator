@@ -179,12 +179,15 @@ Entity mode retorna tabelas. As features disponiveis dependem do schema, dos ass
 | `community_building_export_headroom_kw` | `entity_community_operational` | kW | Headroom export total. |
 | `community_phase_headroom_kw` | `entity_community_operational` | kW | Headroom import por fases agregado. |
 | `community_phase_export_headroom_kw` | `entity_community_operational` | kW | Headroom export por fases agregado. |
+| `community_flexible_*_capacity_kw`, `community_flexible_*_capacity_kwh_step`, `community_flexible_energy_*_kwh` | `entity_community_operational` | varia | Flexibilidade agregada da comunidade para carga/descarga e folga energetica. |
 | `active_buildings_count` | `entity_community_operational` | count | Buildings ativos. |
 | `active_chargers_count` | `entity_community_operational` | count | Chargers ativos. |
 | `active_evs_count` | `entity_community_operational` | count | EVs ativos. |
 | `topology_version` | `entity_community_operational` | count | Versao da topologia. |
 | `community_net_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Lag 1 da net community. |
 | `community_net_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | Media curta da net community. |
+| `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binario | Calendario robusto; `time_step` cru fica apenas em `meta`. |
+| `forecast_price_*`, `forecast_community_*` | `entity_forecasts_derived` | varia | Agregados futuros perfeitos 15m/1h/3h/6h/24h e buckets de 15 min ate 6h. |
 
 ## Tabela `building`
 
@@ -201,6 +204,8 @@ Entity mode retorna tabelas. As features disponiveis dependem do schema, dos ass
 | `load_energy_kwh_step` | `entity_core_electrical` | kWh/step | Energia de carga agregada. |
 | `pv_power_kw` | `entity_core_electrical` | kW | PV do building. |
 | `pv_energy_kwh_step` | `entity_core_electrical` | kWh/step | Energia PV. |
+| `pv_surplus_power_kw` | `entity_core_electrical` | kW | Excedente PV local depois da carga nao flexivel. |
+| `pv_surplus_energy_kwh_step` | `entity_core_electrical` | kWh/step | Excedente PV local no step. |
 | `bess_power_kw` | `entity_core_electrical` | kW | Potencia BESS. |
 | `bess_energy_kwh_step` | `entity_core_electrical` | kWh/step | Energia BESS. |
 | `ev_charging_power_kw` | `entity_core_electrical` | kW | Potencia EV charging. |
@@ -208,10 +213,14 @@ Entity mode retorna tabelas. As features disponiveis dependem do schema, dos ass
 | `electrical_storage_soc_ratio` | `entity_core_electrical` | ratio | SOC BESS. |
 | `charging_total_service_power_kw` | `entity_core_electrical` | kW | Potencia charging total a passar no servico. |
 | `charging_phase_{L}_power_kw` | `entity_core_electrical` | kW | Potencia atual por fase. |
+| `building_import/export_headroom_kw`, `import/export_phase_headroom_kw` | `entity_core_electrical` | kW | Headroom eletrico local atual. |
+| `flexible_*_capacity_kw`, `flexible_*_capacity_kwh_step`, `flexible_energy_*_kwh` | `entity_core_electrical` | varia | Capacidade agregada BESS + EVs ligados para carga/descarga e folga energetica. |
 | `net_energy_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Net lag 1. |
 | `net_energy_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | Media net lag 3. |
 | `import_energy_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Import lag 1. |
 | `export_energy_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Export lag 1. |
+| `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binario | Calendario robusto. |
+| `forecast_load/pv/net/import/export/headroom/pv_surplus_*` | `entity_forecasts_derived` | kW/kWh | Agregados futuros e buckets de 15 min por building. |
 
 ## Tabela `charger`
 
@@ -242,12 +251,25 @@ Entity mode retorna tabelas. As features disponiveis dependem do schema, dos ass
 | `avg_power_to_departure_kw` | `entity_core_electrical` | kW | Alias operacional do anterior. |
 | `charging_slack_kw` | `entity_core_electrical` | kW | `max_charging_power - required_average_power`. |
 | `charging_priority_ratio` | `entity_core_electrical` | ratio | Urgencia energetica normalizada. |
+| `connected_ev_soc_min_ratio` | `entity_core_electrical` | ratio | SOC minimo descarregavel do EV ligado. |
+| `connected_ev_energy_available_kwh` | `entity_core_electrical` | kWh | Energia V2G disponivel acima do SOC minimo. |
+| `connected_ev_energy_to_full_kwh` | `entity_core_electrical` | kWh | Energia que ainda cabe no EV ligado. |
+| `can_charge`, `can_discharge` | `entity_core_electrical` | binario | Se ha capacidade factivel de carga/descarga agora. |
+| `available_charge/discharge_power_kw` | `entity_core_electrical` | kW | Potencia factivel agora depois de SOC, availability, outage e headroom. |
+| `available_charge/discharge_action_normalized` | `entity_core_electrical` | ratio | Magnitude normalizada da acao ainda factivel. |
+| `max_deliverable_energy_until_departure_kwh` | `entity_core_electrical` | kWh | Energia ainda entregavel ate departure sob limites atuais. |
+| `departure_energy_margin_kwh` | `entity_core_electrical` | kWh | Margem entre energia entregavel e energia requerida. |
+| `departure_feasibility_ratio` | `entity_core_electrical` | ratio | Pressao de deadline; acima de 1 indica target acima do entregavel atual. |
+| `min_required_action_normalized` | `entity_core_electrical` | ratio | Acao minima media normalizada necessaria; acima de 1 indica impossibilidade pelo max power atual. |
 | `charge_efficiency_at_max_ratio` | `entity_core_electrical` | ratio | Eficiencia da curva em potencia maxima de carga. |
 | `discharge_efficiency_at_max_ratio` | `entity_core_electrical` | ratio | Eficiencia da curva em potencia maxima de descarga. |
 | `incoming_ev_required_soc_departure` | `entity_core_electrical` | ratio | Required SOC do EV incoming se conhecido. |
 | `incoming_ev_departure_time_step` | `entity_core_electrical` | steps | Departure do EV incoming se conhecido. |
 | `incoming_ev_hours_until_departure` | `entity_core_electrical` | h | Horas ate departure do EV incoming. |
 | `incoming_ev_time_until_departure_ratio` | `entity_core_electrical` | ratio | Horas ate departure / 24. |
+| `last_requested_*`, `last_limited_*`, `last_applied_power_kw`, `last_projection_error_kw` | `entity_action_feedback` | varia | Pedido bruto da policy, comando apos constraints e potencia fisicamente aplicada. |
+| `applied_energy_prev_15m_kwh`, `applied_power_mean_prev_15m_kw`, `time_since_last_nonzero_action_hours` | `entity_action_feedback` | varia | Historico curto de acao/aplicacao. |
+| `clip_reason_*` | `entity_action_feedback` | binario | Motivos de clipping: availability, power/deadband, SOC, headroom building/fase/export, outage ou janela deferrable. |
 
 ## Tabela `ev`
 
@@ -280,9 +302,16 @@ Entity mode retorna tabelas. As features disponiveis dependem do schema, dos ass
 | `max_discharge_power_kw` | `entity_core_electrical` | kW | Potencia maxima de descarga no estado atual. |
 | `energy_to_full_kwh` | `entity_core_electrical` | kWh | Energia ate capacidade cheia. |
 | `energy_available_kwh` | `entity_core_electrical` | kWh | Energia acima do SOC minimo. |
+| `can_charge`, `can_discharge` | `entity_core_electrical` | binario | Se o BESS pode carregar/descarregar agora. |
+| `available_charge/discharge_power_kw` | `entity_core_electrical` | kW | Potencia BESS factivel agora depois de SOC, outage e headroom. |
+| `available_charge/discharge_action_normalized` | `entity_core_electrical` | ratio | Magnitude normalizada de acao BESS ainda factivel. |
+| `available_charge_energy_kwh_step`, `available_discharge_energy_kwh_step` | `entity_core_electrical` | kWh/step | Energia BESS factivel neste step apos limites de SOC/headroom/outage. |
+| `max_charge_energy_kwh_step`, `max_discharge_energy_kwh_step` | `entity_core_electrical` | kWh/step | Limite nominal de potencia BESS convertido para a duracao do step. |
+| `charge_headroom_ratio`, `discharge_available_ratio`, `usable_soc_ratio` | `entity_core_electrical` | ratio | Headroom de carga, energia descarregavel e SOC dentro da faixa usavel. |
 | `current_efficiency_ratio` | `entity_core_electrical` | ratio | Eficiencia corrente. |
 | `degraded_capacity_kwh` | `entity_core_electrical` | kWh | Capacidade apos degradacao. |
 | `soc_min_ratio` | `entity_core_electrical` | ratio | SOC minimo derivado de DoD. |
+| `last_requested_*`, `last_limited_*`, `last_applied_power_kw`, `last_projection_error_kw`, `clip_reason_*` | `entity_action_feedback` | varia | Pedido, comando limitado, aplicacao real e motivos de clipping BESS. |
 
 ## Tabela `pv`
 
@@ -324,8 +353,17 @@ Todas as features pertencem a `entity_base` e sao sempre por appliance.
 | `cycle_load_factor_ratio` | ratio | Potencia media / pico. |
 | `cycle_peak_step_offset_ratio` | ratio | Posicao do pico dentro do ciclo. |
 | `remaining_duration_steps` | steps | Duracao restante. |
+| `remaining_duration_hours` | h | Duracao restante em tempo fisico. |
+| `cycle_remaining_fraction_ratio` | ratio | Fracao de energia do ciclo ainda por executar. |
+| `hours_until_earliest_start` | h | Tempo ate primeiro start permitido. |
+| `start_window_width_hours` | h | Largura da janela de start. |
+| `start_energy_kwh_step`, `start_power_kw` | kWh/kW | Energia/potencia se arrancar agora. |
+| `must_start_now` | binario | Deadline de start esta no step atual ou ja passou. |
 | `remaining_average_power_kw` | kW | Potencia media necessaria restante. |
 | `current_step_power_kw` | kW | Potencia equivalente do step atual. |
+| `last_start_requested`, `last_start_applied`, `start_blocked`, `clip_reason_*` | entity_action_feedback | varia | Feedback curto do ultimo comando de start. |
+
+Forecasts derivados usam valores futuros do dataset como forecast perfeito do simulador (`meta.forecast_config.source = "actual_future"`). Em uso real, adapters externos devem preencher campos equivalentes com forecasts reais.
 
 ## Edges Entity
 

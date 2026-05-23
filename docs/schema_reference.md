@@ -90,6 +90,8 @@ Entity-only configuration:
   "entity_core_electrical": true,
   "entity_community_operational": true,
   "entity_forecasts_existing": false,
+  "entity_forecasts_derived": false,
+  "entity_action_feedback": false,
   "entity_temporal_derived": true
 }
 ```
@@ -100,7 +102,9 @@ Entity-only configuration:
 | `entity_core_electrical` | `false` | Power, step energy, PV, BESS, EV, efficiency and building electrical metrics. |
 | `entity_community_operational` | `false` | District/community aggregates, headroom, counts and topology version. |
 | `entity_forecasts_existing` | `false` | Forecasts already present in the dataset. |
-| `entity_temporal_derived` | `false` | Short lags and rolling means. |
+| `entity_forecasts_derived` | `false` | Perfect-simulation future aggregates and 15-minute bucket grid from dataset futures. |
+| `entity_temporal_derived` | `false` | Short lags, rolling means and calendar sin/cos features. |
+| `entity_action_feedback` | `false` | Requested, limited and applied action feedback plus clipping-reason flags. |
 
 ## `buildings`
 

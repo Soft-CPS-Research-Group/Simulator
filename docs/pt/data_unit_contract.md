@@ -86,6 +86,15 @@ Regras práticas:
   `electric_vehicle_estimated_arrival_time` são contagens de passos até ao evento,
   não horas absolutas do dia. Ao converter de 1h para 15s, um valor `12` passa para
   `2880` no primeiro subpasso e decrece a cada passo de 15s.
+- Forecasts derivados da entity interface: calculados a partir de valores futuros
+  do dataset em tempo de simulador; os horizontes em segundos sao convertidos com
+  `seconds_per_time_step`.
+- Feedback de acao da entity interface: requested/limited sao comandos
+  normalizados; requested/limited/applied power sao `kW`; energia em janelas curtas
+  e `kWh`.
+- Energia BESS na entity interface: `max_*_energy_kwh_step` e a potencia nominal
+  convertida pela duracao do step; `available_*_energy_kwh_step` e a capacidade
+  limitada por SOC/headroom/outage no mesmo step.
 - Datasets abaixo de 1 minuto: incluir uma coluna opcional `seconds` no CSV de
   `energy_simulation` quando possível. Sem essa coluna, `hour` + `minutes` não
   conseguem inferir a cadência sub-minuto, e o simulador assume que a cadência do
@@ -181,6 +190,14 @@ features físicas/normalizadas derivadas:
   necessária.
 - `charging_priority_ratio`: urgência em `[0, 1]`, calculada a partir da razão entre
   potência média necessária e potência máxima do carregador.
+- `max_deliverable_energy_until_departure_kwh`: energia ainda entregável até ao
+  departure com a potência factível atual.
+- `departure_energy_margin_kwh`: margem entre energia entregável e energia
+  necessária; valor negativo indica target atualmente inviável.
+- `departure_feasibility_ratio`: energia necessária dividida pela energia
+  entregável; acima de `1` indica inviabilidade sob os limites atuais.
+- `min_required_action_normalized`: potência média necessária dividida pela potência
+  máxima do carregador; acima de `1` indica conflito de deadline por potência.
 
 ## PV
 

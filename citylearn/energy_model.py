@@ -1472,6 +1472,24 @@ class DeferrableAppliance(ElectricDevice):
         self.__cycle_completion_time_steps = {}
         self.__cycle_missed_time_steps = {}
         self.__cycle_cancelled_time_steps = {}
+        self.action_feedback_last_start_requested = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_last_start_applied = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_start_blocked = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        for reason in (
+            'availability',
+            'power_limit',
+            'soc_limit',
+            'building_headroom',
+            'phase_headroom',
+            'export_headroom',
+            'outage',
+            'deferrable_window',
+        ):
+            setattr(
+                self,
+                f'action_feedback_clip_reason_{reason}',
+                np.zeros(self.episode_tracker.episode_time_steps, dtype='float32'),
+            )
 
         episode_start = int(getattr(self.episode_tracker, 'episode_start_time_step', 0) or 0)
         for cycle in self.deferrable_appliance_simulation.flexibility_schedule:

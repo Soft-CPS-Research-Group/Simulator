@@ -60,13 +60,27 @@ class CityLearnEntityInterfaceService:
     CORE_BUNDLE = "entity_core_electrical"
     COMMUNITY_BUNDLE = "entity_community_operational"
     FORECAST_BUNDLE = "entity_forecasts_existing"
+    DERIVED_FORECAST_BUNDLE = "entity_forecasts_derived"
     TEMPORAL_BUNDLE = "entity_temporal_derived"
+    ACTION_FEEDBACK_BUNDLE = "entity_action_feedback"
     DEFAULT_OBSERVATION_BUNDLES = {
         CORE_BUNDLE: False,
         COMMUNITY_BUNDLE: False,
         FORECAST_BUNDLE: False,
+        DERIVED_FORECAST_BUNDLE: False,
         TEMPORAL_BUNDLE: False,
+        ACTION_FEEDBACK_BUNDLE: False,
     }
+    FORECAST_HORIZONS = (
+        ("15m", 15 * 60),
+        ("1h", 60 * 60),
+        ("3h", 3 * 60 * 60),
+        ("6h", 6 * 60 * 60),
+        ("24h", 24 * 60 * 60),
+    )
+    FORECAST_GRID_BUCKET_SECONDS = 15 * 60
+    FORECAST_GRID_SECONDS = 6 * 60 * 60
+    FORECAST_GRID_BUCKETS = int(FORECAST_GRID_SECONDS / FORECAST_GRID_BUCKET_SECONDS)
 
     LEGACY_CHARGER_FEATURES = [
         "connected_state",
@@ -97,12 +111,57 @@ class CityLearnEntityInterfaceService:
         "avg_power_to_departure_kw",
         "charging_slack_kw",
         "charging_priority_ratio",
+        "connected_ev_soc_min_ratio",
+        "connected_ev_energy_available_kwh",
+        "connected_ev_energy_to_full_kwh",
+        "can_charge",
+        "can_discharge",
+        "available_charge_power_kw",
+        "available_discharge_power_kw",
+        "available_charge_action_normalized",
+        "available_discharge_action_normalized",
+        "max_deliverable_energy_until_departure_kwh",
+        "departure_energy_margin_kwh",
+        "departure_feasibility_ratio",
+        "min_required_action_normalized",
         "charge_efficiency_at_max_ratio",
         "discharge_efficiency_at_max_ratio",
         "incoming_ev_required_soc_departure",
         "incoming_ev_departure_time_step",
         "incoming_ev_hours_until_departure",
         "incoming_ev_time_until_departure_ratio",
+    ]
+    ACTION_FEEDBACK_FEATURES = [
+        "last_requested_action_normalized",
+        "last_limited_action_normalized",
+        "last_requested_power_kw",
+        "last_limited_power_kw",
+        "last_applied_power_kw",
+        "last_projection_error_kw",
+        "applied_energy_prev_15m_kwh",
+        "applied_power_mean_prev_15m_kw",
+        "time_since_last_nonzero_action_hours",
+        "clip_reason_availability",
+        "clip_reason_power_limit",
+        "clip_reason_soc_limit",
+        "clip_reason_building_headroom",
+        "clip_reason_phase_headroom",
+        "clip_reason_export_headroom",
+        "clip_reason_outage",
+        "clip_reason_deferrable_window",
+    ]
+    DEFERRABLE_ACTION_FEEDBACK_FEATURES = [
+        "last_start_requested",
+        "last_start_applied",
+        "start_blocked",
+        "clip_reason_availability",
+        "clip_reason_power_limit",
+        "clip_reason_soc_limit",
+        "clip_reason_building_headroom",
+        "clip_reason_phase_headroom",
+        "clip_reason_export_headroom",
+        "clip_reason_outage",
+        "clip_reason_deferrable_window",
     ]
     LEGACY_EV_FEATURES = [
         "soc",
@@ -128,6 +187,19 @@ class CityLearnEntityInterfaceService:
         "max_discharge_power_kw",
         "energy_to_full_kwh",
         "energy_available_kwh",
+        "can_charge",
+        "can_discharge",
+        "available_charge_power_kw",
+        "available_discharge_power_kw",
+        "available_charge_action_normalized",
+        "available_discharge_action_normalized",
+        "available_charge_energy_kwh_step",
+        "available_discharge_energy_kwh_step",
+        "max_charge_energy_kwh_step",
+        "max_discharge_energy_kwh_step",
+        "charge_headroom_ratio",
+        "discharge_available_ratio",
+        "usable_soc_ratio",
         "current_efficiency_ratio",
         "degraded_capacity_kwh",
         "soc_min_ratio",
@@ -168,6 +240,13 @@ class CityLearnEntityInterfaceService:
         "cycle_load_factor_ratio",
         "cycle_peak_step_offset_ratio",
         "remaining_duration_steps",
+        "remaining_duration_hours",
+        "cycle_remaining_fraction_ratio",
+        "hours_until_earliest_start",
+        "start_window_width_hours",
+        "start_energy_kwh_step",
+        "start_power_kw",
+        "must_start_now",
         "remaining_average_power_kw",
         "current_step_power_kw",
     ]
@@ -182,12 +261,24 @@ class CityLearnEntityInterfaceService:
         "load_energy_kwh_step",
         "pv_power_kw",
         "pv_energy_kwh_step",
+        "pv_surplus_power_kw",
+        "pv_surplus_energy_kwh_step",
         "bess_power_kw",
         "bess_energy_kwh_step",
         "ev_charging_power_kw",
         "ev_charging_energy_kwh_step",
         "electrical_storage_soc_ratio",
         "charging_total_service_power_kw",
+        "building_import_headroom_kw",
+        "building_export_headroom_kw",
+        "import_phase_headroom_kw",
+        "export_phase_headroom_kw",
+        "flexible_charge_power_capacity_kw",
+        "flexible_discharge_power_capacity_kw",
+        "flexible_charge_energy_capacity_kwh_step",
+        "flexible_discharge_energy_capacity_kwh_step",
+        "flexible_energy_to_full_kwh",
+        "flexible_energy_available_kwh",
     ]
     COMMUNITY_DISTRICT_EXTRA_FEATURES = [
         "community_net_power_kw",
@@ -206,6 +297,12 @@ class CityLearnEntityInterfaceService:
         "community_building_export_headroom_kw",
         "community_phase_headroom_kw",
         "community_phase_export_headroom_kw",
+        "community_flexible_charge_power_capacity_kw",
+        "community_flexible_discharge_power_capacity_kw",
+        "community_flexible_charge_energy_capacity_kwh_step",
+        "community_flexible_discharge_energy_capacity_kwh_step",
+        "community_flexible_energy_to_full_kwh",
+        "community_flexible_energy_available_kwh",
         "active_buildings_count",
         "active_chargers_count",
         "active_evs_count",
@@ -216,10 +313,28 @@ class CityLearnEntityInterfaceService:
         "net_energy_prev_3_mean_kwh_step",
         "import_energy_prev_1_kwh_step",
         "export_energy_prev_1_kwh_step",
+        "hour_sin",
+        "hour_cos",
+        "day_type_sin",
+        "day_type_cos",
+        "month_sin",
+        "month_cos",
+        "seconds_of_day_sin",
+        "seconds_of_day_cos",
+        "is_weekend",
     ]
     TEMPORAL_DISTRICT_FEATURES = [
         "community_net_prev_1_kwh_step",
         "community_net_prev_3_mean_kwh_step",
+        "hour_sin",
+        "hour_cos",
+        "day_type_sin",
+        "day_type_cos",
+        "month_sin",
+        "month_cos",
+        "seconds_of_day_sin",
+        "seconds_of_day_cos",
+        "is_weekend",
     ]
 
     def __init__(self, env):
@@ -268,7 +383,9 @@ class CityLearnEntityInterfaceService:
         core_bundle_enabled = self._bundle_enabled(self.CORE_BUNDLE)
         community_bundle_enabled = self._bundle_enabled(self.COMMUNITY_BUNDLE)
         forecast_bundle_enabled = self._bundle_enabled(self.FORECAST_BUNDLE)
+        derived_forecast_bundle_enabled = self._bundle_enabled(self.DERIVED_FORECAST_BUNDLE)
         temporal_bundle_enabled = self._bundle_enabled(self.TEMPORAL_BUNDLE)
+        action_feedback_bundle_enabled = self._bundle_enabled(self.ACTION_FEEDBACK_BUNDLE)
         requires_building_electrical_metrics = core_bundle_enabled or community_bundle_enabled
 
         self._district_obs.fill(0.0)
@@ -314,6 +431,10 @@ class CityLearnEntityInterfaceService:
                         endogenous_t=endogenous_t,
                     )
                 )
+                values.update(self._build_calendar_temporal_metrics(building=building, time_step=t))
+
+            if derived_forecast_bundle_enabled:
+                values.update(self._build_derived_forecast_building_metrics(building=building, time_step=t))
 
             building_feature_maps.append(values)
 
@@ -321,6 +442,9 @@ class CityLearnEntityInterfaceService:
 
         if forecast_bundle_enabled:
             district_values.update(self._build_forecast_district_metrics(first_building_data))
+
+        if derived_forecast_bundle_enabled:
+            district_values.update(self._build_derived_forecast_district_metrics(time_step=t))
 
         if community_bundle_enabled:
             district_values.update(self._build_community_district_metrics(building_electrical_metrics))
@@ -331,6 +455,8 @@ class CityLearnEntityInterfaceService:
                     endogenous_t=endogenous_t,
                 )
             )
+            if len(env.buildings) > 0:
+                district_values.update(self._build_calendar_temporal_metrics(building=env.buildings[0], time_step=t))
 
         for j, name in enumerate(self._district_features):
             self._district_obs[0, j] = self._safe_scalar(district_values.get(name, 0.0))
@@ -427,6 +553,22 @@ class CityLearnEntityInterfaceService:
             for phase_name, feature_name in zip(self._charger_phase_names, self._charger_phase_features):
                 values[feature_name] = 1.0 if assigned_phase in {phase_name, "all_phases"} else 0.0
             if core_bundle_enabled:
+                charger_decision_metrics = self._charger_core_decision_metrics(
+                    building=env.buildings[ref.building_index],
+                    charger=charger,
+                    connected=connected,
+                    current_soc=current_soc,
+                    battery_capacity=battery_capacity,
+                    required_soc=required_soc,
+                    energy_to_required_soc=energy_to_required_soc,
+                    required_average_power=required_average_power,
+                    hours_until_departure=hours_until_departure,
+                    max_charging_power=max_charging_power,
+                    max_discharging_power=max_discharging_power,
+                    charge_efficiency_at_max=charge_efficiency_at_max,
+                    discharge_efficiency_at_max=discharge_efficiency_at_max,
+                    step_hours=step_hours,
+                )
                 values.update(
                     {
                         "commanded_power_kw": commanded_energy / step_hours,
@@ -439,6 +581,7 @@ class CityLearnEntityInterfaceService:
                         "avg_power_to_departure_kw": avg_power_to_departure,
                         "charging_slack_kw": charging_slack,
                         "charging_priority_ratio": charging_priority,
+                        **charger_decision_metrics,
                         "charge_efficiency_at_max_ratio": charge_efficiency_at_max,
                         "discharge_efficiency_at_max_ratio": discharge_efficiency_at_max,
                         "incoming_ev_required_soc_departure": incoming_required_soc,
@@ -451,6 +594,8 @@ class CityLearnEntityInterfaceService:
                         ),
                     }
                 )
+            if action_feedback_bundle_enabled:
+                values.update(self._charger_action_feedback_metrics(charger, endogenous_t, step_hours))
             for col, feature_name in enumerate(self._charger_features):
                 self._charger_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
 
@@ -526,6 +671,21 @@ class CityLearnEntityInterfaceService:
                     if hasattr(storage, "get_max_output_power")
                     else nominal_power
                 )
+                decision_metrics = self._storage_core_decision_metrics(
+                    building=building,
+                    storage=storage,
+                    soc=soc,
+                    capacity=capacity,
+                    nominal_power=nominal_power,
+                    soc_min=soc_min,
+                    energy_to_full=energy_to_full,
+                    energy_available=energy_available,
+                    max_charge_power=max_charge_power,
+                    max_discharge_power=max_discharge_power,
+                    efficiency=self._safe_scalar(getattr(storage, "efficiency", base_efficiency), base_efficiency),
+                    step_hours=step_hours,
+                    include_headroom=True,
+                )
                 values.update(
                     {
                         "electrical_storage_soc_ratio": soc,
@@ -533,11 +693,14 @@ class CityLearnEntityInterfaceService:
                         "max_discharge_power_kw": max_discharge_power,
                         "energy_to_full_kwh": energy_to_full,
                         "energy_available_kwh": energy_available,
+                        **decision_metrics,
                         "current_efficiency_ratio": self._safe_scalar(getattr(storage, "efficiency", base_efficiency), base_efficiency),
                         "degraded_capacity_kwh": self._safe_scalar(getattr(storage, "degraded_capacity", capacity), capacity),
                         "soc_min_ratio": soc_min,
                     }
                 )
+            if action_feedback_bundle_enabled:
+                values.update(self._storage_action_feedback_metrics(building, endogenous_t, step_hours))
             for col, feature_name in enumerate(self._storage_features):
                 self._storage_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
 
@@ -562,6 +725,9 @@ class CityLearnEntityInterfaceService:
             if appliance is None:
                 continue
             values = building._ops_service.deferrable_appliance_observations(appliance)
+            values.update(self._deferrable_core_decision_metrics(appliance, values))
+            if action_feedback_bundle_enabled:
+                values.update(self._deferrable_action_feedback_metrics(appliance, endogenous_t))
             for col, feature_name in enumerate(self._deferrable_appliance_features):
                 self._deferrable_appliance_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
 
@@ -609,11 +775,13 @@ class CityLearnEntityInterfaceService:
             "meta": {
                 "time_step": t,
                 "endogenous_time_step": endogenous_t,
+                "seconds_per_time_step": float(getattr(env, "seconds_per_time_step", 3600.0)),
                 "spec_version": "entity_v1",
                 "temporal_semantics": {
                     "exogenous": "t",
                     "endogenous": "t_minus_1_settled",
                 },
+                "forecast_config": self._forecast_config_meta(),
                 "topology_version": int(getattr(env, "topology_version", 0)),
             },
         }
@@ -919,6 +1087,60 @@ class CityLearnEntityInterfaceService:
             if value not in target:
                 target.append(value)
 
+    @classmethod
+    def _derived_forecast_building_features(cls) -> List[str]:
+        features: List[str] = []
+        for label, _ in cls.FORECAST_HORIZONS:
+            features.extend(
+                [
+                    f"forecast_load_mean_next_{label}_kw",
+                    f"forecast_pv_mean_next_{label}_kw",
+                    f"forecast_net_mean_next_{label}_kw",
+                    f"forecast_import_peak_next_{label}_kw",
+                    f"forecast_export_peak_next_{label}_kw",
+                    f"forecast_headroom_min_next_{label}_kw",
+                    f"forecast_pv_surplus_sum_next_{label}_kwh",
+                ]
+            )
+        for bucket in range(1, cls.FORECAST_GRID_BUCKETS + 1):
+            bucket_label = f"{bucket:02d}"
+            for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus"):
+                features.append(f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw")
+        return features
+
+    @classmethod
+    def _derived_forecast_district_features(cls) -> List[str]:
+        features: List[str] = []
+        for label, _ in cls.FORECAST_HORIZONS:
+            features.extend(
+                [
+                    f"forecast_price_min_next_{label}",
+                    f"forecast_price_mean_next_{label}",
+                    f"forecast_price_max_next_{label}",
+                    f"forecast_community_load_mean_next_{label}_kw",
+                    f"forecast_community_pv_mean_next_{label}_kw",
+                    f"forecast_community_net_mean_next_{label}_kw",
+                    f"forecast_community_import_peak_next_{label}_kw",
+                    f"forecast_community_export_peak_next_{label}_kw",
+                    f"forecast_community_headroom_min_next_{label}_kw",
+                    f"forecast_community_pv_surplus_sum_next_{label}_kwh",
+                ]
+            )
+        for bucket in range(1, cls.FORECAST_GRID_BUCKETS + 1):
+            bucket_label = f"{bucket:02d}"
+            features.append(f"forecast_price_mean_bucket_{bucket_label}_15m")
+            for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus"):
+                features.append(f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw")
+        return features
+
+    def _forecast_config_meta(self) -> Mapping[str, Any]:
+        return {
+            "source": "actual_future",
+            "horizons": [label for label, _ in self.FORECAST_HORIZONS],
+            "grid_bucket_seconds": self.FORECAST_GRID_BUCKET_SECONDS,
+            "grid_horizon_seconds": self.FORECAST_GRID_SECONDS,
+        }
+
     @staticmethod
     def _series_mean(values: Sequence[float], indices: Sequence[int], fallback: float) -> float:
         filtered: List[float] = []
@@ -948,6 +1170,10 @@ class CityLearnEntityInterfaceService:
             return "kwh_step"
         if key.endswith("_capacity_kwh") or key.endswith("_kwh"):
             return "kwh"
+        if key.endswith("_normalized"):
+            return "ratio"
+        if key in {"can_charge", "can_discharge", "must_start_now", "is_weekend", "start_blocked"} or key.startswith("clip_reason_"):
+            return "flag"
         if key.endswith("_soc_ratio") or key.endswith("_ratio") or key.endswith("_soc"):
             return "ratio"
         if key.endswith("_time_step"):
@@ -994,6 +1220,7 @@ class CityLearnEntityInterfaceService:
         non_shiftable = self._safe_index(building.non_shiftable_load_electricity_consumption, endogenous_t, 0.0)
         deferrable = self._safe_index(building.deferrable_appliances_electricity_consumption, endogenous_t, 0.0)
         load_energy = max(cooling + heating + dhw + non_shiftable + deferrable + ev_energy, 0.0)
+        pv_surplus_energy = max(pv_energy - load_energy, 0.0)
 
         constraint_state = getattr(building, "_charging_constraints_state", {}) or {}
         building_headroom = constraint_state.get("building_headroom_kw")
@@ -1014,6 +1241,12 @@ class CityLearnEntityInterfaceService:
             for value in phase_export_headroom.values()
             if value is not None
         )
+        flexible_metrics = self._building_flexible_capacity_metrics(
+            building=building,
+            control_t=control_t,
+            endogenous_t=endogenous_t,
+            step_hours=step_hours,
+        )
 
         metrics = {
             "net_power_kw": net_energy / step_hours,
@@ -1026,6 +1259,8 @@ class CityLearnEntityInterfaceService:
             "load_energy_kwh_step": load_energy,
             "pv_power_kw": pv_energy / step_hours,
             "pv_energy_kwh_step": pv_energy,
+            "pv_surplus_power_kw": pv_surplus_energy / step_hours,
+            "pv_surplus_energy_kwh_step": pv_surplus_energy,
             "bess_power_kw": bess_energy / step_hours,
             "bess_energy_kwh_step": bess_energy,
             "ev_charging_power_kw": ev_energy / step_hours,
@@ -1036,6 +1271,11 @@ class CityLearnEntityInterfaceService:
                 0.0,
             ),
             "charging_total_service_power_kw": total_service_power,
+            "building_import_headroom_kw": self._safe_scalar(building_headroom, 0.0),
+            "building_export_headroom_kw": self._safe_scalar(building_export_headroom, 0.0),
+            "import_phase_headroom_kw": phase_headroom_sum,
+            "export_phase_headroom_kw": phase_export_headroom_sum,
+            **flexible_metrics,
             "_building_headroom_kw": self._safe_scalar(building_headroom, np.nan),
             "_building_export_headroom_kw": self._safe_scalar(building_export_headroom, np.nan),
             "_phase_headroom_kw": phase_headroom_sum,
@@ -1071,6 +1311,36 @@ class CityLearnEntityInterfaceService:
             "export_energy_prev_1_kwh_step": export_prev_1,
         }
 
+    def _build_calendar_temporal_metrics(self, *, building, time_step: int) -> Mapping[str, float]:
+        hour = self._safe_index(getattr(building.energy_simulation, "hour", []), time_step, 1.0)
+        minutes = self._safe_index(getattr(building.energy_simulation, "minutes", []), time_step, 0.0)
+        seconds = self._safe_index(getattr(building.energy_simulation, "seconds", []), time_step, 0.0)
+        day_type = self._safe_index(getattr(building.energy_simulation, "day_type", []), time_step, 1.0)
+        month = self._safe_index(getattr(building.energy_simulation, "month", []), time_step, 1.0)
+
+        hour_zero_based = (hour - 1.0) % 24.0
+        seconds_of_day = hour_zero_based * 3600.0 + minutes * 60.0 + seconds
+
+        def cyc(value: float, period: float) -> Tuple[float, float]:
+            angle = 2.0 * np.pi * (float(value) % period) / period
+            return float(np.sin(angle)), float(np.cos(angle))
+
+        hour_sin, hour_cos = cyc(seconds_of_day, 24.0 * 3600.0)
+        day_sin, day_cos = cyc(day_type - 1.0, 7.0)
+        month_sin, month_cos = cyc(month - 1.0, 12.0)
+
+        return {
+            "hour_sin": hour_sin,
+            "hour_cos": hour_cos,
+            "day_type_sin": day_sin,
+            "day_type_cos": day_cos,
+            "month_sin": month_sin,
+            "month_cos": month_cos,
+            "seconds_of_day_sin": hour_sin,
+            "seconds_of_day_cos": hour_cos,
+            "is_weekend": 1.0 if int(round(day_type)) in {6, 7} else 0.0,
+        }
+
     def _build_forecast_district_metrics(self, first_building_data: Mapping[str, Any]) -> Mapping[str, float]:
         forecasts: Dict[str, float] = {}
         for key, value in first_building_data.items():
@@ -1078,6 +1348,628 @@ class CityLearnEntityInterfaceService:
                 continue
             forecasts[str(key)] = self._safe_scalar(value, 0.0)
         return forecasts
+
+    def _headroom_power_limit_for_connection(self, building, phase_connection: Optional[str], *, export: bool = False) -> float:
+        state = getattr(building, "_charging_constraints_state", {}) or {}
+        total_key = "building_export_headroom_kw" if export else "building_headroom_kw"
+        phase_key = "phase_export_headroom_kw" if export else "phase_headroom_kw"
+        limits: List[float] = []
+
+        total_headroom = self._safe_scalar(state.get(total_key), np.nan)
+        if np.isfinite(total_headroom):
+            limits.append(max(total_headroom, 0.0))
+
+        phase_headrooms = state.get(phase_key) or {}
+        if isinstance(phase_headrooms, Mapping) and len(phase_headrooms) > 0:
+            phase_names = [
+                str(name)
+                for name, value in phase_headrooms.items()
+                if value is not None and np.isfinite(self._safe_scalar(value, np.nan))
+            ]
+            connection = None if phase_connection is None else str(phase_connection)
+
+            if connection in phase_names:
+                limits.append(max(self._safe_scalar(phase_headrooms.get(connection), 0.0), 0.0))
+            else:
+                split_mode = str(getattr(building, "_electrical_service_default_split", "balanced")).upper()
+                if split_mode in phase_names and connection not in {"all_phases", "unassigned"}:
+                    limits.append(max(self._safe_scalar(phase_headrooms.get(split_mode), 0.0), 0.0))
+                elif len(phase_names) > 0:
+                    finite_headrooms = [
+                        max(self._safe_scalar(phase_headrooms.get(name), 0.0), 0.0)
+                        for name in phase_names
+                    ]
+                    if len(finite_headrooms) > 0:
+                        limits.append(min(finite_headrooms) * len(finite_headrooms))
+
+        if len(limits) == 0:
+            return float("inf")
+        return float(min(limits))
+
+    def _charger_core_decision_metrics(
+        self,
+        *,
+        building,
+        charger,
+        connected: bool,
+        current_soc: float,
+        battery_capacity: float,
+        required_soc: float,
+        energy_to_required_soc: float,
+        required_average_power: float,
+        hours_until_departure: float,
+        max_charging_power: float,
+        max_discharging_power: float,
+        charge_efficiency_at_max: float,
+        discharge_efficiency_at_max: float,
+        step_hours: float,
+    ) -> Mapping[str, float]:
+        if not connected or battery_capacity <= 0.0 or current_soc < 0.0:
+            return {
+                "connected_ev_soc_min_ratio": -1.0,
+                "connected_ev_energy_available_kwh": 0.0,
+                "connected_ev_energy_to_full_kwh": 0.0,
+                "can_charge": 0.0,
+                "can_discharge": 0.0,
+                "available_charge_power_kw": 0.0,
+                "available_discharge_power_kw": 0.0,
+                "available_charge_action_normalized": 0.0,
+                "available_discharge_action_normalized": 0.0,
+                "max_deliverable_energy_until_departure_kwh": 0.0,
+                "departure_energy_margin_kwh": 0.0,
+                "departure_feasibility_ratio": -1.0,
+                "min_required_action_normalized": 0.0,
+            }
+
+        battery = getattr(charger.connected_electric_vehicle, "battery", None)
+        depth_of_discharge = self._safe_scalar(getattr(battery, "depth_of_discharge", 1.0), 1.0)
+        soc_min = float(np.clip(1.0 - depth_of_discharge, 0.0, 1.0))
+        energy_available = max((current_soc - soc_min) * battery_capacity, 0.0)
+        energy_to_full = max((1.0 - current_soc) * battery_capacity, 0.0)
+        outage = bool(getattr(building, "power_outage", False))
+
+        charge_efficiency = max(self._safe_scalar(charge_efficiency_at_max, 1.0), 1.0e-6)
+        discharge_efficiency = max(self._safe_scalar(discharge_efficiency_at_max, 1.0), 1.0e-6)
+        charge_power_by_soc = energy_to_full / max(charge_efficiency * step_hours, 1.0e-6)
+        discharge_power_by_soc = energy_available * discharge_efficiency / max(step_hours, 1.0e-6)
+
+        import_limit = self._headroom_power_limit_for_connection(building, getattr(charger, "phase_connection", None), export=False)
+        export_limit = self._headroom_power_limit_for_connection(building, getattr(charger, "phase_connection", None), export=True)
+        charge_candidates = [max(max_charging_power, 0.0), charge_power_by_soc]
+        discharge_candidates = [max(max_discharging_power, 0.0), discharge_power_by_soc]
+        if np.isfinite(import_limit):
+            charge_candidates.append(import_limit)
+        if np.isfinite(export_limit):
+            discharge_candidates.append(export_limit)
+
+        available_charge_power = 0.0 if outage else max(min(charge_candidates), 0.0)
+        available_discharge_power = 0.0 if outage else max(min(discharge_candidates), 0.0)
+        max_deliverable = min(
+            available_charge_power * max(hours_until_departure, 0.0) * charge_efficiency,
+            energy_to_full,
+        )
+        departure_margin = max_deliverable - max(energy_to_required_soc, 0.0)
+        departure_feasibility = (
+            max(energy_to_required_soc, 0.0) / max(max_deliverable, 1.0e-6)
+            if energy_to_required_soc > 0.0
+            else 0.0
+        )
+        min_required_action = (
+            required_average_power / max(max_charging_power, 1.0e-6)
+            if required_average_power > 0.0
+            else 0.0
+        )
+
+        return {
+            "connected_ev_soc_min_ratio": soc_min,
+            "connected_ev_energy_available_kwh": energy_available,
+            "connected_ev_energy_to_full_kwh": energy_to_full,
+            "can_charge": 1.0 if available_charge_power > 1.0e-9 else 0.0,
+            "can_discharge": 1.0 if available_discharge_power > 1.0e-9 else 0.0,
+            "available_charge_power_kw": available_charge_power,
+            "available_discharge_power_kw": available_discharge_power,
+            "available_charge_action_normalized": available_charge_power / max(max_charging_power, 1.0e-6),
+            "available_discharge_action_normalized": available_discharge_power / max(max_discharging_power, 1.0e-6),
+            "max_deliverable_energy_until_departure_kwh": max_deliverable,
+            "departure_energy_margin_kwh": departure_margin,
+            "departure_feasibility_ratio": departure_feasibility,
+            "min_required_action_normalized": min_required_action,
+        }
+
+    def _storage_core_decision_metrics(
+        self,
+        *,
+        building,
+        storage,
+        soc: float,
+        capacity: float,
+        nominal_power: float,
+        soc_min: float,
+        energy_to_full: float,
+        energy_available: float,
+        max_charge_power: float,
+        max_discharge_power: float,
+        efficiency: float,
+        step_hours: float,
+        include_headroom: bool = True,
+    ) -> Mapping[str, float]:
+        efficiency = max(self._safe_scalar(efficiency, 1.0), 1.0e-6)
+        charge_power_by_soc = energy_to_full / max(efficiency * step_hours, 1.0e-6)
+        discharge_power_by_soc = energy_available * efficiency / max(step_hours, 1.0e-6)
+
+        charge_candidates = [max(max_charge_power, 0.0), charge_power_by_soc]
+        discharge_candidates = [max(max_discharge_power, 0.0), discharge_power_by_soc]
+        if include_headroom:
+            connection = getattr(building, "electrical_storage_phase_connection", None)
+            import_limit = self._headroom_power_limit_for_connection(building, connection, export=False)
+            export_limit = self._headroom_power_limit_for_connection(building, connection, export=True)
+            if np.isfinite(import_limit):
+                charge_candidates.append(import_limit)
+            if np.isfinite(export_limit):
+                discharge_candidates.append(export_limit)
+
+        outage = bool(getattr(building, "power_outage", False))
+        available_charge_power = 0.0 if outage else max(min(charge_candidates), 0.0)
+        available_discharge_power = 0.0 if outage else max(min(discharge_candidates), 0.0)
+        usable_denominator = max(1.0 - soc_min, 1.0e-6)
+
+        return {
+            "can_charge": 1.0 if available_charge_power > 1.0e-9 else 0.0,
+            "can_discharge": 1.0 if available_discharge_power > 1.0e-9 else 0.0,
+            "available_charge_power_kw": available_charge_power,
+            "available_discharge_power_kw": available_discharge_power,
+            "available_charge_action_normalized": available_charge_power / max(nominal_power, 1.0e-6),
+            "available_discharge_action_normalized": available_discharge_power / max(nominal_power, 1.0e-6),
+            "available_charge_energy_kwh_step": available_charge_power * step_hours,
+            "available_discharge_energy_kwh_step": available_discharge_power * step_hours,
+            "max_charge_energy_kwh_step": max(max_charge_power, 0.0) * step_hours,
+            "max_discharge_energy_kwh_step": max(max_discharge_power, 0.0) * step_hours,
+            "charge_headroom_ratio": energy_to_full / max(capacity, 1.0e-6),
+            "discharge_available_ratio": energy_available / max(capacity, 1.0e-6),
+            "usable_soc_ratio": float(np.clip((soc - soc_min) / usable_denominator, 0.0, 1.0)),
+        }
+
+    def _building_flexible_capacity_metrics(
+        self,
+        *,
+        building,
+        control_t: int,
+        endogenous_t: int,
+        step_hours: float,
+    ) -> Mapping[str, float]:
+        charge_power = 0.0
+        discharge_power = 0.0
+        energy_to_full = 0.0
+        energy_available = 0.0
+
+        storage = getattr(building, "electrical_storage", None)
+        if storage is not None:
+            capacity = self._safe_scalar(getattr(storage, "capacity", 0.0), 0.0)
+            nominal_power = self._safe_scalar(getattr(storage, "nominal_power", 0.0), 0.0)
+            soc = self._safe_index(getattr(storage, "soc", []), endogenous_t, 0.0)
+            depth_of_discharge = self._safe_scalar(getattr(storage, "depth_of_discharge", 1.0), 1.0)
+            soc_min = max(1.0 - depth_of_discharge, 0.0)
+            current_energy = soc * max(capacity, 0.0)
+            storage_energy_to_full = max(capacity - current_energy, 0.0)
+            storage_energy_available = max((soc - soc_min) * max(capacity, 0.0), 0.0)
+            max_charge_power = (
+                self._safe_scalar(storage.get_max_input_power(), nominal_power)
+                if hasattr(storage, "get_max_input_power")
+                else nominal_power
+            )
+            max_discharge_power = (
+                self._safe_scalar(storage.get_max_output_power(), nominal_power)
+                if hasattr(storage, "get_max_output_power")
+                else nominal_power
+            )
+            storage_metrics = self._storage_core_decision_metrics(
+                building=building,
+                storage=storage,
+                soc=soc,
+                capacity=capacity,
+                nominal_power=nominal_power,
+                soc_min=soc_min,
+                energy_to_full=storage_energy_to_full,
+                energy_available=storage_energy_available,
+                max_charge_power=max_charge_power,
+                max_discharge_power=max_discharge_power,
+                efficiency=self._safe_scalar(getattr(storage, "efficiency", 1.0), 1.0),
+                step_hours=step_hours,
+                include_headroom=False,
+            )
+            charge_power += self._safe_scalar(storage_metrics.get("available_charge_power_kw", 0.0), 0.0)
+            discharge_power += self._safe_scalar(storage_metrics.get("available_discharge_power_kw", 0.0), 0.0)
+            energy_to_full += storage_energy_to_full
+            energy_available += storage_energy_available
+
+        for charger in building.electric_vehicle_chargers or []:
+            sim = getattr(charger, "charger_simulation", None)
+            state = self._safe_index(getattr(sim, "electric_vehicle_charger_state", []), control_t, np.nan)
+            if state != 1 or charger.connected_electric_vehicle is None:
+                continue
+
+            ev = charger.connected_electric_vehicle
+            battery = getattr(ev, "battery", None)
+            capacity = self._safe_scalar(getattr(battery, "capacity", 0.0), 0.0)
+            soc = self._safe_index(getattr(battery, "soc", []), endogenous_t, 0.0)
+            if capacity <= 0.0 or soc < 0.0:
+                continue
+
+            depth_of_discharge = self._safe_scalar(getattr(battery, "depth_of_discharge", 1.0), 1.0)
+            soc_min = max(1.0 - depth_of_discharge, 0.0)
+            ev_energy_to_full = max((1.0 - soc) * capacity, 0.0)
+            ev_energy_available = max((soc - soc_min) * capacity, 0.0)
+            max_charge_power = self._safe_scalar(getattr(charger, "max_charging_power", 0.0), 0.0)
+            max_discharge_power = self._safe_scalar(getattr(charger, "max_discharging_power", 0.0), 0.0)
+            charge_efficiency = self._safe_scalar(
+                charger.get_efficiency(1.0, True) if hasattr(charger, "get_efficiency") else getattr(charger, "efficiency", 1.0),
+                1.0,
+            )
+            discharge_efficiency = self._safe_scalar(
+                charger.get_efficiency(1.0, False) if hasattr(charger, "get_efficiency") else getattr(charger, "efficiency", 1.0),
+                1.0,
+            )
+            charge_power += min(
+                max(max_charge_power, 0.0),
+                ev_energy_to_full / max(charge_efficiency * step_hours, 1.0e-6),
+            )
+            discharge_power += min(
+                max(max_discharge_power, 0.0),
+                ev_energy_available * max(discharge_efficiency, 1.0e-6) / max(step_hours, 1.0e-6),
+            )
+            energy_to_full += ev_energy_to_full
+            energy_available += ev_energy_available
+
+        return {
+            "flexible_charge_power_capacity_kw": charge_power,
+            "flexible_discharge_power_capacity_kw": discharge_power,
+            "flexible_charge_energy_capacity_kwh_step": charge_power * step_hours,
+            "flexible_discharge_energy_capacity_kwh_step": discharge_power * step_hours,
+            "flexible_energy_to_full_kwh": energy_to_full,
+            "flexible_energy_available_kwh": energy_available,
+        }
+
+    def _deferrable_core_decision_metrics(self, appliance, observations: Mapping[str, float]) -> Mapping[str, float]:
+        step_hours = self._step_hours()
+        current_global_fn = getattr(appliance, "_current_global_time_step", None)
+        try:
+            current_step = int(current_global_fn()) if callable(current_global_fn) else int(getattr(appliance, "time_step", self.env.time_step))
+        except Exception:
+            current_step = int(getattr(self.env, "time_step", 0))
+
+        earliest = self._safe_scalar(observations.get("earliest_start_time_step", -1.0), -1.0)
+        latest = self._safe_scalar(observations.get("latest_start_time_step", -1.0), -1.0)
+        pending = self._safe_scalar(observations.get("pending", 0.0), 0.0) > 0.0
+        cycle_energy = self._safe_scalar(observations.get("cycle_energy_kwh", 0.0), 0.0)
+        remaining_energy = self._safe_scalar(observations.get("remaining_energy_kwh", 0.0), 0.0)
+        remaining_duration_steps = self._safe_scalar(observations.get("remaining_duration_steps", 0.0), 0.0)
+
+        try:
+            start_energy = self._safe_scalar(appliance.preview_start_energy_kwh(1.0), 0.0)
+        except Exception:
+            start_energy = 0.0
+
+        hours_until_earliest = max(earliest - current_step, 0.0) * step_hours if pending and earliest >= 0.0 else -1.0
+        start_window_width = max(latest - earliest, 0.0) * step_hours if pending and earliest >= 0.0 and latest >= 0.0 else 0.0
+        must_start_now = 1.0 if pending and latest >= 0.0 and latest <= float(current_step) else 0.0
+
+        return {
+            "remaining_duration_hours": max(remaining_duration_steps, 0.0) * step_hours,
+            "cycle_remaining_fraction_ratio": remaining_energy / max(cycle_energy, 1.0e-6) if cycle_energy > 0.0 else 0.0,
+            "hours_until_earliest_start": hours_until_earliest,
+            "start_window_width_hours": start_window_width,
+            "start_energy_kwh_step": start_energy,
+            "start_power_kw": start_energy / step_hours,
+            "must_start_now": must_start_now,
+        }
+
+    def _feedback_reason_metrics(self, owner, index: int) -> Mapping[str, float]:
+        metrics = {}
+        for reason in (
+            "availability",
+            "power_limit",
+            "soc_limit",
+            "building_headroom",
+            "phase_headroom",
+            "export_headroom",
+            "outage",
+            "deferrable_window",
+        ):
+            key = f"clip_reason_{reason}"
+            values = getattr(owner, f"action_feedback_{key}", [])
+            metrics[key] = self._safe_index(values, index, 0.0)
+        return metrics
+
+    def _feedback_window_indices(self, index: int, window_seconds: float = 15 * 60) -> List[int]:
+        step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
+        steps = max(int(np.ceil(float(window_seconds) / step_seconds)), 1)
+        end = max(int(index), 0)
+        start = max(end - steps + 1, 0)
+        return list(range(start, end + 1))
+
+    def _time_since_last_nonzero_hours(self, values: Sequence[float], index: int, step_hours: float) -> float:
+        idx = min(max(int(index), 0), max(len(values) - 1, 0))
+        for previous in range(idx, -1, -1):
+            if abs(self._safe_index(values, previous, 0.0)) > 1.0e-9:
+                return float((idx - previous) * step_hours)
+        return -1.0
+
+    def _charger_action_feedback_metrics(self, charger, index: int, step_hours: float) -> Mapping[str, float]:
+        applied_values = getattr(charger, "electricity_consumption", [])
+        requested_action = self._safe_index(getattr(charger, "action_feedback_requested_action_normalized", []), index, 0.0)
+        limited_action = self._safe_index(getattr(charger, "action_feedback_limited_action_normalized", []), index, 0.0)
+        requested_power = self._safe_index(getattr(charger, "action_feedback_requested_power_kw", []), index, 0.0)
+        limited_power = self._safe_index(getattr(charger, "action_feedback_limited_power_kw", []), index, 0.0)
+        applied_energy = self._safe_index(applied_values, index, 0.0)
+        applied_power = applied_energy / step_hours
+        window = self._feedback_window_indices(index)
+        window_energy = sum(self._safe_index(applied_values, i, 0.0) for i in window)
+        window_power = [self._safe_index(applied_values, i, 0.0) / step_hours for i in window]
+
+        return {
+            "last_requested_action_normalized": requested_action,
+            "last_limited_action_normalized": limited_action,
+            "last_requested_power_kw": requested_power,
+            "last_limited_power_kw": limited_power,
+            "last_applied_power_kw": applied_power,
+            "last_projection_error_kw": requested_power - applied_power,
+            "applied_energy_prev_15m_kwh": window_energy,
+            "applied_power_mean_prev_15m_kw": self._forecast_stat(window_power, "mean"),
+            "time_since_last_nonzero_action_hours": self._time_since_last_nonzero_hours(applied_values, index, step_hours),
+            **self._feedback_reason_metrics(charger, index),
+        }
+
+    def _storage_action_feedback_metrics(self, building, index: int, step_hours: float) -> Mapping[str, float]:
+        applied_values = getattr(building, "electrical_storage_electricity_consumption", [])
+        requested_action = self._safe_index(getattr(building, "action_feedback_electrical_storage_requested_action_normalized", []), index, 0.0)
+        limited_action = self._safe_index(getattr(building, "action_feedback_electrical_storage_limited_action_normalized", []), index, 0.0)
+        requested_power = self._safe_index(getattr(building, "action_feedback_electrical_storage_requested_power_kw", []), index, 0.0)
+        limited_power = self._safe_index(getattr(building, "action_feedback_electrical_storage_limited_power_kw", []), index, 0.0)
+        applied_energy = self._safe_index(applied_values, index, 0.0)
+        applied_power = applied_energy / step_hours
+        window = self._feedback_window_indices(index)
+        window_energy = sum(self._safe_index(applied_values, i, 0.0) for i in window)
+        window_power = [self._safe_index(applied_values, i, 0.0) / step_hours for i in window]
+
+        metrics = {
+            "last_requested_action_normalized": requested_action,
+            "last_limited_action_normalized": limited_action,
+            "last_requested_power_kw": requested_power,
+            "last_limited_power_kw": limited_power,
+            "last_applied_power_kw": applied_power,
+            "last_projection_error_kw": requested_power - applied_power,
+            "applied_energy_prev_15m_kwh": window_energy,
+            "applied_power_mean_prev_15m_kw": self._forecast_stat(window_power, "mean"),
+            "time_since_last_nonzero_action_hours": self._time_since_last_nonzero_hours(applied_values, index, step_hours),
+        }
+        for reason in (
+            "availability",
+            "power_limit",
+            "soc_limit",
+            "building_headroom",
+            "phase_headroom",
+            "export_headroom",
+            "outage",
+            "deferrable_window",
+        ):
+            key = f"clip_reason_{reason}"
+            metrics[key] = self._safe_index(
+                getattr(building, f"action_feedback_electrical_storage_{key}", []),
+                index,
+                0.0,
+            )
+        return metrics
+
+    def _deferrable_action_feedback_metrics(self, appliance, index: int) -> Mapping[str, float]:
+        return {
+            "last_start_requested": self._safe_index(
+                getattr(appliance, "action_feedback_last_start_requested", []),
+                index,
+                0.0,
+            ),
+            "last_start_applied": self._safe_index(
+                getattr(appliance, "action_feedback_last_start_applied", []),
+                index,
+                0.0,
+            ),
+            "start_blocked": self._safe_index(
+                getattr(appliance, "action_feedback_start_blocked", []),
+                index,
+                0.0,
+            ),
+            **self._feedback_reason_metrics(appliance, index),
+        }
+
+    def _forecast_indices(self, time_step: int, window_seconds: float, length: int, *, offset_steps: int = 0) -> List[int]:
+        if length <= 0:
+            return []
+        step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
+        steps = max(int(np.ceil(float(window_seconds) / step_seconds)), 1)
+        start = min(max(int(time_step) + 1 + int(offset_steps), 0), length - 1)
+        stop = min(start + steps, length)
+        if start >= stop:
+            return [length - 1]
+        return list(range(start, stop))
+
+    def _forecast_stat(self, values: Sequence[float], stat: str, fallback: float = 0.0) -> float:
+        array = np.array(values, dtype="float64")
+        array = array[np.isfinite(array)]
+        if array.size == 0:
+            return float(fallback)
+        if stat == "min":
+            return float(np.nanmin(array))
+        if stat == "max" or stat == "peak":
+            return float(np.nanmax(array))
+        if stat == "sum":
+            return float(np.nansum(array))
+        return float(np.nanmean(array))
+
+    def _dataset_energy_to_control_step_for_building(self, building, energy_kwh: float) -> float:
+        ratio = getattr(building, "time_step_ratio", None)
+        ratio = 1.0 if ratio in (None, 0) else float(ratio)
+        return self._safe_scalar(energy_kwh, 0.0) * ratio
+
+    def _building_forecast_components_at_step(self, building, step: int) -> Mapping[str, float]:
+        step_hours = self._step_hours()
+        temperature = self._safe_index(getattr(building.weather, "outdoor_dry_bulb_temperature", []), step, 0.0)
+        energy_simulation = building.energy_simulation
+
+        non_shiftable = self._dataset_energy_to_control_step_for_building(
+            building,
+            self._safe_index(getattr(energy_simulation, "non_shiftable_load", []), step, 0.0),
+        )
+        cooling_demand = self._dataset_energy_to_control_step_for_building(
+            building,
+            self._safe_index(getattr(energy_simulation, "cooling_demand", []), step, 0.0),
+        )
+        heating_demand = self._dataset_energy_to_control_step_for_building(
+            building,
+            self._safe_index(getattr(energy_simulation, "heating_demand", []), step, 0.0),
+        )
+        dhw_demand = self._dataset_energy_to_control_step_for_building(
+            building,
+            self._safe_index(getattr(energy_simulation, "dhw_demand", []), step, 0.0),
+        )
+
+        cooling = self._safe_scalar(building.cooling_device.get_input_power(cooling_demand, temperature, heating=False), 0.0)
+        if building.heating_device.__class__.__name__ == "HeatPump":
+            heating = self._safe_scalar(building.heating_device.get_input_power(heating_demand, temperature, heating=True), 0.0)
+        else:
+            heating = self._safe_scalar(building.heating_device.get_input_power(heating_demand), 0.0)
+        if building.dhw_device.__class__.__name__ == "HeatPump":
+            dhw = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand, temperature, heating=True), 0.0)
+        else:
+            dhw = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand), 0.0)
+        deferrable = sum(
+            self._safe_index(getattr(appliance, "electricity_consumption", []), step, 0.0)
+            for appliance in building.deferrable_appliances or []
+        )
+        load_energy = max(non_shiftable + cooling + heating + dhw + deferrable, 0.0)
+        pv_energy = abs(self._safe_index(getattr(building, "solar_generation", []), step, 0.0))
+
+        load_kw = load_energy / step_hours
+        pv_kw = pv_energy / step_hours
+        net_kw = load_kw - pv_kw
+        import_kw = max(net_kw, 0.0)
+        export_kw = max(-net_kw, 0.0)
+        pv_surplus_kw = max(pv_kw - load_kw, 0.0)
+
+        import_limit = np.nan
+        if getattr(building, "_electrical_service_enabled", False):
+            import_limit = self._safe_scalar(
+                (getattr(building, "_electrical_service_limits", {}) or {}).get("total", {}).get("import_kw"),
+                np.nan,
+            )
+        else:
+            import_limit = self._safe_scalar(getattr(building, "_building_charger_limit_kw", np.nan), np.nan)
+        headroom_kw = import_limit - net_kw if np.isfinite(import_limit) else 0.0
+
+        return {
+            "load": load_kw,
+            "pv": pv_kw,
+            "net": net_kw,
+            "import": import_kw,
+            "export": export_kw,
+            "headroom": headroom_kw,
+            "pv_surplus": pv_surplus_kw,
+        }
+
+    def _building_forecast_series(self, building, indices: Sequence[int]) -> Mapping[str, List[float]]:
+        series = {signal: [] for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus")}
+        for idx in indices:
+            values = self._building_forecast_components_at_step(building, idx)
+            for signal in series:
+                series[signal].append(self._safe_scalar(values.get(signal, 0.0), 0.0))
+        return series
+
+    def _build_derived_forecast_building_metrics(self, *, building, time_step: int) -> Mapping[str, float]:
+        metrics: Dict[str, float] = {}
+        length = len(getattr(building.energy_simulation, "non_shiftable_load", []))
+        step_hours = self._step_hours()
+        for label, seconds in self.FORECAST_HORIZONS:
+            indices = self._forecast_indices(time_step, seconds, length)
+            series = self._building_forecast_series(building, indices)
+            metrics[f"forecast_load_mean_next_{label}_kw"] = self._forecast_stat(series["load"], "mean")
+            metrics[f"forecast_pv_mean_next_{label}_kw"] = self._forecast_stat(series["pv"], "mean")
+            metrics[f"forecast_net_mean_next_{label}_kw"] = self._forecast_stat(series["net"], "mean")
+            metrics[f"forecast_import_peak_next_{label}_kw"] = self._forecast_stat(series["import"], "peak")
+            metrics[f"forecast_export_peak_next_{label}_kw"] = self._forecast_stat(series["export"], "peak")
+            metrics[f"forecast_headroom_min_next_{label}_kw"] = self._forecast_stat(series["headroom"], "min")
+            metrics[f"forecast_pv_surplus_sum_next_{label}_kwh"] = self._forecast_stat(series["pv_surplus"], "sum") * step_hours
+
+        bucket_steps = max(
+            int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
+            1,
+        )
+        for bucket in range(1, self.FORECAST_GRID_BUCKETS + 1):
+            indices = self._forecast_indices(
+                time_step,
+                self.FORECAST_GRID_BUCKET_SECONDS,
+                length,
+                offset_steps=(bucket - 1) * bucket_steps,
+            )
+            series = self._building_forecast_series(building, indices)
+            bucket_label = f"{bucket:02d}"
+            for signal in series:
+                metrics[f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_stat(series[signal], "mean")
+        return metrics
+
+    def _build_derived_forecast_district_metrics(self, *, time_step: int) -> Mapping[str, float]:
+        metrics: Dict[str, float] = {}
+        if len(self.env.buildings) == 0:
+            return metrics
+        first = self.env.buildings[0]
+        length = len(getattr(first.pricing, "electricity_pricing", []))
+        step_hours = self._step_hours()
+
+        for label, seconds in self.FORECAST_HORIZONS:
+            indices = self._forecast_indices(time_step, seconds, length)
+            prices = [self._safe_index(first.pricing.electricity_pricing, idx, 0.0) for idx in indices]
+            metrics[f"forecast_price_min_next_{label}"] = self._forecast_stat(prices, "min")
+            metrics[f"forecast_price_mean_next_{label}"] = self._forecast_stat(prices, "mean")
+            metrics[f"forecast_price_max_next_{label}"] = self._forecast_stat(prices, "max")
+            community_series = self._community_forecast_series(indices)
+            metrics[f"forecast_community_load_mean_next_{label}_kw"] = self._forecast_stat(community_series["load"], "mean")
+            metrics[f"forecast_community_pv_mean_next_{label}_kw"] = self._forecast_stat(community_series["pv"], "mean")
+            metrics[f"forecast_community_net_mean_next_{label}_kw"] = self._forecast_stat(community_series["net"], "mean")
+            metrics[f"forecast_community_import_peak_next_{label}_kw"] = self._forecast_stat(community_series["import"], "peak")
+            metrics[f"forecast_community_export_peak_next_{label}_kw"] = self._forecast_stat(community_series["export"], "peak")
+            metrics[f"forecast_community_headroom_min_next_{label}_kw"] = self._forecast_stat(community_series["headroom"], "min")
+            metrics[f"forecast_community_pv_surplus_sum_next_{label}_kwh"] = self._forecast_stat(community_series["pv_surplus"], "sum") * step_hours
+
+        bucket_steps = max(
+            int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
+            1,
+        )
+        for bucket in range(1, self.FORECAST_GRID_BUCKETS + 1):
+            indices = self._forecast_indices(
+                time_step,
+                self.FORECAST_GRID_BUCKET_SECONDS,
+                length,
+                offset_steps=(bucket - 1) * bucket_steps,
+            )
+            bucket_label = f"{bucket:02d}"
+            prices = [self._safe_index(first.pricing.electricity_pricing, idx, 0.0) for idx in indices]
+            metrics[f"forecast_price_mean_bucket_{bucket_label}_15m"] = self._forecast_stat(prices, "mean")
+            community_series = self._community_forecast_series(indices)
+            for signal in community_series:
+                metrics[f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_stat(
+                    community_series[signal],
+                    "mean",
+                )
+        return metrics
+
+    def _community_forecast_series(self, indices: Sequence[int]) -> Mapping[str, List[float]]:
+        series = {signal: [] for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus")}
+        for idx in indices:
+            totals = {signal: 0.0 for signal in series}
+            for building in self.env.buildings:
+                values = self._building_forecast_components_at_step(building, idx)
+                for signal in series:
+                    totals[signal] += self._safe_scalar(values.get(signal, 0.0), 0.0)
+            for signal in series:
+                series[signal].append(totals[signal])
+        return series
 
     def _build_community_district_metrics(
         self,
@@ -1090,6 +1982,12 @@ class CityLearnEntityInterfaceService:
         pv_energy = sum(self._safe_scalar(m.get("pv_energy_kwh_step", 0.0), 0.0) for m in building_electrical_metrics)
         bess_energy = sum(self._safe_scalar(m.get("bess_energy_kwh_step", 0.0), 0.0) for m in building_electrical_metrics)
         ev_energy = sum(self._safe_scalar(m.get("ev_charging_energy_kwh_step", 0.0), 0.0) for m in building_electrical_metrics)
+        flexible_charge_power = sum(self._safe_scalar(m.get("flexible_charge_power_capacity_kw", 0.0), 0.0) for m in building_electrical_metrics)
+        flexible_discharge_power = sum(self._safe_scalar(m.get("flexible_discharge_power_capacity_kw", 0.0), 0.0) for m in building_electrical_metrics)
+        flexible_charge_energy = sum(self._safe_scalar(m.get("flexible_charge_energy_capacity_kwh_step", 0.0), 0.0) for m in building_electrical_metrics)
+        flexible_discharge_energy = sum(self._safe_scalar(m.get("flexible_discharge_energy_capacity_kwh_step", 0.0), 0.0) for m in building_electrical_metrics)
+        flexible_energy_to_full = sum(self._safe_scalar(m.get("flexible_energy_to_full_kwh", 0.0), 0.0) for m in building_electrical_metrics)
+        flexible_energy_available = sum(self._safe_scalar(m.get("flexible_energy_available_kwh", 0.0), 0.0) for m in building_electrical_metrics)
 
         building_headroom = [
             self._safe_scalar(m.get("_building_headroom_kw"), np.nan) for m in building_electrical_metrics
@@ -1123,6 +2021,12 @@ class CityLearnEntityInterfaceService:
             "community_building_export_headroom_kw": community_building_export_headroom,
             "community_phase_headroom_kw": community_phase_headroom,
             "community_phase_export_headroom_kw": community_phase_export_headroom,
+            "community_flexible_charge_power_capacity_kw": flexible_charge_power,
+            "community_flexible_discharge_power_capacity_kw": flexible_discharge_power,
+            "community_flexible_charge_energy_capacity_kwh_step": flexible_charge_energy,
+            "community_flexible_discharge_energy_capacity_kwh_step": flexible_discharge_energy,
+            "community_flexible_energy_to_full_kwh": flexible_energy_to_full,
+            "community_flexible_energy_available_kwh": flexible_energy_available,
             "active_buildings_count": float(len(self.env.buildings)),
             "active_chargers_count": float(sum(len(b.electric_vehicle_chargers or []) for b in self.env.buildings)),
             "active_evs_count": float(len(self.env.electric_vehicles)),
@@ -1339,6 +2243,19 @@ class CityLearnEntityInterfaceService:
                 self._table_feature_bundle["district"][name] = self.TEMPORAL_BUNDLE
                 self._table_feature_legacy["district"][name] = False
 
+        if self._bundle_enabled(self.DERIVED_FORECAST_BUNDLE):
+            derived_district_features = self._derived_forecast_district_features()
+            self._append_unique(self._district_features, derived_district_features)
+            for name in derived_district_features:
+                self._table_feature_bundle["district"][name] = self.DERIVED_FORECAST_BUNDLE
+                self._table_feature_legacy["district"][name] = False
+
+            derived_building_features = self._derived_forecast_building_features()
+            self._append_unique(self._building_features, derived_building_features)
+            for name in derived_building_features:
+                self._table_feature_bundle["building"][name] = self.DERIVED_FORECAST_BUNDLE
+                self._table_feature_legacy["building"][name] = False
+
         if self._bundle_enabled(self.FORECAST_BUNDLE) and len(env.buildings) > 0:
             current = env.buildings[0]._get_observations_data(include_all=False)
             forecast_keys = [key for key in current if "_predicted_" in str(key)]
@@ -1359,6 +2276,11 @@ class CityLearnEntityInterfaceService:
             self._append_unique(self._charger_features, self.EXTRA_CHARGER_FEATURES)
             for name in self.EXTRA_CHARGER_FEATURES:
                 self._table_feature_bundle["charger"][name] = self.CORE_BUNDLE
+                self._table_feature_legacy["charger"][name] = False
+        if self._bundle_enabled(self.ACTION_FEEDBACK_BUNDLE):
+            self._append_unique(self._charger_features, self.ACTION_FEEDBACK_FEATURES)
+            for name in self.ACTION_FEEDBACK_FEATURES:
+                self._table_feature_bundle["charger"][name] = self.ACTION_FEEDBACK_BUNDLE
                 self._table_feature_legacy["charger"][name] = False
         self._charger_phase_features = [f"phase_connection_{phase_name}" for phase_name in self._charger_phase_names]
         self._append_unique(self._charger_features, self._charger_phase_features)
@@ -1389,6 +2311,11 @@ class CityLearnEntityInterfaceService:
             for name in self.EXTRA_STORAGE_FEATURES:
                 self._table_feature_bundle["storage"][name] = self.CORE_BUNDLE
                 self._table_feature_legacy["storage"][name] = False
+        if self._bundle_enabled(self.ACTION_FEEDBACK_BUNDLE):
+            self._append_unique(self._storage_features, self.ACTION_FEEDBACK_FEATURES)
+            for name in self.ACTION_FEEDBACK_FEATURES:
+                self._table_feature_bundle["storage"][name] = self.ACTION_FEEDBACK_BUNDLE
+                self._table_feature_legacy["storage"][name] = False
         self._storage_phase_features = [f"phase_connection_{phase_name}" for phase_name in self._storage_phase_names]
         self._append_unique(self._storage_features, self._storage_phase_features)
         for name in self._storage_phase_features:
@@ -1404,6 +2331,11 @@ class CityLearnEntityInterfaceService:
         for name in self._deferrable_appliance_features:
             self._table_feature_bundle["deferrable_appliance"][name] = self.BASE_BUNDLE
             self._table_feature_legacy["deferrable_appliance"][name] = False
+        if self._bundle_enabled(self.ACTION_FEEDBACK_BUNDLE):
+            self._append_unique(self._deferrable_appliance_features, self.DEFERRABLE_ACTION_FEEDBACK_FEATURES)
+            for name in self.DEFERRABLE_ACTION_FEEDBACK_FEATURES:
+                self._table_feature_bundle["deferrable_appliance"][name] = self.ACTION_FEEDBACK_BUNDLE
+                self._table_feature_legacy["deferrable_appliance"][name] = False
 
         self._building_action_features = []
         self._charger_action_features = []
@@ -1702,6 +2634,28 @@ class CityLearnEntityInterfaceService:
 
     def _default_bounds_for_feature(self, name: str) -> Tuple[float, float]:
         key = str(name).lower()
+        if key.endswith("_sin") or key.endswith("_cos"):
+            return -1.0, 1.0
+        if key in {
+            "is_weekend",
+            "start_blocked",
+            "last_start_requested",
+            "last_start_applied",
+            "can_charge",
+            "can_discharge",
+            "must_start_now",
+        }:
+            return 0.0, 1.0
+        if key.startswith("clip_reason_"):
+            return 0.0, 1.0
+        if key in {"departure_feasibility_ratio", "min_required_action_normalized"}:
+            return -1.0, 1.0e6
+        if key in {"available_charge_action_normalized", "available_discharge_action_normalized"}:
+            return 0.0, 1.0
+        if key.endswith("_action_normalized") or key in {"last_requested_action_normalized", "last_limited_action_normalized"}:
+            return -1.0, 1.0
+        if key.startswith("time_since_"):
+            return -1.0, float(max(self.env.time_steps, 1)) * self._step_hours()
         if key.endswith("_soc_ratio") or key.endswith("_ratio"):
             return 0.0, 1.0
         if key.endswith("_time_step"):
@@ -1876,6 +2830,19 @@ class CityLearnEntityInterfaceService:
             "avg_power_to_departure_kw": (0.0, max_theoretical_avg_power),
             "charging_slack_kw": (-max_theoretical_avg_power, max(max_charge_kw, 1.0)),
             "charging_priority_ratio": (0.0, 1.0),
+            "connected_ev_soc_min_ratio": (-1.0, 1.0),
+            "connected_ev_energy_available_kwh": (0.0, max(max_capacity, 1.0)),
+            "connected_ev_energy_to_full_kwh": (0.0, max(max_capacity, 1.0)),
+            "can_charge": (0.0, 1.0),
+            "can_discharge": (0.0, 1.0),
+            "available_charge_power_kw": (0.0, max(max_charge_kw, 1.0)),
+            "available_discharge_power_kw": (0.0, max(max_discharge_kw, 1.0)),
+            "available_charge_action_normalized": (0.0, 1.0),
+            "available_discharge_action_normalized": (0.0, 1.0),
+            "max_deliverable_energy_until_departure_kwh": (0.0, max(max_capacity, max_charge_kw * max_departure * step_hours, 1.0)),
+            "departure_energy_margin_kwh": (-max(max_capacity, 1.0), max(max_capacity, max_charge_kw * max_departure * step_hours, 1.0)),
+            "departure_feasibility_ratio": (-1.0, 1.0e6),
+            "min_required_action_normalized": (0.0, 1.0e6),
             "charge_efficiency_at_max_ratio": (0.0, 1.0),
             "discharge_efficiency_at_max_ratio": (0.0, 1.0),
             "incoming_ev_required_soc_departure": (-0.1, 1.0),
@@ -1948,6 +2915,19 @@ class CityLearnEntityInterfaceService:
                     feature_low, feature_high = 0.0, max(capacity, 1.0)
                 elif feature in {"nominal_power_kw", "max_charge_power_kw", "max_discharge_power_kw", "min_charge_power_kw", "min_discharge_power_kw"}:
                     feature_low, feature_high = 0.0, max(nominal_power, 1.0)
+                elif feature in {"available_charge_power_kw", "available_discharge_power_kw"}:
+                    feature_low, feature_high = 0.0, max(nominal_power, 1.0)
+                elif feature in {"available_charge_action_normalized", "available_discharge_action_normalized"}:
+                    feature_low, feature_high = 0.0, 1.0
+                elif feature in {
+                    "available_charge_energy_kwh_step",
+                    "available_discharge_energy_kwh_step",
+                    "max_charge_energy_kwh_step",
+                    "max_discharge_energy_kwh_step",
+                }:
+                    feature_low, feature_high = 0.0, energy_limit
+                elif feature in {"can_charge", "can_discharge", "charge_headroom_ratio", "discharge_available_ratio", "usable_soc_ratio"}:
+                    feature_low, feature_high = 0.0, 1.0
                 elif feature == "electricity_consumption_kwh":
                     feature_low, feature_high = -energy_limit, energy_limit
                 elif feature in {"efficiency_ratio", "round_trip_efficiency_ratio", "current_efficiency_ratio", "soc_min_ratio"}:
@@ -2043,6 +3023,13 @@ class CityLearnEntityInterfaceService:
             "cycle_load_factor_ratio": (0.0, 1.0),
             "cycle_peak_step_offset_ratio": (-1.0, 1.0),
             "remaining_duration_steps": (0.0, max_duration),
+            "remaining_duration_hours": (0.0, max_duration * self._step_hours()),
+            "cycle_remaining_fraction_ratio": (0.0, 1.0),
+            "hours_until_earliest_start": (-1.0, max_time_step * self._step_hours()),
+            "start_window_width_hours": (0.0, max_time_step * self._step_hours()),
+            "start_energy_kwh_step": (0.0, max_energy),
+            "start_power_kw": (0.0, max_power),
+            "must_start_now": (0.0, 1.0),
             "remaining_average_power_kw": (0.0, max_power),
             "current_step_power_kw": (0.0, max_power),
         }

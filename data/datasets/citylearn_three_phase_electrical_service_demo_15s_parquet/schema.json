@@ -1070,7 +1070,13 @@
     "entity_forecasts_existing": {
       "active": true
     },
+    "entity_forecasts_derived": {
+      "active": true
+    },
     "entity_temporal_derived": {
+      "active": true
+    },
+    "entity_action_feedback": {
       "active": true
     }
   },

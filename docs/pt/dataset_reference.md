@@ -179,6 +179,23 @@ Para datasets a 15s:
 | Teste antes de treino | Correr smoke episode pequeno e `evaluate_v2()`. |
 | Exemplo compacto com assets dinamicos | `data/datasets/citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet/schema.json` tem 7 dias a 15s com eventos add/remove de chargers, PV e BESS. |
 
+## Bundles de Observacao Entity nos Datasets Incluidos
+
+Os datasets entity a 15 segundos e `citylearn_challenge_2022_phase_all_plus_evs`
+ativam todos os bundles de observacoes entity:
+
+| Bundle | Objetivo |
+|---|---|
+| `entity_core_electrical` | Potencia, energia, SOC e capacidade fisica por asset. |
+| `entity_community_operational` | Agregados de potencia, headroom e flexibilidade da comunidade. |
+| `entity_forecasts_existing` | Observacoes `*_predicted_*` existentes no dataset. |
+| `entity_forecasts_derived` | Agregados futuros perfeitos do simulador e grid em buckets de 15 minutos. |
+| `entity_temporal_derived` | Calendario robusto e lags curtos. |
+| `entity_action_feedback` | Feedback de acao pedida, limitada e aplicada com motivos de clipping. |
+
+Outros schemas mantem o comportamento compativel por default salvo se declararem
+`observation_bundles`.
+
 ## Performance e Loader
 
 | Otimizacao | O que faz |

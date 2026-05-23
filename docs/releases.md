@@ -60,6 +60,65 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.0.0 - Entity RL Observation Contract
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+First stable simulator-contract release for entity-mode RL workflows. This release promotes the additive entity observation contract for forecasts, physical deadlines, action feedback, clipping diagnostics and asset-level feasible action capacity.
+
+### Added
+
+- Entity-only derived forecast bundle `entity_forecasts_derived` with physical horizons `15m`, `1h`, `3h`, `6h`, `24h` and 15-minute grid buckets up to 6h.
+- Entity action feedback bundle `entity_action_feedback` with requested, limited and applied EV/BESS/deferrable actions plus clipping-reason flags.
+- RL deadline-pressure observations for EV charging, including `departure_feasibility_ratio`, `departure_energy_margin_kwh`, `max_deliverable_energy_until_departure_kwh` and `min_required_action_normalized`.
+- Feasible action-capacity observations for chargers and BESS, including `can_charge`, `can_discharge`, available power and normalized available action magnitudes.
+- BESS per-step energy capacity observations split into nominal `max_*_energy_kwh_step` and constrained `available_*_energy_kwh_step`.
+- Building and community aggregate flexible charge/discharge capacity and energy slack observations.
+- Deferrable deadline-pressure observations, including `remaining_duration_hours`, `cycle_remaining_fraction_ratio`, `start_energy_kwh_step`, `start_power_kw` and `must_start_now`.
+- Robust temporal entity observations while keeping raw `time_step` in payload `meta`.
+
+### Changed
+
+- 15-second entity datasets and `citylearn_challenge_2022_phase_all_plus_evs` now declare all entity observation bundles active in their schemas.
+- Entity `meta` exposes `seconds_per_time_step` and the forecast config used by derived forecasts.
+- Documentation now describes the entity observation bundles, RL deadline-pressure features and dataset bundle defaults.
+
+### Fixed
+
+- No intentional KPI or physics behavior break. EV departure countdowns remain relative in steps, while `hours_until_departure` is physical hours computed from `seconds_per_time_step`.
+
+### Dataset/Schema Impact
+
+- Updated schemas:
+  - `citylearn_challenge_2022_phase_all_plus_evs`
+  - `citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet`
+  - `citylearn_three_phase_dynamic_assets_only_demo_15s`
+  - `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet`
+  - `citylearn_three_phase_electrical_service_demo_15s`
+  - `citylearn_three_phase_electrical_service_demo_15s_parquet`
+- New bundles remain disabled by default for schemas that do not opt in.
+
+### Compatibility
+
+- Flat observations, legacy names and existing default bundle behavior are preserved.
+- Algorithms that consume the affected entity schemas will see wider entity tables because all bundles are active by default in those datasets.
+- Real-world adapters should fill the same derived forecast contract with real forecasts rather than simulator `actual_future` values.
+
+### Validation
+
+- `.venv/bin/python -m pytest -q`: pass, `346 passed, 17 warnings`
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass, `16/16` scenarios
+- `.venv/bin/python -m build --outdir /tmp/softcpsrecsimulator-1.0.0-dist`: pass
+- `.venv/bin/python -m twine check /tmp/softcpsrecsimulator-1.0.0-dist/*`: pass
+
+### Migration Notes
+
+- RL policies should prefer physical deadline and pressure features such as `hours_until_departure`, `departure_feasibility_ratio`, `departure_energy_margin_kwh`, `available_*_power_kw` and action feedback fields over raw step indices.
+- If fixed-width entity models were trained on earlier schemas, refresh feature lists from `env.entity_specs` before loading/retraining.
+
 ## v0.6.9 - Macro-Step Action Repeat
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

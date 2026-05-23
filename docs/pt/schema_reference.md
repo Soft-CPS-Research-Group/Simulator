@@ -92,6 +92,8 @@ Usado apenas na entity interface.
   "entity_core_electrical": true,
   "entity_community_operational": true,
   "entity_forecasts_existing": false,
+  "entity_forecasts_derived": false,
+  "entity_action_feedback": false,
   "entity_temporal_derived": true
 }
 ```
@@ -102,7 +104,9 @@ Usado apenas na entity interface.
 | `entity_core_electrical` | `false` | Potencias, energia por step, PV, BESS, EV, eficiencia e metricas eletricas por building. |
 | `entity_community_operational` | `false` | Agregados district/community, headrooms, counts e topology version. |
 | `entity_forecasts_existing` | `false` | Forecasts ja existentes no dataset. |
-| `entity_temporal_derived` | `false` | Lags e medias curtas derivadas. |
+| `entity_forecasts_derived` | `false` | Agregados futuros perfeitos do dataset e grid em buckets de 15 min. |
+| `entity_temporal_derived` | `false` | Lags, medias curtas e calendario sin/cos. |
+| `entity_action_feedback` | `false` | Acao pedida, limitada e aplicada, mais flags de clipping. |
 
 ## `buildings`
 

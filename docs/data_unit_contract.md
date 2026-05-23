@@ -74,6 +74,9 @@ Practical rules:
 | EV timestamps | Convert absolute times to integer timesteps used by charger schedules. |
 | Deferrable timestamps | Use global dataset timesteps for `earliest_start_time_step`, `latest_start_time_step` and `deadline_time_step`. |
 | EV charger countdowns | `electric_vehicle_departure_time` and `electric_vehicle_estimated_arrival_time` are step counts, not clock hours. |
+| Entity derived forecasts | Computed from future dataset values in simulator time, with horizons converted from seconds using `seconds_per_time_step`. |
+| Entity action feedback | Requested/limited actions are normalized commands; requested/limited/applied power fields are `kW`; short-window energy fields are `kWh`. |
+| Entity BESS energy capacity | `max_*_energy_kwh_step` is nominal power converted by step duration; `available_*_energy_kwh_step` is the constrained SOC/headroom/outage capacity for the same step. |
 | Sub-minute datasets | Include optional `seconds` in `energy_simulation` whenever possible. |
 | Quality flags like `generated` | Keep them in the ingestion/conversion pipeline; they are not native physical CityLearn fields. |
 
@@ -149,6 +152,10 @@ In the entity interface, EV flexibility should preferably be consumed through ph
 | `required_average_power_kw` | Average power required until departure. |
 | `charging_slack_kw` | Margin between charger max power and required average power. |
 | `charging_priority_ratio` | Urgency in `[0, 1]`, derived from required average power versus charger max power. |
+| `max_deliverable_energy_until_departure_kwh` | Energy that can still be delivered by departure under current feasible charge power. |
+| `departure_energy_margin_kwh` | `max_deliverable_energy_until_departure_kwh - energy_to_required_soc_kwh`; negative means the target is currently infeasible. |
+| `departure_feasibility_ratio` | `energy_to_required_soc_kwh / max_deliverable_energy_until_departure_kwh`; values above `1` indicate infeasibility under current limits. |
+| `min_required_action_normalized` | Required average charger power divided by charger max charging power; values above `1` indicate a power deadline conflict. |
 
 ## PV
 

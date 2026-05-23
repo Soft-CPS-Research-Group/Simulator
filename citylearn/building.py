@@ -2589,6 +2589,25 @@ class Building(Environment):
         self.__power_outage_signal = self.reset_power_outage_signal()
         self.__chargers_electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.__deferrable_appliances_electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_electrical_storage_requested_action_normalized = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_electrical_storage_limited_action_normalized = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_electrical_storage_requested_power_kw = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_electrical_storage_limited_power_kw = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        for reason in (
+            'availability',
+            'power_limit',
+            'soc_limit',
+            'building_headroom',
+            'phase_headroom',
+            'export_headroom',
+            'outage',
+            'deferrable_window',
+        ):
+            setattr(
+                self,
+                f'action_feedback_electrical_storage_clip_reason_{reason}',
+                np.zeros(self.episode_tracker.episode_time_steps, dtype='float32'),
+            )
         self._set_default_charging_headroom()
         self._reset_charging_constraint_histories()
 
