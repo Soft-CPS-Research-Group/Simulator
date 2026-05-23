@@ -348,6 +348,7 @@ class CityLearnEntityInterfaceService:
         self._community_forecast_component_cache: Optional[Mapping[str, np.ndarray]] = None
         self._price_forecast_cache: Optional[np.ndarray] = None
         self._forecast_stat_summary_cache: Dict[int, Tuple[Any, Mapping[str, np.ndarray]]] = {}
+        self._forecast_window_bounds_cache: Dict[Tuple[int, int, float], Dict[str, Any]] = {}
         self._action_feedback_series_cache: Dict[int, Dict[str, Any]] = {}
 
     def reset(self):
@@ -471,12 +472,10 @@ class CityLearnEntityInterfaceService:
             if len(env.buildings) > 0:
                 district_values.update(self._build_calendar_temporal_metrics(building=env.buildings[0], time_step=t))
 
-        for j, name in enumerate(self._district_features):
-            self._district_obs[0, j] = self._safe_scalar(district_values.get(name, 0.0))
+        self._fill_obs_row_from_mapping(self._district_obs[0], self._district_features, district_values)
 
         for i, values in enumerate(building_feature_maps):
-            for j, name in enumerate(self._building_features):
-                self._building_obs[i, j] = self._safe_scalar(values.get(name, 0.0))
+            self._fill_obs_row_from_mapping(self._building_obs[i], self._building_features, values)
 
         for ref in self._charger_refs:
             charger = env.buildings[ref.building_index]._charger_lookup[ref.charger_id]
@@ -609,8 +608,7 @@ class CityLearnEntityInterfaceService:
                 )
             if action_feedback_bundle_enabled:
                 values.update(self._charger_action_feedback_metrics(charger, endogenous_t, step_hours))
-            for col, feature_name in enumerate(self._charger_features):
-                self._charger_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
+            self._fill_obs_row_from_mapping(self._charger_obs[ref.row], self._charger_features, values)
 
         for i, ev in enumerate(env.electric_vehicles):
             soc = self._safe_scalar(ev.battery.soc[endogenous_t], 0.0)
@@ -634,8 +632,7 @@ class CityLearnEntityInterfaceService:
                         "energy_to_full_kwh": energy_to_full,
                     }
                 )
-            for col, feature_name in enumerate(self._ev_features):
-                self._ev_obs[i, col] = self._safe_scalar(values.get(feature_name, 0.0))
+            self._fill_obs_row_from_mapping(self._ev_obs[i], self._ev_features, values)
 
         for ref in self._storage_refs:
             building = env.buildings[ref.building_index]
@@ -714,8 +711,7 @@ class CityLearnEntityInterfaceService:
                 )
             if action_feedback_bundle_enabled:
                 values.update(self._storage_action_feedback_metrics(building, endogenous_t, step_hours))
-            for col, feature_name in enumerate(self._storage_features):
-                self._storage_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
+            self._fill_obs_row_from_mapping(self._storage_obs[ref.row], self._storage_features, values)
 
         if self._pv_features:
             for ref in self._pv_refs:
@@ -729,8 +725,7 @@ class CityLearnEntityInterfaceService:
                     "installed_power_kw": installed_power,
                     "generation_capacity_factor_ratio": generation_power / installed_power if installed_power > 0.0 else 0.0,
                 }
-                for col, feature_name in enumerate(self._pv_features):
-                    self._pv_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
+                self._fill_obs_row_from_mapping(self._pv_obs[ref.row], self._pv_features, values)
 
         for ref in self._deferrable_appliance_refs:
             building = env.buildings[ref.building_index]
@@ -741,8 +736,11 @@ class CityLearnEntityInterfaceService:
             values.update(self._deferrable_core_decision_metrics(appliance, values))
             if action_feedback_bundle_enabled:
                 values.update(self._deferrable_action_feedback_metrics(appliance, endogenous_t))
-            for col, feature_name in enumerate(self._deferrable_appliance_features):
-                self._deferrable_appliance_obs[ref.row, col] = self._safe_scalar(values.get(feature_name, 0.0))
+            self._fill_obs_row_from_mapping(
+                self._deferrable_appliance_obs[ref.row],
+                self._deferrable_appliance_features,
+                values,
+            )
 
         self._charger_to_ev_connected.fill(-1)
         self._charger_to_ev_connected_mask.fill(0.0)
@@ -2001,6 +1999,22 @@ class CityLearnEntityInterfaceService:
             where=counts > 0,
         )
 
+    @staticmethod
+    def _forecast_summary_means_valid(
+        summary: Mapping[str, np.ndarray],
+        starts: np.ndarray,
+        stops: np.ndarray,
+        fallback: float = 0.0,
+    ) -> np.ndarray:
+        counts = summary["count_prefix"][stops] - summary["count_prefix"][starts]
+        totals = summary["sum_prefix"][stops] - summary["sum_prefix"][starts]
+        return np.divide(
+            totals,
+            counts,
+            out=np.full(totals.shape, float(fallback), dtype="float64"),
+            where=counts > 0,
+        )
+
     def _dataset_energy_to_control_step_for_building(self, building, energy_kwh: float) -> float:
         ratio = getattr(building, "time_step_ratio", None)
         ratio = 1.0 if ratio in (None, 0) else float(ratio)
@@ -2012,6 +2026,7 @@ class CityLearnEntityInterfaceService:
         self._community_forecast_component_cache = None
         self._price_forecast_cache = None
         self._forecast_stat_summary_cache = {}
+        self._forecast_window_bounds_cache = {}
 
     def _forecast_window(self, time_step: int, window_seconds: float, length: int, *, offset_steps: int = 0):
         if length <= 0:
@@ -2023,6 +2038,51 @@ class CityLearnEntityInterfaceService:
         if start >= stop:
             return length - 1, length
         return start, stop
+
+    def _forecast_window_bounds(self, time_step: int, length: int) -> Mapping[str, Any]:
+        step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
+        key = (int(time_step), int(length), step_seconds)
+        cached = self._forecast_window_bounds_cache.get(key)
+        if cached is not None:
+            return cached
+
+        if length <= 0:
+            bounds = {
+                "horizons": tuple((label, 0, 0) for label, _ in self.FORECAST_HORIZONS),
+                "bucket_starts": np.zeros(self.FORECAST_GRID_BUCKETS, dtype=np.int64),
+                "bucket_stops": np.zeros(self.FORECAST_GRID_BUCKETS, dtype=np.int64),
+            }
+            self._forecast_window_bounds_cache[key] = bounds
+            return bounds
+
+        base_start = int(time_step) + 1
+        horizon_windows = []
+        for label, seconds in self.FORECAST_HORIZONS:
+            steps = max(int(np.ceil(float(seconds) / step_seconds)), 1)
+            start = min(max(base_start, 0), length - 1)
+            stop = min(start + steps, length)
+            if start >= stop:
+                start, stop = length - 1, length
+            horizon_windows.append((label, start, stop))
+
+        bucket_steps = max(int(np.ceil(float(self.FORECAST_GRID_BUCKET_SECONDS) / step_seconds)), 1)
+        offsets = np.arange(self.FORECAST_GRID_BUCKETS, dtype=np.int64) * bucket_steps
+        starts = np.clip(base_start + offsets, 0, length - 1).astype(np.int64, copy=False)
+        stops = np.minimum(starts + bucket_steps, length).astype(np.int64, copy=False)
+        empty = starts >= stops
+        if np.any(empty):
+            starts = starts.copy()
+            stops = stops.copy()
+            starts[empty] = length - 1
+            stops[empty] = length
+
+        bounds = {
+            "horizons": tuple(horizon_windows),
+            "bucket_starts": starts,
+            "bucket_stops": stops,
+        }
+        self._forecast_window_bounds_cache[key] = bounds
+        return bounds
 
     def _building_forecast_components_at_step(
         self,
@@ -2197,8 +2257,8 @@ class CityLearnEntityInterfaceService:
         length = len(arrays["load"])
         step_hours = self._step_hours()
         summaries = {signal: self._forecast_stat_summary(values) for signal, values in arrays.items()}
-        for label, seconds in self.FORECAST_HORIZONS:
-            start, stop = self._forecast_window(time_step, seconds, length)
+        window_bounds = self._forecast_window_bounds(time_step, length)
+        for label, start, stop in window_bounds["horizons"]:
             metrics[f"forecast_load_mean_next_{label}_kw"] = self._forecast_summary_mean(summaries["load"], start, stop)
             metrics[f"forecast_pv_mean_next_{label}_kw"] = self._forecast_summary_mean(summaries["pv"], start, stop)
             metrics[f"forecast_net_mean_next_{label}_kw"] = self._forecast_summary_mean(summaries["net"], start, stop)
@@ -2207,24 +2267,11 @@ class CityLearnEntityInterfaceService:
             metrics[f"forecast_headroom_min_next_{label}_kw"] = self._forecast_window_stat(arrays["headroom"], "min", start, stop)
             metrics[f"forecast_pv_surplus_sum_next_{label}_kwh"] = self._forecast_summary_sum(summaries["pv_surplus"], start, stop) * step_hours
 
-        bucket_steps = max(
-            int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
-            1,
-        )
-        bucket_starts = np.empty(self.FORECAST_GRID_BUCKETS, dtype=np.int64)
-        bucket_stops = np.empty(self.FORECAST_GRID_BUCKETS, dtype=np.int64)
-        for bucket in range(1, self.FORECAST_GRID_BUCKETS + 1):
-            start, stop = self._forecast_window(
-                time_step,
-                self.FORECAST_GRID_BUCKET_SECONDS,
-                length,
-                offset_steps=(bucket - 1) * bucket_steps,
-            )
-            bucket_starts[bucket - 1] = start
-            bucket_stops[bucket - 1] = stop
+        bucket_starts = window_bounds["bucket_starts"]
+        bucket_stops = window_bounds["bucket_stops"]
 
         for signal, summary in summaries.items():
-            means = self._forecast_summary_means(summary, bucket_starts, bucket_stops)
+            means = self._forecast_summary_means_valid(summary, bucket_starts, bucket_stops)
             for bucket, value in enumerate(means, start=1):
                 bucket_label = f"{bucket:02d}"
                 metrics[f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw"] = float(value)
@@ -2244,9 +2291,9 @@ class CityLearnEntityInterfaceService:
         community_summaries = {
             signal: self._forecast_stat_summary(values) for signal, values in community_arrays.items()
         }
+        window_bounds = self._forecast_window_bounds(time_step, length)
 
-        for label, seconds in self.FORECAST_HORIZONS:
-            start, stop = self._forecast_window(time_step, seconds, length)
+        for label, start, stop in window_bounds["horizons"]:
             metrics[f"forecast_price_min_next_{label}"] = self._forecast_window_stat(prices_array, "min", start, stop)
             metrics[f"forecast_price_mean_next_{label}"] = self._forecast_summary_mean(price_summary, start, stop)
             metrics[f"forecast_price_max_next_{label}"] = self._forecast_window_stat(prices_array, "max", start, stop)
@@ -2258,29 +2305,16 @@ class CityLearnEntityInterfaceService:
             metrics[f"forecast_community_headroom_min_next_{label}_kw"] = self._forecast_window_stat(community_arrays["headroom"], "min", start, stop)
             metrics[f"forecast_community_pv_surplus_sum_next_{label}_kwh"] = self._forecast_summary_sum(community_summaries["pv_surplus"], start, stop) * step_hours
 
-        bucket_steps = max(
-            int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
-            1,
-        )
-        bucket_starts = np.empty(self.FORECAST_GRID_BUCKETS, dtype=np.int64)
-        bucket_stops = np.empty(self.FORECAST_GRID_BUCKETS, dtype=np.int64)
-        for bucket in range(1, self.FORECAST_GRID_BUCKETS + 1):
-            start, stop = self._forecast_window(
-                time_step,
-                self.FORECAST_GRID_BUCKET_SECONDS,
-                length,
-                offset_steps=(bucket - 1) * bucket_steps,
-            )
-            bucket_starts[bucket - 1] = start
-            bucket_stops[bucket - 1] = stop
+        bucket_starts = window_bounds["bucket_starts"]
+        bucket_stops = window_bounds["bucket_stops"]
 
-        price_means = self._forecast_summary_means(price_summary, bucket_starts, bucket_stops)
+        price_means = self._forecast_summary_means_valid(price_summary, bucket_starts, bucket_stops)
         for bucket, value in enumerate(price_means, start=1):
             bucket_label = f"{bucket:02d}"
             metrics[f"forecast_price_mean_bucket_{bucket_label}_15m"] = float(value)
 
         for signal, summary in community_summaries.items():
-            means = self._forecast_summary_means(summary, bucket_starts, bucket_stops)
+            means = self._forecast_summary_means_valid(summary, bucket_starts, bucket_stops)
             for bucket, value in enumerate(means, start=1):
                 bucket_label = f"{bucket:02d}"
                 metrics[f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw"] = float(value)
@@ -3435,6 +3469,19 @@ class CityLearnEntityInterfaceService:
             return cls._safe_scalar(values[index], default)
         except Exception:
             return float(default)
+
+    @staticmethod
+    def _fill_obs_row_from_mapping(row: np.ndarray, feature_names: Sequence[str], values: Mapping[str, Any]) -> None:
+        if len(feature_names) == 0:
+            return
+
+        for index, name in enumerate(feature_names):
+            try:
+                row[index] = values.get(name, 0.0)
+            except (TypeError, ValueError):
+                row[index] = 0.0
+
+        np.nan_to_num(row, copy=False, nan=0.0, posinf=0.0, neginf=0.0)
 
     @staticmethod
     def _to_2d_array(value: Any, *, rows: int, cols: int) -> Optional[np.ndarray]:
