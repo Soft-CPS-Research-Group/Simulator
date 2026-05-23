@@ -342,10 +342,15 @@ class CityLearnEntityInterfaceService:
         self._initialized = False
         self._layout_topology_version = -1
         self._observation_bundles = self._resolve_observation_bundles()
+        self._forecast_base_component_cache: Dict[int, Mapping[str, np.ndarray]] = {}
+        self._forecast_component_cache: Dict[int, Mapping[str, np.ndarray]] = {}
+        self._community_forecast_component_cache: Optional[Mapping[str, np.ndarray]] = None
+        self._price_forecast_cache: Optional[np.ndarray] = None
 
     def reset(self):
         """Rebuild specs and reusable buffers for the current episode layout."""
 
+        self._clear_forecast_component_cache()
         self._build_entity_layout()
         self._build_spaces()
         self._build_specs()
@@ -356,6 +361,7 @@ class CityLearnEntityInterfaceService:
         """Mark specs/layout as stale and rebuild on next access."""
 
         self._initialized = False
+        self._clear_forecast_component_cache()
 
     @property
     def observation_space(self) -> spaces.Dict:
@@ -1792,24 +1798,47 @@ class CityLearnEntityInterfaceService:
         return list(range(start, stop))
 
     def _forecast_stat(self, values: Sequence[float], stat: str, fallback: float = 0.0) -> float:
-        array = np.array(values, dtype="float64")
+        array = np.asarray(values, dtype="float64")
         array = array[np.isfinite(array)]
         if array.size == 0:
             return float(fallback)
         if stat == "min":
-            return float(np.nanmin(array))
+            return float(array.min())
         if stat == "max" or stat == "peak":
-            return float(np.nanmax(array))
+            return float(array.max())
         if stat == "sum":
-            return float(np.nansum(array))
-        return float(np.nanmean(array))
+            return float(array.sum())
+        return float(array.mean())
 
     def _dataset_energy_to_control_step_for_building(self, building, energy_kwh: float) -> float:
         ratio = getattr(building, "time_step_ratio", None)
         ratio = 1.0 if ratio in (None, 0) else float(ratio)
         return self._safe_scalar(energy_kwh, 0.0) * ratio
 
-    def _building_forecast_components_at_step(self, building, step: int) -> Mapping[str, float]:
+    def _clear_forecast_component_cache(self) -> None:
+        self._forecast_base_component_cache = {}
+        self._forecast_component_cache = {}
+        self._community_forecast_component_cache = None
+        self._price_forecast_cache = None
+
+    def _forecast_window(self, time_step: int, window_seconds: float, length: int, *, offset_steps: int = 0):
+        if length <= 0:
+            return 0, 0
+        step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
+        steps = max(int(np.ceil(float(window_seconds) / step_seconds)), 1)
+        start = min(max(int(time_step) + 1 + int(offset_steps), 0), length - 1)
+        stop = min(start + steps, length)
+        if start >= stop:
+            return length - 1, length
+        return start, stop
+
+    def _building_forecast_components_at_step(
+        self,
+        building,
+        step: int,
+        *,
+        include_deferrable: bool = True,
+    ) -> Mapping[str, float]:
         step_hours = self._step_hours()
         temperature = self._safe_index(getattr(building.weather, "outdoor_dry_bulb_temperature", []), step, 0.0)
         energy_simulation = building.energy_simulation
@@ -1840,10 +1869,12 @@ class CityLearnEntityInterfaceService:
             dhw = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand, temperature, heating=True), 0.0)
         else:
             dhw = self._safe_scalar(building.dhw_device.get_input_power(dhw_demand), 0.0)
-        deferrable = sum(
-            self._safe_index(getattr(appliance, "electricity_consumption", []), step, 0.0)
-            for appliance in building.deferrable_appliances or []
-        )
+        deferrable = 0.0
+        if include_deferrable:
+            deferrable = sum(
+                self._safe_index(getattr(appliance, "electricity_consumption", []), step, 0.0)
+                for appliance in building.deferrable_appliances or []
+            )
         load_energy = max(non_shiftable + cooling + heating + dhw + deferrable, 0.0)
         pv_energy = abs(self._safe_index(getattr(building, "solar_generation", []), step, 0.0))
 
@@ -1874,44 +1905,129 @@ class CityLearnEntityInterfaceService:
             "pv_surplus": pv_surplus_kw,
         }
 
-    def _building_forecast_series(self, building, indices: Sequence[int]) -> Mapping[str, List[float]]:
-        series = {signal: [] for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus")}
-        for idx in indices:
-            values = self._building_forecast_components_at_step(building, idx)
+    def _building_base_forecast_arrays(self, building) -> Mapping[str, np.ndarray]:
+        cache_key = id(building)
+        cached = self._forecast_base_component_cache.get(cache_key)
+        if cached is not None:
+            return cached
+
+        length = len(getattr(building.energy_simulation, "non_shiftable_load", []))
+        series = {signal: np.zeros(length, dtype="float64") for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus")}
+        for idx in range(length):
+            values = self._building_forecast_components_at_step(building, idx, include_deferrable=False)
             for signal in series:
-                series[signal].append(self._safe_scalar(values.get(signal, 0.0), 0.0))
+                series[signal][idx] = self._safe_scalar(values.get(signal, 0.0), 0.0)
+
+        self._forecast_base_component_cache[cache_key] = series
         return series
+
+    def _building_deferrable_power_array(self, building, length: int) -> np.ndarray:
+        if length <= 0 or not (building.deferrable_appliances or []):
+            return np.zeros(length, dtype="float64")
+
+        step_hours = self._step_hours()
+        power = np.zeros(length, dtype="float64")
+        for appliance in building.deferrable_appliances or []:
+            values = np.asarray(getattr(appliance, "electricity_consumption", []), dtype="float64")
+            if values.size == 0:
+                continue
+            usable = min(length, values.size)
+            power[:usable] += np.nan_to_num(values[:usable], nan=0.0, posinf=0.0, neginf=0.0) / max(step_hours, 1.0e-9)
+        return power
+
+    def _building_has_deferrable_forecast_load(self, building) -> bool:
+        return bool(building.deferrable_appliances or [])
+
+    def _building_forecast_arrays(self, building) -> Mapping[str, np.ndarray]:
+        cache_key = id(building)
+        base = self._building_base_forecast_arrays(building)
+        if not self._building_has_deferrable_forecast_load(building):
+            cached = self._forecast_component_cache.get(cache_key)
+            if cached is None:
+                cached = dict(base)
+                self._forecast_component_cache[cache_key] = cached
+            return cached
+
+        length = len(base["load"])
+        deferrable_power = self._building_deferrable_power_array(building, length)
+        load = base["load"] + deferrable_power
+        pv = base["pv"]
+        net = load - pv
+        return {
+            "load": load,
+            "pv": pv,
+            "net": net,
+            "import": np.maximum(net, 0.0),
+            "export": np.maximum(-net, 0.0),
+            "headroom": base["headroom"] - deferrable_power,
+            "pv_surplus": np.maximum(pv - load, 0.0),
+        }
+
+    def _building_forecast_series(self, building, indices: Sequence[int]) -> Mapping[str, List[float]]:
+        arrays = self._building_forecast_arrays(building)
+        return {signal: [self._safe_index(values, idx, 0.0) for idx in indices] for signal, values in arrays.items()}
+
+    def _price_forecast_array(self, first_building) -> np.ndarray:
+        if self._price_forecast_cache is None:
+            self._price_forecast_cache = np.nan_to_num(
+                np.asarray(getattr(first_building.pricing, "electricity_pricing", []), dtype="float64"),
+                nan=0.0,
+                posinf=0.0,
+                neginf=0.0,
+            )
+        return self._price_forecast_cache
+
+    def _community_forecast_arrays(self) -> Mapping[str, np.ndarray]:
+        if self._community_forecast_component_cache is not None and not any(
+            self._building_has_deferrable_forecast_load(building) for building in self.env.buildings
+        ):
+            return self._community_forecast_component_cache
+
+        if len(self.env.buildings) == 0:
+            return {signal: np.zeros(0, dtype="float64") for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus")}
+
+        first_arrays = self._building_forecast_arrays(self.env.buildings[0])
+        totals = {signal: np.zeros_like(values, dtype="float64") for signal, values in first_arrays.items()}
+        for building in self.env.buildings:
+            arrays = self._building_forecast_arrays(building)
+            for signal, values in arrays.items():
+                usable = min(totals[signal].size, values.size)
+                totals[signal][:usable] += values[:usable]
+
+        if not any(self._building_has_deferrable_forecast_load(building) for building in self.env.buildings):
+            self._community_forecast_component_cache = totals
+
+        return totals
 
     def _build_derived_forecast_building_metrics(self, *, building, time_step: int) -> Mapping[str, float]:
         metrics: Dict[str, float] = {}
-        length = len(getattr(building.energy_simulation, "non_shiftable_load", []))
+        arrays = self._building_forecast_arrays(building)
+        length = len(arrays["load"])
         step_hours = self._step_hours()
         for label, seconds in self.FORECAST_HORIZONS:
-            indices = self._forecast_indices(time_step, seconds, length)
-            series = self._building_forecast_series(building, indices)
-            metrics[f"forecast_load_mean_next_{label}_kw"] = self._forecast_stat(series["load"], "mean")
-            metrics[f"forecast_pv_mean_next_{label}_kw"] = self._forecast_stat(series["pv"], "mean")
-            metrics[f"forecast_net_mean_next_{label}_kw"] = self._forecast_stat(series["net"], "mean")
-            metrics[f"forecast_import_peak_next_{label}_kw"] = self._forecast_stat(series["import"], "peak")
-            metrics[f"forecast_export_peak_next_{label}_kw"] = self._forecast_stat(series["export"], "peak")
-            metrics[f"forecast_headroom_min_next_{label}_kw"] = self._forecast_stat(series["headroom"], "min")
-            metrics[f"forecast_pv_surplus_sum_next_{label}_kwh"] = self._forecast_stat(series["pv_surplus"], "sum") * step_hours
+            start, stop = self._forecast_window(time_step, seconds, length)
+            metrics[f"forecast_load_mean_next_{label}_kw"] = self._forecast_stat(arrays["load"][start:stop], "mean")
+            metrics[f"forecast_pv_mean_next_{label}_kw"] = self._forecast_stat(arrays["pv"][start:stop], "mean")
+            metrics[f"forecast_net_mean_next_{label}_kw"] = self._forecast_stat(arrays["net"][start:stop], "mean")
+            metrics[f"forecast_import_peak_next_{label}_kw"] = self._forecast_stat(arrays["import"][start:stop], "peak")
+            metrics[f"forecast_export_peak_next_{label}_kw"] = self._forecast_stat(arrays["export"][start:stop], "peak")
+            metrics[f"forecast_headroom_min_next_{label}_kw"] = self._forecast_stat(arrays["headroom"][start:stop], "min")
+            metrics[f"forecast_pv_surplus_sum_next_{label}_kwh"] = self._forecast_stat(arrays["pv_surplus"][start:stop], "sum") * step_hours
 
         bucket_steps = max(
             int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
             1,
         )
         for bucket in range(1, self.FORECAST_GRID_BUCKETS + 1):
-            indices = self._forecast_indices(
+            start, stop = self._forecast_window(
                 time_step,
                 self.FORECAST_GRID_BUCKET_SECONDS,
                 length,
                 offset_steps=(bucket - 1) * bucket_steps,
             )
-            series = self._building_forecast_series(building, indices)
             bucket_label = f"{bucket:02d}"
-            for signal in series:
-                metrics[f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_stat(series[signal], "mean")
+            for signal, values in arrays.items():
+                metrics[f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_stat(values[start:stop], "mean")
         return metrics
 
     def _build_derived_forecast_district_metrics(self, *, time_step: int) -> Mapping[str, float]:
@@ -1919,57 +2035,49 @@ class CityLearnEntityInterfaceService:
         if len(self.env.buildings) == 0:
             return metrics
         first = self.env.buildings[0]
-        length = len(getattr(first.pricing, "electricity_pricing", []))
+        prices_array = self._price_forecast_array(first)
+        length = len(prices_array)
         step_hours = self._step_hours()
+        community_arrays = self._community_forecast_arrays()
 
         for label, seconds in self.FORECAST_HORIZONS:
-            indices = self._forecast_indices(time_step, seconds, length)
-            prices = [self._safe_index(first.pricing.electricity_pricing, idx, 0.0) for idx in indices]
+            start, stop = self._forecast_window(time_step, seconds, length)
+            prices = prices_array[start:stop]
             metrics[f"forecast_price_min_next_{label}"] = self._forecast_stat(prices, "min")
             metrics[f"forecast_price_mean_next_{label}"] = self._forecast_stat(prices, "mean")
             metrics[f"forecast_price_max_next_{label}"] = self._forecast_stat(prices, "max")
-            community_series = self._community_forecast_series(indices)
-            metrics[f"forecast_community_load_mean_next_{label}_kw"] = self._forecast_stat(community_series["load"], "mean")
-            metrics[f"forecast_community_pv_mean_next_{label}_kw"] = self._forecast_stat(community_series["pv"], "mean")
-            metrics[f"forecast_community_net_mean_next_{label}_kw"] = self._forecast_stat(community_series["net"], "mean")
-            metrics[f"forecast_community_import_peak_next_{label}_kw"] = self._forecast_stat(community_series["import"], "peak")
-            metrics[f"forecast_community_export_peak_next_{label}_kw"] = self._forecast_stat(community_series["export"], "peak")
-            metrics[f"forecast_community_headroom_min_next_{label}_kw"] = self._forecast_stat(community_series["headroom"], "min")
-            metrics[f"forecast_community_pv_surplus_sum_next_{label}_kwh"] = self._forecast_stat(community_series["pv_surplus"], "sum") * step_hours
+            metrics[f"forecast_community_load_mean_next_{label}_kw"] = self._forecast_stat(community_arrays["load"][start:stop], "mean")
+            metrics[f"forecast_community_pv_mean_next_{label}_kw"] = self._forecast_stat(community_arrays["pv"][start:stop], "mean")
+            metrics[f"forecast_community_net_mean_next_{label}_kw"] = self._forecast_stat(community_arrays["net"][start:stop], "mean")
+            metrics[f"forecast_community_import_peak_next_{label}_kw"] = self._forecast_stat(community_arrays["import"][start:stop], "peak")
+            metrics[f"forecast_community_export_peak_next_{label}_kw"] = self._forecast_stat(community_arrays["export"][start:stop], "peak")
+            metrics[f"forecast_community_headroom_min_next_{label}_kw"] = self._forecast_stat(community_arrays["headroom"][start:stop], "min")
+            metrics[f"forecast_community_pv_surplus_sum_next_{label}_kwh"] = self._forecast_stat(community_arrays["pv_surplus"][start:stop], "sum") * step_hours
 
         bucket_steps = max(
             int(np.ceil(self.FORECAST_GRID_BUCKET_SECONDS / max(float(getattr(self.env, "seconds_per_time_step", 3600.0)), 1.0))),
             1,
         )
         for bucket in range(1, self.FORECAST_GRID_BUCKETS + 1):
-            indices = self._forecast_indices(
+            start, stop = self._forecast_window(
                 time_step,
                 self.FORECAST_GRID_BUCKET_SECONDS,
                 length,
                 offset_steps=(bucket - 1) * bucket_steps,
             )
             bucket_label = f"{bucket:02d}"
-            prices = [self._safe_index(first.pricing.electricity_pricing, idx, 0.0) for idx in indices]
+            prices = prices_array[start:stop]
             metrics[f"forecast_price_mean_bucket_{bucket_label}_15m"] = self._forecast_stat(prices, "mean")
-            community_series = self._community_forecast_series(indices)
-            for signal in community_series:
+            for signal, values in community_arrays.items():
                 metrics[f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw"] = self._forecast_stat(
-                    community_series[signal],
+                    values[start:stop],
                     "mean",
                 )
         return metrics
 
     def _community_forecast_series(self, indices: Sequence[int]) -> Mapping[str, List[float]]:
-        series = {signal: [] for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus")}
-        for idx in indices:
-            totals = {signal: 0.0 for signal in series}
-            for building in self.env.buildings:
-                values = self._building_forecast_components_at_step(building, idx)
-                for signal in series:
-                    totals[signal] += self._safe_scalar(values.get(signal, 0.0), 0.0)
-            for signal in series:
-                series[signal].append(totals[signal])
-        return series
+        arrays = self._community_forecast_arrays()
+        return {signal: [self._safe_index(values, idx, 0.0) for idx in indices] for signal, values in arrays.items()}
 
     def _build_community_district_metrics(
         self,
