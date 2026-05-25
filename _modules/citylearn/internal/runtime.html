@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.runtime &mdash; CityLearn 1.0.2 documentation</title>
+  <title>citylearn.internal.runtime &mdash; CityLearn 1.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -421,6 +421,12 @@
                 <span class="n">env</span><span class="o">.</span><span class="n">_export_episode_render_data</span><span class="p">(</span><span class="n">final_index</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
                     <span class="n">end_export_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">export_start</span>
+            <span class="k">elif</span> <span class="n">env</span><span class="o">.</span><span class="n">render_mode</span> <span class="o">==</span> <span class="s1">&#39;during&#39;</span> <span class="ow">and</span> <span class="n">env</span><span class="o">.</span><span class="n">render_enabled</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
+                    <span class="n">export_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+                <span class="n">env</span><span class="o">.</span><span class="n">_flush_render_buffer</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
+                    <span class="n">end_export_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">export_start</span>
 
             <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">export_kpis_on_episode_end</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">env</span><span class="o">.</span><span class="n">_final_kpis_exported</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
@@ -435,6 +441,8 @@
         <span class="n">next_observations</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">observations</span> <span class="k">if</span> <span class="n">collect_observations</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;next_observations_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">timer_start</span>
+            <span class="k">if</span> <span class="n">collect_observations</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;interface&#39;</span><span class="p">,</span> <span class="s1">&#39;flat&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;entity&#39;</span><span class="p">:</span>
+                <span class="n">timings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;_last_entity_observation_debug_timing&#39;</span><span class="p">,</span> <span class="p">{}))</span>
 
         <span class="n">timer_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
         <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get_info</span><span class="p">())</span> <span class="k">if</span> <span class="n">collect_info</span> <span class="k">else</span> <span class="p">{}</span>

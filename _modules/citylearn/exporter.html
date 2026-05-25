@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.exporter &mdash; CityLearn 1.0.2 documentation</title>
+  <title>citylearn.exporter &mdash; CityLearn 1.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="../../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -114,6 +114,27 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="s2">&quot;CityLearnEnv&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_counters</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_render_file_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;render_file_format&#39;</span><span class="p">,</span> <span class="s1">&#39;csv&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;csv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;csv&#39;</span><span class="p">,</span> <span class="s1">&#39;parquet&#39;</span><span class="p">}</span> <span class="k">else</span> <span class="s1">&#39;csv&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_render_chunk_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;render_chunk_size&#39;</span><span class="p">,</span> <span class="mi">100_000</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">100_000</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_export_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_file_format</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">filename</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.parquet&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.parquet&#39;</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_buildings_for_time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="s2">&quot;CityLearnEnv&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="k">if</span> <span class="n">env</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">env</span>
@@ -224,6 +245,7 @@
 
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">()</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">new_folder_path</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;env&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -236,10 +258,12 @@
         <span class="n">kpis</span> <span class="o">=</span> <span class="n">kpis</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;cost_function&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">kpi_round_decimals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">kpis</span> <span class="o">=</span> <span class="n">kpis</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">kpi_round_decimals</span><span class="p">)</span>
-        <span class="n">kpis</span> <span class="o">=</span> <span class="n">kpis</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="n">kpis</span> <span class="o">=</span> <span class="n">kpis</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
         <span class="n">kpis</span> <span class="o">=</span> <span class="n">kpis</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;cost_function&#39;</span><span class="p">:</span> <span class="s1">&#39;KPI&#39;</span><span class="p">})</span>
-        <span class="n">kpis</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_file_format</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+            <span class="n">kpis</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kpis</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">include_business_as_usual</span> <span class="ow">and</span> <span class="n">export_business_as_usual_timeseries</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">export_business_as_usual_timeseries</span><span class="p">(</span><span class="n">export_env</span><span class="p">)</span>
         <span class="n">env</span><span class="o">.</span><span class="n">_final_kpis_exported</span> <span class="o">=</span> <span class="kc">True</span></div>
@@ -256,10 +280,14 @@
         <span class="n">baseline_env</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">env</span>
         <span class="n">episode_num</span> <span class="o">=</span> <span class="n">source_env</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode</span>
         <span class="n">final_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;exported_data_business_as_usual_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exported_data_business_as_usual_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">)</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">new_folder_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">filename</span>
         <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="n">file_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_file_format</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">_part*.parquet&quot;</span><span class="p">):</span>
+                <span class="n">part</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_counters</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">fieldnames</span> <span class="o">=</span> <span class="p">[</span>
@@ -275,6 +303,27 @@
             <span class="s1">&#39;ev_charger_electricity_consumption_kwh&#39;</span><span class="p">,</span>
             <span class="s1">&#39;deferrable_appliance_electricity_consumption_kwh&#39;</span><span class="p">,</span>
         <span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_file_format</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">chunk_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_chunk_size</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">final_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">building_rows</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buildings_for_time_step</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">baseline_env</span><span class="p">):</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_business_as_usual_building_row</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">baseline_env</span><span class="p">)</span>
+                    <span class="n">building_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">write_render_rows</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+                        <span class="n">rows</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_business_as_usual_district_row</span><span class="p">(</span><span class="n">baseline_env</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">building_rows</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write_render_rows</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+                    <span class="n">rows</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_render_rows</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+            <span class="k">return</span>
 
         <span class="k">with</span> <span class="n">file_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
             <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">fieldnames</span><span class="p">)</span>
@@ -362,7 +411,7 @@
 <div class="viewcode-block" id="EpisodeExporter.render">
 <a class="viewcode-back" href="../../api/citylearn.exporter.html#citylearn.exporter.EpisodeExporter.render">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render one time step to CSV outputs.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render one time step to configured time-series outputs.&quot;&quot;&quot;</span>
 
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
 
@@ -382,7 +431,7 @@
         <span class="n">episode_num</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">save_to_csv</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;exported_data_community_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exported_data_community_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">),</span>
             <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">iso_timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">env</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()},</span>
         <span class="p">)</span>
 
@@ -390,7 +439,7 @@
 
         <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="n">buildings</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">save_to_csv</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">),</span>
                 <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">iso_timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">building</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()},</span>
             <span class="p">)</span>
 
@@ -398,26 +447,26 @@
             <span class="k">if</span> <span class="n">battery</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">battery</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">time_step</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">save_to_csv</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_battery_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_battery_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">),</span>
                     <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">iso_timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">battery</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()},</span>
                 <span class="p">)</span>
 
             <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chargers_for_time_step</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">):</span>
                 <span class="n">charger</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">time_step</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">save_to_csv</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_id</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_id</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">),</span>
                     <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">iso_timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">charger</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()},</span>
                 <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buildings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">save_to_csv</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;exported_data_pricing_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exported_data_pricing_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">),</span>
                 <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">iso_timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">buildings</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">)},</span>
             <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_electric_vehicles_for_time_step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">save_to_csv</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">),</span>
                 <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">iso_timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">ev</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()},</span>
             <span class="p">)</span></div>
 
@@ -449,6 +498,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">()</span>
         <span class="n">episode_num</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode</span>
         <span class="n">rows_by_filename</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">chunk_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_chunk_size</span><span class="p">()</span>
+        <span class="n">prepared_files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">append_row</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">prepared_files</span><span class="p">:</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">new_folder_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">filename</span>
+                <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">file_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_file_format</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">_part*.parquet&quot;</span><span class="p">):</span>
+                        <span class="n">part</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_counters</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">prepared_files</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">rows_by_filename</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_render_rows</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;topology_mode&#39;</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;dynamic&#39;</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;_topology_service&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ev_lookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">_topology_service</span><span class="o">.</span><span class="n">ev_pool</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -478,18 +547,21 @@
                         <span class="k">pass</span>
 
                 <span class="n">timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_iso_timestamp</span><span class="p">()</span>
-                <span class="n">rows_by_filename</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;exported_data_community_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">append_row</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;exported_data_community_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
                     <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">env</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}</span>
                 <span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="n">buildings</span><span class="p">:</span>
-                    <span class="n">rows_by_filename</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">append_row</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
                         <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">building</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}</span>
                     <span class="p">)</span>
                     <span class="n">battery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_electrical_storage_for_time_step</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">battery</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">battery</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="n">t</span>
-                        <span class="n">rows_by_filename</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_battery_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">append_row</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_battery_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
                             <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">battery</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}</span>
                         <span class="p">)</span>
 
@@ -501,17 +573,20 @@
                                 <span class="n">charger</span><span class="o">.</span><span class="n">incoming_electric_vehicle</span><span class="p">,</span>
                             <span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_set_charger_render_state</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ev_lookup</span><span class="p">)</span>
-                        <span class="n">rows_by_filename</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_id</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">append_row</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_id</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
                             <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">charger</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}</span>
                         <span class="p">)</span>
 
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buildings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">rows_by_filename</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;exported_data_pricing_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">append_row</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;exported_data_pricing_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
                         <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">buildings</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(</span><span class="n">t</span><span class="p">)}</span>
                     <span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">evs</span><span class="p">:</span>
-                    <span class="n">rows_by_filename</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">append_row</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;exported_data_</span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_ep</span><span class="si">{</span><span class="n">episode_num</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
                         <span class="p">{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">ev</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}</span>
                     <span class="p">)</span>
 
@@ -527,18 +602,23 @@
             <span class="n">env</span><span class="o">.</span><span class="n">_render_start_datetime</span> <span class="o">=</span> <span class="n">original_start_datetime</span>
 
         <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">rows</span> <span class="ow">in</span> <span class="n">rows_by_filename</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">new_folder_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">filename</span>
-            <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="n">file_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">write_render_rows</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="EpisodeExporter.save_to_csv">
 <a class="viewcode-back" href="../../api/citylearn.exporter.html#citylearn.exporter.EpisodeExporter.save_to_csv">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save one render row to CSV.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save one render row to configured output format.&quot;&quot;&quot;</span>
 
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_export_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_file_format</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">_render_buffer</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">_render_buffer</span><span class="p">[</span><span class="n">filename</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_chunk_size</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_render_rows</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">_render_buffer</span><span class="p">[</span><span class="n">filename</span><span class="p">])</span>
+                <span class="n">env</span><span class="o">.</span><span class="n">_render_buffer</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">_buffer_render</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;_defer_render_flush&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
             <span class="n">env</span><span class="o">.</span><span class="n">_render_buffer</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
@@ -599,6 +679,10 @@
 
         <span class="n">buffered_fieldnames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">field</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_file_format</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_parquet_rows</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="n">fieldnames</span> <span class="o">=</span> <span class="n">buffered_fieldnames</span>
             <span class="k">with</span> <span class="n">file_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
@@ -610,11 +694,13 @@
 
         <span class="k">with</span> <span class="n">file_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
             <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">)</span>
-            <span class="n">existing_rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
             <span class="n">existing_fieldnames</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">fieldnames</span> <span class="ow">or</span> <span class="p">[]</span>
 
         <span class="n">missing_fieldnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">buffered_fieldnames</span> <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_fieldnames</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">missing_fieldnames</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">file_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+                <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">)</span>
+                <span class="n">existing_rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
             <span class="n">extended_fieldnames</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">existing_fieldnames</span><span class="p">,</span> <span class="o">*</span><span class="n">missing_fieldnames</span><span class="p">]</span>
             <span class="k">with</span> <span class="n">file_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
                 <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">extended_fieldnames</span><span class="p">)</span>
@@ -630,6 +716,26 @@
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
                 <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">({</span><span class="n">field</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">existing_fieldnames</span><span class="p">})</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_parquet_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rows</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]):</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">new_folder_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">filename</span>
+        <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">counter_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_counters</span><span class="p">[</span><span class="n">counter_key</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_counters</span><span class="p">[</span><span class="n">counter_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">counter</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">part_path</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">_part</span><span class="si">{</span><span class="n">counter</span><span class="si">:</span><span class="s2">05d</span><span class="si">}{</span><span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;Parquet render exports require pandas with a parquet engine such as pyarrow.&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataframe</span><span class="o">.</span><span class="n">ne</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">dataframe</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">part_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <div class="viewcode-block" id="EpisodeExporter.ensure_output_dir">
 <a class="viewcode-back" href="../../api/citylearn.exporter.html#citylearn.exporter.EpisodeExporter.ensure_output_dir">[docs]</a>
@@ -679,6 +785,11 @@
                     <span class="k">for</span> <span class="n">csv_file</span> <span class="ow">in</span> <span class="n">render_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;exported_*.csv&#39;</span><span class="p">):</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">csv_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                    <span class="k">for</span> <span class="n">parquet_file</span> <span class="ow">in</span> <span class="n">render_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;exported_*.parquet&#39;</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">parquet_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
                         <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
                             <span class="k">pass</span>
                 <span class="n">env</span><span class="o">.</span><span class="n">_render_dir_initialized</span> <span class="o">=</span> <span class="kc">True</span>

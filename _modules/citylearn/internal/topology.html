@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.topology &mdash; CityLearn 1.0.2 documentation</title>
+  <title>citylearn.internal.topology &mdash; CityLearn 1.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -159,6 +159,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_charger_history</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Charger</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_storage_history</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Battery</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_deferrable_appliance_history</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DeferrableAppliance</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_history_signature</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_history_time_step</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_charger_observation_flags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collect_charger_observation_flags</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_charger_action_enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_schema_action_active</span><span class="p">(</span><span class="s1">&#39;electric_vehicle_storage&#39;</span><span class="p">)</span>
 
@@ -256,6 +258,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_charger_history</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_storage_history</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_deferrable_appliance_history</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_history_signature</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_history_time_step</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_active_views</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_events_for_time_step</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
@@ -355,28 +359,42 @@
         <span class="k">if</span> <span class="n">time_step</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="n">time_step</span><span class="p">])</span>
 
-        <span class="n">valid</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="n">time_step</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="n">time_step</span><span class="p">)</span>
+        <span class="n">latest</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">valid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">latest</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">valid</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="n">latest</span><span class="p">])</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_history_lookup_reference</span><span class="p">(</span><span class="n">history</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">time_step</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">history</span><span class="p">[</span><span class="n">time_step</span><span class="p">]</span>
 
-        <span class="n">valid</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="n">time_step</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="n">time_step</span><span class="p">)</span>
+        <span class="n">latest</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">valid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">latest</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">default</span>
 
-        <span class="k">return</span> <span class="n">history</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">valid</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">history</span><span class="p">[</span><span class="n">latest</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_record_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_active_member_history</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">time_step</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_member_ids</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_active_ev_history</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">time_step</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_ev_ids</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_topology_version_history</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">time_step</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_topology_version</span><span class="p">)</span>
+        <span class="n">time_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time_step</span><span class="p">)</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_member_ids</span><span class="p">),</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_ev_ids</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_topology_version</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_history_time_step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">time_step</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_history_time_step</span>
+            <span class="ow">and</span> <span class="n">signature</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_history_signature</span>
+        <span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_active_member_history</span><span class="p">[</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_member_ids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_active_ev_history</span><span class="p">[</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_ev_ids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_topology_version_history</span><span class="p">[</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_topology_version</span><span class="p">)</span>
         <span class="n">charger_snapshot</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Charger</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">storage_snapshot</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Battery</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">deferrable_snapshot</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DeferrableAppliance</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -396,9 +414,11 @@
                 <span class="n">appliance</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">appliance</span> <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">deferrable_appliances</span> <span class="ow">or</span> <span class="p">[])</span>
             <span class="p">}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_active_charger_history</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">time_step</span><span class="p">)]</span> <span class="o">=</span> <span class="n">charger_snapshot</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_active_storage_history</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">time_step</span><span class="p">)]</span> <span class="o">=</span> <span class="n">storage_snapshot</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_active_deferrable_appliance_history</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">time_step</span><span class="p">)]</span> <span class="o">=</span> <span class="n">deferrable_snapshot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_active_charger_history</span><span class="p">[</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">charger_snapshot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_active_storage_history</span><span class="p">[</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">storage_snapshot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_active_deferrable_appliance_history</span><span class="p">[</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">deferrable_snapshot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_history_signature</span> <span class="o">=</span> <span class="n">signature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_history_time_step</span> <span class="o">=</span> <span class="n">time_step</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_active_views</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
