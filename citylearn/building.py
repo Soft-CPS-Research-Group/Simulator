@@ -2606,7 +2606,7 @@ class Building(Environment):
             setattr(
                 self,
                 f'action_feedback_electrical_storage_clip_reason_{reason}',
-                np.zeros(self.episode_tracker.episode_time_steps, dtype='float32'),
+                np.zeros(self.episode_tracker.episode_time_steps, dtype=bool),
             )
         self._set_default_charging_headroom()
         self._reset_charging_constraint_histories()

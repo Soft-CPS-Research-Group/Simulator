@@ -98,7 +98,7 @@ The packaged 15-second entity datasets and `citylearn_challenge_2022_phase_all_p
 | `entity_core_electrical` | Physical power, energy, SOC and asset capability descriptors. |
 | `entity_community_operational` | Community power, headroom and flexible capacity aggregates. |
 | `entity_forecasts_existing` | Existing dataset `*_predicted_*` observations. |
-| `entity_forecasts_derived` | Simulator-perfect future aggregates and 15-minute bucket grid. |
+| `entity_forecasts_derived` | Compact simulator-perfect point forecasts for price, load, PV and net demand. |
 | `entity_temporal_derived` | Robust calendar and short lag features. |
 | `entity_action_feedback` | Requested, limited and applied action feedback with clipping reasons. |
 

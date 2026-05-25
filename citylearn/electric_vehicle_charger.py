@@ -437,7 +437,7 @@ class Charger(Environment):
             setattr(
                 self,
                 f'action_feedback_clip_reason_{reason}',
-                np.zeros(self.episode_tracker.episode_time_steps, dtype='float32'),
+                np.zeros(self.episode_tracker.episode_time_steps, dtype=bool),
             )
 
     def __str__(self):

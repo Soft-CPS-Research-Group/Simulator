@@ -42,6 +42,8 @@ Esta pagina documenta o contrato do `schema.json`. O schema e a fonte oficial pa
 | `ev_departure_within_tolerance` | float | nao | Tolerancia simetrica de accuracy do SOC no departure, default `0.05`. |
 | `ev_departure_service_tolerance` | float | nao | Tolerancia inferior de servico EV minimo no departure, default `0.05`. |
 | `render_mode` | string | nao | `none`, `during`, `end`. |
+| `render_file_format` | `csv`/`parquet` | nao | Formato dos exports de render, KPIs e serie temporal BAU. |
+| `render_chunk_size` | int | nao | Linhas por chunk de export; default `50000` para parquet e `100000` para CSV. |
 | `export_kpis_on_episode_end` | bool | nao | Export de KPIs no fim do episodio. |
 | `start_date` | string | nao | Data base de render/export. |
 | `debug_timing` | bool | nao | Logs de tempo runtime. |
@@ -104,7 +106,7 @@ Usado apenas na entity interface.
 | `entity_core_electrical` | `false` | Potencias, energia por step, PV, BESS, EV, eficiencia e metricas eletricas por building. |
 | `entity_community_operational` | `false` | Agregados district/community, headrooms, counts e topology version. |
 | `entity_forecasts_existing` | `false` | Forecasts ja existentes no dataset. |
-| `entity_forecasts_derived` | `false` | Agregados futuros perfeitos do dataset e grid em buckets de 15 min. |
+| `entity_forecasts_derived` | `false` | Forecasts pontuais compactos para preco, load, PV e net demand. |
 | `entity_temporal_derived` | `false` | Lags, medias curtas e calendario sin/cos. |
 | `entity_action_feedback` | `false` | Acao pedida, limitada e aplicada, mais flags de clipping. |
 

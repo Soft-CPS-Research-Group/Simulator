@@ -350,19 +350,20 @@ def test_derived_forecast_bundle_uses_physical_horizons(tmp_path: Path):
         obs, _ = env.reset(seed=0)
         district_features = env.entity_specs["tables"]["district"]["features"]
         building_features = env.entity_specs["tables"]["building"]["features"]
-        assert "forecast_price_min_next_15m" in district_features
-        assert "forecast_load_mean_next_15m_kw" in building_features
+        assert "forecast_price_next_15m" in district_features
+        assert "forecast_load_next_15m_kw" in building_features
 
-        price_15m = float(obs["tables"]["district"][0, district_features.index("forecast_price_min_next_15m")])
-        price_1h = float(obs["tables"]["district"][0, district_features.index("forecast_price_mean_next_1h")])
-        load_15m = float(obs["tables"]["building"][0, building_features.index("forecast_load_mean_next_15m_kw")])
-        net_15m = float(obs["tables"]["building"][0, building_features.index("forecast_net_mean_next_15m_kw")])
+        price_15m = float(obs["tables"]["district"][0, district_features.index("forecast_price_next_15m")])
+        price_1h = float(obs["tables"]["district"][0, district_features.index("forecast_price_next_1h")])
+        load_15m = float(obs["tables"]["building"][0, building_features.index("forecast_load_next_15m_kw")])
+        net_15m = float(obs["tables"]["building"][0, building_features.index("forecast_net_next_15m_kw")])
 
         assert price_15m == pytest.approx(0.10)
-        assert price_1h == pytest.approx(np.mean([0.10, 0.11, 0.12, 0.13]))
+        assert price_1h == pytest.approx(0.13)
         assert load_15m == pytest.approx(1.1 / 0.25)
         assert net_15m == pytest.approx(load_15m)
         assert obs["meta"]["forecast_config"]["source"] == "actual_future"
+        assert obs["meta"]["forecast_config"]["type"] == "point"
     finally:
         env.close()
 

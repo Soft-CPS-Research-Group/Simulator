@@ -154,7 +154,7 @@ Entity mode returns `tables`, `edges` and `meta`. Feature availability depends o
 | `topology_version` | `entity_community_operational` | count | Current topology version. |
 | `community_net_prev_1_kwh_step`, `community_net_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | District lag features. |
 | `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binary | Calendar features; raw `time_step` remains only in payload `meta`. |
-| `forecast_price_*`, `forecast_community_*` | `entity_forecasts_derived` | mixed | Perfect-simulation future aggregates over 15m/1h/3h/6h/24h and 15-minute buckets to 6h. |
+| `forecast_price_next_*`, `forecast_community_{load,pv,net}_next_*` | `entity_forecasts_derived` | mixed | Perfect-simulation point forecasts at 15m/1h/3h/6h/24h. |
 
 ### `building`
 
@@ -172,7 +172,7 @@ Entity mode returns `tables`, `edges` and `meta`. Feature availability depends o
 | `net_energy_prev_1_kwh_step`, `net_energy_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | Building lag features. |
 | `import_energy_prev_1_kwh_step`, `export_energy_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Import/export lag features. |
 | `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binary | Calendar features. |
-| `forecast_load/pv/net/import/export/headroom/pv_surplus_*` | `entity_forecasts_derived` | kW/kWh | Building future aggregates and 15-minute bucket means. |
+| `forecast_{load,pv,net}_next_*` | `entity_forecasts_derived` | kW | Building point forecasts at 15m/1h/3h/6h/24h. |
 
 ### `charger`
 
@@ -248,7 +248,7 @@ Only present when `entity_core_electrical` is enabled.
 
 Base deferrable features are in `entity_base`; see the flat deferrable table above for definitions. Entity deferrables also include `remaining_duration_hours`, `cycle_remaining_fraction_ratio`, `hours_until_earliest_start`, `start_window_width_hours`, `start_energy_kwh_step`, `start_power_kw` and `must_start_now` for RL deadline pressure. With `entity_action_feedback`, deferrables also expose `last_start_requested`, `last_start_applied`, `start_blocked` and `clip_reason_*`.
 
-Derived forecasts use future dataset values as perfect simulator forecasts (`meta.forecast_config.source = "actual_future"`). They are intended as a simulator contract; real-world adapters should populate equivalent fields from real forecasts.
+Derived forecasts use future dataset values as perfect simulator point forecasts (`meta.forecast_config.source = "actual_future"`, `meta.forecast_config.type = "point"`). They are intended as a simulator contract; real-world adapters should populate equivalent fields from real forecasts.
 
 ## Entity Edges
 

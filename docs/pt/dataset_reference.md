@@ -189,7 +189,7 @@ ativam todos os bundles de observacoes entity:
 | `entity_core_electrical` | Potencia, energia, SOC e capacidade fisica por asset. |
 | `entity_community_operational` | Agregados de potencia, headroom e flexibilidade da comunidade. |
 | `entity_forecasts_existing` | Observacoes `*_predicted_*` existentes no dataset. |
-| `entity_forecasts_derived` | Agregados futuros perfeitos do simulador e grid em buckets de 15 minutos. |
+| `entity_forecasts_derived` | Forecasts pontuais compactos perfeitos para preco, load, PV e net demand. |
 | `entity_temporal_derived` | Calendario robusto e lags curtos. |
 | `entity_action_feedback` | Feedback de acao pedida, limitada e aplicada com motivos de clipping. |
 

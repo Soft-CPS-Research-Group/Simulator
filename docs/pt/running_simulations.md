@@ -177,7 +177,9 @@ citylearn simulate data/datasets/my_dataset/schema.json evaluate
 | `during` | alto | Escreve por step | Debug curto, inspecao em tempo real. |
 | `end` | medio | Bufferiza e escreve no fim | Episodios longos em que queres CSV final. |
 
-KPIs e exports BAU sao por episodio, portanto um loop de treino pode manter export desligado e ligar apenas no ultimo episodio. Se forem precisos CSVs de series temporais normais nesse episodio final, criar o ambiente com `render_mode="end"` e alternar `render_enabled`; para output so de KPIs, deixar render desligado e chamar `export_final_kpis()` manualmente depois do episodio final.
+Usa `render_file_format="parquet"` para escrever exports de render, KPIs e serie temporal BAU como ficheiros parquet em partes, em vez de CSV. `render_chunk_size` controla o numero de linhas por parte parquet; o default e `50000` para parquet e `100000` para CSV.
+
+KPIs e exports BAU sao por episodio, portanto um loop de treino pode manter export desligado e ligar apenas no ultimo episodio. Se forem precisas series temporais normais nesse episodio final, criar o ambiente com `render_mode="end"` e alternar `render_enabled`; para output so de KPIs, deixar render desligado e chamar `export_final_kpis()` manualmente depois do episodio final.
 
 ```python
 for episode in range(episodes):
@@ -192,9 +194,9 @@ for episode in range(episodes):
 
 | Chamada | Output | Custo BAU sidecar |
 |---|---|---:|
-| `env.export_final_kpis(include_business_as_usual=False)` | So CSV de KPIs | nao |
-| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=False)` | CSV de KPIs com linhas BAU | sim |
-| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=True)` | CSV de KPIs com linhas BAU e CSV de serie temporal BAU | sim |
+| `env.export_final_kpis(include_business_as_usual=False)` | So ficheiro de KPIs | nao |
+| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=False)` | Ficheiro de KPIs com linhas BAU | sim |
+| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=True)` | Ficheiro de KPIs com linhas BAU e serie temporal BAU | sim |
 
 As series temporais normais do episodio sao controladas por `render_mode`/`render_enabled`, nao por `export_final_kpis()`.
 

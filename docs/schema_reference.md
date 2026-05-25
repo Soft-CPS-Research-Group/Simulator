@@ -44,6 +44,8 @@ Portuguese version: [pt/schema_reference.md](pt/schema_reference.md).
 | `ev_departure_within_tolerance` | float | no | Symmetric departure SOC accuracy tolerance, default `0.05`. |
 | `ev_departure_service_tolerance` | float | no | Lower departure SOC service tolerance for minimum acceptable EV service, default `0.05`. |
 | `render_mode` | string | no | `none`, `during` or `end`. |
+| `render_file_format` | `csv`/`parquet` | no | Export format for render, KPI and BAU time-series files. |
+| `render_chunk_size` | int | no | Rows per export chunk; defaults to `50000` for parquet and `100000` for CSV. |
 | `export_kpis_on_episode_end` | bool | no | Export KPIs at episode end. |
 | `start_date` | string | no | Base date for render/export. |
 | `debug_timing` | bool | no | Runtime timing logs. |
@@ -102,7 +104,7 @@ Entity-only configuration:
 | `entity_core_electrical` | `false` | Power, step energy, PV, BESS, EV, efficiency and building electrical metrics. |
 | `entity_community_operational` | `false` | District/community aggregates, headroom, counts and topology version. |
 | `entity_forecasts_existing` | `false` | Forecasts already present in the dataset. |
-| `entity_forecasts_derived` | `false` | Perfect-simulation future aggregates and 15-minute bucket grid from dataset futures. |
+| `entity_forecasts_derived` | `false` | Compact perfect-simulation point forecasts for price, load, PV and net demand. |
 | `entity_temporal_derived` | `false` | Short lags, rolling means and calendar sin/cos features. |
 | `entity_action_feedback` | `false` | Requested, limited and applied action feedback plus clipping-reason flags. |
 

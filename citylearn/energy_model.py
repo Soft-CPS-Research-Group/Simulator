@@ -1,8 +1,9 @@
 import ast
+from array import array
 import logging
 import math
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
 try:
@@ -1026,12 +1027,12 @@ class Battery(StorageDevice, ElectricDevice):
     """
     
     def __init__(self, capacity: float = None, nominal_power: float = None, capacity_loss_coefficient: Union[float, Tuple[float, float]] = None, power_efficiency_curve: List[List[float]] = None, capacity_power_curve: List[List[float]] = None, depth_of_discharge: Union[float, Tuple[float, float]] = None, time_step_ratio: float = None, **kwargs: Any):
-        self._efficiency_history = []
-        self._capacity_history = []
+        self._efficiency_history = array('d')
+        self._capacity_history = array('d')
         self.random_seed = kwargs.get('random_seed', None)
         self.depth_of_discharge = depth_of_discharge
         super().__init__(capacity=capacity, nominal_power=nominal_power, time_step_ratio = time_step_ratio, **kwargs)
-        self._capacity_history = [self.capacity]
+        self._capacity_history = array('d', [self.capacity])
         self.capacity_loss_coefficient = capacity_loss_coefficient
         self.power_efficiency_curve = power_efficiency_curve
         self.capacity_power_curve = capacity_power_curve
@@ -1080,13 +1081,13 @@ class Battery(StorageDevice, ElectricDevice):
         return self.__depth_of_discharge
 
     @property
-    def efficiency_history(self) -> List[float]:
+    def efficiency_history(self) -> Sequence[float]:
         """Time series of technical efficiency."""
 
         return self._efficiency_history
 
     @property
-    def capacity_history(self) -> List[float]:
+    def capacity_history(self) -> Sequence[float]:
         """Time series of maximum amount of energy the storage device can store in [kWh]."""
 
         return self._capacity_history
@@ -1094,7 +1095,7 @@ class Battery(StorageDevice, ElectricDevice):
     @StorageDevice.capacity.setter
     def capacity(self, capacity: Union[float, Tuple[float, float]]):
         StorageDevice.capacity.fset(self, capacity)
-        self._capacity_history = [super().capacity]
+        self._capacity_history = array('d', [super().capacity])
 
     @efficiency.setter
     def efficiency(self, efficiency: Union[float, Tuple[float, float]]):
@@ -1472,9 +1473,9 @@ class DeferrableAppliance(ElectricDevice):
         self.__cycle_completion_time_steps = {}
         self.__cycle_missed_time_steps = {}
         self.__cycle_cancelled_time_steps = {}
-        self.action_feedback_last_start_requested = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
-        self.action_feedback_last_start_applied = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
-        self.action_feedback_start_blocked = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.action_feedback_last_start_requested = np.zeros(self.episode_tracker.episode_time_steps, dtype=bool)
+        self.action_feedback_last_start_applied = np.zeros(self.episode_tracker.episode_time_steps, dtype=bool)
+        self.action_feedback_start_blocked = np.zeros(self.episode_tracker.episode_time_steps, dtype=bool)
         for reason in (
             'availability',
             'power_limit',
@@ -1488,7 +1489,7 @@ class DeferrableAppliance(ElectricDevice):
             setattr(
                 self,
                 f'action_feedback_clip_reason_{reason}',
-                np.zeros(self.episode_tracker.episode_time_steps, dtype='float32'),
+                np.zeros(self.episode_tracker.episode_time_steps, dtype=bool),
             )
 
         episode_start = int(getattr(self.episode_tracker, 'episode_start_time_step', 0) or 0)

@@ -170,6 +170,8 @@ class CityLearnEnv(Environment, Env):
         render_directory = kwargs.pop('render_directory', None)
         render_directory_name = kwargs.pop('render_directory_name', 'render_logs')
         render_flag = kwargs.pop('render', None)
+        render_file_format = kwargs.pop('render_file_format', None)
+        render_chunk_size = kwargs.pop('render_chunk_size', None)
         kw_export_kpis_on_episode_end = kwargs.pop('export_kpis_on_episode_end', None)
         if kw_export_kpis_on_episode_end is not None and export_kpis_on_episode_end is None:
             export_kpis_on_episode_end = kw_export_kpis_on_episode_end
@@ -202,6 +204,8 @@ class CityLearnEnv(Environment, Env):
         self._configure_community_market()
         schema_start_date = self.schema.get('start_date') if isinstance(self.schema, dict) else None
         schema_render_mode = self.schema.get('render_mode') if isinstance(self.schema, dict) else None
+        schema_render_file_format = self.schema.get('render_file_format') if isinstance(self.schema, dict) else None
+        schema_render_chunk_size = self.schema.get('render_chunk_size') if isinstance(self.schema, dict) else None
         schema_export_kpis = self.schema.get('export_kpis_on_episode_end') if isinstance(self.schema, dict) else None
         if schema_export_kpis is not None and export_kpis_on_episode_end is None:
             export_kpis_on_episode_end = parse_bool(
@@ -214,6 +218,15 @@ class CityLearnEnv(Environment, Env):
         if requested_render_mode not in {'none', 'during', 'end'}:
             raise ValueError("render_mode must be one of {'none', 'during', 'end'}.")
         self.render_mode = requested_render_mode
+        requested_render_file_format = render_file_format if render_file_format is not None else schema_render_file_format
+        requested_render_file_format = 'csv' if requested_render_file_format is None else str(requested_render_file_format).strip().lower()
+        if requested_render_file_format not in {'csv', 'parquet'}:
+            raise ValueError("render_file_format must be one of {'csv', 'parquet'}.")
+        self.render_file_format = requested_render_file_format
+        requested_render_chunk_size = render_chunk_size if render_chunk_size is not None else schema_render_chunk_size
+        if requested_render_chunk_size is None:
+            requested_render_chunk_size = 50_000 if requested_render_file_format == 'parquet' else 100_000
+        self.render_chunk_size = max(int(requested_render_chunk_size), 1)
         self._buffer_render = False
         self._defer_render_flush = False
         self._render_buffer = defaultdict(list)
@@ -880,101 +893,130 @@ class CityLearnEnv(Environment, Env):
 
         return self.__net_electricity_consumption
 
+    def _sum_building_series(self, attribute: str) -> np.ndarray:
+        if len(self.buildings) == 0:
+            return np.array([], dtype='float64')
+
+        series = [np.asarray(getattr(b, attribute)).reshape(-1) for b in self.buildings]
+        length = max((len(values) for values in series), default=0)
+        total = np.zeros(length, dtype='float64')
+        valid = np.zeros(length, dtype=bool)
+
+        for values in series:
+            end = len(values)
+            if end == 0:
+                continue
+
+            try:
+                mask = ~np.isnan(values)
+            except TypeError:
+                values = np.asarray(values, dtype='float64').reshape(-1)
+                mask = ~np.isnan(values)
+            if not np.any(mask):
+                continue
+
+            target = total[:end]
+            target[mask] = target[mask] + values[mask]
+            valid[:end] = valid[:end] | mask
+
+        total[~valid] = np.nan
+        return total
+
     @property
     def cooling_electricity_consumption(self) -> np.ndarray:
         """Summed `Building.cooling_electricity_consumption` time series, in [kWh]."""
 
-        return pd.DataFrame([b.cooling_electricity_consumption for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('cooling_electricity_consumption')
 
     @property
     def heating_electricity_consumption(self) -> np.ndarray:
         """Summed `Building.heating_electricity_consumption` time series, in [kWh]."""
 
-        return pd.DataFrame([b.heating_electricity_consumption for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('heating_electricity_consumption')
 
     @property
     def dhw_electricity_consumption(self) -> np.ndarray:
         """Summed `Building.dhw_electricity_consumption` time series, in [kWh]."""
 
-        return pd.DataFrame([b.dhw_electricity_consumption for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('dhw_electricity_consumption')
 
     @property
     def cooling_storage_electricity_consumption(self) -> np.ndarray:
         """Summed `Building.cooling_storage_electricity_consumption` time series, in [kWh]."""
 
-        return pd.DataFrame([b.cooling_storage_electricity_consumption for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('cooling_storage_electricity_consumption')
 
     @property
     def heating_storage_electricity_consumption(self) -> np.ndarray:
         """Summed `Building.heating_storage_electricity_consumption` time series, in [kWh]."""
 
-        return pd.DataFrame([b.heating_storage_electricity_consumption for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('heating_storage_electricity_consumption')
 
     @property
     def dhw_storage_electricity_consumption(self) -> np.ndarray:
         """Summed `Building.dhw_storage_electricity_consumption` time series, in [kWh]."""
 
-        return pd.DataFrame([b.dhw_storage_electricity_consumption for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('dhw_storage_electricity_consumption')
 
     @property
     def electrical_storage_electricity_consumption(self) -> np.ndarray:
         """Summed `Building.electrical_storage_electricity_consumption` time series, in [kWh]."""
 
-        return pd.DataFrame([b.electrical_storage_electricity_consumption for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('electrical_storage_electricity_consumption')
 
     @property
     def energy_from_cooling_device_to_cooling_storage(self) -> np.ndarray:
         """Summed `Building.energy_from_cooling_device_to_cooling_storage` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_cooling_device_to_cooling_storage for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_cooling_device_to_cooling_storage')
 
     @property
     def energy_from_heating_device_to_heating_storage(self) -> np.ndarray:
         """Summed `Building.energy_from_heating_device_to_heating_storage` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_heating_device_to_heating_storage for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_heating_device_to_heating_storage')
 
     @property
     def energy_from_dhw_device_to_dhw_storage(self) -> np.ndarray:
         """Summed `Building.energy_from_dhw_device_to_dhw_storage` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_dhw_device_to_dhw_storage for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_dhw_device_to_dhw_storage')
 
     @property
     def energy_to_electrical_storage(self) -> np.ndarray:
         """Summed `Building.energy_to_electrical_storage` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_to_electrical_storage for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_to_electrical_storage')
 
     @property
     def energy_from_cooling_device(self) -> np.ndarray:
         """Summed `Building.energy_from_cooling_device` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_cooling_device for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_cooling_device')
 
     @property
     def energy_from_heating_device(self) -> np.ndarray:
         """Summed `Building.energy_from_heating_device` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_heating_device for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_heating_device')
 
     @property
     def energy_from_dhw_device(self) -> np.ndarray:
         """Summed `Building.energy_from_dhw_device` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_dhw_device for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_dhw_device')
 
     @property
     def energy_to_non_shiftable_load(self) -> np.ndarray:
         """Summed `Building.energy_to_non_shiftable_load` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_to_non_shiftable_load for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_to_non_shiftable_load')
 
     @property
     def energy_from_cooling_storage(self) -> np.ndarray:
         """Summed `Building.energy_from_cooling_storage` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_cooling_storage for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_cooling_storage')
 
 
     @property
@@ -991,55 +1033,55 @@ class CityLearnEnv(Environment, Env):
     def energy_from_heating_storage(self) -> np.ndarray:
         """Summed `Building.energy_from_heating_storage` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_heating_storage for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_heating_storage')
 
     @property
     def energy_from_dhw_storage(self) -> np.ndarray:
         """Summed `Building.energy_from_dhw_storage` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_dhw_storage for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_dhw_storage')
 
     @property
     def energy_from_electrical_storage(self) -> np.ndarray:
         """Summed `Building.energy_from_electrical_storage` time series, in [kWh]."""
 
-        return pd.DataFrame([b.energy_from_electrical_storage for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('energy_from_electrical_storage')
 
     @property
     def cooling_demand(self) -> np.ndarray:
         """Summed `Building.cooling_demand`, in [kWh]."""
 
-        return pd.DataFrame([b.cooling_demand for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('cooling_demand')
 
     @property
     def heating_demand(self) -> np.ndarray:
         """Summed `Building.heating_demand`, in [kWh]."""
 
-        return pd.DataFrame([b.heating_demand for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('heating_demand')
 
     @property
     def dhw_demand(self) -> np.ndarray:
         """Summed `Building.dhw_demand`, in [kWh]."""
 
-        return pd.DataFrame([b.dhw_demand for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('dhw_demand')
 
     @property
     def non_shiftable_load(self) -> np.ndarray:
         """Summed `Building.non_shiftable_load`, in [kWh]."""
 
-        return pd.DataFrame([b.non_shiftable_load for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('non_shiftable_load')
 
     @property
     def solar_generation(self) -> np.ndarray:
         """Summed `Building.solar_generation, in [kWh]`."""
 
-        return pd.DataFrame([b.solar_generation for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()
+        return self._sum_building_series('solar_generation')
 
     @property
     def power_outage(self) -> np.ndarray:
         """Time series of number of buildings experiencing power outage."""
 
-        return pd.DataFrame([b.power_outage_signal for b in self.buildings]).sum(axis = 0, min_count = 1).to_numpy()[:self.time_step + 1]
+        return self._sum_building_series('power_outage_signal')[:self.time_step + 1]
 
     @staticmethod
     def _schema_declares_dynamic_topology(schema: Any) -> bool:
@@ -1433,6 +1475,14 @@ class CityLearnEnv(Environment, Env):
 
     def _reset_time_tracking(self):
         return self._episode_exporter.reset_time_tracking()
+
+    def close(self):
+        """Flush pending render rows before closing the environment."""
+
+        if hasattr(self, '_episode_exporter'):
+            self._flush_render_buffer()
+
+        return super().close()
 
     def reset(self, seed: int = None, options: Mapping[str, Any] = None) -> Tuple[Any, dict]:
         r"""Reset `CityLearnEnv` to initial state.

@@ -58,6 +58,84 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.1.0 - 2026-05-26
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Minor release focada em tornar simulacoes entity-mode de 15 segundos praticas com todos os bundles de observacao ativos. O trabalho principal remove a fuga de memoria de `entity_action_feedback`, substitui o contrato demasiado grande de forecasts derivados por point forecasts compactos, reduz overhead recorrente de observacoes entity e passa exports longos para Parquet em chunks.
+
+### Added
+
+- Suporte para `render_file_format="parquet"` e `render_chunk_size` em exports de render/KPI/BAU. O render em Parquet escreve ficheiros chunked `*_partNNNNN.parquet`.
+- Campos de timing entity mais finos quando `debug_timing=True`, incluindo `entity_observation_building_time`, `entity_observation_charger_time`, `entity_observation_storage_time`, `entity_observation_district_time`, `entity_observation_copy_time` e secoes relacionadas por tabela.
+- Limpeza de chunks Parquet antigos no diretorio de output da sessao.
+
+### Changed
+
+- `entity_forecasts_derived` mantem o mesmo nome de bundle mas passa a expor apenas point forecasts compactos:
+  - building: `forecast_{load,pv,net}_next_{15m,1h,3h,6h,24h}_kw`
+  - district: `forecast_price_next_*` e `forecast_community_{load,pv,net}_next_*_kw`
+- Removida a grelha antiga de features mean/sum/peak/headroom/surplus/bucket dos derived forecasts e a cache de forecasts em reset/init.
+- A montagem de observacoes entity passa a usar colunas de features precomputadas, escrita direta/sparse de linhas, linhas estaticas por asset e offsets de forecast precomputados.
+- O historico de topologia dinamica passa a guardar snapshots apenas quando membros/assets ativos ou `topology_version` mudam.
+- Os historicos de capacidade/eficiencia da bateria passam a usar arrays numericos compactos em vez de listas Python de floats.
+- Flags booleanas de action feedback e clipping reasons passam a ser guardadas como arrays booleanos em vez de `float32`.
+- Series agregadas para KPI/export no `CityLearnEnv` passam a usar somas numpy em streaming em vez de DataFrames pandas temporarios.
+
+### Fixed
+
+- Corrigido o crescimento dominante de RSS em `entity_action_feedback`, causado por uma cache indexada por objetos temporarios de series de storage.
+- Corrigido overhead excessivo de init/reset causado pelos derived forecasts em datasets de 15 segundos.
+- Corrigida retencao evitavel de memoria no historico de topologia dinamica quando nao ha eventos de topologia.
+- Corrigidos picos evitaveis de memoria em KPI/export causados por DataFrames temporarios sobre todas as series dos buildings.
+
+### Benchmark Notes
+
+Medicoes locais representativas em `citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet`, interface entity, topologia dinamica, todos os bundles de observacao, `render_mode="none"`, `export_kpis_on_episode_end=False`:
+
+| Area | Antes | Depois | Impacto |
+|---|---:|---:|---:|
+| Colunas entity com todos os bundles | ~732 | ~322 | ~56% menos colunas |
+| Caminho init/reset dos derived forecasts | ~15.0s init / ~12.8s reset | ~2.0s init / ~0.15s reset | ~87% menos init, ~99% menos reset |
+| Crescimento RSS de `entity_action_feedback` em 700 steps | ~+2071 MiB | ~+5 MiB | fuga removida |
+| Tamanho da cache de action feedback em 700 steps | 11,224 entradas / 3.9M valores cached | 24-25 entradas | cache estavel por asset |
+| RSS pos-reset numa janela 15s de 40,320 steps | ~658.7 MiB | ~630.4 MiB | ~28 MiB menos no reset apos flags booleanas |
+| `next_observations` em smoke debug de 1k steps | ~6.49 ms/step | ~5.80 ms/step | ~11% mais rapido |
+| Smoke de 5k steps sem debug | n/a | ~12.4 ms/step, ~718 MiB RSS aos 5k | ponto operacional atual |
+
+Em datasets full-year de 15 segundos, os historicos retidos pelo simulador continuam a escalar linearmente com numero de steps, assets e necessidades de KPI/export. Esta release remove o crescimento patologico de cache, mas nao transforma uma run full-year all-bundles em memoria constante.
+
+### Dataset/Schema Impact
+
+- Nenhum ficheiro de dataset incluido ou chave de schema e renomeado.
+- O contrato de features das observacoes entity muda quando `entity_forecasts_derived` esta ativo, porque a grelha antiga de derived forecasts e removida de forma intencional.
+- Export Parquet requer um engine Parquet do pandas como `pyarrow`; CSV continua a ser o formato default.
+
+### Compatibility
+
+- Minor release com mudanca intencional no contrato de observacoes entity para `entity_forecasts_derived`.
+- Equacoes fisicas, aplicacao de acoes, semantica de eventos de topologia dinamica, formulas KPI e observacoes flat devem manter-se inalteradas.
+- Agentes RL fixed-width ou normalizers guardados contra observacoes entity all-bundles v1.0.x devem refrescar `entity_specs`, colunas de features e estatisticas de input antes de usar v1.1.0.
+
+### Validation
+
+- `.venv/bin/pytest tests/test_entity_observation_bundles.py tests/test_dynamic_topology_entity_mode.py tests/test_dynamic_topology_full_timeline.py tests/test_dynamic_topology_assets_only_dataset.py tests/unit/test_physics_units_refactor.py tests/unit/test_physics_invariants.py tests/unit/test_subhour_scaling.py tests/unit/test_rendering_behaviour.py::test_parquet_render_format_writes_chunked_exports_and_kpis -q`: pass, `71 passed`
+- `.venv/bin/pytest tests/test_deferrable_appliance_integration.py::test_entity_action_feedback_for_deferrable_start tests/test_deferrable_appliance_integration.py::test_entity_action_feedback_for_blocked_deferrable_start tests/test_kpis.py tests/test_kpi_v2.py tests/test_kpi_golden.py tests/test_series_integrity.py tests/unit/test_export_logic.py tests/unit/test_ui_export_contract.py -q`: pass, `57 passed, 17 warnings`
+- `.venv/bin/pytest tests/unit/test_step_many.py -q`: pass, `5 passed`
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass, `16/16` cenarios
+- `.venv/bin/pytest -q`: pass, `347 passed, 17 warnings`
+- `.venv/bin/python -m build --outdir /tmp/softcpsrecsimulator-1.1.0-dist`: pass, gerou sdist e wheel
+- `.venv/bin/python -m twine check /tmp/softcpsrecsimulator-1.1.0-dist/*`: pass
+
+### Migration Notes
+
+- Refrescar `env.entity_specs` e retreinar ou remapear inputs fixed-width que usavam `entity_forecasts_derived`.
+- Para usar exports Parquet em chunks, configurar `render_file_format="parquet"` e opcionalmente `render_chunk_size`.
+- Em runs longas de 15 segundos, manter render/KPI exports desligados salvo quando necessarios, ou exportar em Parquet chunked.
+
 ## v1.0.2 - 2026-05-23
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

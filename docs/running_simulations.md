@@ -178,7 +178,9 @@ citylearn simulate data/datasets/my_dataset/schema.json evaluate
 | `during` | high | Writes rows each step | Short debugging runs. |
 | `end` | medium | Writes full episode at end | Long episodes with final CSV output. |
 
-KPI and BAU exports are episode-scoped, so training loops can keep export disabled and turn it on only for the final episode. If normal time-series CSVs are needed on that final episode, create the environment with `render_mode="end"` and toggle `render_enabled`; for KPI-only output, leave render disabled and call `export_final_kpis()` manually after the final episode.
+Set `render_file_format="parquet"` to write render, KPI and BAU time-series exports as chunked parquet part files instead of CSV. `render_chunk_size` controls the number of rows per parquet part; the default is `50000` for parquet and `100000` for CSV.
+
+KPI and BAU exports are episode-scoped, so training loops can keep export disabled and turn it on only for the final episode. If normal time-series outputs are needed on that final episode, create the environment with `render_mode="end"` and toggle `render_enabled`; for KPI-only output, leave render disabled and call `export_final_kpis()` manually after the final episode.
 
 ```python
 for episode in range(episodes):
@@ -193,9 +195,9 @@ for episode in range(episodes):
 
 | Call | Output | BAU sidecar cost |
 |---|---|---:|
-| `env.export_final_kpis(include_business_as_usual=False)` | KPI CSV only | no |
-| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=False)` | KPI CSV with BAU rows | yes |
-| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=True)` | KPI CSV with BAU rows and BAU timeseries CSV | yes |
+| `env.export_final_kpis(include_business_as_usual=False)` | KPI file only | no |
+| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=False)` | KPI file with BAU rows | yes |
+| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=True)` | KPI file with BAU rows and BAU time-series file | yes |
 
 Normal episode time series are controlled by `render_mode`/`render_enabled`, not by `export_final_kpis()`.
 

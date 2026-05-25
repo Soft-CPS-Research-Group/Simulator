@@ -278,6 +278,42 @@ def test_during_mode_can_disable_auto_kpi_export(tmp_path):
         env.close()
 
 
+def test_parquet_render_format_writes_chunked_exports_and_kpis(tmp_path):
+    pd = pytest.importorskip("pandas")
+    pytest.importorskip("pyarrow")
+
+    env = CityLearnEnv(
+        str(DATASET),
+        central_agent=True,
+        episode_time_steps=4,
+        render_mode="end",
+        render_file_format="parquet",
+        render_chunk_size=2,
+        render_directory=tmp_path,
+        random_seed=0,
+    )
+
+    try:
+        env.reset()
+        zeros = [np.zeros(env.action_space[0].shape[0], dtype="float32")]
+        while not env.terminated:
+            _, _, terminated, truncated, _ = env.step(zeros)
+            if terminated or truncated:
+                break
+
+        outputs_path = Path(env.new_folder_path)
+        parquet_files = sorted(outputs_path.glob("*.parquet"))
+        assert parquet_files
+        assert any(path.name.startswith("exported_data_community_ep0_part") for path in parquet_files)
+        assert any("business_as_usual" in path.name for path in parquet_files)
+        assert (outputs_path / "exported_kpis.parquet").is_file()
+        assert not (outputs_path / "exported_kpis.csv").exists()
+        assert len(pd.read_parquet(outputs_path / "exported_kpis.parquet")) > 0
+    finally:
+        env.close()
+        _cleanup_env(env)
+
+
 def test_render_directory_override(tmp_path):
     custom_root = tmp_path / 'custom_results'
 

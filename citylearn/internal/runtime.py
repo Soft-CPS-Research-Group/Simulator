@@ -326,6 +326,12 @@ class CityLearnRuntimeService:
                 env._export_episode_render_data(final_index)
                 if debug_timing:
                     end_export_time = time.perf_counter() - export_start
+            elif env.render_mode == 'during' and env.render_enabled:
+                if debug_timing:
+                    export_start = time.perf_counter()
+                env._flush_render_buffer()
+                if debug_timing:
+                    end_export_time = time.perf_counter() - export_start
 
             if env.export_kpis_on_episode_end and not env._final_kpis_exported:
                 if debug_timing:
@@ -340,6 +346,8 @@ class CityLearnRuntimeService:
         next_observations = env.observations if collect_observations else None
         if debug_timing:
             timings['next_observations_time'] = time.perf_counter() - timer_start
+            if collect_observations and getattr(env, 'interface', 'flat') == 'entity':
+                timings.update(getattr(env, '_last_entity_observation_debug_timing', {}))
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         info = dict(env.get_info()) if collect_info else {}

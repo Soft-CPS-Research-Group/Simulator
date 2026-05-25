@@ -25,6 +25,27 @@ class EpisodeExporter:
 
     def __init__(self, env: "CityLearnEnv"):
         self.env = env
+        self._chunk_counters = defaultdict(int)
+
+    def _render_file_format(self) -> str:
+        value = str(getattr(self.env, 'render_file_format', 'csv') or 'csv').strip().lower()
+        return value if value in {'csv', 'parquet'} else 'csv'
+
+    def _render_chunk_size(self) -> int:
+        try:
+            return max(int(getattr(self.env, 'render_chunk_size', 100_000)), 1)
+        except (TypeError, ValueError):
+            return 100_000
+
+    def _export_filename(self, filename: str) -> str:
+        if self._render_file_format() != 'parquet':
+            return filename
+
+        path = Path(filename)
+        if path.suffix.lower() == '.parquet':
+            return str(path)
+
+        return str(path.with_suffix('.parquet'))
 
     def _buildings_for_time_step(self, time_step: int, env: "CityLearnEnv" = None):
         env = self.env if env is None else env
@@ -130,6 +151,7 @@ class EpisodeExporter:
 
         env = self.env
         self.ensure_output_dir()
+        filepath = self._export_filename(filepath)
         file_path = os.path.join(env.new_folder_path, filepath)
 
         if model is not None and getattr(model, 'env', None) is not None:
@@ -142,10 +164,12 @@ class EpisodeExporter:
         kpis = kpis.pivot(index='cost_function', columns='name', values='value')
         if kpi_round_decimals is not None:
             kpis = kpis.round(kpi_round_decimals)
-        kpis = kpis.fillna('')
         kpis = kpis.reset_index()
         kpis = kpis.rename(columns={'cost_function': 'KPI'})
-        kpis.to_csv(file_path, index=False, encoding='utf-8')
+        if self._render_file_format() == 'parquet':
+            kpis.to_parquet(file_path, index=False)
+        else:
+            kpis.fillna('').to_csv(file_path, index=False, encoding='utf-8')
         if include_business_as_usual and export_business_as_usual_timeseries:
             self.export_business_as_usual_timeseries(export_env)
         env._final_kpis_exported = True
@@ -159,10 +183,14 @@ class EpisodeExporter:
         baseline_env = result.env
         episode_num = source_env.episode_tracker.episode
         final_index = int(result.time_step)
-        filename = f"exported_data_business_as_usual_ep{episode_num}.csv"
+        filename = self._export_filename(f"exported_data_business_as_usual_ep{episode_num}.csv")
         file_path = Path(env.new_folder_path) / filename
         if file_path.exists():
             file_path.unlink()
+        if self._render_file_format() == 'parquet':
+            for part in file_path.parent.glob(f"{file_path.stem}_part*.parquet"):
+                part.unlink()
+            self._chunk_counters[str(file_path)] = 0
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
         fieldnames = [
@@ -178,6 +206,27 @@ class EpisodeExporter:
             'ev_charger_electricity_consumption_kwh',
             'deferrable_appliance_electricity_consumption_kwh',
         ]
+
+        if self._render_file_format() == 'parquet':
+            rows = []
+            chunk_size = self._render_chunk_size()
+            for t in range(final_index + 1):
+                building_rows = []
+                for building in self._buildings_for_time_step(t, baseline_env):
+                    row = self._business_as_usual_building_row(building, t, baseline_env)
+                    building_rows.append(row)
+                    rows.append(row)
+                    if len(rows) >= chunk_size:
+                        self.write_render_rows(filename, rows)
+                        rows.clear()
+
+                rows.append(self._business_as_usual_district_row(baseline_env, t, building_rows))
+                if len(rows) >= chunk_size:
+                    self.write_render_rows(filename, rows)
+                    rows.clear()
+
+            self.write_render_rows(filename, rows)
+            return
 
         with file_path.open('w', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -262,7 +311,7 @@ class EpisodeExporter:
             return 0.0
 
     def render(self):
-        """Render one time step to CSV outputs."""
+        """Render one time step to configured time-series outputs."""
 
         env = self.env
 
@@ -282,7 +331,7 @@ class EpisodeExporter:
         episode_num = env.episode_tracker.episode
 
         self.save_to_csv(
-            f"exported_data_community_ep{episode_num}.csv",
+            self._export_filename(f"exported_data_community_ep{episode_num}.csv"),
             {"timestamp": iso_timestamp, **env.as_dict()},
         )
 
@@ -290,7 +339,7 @@ class EpisodeExporter:
 
         for building in buildings:
             self.save_to_csv(
-                f"exported_data_{building.name.lower()}_ep{episode_num}.csv",
+                self._export_filename(f"exported_data_{building.name.lower()}_ep{episode_num}.csv"),
                 {"timestamp": iso_timestamp, **building.as_dict()},
             )
 
@@ -298,26 +347,26 @@ class EpisodeExporter:
             if battery is not None:
                 battery.time_step = env.time_step
                 self.save_to_csv(
-                    f"exported_data_{building.name.lower()}_battery_ep{episode_num}.csv",
+                    self._export_filename(f"exported_data_{building.name.lower()}_battery_ep{episode_num}.csv"),
                     {"timestamp": iso_timestamp, **battery.as_dict()},
                 )
 
             for charger in self._chargers_for_time_step(building, env.time_step):
                 charger.time_step = env.time_step
                 self.save_to_csv(
-                    f"exported_data_{building.name.lower()}_{charger.charger_id}_ep{episode_num}.csv",
+                    self._export_filename(f"exported_data_{building.name.lower()}_{charger.charger_id}_ep{episode_num}.csv"),
                     {"timestamp": iso_timestamp, **charger.as_dict()},
                 )
 
         if len(buildings) > 0:
             self.save_to_csv(
-                f"exported_data_pricing_ep{episode_num}.csv",
+                self._export_filename(f"exported_data_pricing_ep{episode_num}.csv"),
                 {"timestamp": iso_timestamp, **buildings[0].pricing.as_dict(env.time_step)},
             )
 
         for ev in self._electric_vehicles_for_time_step(env.time_step):
             self.save_to_csv(
-                f"exported_data_{ev.name.lower()}_ep{episode_num}.csv",
+                self._export_filename(f"exported_data_{ev.name.lower()}_ep{episode_num}.csv"),
                 {"timestamp": iso_timestamp, **ev.as_dict()},
             )
 
@@ -346,6 +395,26 @@ class EpisodeExporter:
         self.ensure_output_dir()
         episode_num = env.episode_tracker.episode
         rows_by_filename: Dict[str, List[Mapping[str, Any]]] = defaultdict(list)
+        chunk_size = self._render_chunk_size()
+        prepared_files = set()
+
+        def append_row(filename: str, row: Mapping[str, Any]):
+            filename = self._export_filename(filename)
+            if filename not in prepared_files:
+                file_path = Path(env.new_folder_path) / filename
+                if file_path.exists():
+                    file_path.unlink()
+                if self._render_file_format() == 'parquet':
+                    for part in file_path.parent.glob(f"{file_path.stem}_part*.parquet"):
+                        part.unlink()
+                    self._chunk_counters[str(file_path)] = 0
+                prepared_files.add(filename)
+            rows = rows_by_filename[filename]
+            rows.append(row)
+            if len(rows) >= chunk_size:
+                self.write_render_rows(filename, rows)
+                rows.clear()
+
         if getattr(env, 'topology_mode', 'static') == 'dynamic' and getattr(env, '_topology_service', None) is not None:
             ev_lookup = dict(env._topology_service.ev_pool)
         else:
@@ -375,18 +444,21 @@ class EpisodeExporter:
                         pass
 
                 timestamp = self.get_iso_timestamp()
-                rows_by_filename[f"exported_data_community_ep{episode_num}.csv"].append(
+                append_row(
+                    f"exported_data_community_ep{episode_num}.csv",
                     {"timestamp": timestamp, **env.as_dict()}
                 )
 
                 for building in buildings:
-                    rows_by_filename[f"exported_data_{building.name.lower()}_ep{episode_num}.csv"].append(
+                    append_row(
+                        f"exported_data_{building.name.lower()}_ep{episode_num}.csv",
                         {"timestamp": timestamp, **building.as_dict()}
                     )
                     battery = self._electrical_storage_for_time_step(building, t)
                     if battery is not None:
                         battery.time_step = t
-                        rows_by_filename[f"exported_data_{building.name.lower()}_battery_ep{episode_num}.csv"].append(
+                        append_row(
+                            f"exported_data_{building.name.lower()}_battery_ep{episode_num}.csv",
                             {"timestamp": timestamp, **battery.as_dict()}
                         )
 
@@ -398,17 +470,20 @@ class EpisodeExporter:
                                 charger.incoming_electric_vehicle,
                             )
                         self._set_charger_render_state(charger, t, ev_lookup)
-                        rows_by_filename[f"exported_data_{building.name.lower()}_{charger.charger_id}_ep{episode_num}.csv"].append(
+                        append_row(
+                            f"exported_data_{building.name.lower()}_{charger.charger_id}_ep{episode_num}.csv",
                             {"timestamp": timestamp, **charger.as_dict()}
                         )
 
                 if len(buildings) > 0:
-                    rows_by_filename[f"exported_data_pricing_ep{episode_num}.csv"].append(
+                    append_row(
+                        f"exported_data_pricing_ep{episode_num}.csv",
                         {"timestamp": timestamp, **buildings[0].pricing.as_dict(t)}
                     )
 
                 for ev in evs:
-                    rows_by_filename[f"exported_data_{ev.name.lower()}_ep{episode_num}.csv"].append(
+                    append_row(
+                        f"exported_data_{ev.name.lower()}_ep{episode_num}.csv",
                         {"timestamp": timestamp, **ev.as_dict()}
                     )
 
@@ -424,15 +499,20 @@ class EpisodeExporter:
             env._render_start_datetime = original_start_datetime
 
         for filename, rows in rows_by_filename.items():
-            file_path = Path(env.new_folder_path) / filename
-            if file_path.exists():
-                file_path.unlink()
             self.write_render_rows(filename, rows)
 
     def save_to_csv(self, filename: str, data: Mapping[str, Any]):
-        """Save one render row to CSV."""
+        """Save one render row to configured output format."""
 
         env = self.env
+        filename = self._export_filename(filename)
+
+        if self._render_file_format() == 'parquet':
+            env._render_buffer[filename].append(dict(data))
+            if len(env._render_buffer[filename]) >= self._render_chunk_size():
+                self.write_render_rows(filename, env._render_buffer[filename])
+                env._render_buffer[filename].clear()
+            return
 
         if env._buffer_render and getattr(env, '_defer_render_flush', False):
             env._render_buffer[filename].append(dict(data))
@@ -487,6 +567,10 @@ class EpisodeExporter:
 
         buffered_fieldnames = list(dict.fromkeys(field for row in rows for field in row.keys()))
 
+        if self._render_file_format() == 'parquet':
+            self._write_parquet_rows(filename, rows)
+            return
+
         if not file_path.exists():
             fieldnames = buffered_fieldnames
             with file_path.open('w', newline='') as csvfile:
@@ -498,11 +582,13 @@ class EpisodeExporter:
 
         with file_path.open('r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
-            existing_rows = list(reader)
             existing_fieldnames = reader.fieldnames or []
 
         missing_fieldnames = [field for field in buffered_fieldnames if field not in existing_fieldnames]
         if missing_fieldnames:
+            with file_path.open('r', newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                existing_rows = list(reader)
             extended_fieldnames = [*existing_fieldnames, *missing_fieldnames]
             with file_path.open('w', newline='') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=extended_fieldnames)
@@ -517,6 +603,26 @@ class EpisodeExporter:
             writer = csv.DictWriter(csvfile, fieldnames=existing_fieldnames)
             for row in rows:
                 writer.writerow({field: row.get(field, '') for field in existing_fieldnames})
+
+    def _write_parquet_rows(self, filename: str, rows: List[Mapping[str, Any]]):
+        env = self.env
+        file_path = Path(env.new_folder_path) / filename
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        counter_key = str(file_path)
+        counter = self._chunk_counters[counter_key]
+        self._chunk_counters[counter_key] = counter + 1
+        part_path = file_path.with_name(f"{file_path.stem}_part{counter:05d}{file_path.suffix}")
+
+        try:
+            import pandas as pd
+        except ImportError as exc:
+            raise ImportError(
+                "Parquet render exports require pandas with a parquet engine such as pyarrow."
+            ) from exc
+
+        dataframe = pd.DataFrame(rows)
+        dataframe = dataframe.where(dataframe.ne(''), np.nan)
+        dataframe.to_parquet(part_path, index=False)
 
     def ensure_output_dir(self, *, ensure_exists: bool = True):
         """Prepare the render output directory and optionally create it on disk."""
@@ -564,6 +670,11 @@ class EpisodeExporter:
                     for csv_file in render_dir.glob('exported_*.csv'):
                         try:
                             csv_file.unlink()
+                        except OSError:
+                            pass
+                    for parquet_file in render_dir.glob('exported_*.parquet'):
+                        try:
+                            parquet_file.unlink()
                         except OSError:
                             pass
                 env._render_dir_initialized = True

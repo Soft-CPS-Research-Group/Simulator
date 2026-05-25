@@ -67,6 +67,8 @@ class CityLearnTopologyService:
         self._active_charger_history: Dict[int, Dict[str, Dict[str, Charger]]] = {}
         self._active_storage_history: Dict[int, Dict[str, Optional[Battery]]] = {}
         self._active_deferrable_appliance_history: Dict[int, Dict[str, Dict[str, DeferrableAppliance]]] = {}
+        self._last_history_signature = None
+        self._last_history_time_step = None
         self._charger_observation_flags = self._collect_charger_observation_flags()
         self._charger_action_enabled = self._is_schema_action_active('electric_vehicle_storage')
 
@@ -159,6 +161,8 @@ class CityLearnTopologyService:
         self._active_charger_history = {}
         self._active_storage_history = {}
         self._active_deferrable_appliance_history = {}
+        self._last_history_signature = None
+        self._last_history_time_step = None
 
         self._set_active_views()
         self.apply_events_for_time_step(0)
@@ -236,28 +240,42 @@ class CityLearnTopologyService:
         if time_step in history:
             return deepcopy(history[time_step])
 
-        valid = [k for k in history.keys() if k <= time_step]
-
-        if len(valid) == 0:
+        valid = (k for k in history.keys() if k <= time_step)
+        latest = max(valid, default=None)
+        if latest is None:
             return deepcopy(default)
 
-        return deepcopy(history[max(valid)])
+        return deepcopy(history[latest])
 
     @staticmethod
     def _history_lookup_reference(history: Mapping[int, Any], time_step: int, default: Any):
         if time_step in history:
             return history[time_step]
 
-        valid = [k for k in history.keys() if k <= time_step]
-        if len(valid) == 0:
+        valid = (k for k in history.keys() if k <= time_step)
+        latest = max(valid, default=None)
+        if latest is None:
             return default
 
-        return history[max(valid)]
+        return history[latest]
 
     def _record_history(self, time_step: int):
-        self._active_member_history[int(time_step)] = list(self._active_member_ids)
-        self._active_ev_history[int(time_step)] = list(self._active_ev_ids)
-        self._topology_version_history[int(time_step)] = int(self._topology_version)
+        time_step = int(time_step)
+        signature = (
+            tuple(self._active_member_ids),
+            tuple(self._active_ev_ids),
+            int(self._topology_version),
+        )
+        if (
+            self._last_history_time_step is not None
+            and time_step != self._last_history_time_step
+            and signature == self._last_history_signature
+        ):
+            return
+
+        self._active_member_history[time_step] = list(self._active_member_ids)
+        self._active_ev_history[time_step] = list(self._active_ev_ids)
+        self._topology_version_history[time_step] = int(self._topology_version)
         charger_snapshot: Dict[str, Dict[str, Charger]] = {}
         storage_snapshot: Dict[str, Optional[Battery]] = {}
         deferrable_snapshot: Dict[str, Dict[str, DeferrableAppliance]] = {}
@@ -277,9 +295,11 @@ class CityLearnTopologyService:
                 appliance.name: appliance for appliance in (building.deferrable_appliances or [])
             }
 
-        self._active_charger_history[int(time_step)] = charger_snapshot
-        self._active_storage_history[int(time_step)] = storage_snapshot
-        self._active_deferrable_appliance_history[int(time_step)] = deferrable_snapshot
+        self._active_charger_history[time_step] = charger_snapshot
+        self._active_storage_history[time_step] = storage_snapshot
+        self._active_deferrable_appliance_history[time_step] = deferrable_snapshot
+        self._last_history_signature = signature
+        self._last_history_time_step = time_step
 
     def _set_active_views(self):
         env = self.env

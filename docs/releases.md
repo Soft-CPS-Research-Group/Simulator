@@ -60,6 +60,84 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.1.0 - 2026-05-26
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Minor release focused on making 15-second entity-mode simulations practical with all observation bundles enabled. The main work removes the `entity_action_feedback` memory leak, replaces the oversized derived-forecast contract with compact point forecasts, reduces recurring entity observation overhead, and moves long exports toward chunked Parquet.
+
+### Added
+
+- `render_file_format="parquet"` and `render_chunk_size` support for render/KPI/BAU exports. Parquet render output is written as chunked `*_partNNNNN.parquet` files.
+- Fine-grained entity observation timing fields when `debug_timing=True`, including `entity_observation_building_time`, `entity_observation_charger_time`, `entity_observation_storage_time`, `entity_observation_district_time`, `entity_observation_copy_time` and related table sections.
+- Chunk cleanup for previous Parquet render artifacts in the session output directory.
+
+### Changed
+
+- `entity_forecasts_derived` now keeps the same bundle name but exposes compact point forecasts only:
+  - building: `forecast_{load,pv,net}_next_{15m,1h,3h,6h,24h}_kw`
+  - district: `forecast_price_next_*` and `forecast_community_{load,pv,net}_next_*_kw`
+- Removed the old derived-forecast mean/sum/peak/headroom/surplus/bucket feature grid and the reset-time forecast cache.
+- Entity observation assembly now uses precomputed feature columns, sparse/direct row writes, static asset rows and precomputed forecast step offsets.
+- Dynamic topology history now records snapshots only when active members/assets or topology version change.
+- Battery capacity/efficiency histories now use compact numeric arrays instead of Python float lists.
+- Boolean action-feedback flags and clipping reasons are stored as boolean arrays instead of `float32`.
+- Environment-level KPI/export aggregate series now use numpy streaming sums instead of temporary pandas DataFrames.
+
+### Fixed
+
+- Fixed the dominant `entity_action_feedback` RSS growth, caused by a cache keyed on transient storage series objects.
+- Fixed excessive initialization/reset overhead from derived forecasts on 15-second datasets.
+- Fixed avoidable memory retention in dynamic topology history when no topology event occurs.
+- Fixed avoidable export/KPI memory spikes from temporary DataFrames over all building time series.
+
+### Benchmark Notes
+
+Representative local measurements on `citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet`, entity interface, dynamic topology, all observation bundles, `render_mode="none"`, `export_kpis_on_episode_end=False`:
+
+| Area | Before | After | Impact |
+|---|---:|---:|---:|
+| Entity all-bundles feature columns | ~732 | ~322 | ~56% fewer columns |
+| Derived forecast init/reset path | ~15.0s init / ~12.8s reset | ~2.0s init / ~0.15s reset | ~87% init reduction, ~99% reset reduction |
+| `entity_action_feedback` RSS growth over 700 steps | ~+2071 MiB | ~+5 MiB | leak removed |
+| Action-feedback cache size over 700 steps | 11,224 entries / 3.9M cached values | 24-25 entries | stable per-asset cache |
+| 40,320-step 15s window post-reset RSS | ~658.7 MiB | ~630.4 MiB | ~28 MiB lower at reset after boolean flags |
+| `next_observations` on 1k-step debug smoke | ~6.49 ms/step | ~5.80 ms/step | ~11% faster |
+| 5k-step no-debug smoke | n/a | ~12.4 ms/step, ~718 MiB RSS at 5k | current operating point |
+
+For full-year 15-second datasets, retained simulator histories still scale linearly with step count, assets and enabled KPI/export needs. This release removes the pathological cache growth, but it does not make a full-year all-bundles run constant-memory.
+
+### Dataset/Schema Impact
+
+- No packaged dataset files or schema keys are renamed.
+- The entity observation feature contract changes when `entity_forecasts_derived` is active because the old large derived-forecast grid is intentionally removed.
+- Parquet export requires a pandas Parquet engine such as `pyarrow`; CSV remains the default export format.
+
+### Compatibility
+
+- Minor release with an intentional entity observation contract change for `entity_forecasts_derived`.
+- Physics equations, action application, dynamic topology event semantics, KPI formulas and flat observation behavior are intended to remain unchanged.
+- Fixed-width RL agents or saved normalizers trained against v1.0.x all-bundles entity observations must refresh `entity_specs`, feature columns and input statistics before using v1.1.0.
+
+### Validation
+
+- `.venv/bin/pytest tests/test_entity_observation_bundles.py tests/test_dynamic_topology_entity_mode.py tests/test_dynamic_topology_full_timeline.py tests/test_dynamic_topology_assets_only_dataset.py tests/unit/test_physics_units_refactor.py tests/unit/test_physics_invariants.py tests/unit/test_subhour_scaling.py tests/unit/test_rendering_behaviour.py::test_parquet_render_format_writes_chunked_exports_and_kpis -q`: pass, `71 passed`
+- `.venv/bin/pytest tests/test_deferrable_appliance_integration.py::test_entity_action_feedback_for_deferrable_start tests/test_deferrable_appliance_integration.py::test_entity_action_feedback_for_blocked_deferrable_start tests/test_kpis.py tests/test_kpi_v2.py tests/test_kpi_golden.py tests/test_series_integrity.py tests/unit/test_export_logic.py tests/unit/test_ui_export_contract.py -q`: pass, `57 passed, 17 warnings`
+- `.venv/bin/pytest tests/unit/test_step_many.py -q`: pass, `5 passed`
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass, `16/16` scenarios
+- `.venv/bin/pytest -q`: pass, `347 passed, 17 warnings`
+- `.venv/bin/python -m build --outdir /tmp/softcpsrecsimulator-1.1.0-dist`: pass, generated sdist and wheel
+- `.venv/bin/python -m twine check /tmp/softcpsrecsimulator-1.1.0-dist/*`: pass
+
+### Migration Notes
+
+- Refresh `env.entity_specs` and retrain or remap any fixed-width model inputs that used `entity_forecasts_derived`.
+- To use chunked Parquet exports, set `render_file_format="parquet"` and optionally `render_chunk_size`.
+- For long 15-second runs, keep render/KPI exports disabled unless needed, or export in Parquet chunks.
+
 ## v1.0.2 - 2026-05-23
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

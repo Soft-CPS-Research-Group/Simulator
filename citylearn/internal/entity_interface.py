@@ -1,9 +1,8 @@
 """Canonical entity observation/action contract for CityLearnEnv."""
 
 from __future__ import annotations
-
-import weakref
 from dataclasses import dataclass
+import time
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from gymnasium import spaces
@@ -79,9 +78,8 @@ class CityLearnEntityInterfaceService:
         ("6h", 6 * 60 * 60),
         ("24h", 24 * 60 * 60),
     )
-    FORECAST_GRID_BUCKET_SECONDS = 15 * 60
-    FORECAST_GRID_SECONDS = 6 * 60 * 60
-    FORECAST_GRID_BUCKETS = int(FORECAST_GRID_SECONDS / FORECAST_GRID_BUCKET_SECONDS)
+    DERIVED_FORECAST_BUILDING_SIGNALS = ("load", "pv", "net")
+    DERIVED_FORECAST_DISTRICT_SIGNALS = ("load", "pv", "net")
 
     LEGACY_CHARGER_FEATURES = [
         "connected_state",
@@ -343,18 +341,11 @@ class CityLearnEntityInterfaceService:
         self._initialized = False
         self._layout_topology_version = -1
         self._observation_bundles = self._resolve_observation_bundles()
-        self._forecast_base_component_cache: Dict[int, Mapping[str, np.ndarray]] = {}
-        self._forecast_component_cache: Dict[int, Mapping[str, np.ndarray]] = {}
-        self._community_forecast_component_cache: Optional[Mapping[str, np.ndarray]] = None
-        self._price_forecast_cache: Optional[np.ndarray] = None
-        self._forecast_stat_summary_cache: Dict[int, Tuple[Any, Mapping[str, np.ndarray]]] = {}
-        self._forecast_window_bounds_cache: Dict[Tuple[int, int, float], Dict[str, Any]] = {}
         self._action_feedback_series_cache: Dict[int, Dict[str, Any]] = {}
 
     def reset(self):
         """Rebuild specs and reusable buffers for the current episode layout."""
 
-        self._clear_forecast_component_cache()
         self._action_feedback_series_cache = {}
         self._build_entity_layout()
         self._build_spaces()
@@ -366,7 +357,6 @@ class CityLearnEntityInterfaceService:
         """Mark specs/layout as stale and rebuild on next access."""
 
         self._initialized = False
-        self._clear_forecast_component_cache()
         self._action_feedback_series_cache = {}
 
     @property
@@ -392,6 +382,19 @@ class CityLearnEntityInterfaceService:
         t = int(env.time_step)
         endogenous_t = max(t - 1, 0)
         step_hours = self._step_hours()
+        debug_timing = bool(getattr(env, "debug_timing", False))
+        timings: Dict[str, float] = {}
+        section_start = time.perf_counter() if debug_timing else 0.0
+
+        def finish_section(name: str):
+            nonlocal section_start
+            if not debug_timing:
+                return
+
+            now = time.perf_counter()
+            timings[f"entity_observation_{name}_time"] = now - section_start
+            section_start = now
+
         core_bundle_enabled = self._bundle_enabled(self.CORE_BUNDLE)
         community_bundle_enabled = self._bundle_enabled(self.COMMUNITY_BUNDLE)
         forecast_bundle_enabled = self._bundle_enabled(self.FORECAST_BUNDLE)
@@ -399,22 +402,28 @@ class CityLearnEntityInterfaceService:
         temporal_bundle_enabled = self._bundle_enabled(self.TEMPORAL_BUNDLE)
         action_feedback_bundle_enabled = self._bundle_enabled(self.ACTION_FEEDBACK_BUNDLE)
         requires_building_electrical_metrics = core_bundle_enabled or community_bundle_enabled
-        if derived_forecast_bundle_enabled:
-            self._prune_forecast_stat_summary_cache()
 
         self._district_obs.fill(0.0)
         self._building_obs.fill(0.0)
-        self._charger_obs.fill(0.0)
+        self._charger_obs[...] = self._charger_static_obs
         self._ev_obs.fill(0.0)
-        self._storage_obs.fill(0.0)
-        self._pv_obs.fill(0.0)
+        self._storage_obs[...] = self._storage_static_obs
+        self._pv_obs[...] = self._pv_static_obs
         self._deferrable_appliance_obs.fill(0.0)
+        finish_section("buffer_reset")
 
-        building_feature_maps: List[Mapping[str, float]] = []
         building_electrical_metrics: List[Mapping[str, float]] = []
+        derived_forecast_community_values = (
+            {
+                label: {signal: 0.0 for signal in self.DERIVED_FORECAST_DISTRICT_SIGNALS}
+                for label, _ in self.FORECAST_HORIZONS
+            }
+            if derived_forecast_bundle_enabled else None
+        )
         first_building_data: Mapping[str, Any] = {}
 
         for i, building in enumerate(env.buildings):
+            row = self._building_obs[i]
             # Exogenous signals are read at current t, while endogenous values come from
             # the latest settled transition (max(t-1, 0)) to avoid uninitialized buffers.
             observation_names = (
@@ -430,7 +439,7 @@ class CityLearnEntityInterfaceService:
             if i == 0:
                 first_building_data = data
 
-            values = dict(data)
+            self._fill_obs_row_sparse(row, self._building_feature_cols, data)
             electrical_metrics = None
             if requires_building_electrical_metrics:
                 electrical_metrics = self._build_electrical_building_metrics(
@@ -441,53 +450,86 @@ class CityLearnEntityInterfaceService:
                 )
 
             if core_bundle_enabled and electrical_metrics is not None:
-                values.update(electrical_metrics)
+                self._fill_obs_row_sparse(row, self._building_feature_cols, electrical_metrics)
 
             if community_bundle_enabled and electrical_metrics is not None:
                 building_electrical_metrics.append(electrical_metrics)
 
             if temporal_bundle_enabled:
-                values.update(
+                self._fill_obs_row_sparse(
+                    row,
+                    self._building_feature_cols,
                     self._build_temporal_building_metrics(
                         building=building,
                         endogenous_t=endogenous_t,
-                    )
+                    ),
                 )
-                values.update(self._build_calendar_temporal_metrics(building=building, time_step=t))
+                self._fill_obs_row_sparse(
+                    row,
+                    self._building_feature_cols,
+                    self._build_calendar_temporal_metrics(building=building, time_step=t),
+                )
 
             if derived_forecast_bundle_enabled:
-                values.update(self._build_derived_forecast_building_metrics(building=building, time_step=t))
+                forecast_values = self._build_derived_forecast_building_metrics(building=building, time_step=t)
+                self._fill_obs_row_sparse(row, self._building_feature_cols, forecast_values)
+                for label, _ in self.FORECAST_HORIZONS:
+                    target = derived_forecast_community_values[label]
+                    for signal in self.DERIVED_FORECAST_DISTRICT_SIGNALS:
+                        target[signal] += self._safe_scalar(
+                            forecast_values.get(f"forecast_{signal}_next_{label}_kw", 0.0),
+                            0.0,
+                        )
+        finish_section("building")
 
-            building_feature_maps.append(values)
-
-        district_values = dict(first_building_data)
+        district_row = self._district_obs[0]
+        self._fill_obs_row_sparse(district_row, self._district_feature_cols, first_building_data)
 
         if forecast_bundle_enabled:
-            district_values.update(self._build_forecast_district_metrics(first_building_data))
+            self._fill_obs_row_sparse(
+                district_row,
+                self._district_feature_cols,
+                self._build_forecast_district_metrics(first_building_data),
+            )
 
         if derived_forecast_bundle_enabled:
-            district_values.update(self._build_derived_forecast_district_metrics(time_step=t))
+            self._fill_obs_row_sparse(
+                district_row,
+                self._district_feature_cols,
+                self._build_derived_forecast_district_metrics(
+                    time_step=t,
+                    community_values=derived_forecast_community_values,
+                ),
+            )
 
         if community_bundle_enabled:
-            district_values.update(self._build_community_district_metrics(building_electrical_metrics))
+            self._fill_obs_row_sparse(
+                district_row,
+                self._district_feature_cols,
+                self._build_community_district_metrics(building_electrical_metrics),
+            )
 
         if temporal_bundle_enabled:
-            district_values.update(
+            self._fill_obs_row_sparse(
+                district_row,
+                self._district_feature_cols,
                 self._build_temporal_district_metrics(
                     endogenous_t=endogenous_t,
-                )
+                ),
             )
             if len(env.buildings) > 0:
-                district_values.update(self._build_calendar_temporal_metrics(building=env.buildings[0], time_step=t))
-
-        self._fill_obs_row_from_mapping(self._district_obs[0], self._district_features, district_values)
-
-        for i, values in enumerate(building_feature_maps):
-            self._fill_obs_row_from_mapping(self._building_obs[i], self._building_features, values)
+                self._fill_obs_row_sparse(
+                    district_row,
+                    self._district_feature_cols,
+                    self._build_calendar_temporal_metrics(building=env.buildings[0], time_step=t),
+                )
+        finish_section("district")
 
         for ref in self._charger_refs:
             charger = env.buildings[ref.building_index]._charger_lookup[ref.charger_id]
             sim = charger.charger_simulation
+            row = self._charger_obs[ref.row]
+            static_values = self._charger_static_values.get(ref.row, {})
             state = self._safe_index(sim.electric_vehicle_charger_state, t, np.nan)
             connected = charger.connected_electric_vehicle is not None and state == 1
             incoming = charger.incoming_electric_vehicle is not None and state == 2
@@ -498,21 +540,10 @@ class CityLearnEntityInterfaceService:
             )
             required_soc = self._safe_index(sim.electric_vehicle_required_soc_departure, t, -0.1)
             departure_steps = self._safe_index(sim.electric_vehicle_departure_time, t, -1.0)
-            max_charging_power = self._safe_scalar(charger.max_charging_power, 0.0)
-            max_discharging_power = self._safe_scalar(charger.max_discharging_power, 0.0)
-            min_charging_power = self._safe_scalar(getattr(charger, "min_charging_power", 0.0), 0.0)
-            min_discharging_power = self._safe_scalar(getattr(charger, "min_discharging_power", 0.0), 0.0)
-            charger_efficiency = self._safe_scalar(getattr(charger, "efficiency", 1.0), 1.0)
-            charge_efficiency_at_max = (
-                self._safe_scalar(charger.get_efficiency(1.0, True), charger_efficiency)
-                if hasattr(charger, "get_efficiency")
-                else charger_efficiency
-            )
-            discharge_efficiency_at_max = (
-                self._safe_scalar(charger.get_efficiency(1.0, False), charger_efficiency)
-                if hasattr(charger, "get_efficiency")
-                else charger_efficiency
-            )
+            max_charging_power = self._safe_scalar(static_values.get("max_charging_power_kw"), 0.0)
+            max_discharging_power = self._safe_scalar(static_values.get("max_discharging_power_kw"), 0.0)
+            charge_efficiency_at_max = self._safe_scalar(static_values.get("charge_efficiency_at_max_ratio"), 1.0)
+            discharge_efficiency_at_max = self._safe_scalar(static_values.get("discharge_efficiency_at_max_ratio"), 1.0)
             incoming_required_soc = required_soc if incoming else -0.1
             incoming_departure_steps = departure_steps if incoming else -1.0
             incoming_hours_until_departure = (
@@ -553,25 +584,30 @@ class CityLearnEntityInterfaceService:
                 charging_slack = 0.0
                 charging_priority = 0.0
 
-            values = {
-                "connected_state": 1.0 if connected else 0.0,
-                "incoming_state": 1.0 if incoming else 0.0,
-                "connected_ev_soc": current_soc,
-                "connected_ev_required_soc_departure": required_soc if connected else -0.1,
-                "connected_ev_battery_capacity_kwh": battery_capacity,
-                "connected_ev_departure_time_step": self._safe_index(sim.electric_vehicle_departure_time, t, -1.0) if connected else -1.0,
-                "incoming_ev_estimated_soc_arrival": self._safe_index(sim.electric_vehicle_estimated_soc_arrival, t, -0.1) if incoming else -0.1,
-                "incoming_ev_estimated_arrival_time_step": self._safe_index(sim.electric_vehicle_estimated_arrival_time, t, -1.0) if incoming else -1.0,
-                "last_charged_kwh": commanded_energy,
-                "max_charging_power_kw": max_charging_power,
-                "max_discharging_power_kw": max_discharging_power,
-                "min_charging_power_kw": min_charging_power,
-                "min_discharging_power_kw": min_discharging_power,
-                "charger_efficiency_ratio": charger_efficiency,
-            }
-            assigned_phase = getattr(env.buildings[ref.building_index], "_charger_phase_map", {}).get(ref.charger_id)
-            for phase_name, feature_name in zip(self._charger_phase_names, self._charger_phase_features):
-                values[feature_name] = 1.0 if assigned_phase in {phase_name, "all_phases"} else 0.0
+            self._set_obs_value(row, self._charger_feature_cols, "connected_state", 1.0 if connected else 0.0)
+            self._set_obs_value(row, self._charger_feature_cols, "incoming_state", 1.0 if incoming else 0.0)
+            self._set_obs_value(row, self._charger_feature_cols, "connected_ev_soc", current_soc)
+            self._set_obs_value(row, self._charger_feature_cols, "connected_ev_required_soc_departure", required_soc if connected else -0.1)
+            self._set_obs_value(row, self._charger_feature_cols, "connected_ev_battery_capacity_kwh", battery_capacity)
+            self._set_obs_value(
+                row,
+                self._charger_feature_cols,
+                "connected_ev_departure_time_step",
+                self._safe_index(sim.electric_vehicle_departure_time, t, -1.0) if connected else -1.0,
+            )
+            self._set_obs_value(
+                row,
+                self._charger_feature_cols,
+                "incoming_ev_estimated_soc_arrival",
+                self._safe_index(sim.electric_vehicle_estimated_soc_arrival, t, -0.1) if incoming else -0.1,
+            )
+            self._set_obs_value(
+                row,
+                self._charger_feature_cols,
+                "incoming_ev_estimated_arrival_time_step",
+                self._safe_index(sim.electric_vehicle_estimated_arrival_time, t, -1.0) if incoming else -1.0,
+            )
+            self._set_obs_value(row, self._charger_feature_cols, "last_charged_kwh", commanded_energy)
             if core_bundle_enabled:
                 charger_decision_metrics = self._charger_core_decision_metrics(
                     building=env.buildings[ref.building_index],
@@ -589,62 +625,66 @@ class CityLearnEntityInterfaceService:
                     discharge_efficiency_at_max=discharge_efficiency_at_max,
                     step_hours=step_hours,
                 )
-                values.update(
-                    {
-                        "commanded_power_kw": commanded_energy / step_hours,
-                        "applied_power_kw": applied_energy / step_hours,
-                        "applied_energy_kwh_step": applied_energy,
-                        "hours_until_departure": hours_until_departure,
-                        "time_until_departure_ratio": np.clip(hours_until_departure / 24.0, 0.0, 1.0) if connected else -1.0,
-                        "energy_to_required_soc_kwh": energy_to_required_soc,
-                        "required_average_power_kw": required_average_power,
-                        "avg_power_to_departure_kw": avg_power_to_departure,
-                        "charging_slack_kw": charging_slack,
-                        "charging_priority_ratio": charging_priority,
-                        **charger_decision_metrics,
-                        "charge_efficiency_at_max_ratio": charge_efficiency_at_max,
-                        "discharge_efficiency_at_max_ratio": discharge_efficiency_at_max,
-                        "incoming_ev_required_soc_departure": incoming_required_soc,
-                        "incoming_ev_departure_time_step": incoming_departure_steps,
-                        "incoming_ev_hours_until_departure": incoming_hours_until_departure,
-                        "incoming_ev_time_until_departure_ratio": (
-                            np.clip(incoming_hours_until_departure / 24.0, 0.0, 1.0)
-                            if incoming and incoming_hours_until_departure >= 0.0
-                            else -1.0
-                        ),
-                    }
+                self._set_obs_value(row, self._charger_feature_cols, "commanded_power_kw", commanded_energy / step_hours)
+                self._set_obs_value(row, self._charger_feature_cols, "applied_power_kw", applied_energy / step_hours)
+                self._set_obs_value(row, self._charger_feature_cols, "applied_energy_kwh_step", applied_energy)
+                self._set_obs_value(row, self._charger_feature_cols, "hours_until_departure", hours_until_departure)
+                self._set_obs_value(
+                    row,
+                    self._charger_feature_cols,
+                    "time_until_departure_ratio",
+                    np.clip(hours_until_departure / 24.0, 0.0, 1.0) if connected else -1.0,
+                )
+                self._set_obs_value(row, self._charger_feature_cols, "energy_to_required_soc_kwh", energy_to_required_soc)
+                self._set_obs_value(row, self._charger_feature_cols, "required_average_power_kw", required_average_power)
+                self._set_obs_value(row, self._charger_feature_cols, "avg_power_to_departure_kw", avg_power_to_departure)
+                self._set_obs_value(row, self._charger_feature_cols, "charging_slack_kw", charging_slack)
+                self._set_obs_value(row, self._charger_feature_cols, "charging_priority_ratio", charging_priority)
+                self._fill_obs_row_sparse(row, self._charger_feature_cols, charger_decision_metrics)
+                self._set_obs_value(row, self._charger_feature_cols, "incoming_ev_required_soc_departure", incoming_required_soc)
+                self._set_obs_value(row, self._charger_feature_cols, "incoming_ev_departure_time_step", incoming_departure_steps)
+                self._set_obs_value(row, self._charger_feature_cols, "incoming_ev_hours_until_departure", incoming_hours_until_departure)
+                self._set_obs_value(
+                    row,
+                    self._charger_feature_cols,
+                    "incoming_ev_time_until_departure_ratio",
+                    (
+                        np.clip(incoming_hours_until_departure / 24.0, 0.0, 1.0)
+                        if incoming and incoming_hours_until_departure >= 0.0
+                        else -1.0
+                    ),
                 )
             if action_feedback_bundle_enabled:
-                values.update(self._charger_action_feedback_metrics(charger, endogenous_t, step_hours))
-            self._fill_obs_row_from_mapping(self._charger_obs[ref.row], self._charger_features, values)
+                self._fill_obs_row_sparse(
+                    row,
+                    self._charger_feature_cols,
+                    self._charger_action_feedback_metrics(charger, endogenous_t, step_hours),
+                )
+        finish_section("charger")
 
         for i, ev in enumerate(env.electric_vehicles):
+            row = self._ev_obs[i]
             soc = self._safe_scalar(ev.battery.soc[endogenous_t], 0.0)
             capacity = self._safe_scalar(ev.battery.capacity, 0.0)
             depth_of_discharge = self._safe_scalar(ev.battery.depth_of_discharge, 0.0)
-            values = {
-                "soc": soc,
-                "battery_capacity_kwh": capacity,
-                "depth_of_discharge_ratio": depth_of_discharge,
-            }
+            self._set_obs_value(row, self._ev_feature_cols, "soc", soc)
+            self._set_obs_value(row, self._ev_feature_cols, "battery_capacity_kwh", capacity)
+            self._set_obs_value(row, self._ev_feature_cols, "depth_of_discharge_ratio", depth_of_discharge)
             if core_bundle_enabled:
                 soc_min = max(1.0 - depth_of_discharge, 0.0)
                 energy_available = max((soc - soc_min) * max(capacity, 0.0), 0.0)
                 energy_to_full = max((1.0 - soc) * max(capacity, 0.0), 0.0)
-                values.update(
-                    {
-                        "soc_ratio": soc,
-                        "soc_min_ratio": soc_min,
-                        "soc_max_ratio": 1.0,
-                        "energy_available_kwh": energy_available,
-                        "energy_to_full_kwh": energy_to_full,
-                    }
-                )
-            self._fill_obs_row_from_mapping(self._ev_obs[i], self._ev_features, values)
+                self._set_obs_value(row, self._ev_feature_cols, "soc_ratio", soc)
+                self._set_obs_value(row, self._ev_feature_cols, "soc_min_ratio", soc_min)
+                self._set_obs_value(row, self._ev_feature_cols, "soc_max_ratio", 1.0)
+                self._set_obs_value(row, self._ev_feature_cols, "energy_available_kwh", energy_available)
+                self._set_obs_value(row, self._ev_feature_cols, "energy_to_full_kwh", energy_to_full)
+        finish_section("ev")
 
         for ref in self._storage_refs:
             building = env.buildings[ref.building_index]
             storage = building.electrical_storage
+            row = self._storage_obs[ref.row]
             capacity = self._safe_scalar(getattr(storage, "capacity", 0.0), 0.0)
             nominal_power = self._safe_scalar(getattr(storage, "nominal_power", 0.0), 0.0)
             soc = self._safe_scalar(storage.soc[endogenous_t], 0.0)
@@ -657,22 +697,29 @@ class CityLearnEntityInterfaceService:
                 getattr(storage, "round_trip_efficiency", base_efficiency ** 0.5),
                 base_efficiency ** 0.5,
             )
-            values = {
-                "soc": soc,
-                "capacity_kwh": capacity,
-                "nominal_power_kw": nominal_power,
-                "electricity_consumption_kwh": self._safe_scalar(
-                    building.electrical_storage_electricity_consumption[endogenous_t],
-                    0.0,
-                ),
-                "min_charge_power_kw": self._safe_scalar(getattr(storage, "min_charge_power", 0.0), 0.0),
-                "min_discharge_power_kw": self._safe_scalar(getattr(storage, "min_discharge_power", 0.0), 0.0),
-                "efficiency_ratio": base_efficiency,
-                "round_trip_efficiency_ratio": round_trip_efficiency,
-            }
-            assigned_storage_phase = getattr(building, "electrical_storage_phase_connection", None)
-            for phase_name, feature_name in zip(self._storage_phase_names, self._storage_phase_features):
-                values[feature_name] = 1.0 if assigned_storage_phase in {phase_name, "all_phases"} else 0.0
+            self._set_obs_value(row, self._storage_feature_cols, "soc", soc)
+            self._set_obs_value(row, self._storage_feature_cols, "capacity_kwh", capacity)
+            self._set_obs_value(row, self._storage_feature_cols, "nominal_power_kw", nominal_power)
+            self._set_obs_value(
+                row,
+                self._storage_feature_cols,
+                "electricity_consumption_kwh",
+                self._safe_scalar(building.electrical_storage_electricity_consumption[endogenous_t], 0.0),
+            )
+            self._set_obs_value(
+                row,
+                self._storage_feature_cols,
+                "min_charge_power_kw",
+                self._safe_scalar(getattr(storage, "min_charge_power", 0.0), 0.0),
+            )
+            self._set_obs_value(
+                row,
+                self._storage_feature_cols,
+                "min_discharge_power_kw",
+                self._safe_scalar(getattr(storage, "min_discharge_power", 0.0), 0.0),
+            )
+            self._set_obs_value(row, self._storage_feature_cols, "efficiency_ratio", base_efficiency)
+            self._set_obs_value(row, self._storage_feature_cols, "round_trip_efficiency_ratio", round_trip_efficiency)
             if core_bundle_enabled:
                 depth_of_discharge = self._safe_scalar(getattr(storage, "depth_of_discharge", 1.0), 1.0)
                 soc_min = max(1.0 - depth_of_discharge, 0.0)
@@ -704,51 +751,71 @@ class CityLearnEntityInterfaceService:
                     step_hours=step_hours,
                     include_headroom=True,
                 )
-                values.update(
-                    {
-                        "electrical_storage_soc_ratio": soc,
-                        "max_charge_power_kw": max_charge_power,
-                        "max_discharge_power_kw": max_discharge_power,
-                        "energy_to_full_kwh": energy_to_full,
-                        "energy_available_kwh": energy_available,
-                        **decision_metrics,
-                        "current_efficiency_ratio": self._safe_scalar(getattr(storage, "efficiency", base_efficiency), base_efficiency),
-                        "degraded_capacity_kwh": self._safe_scalar(getattr(storage, "degraded_capacity", capacity), capacity),
-                        "soc_min_ratio": soc_min,
-                    }
+                self._set_obs_value(row, self._storage_feature_cols, "electrical_storage_soc_ratio", soc)
+                self._set_obs_value(row, self._storage_feature_cols, "max_charge_power_kw", max_charge_power)
+                self._set_obs_value(row, self._storage_feature_cols, "max_discharge_power_kw", max_discharge_power)
+                self._set_obs_value(row, self._storage_feature_cols, "energy_to_full_kwh", energy_to_full)
+                self._set_obs_value(row, self._storage_feature_cols, "energy_available_kwh", energy_available)
+                self._fill_obs_row_sparse(row, self._storage_feature_cols, decision_metrics)
+                self._set_obs_value(
+                    row,
+                    self._storage_feature_cols,
+                    "current_efficiency_ratio",
+                    self._safe_scalar(getattr(storage, "efficiency", base_efficiency), base_efficiency),
                 )
+                self._set_obs_value(
+                    row,
+                    self._storage_feature_cols,
+                    "degraded_capacity_kwh",
+                    self._safe_scalar(getattr(storage, "degraded_capacity", capacity), capacity),
+                )
+                self._set_obs_value(row, self._storage_feature_cols, "soc_min_ratio", soc_min)
             if action_feedback_bundle_enabled:
-                values.update(self._storage_action_feedback_metrics(building, endogenous_t, step_hours))
-            self._fill_obs_row_from_mapping(self._storage_obs[ref.row], self._storage_features, values)
+                self._fill_obs_row_sparse(
+                    row,
+                    self._storage_feature_cols,
+                    self._storage_action_feedback_metrics(building, endogenous_t, step_hours),
+                )
+        finish_section("storage")
 
         if self._pv_features:
             for ref in self._pv_refs:
                 building = env.buildings[ref.building_index]
+                row = self._pv_obs[ref.row]
                 generation_energy = abs(self._safe_index(building.solar_generation, endogenous_t, 0.0))
                 installed_power = self._safe_scalar(getattr(building.pv, "nominal_power", 0.0), 0.0)
                 generation_power = generation_energy / step_hours
-                values = {
-                    "generation_power_kw": generation_power,
-                    "generation_energy_kwh_step": generation_energy,
-                    "installed_power_kw": installed_power,
-                    "generation_capacity_factor_ratio": generation_power / installed_power if installed_power > 0.0 else 0.0,
-                }
-                self._fill_obs_row_from_mapping(self._pv_obs[ref.row], self._pv_features, values)
+                self._set_obs_value(row, self._pv_feature_cols, "generation_power_kw", generation_power)
+                self._set_obs_value(row, self._pv_feature_cols, "generation_energy_kwh_step", generation_energy)
+                self._set_obs_value(row, self._pv_feature_cols, "installed_power_kw", installed_power)
+                self._set_obs_value(
+                    row,
+                    self._pv_feature_cols,
+                    "generation_capacity_factor_ratio",
+                    generation_power / installed_power if installed_power > 0.0 else 0.0,
+                )
+        finish_section("pv")
 
         for ref in self._deferrable_appliance_refs:
             building = env.buildings[ref.building_index]
             appliance = self._deferrable_appliance_by_building_and_id.get((ref.building_index, ref.appliance_id))
             if appliance is None:
                 continue
+            row = self._deferrable_appliance_obs[ref.row]
             values = building._ops_service.deferrable_appliance_observations(appliance)
-            values.update(self._deferrable_core_decision_metrics(appliance, values))
-            if action_feedback_bundle_enabled:
-                values.update(self._deferrable_action_feedback_metrics(appliance, endogenous_t))
-            self._fill_obs_row_from_mapping(
-                self._deferrable_appliance_obs[ref.row],
-                self._deferrable_appliance_features,
-                values,
+            self._fill_obs_row_sparse(row, self._deferrable_appliance_feature_cols, values)
+            self._fill_obs_row_sparse(
+                row,
+                self._deferrable_appliance_feature_cols,
+                self._deferrable_core_decision_metrics(appliance, values),
             )
+            if action_feedback_bundle_enabled:
+                self._fill_obs_row_sparse(
+                    row,
+                    self._deferrable_appliance_feature_cols,
+                    self._deferrable_action_feedback_metrics(appliance, endogenous_t),
+                )
+        finish_section("deferrable_appliance")
 
         self._charger_to_ev_connected.fill(-1)
         self._charger_to_ev_connected_mask.fill(0.0)
@@ -761,16 +828,32 @@ class CityLearnEntityInterfaceService:
             if state == 1 and charger.connected_electric_vehicle is not None:
                 ev_row = self._ev_row_by_name.get(charger.connected_electric_vehicle.name)
                 if ev_row is not None:
-                    self._charger_to_ev_connected[ref.row] = np.array([ref.row, ev_row], dtype=np.int32)
+                    self._charger_to_ev_connected[ref.row, 0] = ref.row
+                    self._charger_to_ev_connected[ref.row, 1] = ev_row
                     self._charger_to_ev_connected_mask[ref.row] = 1.0
 
             if state == 2 and charger.incoming_electric_vehicle is not None:
                 ev_row = self._ev_row_by_name.get(charger.incoming_electric_vehicle.name)
                 if ev_row is not None:
-                    self._charger_to_ev_incoming[ref.row] = np.array([ref.row, ev_row], dtype=np.int32)
+                    self._charger_to_ev_incoming[ref.row, 0] = ref.row
+                    self._charger_to_ev_incoming[ref.row, 1] = ev_row
                     self._charger_to_ev_incoming_mask[ref.row] = 1.0
+        finish_section("edges")
 
-        return {
+        for table in (
+            self._district_obs,
+            self._building_obs,
+            self._charger_obs,
+            self._ev_obs,
+            self._storage_obs,
+            self._pv_obs,
+            self._deferrable_appliance_obs,
+        ):
+            np.nan_to_num(table, copy=False, nan=0.0, posinf=0.0, neginf=0.0)
+        finish_section("sanitize")
+
+        copy_start = time.perf_counter() if debug_timing else 0.0
+        payload = {
             "tables": {
                 "district": self._district_obs.copy(),
                 "building": self._building_obs.copy(),
@@ -804,6 +887,13 @@ class CityLearnEntityInterfaceService:
                 "topology_version": int(getattr(env, "topology_version", 0)),
             },
         }
+        if debug_timing:
+            timings["entity_observation_copy_time"] = time.perf_counter() - copy_start
+            env._last_entity_observation_debug_timing = timings
+        else:
+            env._last_entity_observation_debug_timing = {}
+
+        return payload
 
     def parse_actions(self, actions: Any) -> List[Mapping[str, float]]:
         """Parse canonical entity action payload into per-building action dicts."""
@@ -817,9 +907,12 @@ class CityLearnEntityInterfaceService:
             raise AssertionError("Entity interface expects mapping payload with action tables.")
 
         tables = actions.get("tables", actions)
-        building_table = tables.get("building")
-        charger_table = tables.get("charger")
-        deferrable_appliance_table = tables.get("deferrable_appliance")
+        if not isinstance(tables, Mapping):
+            raise AssertionError("Entity action 'tables' must be a mapping of entity tables.")
+
+        building_table = self._action_table_candidate(actions, tables, "building")
+        charger_table = self._action_table_candidate(actions, tables, "charger")
+        deferrable_appliance_table = self._action_table_candidate(actions, tables, "deferrable_appliance")
 
         building_table = self._to_2d_array(building_table, rows=len(self._building_ids), cols=len(self._building_action_features))
         charger_table = self._to_2d_array(charger_table, rows=len(self._charger_refs), cols=len(self._charger_action_features))
@@ -828,12 +921,17 @@ class CityLearnEntityInterfaceService:
             rows=len(self._deferrable_appliance_refs),
             cols=len(self._deferrable_appliance_action_features),
         )
-        building_overrides, charger_overrides, deferrable_appliance_overrides = self._resolve_map_overrides(actions)
+        if self._has_action_overrides(actions):
+            building_overrides, charger_overrides, deferrable_appliance_overrides = self._resolve_map_overrides(actions)
+        else:
+            building_overrides, charger_overrides, deferrable_appliance_overrides = {}, {}, {}
 
-        vectors: List[List[float]] = []
+        parsed_actions = []
         for building_idx, building in enumerate(self.env.buildings):
-            building_values = []
             per_building_map = building_overrides.get(building.name, {})
+            action_dict = {}
+            electric_vehicle_actions = {}
+            deferrable_appliance_actions = {}
 
             for action_name, low, high in zip(building.active_actions, building.action_space.low, building.action_space.high):
                 value = 0.0
@@ -867,11 +965,45 @@ class CityLearnEntityInterfaceService:
                         value = self._safe_scalar(per_building_map[action_name], float(value))
 
                 value = float(np.clip(value, low, high))
-                building_values.append(value)
+                if action_name.startswith("electric_vehicle_storage_"):
+                    charger_id = action_name.replace("electric_vehicle_storage_", "")
+                    electric_vehicle_actions[charger_id] = value
+                elif action_name.startswith("deferrable_appliance_"):
+                    deferrable_appliance_actions[action_name] = value
+                else:
+                    action_dict[f"{action_name}_action"] = value
 
-            vectors.append(building_values)
+            if electric_vehicle_actions:
+                action_dict["electric_vehicle_storage_actions"] = electric_vehicle_actions
+            if deferrable_appliance_actions:
+                action_dict["deferrable_appliance_actions"] = deferrable_appliance_actions
 
-        return self._map_vectors_to_action_dicts(vectors)
+            parsed_actions.append(action_dict)
+
+        return parsed_actions
+
+    @staticmethod
+    def _action_table_candidate(actions: Mapping[str, Any], tables: Mapping[str, Any], name: str) -> Any:
+        value = tables.get(name)
+        if tables is actions and isinstance(value, Mapping):
+            return None
+        return value
+
+    @staticmethod
+    def _has_action_overrides(actions: Mapping[str, Any]) -> bool:
+        raw_map = actions.get("map")
+        if raw_map is not None:
+            if not isinstance(raw_map, Mapping):
+                raise AssertionError("Entity action 'map' must be a mapping keyed by canonical entity ids.")
+            if len(raw_map) > 0:
+                return True
+
+        for key in ("building", "charger", "deferrable_appliance"):
+            value = actions.get(key)
+            if isinstance(value, Mapping) and len(value) > 0:
+                return True
+
+        return False
 
     def _resolve_map_overrides(self, actions: Mapping[str, Any]) -> Tuple[Mapping[str, Mapping[str, Any]], Mapping[str, Mapping[str, Any]], Mapping[str, Mapping[str, Any]]]:
         raw_map = actions.get("map")
@@ -1110,54 +1242,26 @@ class CityLearnEntityInterfaceService:
     def _derived_forecast_building_features(cls) -> List[str]:
         features: List[str] = []
         for label, _ in cls.FORECAST_HORIZONS:
-            features.extend(
-                [
-                    f"forecast_load_mean_next_{label}_kw",
-                    f"forecast_pv_mean_next_{label}_kw",
-                    f"forecast_net_mean_next_{label}_kw",
-                    f"forecast_import_peak_next_{label}_kw",
-                    f"forecast_export_peak_next_{label}_kw",
-                    f"forecast_headroom_min_next_{label}_kw",
-                    f"forecast_pv_surplus_sum_next_{label}_kwh",
-                ]
-            )
-        for bucket in range(1, cls.FORECAST_GRID_BUCKETS + 1):
-            bucket_label = f"{bucket:02d}"
-            for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus"):
-                features.append(f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw")
+            for signal in cls.DERIVED_FORECAST_BUILDING_SIGNALS:
+                features.append(f"forecast_{signal}_next_{label}_kw")
         return features
 
     @classmethod
     def _derived_forecast_district_features(cls) -> List[str]:
         features: List[str] = []
         for label, _ in cls.FORECAST_HORIZONS:
-            features.extend(
-                [
-                    f"forecast_price_min_next_{label}",
-                    f"forecast_price_mean_next_{label}",
-                    f"forecast_price_max_next_{label}",
-                    f"forecast_community_load_mean_next_{label}_kw",
-                    f"forecast_community_pv_mean_next_{label}_kw",
-                    f"forecast_community_net_mean_next_{label}_kw",
-                    f"forecast_community_import_peak_next_{label}_kw",
-                    f"forecast_community_export_peak_next_{label}_kw",
-                    f"forecast_community_headroom_min_next_{label}_kw",
-                    f"forecast_community_pv_surplus_sum_next_{label}_kwh",
-                ]
-            )
-        for bucket in range(1, cls.FORECAST_GRID_BUCKETS + 1):
-            bucket_label = f"{bucket:02d}"
-            features.append(f"forecast_price_mean_bucket_{bucket_label}_15m")
-            for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus"):
-                features.append(f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw")
+            features.append(f"forecast_price_next_{label}")
+            for signal in cls.DERIVED_FORECAST_DISTRICT_SIGNALS:
+                features.append(f"forecast_community_{signal}_next_{label}_kw")
         return features
 
     def _forecast_config_meta(self) -> Mapping[str, Any]:
         return {
             "source": "actual_future",
+            "type": "point",
             "horizons": [label for label, _ in self.FORECAST_HORIZONS],
-            "grid_bucket_seconds": self.FORECAST_GRID_BUCKET_SECONDS,
-            "grid_horizon_seconds": self.FORECAST_GRID_SECONDS,
+            "building_signals": list(self.DERIVED_FORECAST_BUILDING_SIGNALS),
+            "district_signals": ["price", *[f"community_{signal}" for signal in self.DERIVED_FORECAST_DISTRICT_SIGNALS]],
         }
 
     @staticmethod
@@ -1706,65 +1810,44 @@ class CityLearnEntityInterfaceService:
         start = max(end - steps + 1, 0)
         return list(range(start, end + 1))
 
-    def _time_since_last_nonzero_hours(self, values: Sequence[float], index: int, step_hours: float) -> float:
-        idx = min(max(int(index), 0), max(len(values) - 1, 0))
-        for previous in range(idx, -1, -1):
-            if abs(self._safe_index(values, previous, 0.0)) > 1.0e-9:
-                return float((idx - previous) * step_hours)
-        return -1.0
-
-    def _action_feedback_series_summary(self, values: Sequence[float], index: int) -> Tuple[Dict[str, Any], int]:
+    def _action_feedback_last_nonzero_index(
+        self,
+        values: Sequence[float],
+        index: int,
+        cache_key: Any,
+    ) -> Tuple[int, int]:
         try:
             length = len(values)
         except Exception:
             length = 0
         if length <= 0:
-            return {
-                "values": values,
-                "upto": -1,
-                "sum_prefix": [0.0],
-                "last_nonzero": [],
-                "value_snapshot": [],
-            }, -1
+            return -1, -1
 
         target = min(max(int(index), 0), length - 1)
-        cache_key = id(values)
+        cache_key = id(values) if cache_key is None else cache_key
         cached = self._action_feedback_series_cache.get(cache_key)
-        if cached is None or cached.get("values") is not values or int(cached.get("upto", -1)) > target:
-            cached = {
-                "values": values,
-                "upto": -1,
-                "sum_prefix": [0.0],
-                "last_nonzero": [],
-                "value_snapshot": [],
+        if cached is None or int(cached.get("target", -1)) > target:
+            last_nonzero = -1
+            for previous in range(target, -1, -1):
+                if abs(self._safe_index(values, previous, 0.0)) > 1.0e-9:
+                    last_nonzero = previous
+                    break
+            self._action_feedback_series_cache[cache_key] = {
+                "target": target,
+                "last_nonzero": last_nonzero,
             }
-            self._action_feedback_series_cache[cache_key] = cached
+            return last_nonzero, target
 
-        upto = int(cached["upto"])
-        if target <= upto:
-            current_value = self._safe_index(values, target, 0.0)
-            if float(cached["value_snapshot"][target]) != current_value:
-                cached["sum_prefix"] = cached["sum_prefix"][: target + 1]
-                cached["last_nonzero"] = cached["last_nonzero"][:target]
-                cached["value_snapshot"] = cached["value_snapshot"][:target]
-                cached["upto"] = target - 1
-                upto = int(cached["upto"])
+        current_target = int(cached.get("target", -1))
+        last_nonzero = int(cached.get("last_nonzero", -1))
+        while current_target < target:
+            current_target += 1
+            if abs(self._safe_index(values, current_target, 0.0)) > 1.0e-9:
+                last_nonzero = current_target
 
-        sum_prefix = cached["sum_prefix"]
-        last_nonzero = cached["last_nonzero"]
-        value_snapshot = cached["value_snapshot"]
-        last_seen = int(last_nonzero[-1]) if last_nonzero else -1
-        while upto < target:
-            upto += 1
-            value = self._safe_index(values, upto, 0.0)
-            sum_prefix.append(float(sum_prefix[-1]) + value)
-            if abs(value) > 1.0e-9:
-                last_seen = upto
-            last_nonzero.append(last_seen)
-            value_snapshot.append(value)
-
-        cached["upto"] = upto
-        return cached, target
+        cached["target"] = target
+        cached["last_nonzero"] = last_nonzero
+        return last_nonzero, target
 
     def _action_feedback_applied_window_metrics(
         self,
@@ -1773,20 +1856,25 @@ class CityLearnEntityInterfaceService:
         step_hours: float,
         *,
         window_seconds: float = 15 * 60,
+        cache_key: Any = None,
     ) -> Tuple[float, float, float]:
-        summary, target = self._action_feedback_series_summary(values, index)
-        if target < 0:
+        try:
+            length = len(values)
+        except Exception:
+            length = 0
+        if length <= 0:
             return 0.0, 0.0, -1.0
 
+        target = min(max(int(index), 0), length - 1)
         step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
         steps = max(int(np.ceil(float(window_seconds) / step_seconds)), 1)
         start = max(target - steps + 1, 0)
         stop = target + 1
-        sum_prefix = summary["sum_prefix"]
-        window_energy = float(sum_prefix[stop] - sum_prefix[start])
+        window_values = np.asarray(values[start:stop], dtype="float64")
+        window_energy = float(np.nan_to_num(window_values, nan=0.0, posinf=0.0, neginf=0.0).sum())
         window_count = max(stop - start, 1)
         mean_power = window_energy / max(float(window_count) * step_hours, 1.0e-12)
-        last_nonzero = int(summary["last_nonzero"][target])
+        last_nonzero, _ = self._action_feedback_last_nonzero_index(values, target, cache_key)
         time_since = float((target - last_nonzero) * step_hours) if last_nonzero >= 0 else -1.0
         return window_energy, mean_power, time_since
 
@@ -1802,6 +1890,7 @@ class CityLearnEntityInterfaceService:
             applied_values,
             index,
             step_hours,
+            cache_key=(id(charger), "charger_applied_energy"),
         )
 
         return {
@@ -1829,6 +1918,7 @@ class CityLearnEntityInterfaceService:
             applied_values,
             index,
             step_hours,
+            cache_key=(id(building), "storage_applied_energy"),
         )
 
         metrics = {
@@ -1880,217 +1970,25 @@ class CityLearnEntityInterfaceService:
             **self._feedback_reason_metrics(appliance, index),
         }
 
-    def _forecast_indices(self, time_step: int, window_seconds: float, length: int, *, offset_steps: int = 0) -> List[int]:
-        if length <= 0:
-            return []
-        step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
-        steps = max(int(np.ceil(float(window_seconds) / step_seconds)), 1)
-        start = min(max(int(time_step) + 1 + int(offset_steps), 0), length - 1)
-        stop = min(start + steps, length)
-        if start >= stop:
-            return [length - 1]
-        return list(range(start, stop))
-
-    def _forecast_stat(self, values: Sequence[float], stat: str, fallback: float = 0.0) -> float:
-        array = np.asarray(values, dtype="float64")
-        array = array[np.isfinite(array)]
-        if array.size == 0:
-            return float(fallback)
-        if stat == "min":
-            return float(array.min())
-        if stat == "max" or stat == "peak":
-            return float(array.max())
-        if stat == "sum":
-            return float(array.sum())
-        return float(array.mean())
-
-    def _prune_forecast_stat_summary_cache(self) -> None:
-        if not self._forecast_stat_summary_cache:
-            return
-        dead_keys = [
-            key for key, (array_ref, _) in self._forecast_stat_summary_cache.items()
-            if array_ref() is None
-        ]
-        for key in dead_keys:
-            self._forecast_stat_summary_cache.pop(key, None)
-
-    def _forecast_stat_summary(self, values: Sequence[float]) -> Mapping[str, np.ndarray]:
-        array = np.asarray(values, dtype="float64")
-        cache_key = id(array)
-        cached = self._forecast_stat_summary_cache.get(cache_key)
-        if cached is not None:
-            array_ref, summary = cached
-            if array_ref() is array:
-                return summary
-
-        finite = np.isfinite(array)
-        cleaned = np.where(finite, array, 0.0)
-        summary = {
-            "sum_prefix": np.concatenate(([0.0], np.cumsum(cleaned, dtype="float64"))),
-            "count_prefix": np.concatenate(([0], np.cumsum(finite.astype(np.int64)))),
-        }
-        self._forecast_stat_summary_cache[cache_key] = (weakref.ref(array), summary)
-        return summary
-
-    def _forecast_window_stat(
-        self,
-        values: Sequence[float],
-        stat: str,
-        start: int,
-        stop: int,
-        fallback: float = 0.0,
-    ) -> float:
-        if stat not in {"mean", "sum"}:
-            return self._forecast_stat(np.asarray(values, dtype="float64")[start:stop], stat, fallback)
-
-        summary = self._forecast_stat_summary(values)
-        length = int(summary["sum_prefix"].size) - 1
-        start = min(max(int(start), 0), length)
-        stop = min(max(int(stop), start), length)
-        if start >= stop:
-            return float(fallback)
-
-        count = int(summary["count_prefix"][stop] - summary["count_prefix"][start])
-        if count <= 0:
-            return float(fallback)
-
-        total = float(summary["sum_prefix"][stop] - summary["sum_prefix"][start])
-        if stat == "sum":
-            return total
-        return total / float(count)
-
-    @staticmethod
-    def _forecast_summary_mean(summary: Mapping[str, np.ndarray], start: int, stop: int, fallback: float = 0.0) -> float:
-        length = int(summary["sum_prefix"].size) - 1
-        start = min(max(int(start), 0), length)
-        stop = min(max(int(stop), start), length)
-        if start >= stop:
-            return float(fallback)
-
-        count = int(summary["count_prefix"][stop] - summary["count_prefix"][start])
-        if count <= 0:
-            return float(fallback)
-
-        total = float(summary["sum_prefix"][stop] - summary["sum_prefix"][start])
-        return total / float(count)
-
-    @staticmethod
-    def _forecast_summary_sum(summary: Mapping[str, np.ndarray], start: int, stop: int, fallback: float = 0.0) -> float:
-        length = int(summary["sum_prefix"].size) - 1
-        start = min(max(int(start), 0), length)
-        stop = min(max(int(stop), start), length)
-        if start >= stop:
-            return float(fallback)
-
-        count = int(summary["count_prefix"][stop] - summary["count_prefix"][start])
-        if count <= 0:
-            return float(fallback)
-
-        return float(summary["sum_prefix"][stop] - summary["sum_prefix"][start])
-
-    @staticmethod
-    def _forecast_summary_means(
-        summary: Mapping[str, np.ndarray],
-        starts: np.ndarray,
-        stops: np.ndarray,
-        fallback: float = 0.0,
-    ) -> np.ndarray:
-        length = int(summary["sum_prefix"].size) - 1
-        starts = np.clip(starts.astype(np.int64, copy=False), 0, length)
-        stops = np.clip(stops.astype(np.int64, copy=False), starts, length)
-        counts = summary["count_prefix"][stops] - summary["count_prefix"][starts]
-        totals = summary["sum_prefix"][stops] - summary["sum_prefix"][starts]
-        return np.divide(
-            totals,
-            counts,
-            out=np.full(totals.shape, float(fallback), dtype="float64"),
-            where=counts > 0,
-        )
-
-    @staticmethod
-    def _forecast_summary_means_valid(
-        summary: Mapping[str, np.ndarray],
-        starts: np.ndarray,
-        stops: np.ndarray,
-        fallback: float = 0.0,
-    ) -> np.ndarray:
-        counts = summary["count_prefix"][stops] - summary["count_prefix"][starts]
-        totals = summary["sum_prefix"][stops] - summary["sum_prefix"][starts]
-        return np.divide(
-            totals,
-            counts,
-            out=np.full(totals.shape, float(fallback), dtype="float64"),
-            where=counts > 0,
-        )
-
     def _dataset_energy_to_control_step_for_building(self, building, energy_kwh: float) -> float:
         ratio = getattr(building, "time_step_ratio", None)
         ratio = 1.0 if ratio in (None, 0) else float(ratio)
         return self._safe_scalar(energy_kwh, 0.0) * ratio
 
-    def _clear_forecast_component_cache(self) -> None:
-        self._forecast_base_component_cache = {}
-        self._forecast_component_cache = {}
-        self._community_forecast_component_cache = None
-        self._price_forecast_cache = None
-        self._forecast_stat_summary_cache = {}
-        self._forecast_window_bounds_cache = {}
-
-    def _forecast_window(self, time_step: int, window_seconds: float, length: int, *, offset_steps: int = 0):
+    def _forecast_point_index(self, time_step: int, horizon_seconds: float, length: int) -> int:
         if length <= 0:
-            return 0, 0
-        step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
-        steps = max(int(np.ceil(float(window_seconds) / step_seconds)), 1)
-        start = min(max(int(time_step) + 1 + int(offset_steps), 0), length - 1)
-        stop = min(start + steps, length)
-        if start >= stop:
-            return length - 1, length
-        return start, stop
+            return -1
 
-    def _forecast_window_bounds(self, time_step: int, length: int) -> Mapping[str, Any]:
         step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
-        key = (int(time_step), int(length), step_seconds)
-        cached = self._forecast_window_bounds_cache.get(key)
-        if cached is not None:
-            return cached
+        steps_ahead = max(int(np.ceil(float(horizon_seconds) / step_seconds)), 1)
+        return self._forecast_point_index_from_steps(time_step, steps_ahead, length)
 
+    @staticmethod
+    def _forecast_point_index_from_steps(time_step: int, steps_ahead: int, length: int) -> int:
         if length <= 0:
-            bounds = {
-                "horizons": tuple((label, 0, 0) for label, _ in self.FORECAST_HORIZONS),
-                "bucket_starts": np.zeros(self.FORECAST_GRID_BUCKETS, dtype=np.int64),
-                "bucket_stops": np.zeros(self.FORECAST_GRID_BUCKETS, dtype=np.int64),
-            }
-            self._forecast_window_bounds_cache[key] = bounds
-            return bounds
+            return -1
 
-        base_start = int(time_step) + 1
-        horizon_windows = []
-        for label, seconds in self.FORECAST_HORIZONS:
-            steps = max(int(np.ceil(float(seconds) / step_seconds)), 1)
-            start = min(max(base_start, 0), length - 1)
-            stop = min(start + steps, length)
-            if start >= stop:
-                start, stop = length - 1, length
-            horizon_windows.append((label, start, stop))
-
-        bucket_steps = max(int(np.ceil(float(self.FORECAST_GRID_BUCKET_SECONDS) / step_seconds)), 1)
-        offsets = np.arange(self.FORECAST_GRID_BUCKETS, dtype=np.int64) * bucket_steps
-        starts = np.clip(base_start + offsets, 0, length - 1).astype(np.int64, copy=False)
-        stops = np.minimum(starts + bucket_steps, length).astype(np.int64, copy=False)
-        empty = starts >= stops
-        if np.any(empty):
-            starts = starts.copy()
-            stops = stops.copy()
-            starts[empty] = length - 1
-            stops[empty] = length
-
-        bounds = {
-            "horizons": tuple(horizon_windows),
-            "bucket_starts": starts,
-            "bucket_stops": stops,
-        }
-        self._forecast_window_bounds_cache[key] = bounds
-        return bounds
+        return min(max(int(time_step) + int(steps_ahead), 0), length - 1)
 
     def _building_forecast_components_at_step(
         self,
@@ -2098,7 +1996,7 @@ class CityLearnEntityInterfaceService:
         step: int,
         *,
         include_deferrable: bool = True,
-    ) -> Mapping[str, float]:
+    ) -> Tuple[float, float, float]:
         step_hours = self._step_hours()
         temperature = self._safe_index(getattr(building.weather, "outdoor_dry_bulb_temperature", []), step, 0.0)
         energy_simulation = building.energy_simulation
@@ -2141,196 +2039,69 @@ class CityLearnEntityInterfaceService:
         load_kw = load_energy / step_hours
         pv_kw = pv_energy / step_hours
         net_kw = load_kw - pv_kw
-        import_kw = max(net_kw, 0.0)
-        export_kw = max(-net_kw, 0.0)
-        pv_surplus_kw = max(pv_kw - load_kw, 0.0)
-
-        import_limit = np.nan
-        if getattr(building, "_electrical_service_enabled", False):
-            import_limit = self._safe_scalar(
-                (getattr(building, "_electrical_service_limits", {}) or {}).get("total", {}).get("import_kw"),
-                np.nan,
-            )
-        else:
-            import_limit = self._safe_scalar(getattr(building, "_building_charger_limit_kw", np.nan), np.nan)
-        headroom_kw = import_limit - net_kw if np.isfinite(import_limit) else 0.0
-
-        return {
-            "load": load_kw,
-            "pv": pv_kw,
-            "net": net_kw,
-            "import": import_kw,
-            "export": export_kw,
-            "headroom": headroom_kw,
-            "pv_surplus": pv_surplus_kw,
-        }
-
-    def _building_base_forecast_arrays(self, building) -> Mapping[str, np.ndarray]:
-        cache_key = id(building)
-        cached = self._forecast_base_component_cache.get(cache_key)
-        if cached is not None:
-            return cached
-
-        length = len(getattr(building.energy_simulation, "non_shiftable_load", []))
-        series = {signal: np.zeros(length, dtype="float64") for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus")}
-        for idx in range(length):
-            values = self._building_forecast_components_at_step(building, idx, include_deferrable=False)
-            for signal in series:
-                series[signal][idx] = self._safe_scalar(values.get(signal, 0.0), 0.0)
-
-        self._forecast_base_component_cache[cache_key] = series
-        return series
-
-    def _building_deferrable_power_array(self, building, length: int) -> np.ndarray:
-        if length <= 0 or not (building.deferrable_appliances or []):
-            return np.zeros(length, dtype="float64")
-
-        step_hours = self._step_hours()
-        power = np.zeros(length, dtype="float64")
-        for appliance in building.deferrable_appliances or []:
-            values = np.asarray(getattr(appliance, "electricity_consumption", []), dtype="float64")
-            if values.size == 0:
-                continue
-            usable = min(length, values.size)
-            power[:usable] += np.nan_to_num(values[:usable], nan=0.0, posinf=0.0, neginf=0.0) / max(step_hours, 1.0e-9)
-        return power
-
-    def _building_has_deferrable_forecast_load(self, building) -> bool:
-        return bool(building.deferrable_appliances or [])
-
-    def _building_forecast_arrays(self, building) -> Mapping[str, np.ndarray]:
-        cache_key = id(building)
-        base = self._building_base_forecast_arrays(building)
-        if not self._building_has_deferrable_forecast_load(building):
-            cached = self._forecast_component_cache.get(cache_key)
-            if cached is None:
-                cached = dict(base)
-                self._forecast_component_cache[cache_key] = cached
-            return cached
-
-        length = len(base["load"])
-        deferrable_power = self._building_deferrable_power_array(building, length)
-        load = base["load"] + deferrable_power
-        pv = base["pv"]
-        net = load - pv
-        return {
-            "load": load,
-            "pv": pv,
-            "net": net,
-            "import": np.maximum(net, 0.0),
-            "export": np.maximum(-net, 0.0),
-            "headroom": base["headroom"] - deferrable_power,
-            "pv_surplus": np.maximum(pv - load, 0.0),
-        }
-
-    def _building_forecast_series(self, building, indices: Sequence[int]) -> Mapping[str, List[float]]:
-        arrays = self._building_forecast_arrays(building)
-        return {signal: [self._safe_index(values, idx, 0.0) for idx in indices] for signal, values in arrays.items()}
-
-    def _price_forecast_array(self, first_building) -> np.ndarray:
-        if self._price_forecast_cache is None:
-            self._price_forecast_cache = np.nan_to_num(
-                np.asarray(getattr(first_building.pricing, "electricity_pricing", []), dtype="float64"),
-                nan=0.0,
-                posinf=0.0,
-                neginf=0.0,
-            )
-        return self._price_forecast_cache
-
-    def _community_forecast_arrays(self) -> Mapping[str, np.ndarray]:
-        if self._community_forecast_component_cache is not None and not any(
-            self._building_has_deferrable_forecast_load(building) for building in self.env.buildings
-        ):
-            return self._community_forecast_component_cache
-
-        if len(self.env.buildings) == 0:
-            return {signal: np.zeros(0, dtype="float64") for signal in ("load", "pv", "net", "import", "export", "headroom", "pv_surplus")}
-
-        first_arrays = self._building_forecast_arrays(self.env.buildings[0])
-        totals = {signal: np.zeros_like(values, dtype="float64") for signal, values in first_arrays.items()}
-        for building in self.env.buildings:
-            arrays = self._building_forecast_arrays(building)
-            for signal, values in arrays.items():
-                usable = min(totals[signal].size, values.size)
-                totals[signal][:usable] += values[:usable]
-
-        if not any(self._building_has_deferrable_forecast_load(building) for building in self.env.buildings):
-            self._community_forecast_component_cache = totals
-
-        return totals
+        return load_kw, pv_kw, net_kw
 
     def _build_derived_forecast_building_metrics(self, *, building, time_step: int) -> Mapping[str, float]:
         metrics: Dict[str, float] = {}
-        arrays = self._building_forecast_arrays(building)
-        length = len(arrays["load"])
-        step_hours = self._step_hours()
-        summaries = {signal: self._forecast_stat_summary(values) for signal, values in arrays.items()}
-        window_bounds = self._forecast_window_bounds(time_step, length)
-        for label, start, stop in window_bounds["horizons"]:
-            metrics[f"forecast_load_mean_next_{label}_kw"] = self._forecast_summary_mean(summaries["load"], start, stop)
-            metrics[f"forecast_pv_mean_next_{label}_kw"] = self._forecast_summary_mean(summaries["pv"], start, stop)
-            metrics[f"forecast_net_mean_next_{label}_kw"] = self._forecast_summary_mean(summaries["net"], start, stop)
-            metrics[f"forecast_import_peak_next_{label}_kw"] = self._forecast_window_stat(arrays["import"], "peak", start, stop)
-            metrics[f"forecast_export_peak_next_{label}_kw"] = self._forecast_window_stat(arrays["export"], "peak", start, stop)
-            metrics[f"forecast_headroom_min_next_{label}_kw"] = self._forecast_window_stat(arrays["headroom"], "min", start, stop)
-            metrics[f"forecast_pv_surplus_sum_next_{label}_kwh"] = self._forecast_summary_sum(summaries["pv_surplus"], start, stop) * step_hours
+        length = len(getattr(building.energy_simulation, "non_shiftable_load", []))
 
-        bucket_starts = window_bounds["bucket_starts"]
-        bucket_stops = window_bounds["bucket_stops"]
-
-        for signal, summary in summaries.items():
-            means = self._forecast_summary_means_valid(summary, bucket_starts, bucket_stops)
-            for bucket, value in enumerate(means, start=1):
-                bucket_label = f"{bucket:02d}"
-                metrics[f"forecast_{signal}_mean_bucket_{bucket_label}_15m_kw"] = float(value)
+        for label, steps_ahead in self._forecast_step_offsets:
+            point_index = self._forecast_point_index_from_steps(time_step, steps_ahead, length)
+            load_kw, pv_kw, net_kw = (
+                self._building_forecast_components_at_step(building, point_index, include_deferrable=True)
+                if point_index >= 0 else (0.0, 0.0, 0.0)
+            )
+            metrics[f"forecast_load_next_{label}_kw"] = load_kw
+            metrics[f"forecast_pv_next_{label}_kw"] = pv_kw
+            metrics[f"forecast_net_next_{label}_kw"] = net_kw
 
         return metrics
 
-    def _build_derived_forecast_district_metrics(self, *, time_step: int) -> Mapping[str, float]:
+    def _build_derived_forecast_district_metrics(
+        self,
+        *,
+        time_step: int,
+        community_values: Optional[Mapping[str, Mapping[str, float]]] = None,
+    ) -> Mapping[str, float]:
         metrics: Dict[str, float] = {}
         if len(self.env.buildings) == 0:
             return metrics
         first = self.env.buildings[0]
-        prices_array = self._price_forecast_array(first)
-        length = len(prices_array)
-        step_hours = self._step_hours()
-        community_arrays = self._community_forecast_arrays()
-        price_summary = self._forecast_stat_summary(prices_array)
-        community_summaries = {
-            signal: self._forecast_stat_summary(values) for signal, values in community_arrays.items()
-        }
-        window_bounds = self._forecast_window_bounds(time_step, length)
 
-        for label, start, stop in window_bounds["horizons"]:
-            metrics[f"forecast_price_min_next_{label}"] = self._forecast_window_stat(prices_array, "min", start, stop)
-            metrics[f"forecast_price_mean_next_{label}"] = self._forecast_summary_mean(price_summary, start, stop)
-            metrics[f"forecast_price_max_next_{label}"] = self._forecast_window_stat(prices_array, "max", start, stop)
-            metrics[f"forecast_community_load_mean_next_{label}_kw"] = self._forecast_summary_mean(community_summaries["load"], start, stop)
-            metrics[f"forecast_community_pv_mean_next_{label}_kw"] = self._forecast_summary_mean(community_summaries["pv"], start, stop)
-            metrics[f"forecast_community_net_mean_next_{label}_kw"] = self._forecast_summary_mean(community_summaries["net"], start, stop)
-            metrics[f"forecast_community_import_peak_next_{label}_kw"] = self._forecast_window_stat(community_arrays["import"], "peak", start, stop)
-            metrics[f"forecast_community_export_peak_next_{label}_kw"] = self._forecast_window_stat(community_arrays["export"], "peak", start, stop)
-            metrics[f"forecast_community_headroom_min_next_{label}_kw"] = self._forecast_window_stat(community_arrays["headroom"], "min", start, stop)
-            metrics[f"forecast_community_pv_surplus_sum_next_{label}_kwh"] = self._forecast_summary_sum(community_summaries["pv_surplus"], start, stop) * step_hours
+        for label, steps_ahead in self._forecast_step_offsets:
+            price_index = self._forecast_point_index_from_steps(
+                time_step,
+                steps_ahead,
+                len(getattr(first.pricing, "electricity_pricing", [])),
+            )
+            metrics[f"forecast_price_next_{label}"] = self._safe_index(
+                getattr(first.pricing, "electricity_pricing", []),
+                price_index,
+                0.0,
+            )
+            if community_values is None:
+                label_values = {signal: 0.0 for signal in self.DERIVED_FORECAST_DISTRICT_SIGNALS}
+                for building in self.env.buildings:
+                    length = len(getattr(building.energy_simulation, "non_shiftable_load", []))
+                    point_index = self._forecast_point_index_from_steps(time_step, steps_ahead, length)
+                    if point_index < 0:
+                        continue
+                    load_kw, pv_kw, net_kw = self._building_forecast_components_at_step(
+                        building,
+                        point_index,
+                        include_deferrable=True,
+                    )
+                    label_values["load"] += load_kw
+                    label_values["pv"] += pv_kw
+                    label_values["net"] += net_kw
+            else:
+                label_values = community_values.get(label, {})
 
-        bucket_starts = window_bounds["bucket_starts"]
-        bucket_stops = window_bounds["bucket_stops"]
+            for signal in self.DERIVED_FORECAST_DISTRICT_SIGNALS:
+                value = self._safe_scalar(label_values.get(signal, 0.0), 0.0)
+                metrics[f"forecast_community_{signal}_next_{label}_kw"] = float(value)
 
-        price_means = self._forecast_summary_means_valid(price_summary, bucket_starts, bucket_stops)
-        for bucket, value in enumerate(price_means, start=1):
-            bucket_label = f"{bucket:02d}"
-            metrics[f"forecast_price_mean_bucket_{bucket_label}_15m"] = float(value)
-
-        for signal, summary in community_summaries.items():
-            means = self._forecast_summary_means_valid(summary, bucket_starts, bucket_stops)
-            for bucket, value in enumerate(means, start=1):
-                bucket_label = f"{bucket:02d}"
-                metrics[f"forecast_community_{signal}_mean_bucket_{bucket_label}_15m_kw"] = float(value)
         return metrics
-
-    def _community_forecast_series(self, indices: Sequence[int]) -> Mapping[str, List[float]]:
-        arrays = self._community_forecast_arrays()
-        return {signal: [self._safe_index(values, idx, 0.0) for idx in indices] for signal, values in arrays.items()}
 
     def _build_community_district_metrics(
         self,
@@ -2746,6 +2517,21 @@ class CityLearnEntityInterfaceService:
         self._storage_obs = np.zeros((len(self._storage_refs), len(self._storage_features)), dtype=np.float32)
         self._pv_obs = np.zeros((len(self._pv_refs), len(self._pv_features)), dtype=np.float32)
         self._deferrable_appliance_obs = np.zeros((len(self._deferrable_appliance_refs), len(self._deferrable_appliance_features)), dtype=np.float32)
+        self._district_feature_cols = {name: i for i, name in enumerate(self._district_features)}
+        self._building_feature_cols = {name: i for i, name in enumerate(self._building_features)}
+        self._charger_feature_cols = {name: i for i, name in enumerate(self._charger_features)}
+        self._ev_feature_cols = {name: i for i, name in enumerate(self._ev_features)}
+        self._storage_feature_cols = {name: i for i, name in enumerate(self._storage_features)}
+        self._pv_feature_cols = {name: i for i, name in enumerate(self._pv_features)}
+        self._deferrable_appliance_feature_cols = {
+            name: i for i, name in enumerate(self._deferrable_appliance_features)
+        }
+        step_seconds = max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
+        self._forecast_step_offsets = tuple(
+            (label, max(int(np.ceil(float(seconds) / step_seconds)), 1))
+            for label, seconds in self.FORECAST_HORIZONS
+        )
+        self._build_static_observation_rows()
 
         self._district_to_building = np.zeros((len(self._building_ids), 2), dtype=np.int32)
         if len(self._building_ids) > 0:
@@ -2771,6 +2557,65 @@ class CityLearnEntityInterfaceService:
         self._charger_to_ev_connected_mask = np.zeros((len(self._charger_refs),), dtype=np.float32)
         self._charger_to_ev_incoming = np.full((len(self._charger_refs), 2), -1, dtype=np.int32)
         self._charger_to_ev_incoming_mask = np.zeros((len(self._charger_refs),), dtype=np.float32)
+
+    def _build_static_observation_rows(self):
+        """Pre-fill static entity feature values for the current topology layout."""
+
+        self._charger_static_obs = np.zeros_like(self._charger_obs)
+        self._storage_static_obs = np.zeros_like(self._storage_obs)
+        self._pv_static_obs = np.zeros_like(self._pv_obs)
+        self._charger_static_values: Dict[int, Mapping[str, float]] = {}
+
+        for ref in self._charger_refs:
+            building = self.env.buildings[ref.building_index]
+            charger = building._charger_lookup[ref.charger_id]
+            row = self._charger_static_obs[ref.row]
+            max_charging_power = self._safe_scalar(charger.max_charging_power, 0.0)
+            max_discharging_power = self._safe_scalar(charger.max_discharging_power, 0.0)
+            min_charging_power = self._safe_scalar(getattr(charger, "min_charging_power", 0.0), 0.0)
+            min_discharging_power = self._safe_scalar(getattr(charger, "min_discharging_power", 0.0), 0.0)
+            charger_efficiency = self._safe_scalar(getattr(charger, "efficiency", 1.0), 1.0)
+            charge_efficiency_at_max = (
+                self._safe_scalar(charger.get_efficiency(1.0, True), charger_efficiency)
+                if hasattr(charger, "get_efficiency")
+                else charger_efficiency
+            )
+            discharge_efficiency_at_max = (
+                self._safe_scalar(charger.get_efficiency(1.0, False), charger_efficiency)
+                if hasattr(charger, "get_efficiency")
+                else charger_efficiency
+            )
+            static_values = {
+                "max_charging_power_kw": max_charging_power,
+                "max_discharging_power_kw": max_discharging_power,
+                "min_charging_power_kw": min_charging_power,
+                "min_discharging_power_kw": min_discharging_power,
+                "charger_efficiency_ratio": charger_efficiency,
+                "charge_efficiency_at_max_ratio": charge_efficiency_at_max,
+                "discharge_efficiency_at_max_ratio": discharge_efficiency_at_max,
+            }
+            assigned_phase = getattr(building, "_charger_phase_map", {}).get(ref.charger_id)
+            for phase_name, feature_name in zip(self._charger_phase_names, self._charger_phase_features):
+                static_values[feature_name] = 1.0 if assigned_phase in {phase_name, "all_phases"} else 0.0
+            self._fill_obs_row_sparse(row, self._charger_feature_cols, static_values)
+            self._charger_static_values[ref.row] = static_values
+
+        for ref in self._storage_refs:
+            building = self.env.buildings[ref.building_index]
+            row = self._storage_static_obs[ref.row]
+            assigned_phase = getattr(building, "electrical_storage_phase_connection", None)
+            for phase_name, feature_name in zip(self._storage_phase_names, self._storage_phase_features):
+                self._set_obs_value(
+                    row,
+                    self._storage_feature_cols,
+                    feature_name,
+                    1.0 if assigned_phase in {phase_name, "all_phases"} else 0.0,
+                )
+
+        for ref in self._pv_refs:
+            building = self.env.buildings[ref.building_index]
+            installed_power = self._safe_scalar(getattr(building.pv, "nominal_power", 0.0), 0.0)
+            self._set_obs_value(self._pv_static_obs[ref.row], self._pv_feature_cols, "installed_power_kw", installed_power)
 
     def _build_spaces(self):
         district_low, district_high = self._observation_bounds_for_features(self._district_features, owner="district")
@@ -3501,6 +3346,34 @@ class CityLearnEntityInterfaceService:
                 row[index] = 0.0
 
         np.nan_to_num(row, copy=False, nan=0.0, posinf=0.0, neginf=0.0)
+
+    @classmethod
+    def _set_obs_value(
+        cls,
+        row: np.ndarray,
+        feature_cols: Mapping[str, int],
+        name: str,
+        value: Any,
+        default: float = 0.0,
+    ) -> None:
+        col = feature_cols.get(name)
+        if col is None:
+            return
+
+        try:
+            row[col] = value
+        except (TypeError, ValueError):
+            row[col] = default
+
+    @classmethod
+    def _fill_obs_row_sparse(
+        cls,
+        row: np.ndarray,
+        feature_cols: Mapping[str, int],
+        values: Mapping[str, Any],
+    ) -> None:
+        for name, value in values.items():
+            cls._set_obs_value(row, feature_cols, name, value)
 
     @staticmethod
     def _to_2d_array(value: Any, *, rows: int, cols: int) -> Optional[np.ndarray]:

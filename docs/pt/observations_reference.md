@@ -187,7 +187,7 @@ Entity mode retorna tabelas. As features disponiveis dependem do schema, dos ass
 | `community_net_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Lag 1 da net community. |
 | `community_net_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | Media curta da net community. |
 | `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binario | Calendario robusto; `time_step` cru fica apenas em `meta`. |
-| `forecast_price_*`, `forecast_community_*` | `entity_forecasts_derived` | varia | Agregados futuros perfeitos 15m/1h/3h/6h/24h e buckets de 15 min ate 6h. |
+| `forecast_price_next_*`, `forecast_community_{load,pv,net}_next_*` | `entity_forecasts_derived` | varia | Forecasts pontuais perfeitos a 15m/1h/3h/6h/24h. |
 
 ## Tabela `building`
 
@@ -220,7 +220,7 @@ Entity mode retorna tabelas. As features disponiveis dependem do schema, dos ass
 | `import_energy_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Import lag 1. |
 | `export_energy_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Export lag 1. |
 | `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binario | Calendario robusto. |
-| `forecast_load/pv/net/import/export/headroom/pv_surplus_*` | `entity_forecasts_derived` | kW/kWh | Agregados futuros e buckets de 15 min por building. |
+| `forecast_{load,pv,net}_next_*` | `entity_forecasts_derived` | kW | Forecasts pontuais por building a 15m/1h/3h/6h/24h. |
 
 ## Tabela `charger`
 
@@ -363,7 +363,7 @@ Todas as features pertencem a `entity_base` e sao sempre por appliance.
 | `current_step_power_kw` | kW | Potencia equivalente do step atual. |
 | `last_start_requested`, `last_start_applied`, `start_blocked`, `clip_reason_*` | entity_action_feedback | varia | Feedback curto do ultimo comando de start. |
 
-Forecasts derivados usam valores futuros do dataset como forecast perfeito do simulador (`meta.forecast_config.source = "actual_future"`). Em uso real, adapters externos devem preencher campos equivalentes com forecasts reais.
+Forecasts derivados usam valores futuros do dataset como forecasts pontuais perfeitos do simulador (`meta.forecast_config.source = "actual_future"`, `meta.forecast_config.type = "point"`). Em uso real, adapters externos devem preencher campos equivalentes com forecasts reais.
 
 ## Edges Entity
 

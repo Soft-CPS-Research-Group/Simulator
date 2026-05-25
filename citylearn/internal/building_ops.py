@@ -630,17 +630,30 @@ class BuildingOpsService:
             cache = {}
             setattr(owner, '_action_feedback_array_cache', cache)
 
-        cache_key = (name, expected)
+        dtype = self._feedback_array_dtype(name)
+        cache_key = (name, expected, np.dtype(dtype).str)
         values = cache.get(cache_key)
         if values is not None:
             return values
 
         values = getattr(owner, name, None)
-        if values is None or len(values) != expected:
-            values = np.zeros(expected, dtype='float32')
+        if values is None or len(values) != expected or getattr(values, 'dtype', None) != np.dtype(dtype):
+            values = np.zeros(expected, dtype=dtype)
             setattr(owner, name, values)
         cache[cache_key] = values
         return values
+
+    @staticmethod
+    def _feedback_array_dtype(name: str):
+        if (
+            'clip_reason_' in name
+            or name.endswith('last_start_requested')
+            or name.endswith('last_start_applied')
+            or name.endswith('start_blocked')
+        ):
+            return np.bool_
+
+        return np.float32
 
     def _set_feedback_value(self, owner, name: str, value: float):
         t = int(self.building.time_step)
