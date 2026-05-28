@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.entity_interface &mdash; CityLearn 1.1.0 documentation</title>
+  <title>citylearn.internal.entity_interface &mdash; CityLearn 1.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/documentation_options.js?v=6efca38a"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -164,6 +164,7 @@
     <span class="n">DERIVED_FORECAST_BUNDLE</span> <span class="o">=</span> <span class="s2">&quot;entity_forecasts_derived&quot;</span>
     <span class="n">TEMPORAL_BUNDLE</span> <span class="o">=</span> <span class="s2">&quot;entity_temporal_derived&quot;</span>
     <span class="n">ACTION_FEEDBACK_BUNDLE</span> <span class="o">=</span> <span class="s2">&quot;entity_action_feedback&quot;</span>
+    <span class="n">DEMAND_RESPONSE_BUNDLE</span> <span class="o">=</span> <span class="s2">&quot;entity_demand_response&quot;</span>
     <span class="n">DEFAULT_OBSERVATION_BUNDLES</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">CORE_BUNDLE</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">COMMUNITY_BUNDLE</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -171,6 +172,7 @@
         <span class="n">DERIVED_FORECAST_BUNDLE</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">TEMPORAL_BUNDLE</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">ACTION_FEEDBACK_BUNDLE</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">DEMAND_RESPONSE_BUNDLE</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">FORECAST_HORIZONS</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s2">&quot;15m&quot;</span><span class="p">,</span> <span class="mi">15</span> <span class="o">*</span> <span class="mi">60</span><span class="p">),</span>
@@ -436,6 +438,18 @@
         <span class="s2">&quot;seconds_of_day_cos&quot;</span><span class="p">,</span>
         <span class="s2">&quot;is_weekend&quot;</span><span class="p">,</span>
     <span class="p">]</span>
+    <span class="n">DEMAND_RESPONSE_DISTRICT_FEATURES</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;dr_active&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dr_issuer_code&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dr_direction&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dr_target_power_kw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dr_baseline_power_kw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dr_time_remaining_hours&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dr_activation_price_eur_per_kwh&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dr_shortfall_penalty_eur_per_kwh&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dr_previous_delivered_power_kw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dr_previous_shortfall_power_kw&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
@@ -510,6 +524,7 @@
         <span class="n">derived_forecast_bundle_enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DERIVED_FORECAST_BUNDLE</span><span class="p">)</span>
         <span class="n">temporal_bundle_enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TEMPORAL_BUNDLE</span><span class="p">)</span>
         <span class="n">action_feedback_bundle_enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ACTION_FEEDBACK_BUNDLE</span><span class="p">)</span>
+        <span class="n">demand_response_bundle_enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DEMAND_RESPONSE_BUNDLE</span><span class="p">)</span>
         <span class="n">requires_building_electrical_metrics</span> <span class="o">=</span> <span class="n">core_bundle_enabled</span> <span class="ow">or</span> <span class="n">community_bundle_enabled</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_district_obs</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
@@ -632,6 +647,11 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_district_feature_cols</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_build_calendar_temporal_metrics</span><span class="p">(</span><span class="n">building</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">time_step</span><span class="o">=</span><span class="n">t</span><span class="p">),</span>
                 <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">demand_response_bundle_enabled</span><span class="p">:</span>
+            <span class="n">service</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;_demand_response_service&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">observation_values</span><span class="p">()</span> <span class="k">if</span> <span class="n">service</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fill_obs_row_sparse</span><span class="p">(</span><span class="n">district_row</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_district_feature_cols</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
         <span class="n">finish_section</span><span class="p">(</span><span class="s2">&quot;district&quot;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charger_refs</span><span class="p">:</span>
@@ -994,6 +1014,11 @@
                 <span class="p">},</span>
                 <span class="s2">&quot;forecast_config&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forecast_config_meta</span><span class="p">(),</span>
                 <span class="s2">&quot;topology_version&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;topology_version&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                <span class="s2">&quot;demand_response&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="n">env</span><span class="o">.</span><span class="n">_demand_response_service</span><span class="o">.</span><span class="n">observation_meta</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;_demand_response_service&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;active_request_id&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+                <span class="p">),</span>
             <span class="p">},</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
@@ -1408,8 +1433,10 @@
             <span class="k">return</span> <span class="s2">&quot;kwh&quot;</span>
         <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_normalized&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="s2">&quot;ratio&quot;</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;can_charge&quot;</span><span class="p">,</span> <span class="s2">&quot;can_discharge&quot;</span><span class="p">,</span> <span class="s2">&quot;must_start_now&quot;</span><span class="p">,</span> <span class="s2">&quot;is_weekend&quot;</span><span class="p">,</span> <span class="s2">&quot;start_blocked&quot;</span><span class="p">}</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;clip_reason_&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;can_charge&quot;</span><span class="p">,</span> <span class="s2">&quot;can_discharge&quot;</span><span class="p">,</span> <span class="s2">&quot;must_start_now&quot;</span><span class="p">,</span> <span class="s2">&quot;is_weekend&quot;</span><span class="p">,</span> <span class="s2">&quot;start_blocked&quot;</span><span class="p">,</span> <span class="s2">&quot;dr_active&quot;</span><span class="p">}</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;clip_reason_&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="s2">&quot;flag&quot;</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_eur_per_kwh&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;eur_per_kwh&quot;</span>
         <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_soc_ratio&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_ratio&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_soc&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="s2">&quot;ratio&quot;</span>
         <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_time_step&quot;</span><span class="p">):</span>
@@ -2488,6 +2515,12 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_table_feature_bundle</span><span class="p">[</span><span class="s2">&quot;district&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEMPORAL_BUNDLE</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_table_feature_legacy</span><span class="p">[</span><span class="s2">&quot;district&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DEMAND_RESPONSE_BUNDLE</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_append_unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_district_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEMAND_RESPONSE_DISTRICT_FEATURES</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEMAND_RESPONSE_DISTRICT_FEATURES</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_table_feature_bundle</span><span class="p">[</span><span class="s2">&quot;district&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEMAND_RESPONSE_BUNDLE</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_table_feature_legacy</span><span class="p">[</span><span class="s2">&quot;district&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DERIVED_FORECAST_BUNDLE</span><span class="p">):</span>
             <span class="n">derived_district_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derived_forecast_district_features</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_append_unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_district_features</span><span class="p">,</span> <span class="n">derived_district_features</span><span class="p">)</span>
@@ -2974,8 +3007,15 @@
             <span class="s2">&quot;can_charge&quot;</span><span class="p">,</span>
             <span class="s2">&quot;can_discharge&quot;</span><span class="p">,</span>
             <span class="s2">&quot;must_start_now&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dr_active&quot;</span><span class="p">,</span>
         <span class="p">}:</span>
             <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;dr_direction&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;dr_issuer_code&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_eur_per_kwh&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0e6</span>
         <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;clip_reason_&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;departure_feasibility_ratio&quot;</span><span class="p">,</span> <span class="s2">&quot;min_required_action_normalized&quot;</span><span class="p">}:</span>

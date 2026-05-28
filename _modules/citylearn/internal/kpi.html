@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.kpi &mdash; CityLearn 1.1.0 documentation</title>
+  <title>citylearn.internal.kpi &mdash; CityLearn 1.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/documentation_options.js?v=6efca38a"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -2768,6 +2768,34 @@
                         <span class="n">v2</span><span class="p">(</span><span class="s1">&#39;district&#39;</span><span class="p">,</span> <span class="s1">&#39;solar_self_consumption&#39;</span><span class="p">,</span> <span class="s1">&#39;community_market&#39;</span><span class="p">,</span> <span class="s1">&#39;import_share&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
                         <span class="n">share</span><span class="p">,</span>
                     <span class="p">)</span>
+
+        <span class="n">demand_response_service</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;_demand_response_service&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">demand_response_service</span><span class="p">,</span> <span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">dr_by_building</span><span class="p">,</span> <span class="n">dr_district</span> <span class="o">=</span> <span class="n">demand_response_service</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span><span class="n">building_names</span><span class="p">)</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">dr_name</span><span class="p">(</span><span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s1">_demand_response_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s1">&#39;</span>
+
+            <span class="n">dr_metrics</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="s1">&#39;events_count&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_events_count&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;active_time_step_count&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_active_time_step_count&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;requested_total_kwh&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_requested_total_kwh&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;delivered_total_kwh&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_delivered_total_kwh&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;shortfall_total_kwh&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_shortfall_total_kwh&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;compliance_ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_compliance_ratio&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;revenue_total_eur&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_revenue_total_eur&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;penalty_total_eur&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_penalty_total_eur&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;net_revenue_total_eur&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_net_revenue_total_eur&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;invalid_baseline_time_step_count&#39;</span><span class="p">,</span> <span class="s1">&#39;demand_response_invalid_baseline_time_step_count&#39;</span><span class="p">),</span>
+            <span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dr_metrics</span><span class="p">:</span>
+                <span class="n">put</span><span class="p">(</span><span class="s1">&#39;district&#39;</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="n">dr_name</span><span class="p">(</span><span class="s1">&#39;district&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="p">),</span> <span class="n">dr_district</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">building_name</span> <span class="ow">in</span> <span class="n">building_names</span><span class="p">:</span>
+                <span class="n">totals</span> <span class="o">=</span> <span class="n">dr_by_building</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">building_name</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">for</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dr_metrics</span><span class="p">:</span>
+                    <span class="n">put</span><span class="p">(</span><span class="s1">&#39;building&#39;</span><span class="p">,</span> <span class="n">building_name</span><span class="p">,</span> <span class="n">dr_name</span><span class="p">(</span><span class="s1">&#39;building&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="p">),</span> <span class="n">totals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
 
         <span class="c1"># Export ratio_to_baseline is derived from totals with safe division.</span>
         <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="n">kpi_buildings</span><span class="p">:</span>
