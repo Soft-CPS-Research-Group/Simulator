@@ -19,6 +19,7 @@ Submodules
    citylearn.internal.kpi
    citylearn.internal.loading
    citylearn.internal.physics_invariants
+   citylearn.internal.robustness
    citylearn.internal.runtime
    citylearn.internal.topology
    citylearn.internal.units

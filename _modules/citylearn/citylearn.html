@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 1.3.0 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 1.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1f29e9d3"></script>
+      <script src="../../_static/documentation_options.js?v=9172181d"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -114,6 +114,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.entity_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnEntityInterfaceService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.topology</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnTopologyService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.demand_response</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnDemandResponseService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.robustness</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnRobustnessService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_bool</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.reward_function</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">MultiBuildingRewardFunction</span><span class="p">,</span>
@@ -379,6 +380,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span> <span class="o">=</span> <span class="n">CityLearnEntityInterfaceService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_topology_service</span> <span class="o">=</span> <span class="n">CityLearnTopologyService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_demand_response_service</span> <span class="o">=</span> <span class="n">CityLearnDemandResponseService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span> <span class="o">=</span> <span class="n">CityLearnRobustnessService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">root_directory</span><span class="p">,</span> <span class="n">buildings</span><span class="p">,</span> <span class="n">electric_vehicles</span><span class="p">,</span> <span class="n">episode_time_steps</span><span class="p">,</span> <span class="n">rolling_episode_split</span><span class="p">,</span> <span class="n">random_episode_split</span><span class="p">,</span> \
             <span class="n">seconds_per_time_step</span><span class="p">,</span> <span class="n">reward_function</span><span class="p">,</span> <span class="n">central_agent</span><span class="p">,</span> <span class="n">shared_observations</span><span class="p">,</span> <span class="n">episode_tracker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span>
                 <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">),</span>
@@ -415,6 +417,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">buildings</span> <span class="o">=</span> <span class="n">buildings</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">electric_vehicles</span> <span class="o">=</span> <span class="n">electric_vehicles</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_demand_response_service</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
         <span class="n">reference_buildings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buildings</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buildings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_buildings</span>
         <span class="n">get_time_step_ratio</span> <span class="o">=</span> <span class="n">reference_buildings</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference_buildings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="o">=</span> <span class="n">get_time_step_ratio</span>
@@ -670,9 +673,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface</span> <span class="o">==</span> <span class="s1">&#39;entity&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span><span class="o">.</span><span class="n">observation_space</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">adjust_observation_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span><span class="o">.</span><span class="n">observation_space</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_flat_observation_space</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">adjust_observation_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_flat_observation_space</span><span class="p">())</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_flat_observation_space</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">]:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">central_agent</span><span class="p">:</span>
@@ -743,7 +746,7 @@
 <span class="sd">        is returned where each sublist is a list of 1 building&#39;s observation values and the sublist in the same order as `buildings`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface</span> <span class="o">==</span> <span class="s1">&#39;entity&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span><span class="o">.</span><span class="n">observation_payload</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">apply_observations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span><span class="o">.</span><span class="n">observation_payload</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache_time_step</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache</span>
@@ -777,7 +780,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache</span> <span class="o">=</span> <span class="n">observations</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span>
 
-        <span class="k">return</span> <span class="n">observations</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">apply_observations</span><span class="p">(</span><span class="n">observations</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
@@ -1372,6 +1375,7 @@
                 <span class="s1">&#39;matching_granularity&#39;</span><span class="p">:</span> <span class="s1">&#39;aggregate_building&#39;</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="s1">&#39;demand_response&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_demand_response_service</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(),</span>
+            <span class="s1">&#39;robustness&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(),</span>
             <span class="s1">&#39;entity_specs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span><span class="o">.</span><span class="n">specs</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface</span> <span class="o">==</span> <span class="s1">&#39;entity&#39;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s1">&#39;buildings&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buildings</span><span class="p">],</span>
         <span class="p">}</span></div>
@@ -1675,6 +1679,7 @@
                 <span class="n">ev</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_demand_response_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">associate_chargers_to_electric_vehicles</span><span class="p">()</span>
 
         <span class="c1"># reset reward function (does nothing by default)</span>
@@ -1697,6 +1702,7 @@
         <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;physics_invariant_checks&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_physics_invariant_service</span><span class="o">.</span><span class="n">assert_step_invariants</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">validate_targets</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="n">env_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_info</span><span class="p">()</span></div>
