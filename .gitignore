@@ -192,6 +192,7 @@ tmp_entity_obs*.json
 
 # Local presentation planning notes
 docs/simulator_improvements_presentation_map.md
+docs/paper/
 
 # Generated full-year 15-second datasets are large artifacts, not source data.
 data/datasets/citylearn_three_phase_dynamic_assets_only_demo_15s/
