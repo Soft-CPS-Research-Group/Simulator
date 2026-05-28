@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn package &mdash; CityLearn 1.2.0 documentation</title>
+  <title>citylearn package &mdash; CityLearn 1.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=6efca38a"></script>
+      <script src="../_static/documentation_options.js?v=1f29e9d3"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -76,6 +76,7 @@
 <li class="toctree-l4"><a class="reference internal" href="citylearn.electric_vehicle_charger.html">citylearn.electric_vehicle_charger module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.energy_model.html">citylearn.energy_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.exporter.html">citylearn.exporter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.multi_community.html">citylearn.multi_community module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.occupant.html">citylearn.occupant module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.power_outage.html">citylearn.power_outage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.preprocessing.html">citylearn.preprocessing module</a></li>
@@ -873,6 +874,37 @@
 <li class="toctree-l3"><a class="reference internal" href="citylearn.exporter.html#citylearn.exporter.EpisodeExporter.restore_render_time_step"><code class="docutils literal notranslate"><span class="pre">EpisodeExporter.restore_render_time_step()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.exporter.html#citylearn.exporter.EpisodeExporter.save_to_csv"><code class="docutils literal notranslate"><span class="pre">EpisodeExporter.save_to_csv()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.exporter.html#citylearn.exporter.EpisodeExporter.write_render_rows"><code class="docutils literal notranslate"><span class="pre">EpisodeExporter.write_render_rows()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citylearn.multi_community.html">citylearn.multi_community module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.PORTFOLIO_COMMUNITY_ID"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.PORTFOLIO_COMMUNITY_ID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.PORTFOLIO_NAME"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.PORTFOLIO_NAME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.action_space"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.action_space</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.central_agent"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.central_agent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.close"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.community_ids"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.community_ids</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.entity_specs"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.entity_specs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.episode_time_steps"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.episode_time_steps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.evaluate_v2"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.evaluate_v2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.export_final_kpis"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.export_final_kpis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.get_metadata"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.get_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.interface"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.interface</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.observation_space"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.observation_space</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.observations"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.observations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.render"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.render()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.reset"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.rewards"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.rewards</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.seconds_per_time_step"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.seconds_per_time_step</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.step"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.terminated"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.terminated</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.time_step"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.time_step</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.time_steps"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.time_steps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.truncated"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.truncated</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.unwrapped"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.unwrapped</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.weights"><code class="docutils literal notranslate"><span class="pre">MultiCommunityEnv.weights</span></code></a></li>
 </ul>
 </li>
 </ul>
