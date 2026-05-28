@@ -28,6 +28,7 @@ Default documentation is in English. Portuguese documentation is available under
 | [Actions reference](docs/actions_reference.md) | [PT](docs/pt/actions_reference.md) | Flat/entity actions, ranges and physical meaning. |
 | [Flat and entity interfaces](docs/interfaces_flat_entity.md) | [PT](docs/pt/interfaces_flat_entity.md) | Vector mode, entity-table mode and dynamic topology semantics. |
 | [KPIs reference](docs/kpis_reference.md) | [PT](docs/pt/kpis_reference.md) | `evaluate()`, `evaluate_v2()`, KPI units and KPI families. |
+| [Multi-community reference](docs/multi_community_reference.md) | [PT](docs/pt/multi_community_reference.md) | Orchestrating multiple synchronized communities and portfolio KPIs. |
 | [Data unit contract](docs/data_unit_contract.md) | [PT](docs/pt/data_unit_contract.md) | Formal contract for `kWh/step`, `kW`, prices, emissions and timesteps. |
 | [Simulator features](docs/features.md) | [PT](docs/pt/features.md) | Capability inventory, including less obvious features. |
 | [Developer guide](docs/developer_guide.md) | [PT](docs/pt/developer_guide.md) | Tests, audits, performance checks and internal architecture. |
@@ -49,6 +50,7 @@ Additional reference: [KPI v2 naming tree](docs/KPI_V2_TREE.md).
 | Entity RL observations | Forecast bundles, physical deadline pressure, feasible action capacity and requested/limited/applied action feedback. |
 | Dynamic topology | Add/remove buildings and assets during simulation in entity mode. |
 | Demand response | Dataset-driven DSO/TSO flexibility requests in entity observations, with settlement and KPIs. |
+| Multi-community | Synchronized orchestration of multiple independent communities with portfolio KPI rows. |
 | Three phase | Phase connections, headroom, phase power, violations and phase KPIs. |
 | Community market | Local settlement, import weights, savings and self-consumption KPIs. |
 | Performance | Windowed loading, shared weather/pricing/carbon cache, runtime profiling and Parquet for large 15s datasets. |
@@ -108,6 +110,29 @@ Demand response dataset:
 env = CityLearnEnv(
     "data/datasets/citylearn_challenge_2022_phase_all_demand_response/schema.json",
     interface="entity",
+)
+```
+
+Multi-community portfolio:
+
+```python
+from citylearn.multi_community import MultiCommunityEnv
+
+env = MultiCommunityEnv(
+    communities=[
+        {
+            "community_id": "community_a",
+            "schema": "data/datasets/community_a/schema.json",
+            "env_kwargs": {"interface": "entity", "episode_time_steps": 48},
+            "weight": 1.0,
+        },
+        {
+            "community_id": "community_b",
+            "schema": "data/datasets/community_b/schema.json",
+            "env_kwargs": {"interface": "entity", "episode_time_steps": 48},
+            "weight": 1.0,
+        },
+    ],
 )
 ```
 

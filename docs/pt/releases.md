@@ -58,6 +58,60 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.3.0 - 2026-05-28
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Minor release que adiciona orquestracao multi-comunidade v1 atraves do novo `MultiCommunityEnv` publico. O wrapper corre varias comunidades `CityLearnEnv` independentes em lockstep sincronizado, preserva fisica, rewards, demand response e KPIs de cada comunidade, e adiciona linhas KPI de portfolio para reporting entre comunidades.
+
+### Added
+
+- Wrapper publico `citylearn.multi_community.MultiCommunityEnv`.
+- Payloads `reset()` e `step()` por comunidade, indexados por `community_id`.
+- `action_space`, `observation_space` e `entity_specs` por comunidade.
+- Validacao de sincronizacao para `seconds_per_time_step`, episode length efetivo, `interface` e `central_agent`.
+- Info de reward portfolio com soma finita dos rewards filhos, reward total ponderado e media ponderada.
+- Output `evaluate_v2()` multi-comunidade com `community_id` nas linhas locais e linhas `level="portfolio"` agregadas a partir dos KPIs district.
+- Layout de export multi-comunidade com subpastas por comunidade e CSV global `exported_kpis_multi_community.csv`.
+- Documentacao bilingue de referencia e quickstarts multi-comunidade.
+- Testes unitarios para validacao do constructor, routing de reset/step, agregacao de rewards, entity mode, demand response independente, KPIs portfolio, layout de export e regressao single-community.
+
+### Changed
+
+- README e documentacao de features/running passam a incluir uso multi-comunidade e links.
+- `citylearn.__init__` expoe `MultiCommunityEnv` de forma lazy sem importar o simulador durante package import.
+
+### Fixed
+
+- Sem fixes nao relacionados.
+
+### Dataset/Schema Impact
+
+- Sem novos ficheiros de dataset e sem alteracoes de schema.
+- `MultiCommunityEnv` usa os schemas filhos passados em `communities[*].schema`.
+- Demand response continua configurado por dataset filho; a v1 nao introduz coordenacao DSO/TSO global nem ficheiro de pedidos DR de portfolio.
+
+### Compatibility
+
+- Minor release aditiva para utilizadores existentes de `CityLearnEnv`.
+- Imports single-community, datasets, KPIs e contratos flat/entity existentes ficam inalterados salvo quando o utilizador instancia explicitamente `MultiCommunityEnv`.
+- A v1 multi-comunidade rejeita mistura de interfaces, mistura de modos `central_agent`, resolucoes temporais diferentes e episode lengths efetivos diferentes.
+
+### Validation
+
+- `.venv/bin/pytest -q tests/test_multi_community_env.py`: pass, `15 passed`
+- `.venv/bin/pytest -q tests/test_multi_community_env.py tests/test_demand_response.py tests/test_kpis.py tests/unit/test_export_logic.py`: pass, `33 passed`
+- `.venv/bin/pytest -q`: pass, `371 passed, 17 warnings`
+- `git diff --check`: pass
+
+### Migration Notes
+
+- Utilizadores existentes nao precisam de alterar nada.
+- Para correr um portfolio, instanciar `MultiCommunityEnv` com um schema filho por comunidade e passar actions indexadas por `community_id`.
+- Linhas KPI de portfolio so aparecem em `MultiCommunityEnv.evaluate_v2()` e nao aparecem no output normal de `CityLearnEnv.evaluate_v2()`.
+
 ## v1.2.0 - 2026-05-28
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

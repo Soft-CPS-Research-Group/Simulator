@@ -56,6 +56,35 @@ action_payload = {
 obs, reward, terminated, truncated, info = env.step(action_payload)
 ```
 
+## Quickstart Multi-Comunidade
+
+Usa `MultiCommunityEnv` quando um loop de treino deve avancar varias comunidades independentes em lockstep. Cada filho mantem a sua propria fisica, KPIs e ficheiros de demand response.
+
+```python
+from citylearn.multi_community import MultiCommunityEnv
+
+env = MultiCommunityEnv(
+    communities=[
+        {
+            "community_id": "community_a",
+            "schema": "data/datasets/community_a/schema.json",
+            "env_kwargs": {"interface": "entity", "episode_time_steps": 48},
+            "weight": 1.0,
+        },
+        {
+            "community_id": "community_b",
+            "schema": "data/datasets/community_b/schema.json",
+            "env_kwargs": {"interface": "entity", "episode_time_steps": 48},
+            "weight": 1.0,
+        },
+    ]
+)
+
+observations, info = env.reset(seed=0)
+```
+
+Todas as comunidades tem de partilhar `seconds_per_time_step`, episode length efetivo, `interface` e modo `central_agent`. `evaluate_v2()` devolve linhas locais com `community_id` e linhas portfolio com `level="portfolio"`. Ver [multi_community_reference.md](multi_community_reference.md).
+
 ## Parametros de `CityLearnEnv`
 
 | Parametro | Tipo | Default | O que faz | Notas |

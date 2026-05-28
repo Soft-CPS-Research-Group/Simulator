@@ -12,6 +12,7 @@ Esta pasta contem a versao portuguesa das paginas de referencia principais. A do
 | [dataset_reference.md](dataset_reference.md) | Formato de datasets, CSV/Parquet, 15s e conversao kW para kWh/step. |
 | [data_unit_contract.md](data_unit_contract.md) | Contrato formal de unidades. |
 | [kpis_reference.md](kpis_reference.md) | KPIs v1/v2, unidades e familias. |
+| [multi_community_reference.md](multi_community_reference.md) | Multi-comunidade, sincronizacao temporal, DR independente e KPIs portfolio. |
 | [features.md](features.md) | Funcionalidades do simulador. |
 | [releases.md](releases.md) | Politica de releases e changelog operacional. |
 | [developer_guide.md](developer_guide.md) | Testes, auditorias, performance e arquitetura interna. |

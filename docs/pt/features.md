@@ -15,6 +15,7 @@ Esta pagina resume o que o simulador tem de bom, incluindo funcionalidades que n
 | EVs e chargers | Schedules por charger, EV connected/incoming, V2G e eficiencia. |
 | Deferrable appliances | Ciclos normalizados, janelas de flexibilidade e KPIs de servico. |
 | Demand response | Pedidos DSO/TSO orientados por dataset com observacoes entity, settlement e KPIs. |
+| Multi-comunidade | Orquestra varias comunidades `CityLearnEnv` sincronizadas e reporta KPIs de portfolio. |
 
 ## Fisica e Unidades
 
@@ -70,6 +71,16 @@ Esta pagina resume o que o simulador tem de bom, incluindo funcionalidades que n
 | Self-consumption community | Mede share local/import. |
 | KPI v2 naming tree | Nomes estruturados por level/family/subfamily/metric/unit. |
 | Golden tests | Testes com valores calculados a mao para KPIs criticos. |
+
+## Multi-Comunidade
+
+| Feature | O que oferece |
+|---|---|
+| `MultiCommunityEnv` | Wrapper publico em `citylearn.multi_community` para varias comunidades independentes. |
+| Step sincronizado | Todas as comunidades tem de partilhar `seconds_per_time_step`, episode length, interface e modo `central_agent`. |
+| DR independente | Cada comunidade mantem os seus pedidos, observations, settlement e KPIs de demand response. |
+| KPIs portfolio | `evaluate_v2()` adiciona linhas `level="portfolio"` com somas e ratios ponderados. |
+| Layout de export | KPIs locais em subpastas por comunidade e CSV global `exported_kpis_multi_community.csv`. |
 
 ## Dataset e Performance
 

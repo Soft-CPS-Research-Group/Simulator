@@ -17,6 +17,7 @@ Portuguese version: [pt/features.md](pt/features.md).
 | EVs and chargers | Charger-centric schedules, connected/incoming EVs, V2G-capable action path. |
 | Deferrable appliances | Normalized cycles, flexibility windows and service KPIs. |
 | Demand response | Dataset-driven DSO/TSO flexibility requests with entity observations, settlement and KPIs. |
+| Multi-community orchestration | Runs multiple synchronized `CityLearnEnv` communities and reports portfolio KPIs. |
 
 ## Physics and Units
 
@@ -72,6 +73,16 @@ Portuguese version: [pt/features.md](pt/features.md).
 | Community self-consumption | Local import share and traded energy KPIs. |
 | KPI v2 naming tree | Structured KPI names by level/family/subfamily/metric/unit. |
 | Golden tests | Hand-calculated KPI tests for critical metrics. |
+
+## Multi-Community
+
+| Feature | What it provides |
+|---|---|
+| `MultiCommunityEnv` | Public wrapper in `citylearn.multi_community` for multiple independent communities. |
+| Synchronized stepping | Every child community must share `seconds_per_time_step`, episode length, interface and `central_agent` mode. |
+| Independent DR | Each community keeps its own demand-response requests, observations, settlement and KPIs. |
+| Portfolio KPI rows | `evaluate_v2()` adds `level="portfolio"` rows with summed totals and weighted ratios. |
+| Export layout | Child KPIs go to per-community subfolders, with a global `exported_kpis_multi_community.csv`. |
 
 ## Dataset and Performance
 

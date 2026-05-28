@@ -1,1 +1,12 @@
-__version__ = '1.2.0'
+__version__ = '1.3.0'
+
+__all__ = ["MultiCommunityEnv", "__version__"]
+
+
+def __getattr__(name: str):
+    if name == "MultiCommunityEnv":
+        from citylearn.multi_community import MultiCommunityEnv
+
+        return MultiCommunityEnv
+
+    raise AttributeError(f"module 'citylearn' has no attribute {name!r}")
