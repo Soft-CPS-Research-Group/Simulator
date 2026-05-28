@@ -18,6 +18,7 @@ Portuguese version: [pt/features.md](pt/features.md).
 | Deferrable appliances | Normalized cycles, flexibility windows and service KPIs. |
 | Demand response | Dataset-driven DSO/TSO flexibility requests with entity observations, settlement and KPIs. |
 | Multi-community orchestration | Runs multiple synchronized `CityLearnEnv` communities and reports portfolio KPIs. |
+| Robustness events | Optional dataset-driven degradation of observations, forecasts, actions and logical asset availability. |
 
 ## Physics and Units
 
@@ -39,6 +40,7 @@ Portuguese version: [pt/features.md](pt/features.md).
 | Stable IDs | Enables memory per entity and dynamic topology. |
 | Observation bundles | Controls the richness and cost of observations. |
 | Demand response bundle | Adds active request, baseline, prices and previous delivery/shortfall to the district table. |
+| Robustness bundle | Adds active robustness state and previous-step corruption counters to the district table. |
 | Machine-readable specs | `env.entity_specs` exposes IDs, features, units and bundles. |
 | Observation copies | Prevents agents from mutating internal simulator state by accident. |
 
@@ -83,6 +85,17 @@ Portuguese version: [pt/features.md](pt/features.md).
 | Independent DR | Each community keeps its own demand-response requests, observations, settlement and KPIs. |
 | Portfolio KPI rows | `evaluate_v2()` adds `level="portfolio"` rows with summed totals and weighted ratios. |
 | Export layout | Child KPIs go to per-community subfolders, with a global `exported_kpis_multi_community.csv`. |
+
+## Robustness
+
+| Feature | What it provides |
+|---|---|
+| Dataset events | CSV/Parquet event files configure deterministic perturbations. |
+| Modular switches | Observations, forecasts, actions and assets can be enabled independently. |
+| Real-state separation | Observation/forecast corruption does not change rewards, DR settlement or physical KPIs. |
+| Imperfect action channel | Dropout, noise, bias, stuck, delay and clip can change the applied control action. |
+| Logical asset outage | Assets stay in the topology, while telemetry and/or control can become unavailable. |
+| Robustness KPIs | Counts event coverage, corruptions, missing observations and action dropouts. |
 
 ## Dataset and Performance
 

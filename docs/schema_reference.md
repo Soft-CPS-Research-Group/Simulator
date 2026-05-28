@@ -1,6 +1,6 @@
 # Schema Reference
 
-This page documents the `schema.json` contract. The schema is the source of truth for buildings, devices, EVs, deferrable appliances, interfaces, observation bundles, demand response, dynamic topology and local market configuration.
+This page documents the `schema.json` contract. The schema is the source of truth for buildings, devices, EVs, deferrable appliances, interfaces, observation bundles, demand response, robustness, dynamic topology and local market configuration.
 
 Portuguese version: [pt/schema_reference.md](pt/schema_reference.md).
 
@@ -41,6 +41,7 @@ Portuguese version: [pt/schema_reference.md](pt/schema_reference.md).
 | `topology_mode` | `static`/`dynamic` | no | Enables topology events. |
 | `topology_events` | list | if dynamic | Add/remove events. |
 | `demand_response` | object | no | Dataset-driven DSO/TSO flexibility requests and settlement. |
+| `robustness` | object | no | Dataset-driven observation, forecast, action and asset availability perturbations. |
 | `community_market` | object | no | Local market and market KPIs. |
 | `ev_departure_within_tolerance` | float | no | Symmetric departure SOC accuracy tolerance, default `0.05`. |
 | `ev_departure_service_tolerance` | float | no | Lower departure SOC service tolerance for minimum acceptable EV service, default `0.05`. |
@@ -95,6 +96,7 @@ Entity-only configuration:
   "entity_forecasts_existing": false,
   "entity_forecasts_derived": false,
   "entity_demand_response": false,
+  "entity_robustness": false,
   "entity_action_feedback": false,
   "entity_temporal_derived": true
 }
@@ -108,6 +110,7 @@ Entity-only configuration:
 | `entity_forecasts_existing` | `false` | Forecasts already present in the dataset. |
 | `entity_forecasts_derived` | `false` | Compact perfect-simulation point forecasts for price, load, PV and net demand. |
 | `entity_demand_response` | `false` | Current district DR request fields, frozen baseline and previous-step delivery/shortfall. |
+| `entity_robustness` | `false` | Active robustness state and previous-step corruption counters in the district table. |
 | `entity_temporal_derived` | `false` | Short lags, rolling means and calendar sin/cos features. |
 | `entity_action_feedback` | `false` | Requested, limited and applied action feedback plus clipping-reason flags. |
 
@@ -367,6 +370,58 @@ When active, enable the observation bundle:
 
 The numeric features are added to the `district` entity table. The active `request_id` is kept in `observations["meta"]["demand_response"]`, not in the numeric matrix.
 
+## Robustness
+
+Robustness v1 is dataset-driven and fully optional. Observation and forecast events corrupt only the payload returned to the agent. Rewards, physical KPIs and demand-response settlement continue to use the real simulator state. Action and asset-control events change the action effectively applied.
+
+```json
+"robustness": {
+  "enabled": true,
+  "events_file": "robustness_events.csv",
+  "random_seed": 0,
+  "missing_replacement_value": -9999.0,
+  "modules": {
+    "observations": {"enabled": true},
+    "forecasts": {"enabled": true},
+    "actions": {"enabled": true},
+    "assets": {"enabled": true}
+  }
+}
+```
+
+| Field | Default | Purpose |
+|---|---:|---|
+| `enabled` | `false` | Enables robustness event loading and application. |
+| `events_file` | required when enabled | CSV or Parquet file relative to `root_directory` or the schema folder. |
+| `random_seed` | `0` | Deterministic seed for event noise. |
+| `missing_replacement_value` | `-9999.0` | Default sentinel for missing observation/telemetry values. |
+| `modules.*.enabled` | `true` when robustness is enabled | Individually enables observations, forecasts, actions and assets. |
+
+Event file columns:
+
+| Column | Unit/domain | Meaning |
+|---|---:|---|
+| `event_id` | string | Unique event ID exposed in metadata. |
+| `module` | `observation`/`forecast`/`action`/`asset` | Perturbation module. |
+| `target_type` | entity type | `district`, `building`, `storage`, `charger`, `ev`, `pv` or `deferrable_appliance`. |
+| `target_id` | id or `*` | Target entity name/id, or all compatible targets. |
+| `target_feature` | feature/action | For assets use `telemetry`, `control` or `both`. |
+| `start_time_step`, `end_time_step` | global timestep | Inclusive activation window. |
+| `mode` | enum | Observation/forecast: `missing`, `noise`, `bias`, `stuck`, `clip`; action: `dropout`, `noise`, `bias`, `stuck`, `delay`, `clip`; asset: `unavailable`. |
+| `value`, `std`, `min_value`, `max_value` | numeric | Optional mode parameters. |
+| `replacement_value` | numeric | Optional missing/telemetry sentinel. |
+| `delay_steps` | count | Optional action delay horizon. |
+
+When using entity observations, enable diagnostics if needed:
+
+```json
+"observation_bundles": {
+  "entity_robustness": true
+}
+```
+
+Metadata is exposed under `observations["meta"]["robustness"]`.
+
 ## Community Market
 
 ```json
@@ -403,6 +458,7 @@ The numeric features are added to the `district` entity table. The active `reque
 | Entity/GNN/Transformer | `interface="entity"` plus desired observation bundles. |
 | Dynamic topology | `interface="entity"`, `topology_mode="dynamic"`, `topology_events`. |
 | Demand response | `interface="entity"`, `demand_response.enabled=true`, `entity_demand_response` bundle. |
+| Robustness | Any interface, `robustness.enabled=true`; add `entity_robustness` for entity diagnostics. |
 | Real PV measurements | `pv.attributes.generation_mode="absolute"`. |
 | 15-second data | `seconds_per_time_step=15` and files already at that cadence. |
 | Large datasets | Prefer Parquet paths with the same columns. |

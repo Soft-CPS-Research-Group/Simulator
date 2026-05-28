@@ -185,6 +185,12 @@ class CityLearnRuntimeService:
             timings['parse_actions_time'] = time.perf_counter() - timer_start
 
         timer_start = time.perf_counter() if debug_timing else 0.0
+        if getattr(getattr(env, '_robustness_service', None), 'enabled', False):
+            actions = env._robustness_service.apply_actions(actions)
+        if debug_timing:
+            timings['robustness_action_time'] = time.perf_counter() - timer_start
+
+        timer_start = time.perf_counter() if debug_timing else 0.0
         clear_step_electric_loads_time = 0.0
         building_apply_action_times = []
         for building, building_actions in zip(env.buildings, actions):
@@ -419,6 +425,8 @@ class CityLearnRuntimeService:
         env._observations_cache = None
         env._observations_cache_time_step = -1
         actions = self.parse_actions(actions)
+        if getattr(getattr(env, '_robustness_service', None), 'enabled', False):
+            actions = env._robustness_service.apply_actions(actions)
 
         for building, building_actions in zip(env.buildings, actions):
             if int(env.time_step) == 0:

@@ -181,6 +181,7 @@ Para datasets a 15s:
 | Teste antes de treino | Correr smoke episode pequeno e `evaluate_v2()`. |
 | Exemplo compacto com assets dinamicos | `data/datasets/citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet/schema.json` tem 7 dias a 15s com eventos add/remove de chargers, PV e BESS. |
 | Exemplo demand response | `data/datasets/citylearn_challenge_2022_phase_all_demand_response/schema.json` tem buildings 2022 phase-all sem EVs e pedidos DR district. |
+| Exemplo robustez | `data/datasets/citylearn_challenge_2022_phase_all_robustness/schema.json` tem buildings 2022 phase-all sem EVs e eventos esparsos de robustez. |
 
 ## Bundles de Observacao Entity nos Datasets Incluidos
 
@@ -196,6 +197,7 @@ ativam todos os bundles de observacoes entity:
 | `entity_temporal_derived` | Calendario robusto e lags curtos. |
 | `entity_action_feedback` | Feedback de acao pedida, limitada e aplicada com motivos de clipping. |
 | `entity_demand_response` | Pedido demand response district atual, baseline e delivery/shortfall anterior. |
+| `entity_robustness` | Estado de robustez ativo e contadores de corrupcao do step anterior. |
 
 Outros schemas mantem o comportamento compativel por default salvo se declararem
 `observation_bundles`.
@@ -217,6 +219,21 @@ Datasets de demand response definem `schema["demand_response"]["enabled"] = true
 
 Na v1 o simulador calcula uma baseline congelada no inicio do evento a partir dos `baseline_window_seconds` anteriores, liquida apenas steps ativos e guarda historico esparso em vez de arrays densos por timestep.
 
+## Ficheiros de Eventos de Robustez
+
+Datasets de robustez definem `schema["robustness"]["enabled"] = true`, apontam `events_file` para CSV ou Parquet e ligam apenas os modulos que querem estudar. Flat e entity sao suportados; em entity pode ativar-se `observation_bundles.entity_robustness` para diagnostico.
+
+| Coluna | Unidade/dominio | O que e |
+|---|---:|---|
+| `event_id` | string | ID unico do evento. |
+| `module` | enum | `observation`, `forecast`, `action` ou `asset`. |
+| `target_type` | tipo de entidade | `district`, `building`, `storage`, `charger`, `ev`, `pv` ou `deferrable_appliance`. |
+| `target_id` | id ou `*` | ID/nome da entidade ou todos os targets compativeis. |
+| `target_feature` | feature/acao | Para assets usar `telemetry`, `control` ou `both`. |
+| `start_time_step`, `end_time_step` | timestep global | Janela inclusiva do evento. |
+| `mode` | enum | Modo suportado pelo modulo selecionado. |
+| `value`, `std`, `min_value`, `max_value`, `replacement_value`, `delay_steps` | opcional | Parametros do modo. |
+
 ## Performance e Loader
 
 | Otimizacao | O que faz |
@@ -234,6 +251,7 @@ Na v1 o simulador calcula uma baseline congelada no inicio do evento a partir do
 4. Garantir que EV schedule usa countdowns em timesteps da resolucao.
 5. Escrever deferrables em catalogo + schedule.
 6. Para demand response, escrever ficheiro esparso de pedidos e ativar entity mode mais `entity_demand_response`.
-7. Preferir Parquet para datasets anuais/sub-minuto.
-8. Correr smoke run e `evaluate_v2()`.
-9. Correr `audit_physics.py` quando o dataset for novo ou critico.
+7. Para robustez, escrever ficheiro esparso de eventos e ativar apenas os modulos necessarios.
+8. Preferir Parquet para datasets anuais/sub-minuto.
+9. Correr smoke run e `evaluate_v2()`.
+10. Correr `audit_physics.py` quando o dataset for novo ou critico.

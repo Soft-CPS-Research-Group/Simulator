@@ -60,6 +60,53 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.4.0 - 2026-05-28
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Adds optional dataset-driven robustness v1 for `CityLearnEnv`. Existing datasets keep the old behavior unless `robustness.enabled=true`.
+
+### Added
+
+- Internal `CityLearnRobustnessService` with sparse CSV/Parquet event loading, deterministic event ordering and reproducible noise.
+- Robustness modules for observations, forecasts, actions and logical asset availability.
+- `entity_robustness` observation bundle with district diagnostics and `observations["meta"]["robustness"]`.
+- Robustness KPI counters for district/building levels.
+- Packaged no-EV robustness dataset at `data/datasets/citylearn_challenge_2022_phase_all_robustness/schema.json`, copied from the 2022 phase-all dataset with local files and sparse robustness events.
+- Bilingual robustness reference documentation.
+- Unit coverage for disabled behavior, CSV/Parquet parsing, module toggles, validation errors, flat/entity observations, forecasts, action modes, asset outages, KPIs, multi-community aggregation and packaged dataset loading.
+
+### Changed
+
+- Entity contract snapshots now include `entity_robustness` as an inactive default bundle.
+- `CityLearnEnv` metadata includes a `robustness` section.
+
+### Dataset/Schema Impact
+
+- New optional top-level `robustness` schema section.
+- New optional `entity_robustness` observation bundle.
+- No existing dataset behavior changes when robustness is absent or disabled.
+
+### Compatibility
+
+- Additive for existing `CityLearnEnv` users.
+- Observation/forecast corruption is agent-facing only; real physical state, reward, DR settlement and normal KPIs remain based on uncorrupted simulator state.
+- Action and asset-control events intentionally change the applied physical action.
+
+### Validation
+
+- `.venv/bin/pytest -q`: pass, `393 passed, 17 warnings`
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass, `16/16` scenarios
+- `git diff --check`: pass
+
+### Migration Notes
+
+- Existing datasets do not need changes.
+- Add `robustness.enabled=true` plus an `events_file` only for robustness experiments.
+
 ## v1.3.0 - 2026-05-28
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

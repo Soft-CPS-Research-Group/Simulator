@@ -16,6 +16,7 @@ Esta pagina resume o que o simulador tem de bom, incluindo funcionalidades que n
 | Deferrable appliances | Ciclos normalizados, janelas de flexibilidade e KPIs de servico. |
 | Demand response | Pedidos DSO/TSO orientados por dataset com observacoes entity, settlement e KPIs. |
 | Multi-comunidade | Orquestra varias comunidades `CityLearnEnv` sincronizadas e reporta KPIs de portfolio. |
+| Eventos de robustez | Degradacao opcional e orientada por dataset para observations, forecasts, actions e disponibilidade logica de assets. |
 
 ## Fisica e Unidades
 
@@ -37,6 +38,7 @@ Esta pagina resume o que o simulador tem de bom, incluindo funcionalidades que n
 | IDs estaveis | Permite memoria por entidade e topology dynamic. |
 | Bundles | Permite controlar custo/riqueza das observacoes. |
 | Bundle demand response | Adiciona pedido ativo, baseline, precos e delivery/shortfall anterior a tabela district. |
+| Bundle robustez | Adiciona estado de robustez ativo e contadores de corrupcao do step anterior a tabela district. |
 | Specs machine-readable | `env.entity_specs` descreve ids, features, unidades e bundles. |
 | Copias nas observacoes | Evita mutacao acidental do estado interno pelo agente. |
 
@@ -81,6 +83,17 @@ Esta pagina resume o que o simulador tem de bom, incluindo funcionalidades que n
 | DR independente | Cada comunidade mantem os seus pedidos, observations, settlement e KPIs de demand response. |
 | KPIs portfolio | `evaluate_v2()` adiciona linhas `level="portfolio"` com somas e ratios ponderados. |
 | Layout de export | KPIs locais em subpastas por comunidade e CSV global `exported_kpis_multi_community.csv`. |
+
+## Robustez
+
+| Feature | O que oferece |
+|---|---|
+| Eventos por dataset | Ficheiros CSV/Parquet configuram perturbacoes deterministicas. |
+| Switches modulares | Observations, forecasts, actions e assets podem ser ligados separadamente. |
+| Separacao do estado real | Corrupcao de observation/forecast nao altera rewards, settlement DR nem KPIs fisicos. |
+| Canal de acao imperfeito | Dropout, noise, bias, stuck, delay e clip podem alterar a acao aplicada. |
+| Outage logico de asset | Assets ficam na topologia, mas telemetria e/ou controlo podem ficar indisponiveis. |
+| KPIs de robustez | Contam eventos, corrupcoes, observations missing e action dropouts. |
 
 ## Dataset e Performance
 

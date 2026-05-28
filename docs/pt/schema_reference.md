@@ -1,6 +1,6 @@
 # Schema Reference
 
-Esta pagina documenta o contrato do `schema.json`. O schema e a fonte oficial para construir buildings, dispositivos, EVs, appliances, modos de interface, demand response, topology dynamic, bundles e mercado.
+Esta pagina documenta o contrato do `schema.json`. O schema e a fonte oficial para construir buildings, dispositivos, EVs, appliances, modos de interface, demand response, robustez, topology dynamic, bundles e mercado.
 
 ## Regras Gerais
 
@@ -39,6 +39,7 @@ Esta pagina documenta o contrato do `schema.json`. O schema e a fonte oficial pa
 | `topology_mode` | `static`/`dynamic` | nao | Ativa eventos dinamicos. |
 | `topology_events` | list | se dynamic | Eventos add/remove. |
 | `demand_response` | object | nao | Pedidos DSO/TSO de flexibilidade e settlement orientados por dataset. |
+| `robustness` | object | nao | Perturbacoes orientadas por dataset para observacoes, forecasts, acoes e assets. |
 | `community_market` | object | nao | Mercado local e KPIs associados. |
 | `ev_departure_within_tolerance` | float | nao | Tolerancia simetrica de accuracy do SOC no departure, default `0.05`. |
 | `ev_departure_service_tolerance` | float | nao | Tolerancia inferior de servico EV minimo no departure, default `0.05`. |
@@ -97,6 +98,7 @@ Usado apenas na entity interface.
   "entity_forecasts_existing": false,
   "entity_forecasts_derived": false,
   "entity_demand_response": false,
+  "entity_robustness": false,
   "entity_action_feedback": false,
   "entity_temporal_derived": true
 }
@@ -110,6 +112,7 @@ Usado apenas na entity interface.
 | `entity_forecasts_existing` | `false` | Forecasts ja existentes no dataset. |
 | `entity_forecasts_derived` | `false` | Forecasts pontuais compactos para preco, load, PV e net demand. |
 | `entity_demand_response` | `false` | Estado do pedido DR district, baseline congelado e delivery/shortfall do step anterior. |
+| `entity_robustness` | `false` | Estado de robustez e contadores de corrupcao do step anterior na tabela district. |
 | `entity_temporal_derived` | `false` | Lags, medias curtas e calendario sin/cos. |
 | `entity_action_feedback` | `false` | Acao pedida, limitada e aplicada, mais flags de clipping. |
 
@@ -373,6 +376,58 @@ Quando ativo, ativar tambem o bundle:
 
 As features numericas entram na tabela entity `district`. O `request_id` ativo fica em `observations["meta"]["demand_response"]`, nao numa matriz numerica.
 
+## Robustez
+
+Robustez v1 e orientada por dataset e totalmente opcional. Eventos de observation e forecast degradam apenas o payload recebido pelo agente. Rewards, KPIs fisicos e settlement de demand response continuam a usar o estado real do simulador. Eventos de action e asset-control alteram a acao efetivamente aplicada.
+
+```json
+"robustness": {
+  "enabled": true,
+  "events_file": "robustness_events.csv",
+  "random_seed": 0,
+  "missing_replacement_value": -9999.0,
+  "modules": {
+    "observations": {"enabled": true},
+    "forecasts": {"enabled": true},
+    "actions": {"enabled": true},
+    "assets": {"enabled": true}
+  }
+}
+```
+
+| Campo | Default | O que faz |
+|---|---:|---|
+| `enabled` | `false` | Ativa leitura e aplicacao de eventos de robustez. |
+| `events_file` | obrigatorio quando ativo | Ficheiro CSV ou Parquet relativo a `root_directory` ou a pasta do schema. |
+| `random_seed` | `0` | Semente deterministica para ruido dos eventos. |
+| `missing_replacement_value` | `-9999.0` | Sentinela default para observacoes/telemetria em falta. |
+| `modules.*.enabled` | `true` quando robustez ativa | Liga separadamente observations, forecasts, actions e assets. |
+
+Colunas do ficheiro de eventos:
+
+| Coluna | Unidade/dominio | O que e |
+|---|---:|---|
+| `event_id` | string | ID unico exposto em metadata. |
+| `module` | `observation`/`forecast`/`action`/`asset` | Modulo perturbado. |
+| `target_type` | tipo de entidade | `district`, `building`, `storage`, `charger`, `ev`, `pv` ou `deferrable_appliance`. |
+| `target_id` | id ou `*` | Nome/id da entidade, ou todos os targets compativeis. |
+| `target_feature` | feature/acao | Para assets usar `telemetry`, `control` ou `both`. |
+| `start_time_step`, `end_time_step` | timestep global | Janela inclusiva de ativacao. |
+| `mode` | enum | Observation/forecast: `missing`, `noise`, `bias`, `stuck`, `clip`; action: `dropout`, `noise`, `bias`, `stuck`, `delay`, `clip`; asset: `unavailable`. |
+| `value`, `std`, `min_value`, `max_value` | numerico | Parametros opcionais do modo. |
+| `replacement_value` | numerico | Sentinela opcional para missing/telemetry. |
+| `delay_steps` | count | Atraso opcional de acao. |
+
+Em entity observations, ativar diagnostico se necessario:
+
+```json
+"observation_bundles": {
+  "entity_robustness": true
+}
+```
+
+Metadata fica em `observations["meta"]["robustness"]`.
+
 ## Community Market
 
 ```json
@@ -409,6 +464,7 @@ As features numericas entram na tabela entity `district`. O `request_id` ativo f
 | Entity para GNN/Transformer | `interface="entity"`, bundles conforme necessidade. |
 | Topologia dinamica | `interface="entity"`, `topology_mode="dynamic"`, `topology_events`. |
 | Demand response | `interface="entity"`, `demand_response.enabled=true`, bundle `entity_demand_response`. |
+| Robustez | Qualquer interface, `robustness.enabled=true`; adicionar `entity_robustness` para diagnostico entity. |
 | Datasets reais PV absoluto | `pv.attributes.generation_mode="absolute"`. |
 | 15 segundos | `seconds_per_time_step=15` e ficheiros ja nessa cadencia. |
 | Parquet pesado | Trocar paths `.csv` por `.parquet` mantendo colunas. |

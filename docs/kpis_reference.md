@@ -34,7 +34,7 @@ level_family_subfamily_metric_variant_unit
 | Part | Examples |
 |---|---|
 | `level` | `building`, `district`. |
-| `family` | `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`, `demand_response`. |
+| `family` | `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`, `demand_response`, `robustness`. |
 | `subfamily` | `total`, `daily_average`, `ratio_to_baseline`, `ratio_to_business_as_usual`, `shape_quality`, `service`. |
 | `metric` | `import`, `export`, `charge`, `completed_cycles`. |
 | `variant` | `control`, `baseline`, `business_as_usual`, `delta`, `delta_to_business_as_usual`, `total`, `average`, `l1`. |
@@ -52,6 +52,7 @@ Examples:
 | `district_solar_self_consumption_ratio_self_consumption_ratio` | District solar self-consumption ratio. |
 | `building_deferrable_appliance_service_completed_cycles_count` | Completed deferrable cycles. |
 | `district_demand_response_compliance_ratio` | Credited DR delivery divided by valid requested energy. |
+| `district_robustness_action_dropout_count` | Number of action dropouts applied by robustness events. |
 
 ## Core Equations
 
@@ -86,6 +87,7 @@ Safe division returns `None` or a safe placeholder when the denominator is not p
 | `comfort_resilience` | building, district | Discomfort and outage/resilience events. |
 | `deferrable_appliance` | building, district | Completed/missed cycles, service level and served energy. |
 | `demand_response` | building, district | Flexibility requests, delivery, shortfall and settlement economics. |
+| `robustness` | building, district | Dataset-driven observation, forecast, action and asset perturbation counters. |
 
 ## EV KPIs
 
@@ -160,6 +162,23 @@ Available when `demand_response.enabled=true`.
 | `demand_response_invalid_baseline_time_step_count` | building/district | count | Active steps excluded from economics because the pre-event baseline was invalid. |
 
 Names are prefixed with `district_` or `building_`, for example `district_demand_response_net_revenue_total_eur`.
+
+## Robustness KPIs
+
+Available when `robustness.enabled=true`.
+
+| KPI suffix | Level | Unit | Meaning |
+|---|---|---:|---|
+| `robustness_events_count` | building/district | count | Unique robustness events that affected the target level. |
+| `robustness_active_time_step_count` | building/district | count | Timesteps with at least one applied robustness perturbation. |
+| `robustness_observation_corruption_count` | building/district | count | Agent-facing observation corruptions. |
+| `robustness_forecast_corruption_count` | building/district | count | Agent-facing forecast corruptions. |
+| `robustness_action_corruption_count` | building/district | count | Action-channel corruptions before physical application. |
+| `robustness_asset_unavailable_time_step_count` | building/district | count | Asset unavailable applications. |
+| `robustness_missing_observation_count` | building/district | count | Observation or telemetry values replaced by the missing sentinel. |
+| `robustness_action_dropout_count` | building/district | count | Actions forced to zero by dropout or asset-control outage. |
+
+Names are prefixed with `district_` or `building_`, for example `district_robustness_missing_observation_count`.
 
 ## Electrical Service and Phase KPIs
 

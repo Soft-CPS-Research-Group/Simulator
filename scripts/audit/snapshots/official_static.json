@@ -127,6 +127,9 @@
     "entity_forecasts_existing": {
       "active": true
     },
+    "entity_robustness": {
+      "active": false
+    },
     "entity_temporal_derived": {
       "active": true
     }

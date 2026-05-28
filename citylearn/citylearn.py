@@ -27,6 +27,7 @@ from citylearn.internal.runtime import CityLearnRuntimeService
 from citylearn.internal.entity_interface import CityLearnEntityInterfaceService
 from citylearn.internal.topology import CityLearnTopologyService
 from citylearn.internal.demand_response import CityLearnDemandResponseService
+from citylearn.internal.robustness import CityLearnRobustnessService
 from citylearn.utilities import parse_bool
 from citylearn.reward_function import (
     MultiBuildingRewardFunction,
@@ -287,6 +288,7 @@ class CityLearnEnv(Environment, Env):
         self._entity_service = CityLearnEntityInterfaceService(self)
         self._topology_service = CityLearnTopologyService(self)
         self._demand_response_service = CityLearnDemandResponseService(self)
+        self._robustness_service = CityLearnRobustnessService(self)
         root_directory, buildings, electric_vehicles, episode_time_steps, rolling_episode_split, random_episode_split, \
             seconds_per_time_step, reward_function, central_agent, shared_observations, episode_tracker = self._load(
                 deepcopy(self.schema),
@@ -323,6 +325,7 @@ class CityLearnEnv(Environment, Env):
             self.buildings = buildings
             self.electric_vehicles = electric_vehicles
         self._demand_response_service.initialize()
+        self._robustness_service.initialize()
         reference_buildings = self.buildings if len(self.buildings) > 0 else self._all_buildings
         get_time_step_ratio = reference_buildings[0].time_step_ratio if len(reference_buildings) > 0 else 1.0
         self.time_step_ratio = get_time_step_ratio
@@ -578,9 +581,9 @@ class CityLearnEnv(Environment, Env):
         """
 
         if self.interface == 'entity':
-            return self._entity_service.observation_space
+            return self._robustness_service.adjust_observation_space(self._entity_service.observation_space)
 
-        return self._get_flat_observation_space()
+        return self._robustness_service.adjust_observation_space(self._get_flat_observation_space())
 
     def _get_flat_observation_space(self) -> List[spaces.Box]:
         if self.central_agent:
@@ -651,7 +654,7 @@ class CityLearnEnv(Environment, Env):
         is returned where each sublist is a list of 1 building's observation values and the sublist in the same order as `buildings`.
         """
         if self.interface == 'entity':
-            return self._entity_service.observation_payload()
+            return self._robustness_service.apply_observations(self._entity_service.observation_payload())
 
         if self._observations_cache is not None and self._observations_cache_time_step == self.time_step:
             return self._observations_cache
@@ -685,7 +688,7 @@ class CityLearnEnv(Environment, Env):
         self._observations_cache = observations
         self._observations_cache_time_step = self.time_step
 
-        return observations
+        return self._robustness_service.apply_observations(observations)
 
     @property
     def observation_names(self) -> List[List[str]]:
@@ -1278,6 +1281,7 @@ class CityLearnEnv(Environment, Env):
                 'matching_granularity': 'aggregate_building',
             },
             'demand_response': self._demand_response_service.get_metadata(),
+            'robustness': self._robustness_service.get_metadata(),
             'entity_specs': self._entity_service.specs if self.interface == 'entity' else None,
             'buildings': [b.get_metadata() for b in self.buildings],
         }
@@ -1539,6 +1543,7 @@ class CityLearnEnv(Environment, Env):
                 ev.reset()
 
         self._demand_response_service.reset()
+        self._robustness_service.reset()
         self.associate_chargers_to_electric_vehicles()
 
         # reset reward function (does nothing by default)
@@ -1561,6 +1566,7 @@ class CityLearnEnv(Environment, Env):
         if bool(getattr(self, 'physics_invariant_checks', False)):
             self._physics_invariant_service.assert_step_invariants(int(self.time_step))
         self._entity_service.reset()
+        self._robustness_service.validate_targets()
         self.reward_function.env_metadata = self.get_metadata()
 
         return self.observations, self.get_info()

@@ -1,6 +1,6 @@
 # CityLearn
 
-CityLearn is an open-source Farama Foundation Gymnasium environment for building energy coordination, demand response and multi-agent reinforcement learning. This repository is a research fork that extends the upstream simulator with EVs, normalized deferrable appliances, sub-hourly physics, entity observations, dataset-driven demand response, dynamic topology, three-phase electrical service, community KPIs and performance work for large datasets.
+CityLearn is an open-source Farama Foundation Gymnasium environment for building energy coordination, demand response and multi-agent reinforcement learning. This repository is a research fork that extends the upstream simulator with EVs, normalized deferrable appliances, sub-hourly physics, entity observations, dataset-driven demand response, robustness events, dynamic topology, three-phase electrical service, community KPIs and performance work for large datasets.
 
 Package name:
 
@@ -29,6 +29,7 @@ Default documentation is in English. Portuguese documentation is available under
 | [Flat and entity interfaces](docs/interfaces_flat_entity.md) | [PT](docs/pt/interfaces_flat_entity.md) | Vector mode, entity-table mode and dynamic topology semantics. |
 | [KPIs reference](docs/kpis_reference.md) | [PT](docs/pt/kpis_reference.md) | `evaluate()`, `evaluate_v2()`, KPI units and KPI families. |
 | [Multi-community reference](docs/multi_community_reference.md) | [PT](docs/pt/multi_community_reference.md) | Orchestrating multiple synchronized communities and portfolio KPIs. |
+| [Robustness reference](docs/robustness_reference.md) | [PT](docs/pt/robustness_reference.md) | Dataset-driven observation, forecast, action and asset availability perturbations. |
 | [Data unit contract](docs/data_unit_contract.md) | [PT](docs/pt/data_unit_contract.md) | Formal contract for `kWh/step`, `kW`, prices, emissions and timesteps. |
 | [Simulator features](docs/features.md) | [PT](docs/pt/features.md) | Capability inventory, including less obvious features. |
 | [Developer guide](docs/developer_guide.md) | [PT](docs/pt/developer_guide.md) | Tests, audits, performance checks and internal architecture. |
@@ -51,6 +52,7 @@ Additional reference: [KPI v2 naming tree](docs/KPI_V2_TREE.md).
 | Dynamic topology | Add/remove buildings and assets during simulation in entity mode. |
 | Demand response | Dataset-driven DSO/TSO flexibility requests in entity observations, with settlement and KPIs. |
 | Multi-community | Synchronized orchestration of multiple independent communities with portfolio KPI rows. |
+| Robustness | Optional dataset-driven observation, forecast, action-channel and logical asset outages with KPIs. |
 | Three phase | Phase connections, headroom, phase power, violations and phase KPIs. |
 | Community market | Local settlement, import weights, savings and self-consumption KPIs. |
 | Performance | Windowed loading, shared weather/pricing/carbon cache, runtime profiling and Parquet for large 15s datasets. |
@@ -109,6 +111,15 @@ Demand response dataset:
 ```python
 env = CityLearnEnv(
     "data/datasets/citylearn_challenge_2022_phase_all_demand_response/schema.json",
+    interface="entity",
+)
+```
+
+Robustness dataset:
+
+```python
+env = CityLearnEnv(
+    "data/datasets/citylearn_challenge_2022_phase_all_robustness/schema.json",
     interface="entity",
 )
 ```

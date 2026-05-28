@@ -104,6 +104,7 @@ The packaged 15-second entity datasets and `citylearn_challenge_2022_phase_all_p
 | `entity_temporal_derived` | Robust calendar and short lag features. |
 | `entity_action_feedback` | Requested, limited and applied action feedback with clipping reasons. |
 | `entity_demand_response` | Current district demand-response request, baseline and previous delivery/shortfall. |
+| `entity_robustness` | Active robustness state and previous-step corruption counters. |
 
 Other schemas keep the default-compatible behavior unless they declare `observation_bundles`.
 
@@ -123,6 +124,21 @@ Demand-response datasets set `schema["demand_response"]["enabled"] = true`, poin
 | `tolerance_power_kw` | kW | Optional tolerance; defaults to `0`. |
 
 The v1 simulator computes a frozen baseline at event start from the previous `baseline_window_seconds`, settles only active request steps, and keeps history sparse instead of writing dense per-timestep arrays.
+
+## Robustness Event Files
+
+Robustness datasets set `schema["robustness"]["enabled"] = true`, point `events_file` to a CSV or Parquet file, and enable only the modules they want to study. Flat and entity interfaces are supported; entity datasets can add `observation_bundles.entity_robustness` for diagnostics.
+
+| Column | Unit/domain | Meaning |
+|---|---:|---|
+| `event_id` | string | Unique event ID. |
+| `module` | enum | `observation`, `forecast`, `action` or `asset`. |
+| `target_type` | entity type | `district`, `building`, `storage`, `charger`, `ev`, `pv` or `deferrable_appliance`. |
+| `target_id` | id or `*` | Entity id/name or all compatible targets. |
+| `target_feature` | feature/action | For assets use `telemetry`, `control` or `both`. |
+| `start_time_step`, `end_time_step` | global timestep | Inclusive event window. |
+| `mode` | enum | Mode supported by the selected module. |
+| `value`, `std`, `min_value`, `max_value`, `replacement_value`, `delay_steps` | optional | Mode parameters. |
 
 ## Deferrable Appliances
 
@@ -189,6 +205,7 @@ For real production datasets, `absolute` is the recommended mode.
 | Pre-training smoke test | Run a short window and call `evaluate_v2()`. |
 | Compact dynamic-assets example | `data/datasets/citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet/schema.json` contains 7 days at 15s with charger, PV and BESS add/remove events. |
 | Demand-response example | `data/datasets/citylearn_challenge_2022_phase_all_demand_response/schema.json` contains 2022 phase-all buildings without EVs plus district DR requests. |
+| Robustness example | `data/datasets/citylearn_challenge_2022_phase_all_robustness/schema.json` contains 2022 phase-all buildings without EVs plus sparse robustness events. |
 
 ## Performance and Loader Behavior
 
@@ -207,6 +224,7 @@ For real production datasets, `absolute` is the recommended mode.
 4. Ensure EV schedules use countdowns in dataset timesteps.
 5. Write deferrables as catalog plus schedule.
 6. For demand response, write a sparse request file and enable entity mode plus `entity_demand_response`.
-7. Prefer Parquet for annual or sub-minute datasets.
-8. Run a smoke episode and `evaluate_v2()`.
-9. Run `audit_physics.py` for new critical datasets.
+7. For robustness, write sparse event files and enable only the needed modules.
+8. Prefer Parquet for annual or sub-minute datasets.
+9. Run a smoke episode and `evaluate_v2()`.
+10. Run `audit_physics.py` for new critical datasets.

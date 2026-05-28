@@ -58,6 +58,53 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.4.0 - 2026-05-28
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Adiciona robustez v1 opcional e orientada por dataset ao `CityLearnEnv`. Datasets existentes mantem o comportamento anterior salvo se `robustness.enabled=true`.
+
+### Added
+
+- Servico interno `CityLearnRobustnessService` com leitura esparsa de eventos CSV/Parquet, ordem deterministica e ruido reprodutivel.
+- Modulos de robustez para observations, forecasts, actions e disponibilidade logica de assets.
+- Bundle `entity_robustness` com diagnostico district e `observations["meta"]["robustness"]`.
+- KPIs de robustez district/building.
+- Dataset incluido sem EVs em `data/datasets/citylearn_challenge_2022_phase_all_robustness/schema.json`, copiado do 2022 phase-all com ficheiros locais e eventos esparsos de robustez.
+- Documentacao bilingue de referencia para robustez.
+- Testes unitarios para comportamento desligado, CSV/Parquet, toggles de modulos, erros de validacao, observations flat/entity, forecasts, modos de action, outages de assets, KPIs, agregacao multi-comunidade e carregamento do dataset incluido.
+
+### Changed
+
+- Snapshots do contrato entity passam a incluir `entity_robustness` como bundle default inativo.
+- Metadata de `CityLearnEnv` passa a incluir a secao `robustness`.
+
+### Dataset/Schema Impact
+
+- Nova secao top-level opcional `robustness`.
+- Novo bundle opcional `entity_robustness`.
+- Sem alteracao de comportamento para datasets existentes quando robustez esta ausente ou desligada.
+
+### Compatibility
+
+- Aditivo para utilizadores existentes de `CityLearnEnv`.
+- Corrupcao de observation/forecast afeta apenas o que o agente ve; estado fisico real, reward, settlement DR e KPIs normais continuam baseados no estado nao corrompido.
+- Eventos de action e asset-control alteram intencionalmente a acao fisica aplicada.
+
+### Validation
+
+- `.venv/bin/pytest -q`: pass, `393 passed, 17 warnings`
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass, `16/16` cenarios
+- `git diff --check`: pass
+
+### Migration Notes
+
+- Datasets existentes nao precisam de alteracoes.
+- Adicionar `robustness.enabled=true` e um `events_file` apenas para experiencias de robustez.
+
 ## v1.3.0 - 2026-05-28
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

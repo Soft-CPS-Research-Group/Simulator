@@ -2700,6 +2700,29 @@ class CityLearnKPIService:
                 for suffix, key in dr_metrics:
                     put('building', building_name, dr_name('building', suffix), totals.get(key))
 
+        robustness_service = getattr(env, '_robustness_service', None)
+        if getattr(robustness_service, 'enabled', False):
+            robustness_by_building, robustness_district = robustness_service.summarize(building_names)
+
+            robustness_metrics = [
+                'robustness_events_count',
+                'robustness_active_time_step_count',
+                'robustness_observation_corruption_count',
+                'robustness_forecast_corruption_count',
+                'robustness_action_corruption_count',
+                'robustness_asset_unavailable_time_step_count',
+                'robustness_missing_observation_count',
+                'robustness_action_dropout_count',
+            ]
+
+            for key in robustness_metrics:
+                put('district', 'District', f'district_{key}', robustness_district.get(key))
+
+            for building_name in building_names:
+                totals = robustness_by_building.get(building_name, {})
+                for key in robustness_metrics:
+                    put('building', building_name, f'building_{key}', totals.get(key))
+
         # Export ratio_to_baseline is derived from totals with safe division.
         for building in kpi_buildings:
             control_cond, baseline_cond = self._default_building_conditions(

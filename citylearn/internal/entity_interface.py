@@ -64,6 +64,7 @@ class CityLearnEntityInterfaceService:
     TEMPORAL_BUNDLE = "entity_temporal_derived"
     ACTION_FEEDBACK_BUNDLE = "entity_action_feedback"
     DEMAND_RESPONSE_BUNDLE = "entity_demand_response"
+    ROBUSTNESS_BUNDLE = "entity_robustness"
     DEFAULT_OBSERVATION_BUNDLES = {
         CORE_BUNDLE: False,
         COMMUNITY_BUNDLE: False,
@@ -72,6 +73,7 @@ class CityLearnEntityInterfaceService:
         TEMPORAL_BUNDLE: False,
         ACTION_FEEDBACK_BUNDLE: False,
         DEMAND_RESPONSE_BUNDLE: False,
+        ROBUSTNESS_BUNDLE: False,
     }
     FORECAST_HORIZONS = (
         ("15m", 15 * 60),
@@ -349,6 +351,13 @@ class CityLearnEntityInterfaceService:
         "dr_previous_delivered_power_kw",
         "dr_previous_shortfall_power_kw",
     ]
+    ROBUSTNESS_DISTRICT_FEATURES = [
+        "robustness_active",
+        "robustness_observation_corruption_count_previous",
+        "robustness_forecast_corruption_count_previous",
+        "robustness_action_corruption_count_previous",
+        "robustness_asset_unavailable_count",
+    ]
 
     def __init__(self, env):
         self.env = env
@@ -416,6 +425,7 @@ class CityLearnEntityInterfaceService:
         temporal_bundle_enabled = self._bundle_enabled(self.TEMPORAL_BUNDLE)
         action_feedback_bundle_enabled = self._bundle_enabled(self.ACTION_FEEDBACK_BUNDLE)
         demand_response_bundle_enabled = self._bundle_enabled(self.DEMAND_RESPONSE_BUNDLE)
+        robustness_bundle_enabled = self._bundle_enabled(self.ROBUSTNESS_BUNDLE)
         requires_building_electrical_metrics = core_bundle_enabled or community_bundle_enabled
 
         self._district_obs.fill(0.0)
@@ -541,6 +551,11 @@ class CityLearnEntityInterfaceService:
 
         if demand_response_bundle_enabled:
             service = getattr(env, "_demand_response_service", None)
+            values = service.observation_values() if service is not None else {}
+            self._fill_obs_row_sparse(district_row, self._district_feature_cols, values)
+
+        if robustness_bundle_enabled:
+            service = getattr(env, "_robustness_service", None)
             values = service.observation_values() if service is not None else {}
             self._fill_obs_row_sparse(district_row, self._district_feature_cols, values)
         finish_section("district")
@@ -909,6 +924,11 @@ class CityLearnEntityInterfaceService:
                     env._demand_response_service.observation_meta()
                     if getattr(env, "_demand_response_service", None) is not None
                     else {"enabled": False, "active_request_id": None}
+                ),
+                "robustness": (
+                    env._robustness_service.observation_meta()
+                    if getattr(env, "_robustness_service", None) is not None
+                    else {"enabled": False, "active_event_ids": []}
                 ),
             },
         }
@@ -2406,6 +2426,12 @@ class CityLearnEntityInterfaceService:
             self._append_unique(self._district_features, self.DEMAND_RESPONSE_DISTRICT_FEATURES)
             for name in self.DEMAND_RESPONSE_DISTRICT_FEATURES:
                 self._table_feature_bundle["district"][name] = self.DEMAND_RESPONSE_BUNDLE
+                self._table_feature_legacy["district"][name] = False
+
+        if self._bundle_enabled(self.ROBUSTNESS_BUNDLE):
+            self._append_unique(self._district_features, self.ROBUSTNESS_DISTRICT_FEATURES)
+            for name in self.ROBUSTNESS_DISTRICT_FEATURES:
+                self._table_feature_bundle["district"][name] = self.ROBUSTNESS_BUNDLE
                 self._table_feature_legacy["district"][name] = False
 
         if self._bundle_enabled(self.DERIVED_FORECAST_BUNDLE):
