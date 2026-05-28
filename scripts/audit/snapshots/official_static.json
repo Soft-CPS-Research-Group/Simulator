@@ -118,6 +118,9 @@
     "entity_core_electrical": {
       "active": true
     },
+    "entity_demand_response": {
+      "active": false
+    },
     "entity_forecasts_derived": {
       "active": true
     },

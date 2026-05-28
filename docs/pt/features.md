@@ -14,6 +14,7 @@ Esta pagina resume o que o simulador tem de bom, incluindo funcionalidades que n
 | PV | Geracao em modo perfil por kW ou absoluto `kWh/step`. |
 | EVs e chargers | Schedules por charger, EV connected/incoming, V2G e eficiencia. |
 | Deferrable appliances | Ciclos normalizados, janelas de flexibilidade e KPIs de servico. |
+| Demand response | Pedidos DSO/TSO orientados por dataset com observacoes entity, settlement e KPIs. |
 
 ## Fisica e Unidades
 
@@ -34,6 +35,7 @@ Esta pagina resume o que o simulador tem de bom, incluindo funcionalidades que n
 | Edges relacionais | Pronto para GNN/GraphRL. |
 | IDs estaveis | Permite memoria por entidade e topology dynamic. |
 | Bundles | Permite controlar custo/riqueza das observacoes. |
+| Bundle demand response | Adiciona pedido ativo, baseline, precos e delivery/shortfall anterior a tabela district. |
 | Specs machine-readable | `env.entity_specs` descreve ids, features, unidades e bundles. |
 | Copias nas observacoes | Evita mutacao acidental do estado interno pelo agente. |
 

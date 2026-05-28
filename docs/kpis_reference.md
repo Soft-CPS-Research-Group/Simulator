@@ -34,7 +34,7 @@ level_family_subfamily_metric_variant_unit
 | Part | Examples |
 |---|---|
 | `level` | `building`, `district`. |
-| `family` | `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`. |
+| `family` | `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`, `demand_response`. |
 | `subfamily` | `total`, `daily_average`, `ratio_to_baseline`, `ratio_to_business_as_usual`, `shape_quality`, `service`. |
 | `metric` | `import`, `export`, `charge`, `completed_cycles`. |
 | `variant` | `control`, `baseline`, `business_as_usual`, `delta`, `delta_to_business_as_usual`, `total`, `average`, `l1`. |
@@ -51,6 +51,7 @@ Examples:
 | `district_energy_grid_shape_quality_ramping_average_to_baseline_ratio` | Ramping relative to baseline. |
 | `district_solar_self_consumption_ratio_self_consumption_ratio` | District solar self-consumption ratio. |
 | `building_deferrable_appliance_service_completed_cycles_count` | Completed deferrable cycles. |
+| `district_demand_response_compliance_ratio` | Credited DR delivery divided by valid requested energy. |
 
 ## Core Equations
 
@@ -84,6 +85,7 @@ Safe division returns `None` or a safe placeholder when the denominator is not p
 | `equity` | building, district | Relative benefits and benefit distribution. |
 | `comfort_resilience` | building, district | Discomfort and outage/resilience events. |
 | `deferrable_appliance` | building, district | Completed/missed cycles, service level and served energy. |
+| `demand_response` | building, district | Flexibility requests, delivery, shortfall and settlement economics. |
 
 ## EV KPIs
 
@@ -139,6 +141,25 @@ EV departure tolerance semantics:
 | served energy | kWh | Energy of completed cycles. |
 | unserved energy | kWh | Energy of missed cycles. |
 | average start delay | hours | Mean `start - earliest_start`. |
+
+## Demand Response KPIs
+
+Available when `demand_response.enabled=true`.
+
+| KPI suffix | Level | Unit | Meaning |
+|---|---|---:|---|
+| `demand_response_events_count` | building/district | count | Unique DR events with active settlement rows. |
+| `demand_response_active_time_step_count` | building/district | count | Number of active DR timesteps. |
+| `demand_response_requested_total_kwh` | building/district | kWh | Requested energy from `target_power_kw` over active steps. |
+| `demand_response_delivered_total_kwh` | building/district | kWh | Signed delivery, positive when the controller moves in the requested direction. |
+| `demand_response_shortfall_total_kwh` | building/district | kWh | Non-delivered requested energy after tolerance. |
+| `demand_response_compliance_ratio` | building/district | ratio | Credited delivery divided by valid requested energy. |
+| `demand_response_revenue_total_eur` | building/district | eur | Credited delivery revenue. |
+| `demand_response_penalty_total_eur` | building/district | eur | Shortfall penalty. |
+| `demand_response_net_revenue_total_eur` | building/district | eur | Revenue minus penalty. |
+| `demand_response_invalid_baseline_time_step_count` | building/district | count | Active steps excluded from economics because the pre-event baseline was invalid. |
+
+Names are prefixed with `district_` or `building_`, for example `district_demand_response_net_revenue_total_eur`.
 
 ## Electrical Service and Phase KPIs
 

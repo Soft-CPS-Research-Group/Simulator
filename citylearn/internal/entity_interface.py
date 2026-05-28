@@ -63,6 +63,7 @@ class CityLearnEntityInterfaceService:
     DERIVED_FORECAST_BUNDLE = "entity_forecasts_derived"
     TEMPORAL_BUNDLE = "entity_temporal_derived"
     ACTION_FEEDBACK_BUNDLE = "entity_action_feedback"
+    DEMAND_RESPONSE_BUNDLE = "entity_demand_response"
     DEFAULT_OBSERVATION_BUNDLES = {
         CORE_BUNDLE: False,
         COMMUNITY_BUNDLE: False,
@@ -70,6 +71,7 @@ class CityLearnEntityInterfaceService:
         DERIVED_FORECAST_BUNDLE: False,
         TEMPORAL_BUNDLE: False,
         ACTION_FEEDBACK_BUNDLE: False,
+        DEMAND_RESPONSE_BUNDLE: False,
     }
     FORECAST_HORIZONS = (
         ("15m", 15 * 60),
@@ -335,6 +337,18 @@ class CityLearnEntityInterfaceService:
         "seconds_of_day_cos",
         "is_weekend",
     ]
+    DEMAND_RESPONSE_DISTRICT_FEATURES = [
+        "dr_active",
+        "dr_issuer_code",
+        "dr_direction",
+        "dr_target_power_kw",
+        "dr_baseline_power_kw",
+        "dr_time_remaining_hours",
+        "dr_activation_price_eur_per_kwh",
+        "dr_shortfall_penalty_eur_per_kwh",
+        "dr_previous_delivered_power_kw",
+        "dr_previous_shortfall_power_kw",
+    ]
 
     def __init__(self, env):
         self.env = env
@@ -401,6 +415,7 @@ class CityLearnEntityInterfaceService:
         derived_forecast_bundle_enabled = self._bundle_enabled(self.DERIVED_FORECAST_BUNDLE)
         temporal_bundle_enabled = self._bundle_enabled(self.TEMPORAL_BUNDLE)
         action_feedback_bundle_enabled = self._bundle_enabled(self.ACTION_FEEDBACK_BUNDLE)
+        demand_response_bundle_enabled = self._bundle_enabled(self.DEMAND_RESPONSE_BUNDLE)
         requires_building_electrical_metrics = core_bundle_enabled or community_bundle_enabled
 
         self._district_obs.fill(0.0)
@@ -523,6 +538,11 @@ class CityLearnEntityInterfaceService:
                     self._district_feature_cols,
                     self._build_calendar_temporal_metrics(building=env.buildings[0], time_step=t),
                 )
+
+        if demand_response_bundle_enabled:
+            service = getattr(env, "_demand_response_service", None)
+            values = service.observation_values() if service is not None else {}
+            self._fill_obs_row_sparse(district_row, self._district_feature_cols, values)
         finish_section("district")
 
         for ref in self._charger_refs:
@@ -885,6 +905,11 @@ class CityLearnEntityInterfaceService:
                 },
                 "forecast_config": self._forecast_config_meta(),
                 "topology_version": int(getattr(env, "topology_version", 0)),
+                "demand_response": (
+                    env._demand_response_service.observation_meta()
+                    if getattr(env, "_demand_response_service", None) is not None
+                    else {"enabled": False, "active_request_id": None}
+                ),
             },
         }
         if debug_timing:
@@ -1295,8 +1320,10 @@ class CityLearnEntityInterfaceService:
             return "kwh"
         if key.endswith("_normalized"):
             return "ratio"
-        if key in {"can_charge", "can_discharge", "must_start_now", "is_weekend", "start_blocked"} or key.startswith("clip_reason_"):
+        if key in {"can_charge", "can_discharge", "must_start_now", "is_weekend", "start_blocked", "dr_active"} or key.startswith("clip_reason_"):
             return "flag"
+        if key.endswith("_eur_per_kwh"):
+            return "eur_per_kwh"
         if key.endswith("_soc_ratio") or key.endswith("_ratio") or key.endswith("_soc"):
             return "ratio"
         if key.endswith("_time_step"):
@@ -2375,6 +2402,12 @@ class CityLearnEntityInterfaceService:
                 self._table_feature_bundle["district"][name] = self.TEMPORAL_BUNDLE
                 self._table_feature_legacy["district"][name] = False
 
+        if self._bundle_enabled(self.DEMAND_RESPONSE_BUNDLE):
+            self._append_unique(self._district_features, self.DEMAND_RESPONSE_DISTRICT_FEATURES)
+            for name in self.DEMAND_RESPONSE_DISTRICT_FEATURES:
+                self._table_feature_bundle["district"][name] = self.DEMAND_RESPONSE_BUNDLE
+                self._table_feature_legacy["district"][name] = False
+
         if self._bundle_enabled(self.DERIVED_FORECAST_BUNDLE):
             derived_district_features = self._derived_forecast_district_features()
             self._append_unique(self._district_features, derived_district_features)
@@ -2861,8 +2894,15 @@ class CityLearnEntityInterfaceService:
             "can_charge",
             "can_discharge",
             "must_start_now",
+            "dr_active",
         }:
             return 0.0, 1.0
+        if key == "dr_direction":
+            return -1.0, 1.0
+        if key == "dr_issuer_code":
+            return 0.0, 2.0
+        if key.endswith("_eur_per_kwh"):
+            return 0.0, 1.0e6
         if key.startswith("clip_reason_"):
             return 0.0, 1.0
         if key in {"departure_feasibility_ratio", "min_required_action_normalized"}:

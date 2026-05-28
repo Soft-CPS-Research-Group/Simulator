@@ -60,6 +60,61 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.2.0 - 2026-05-28
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Minor release adding dataset-driven demand response v1 for entity-mode simulations. DSO/TSO requests are loaded from dataset files, exposed through district entity observations, settled after each physical step, and reported through district/building KPIs.
+
+### Added
+
+- `demand_response` schema section with CSV/Parquet `requests_file` support.
+- `entity_demand_response` observation bundle with district DR request state, baseline, prices and previous-step delivery/shortfall fields.
+- Internal `CityLearnDemandResponseService` with sparse request loading, cursor-based activation, rolling pre-event baselines and active-step settlement only.
+- District and building demand-response KPIs for events, active steps, requested/delivered/shortfall energy, compliance, revenue, penalty, net revenue and invalid-baseline steps.
+- Packaged no-EV demand-response dataset at `data/datasets/citylearn_challenge_2022_phase_all_demand_response/schema.json`, copied from the 2022 phase-all dataset with local files and all entity observation bundles enabled.
+- Unit coverage for CSV/Parquet parsing, entity observation exposure, flat-interface rejection, overlap rejection, up/down semantics, KPI/economic settlement, invalid baselines and packaged dataset loading.
+
+### Changed
+
+- Native business-as-usual KPI sidecar switches to entity interface when demand response is enabled, preserving the entity-only DR contract.
+
+### Fixed
+
+- No unrelated fixes.
+
+### Dataset/Schema Impact
+
+- New optional top-level `demand_response` schema key:
+  `enabled`, `requests_file`, `baseline_method`, `baseline_window_seconds` and `allow_overlapping_requests`.
+- Demand response v1 requires `interface="entity"` when enabled.
+- Request files must define `request_id`, `issuer`, `direction`, `start_time_step`, `end_time_step`, `target_power_kw`, `activation_price_eur_per_kwh`, `shortfall_penalty_eur_per_kwh` and optional `tolerance_power_kw`.
+- `entity_demand_response` adds only district table features; active `request_id` is exposed in observation `meta`, not as a numeric feature.
+
+### Compatibility
+
+- Additive minor release for existing flat/entity datasets that do not enable demand response.
+- Schemas that enable `demand_response.enabled=true` with `interface="flat"` now fail fast with a clear error.
+- Overlapping DR requests are rejected in v1 unless future support is implemented.
+
+### Validation
+
+- `.venv/bin/pytest -q tests/test_demand_response.py`: pass, `9 passed`
+- `.venv/bin/pytest -q`: pass, `356 passed, 17 warnings`
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass, `16/16` scenarios
+- Demand-response packaged dataset smoke run for 30 entity steps plus `evaluate_v2(include_business_as_usual=False)`: pass, `180` DR KPI rows
+- `.venv/bin/python -m build --outdir /tmp/softcpsrecsimulator-1.2.0-dist`: pass, generated sdist and wheel
+- `.venv/bin/python -m twine check /tmp/softcpsrecsimulator-1.2.0-dist/*`: pass
+
+### Migration Notes
+
+- Existing datasets need no change unless they want demand response.
+- To train with DR, enable `interface="entity"`, set `demand_response.enabled=true`, provide a request file and activate `observation_bundles.entity_demand_response`.
+- Fixed-width entity agents must refresh `env.entity_specs` when enabling `entity_demand_response`.
+
 ## v1.1.0 - 2026-05-26
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

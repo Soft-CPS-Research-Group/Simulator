@@ -1,6 +1,6 @@
 # Schema Reference
 
-This page documents the `schema.json` contract. The schema is the source of truth for buildings, devices, EVs, deferrable appliances, interfaces, observation bundles, dynamic topology and local market configuration.
+This page documents the `schema.json` contract. The schema is the source of truth for buildings, devices, EVs, deferrable appliances, interfaces, observation bundles, demand response, dynamic topology and local market configuration.
 
 Portuguese version: [pt/schema_reference.md](pt/schema_reference.md).
 
@@ -40,6 +40,7 @@ Portuguese version: [pt/schema_reference.md](pt/schema_reference.md).
 | `observation_bundles` | object | no | Additional entity observation bundles. |
 | `topology_mode` | `static`/`dynamic` | no | Enables topology events. |
 | `topology_events` | list | if dynamic | Add/remove events. |
+| `demand_response` | object | no | Dataset-driven DSO/TSO flexibility requests and settlement. |
 | `community_market` | object | no | Local market and market KPIs. |
 | `ev_departure_within_tolerance` | float | no | Symmetric departure SOC accuracy tolerance, default `0.05`. |
 | `ev_departure_service_tolerance` | float | no | Lower departure SOC service tolerance for minimum acceptable EV service, default `0.05`. |
@@ -93,6 +94,7 @@ Entity-only configuration:
   "entity_community_operational": true,
   "entity_forecasts_existing": false,
   "entity_forecasts_derived": false,
+  "entity_demand_response": false,
   "entity_action_feedback": false,
   "entity_temporal_derived": true
 }
@@ -105,6 +107,7 @@ Entity-only configuration:
 | `entity_community_operational` | `false` | District/community aggregates, headroom, counts and topology version. |
 | `entity_forecasts_existing` | `false` | Forecasts already present in the dataset. |
 | `entity_forecasts_derived` | `false` | Compact perfect-simulation point forecasts for price, load, PV and net demand. |
+| `entity_demand_response` | `false` | Current district DR request fields, frozen baseline and previous-step delivery/shortfall. |
 | `entity_temporal_derived` | `false` | Short lags, rolling means and calendar sin/cos features. |
 | `entity_action_feedback` | `false` | Requested, limited and applied action feedback plus clipping-reason flags. |
 
@@ -319,6 +322,51 @@ EV battery standby loss is intentionally isolated from stationary storage defaul
 
 Removing a deferrable appliance cancels pending/running cycles and clears future consumption. Removing PV creates a zero PV. Removing storage creates a zero BESS.
 
+## Demand Response
+
+Demand response v1 is dataset-driven and entity-only. The agent observes district-level flexibility requests and responds through the physical actions that already exist, such as storage, EVs and flexible loads.
+
+```json
+"demand_response": {
+  "enabled": true,
+  "requests_file": "demand_response_requests.csv",
+  "baseline_method": "rolling_pre_event_average",
+  "baseline_window_seconds": 3600,
+  "allow_overlapping_requests": false
+}
+```
+
+| Field | Default | Purpose |
+|---|---:|---|
+| `enabled` | `false` | Enables demand-response request loading, observations, settlement and KPIs. |
+| `requests_file` | required when enabled | CSV or Parquet file relative to `root_directory` or the schema folder. |
+| `baseline_method` | `rolling_pre_event_average` | Baseline method. This is the only v1 method. |
+| `baseline_window_seconds` | `3600` | Pre-event history window used to compute the frozen event baseline. |
+| `allow_overlapping_requests` | `false` | Overlapping requests are rejected in v1. |
+
+Request file columns:
+
+| Column | Unit/domain | Meaning |
+|---|---:|---|
+| `request_id` | string | Unique request ID. Exposed in observation `meta`. |
+| `issuer` | `dso`/`tso` | Entity that issued the request. |
+| `direction` | `up`/`down` | Load perspective: `up` increases net load, `down` reduces net load. |
+| `start_time_step`, `end_time_step` | global timestep | Inclusive activation window. |
+| `target_power_kw` | kW | Positive district target power. |
+| `activation_price_eur_per_kwh` | currency/kWh | Credited delivery price. |
+| `shortfall_penalty_eur_per_kwh` | currency/kWh | Penalty for shortfall. |
+| `tolerance_power_kw` | kW | Optional tolerance; defaults to `0`. |
+
+When active, enable the observation bundle:
+
+```json
+"observation_bundles": {
+  "entity_demand_response": true
+}
+```
+
+The numeric features are added to the `district` entity table. The active `request_id` is kept in `observations["meta"]["demand_response"]`, not in the numeric matrix.
+
 ## Community Market
 
 ```json
@@ -354,6 +402,7 @@ Removing a deferrable appliance cancels pending/running cycles and clears future
 | Classic flat training | Omit `interface` or use `interface="flat"`; static topology. |
 | Entity/GNN/Transformer | `interface="entity"` plus desired observation bundles. |
 | Dynamic topology | `interface="entity"`, `topology_mode="dynamic"`, `topology_events`. |
+| Demand response | `interface="entity"`, `demand_response.enabled=true`, `entity_demand_response` bundle. |
 | Real PV measurements | `pv.attributes.generation_mode="absolute"`. |
 | 15-second data | `seconds_per_time_step=15` and files already at that cadence. |
 | Large datasets | Prefer Parquet paths with the same columns. |

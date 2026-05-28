@@ -152,9 +152,21 @@ Entity mode returns `tables`, `edges` and `meta`. Feature availability depends o
 | `community_flexible_*_capacity_kw`, `community_flexible_*_capacity_kwh_step`, `community_flexible_energy_*_kwh` | `entity_community_operational` | mixed | Aggregate flexible charge/discharge power and energy slack. |
 | `active_buildings_count`, `active_chargers_count`, `active_evs_count` | `entity_community_operational` | count | Active topology counts. |
 | `topology_version` | `entity_community_operational` | count | Current topology version. |
+| `dr_active` | `entity_demand_response` | binary | Whether a demand-response request is active at this timestep. |
+| `dr_issuer_code` | `entity_demand_response` | enum | Request issuer code: `1=dso`, `2=tso`, `0=none/unknown`. |
+| `dr_direction` | `entity_demand_response` | enum | Load-perspective direction: `1=up`, `-1=down`, `0=none`. |
+| `dr_target_power_kw` | `entity_demand_response` | kW | Active district target power. |
+| `dr_baseline_power_kw` | `entity_demand_response` | kW | Frozen baseline net power for the active request when valid. |
+| `dr_time_remaining_hours` | `entity_demand_response` | hours | Time remaining in the inclusive activation window. |
+| `dr_activation_price_eur_per_kwh` | `entity_demand_response` | currency/kWh | Credited price for delivered energy. |
+| `dr_shortfall_penalty_eur_per_kwh` | `entity_demand_response` | currency/kWh | Penalty price for shortfall energy. |
+| `dr_previous_delivered_power_kw` | `entity_demand_response` | kW | Delivered power settled at the previous active DR step. |
+| `dr_previous_shortfall_power_kw` | `entity_demand_response` | kW | Shortfall power settled at the previous active DR step. |
 | `community_net_prev_1_kwh_step`, `community_net_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | District lag features. |
 | `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binary | Calendar features; raw `time_step` remains only in payload `meta`. |
 | `forecast_price_next_*`, `forecast_community_{load,pv,net}_next_*` | `entity_forecasts_derived` | mixed | Perfect-simulation point forecasts at 15m/1h/3h/6h/24h. |
+
+Demand-response `request_id` and baseline validity are exposed in `observations["meta"]["demand_response"]`, not as numeric table columns.
 
 ### `building`
 

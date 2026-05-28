@@ -1,6 +1,6 @@
 # Dataset Reference
 
-Esta pagina descreve como construir datasets compativeis com o simulador, incluindo CSV, Parquet, dados reais em kW, EVs, PV absoluto e deferrable appliances.
+Esta pagina descreve como construir datasets compativeis com o simulador, incluindo CSV, Parquet, dados reais em kW, EVs, PV absoluto, deferrable appliances e pedidos demand response.
 
 ## Formatos Aceites
 
@@ -26,6 +26,8 @@ CSV e Parquet sao intercambiaveis se:
 | BESS/charger power limits | kW |
 | EV required/estimated SOC no ficheiro charger | percent no CSV original, convertido para ratio internamente |
 | Precos | currency/kWh |
+| Target de pedidos DR | kW |
+| Precos e penalizacoes DR | currency/kWh |
 | Carbon intensity | kgCO2/kWh |
 | Weather temperature | C |
 | Irradiance | W/m2 |
@@ -178,6 +180,7 @@ Para datasets a 15s:
 | Ficheiros grandes | Preferir Parquet. |
 | Teste antes de treino | Correr smoke episode pequeno e `evaluate_v2()`. |
 | Exemplo compacto com assets dinamicos | `data/datasets/citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet/schema.json` tem 7 dias a 15s com eventos add/remove de chargers, PV e BESS. |
+| Exemplo demand response | `data/datasets/citylearn_challenge_2022_phase_all_demand_response/schema.json` tem buildings 2022 phase-all sem EVs e pedidos DR district. |
 
 ## Bundles de Observacao Entity nos Datasets Incluidos
 
@@ -192,9 +195,27 @@ ativam todos os bundles de observacoes entity:
 | `entity_forecasts_derived` | Forecasts pontuais compactos perfeitos para preco, load, PV e net demand. |
 | `entity_temporal_derived` | Calendario robusto e lags curtos. |
 | `entity_action_feedback` | Feedback de acao pedida, limitada e aplicada com motivos de clipping. |
+| `entity_demand_response` | Pedido demand response district atual, baseline e delivery/shortfall anterior. |
 
 Outros schemas mantem o comportamento compativel por default salvo se declararem
 `observation_bundles`.
+
+## Ficheiros de Pedidos Demand Response
+
+Datasets de demand response definem `schema["demand_response"]["enabled"] = true`, apontam `requests_file` para CSV ou Parquet, usam `interface="entity"` e normalmente ativam `observation_bundles.entity_demand_response`.
+
+| Coluna | Unidade/dominio | O que e |
+|---|---:|---|
+| `request_id` | string | ID unico do pedido. |
+| `issuer` | `dso`/`tso` | Emissor do pedido. |
+| `direction` | `up`/`down` | Perspetiva da carga: `up` aumenta net load, `down` reduz net load. |
+| `start_time_step`, `end_time_step` | timestep global | Janela inclusiva de ativacao. |
+| `target_power_kw` | kW | Target positivo da comunidade/district. |
+| `activation_price_eur_per_kwh` | currency/kWh | Pagamento pela energia entregue creditada. |
+| `shortfall_penalty_eur_per_kwh` | currency/kWh | Penalizacao por energia em shortfall. |
+| `tolerance_power_kw` | kW | Tolerancia opcional; default `0`. |
+
+Na v1 o simulador calcula uma baseline congelada no inicio do evento a partir dos `baseline_window_seconds` anteriores, liquida apenas steps ativos e guarda historico esparso em vez de arrays densos por timestep.
 
 ## Performance e Loader
 
@@ -212,6 +233,7 @@ Outros schemas mantem o comportamento compativel por default salvo se declararem
 3. Decidir PV `absolute` ou `per_kw`.
 4. Garantir que EV schedule usa countdowns em timesteps da resolucao.
 5. Escrever deferrables em catalogo + schedule.
-6. Preferir Parquet para datasets anuais/sub-minuto.
-7. Correr smoke run e `evaluate_v2()`.
-8. Correr `audit_physics.py` quando o dataset for novo ou critico.
+6. Para demand response, escrever ficheiro esparso de pedidos e ativar entity mode mais `entity_demand_response`.
+7. Preferir Parquet para datasets anuais/sub-minuto.
+8. Correr smoke run e `evaluate_v2()`.
+9. Correr `audit_physics.py` quando o dataset for novo ou critico.

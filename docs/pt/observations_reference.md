@@ -184,10 +184,22 @@ Entity mode retorna tabelas. As features disponiveis dependem do schema, dos ass
 | `active_chargers_count` | `entity_community_operational` | count | Chargers ativos. |
 | `active_evs_count` | `entity_community_operational` | count | EVs ativos. |
 | `topology_version` | `entity_community_operational` | count | Versao da topologia. |
+| `dr_active` | `entity_demand_response` | binario | Se existe pedido demand response ativo neste timestep. |
+| `dr_issuer_code` | `entity_demand_response` | enum | Codigo do issuer: `1=dso`, `2=tso`, `0=nenhum/desconhecido`. |
+| `dr_direction` | `entity_demand_response` | enum | Direcao na perspetiva da carga: `1=up`, `-1=down`, `0=nenhuma`. |
+| `dr_target_power_kw` | `entity_demand_response` | kW | Target district do pedido ativo. |
+| `dr_baseline_power_kw` | `entity_demand_response` | kW | Baseline net power congelado do pedido ativo quando valido. |
+| `dr_time_remaining_hours` | `entity_demand_response` | h | Tempo restante na janela inclusiva de ativacao. |
+| `dr_activation_price_eur_per_kwh` | `entity_demand_response` | currency/kWh | Preco creditado por energia entregue. |
+| `dr_shortfall_penalty_eur_per_kwh` | `entity_demand_response` | currency/kWh | Penalizacao por energia em shortfall. |
+| `dr_previous_delivered_power_kw` | `entity_demand_response` | kW | Potencia entregue liquidada no step DR ativo anterior. |
+| `dr_previous_shortfall_power_kw` | `entity_demand_response` | kW | Shortfall liquidado no step DR ativo anterior. |
 | `community_net_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Lag 1 da net community. |
 | `community_net_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | Media curta da net community. |
 | `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binario | Calendario robusto; `time_step` cru fica apenas em `meta`. |
 | `forecast_price_next_*`, `forecast_community_{load,pv,net}_next_*` | `entity_forecasts_derived` | varia | Forecasts pontuais perfeitos a 15m/1h/3h/6h/24h. |
+
+O `request_id` e validade da baseline de demand response ficam em `observations["meta"]["demand_response"]`, nao como colunas numericas.
 
 ## Tabela `building`
 

@@ -83,6 +83,11 @@ class CityLearnBusinessAsUsualBaselineService:
         end = int(getattr(env.episode_tracker, 'episode_end_time_step', max(start, getattr(env, 'time_steps', 1) - 1)) or start)
         episode_steps = int(getattr(env.episode_tracker, 'episode_time_steps', max(end - start + 1, 1)) or max(end - start + 1, 1))
 
+        requires_entity_interface = (
+            getattr(env, 'topology_mode', None) == 'dynamic'
+            or bool(getattr(getattr(env, '_demand_response_service', None), 'enabled', False))
+        )
+
         baseline_env = env.__class__(
             schema,
             root_directory=getattr(env, 'root_directory', None),
@@ -98,7 +103,7 @@ class CityLearnBusinessAsUsualBaselineService:
             random_seed=getattr(env, 'random_seed', None),
             offline=getattr(env, 'offline', False),
             time_step_ratio=getattr(env, 'time_step_ratio', None),
-            interface='entity' if getattr(env, 'topology_mode', None) == 'dynamic' else 'flat',
+            interface='entity' if requires_entity_interface else 'flat',
             topology_mode=getattr(env, 'topology_mode', None),
             render_mode='none',
             export_kpis_on_episode_end=False,

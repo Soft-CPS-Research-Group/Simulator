@@ -16,6 +16,7 @@ Portuguese version: [pt/features.md](pt/features.md).
 | PV | Generation in normalized per-kW mode or absolute measured-energy mode. |
 | EVs and chargers | Charger-centric schedules, connected/incoming EVs, V2G-capable action path. |
 | Deferrable appliances | Normalized cycles, flexibility windows and service KPIs. |
+| Demand response | Dataset-driven DSO/TSO flexibility requests with entity observations, settlement and KPIs. |
 
 ## Physics and Units
 
@@ -36,6 +37,7 @@ Portuguese version: [pt/features.md](pt/features.md).
 | Relational edges | Ready for GraphRL/GNN models. |
 | Stable IDs | Enables memory per entity and dynamic topology. |
 | Observation bundles | Controls the richness and cost of observations. |
+| Demand response bundle | Adds active request, baseline, prices and previous delivery/shortfall to the district table. |
 | Machine-readable specs | `env.entity_specs` exposes IDs, features, units and bundles. |
 | Observation copies | Prevents agents from mutating internal simulator state by accident. |
 

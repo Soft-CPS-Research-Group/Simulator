@@ -1,6 +1,6 @@
 # Schema Reference
 
-Esta pagina documenta o contrato do `schema.json`. O schema e a fonte oficial para construir buildings, dispositivos, EVs, appliances, modos de interface, topology dynamic, bundles e mercado.
+Esta pagina documenta o contrato do `schema.json`. O schema e a fonte oficial para construir buildings, dispositivos, EVs, appliances, modos de interface, demand response, topology dynamic, bundles e mercado.
 
 ## Regras Gerais
 
@@ -38,6 +38,7 @@ Esta pagina documenta o contrato do `schema.json`. O schema e a fonte oficial pa
 | `observation_bundles` | object | nao | Bundles adicionais da entity interface. |
 | `topology_mode` | `static`/`dynamic` | nao | Ativa eventos dinamicos. |
 | `topology_events` | list | se dynamic | Eventos add/remove. |
+| `demand_response` | object | nao | Pedidos DSO/TSO de flexibilidade e settlement orientados por dataset. |
 | `community_market` | object | nao | Mercado local e KPIs associados. |
 | `ev_departure_within_tolerance` | float | nao | Tolerancia simetrica de accuracy do SOC no departure, default `0.05`. |
 | `ev_departure_service_tolerance` | float | nao | Tolerancia inferior de servico EV minimo no departure, default `0.05`. |
@@ -95,6 +96,7 @@ Usado apenas na entity interface.
   "entity_community_operational": true,
   "entity_forecasts_existing": false,
   "entity_forecasts_derived": false,
+  "entity_demand_response": false,
   "entity_action_feedback": false,
   "entity_temporal_derived": true
 }
@@ -107,6 +109,7 @@ Usado apenas na entity interface.
 | `entity_community_operational` | `false` | Agregados district/community, headrooms, counts e topology version. |
 | `entity_forecasts_existing` | `false` | Forecasts ja existentes no dataset. |
 | `entity_forecasts_derived` | `false` | Forecasts pontuais compactos para preco, load, PV e net demand. |
+| `entity_demand_response` | `false` | Estado do pedido DR district, baseline congelado e delivery/shortfall do step anterior. |
 | `entity_temporal_derived` | `false` | Lags, medias curtas e calendario sin/cos. |
 | `entity_action_feedback` | `false` | Acao pedida, limitada e aplicada, mais flags de clipping. |
 
@@ -325,6 +328,51 @@ O standby loss das baterias EV fica isolado dos defaults de storage estacionario
 
 Remover `deferrable_appliance` cancela ciclos pendentes/running e limpa consumo futuro. Remover PV cria PV zero. Remover storage cria BESS zero.
 
+## Demand Response
+
+Demand response v1 e orientado por dataset e entity-only. O agente observa pedidos de flexibilidade ao nivel district e responde atraves das acoes fisicas existentes, como storage, EVs e cargas flexiveis.
+
+```json
+"demand_response": {
+  "enabled": true,
+  "requests_file": "demand_response_requests.csv",
+  "baseline_method": "rolling_pre_event_average",
+  "baseline_window_seconds": 3600,
+  "allow_overlapping_requests": false
+}
+```
+
+| Campo | Default | O que faz |
+|---|---:|---|
+| `enabled` | `false` | Ativa leitura de pedidos DR, observacoes, settlement e KPIs. |
+| `requests_file` | obrigatorio quando ativo | Ficheiro CSV ou Parquet relativo a `root_directory` ou a pasta do schema. |
+| `baseline_method` | `rolling_pre_event_average` | Metodo de baseline. Este e o unico metodo v1. |
+| `baseline_window_seconds` | `3600` | Janela historica pre-evento usada para calcular baseline congelado. |
+| `allow_overlapping_requests` | `false` | Pedidos sobrepostos sao rejeitados na v1. |
+
+Colunas do ficheiro de pedidos:
+
+| Coluna | Unidade/dominio | O que e |
+|---|---:|---|
+| `request_id` | string | ID unico do pedido. Exposto em `meta`. |
+| `issuer` | `dso`/`tso` | Entidade que emitiu o pedido. |
+| `direction` | `up`/`down` | Perspetiva da carga: `up` aumenta net load, `down` reduz net load. |
+| `start_time_step`, `end_time_step` | timestep global | Janela inclusiva de ativacao. |
+| `target_power_kw` | kW | Target positivo ao nivel district. |
+| `activation_price_eur_per_kwh` | currency/kWh | Preco creditado pela entrega. |
+| `shortfall_penalty_eur_per_kwh` | currency/kWh | Penalizacao por shortfall. |
+| `tolerance_power_kw` | kW | Tolerancia opcional; default `0`. |
+
+Quando ativo, ativar tambem o bundle:
+
+```json
+"observation_bundles": {
+  "entity_demand_response": true
+}
+```
+
+As features numericas entram na tabela entity `district`. O `request_id` ativo fica em `observations["meta"]["demand_response"]`, nao numa matriz numerica.
+
 ## Community Market
 
 ```json
@@ -360,6 +408,7 @@ Remover `deferrable_appliance` cancela ciclos pendentes/running e limpa consumo 
 | Treino flat classico | `interface` omitido ou `flat`, `topology_mode` omitido ou `static`. |
 | Entity para GNN/Transformer | `interface="entity"`, bundles conforme necessidade. |
 | Topologia dinamica | `interface="entity"`, `topology_mode="dynamic"`, `topology_events`. |
+| Demand response | `interface="entity"`, `demand_response.enabled=true`, bundle `entity_demand_response`. |
 | Datasets reais PV absoluto | `pv.attributes.generation_mode="absolute"`. |
 | 15 segundos | `seconds_per_time_step=15` e ficheiros ja nessa cadencia. |
 | Parquet pesado | Trocar paths `.csv` por `.parquet` mantendo colunas. |

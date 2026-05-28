@@ -1,6 +1,6 @@
 # CityLearn
 
-CityLearn is an open-source Farama Foundation Gymnasium environment for building energy coordination, demand response and multi-agent reinforcement learning. This repository is a research fork that extends the upstream simulator with EVs, normalized deferrable appliances, sub-hourly physics, entity observations, dynamic topology, three-phase electrical service, community KPIs and performance work for large datasets.
+CityLearn is an open-source Farama Foundation Gymnasium environment for building energy coordination, demand response and multi-agent reinforcement learning. This repository is a research fork that extends the upstream simulator with EVs, normalized deferrable appliances, sub-hourly physics, entity observations, dataset-driven demand response, dynamic topology, three-phase electrical service, community KPIs and performance work for large datasets.
 
 Package name:
 
@@ -48,6 +48,7 @@ Additional reference: [KPI v2 naming tree](docs/KPI_V2_TREE.md).
 | Interfaces | Flat Gymnasium vectors and entity tables/edges for offline RL, GraphRL and Transformers. |
 | Entity RL observations | Forecast bundles, physical deadline pressure, feasible action capacity and requested/limited/applied action feedback. |
 | Dynamic topology | Add/remove buildings and assets during simulation in entity mode. |
+| Demand response | Dataset-driven DSO/TSO flexibility requests in entity observations, with settlement and KPIs. |
 | Three phase | Phase connections, headroom, phase power, violations and phase KPIs. |
 | Community market | Local settlement, import weights, savings and self-consumption KPIs. |
 | Performance | Windowed loading, shared weather/pricing/carbon cache, runtime profiling and Parquet for large 15s datasets. |
@@ -98,6 +99,15 @@ env = CityLearnEnv(
     "data/datasets/citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet/schema.json",
     interface="entity",
     topology_mode="dynamic",
+)
+```
+
+Demand response dataset:
+
+```python
+env = CityLearnEnv(
+    "data/datasets/citylearn_challenge_2022_phase_all_demand_response/schema.json",
+    interface="entity",
 )
 ```
 

@@ -2672,6 +2672,34 @@ class CityLearnKPIService:
                         share,
                     )
 
+        demand_response_service = getattr(env, '_demand_response_service', None)
+        if getattr(demand_response_service, 'enabled', False):
+            dr_by_building, dr_district = demand_response_service.summarize(building_names)
+
+            def dr_name(level: str, suffix: str) -> str:
+                return f'{level}_demand_response_{suffix}'
+
+            dr_metrics = [
+                ('events_count', 'demand_response_events_count'),
+                ('active_time_step_count', 'demand_response_active_time_step_count'),
+                ('requested_total_kwh', 'demand_response_requested_total_kwh'),
+                ('delivered_total_kwh', 'demand_response_delivered_total_kwh'),
+                ('shortfall_total_kwh', 'demand_response_shortfall_total_kwh'),
+                ('compliance_ratio', 'demand_response_compliance_ratio'),
+                ('revenue_total_eur', 'demand_response_revenue_total_eur'),
+                ('penalty_total_eur', 'demand_response_penalty_total_eur'),
+                ('net_revenue_total_eur', 'demand_response_net_revenue_total_eur'),
+                ('invalid_baseline_time_step_count', 'demand_response_invalid_baseline_time_step_count'),
+            ]
+
+            for suffix, key in dr_metrics:
+                put('district', 'District', dr_name('district', suffix), dr_district.get(key))
+
+            for building_name in building_names:
+                totals = dr_by_building.get(building_name, {})
+                for suffix, key in dr_metrics:
+                    put('building', building_name, dr_name('building', suffix), totals.get(key))
+
         # Export ratio_to_baseline is derived from totals with safe division.
         for building in kpi_buildings:
             control_cond, baseline_cond = self._default_building_conditions(

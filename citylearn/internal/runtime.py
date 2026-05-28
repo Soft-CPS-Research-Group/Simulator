@@ -214,6 +214,12 @@ class CityLearnRuntimeService:
             timings['update_variables_time'] = time.perf_counter() - timer_start
             timings.update(getattr(env, '_last_update_variables_debug_timing', {}))
 
+        timer_start = time.perf_counter() if debug_timing else 0.0
+        if getattr(getattr(env, '_demand_response_service', None), 'enabled', False):
+            env._demand_response_service.settle_current_time_step()
+        if debug_timing:
+            timings['demand_response_settlement_time'] = time.perf_counter() - timer_start
+
         if bool(getattr(env, 'physics_invariant_checks', False)):
             timer_start = time.perf_counter() if debug_timing else 0.0
             env._physics_invariant_service.assert_step_invariants(int(env.time_step))
@@ -420,6 +426,8 @@ class CityLearnRuntimeService:
             building.apply_actions(**building_actions)
 
         self.update_variables()
+        if getattr(getattr(env, '_demand_response_service', None), 'enabled', False):
+            env._demand_response_service.settle_current_time_step()
         if bool(getattr(env, 'physics_invariant_checks', False)):
             env._physics_invariant_service.assert_step_invariants(int(env.time_step))
 

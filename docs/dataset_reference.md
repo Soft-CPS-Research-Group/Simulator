@@ -1,6 +1,6 @@
 # Dataset Reference
 
-This page explains how to build simulator-compatible datasets, including CSV, Parquet, real power data in kW, EVs, absolute PV and normalized deferrable appliances.
+This page explains how to build simulator-compatible datasets, including CSV, Parquet, real power data in kW, EVs, absolute PV, normalized deferrable appliances and demand-response requests.
 
 Portuguese version: [pt/dataset_reference.md](pt/dataset_reference.md).
 
@@ -23,6 +23,8 @@ CSV and Parquet are interchangeable when the schema path is updated and columns,
 | BESS and charger power limits | kW |
 | EV required/estimated SOC in charger files | percent in the raw file, converted to ratio internally |
 | Prices | currency/kWh |
+| DR request target power | kW |
+| DR request prices and penalties | currency/kWh |
 | Carbon intensity | kgCO2/kWh |
 | Weather temperature | C |
 | Irradiance | W/m2 |
@@ -101,8 +103,26 @@ The packaged 15-second entity datasets and `citylearn_challenge_2022_phase_all_p
 | `entity_forecasts_derived` | Compact simulator-perfect point forecasts for price, load, PV and net demand. |
 | `entity_temporal_derived` | Robust calendar and short lag features. |
 | `entity_action_feedback` | Requested, limited and applied action feedback with clipping reasons. |
+| `entity_demand_response` | Current district demand-response request, baseline and previous delivery/shortfall. |
 
 Other schemas keep the default-compatible behavior unless they declare `observation_bundles`.
+
+## Demand Response Request Files
+
+Demand-response datasets set `schema["demand_response"]["enabled"] = true`, point `requests_file` to a CSV or Parquet file, use `interface="entity"` and normally enable `observation_bundles.entity_demand_response`.
+
+| Column | Unit/domain | Meaning |
+|---|---:|---|
+| `request_id` | string | Unique request ID. |
+| `issuer` | `dso`/`tso` | Request issuer. |
+| `direction` | `up`/`down` | Load perspective: `up` increases net load, `down` reduces net load. |
+| `start_time_step`, `end_time_step` | global timestep | Inclusive activation window. |
+| `target_power_kw` | kW | Positive community/district power target. |
+| `activation_price_eur_per_kwh` | currency/kWh | Payment for credited delivered energy. |
+| `shortfall_penalty_eur_per_kwh` | currency/kWh | Penalty for shortfall energy. |
+| `tolerance_power_kw` | kW | Optional tolerance; defaults to `0`. |
+
+The v1 simulator computes a frozen baseline at event start from the previous `baseline_window_seconds`, settles only active request steps, and keeps history sparse instead of writing dense per-timestep arrays.
 
 ## Deferrable Appliances
 
@@ -168,6 +188,7 @@ For real production datasets, `absolute` is the recommended mode.
 | Large files | Prefer Parquet. |
 | Pre-training smoke test | Run a short window and call `evaluate_v2()`. |
 | Compact dynamic-assets example | `data/datasets/citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet/schema.json` contains 7 days at 15s with charger, PV and BESS add/remove events. |
+| Demand-response example | `data/datasets/citylearn_challenge_2022_phase_all_demand_response/schema.json` contains 2022 phase-all buildings without EVs plus district DR requests. |
 
 ## Performance and Loader Behavior
 
@@ -185,6 +206,7 @@ For real production datasets, `absolute` is the recommended mode.
 3. Choose PV `absolute` or `per_kw`.
 4. Ensure EV schedules use countdowns in dataset timesteps.
 5. Write deferrables as catalog plus schedule.
-6. Prefer Parquet for annual or sub-minute datasets.
-7. Run a smoke episode and `evaluate_v2()`.
-8. Run `audit_physics.py` for new critical datasets.
+6. For demand response, write a sparse request file and enable entity mode plus `entity_demand_response`.
+7. Prefer Parquet for annual or sub-minute datasets.
+8. Run a smoke episode and `evaluate_v2()`.
+9. Run `audit_physics.py` for new critical datasets.

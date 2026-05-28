@@ -7,7 +7,7 @@ All KPI names in `evaluate_v2()` follow:
 `level_family_subfamily_metric_variant_unit`
 
 - `level`: `building` or `district`
-- `family`: `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`
+- `family`: `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`, `demand_response`
 - `subfamily`: e.g. `total`, `daily_average`, `ratio_to_baseline`, `shape_quality`, `community_market`, `events`, `performance`, `health`, `violations`, `imbalance`, `phase_peaks`, `benefit`, `distribution`, `discomfort`, `resilience`
 - `variant`: optional (e.g. `control`, `baseline`, `delta`, `min`, `max`, `average`, `total`, `daily_average`)
 - `unit`: optional and always at the end (e.g. `eur`, `kwh`, `kgco2`, `kw`, `count`, `percent`, `ratio`, `c`)
@@ -21,6 +21,7 @@ Examples:
 - `district_energy_grid_community_market_local_traded_total_kwh`
 - `district_solar_self_consumption_total_generation_kwh`
 - `district_solar_self_consumption_community_market_import_share_ratio`
+- `district_demand_response_net_revenue_total_eur`
 
 ---
 
@@ -167,6 +168,18 @@ Community market (conditional):
 - `district_comfort_resilience_resilience_unserved_energy_outage_normalized_ratio`
 - `district_comfort_resilience_resilience_unserved_energy_annual_normalized_ratio`
 
+### `demand_response`
+- `district_demand_response_events_count`
+- `district_demand_response_active_time_step_count`
+- `district_demand_response_requested_total_kwh`
+- `district_demand_response_delivered_total_kwh`
+- `district_demand_response_shortfall_total_kwh`
+- `district_demand_response_compliance_ratio`
+- `district_demand_response_revenue_total_eur`
+- `district_demand_response_penalty_total_eur`
+- `district_demand_response_net_revenue_total_eur`
+- `district_demand_response_invalid_baseline_time_step_count`
+
 ---
 
 ## B1 (Single Building)
@@ -186,6 +199,7 @@ Main pattern examples:
 - `building_ev_performance_departure_within_tolerance_ratio`
 - `building_ev_events_departure_target_infeasible_count`
 - `building_ev_performance_departure_min_acceptable_feasible_ratio`
+- `building_demand_response_net_revenue_total_eur`
 
 ---
 

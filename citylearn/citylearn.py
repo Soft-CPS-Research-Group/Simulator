@@ -26,6 +26,7 @@ from citylearn.internal.physics_invariants import CityLearnPhysicsInvariantServi
 from citylearn.internal.runtime import CityLearnRuntimeService
 from citylearn.internal.entity_interface import CityLearnEntityInterfaceService
 from citylearn.internal.topology import CityLearnTopologyService
+from citylearn.internal.demand_response import CityLearnDemandResponseService
 from citylearn.utilities import parse_bool
 from citylearn.reward_function import (
     MultiBuildingRewardFunction,
@@ -285,6 +286,7 @@ class CityLearnEnv(Environment, Env):
         self._physics_invariant_service = CityLearnPhysicsInvariantService(self)
         self._entity_service = CityLearnEntityInterfaceService(self)
         self._topology_service = CityLearnTopologyService(self)
+        self._demand_response_service = CityLearnDemandResponseService(self)
         root_directory, buildings, electric_vehicles, episode_time_steps, rolling_episode_split, random_episode_split, \
             seconds_per_time_step, reward_function, central_agent, shared_observations, episode_tracker = self._load(
                 deepcopy(self.schema),
@@ -320,6 +322,7 @@ class CityLearnEnv(Environment, Env):
         else:
             self.buildings = buildings
             self.electric_vehicles = electric_vehicles
+        self._demand_response_service.initialize()
         reference_buildings = self.buildings if len(self.buildings) > 0 else self._all_buildings
         get_time_step_ratio = reference_buildings[0].time_step_ratio if len(reference_buildings) > 0 else 1.0
         self.time_step_ratio = get_time_step_ratio
@@ -1274,6 +1277,7 @@ class CityLearnEnv(Environment, Env):
                 },
                 'matching_granularity': 'aggregate_building',
             },
+            'demand_response': self._demand_response_service.get_metadata(),
             'entity_specs': self._entity_service.specs if self.interface == 'entity' else None,
             'buildings': [b.get_metadata() for b in self.buildings],
         }
@@ -1534,6 +1538,7 @@ class CityLearnEnv(Environment, Env):
             for ev in self.electric_vehicles:
                 ev.reset()
 
+        self._demand_response_service.reset()
         self.associate_chargers_to_electric_vehicles()
 
         # reset reward function (does nothing by default)
