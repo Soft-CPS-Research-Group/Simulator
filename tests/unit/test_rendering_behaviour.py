@@ -278,6 +278,40 @@ def test_during_mode_can_disable_auto_kpi_export(tmp_path):
         env.close()
 
 
+def test_agent_learn_exports_only_final_episode_by_default(tmp_path, monkeypatch):
+    env = CityLearnEnv(
+        str(DATASET),
+        central_agent=True,
+        episode_time_steps=4,
+        render_mode="during",
+        render_directory=tmp_path,
+        random_seed=0,
+    )
+    export_calls = []
+    original_export_final_kpis = env.export_final_kpis
+
+    def _export_final_kpis(*args, **kwargs):
+        export_calls.append(env.episode_tracker.episode)
+        return original_export_final_kpis(*args, **kwargs)
+
+    monkeypatch.setattr(env, "export_final_kpis", _export_final_kpis)
+
+    try:
+        controller = Agent(env)
+        controller.learn(episodes=2, logging_level=50)
+
+        outputs_path = Path(env.new_folder_path)
+        assert export_calls == [1]
+        assert not any(outputs_path.glob("exported_data_*_ep0.csv"))
+        assert (outputs_path / "exported_data_community_ep1.csv").is_file()
+        assert (outputs_path / "exported_data_business_as_usual_ep1.csv").is_file()
+        assert not (outputs_path / "exported_data_business_as_usual_ep0.csv").exists()
+        assert (outputs_path / "exported_kpis.csv").is_file()
+    finally:
+        _cleanup_env(env)
+        env.close()
+
+
 def test_parquet_render_format_writes_chunked_exports_and_kpis(tmp_path):
     pd = pytest.importorskip("pandas")
     pytest.importorskip("pyarrow")

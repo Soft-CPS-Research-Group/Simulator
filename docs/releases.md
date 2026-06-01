@@ -60,6 +60,55 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.0 - 2026-06-01
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Minor release aligning simulator exports with the EnergAIze job scorecard and reducing multi-episode export overhead. Planned training runs now export only the final episode by default, and v2 KPIs include the scorecard rows needed for direct UI comparison against BAU.
+
+### Added
+
+- `CityLearnKPIService.SCORECARD_DEFAULT_KPIS`, an explicit contract for the KPIs consumed by the job scorecard.
+- Business-as-usual and delta rows for solar self-consumption ratio at district and building levels.
+- Business-as-usual and delta rows for solar generation/export totals and daily averages.
+- `export_only_final_episode` environment setting, defaulting to `true`, plus final-episode export planning for `Agent.learn(episodes=...)` and CLI training.
+- Regression coverage proving default `evaluate_v2()` exports the scorecard KPI contract.
+- Regression coverage proving a planned two-episode training run exports only the final episode's timeseries, KPIs and BAU audit.
+
+### Changed
+
+- Automatic render exports, final KPI exports and BAU timeseries exports are skipped for non-final episodes in planned multi-episode runs.
+- Skipped intermediate episodes no longer calculate or write final KPIs/BAU, reducing runtime and disk usage for training jobs.
+- Manual `export_final_kpis()`, direct `evaluate_v2()` calls and unplanned reset/step loops keep their existing behavior.
+
+### Fixed
+
+- Solar self-consumption can now be compared against BAU when the simulator exports BAU rows, instead of showing only the policy value.
+
+### Dataset/Schema Impact
+
+- New optional top-level schema setting: `export_only_final_episode`.
+- Existing datasets need no changes; the default is `true`.
+- KPI v2 output is additive: existing KPI names remain, and new BAU/delta solar self-consumption rows are added.
+
+### Compatibility
+
+- Planned multi-episode training with automatic exports now writes only the final episode by default. Set `export_only_final_episode=false` to restore per-episode automatic exports.
+- Single-episode jobs, manual exports and manual evaluation remain compatible.
+
+### Validation
+
+- `.venv/bin/pytest -q`: pass, `395 passed, 18 warnings`
+- `git diff --check`: pass
+- `.venv/bin/python -m compileall -q citylearn/__main__.py citylearn/agents/base.py citylearn/citylearn.py citylearn/exporter.py citylearn/internal/runtime.py citylearn/internal/kpi.py citylearn/__init__.py`: pass
+
+### Migration Notes
+
+- For training jobs, consume `exported_kpis.csv` and `exported_data_*_epN.*` from the final planned episode.
+- If downstream tooling expects every episode to be exported, set `export_only_final_episode=false` in the schema or environment kwargs.
+
 ## v1.4.0 - 2026-05-28
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

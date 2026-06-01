@@ -142,6 +142,8 @@ class CityLearnEnv(Environment, Env):
     export_kpis_on_episode_end: bool, optional
         Whether to automatically export ``exported_kpis.csv`` when an episode terminates.
         If not provided, defaults to the effective rendering setting (enabled when rendering is enabled).
+    export_only_final_episode: bool, optional
+        Whether automatic exports should run only on the final planned episode. Defaults to ``True``.
     ev_departure_within_tolerance: float, optional
         Symmetric SOC target accuracy tolerance used by EV departure within-tolerance KPIs. Defaults to ``0.05``.
     ev_departure_service_tolerance: float, optional
@@ -174,6 +176,7 @@ class CityLearnEnv(Environment, Env):
         render_flag = kwargs.pop('render', None)
         render_file_format = kwargs.pop('render_file_format', None)
         render_chunk_size = kwargs.pop('render_chunk_size', None)
+        export_only_final_episode = kwargs.pop('export_only_final_episode', None)
         kw_export_kpis_on_episode_end = kwargs.pop('export_kpis_on_episode_end', None)
         if kw_export_kpis_on_episode_end is not None and export_kpis_on_episode_end is None:
             export_kpis_on_episode_end = kw_export_kpis_on_episode_end
@@ -209,11 +212,18 @@ class CityLearnEnv(Environment, Env):
         schema_render_file_format = self.schema.get('render_file_format') if isinstance(self.schema, dict) else None
         schema_render_chunk_size = self.schema.get('render_chunk_size') if isinstance(self.schema, dict) else None
         schema_export_kpis = self.schema.get('export_kpis_on_episode_end') if isinstance(self.schema, dict) else None
+        schema_export_only_final_episode = self.schema.get('export_only_final_episode') if isinstance(self.schema, dict) else None
         if schema_export_kpis is not None and export_kpis_on_episode_end is None:
             export_kpis_on_episode_end = parse_bool(
                 schema_export_kpis,
                 default=False,
                 path='export_kpis_on_episode_end',
+            )
+        if schema_export_only_final_episode is not None and export_only_final_episode is None:
+            export_only_final_episode = parse_bool(
+                schema_export_only_final_episode,
+                default=True,
+                path='export_only_final_episode',
             )
         if schema_render_mode is not None:
             requested_render_mode = str(schema_render_mode).lower()
@@ -267,6 +277,7 @@ class CityLearnEnv(Environment, Env):
         self.current_day = self._render_start_date.day
         self.year = self._render_start_date.year
         self._final_kpis_exported = False
+        self._final_export_episode_index = None
         self.__rewards = None
         self.buildings = []
         self.random_seed = self.schema.get('random_seed', None) if random_seed is None else random_seed
@@ -363,6 +374,11 @@ class CityLearnEnv(Environment, Env):
                 path='export_kpis_on_episode_end',
             )
         self.export_kpis_on_episode_end = export_kpis_on_episode_end
+        self.export_only_final_episode = True if export_only_final_episode is None else parse_bool(
+            export_only_final_episode,
+            default=True,
+            path='export_only_final_episode',
+        )
 
         # reset environment and initializes episode time steps
         self.reset()
@@ -431,6 +447,12 @@ class CityLearnEnv(Environment, Env):
         """Whether KPIs are exported automatically when an episode terminates."""
 
         return getattr(self, '_CityLearnEnv__export_kpis_on_episode_end', False)
+
+    @property
+    def export_only_final_episode(self) -> bool:
+        """Whether automatic exports are limited to the final planned episode."""
+
+        return getattr(self, '_CityLearnEnv__export_only_final_episode', True)
 
     @property
     def root_directory(self) -> Union[str, Path]:
@@ -1173,6 +1195,10 @@ class CityLearnEnv(Environment, Env):
     def export_kpis_on_episode_end(self, enabled: bool):
         self.__export_kpis_on_episode_end = bool(enabled)
 
+    @export_only_final_episode.setter
+    def export_only_final_episode(self, enabled: bool):
+        self.__export_only_final_episode = bool(enabled)
+
     @root_directory.setter
     def root_directory(self, root_directory: Union[str, Path]):
         self.__root_directory = root_directory
@@ -1435,6 +1461,34 @@ class CityLearnEnv(Environment, Env):
             export_business_as_usual_timeseries=export_business_as_usual_timeseries,
             kpi_round_decimals=kpi_round_decimals,
         )
+
+    def plan_final_episode_exports(self, episodes: int = None):
+        """Plan automatic exports for the final episode in the next ``episodes`` resets."""
+
+        previous = getattr(self, '_final_export_episode_index', None)
+
+        if episodes is None:
+            self._final_export_episode_index = None
+            return previous
+
+        episodes = int(episodes)
+        if episodes <= 0:
+            raise ValueError(f'episodes must be >= 1, got {episodes}.')
+
+        current_episode = int(getattr(self.episode_tracker, 'episode', -1))
+        self._final_export_episode_index = current_episode + episodes
+        return previous
+
+    def _should_export_current_episode(self) -> bool:
+        if not self.export_only_final_episode:
+            return True
+
+        final_episode_index = getattr(self, '_final_export_episode_index', None)
+        if final_episode_index is None:
+            return True
+
+        current_episode = int(getattr(self.episode_tracker, 'episode', -1))
+        return current_episode >= int(final_episode_index)
 
     def render(self):
         """Render current state of the environment to CSV outputs."""

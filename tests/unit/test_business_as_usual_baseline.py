@@ -191,6 +191,8 @@ def test_evaluate_v2_adds_business_as_usual_rows_and_can_disable_them():
         assert "district_cost_total_business_as_usual_eur" in set(with_bau["cost_function"])
         assert "district_energy_grid_ratio_to_business_as_usual_import_total_ratio" in set(with_bau["cost_function"])
         assert "district_ev_total_charge_business_as_usual_kwh" in set(with_bau["cost_function"])
+        assert "district_solar_self_consumption_ratio_self_consumption_business_as_usual_ratio" in set(with_bau["cost_function"])
+        assert "building_solar_self_consumption_ratio_self_consumption_business_as_usual_ratio" in set(with_bau["cost_function"])
 
         cache_before = env.run_business_as_usual_baseline()
         cache_after = env.run_business_as_usual_baseline()

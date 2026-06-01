@@ -58,6 +58,55 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.0 - 2026-06-01
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Minor release que alinha os exports do simulador com o scorecard de jobs do EnergAIze e reduz overhead em treinos multi-episodio. Runs planeadas passam a exportar apenas o ultimo episodio por default, e os KPIs v2 passam a incluir as linhas de scorecard necessarias para comparacao direta contra BAU.
+
+### Added
+
+- `CityLearnKPIService.SCORECARD_DEFAULT_KPIS`, contrato explicito dos KPIs consumidos pelo scorecard de jobs.
+- Linhas business-as-usual e delta para o ratio de solar self-consumption em district e building.
+- Linhas business-as-usual e delta para totais e medias diarias de solar generation/export.
+- Setting de ambiente `export_only_final_episode`, com default `true`, e planeamento do export final para `Agent.learn(episodes=...)` e treino via CLI.
+- Teste de regressao que garante que `evaluate_v2()` default exporta o contrato KPI do scorecard.
+- Teste de regressao que garante que um treino planeado de dois episodios exporta apenas timeseries, KPIs e auditoria BAU do episodio final.
+
+### Changed
+
+- Exports automaticos de render, KPIs finais e timeseries BAU sao ignorados nos episodios nao finais em runs multi-episodio planeadas.
+- Episodios intermedios ignorados deixam de calcular ou escrever KPIs finais/BAU, reduzindo runtime e uso de disco em jobs de treino.
+- `export_final_kpis()` manual, chamadas diretas a `evaluate_v2()` e ciclos reset/step nao planeados mantem o comportamento anterior.
+
+### Fixed
+
+- Solar self-consumption passa a poder ser comparado contra BAU quando o simulador exporta linhas BAU, em vez de expor apenas o valor da policy.
+
+### Dataset/Schema Impact
+
+- Novo setting top-level opcional: `export_only_final_episode`.
+- Datasets existentes nao precisam de alteracoes; o default e `true`.
+- Output KPI v2 e aditivo: nomes KPI existentes mantem-se, e sao adicionadas novas linhas BAU/delta para solar self-consumption.
+
+### Compatibility
+
+- Treino multi-episodio planeado com exports automaticos passa a escrever apenas o episodio final por default. Definir `export_only_final_episode=false` para voltar a exports automaticos por episodio.
+- Jobs de episodio unico, exports manuais e avaliacao manual mantem compatibilidade.
+
+### Validation
+
+- `.venv/bin/pytest -q`: pass, `395 passed, 18 warnings`
+- `git diff --check`: pass
+- `.venv/bin/python -m compileall -q citylearn/__main__.py citylearn/agents/base.py citylearn/citylearn.py citylearn/exporter.py citylearn/internal/runtime.py citylearn/internal/kpi.py citylearn/__init__.py`: pass
+
+### Migration Notes
+
+- Em jobs de treino, consumir `exported_kpis.csv` e `exported_data_*_epN.*` do ultimo episodio planeado.
+- Se tooling downstream esperar export de todos os episodios, definir `export_only_final_episode=false` no schema ou nos kwargs do ambiente.
+
 ## v1.4.0 - 2026-05-28
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

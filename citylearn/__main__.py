@@ -289,15 +289,24 @@ class Simulator:
     def __train(self, episodes: int):
         kwargs = {}
         self.__train_start_timestamp = datetime.datetime.now(datetime.UTC)
+        env = self.env.unwrapped
+        previous_final_export_episode_index = (
+            env.plan_final_episode_exports(episodes)
+            if hasattr(env, 'plan_final_episode_exports') else None
+        )
 
-        if isinstance(self.agent, CityLearnAgent):
-            kwargs = {**kwargs, 'episodes': episodes}
-            self.agent.learn(**kwargs)
-        
-        else:
-            kwargs = {**kwargs, 'total_timesteps': episodes*self.env.unwrapped.time_steps}
-            self.agent = self.agent.learn(**kwargs)
-        
+        try:
+            if isinstance(self.agent, CityLearnAgent):
+                kwargs = {**kwargs, 'episodes': episodes}
+                self.agent.learn(**kwargs)
+
+            else:
+                kwargs = {**kwargs, 'total_timesteps': episodes*self.env.unwrapped.time_steps}
+                self.agent = self.agent.learn(**kwargs)
+        finally:
+            if hasattr(env, 'plan_final_episode_exports'):
+                env._final_export_episode_index = previous_final_export_episode_index
+
         self.__train_end_timestamp = datetime.datetime.now(datetime.UTC)
 
     def __save_agent(self):

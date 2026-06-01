@@ -487,12 +487,45 @@ def test_kpi_v2_adds_domain_and_market_metrics(tmp_path: Path):
             "building_ev_performance_departure_success_feasible_ratio",
             "building_battery_total_throughput_kwh",
             "building_solar_self_consumption_total_generation_kwh",
+            "building_solar_self_consumption_total_generation_business_as_usual_kwh",
             "building_solar_self_consumption_daily_average_export_kwh",
+            "building_solar_self_consumption_ratio_self_consumption_business_as_usual_ratio",
             "district_energy_grid_community_market_local_traded_total_kwh",
             "district_energy_grid_community_market_local_traded_daily_average_kwh",
             "district_solar_self_consumption_community_market_import_share_ratio",
         }
         assert expected.issubset(set(df["cost_function"].unique()))
+
+        assert _kpi_value(df, "Building_B", "building_solar_self_consumption_total_generation_kwh") == pytest.approx(2.0)
+        assert _kpi_value(df, "Building_B", "building_solar_self_consumption_total_export_kwh") == pytest.approx(2.0)
+        assert _kpi_value(df, "Building_B", "building_solar_self_consumption_ratio_self_consumption_ratio") == pytest.approx(0.0)
+        assert _kpi_value(
+            df,
+            "Building_B",
+            "building_solar_self_consumption_ratio_self_consumption_business_as_usual_ratio",
+        ) == pytest.approx(0.0)
+        assert _kpi_value(
+            df,
+            "Building_B",
+            "building_solar_self_consumption_ratio_self_consumption_delta_to_business_as_usual_ratio",
+        ) == pytest.approx(0.0)
+        assert pd.isna(_kpi_value(df, "Building_A", "building_solar_self_consumption_ratio_self_consumption_ratio"))
+    finally:
+        env.close()
+
+
+def test_evaluate_v2_exports_default_scorecard_kpis(tmp_path: Path):
+    schema_path = _build_two_building_market_schema(tmp_path)
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=2, random_seed=0)
+
+    try:
+        env.reset()
+        env.step([np.zeros(len(env.action_names[0]), dtype="float32")])
+        df = env.evaluate_v2()
+
+        exported = set(df["cost_function"].unique())
+        missing = sorted(set(CityLearnKPIService.SCORECARD_DEFAULT_KPIS) - exported)
+        assert missing == []
     finally:
         env.close()
 

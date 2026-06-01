@@ -318,6 +318,9 @@ class EpisodeExporter:
         if not getattr(env, 'render_enabled', False):
             return
 
+        if not env._should_export_current_episode():
+            return
+
         if env.render_mode == 'end' and getattr(env, '_defer_render_flush', False):
             return
 
@@ -390,6 +393,9 @@ class EpisodeExporter:
         env = self.env
 
         if final_index < 0:
+            return
+
+        if not env._should_export_current_episode():
             return
 
         self.ensure_output_dir()
@@ -526,6 +532,10 @@ class EpisodeExporter:
         env = self.env
 
         if not getattr(env, '_render_buffer', None):
+            return
+
+        if not env._should_export_current_episode():
+            env._render_buffer.clear()
             return
 
         has_pending_rows = any(env._render_buffer.values())

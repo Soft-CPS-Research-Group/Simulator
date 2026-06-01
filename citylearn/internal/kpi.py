@@ -18,6 +18,70 @@ class CityLearnKPIService:
     EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT = 0.05
     EV_DEPARTURE_SERVICE_TOLERANCE_DEFAULT = 0.05
     EV_DEPARTURE_EPS = 1.0e-6
+    SCORECARD_DEFAULT_KPIS: Tuple[str, ...] = (
+        # Cost scorecard values and BAU reference.
+        'district_cost_total_control_eur',
+        'district_cost_total_business_as_usual_eur',
+        'district_cost_total_delta_to_business_as_usual_eur',
+        'building_cost_total_control_eur',
+        'building_cost_total_business_as_usual_eur',
+        'building_cost_total_delta_to_business_as_usual_eur',
+
+        # EV service and grid-safety values are judged directly, not vs BAU.
+        'district_ev_performance_departure_min_acceptable_feasible_ratio',
+        'district_ev_performance_departure_within_tolerance_feasible_ratio',
+        'district_electrical_service_phase_violations_energy_total_kwh',
+        'building_ev_performance_departure_min_acceptable_feasible_ratio',
+        'building_ev_performance_departure_within_tolerance_feasible_ratio',
+        'building_electrical_service_phase_violations_energy_total_kwh',
+
+        # Battery and V2G totals with BAU reference rows.
+        'district_battery_total_throughput_kwh',
+        'district_battery_total_throughput_business_as_usual_kwh',
+        'district_battery_total_throughput_delta_to_business_as_usual_kwh',
+        'district_ev_total_v2g_export_kwh',
+        'district_ev_total_v2g_export_business_as_usual_kwh',
+        'district_ev_total_v2g_export_delta_to_business_as_usual_kwh',
+        'building_battery_total_throughput_kwh',
+        'building_battery_total_throughput_business_as_usual_kwh',
+        'building_battery_total_throughput_delta_to_business_as_usual_kwh',
+        'building_ev_total_v2g_export_kwh',
+        'building_ev_total_v2g_export_business_as_usual_kwh',
+        'building_ev_total_v2g_export_delta_to_business_as_usual_kwh',
+
+        # Solar self-consumption with BAU reference rows.
+        'district_solar_self_consumption_ratio_self_consumption_ratio',
+        'district_solar_self_consumption_ratio_self_consumption_business_as_usual_ratio',
+        'district_solar_self_consumption_ratio_self_consumption_delta_to_business_as_usual_ratio',
+        'building_solar_self_consumption_ratio_self_consumption_ratio',
+        'building_solar_self_consumption_ratio_self_consumption_business_as_usual_ratio',
+        'building_solar_self_consumption_ratio_self_consumption_delta_to_business_as_usual_ratio',
+
+        # Community/building grid exchange values with BAU reference rows.
+        'district_energy_grid_total_import_control_kwh',
+        'district_energy_grid_total_import_business_as_usual_kwh',
+        'district_energy_grid_total_import_delta_to_business_as_usual_kwh',
+        'district_energy_grid_total_export_control_kwh',
+        'district_energy_grid_total_export_business_as_usual_kwh',
+        'district_energy_grid_total_export_delta_to_business_as_usual_kwh',
+        'district_energy_grid_total_net_exchange_control_kwh',
+        'district_energy_grid_total_net_exchange_business_as_usual_kwh',
+        'district_energy_grid_total_net_exchange_delta_to_business_as_usual_kwh',
+        'building_energy_grid_total_import_control_kwh',
+        'building_energy_grid_total_import_business_as_usual_kwh',
+        'building_energy_grid_total_import_delta_to_business_as_usual_kwh',
+        'building_energy_grid_total_export_control_kwh',
+        'building_energy_grid_total_export_business_as_usual_kwh',
+        'building_energy_grid_total_export_delta_to_business_as_usual_kwh',
+        'building_energy_grid_total_net_exchange_control_kwh',
+        'building_energy_grid_total_net_exchange_business_as_usual_kwh',
+        'building_energy_grid_total_net_exchange_delta_to_business_as_usual_kwh',
+
+        # District-only grid-shape ratios used by the community scorecard.
+        'district_energy_grid_shape_quality_peak_daily_average_to_business_as_usual_ratio',
+        'district_energy_grid_shape_quality_peak_all_time_average_to_business_as_usual_ratio',
+        'district_energy_grid_shape_quality_load_factor_penalty_daily_average_to_business_as_usual_ratio',
+    )
     LEGACY_COST_FUNCTIONS = {
         'all_time_peak_average',
         'annual_normalized_unserved_energy_total',
@@ -2325,6 +2389,36 @@ class CityLearnKPIService:
                         current_key=v2(level, 'battery', subfamily, metric, None, unit),
                         ratio_metric=metric,
                     )
+
+                for metric in ['generation', 'export']:
+                    add_total_daily_ratio(
+                        level,
+                        name,
+                        family='solar_self_consumption',
+                        total_subfamily='total',
+                        control_total_metric=metric,
+                        bau_total_metric=metric,
+                        delta_total_metric=metric,
+                        daily_subfamily='daily_average',
+                        control_daily_metric=metric,
+                        bau_daily_metric=metric,
+                        delta_daily_metric=metric,
+                        ratio_metric=f'{metric}_total',
+                        unit='kwh',
+                        bau_variant='business_as_usual',
+                        delta_variant='delta_to_business_as_usual',
+                    )
+
+                add_plain_metric(
+                    level,
+                    name,
+                    family='solar_self_consumption',
+                    subfamily='ratio',
+                    metric='self_consumption',
+                    unit='ratio',
+                    current_key=v2(level, 'solar_self_consumption', 'ratio', 'self_consumption', None, 'ratio'),
+                    ratio_metric='self_consumption',
+                )
 
                 for metric, unit in [
                     ('completed_cycles', 'count'),

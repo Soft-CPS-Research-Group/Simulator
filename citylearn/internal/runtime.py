@@ -345,7 +345,11 @@ class CityLearnRuntimeService:
                 if debug_timing:
                     end_export_time = time.perf_counter() - export_start
 
-            if env.export_kpis_on_episode_end and not env._final_kpis_exported:
+            if (
+                env.export_kpis_on_episode_end
+                and env._should_export_current_episode()
+                and not env._final_kpis_exported
+            ):
                 if debug_timing:
                     final_kpi_export_start = time.perf_counter()
                 env.export_final_kpis()
