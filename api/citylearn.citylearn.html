@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn module &mdash; CityLearn 1.4.0 documentation</title>
+  <title>citylearn.citylearn module &mdash; CityLearn 1.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=9172181d"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -169,6 +169,7 @@ a timestamp is used.</p></li>
 <code class="docutils literal notranslate"><span class="pre">'end'</span></code> for exports performed at episode completion while still allowing manual snapshots via <a class="reference internal" href="#citylearn.citylearn.CityLearnEnv.render" title="citylearn.citylearn.CityLearnEnv.render"><code class="xref py py-meth docutils literal notranslate"><span class="pre">render()</span></code></a>.</p></li>
 <li><p><strong>export_kpis_on_episode_end</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to automatically export <code class="docutils literal notranslate"><span class="pre">exported_kpis.csv</span></code> when an episode terminates.
 If not provided, defaults to the effective rendering setting (enabled when rendering is enabled).</p></li>
+<li><p><strong>export_only_final_episode</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether automatic exports should run only on the final planned episode. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
 <li><p><strong>ev_departure_within_tolerance</strong> (<em>float</em><em>, </em><em>optional</em>) – Symmetric SOC target accuracy tolerance used by EV departure within-tolerance KPIs. Defaults to <code class="docutils literal notranslate"><span class="pre">0.05</span></code>.</p></li>
 <li><p><strong>ev_departure_service_tolerance</strong> (<em>float</em><em>, </em><em>optional</em>) – Lower SOC service tolerance used by EV departure minimum-acceptable KPIs. Defaults to <code class="docutils literal notranslate"><span class="pre">0.05</span></code>.</p></li>
 <li><p><strong>**kwargs</strong> (<em>dict</em>) – Other keyword arguments used to initialize super classes.</p></li>
@@ -427,6 +428,12 @@ current episode time steps for reading observations from data files.</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="citylearn.citylearn.CityLearnEnv.export_only_final_episode">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">export_only_final_episode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#citylearn.citylearn.CityLearnEnv.export_only_final_episode" title="Link to this definition"></a></dt>
+<dd><p>Whether automatic exports are limited to the final planned episode.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="citylearn.citylearn.CityLearnEnv.flat_action_space">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">flat_action_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Box</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#citylearn.citylearn.CityLearnEnv.flat_action_space" title="Link to this definition"></a></dt>
 <dd><p>Flat interface action space irrespective of <cite>interface</cite> mode.</p>
@@ -648,6 +655,12 @@ is returned where each sublist is a list of 1 building’s observation values an
 <dt class="sig sig-object py" id="citylearn.citylearn.CityLearnEnv.offline">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offline</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#citylearn.citylearn.CityLearnEnv.offline" title="Link to this definition"></a></dt>
 <dd><p>Whether network access should be disabled for dataset/misc lookups.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.citylearn.CityLearnEnv.plan_final_episode_exports">
+<span class="sig-name descname"><span class="pre">plan_final_episode_exports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">episodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/citylearn.html#CityLearnEnv.plan_final_episode_exports"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.citylearn.CityLearnEnv.plan_final_episode_exports" title="Link to this definition"></a></dt>
+<dd><p>Plan automatic exports for the final episode in the next <code class="docutils literal notranslate"><span class="pre">episodes</span></code> resets.</p>
 </dd></dl>
 
 <dl class="py property">

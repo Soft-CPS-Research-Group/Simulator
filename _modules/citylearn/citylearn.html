@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 1.4.0 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 1.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=9172181d"></script>
+      <script src="../../_static/documentation_options.js?v=e0a75244"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -234,6 +234,8 @@
 <span class="sd">    export_kpis_on_episode_end: bool, optional</span>
 <span class="sd">        Whether to automatically export ``exported_kpis.csv`` when an episode terminates.</span>
 <span class="sd">        If not provided, defaults to the effective rendering setting (enabled when rendering is enabled).</span>
+<span class="sd">    export_only_final_episode: bool, optional</span>
+<span class="sd">        Whether automatic exports should run only on the final planned episode. Defaults to ``True``.</span>
 <span class="sd">    ev_departure_within_tolerance: float, optional</span>
 <span class="sd">        Symmetric SOC target accuracy tolerance used by EV departure within-tolerance KPIs. Defaults to ``0.05``.</span>
 <span class="sd">    ev_departure_service_tolerance: float, optional</span>
@@ -266,6 +268,7 @@
         <span class="n">render_flag</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;render&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">render_file_format</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;render_file_format&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">render_chunk_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;render_chunk_size&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">export_only_final_episode</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;export_only_final_episode&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">kw_export_kpis_on_episode_end</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;export_kpis_on_episode_end&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">kw_export_kpis_on_episode_end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">export_kpis_on_episode_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">export_kpis_on_episode_end</span> <span class="o">=</span> <span class="n">kw_export_kpis_on_episode_end</span>
@@ -301,11 +304,18 @@
         <span class="n">schema_render_file_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;render_file_format&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">schema_render_chunk_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;render_chunk_size&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">schema_export_kpis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;export_kpis_on_episode_end&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">schema_export_only_final_episode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;export_only_final_episode&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">schema_export_kpis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">export_kpis_on_episode_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">export_kpis_on_episode_end</span> <span class="o">=</span> <span class="n">parse_bool</span><span class="p">(</span>
                 <span class="n">schema_export_kpis</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">path</span><span class="o">=</span><span class="s1">&#39;export_kpis_on_episode_end&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">schema_export_only_final_episode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">export_only_final_episode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">export_only_final_episode</span> <span class="o">=</span> <span class="n">parse_bool</span><span class="p">(</span>
+                <span class="n">schema_export_only_final_episode</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">path</span><span class="o">=</span><span class="s1">&#39;export_only_final_episode&#39;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">schema_render_mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">requested_render_mode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">schema_render_mode</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -359,6 +369,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_day</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_start_date</span><span class="o">.</span><span class="n">day</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">year</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_start_date</span><span class="o">.</span><span class="n">year</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_final_kpis_exported</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_final_export_episode_index</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__rewards</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buildings</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;random_seed&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">random_seed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">random_seed</span>
@@ -455,6 +466,11 @@
                 <span class="n">path</span><span class="o">=</span><span class="s1">&#39;export_kpis_on_episode_end&#39;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">export_kpis_on_episode_end</span> <span class="o">=</span> <span class="n">export_kpis_on_episode_end</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_only_final_episode</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">export_only_final_episode</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parse_bool</span><span class="p">(</span>
+            <span class="n">export_only_final_episode</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="s1">&#39;export_only_final_episode&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># reset environment and initializes episode time steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
@@ -523,6 +539,12 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether KPIs are exported automatically when an episode terminates.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_CityLearnEnv__export_kpis_on_episode_end&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_only_final_episode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether automatic exports are limited to the final planned episode.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_CityLearnEnv__export_only_final_episode&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">root_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
@@ -1265,6 +1287,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">export_kpis_on_episode_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__export_kpis_on_episode_end</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
 
+    <span class="nd">@export_only_final_episode</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_only_final_episode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__export_only_final_episode</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
+
     <span class="nd">@root_directory</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">root_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_directory</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__root_directory</span> <span class="o">=</span> <span class="n">root_directory</span>
@@ -1563,6 +1589,37 @@
             <span class="n">kpi_round_decimals</span><span class="o">=</span><span class="n">kpi_round_decimals</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="CityLearnEnv.plan_final_episode_exports">
+<a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.plan_final_episode_exports">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plan_final_episode_exports</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">episodes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plan automatic exports for the final episode in the next ``episodes`` resets.&quot;&quot;&quot;</span>
+
+        <span class="n">previous</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_final_export_episode_index&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">episodes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_final_export_episode_index</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">previous</span>
+
+        <span class="n">episodes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">episodes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">episodes</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;episodes must be &gt;= 1, got </span><span class="si">{</span><span class="n">episodes</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+        <span class="n">current_episode</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="p">,</span> <span class="s1">&#39;episode&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_final_export_episode_index</span> <span class="o">=</span> <span class="n">current_episode</span> <span class="o">+</span> <span class="n">episodes</span>
+        <span class="k">return</span> <span class="n">previous</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_should_export_current_episode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_only_final_episode</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">final_episode_index</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_final_export_episode_index&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">final_episode_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">current_episode</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="p">,</span> <span class="s1">&#39;episode&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">current_episode</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">final_episode_index</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CityLearnEnv.render">
 <a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.render">[docs]</a>

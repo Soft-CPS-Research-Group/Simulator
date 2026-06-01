@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.kpi &mdash; CityLearn 1.4.0 documentation</title>
+  <title>citylearn.internal.kpi &mdash; CityLearn 1.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=9172181d"></script>
+      <script src="../../../_static/documentation_options.js?v=e0a75244"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -107,6 +107,70 @@
     <span class="n">EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT</span> <span class="o">=</span> <span class="mf">0.05</span>
     <span class="n">EV_DEPARTURE_SERVICE_TOLERANCE_DEFAULT</span> <span class="o">=</span> <span class="mf">0.05</span>
     <span class="n">EV_DEPARTURE_EPS</span> <span class="o">=</span> <span class="mf">1.0e-6</span>
+    <span class="n">SCORECARD_DEFAULT_KPIS</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="c1"># Cost scorecard values and BAU reference.</span>
+        <span class="s1">&#39;district_cost_total_control_eur&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_cost_total_business_as_usual_eur&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_cost_total_delta_to_business_as_usual_eur&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_cost_total_control_eur&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_cost_total_business_as_usual_eur&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_cost_total_delta_to_business_as_usual_eur&#39;</span><span class="p">,</span>
+
+        <span class="c1"># EV service and grid-safety values are judged directly, not vs BAU.</span>
+        <span class="s1">&#39;district_ev_performance_departure_min_acceptable_feasible_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_ev_performance_departure_within_tolerance_feasible_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_electrical_service_phase_violations_energy_total_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_ev_performance_departure_min_acceptable_feasible_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_ev_performance_departure_within_tolerance_feasible_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_electrical_service_phase_violations_energy_total_kwh&#39;</span><span class="p">,</span>
+
+        <span class="c1"># Battery and V2G totals with BAU reference rows.</span>
+        <span class="s1">&#39;district_battery_total_throughput_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_battery_total_throughput_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_battery_total_throughput_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_ev_total_v2g_export_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_ev_total_v2g_export_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_ev_total_v2g_export_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_battery_total_throughput_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_battery_total_throughput_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_battery_total_throughput_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_ev_total_v2g_export_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_ev_total_v2g_export_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_ev_total_v2g_export_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+
+        <span class="c1"># Solar self-consumption with BAU reference rows.</span>
+        <span class="s1">&#39;district_solar_self_consumption_ratio_self_consumption_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_solar_self_consumption_ratio_self_consumption_business_as_usual_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_solar_self_consumption_ratio_self_consumption_delta_to_business_as_usual_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_solar_self_consumption_ratio_self_consumption_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_solar_self_consumption_ratio_self_consumption_business_as_usual_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_solar_self_consumption_ratio_self_consumption_delta_to_business_as_usual_ratio&#39;</span><span class="p">,</span>
+
+        <span class="c1"># Community/building grid exchange values with BAU reference rows.</span>
+        <span class="s1">&#39;district_energy_grid_total_import_control_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_total_import_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_total_import_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_total_export_control_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_total_export_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_total_export_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_total_net_exchange_control_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_total_net_exchange_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_total_net_exchange_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_energy_grid_total_import_control_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_energy_grid_total_import_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_energy_grid_total_import_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_energy_grid_total_export_control_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_energy_grid_total_export_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_energy_grid_total_export_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_energy_grid_total_net_exchange_control_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_energy_grid_total_net_exchange_business_as_usual_kwh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;building_energy_grid_total_net_exchange_delta_to_business_as_usual_kwh&#39;</span><span class="p">,</span>
+
+        <span class="c1"># District-only grid-shape ratios used by the community scorecard.</span>
+        <span class="s1">&#39;district_energy_grid_shape_quality_peak_daily_average_to_business_as_usual_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_shape_quality_peak_all_time_average_to_business_as_usual_ratio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;district_energy_grid_shape_quality_load_factor_penalty_daily_average_to_business_as_usual_ratio&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">LEGACY_COST_FUNCTIONS</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;all_time_peak_average&#39;</span><span class="p">,</span>
         <span class="s1">&#39;annual_normalized_unserved_energy_total&#39;</span><span class="p">,</span>
@@ -2420,6 +2484,36 @@
                         <span class="n">current_key</span><span class="o">=</span><span class="n">v2</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;battery&#39;</span><span class="p">,</span> <span class="n">subfamily</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span>
                         <span class="n">ratio_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
                     <span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;generation&#39;</span><span class="p">,</span> <span class="s1">&#39;export&#39;</span><span class="p">]:</span>
+                    <span class="n">add_total_daily_ratio</span><span class="p">(</span>
+                        <span class="n">level</span><span class="p">,</span>
+                        <span class="n">name</span><span class="p">,</span>
+                        <span class="n">family</span><span class="o">=</span><span class="s1">&#39;solar_self_consumption&#39;</span><span class="p">,</span>
+                        <span class="n">total_subfamily</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">,</span>
+                        <span class="n">control_total_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+                        <span class="n">bau_total_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+                        <span class="n">delta_total_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+                        <span class="n">daily_subfamily</span><span class="o">=</span><span class="s1">&#39;daily_average&#39;</span><span class="p">,</span>
+                        <span class="n">control_daily_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+                        <span class="n">bau_daily_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+                        <span class="n">delta_daily_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+                        <span class="n">ratio_metric</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s1">_total&#39;</span><span class="p">,</span>
+                        <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;kwh&#39;</span><span class="p">,</span>
+                        <span class="n">bau_variant</span><span class="o">=</span><span class="s1">&#39;business_as_usual&#39;</span><span class="p">,</span>
+                        <span class="n">delta_variant</span><span class="o">=</span><span class="s1">&#39;delta_to_business_as_usual&#39;</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                <span class="n">add_plain_metric</span><span class="p">(</span>
+                    <span class="n">level</span><span class="p">,</span>
+                    <span class="n">name</span><span class="p">,</span>
+                    <span class="n">family</span><span class="o">=</span><span class="s1">&#39;solar_self_consumption&#39;</span><span class="p">,</span>
+                    <span class="n">subfamily</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">,</span>
+                    <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;self_consumption&#39;</span><span class="p">,</span>
+                    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">,</span>
+                    <span class="n">current_key</span><span class="o">=</span><span class="n">v2</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;solar_self_consumption&#39;</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;self_consumption&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">),</span>
+                    <span class="n">ratio_metric</span><span class="o">=</span><span class="s1">&#39;self_consumption&#39;</span><span class="p">,</span>
+                <span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">unit</span> <span class="ow">in</span> <span class="p">[</span>
                     <span class="p">(</span><span class="s1">&#39;completed_cycles&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
