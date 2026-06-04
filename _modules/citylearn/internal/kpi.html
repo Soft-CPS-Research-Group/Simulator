@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.kpi &mdash; CityLearn 1.5.0 documentation</title>
+  <title>citylearn.internal.kpi &mdash; CityLearn 1.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../../../_static/documentation_options.js?v=44dfd65d"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -87,7 +87,7 @@
   <h1>Source code for citylearn.internal.kpi</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -969,8 +969,8 @@
 
         <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="n">building</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span> <span class="ow">or</span> <span class="p">[]:</span>
             <span class="n">consumption</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">electricity_consumption</span><span class="p">[</span><span class="n">t_start</span><span class="p">:</span><span class="n">t_final</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
-            <span class="n">charge_total_kwh</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">consumption</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-            <span class="n">v2g_export_total_kwh</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="o">-</span><span class="n">consumption</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="n">charge_total_kwh</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sum_finite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">consumption</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+            <span class="n">v2g_export_total_kwh</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sum_finite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="o">-</span><span class="n">consumption</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
             <span class="n">sim</span> <span class="o">=</span> <span class="n">charger</span><span class="o">.</span><span class="n">charger_simulation</span>
             <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_charger_state</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
@@ -1137,8 +1137,8 @@
 
         <span class="n">storage</span> <span class="o">=</span> <span class="n">building</span><span class="o">.</span><span class="n">electrical_storage</span>
         <span class="n">storage_series</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">electrical_storage_electricity_consumption</span><span class="p">[</span><span class="n">t_start</span><span class="p">:</span><span class="n">t_final</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
-        <span class="n">charge_total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">storage_series</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-        <span class="n">discharge_total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="o">-</span><span class="n">storage_series</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">charge_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sum_finite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">storage_series</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">discharge_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sum_finite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="o">-</span><span class="n">storage_series</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="n">throughput_total</span> <span class="o">=</span> <span class="n">charge_total</span> <span class="o">+</span> <span class="n">discharge_total</span>
 
         <span class="n">capacity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="s1">&#39;capacity&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
@@ -1175,13 +1175,63 @@
 
         <span class="n">generation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="o">-</span><span class="n">solar</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">export</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="o">-</span><span class="n">net</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">pv_generation_total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">generation</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-        <span class="n">pv_export_total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">generation</span><span class="p">,</span> <span class="n">export</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">pv_generation_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sum_finite</span><span class="p">(</span><span class="n">generation</span><span class="p">)</span>
+        <span class="n">pv_export_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sum_finite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">generation</span><span class="p">,</span> <span class="n">export</span><span class="p">))</span>
         <span class="n">self_consumption_ratio</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">pv_generation_total</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pv_generation_total</span> <span class="o">-</span> <span class="n">pv_export_total</span><span class="p">)</span> <span class="o">/</span> <span class="n">pv_generation_total</span>
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">&#39;pv_generation_total_kwh&#39;</span><span class="p">:</span> <span class="n">pv_generation_total</span><span class="p">,</span>
             <span class="s1">&#39;pv_export_total_kwh&#39;</span><span class="p">:</span> <span class="n">pv_export_total</span><span class="p">,</span>
+            <span class="s1">&#39;pv_self_consumption_ratio&#39;</span><span class="p">:</span> <span class="n">self_consumption_ratio</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_district_pv_metrics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">buildings</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+        <span class="n">building_windows</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">final_t</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="n">series_by_building</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="n">buildings</span><span class="p">:</span>
+            <span class="n">t_start</span><span class="p">,</span> <span class="n">t_end</span> <span class="o">=</span> <span class="n">building_windows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">t_end</span> <span class="o">&lt;</span> <span class="n">t_start</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">series_by_building</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">t_start</span><span class="p">),</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">t_end</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">solar_generation</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">net_electricity_consumption</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">pv_generation_total</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">pv_export_total</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">final_t</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">generation_t</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">district_net_t</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">t_end</span><span class="p">,</span> <span class="n">solar</span><span class="p">,</span> <span class="n">net</span> <span class="ow">in</span> <span class="n">series_by_building</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">t_start</span> <span class="o">&lt;=</span> <span class="n">t</span> <span class="o">&lt;=</span> <span class="n">t_end</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="n">solar_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">solar</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">solar</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">net_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">net</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">net</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">generation_t</span> <span class="o">+=</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="n">solar_value</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">district_net_t</span> <span class="o">+=</span> <span class="n">net_value</span>
+
+            <span class="n">pv_generation_total</span> <span class="o">+=</span> <span class="n">generation_t</span>
+            <span class="n">pv_export_total</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="n">generation_t</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="n">district_net_t</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+
+        <span class="n">self_consumption_ratio</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">pv_generation_total</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pv_generation_total</span> <span class="o">-</span> <span class="n">pv_export_total</span><span class="p">)</span> <span class="o">/</span> <span class="n">pv_generation_total</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;pv_generation_total_kwh&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">pv_generation_total</span><span class="p">),</span>
+            <span class="s1">&#39;pv_export_total_kwh&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">pv_export_total</span><span class="p">),</span>
             <span class="s1">&#39;pv_self_consumption_ratio&#39;</span><span class="p">:</span> <span class="n">self_consumption_ratio</span><span class="p">,</span>
         <span class="p">}</span>
 
@@ -1501,20 +1551,15 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">local_export</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">exports</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
 
-            <span class="n">grid_export_price_cfg</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;community_market_grid_export_price&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">building</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">active_buildings_t</span><span class="p">):</span>
                 <span class="n">grid_import_price</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">electricity_pricing</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
                 <span class="n">local_price</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="n">grid_import_price</span>
-                <span class="n">grid_export_price</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_step_value</span><span class="p">(</span><span class="n">grid_export_price_cfg</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
                 <span class="n">grid_import_remaining</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">imports</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">local_import</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
-                <span class="n">grid_export_remaining</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">exports</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">local_export</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
 
                 <span class="n">cost</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">grid_import_remaining</span> <span class="o">*</span> <span class="n">grid_import_price</span>
                     <span class="o">+</span> <span class="n">local_import</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">local_price</span>
                     <span class="o">-</span> <span class="n">local_export</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">local_price</span>
-                    <span class="o">-</span> <span class="n">grid_export_remaining</span> <span class="o">*</span> <span class="n">grid_export_price</span>
                 <span class="p">)</span>
                 <span class="n">totals</span><span class="p">[</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span>
 
@@ -1573,9 +1618,6 @@
         <span class="n">bess_throughput_total</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">bess_capacity_total</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">bess_capacity_loss_total</span> <span class="o">=</span> <span class="mf">0.0</span>
-
-        <span class="n">pv_generation_total</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">pv_export_total</span> <span class="o">=</span> <span class="mf">0.0</span>
 
         <span class="n">phase_violation_total</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">phase_violation_count</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -1873,9 +1915,6 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;pv_export_daily_average_kwh&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_daily_average</span><span class="p">(</span><span class="n">pv_metrics</span><span class="p">[</span><span class="s1">&#39;pv_export_total_kwh&#39;</span><span class="p">],</span> <span class="n">building_days</span><span class="p">),</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;pv_self_consumption_ratio&#39;</span><span class="p">,</span> <span class="n">pv_metrics</span><span class="p">[</span><span class="s1">&#39;pv_self_consumption_ratio&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
             <span class="p">])</span>
-            <span class="n">pv_generation_total</span> <span class="o">+=</span> <span class="n">pv_metrics</span><span class="p">[</span><span class="s1">&#39;pv_generation_total_kwh&#39;</span><span class="p">]</span>
-            <span class="n">pv_export_total</span> <span class="o">+=</span> <span class="n">pv_metrics</span><span class="p">[</span><span class="s1">&#39;pv_export_total_kwh&#39;</span><span class="p">]</span>
-
             <span class="n">phase_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_phase_metrics</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">t_start</span><span class="o">=</span><span class="n">t_start</span><span class="p">,</span> <span class="n">t_final</span><span class="o">=</span><span class="n">t_end</span><span class="p">)</span>
             <span class="n">extended_building_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;electrical_service_violation_total_kwh&#39;</span><span class="p">,</span> <span class="n">phase_metrics</span><span class="p">[</span><span class="s1">&#39;electrical_service_violation_total_kwh&#39;</span><span class="p">],</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">),</span>
@@ -2043,7 +2082,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;bess_capacity_fade_ratio&#39;</span><span class="p">,</span> <span class="n">district_bess_fade</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
         <span class="p">])</span>
 
-        <span class="n">district_pv_ratio</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">pv_generation_total</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pv_generation_total</span> <span class="o">-</span> <span class="n">pv_export_total</span><span class="p">)</span> <span class="o">/</span> <span class="n">pv_generation_total</span>
+        <span class="n">final_t</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;time_step&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">district_pv_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_district_pv_metrics</span><span class="p">(</span><span class="n">kpi_buildings</span><span class="p">,</span> <span class="n">building_windows</span><span class="p">,</span> <span class="n">final_t</span><span class="o">=</span><span class="n">final_t</span><span class="p">)</span>
+        <span class="n">pv_generation_total</span> <span class="o">=</span> <span class="n">district_pv_metrics</span><span class="p">[</span><span class="s1">&#39;pv_generation_total_kwh&#39;</span><span class="p">]</span>
+        <span class="n">pv_export_total</span> <span class="o">=</span> <span class="n">district_pv_metrics</span><span class="p">[</span><span class="s1">&#39;pv_export_total_kwh&#39;</span><span class="p">]</span>
+        <span class="n">district_pv_ratio</span> <span class="o">=</span> <span class="n">district_pv_metrics</span><span class="p">[</span><span class="s1">&#39;pv_self_consumption_ratio&#39;</span><span class="p">]</span>
         <span class="n">extended_district_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;pv_generation_total_kwh&#39;</span><span class="p">,</span> <span class="n">pv_generation_total</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">&#39;pv_export_total_kwh&#39;</span><span class="p">,</span> <span class="n">pv_export_total</span><span class="p">,</span> <span class="s1">&#39;District&#39;</span><span class="p">,</span> <span class="s1">&#39;district&#39;</span><span class="p">),</span>
@@ -2060,7 +2103,6 @@
         <span class="p">])</span>
 
         <span class="n">phase_union</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;L1&#39;</span><span class="p">,</span> <span class="s1">&#39;L2&#39;</span><span class="p">,</span> <span class="s1">&#39;L3&#39;</span><span class="p">]</span>
-        <span class="n">final_t</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;time_step&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">phase_name</span> <span class="ow">in</span> <span class="n">phase_union</span><span class="p">:</span>
             <span class="n">phase_series</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">final_t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
             <span class="n">has_phase_data</span> <span class="o">=</span> <span class="kc">False</span>
