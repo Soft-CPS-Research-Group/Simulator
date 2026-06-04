@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -880,8 +880,8 @@ class CityLearnKPIService:
 
         for charger in building.electric_vehicle_chargers or []:
             consumption = np.array(charger.electricity_consumption[t_start:t_final + 1], dtype='float64')
-            charge_total_kwh += float(np.clip(consumption, 0.0, None).sum())
-            v2g_export_total_kwh += float(np.clip(-consumption, 0.0, None).sum())
+            charge_total_kwh += self._sum_finite(np.clip(consumption, 0.0, None))
+            v2g_export_total_kwh += self._sum_finite(np.clip(-consumption, 0.0, None))
 
             sim = charger.charger_simulation
             states = np.array(sim.electric_vehicle_charger_state, dtype='float64')
@@ -1048,8 +1048,8 @@ class CityLearnKPIService:
 
         storage = building.electrical_storage
         storage_series = np.array(building.electrical_storage_electricity_consumption[t_start:t_final + 1], dtype='float64')
-        charge_total = float(np.clip(storage_series, 0.0, None).sum())
-        discharge_total = float(np.clip(-storage_series, 0.0, None).sum())
+        charge_total = self._sum_finite(np.clip(storage_series, 0.0, None))
+        discharge_total = self._sum_finite(np.clip(-storage_series, 0.0, None))
         throughput_total = charge_total + discharge_total
 
         capacity = self._to_scalar(getattr(storage, 'capacity', 0.0), 0.0)
@@ -1086,13 +1086,63 @@ class CityLearnKPIService:
 
         generation = np.clip(-solar, 0.0, None)
         export = np.clip(-net, 0.0, None)
-        pv_generation_total = float(generation.sum())
-        pv_export_total = float(np.minimum(generation, export).sum())
+        pv_generation_total = self._sum_finite(generation)
+        pv_export_total = self._sum_finite(np.minimum(generation, export))
         self_consumption_ratio = None if pv_generation_total <= 0.0 else (pv_generation_total - pv_export_total) / pv_generation_total
 
         return {
             'pv_generation_total_kwh': pv_generation_total,
             'pv_export_total_kwh': pv_export_total,
+            'pv_self_consumption_ratio': self_consumption_ratio,
+        }
+
+    def _compute_district_pv_metrics(
+        self,
+        buildings: Sequence,
+        building_windows: Mapping[str, Tuple[int, int]],
+        *,
+        final_t: int,
+    ) -> Dict[str, float]:
+        series_by_building = []
+        for building in buildings:
+            t_start, t_end = building_windows.get(building.name, (0, -1))
+            if t_end < t_start:
+                continue
+
+            series_by_building.append(
+                (
+                    building.name,
+                    int(t_start),
+                    int(t_end),
+                    np.array(building.solar_generation, dtype='float64'),
+                    np.array(building.net_electricity_consumption, dtype='float64'),
+                )
+            )
+
+        pv_generation_total = 0.0
+        pv_export_total = 0.0
+
+        for t in range(int(max(final_t, 0)) + 1):
+            generation_t = 0.0
+            district_net_t = 0.0
+
+            for _, t_start, t_end, solar, net in series_by_building:
+                if not (t_start <= t <= t_end):
+                    continue
+
+                solar_value = self._to_scalar(solar[t] if t < len(solar) else np.nan, 0.0)
+                net_value = self._to_scalar(net[t] if t < len(net) else np.nan, 0.0)
+                generation_t += max(-solar_value, 0.0)
+                district_net_t += net_value
+
+            pv_generation_total += generation_t
+            pv_export_total += min(generation_t, max(-district_net_t, 0.0))
+
+        self_consumption_ratio = None if pv_generation_total <= 0.0 else (pv_generation_total - pv_export_total) / pv_generation_total
+
+        return {
+            'pv_generation_total_kwh': float(pv_generation_total),
+            'pv_export_total_kwh': float(pv_export_total),
             'pv_self_consumption_ratio': self_consumption_ratio,
         }
 
@@ -1412,20 +1462,15 @@ class CityLearnKPIService:
             else:
                 local_export = np.zeros_like(exports, dtype='float64')
 
-            grid_export_price_cfg = getattr(env, 'community_market_grid_export_price', 0.0)
-
             for idx, building in enumerate(active_buildings_t):
                 grid_import_price = self._to_scalar(building.pricing.electricity_pricing[t], 0.0)
                 local_price = ratio * grid_import_price
-                grid_export_price = self._resolve_step_value(grid_export_price_cfg, t, 0.0)
                 grid_import_remaining = max(imports[idx] - local_import[idx], 0.0)
-                grid_export_remaining = max(exports[idx] - local_export[idx], 0.0)
 
                 cost = (
                     grid_import_remaining * grid_import_price
                     + local_import[idx] * local_price
                     - local_export[idx] * local_price
-                    - grid_export_remaining * grid_export_price
                 )
                 totals[building.name] += float(cost)
 
@@ -1482,9 +1527,6 @@ class CityLearnKPIService:
         bess_throughput_total = 0.0
         bess_capacity_total = 0.0
         bess_capacity_loss_total = 0.0
-
-        pv_generation_total = 0.0
-        pv_export_total = 0.0
 
         phase_violation_total = 0.0
         phase_violation_count = 0.0
@@ -1782,9 +1824,6 @@ class CityLearnKPIService:
                 self._metric('pv_export_daily_average_kwh', self._daily_average(pv_metrics['pv_export_total_kwh'], building_days), building.name, 'building'),
                 self._metric('pv_self_consumption_ratio', pv_metrics['pv_self_consumption_ratio'], building.name, 'building'),
             ])
-            pv_generation_total += pv_metrics['pv_generation_total_kwh']
-            pv_export_total += pv_metrics['pv_export_total_kwh']
-
             phase_metrics = self._compute_phase_metrics(building, t_start=t_start, t_final=t_end)
             extended_building_rows.extend([
                 self._metric('electrical_service_violation_total_kwh', phase_metrics['electrical_service_violation_total_kwh'], building.name, 'building'),
@@ -1952,7 +1991,11 @@ class CityLearnKPIService:
             self._metric('bess_capacity_fade_ratio', district_bess_fade, 'District', 'district'),
         ])
 
-        district_pv_ratio = None if pv_generation_total <= 0.0 else (pv_generation_total - pv_export_total) / pv_generation_total
+        final_t = int(max(getattr(env, 'time_step', 0), 0))
+        district_pv_metrics = self._compute_district_pv_metrics(kpi_buildings, building_windows, final_t=final_t)
+        pv_generation_total = district_pv_metrics['pv_generation_total_kwh']
+        pv_export_total = district_pv_metrics['pv_export_total_kwh']
+        district_pv_ratio = district_pv_metrics['pv_self_consumption_ratio']
         extended_district_rows.extend([
             self._metric('pv_generation_total_kwh', pv_generation_total, 'District', 'district'),
             self._metric('pv_export_total_kwh', pv_export_total, 'District', 'district'),
@@ -1969,7 +2012,6 @@ class CityLearnKPIService:
         ])
 
         phase_union = ['L1', 'L2', 'L3']
-        final_t = int(max(getattr(env, 'time_step', 0), 0))
         for phase_name in phase_union:
             phase_series = np.zeros(final_t + 1, dtype='float64')
             has_phase_data = False

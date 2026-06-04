@@ -49,7 +49,7 @@ Examples:
 | `building_energy_grid_total_import_control_kwh` | Building import energy. |
 | `building_energy_grid_ratio_to_business_as_usual_import_total_ratio` | Building import relative to the native business-as-usual baseline. |
 | `district_energy_grid_shape_quality_ramping_average_to_baseline_ratio` | Ramping relative to baseline. |
-| `district_solar_self_consumption_ratio_self_consumption_ratio` | District solar self-consumption ratio. |
+| `district_solar_self_consumption_ratio_self_consumption_ratio` | District/community solar self-consumption ratio after same-timestep member imports and exports are balanced. |
 | `building_deferrable_appliance_service_completed_cycles_count` | Completed deferrable cycles. |
 | `district_demand_response_compliance_ratio` | Credited DR delivery divided by valid requested energy. |
 | `district_robustness_action_dropout_count` | Number of action dropouts applied by robustness events. |
@@ -79,7 +79,7 @@ Safe division returns `None` or a safe placeholder when the denominator is not p
 | `cost` | building, district | Cost control/baseline/business-as-usual/delta/ratio. |
 | `energy_grid` | building, district | Import, export, net exchange and shape quality. |
 | `emissions` | building, district | Emissions control/baseline/business-as-usual/delta/ratio. |
-| `solar_self_consumption` | building, district | Generation, export and self-consumption. |
+| `solar_self_consumption` | building, district | Generation, export and self-consumption. District export is PV-backed net export outside the community. |
 | `ev` | building, district | Departures, success rate, deficits, charge and V2G. |
 | `battery` | building, district | Charge, discharge, throughput, cycles, capacity fade. |
 | `electrical_service_phase` | building, district | Violations, imbalance and phase peaks. |

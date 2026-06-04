@@ -204,11 +204,13 @@ def _assert_market_settlement_conservation(
         local_export = float(row["local_export_kwh"])
         grid_import = float(row["grid_import_kwh"])
         grid_export = float(row["grid_export_kwh"])
+        grid_export_price = float(row["grid_export_price"])
 
         assert local_import >= -eps
         assert local_export >= -eps
         assert grid_import >= -eps
         assert grid_export >= -eps
+        assert grid_export_price == pytest.approx(0.0, abs=eps)
         assert local_import + grid_import == pytest.approx(member_import, abs=eps)
         assert local_export + grid_export == pytest.approx(member_export, abs=eps)
         assert not (local_import > eps and local_export > eps)
@@ -218,7 +220,7 @@ def _assert_market_settlement_conservation(
             grid_import * float(row["grid_import_price"])
             + local_import * float(row["local_price"])
             - local_export * float(row["local_price"])
-            - grid_export * float(row["grid_export_price"])
+            - grid_export * grid_export_price
         )
         assert float(row["settled_cost_eur"]) == pytest.approx(expected_cost, abs=eps)
         assert float(building.net_electricity_consumption_cost[time_step]) == pytest.approx(expected_cost, abs=eps)

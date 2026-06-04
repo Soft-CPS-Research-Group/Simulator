@@ -47,7 +47,7 @@ Exemplos:
 | `building_energy_grid_total_import_control_kwh` | Import total do building. |
 | `building_energy_grid_ratio_to_business_as_usual_import_total_ratio` | Import do building relativo a baseline nativa business-as-usual. |
 | `district_energy_grid_shape_quality_ramping_average_to_baseline_ratio` | Ramping medio relativo ao baseline. |
-| `district_solar_self_consumption_ratio_self_consumption_ratio` | Self-consumption solar do distrito. |
+| `district_solar_self_consumption_ratio_self_consumption_ratio` | Self-consumption solar do distrito/comunidade depois de balancear imports e exports dos membros no mesmo timestep. |
 | `building_deferrable_appliance_service_completed_cycles_count` | Ciclos deferiveis completados. |
 | `district_demand_response_compliance_ratio` | Delivery DR creditado dividido pela energia pedida valida. |
 | `district_robustness_action_dropout_count` | Numero de action dropouts aplicados por eventos de robustez. |
@@ -77,7 +77,7 @@ Safe division devolve `None`/placeholder quando o denominador nao e fisicamente 
 | `cost` | building, district | Custo control/baseline/business-as-usual/delta/ratio. |
 | `energy_grid` | building, district | Import, export, net exchange e shape quality. |
 | `emissions` | building, district | Emissoes control/baseline/business-as-usual/delta/ratio. |
-| `solar_self_consumption` | building, district | Geracao, export e self-consumption. |
+| `solar_self_consumption` | building, district | Geracao, export e self-consumption. No distrito, export e o export PV-backed net para fora da comunidade. |
 | `ev` | building, district | Departures, success rate, deficits, charge e V2G. |
 | `battery` | building, district | Charge, discharge, throughput, cycles, capacity fade. |
 | `electrical_service_phase` | building, district | Violacoes, imbalance e peaks por fase. |

@@ -1643,7 +1643,7 @@ class CityLearnEnv(Environment, Env):
             ratio = 0.8
 
         self.community_market_sell_ratio = min(max(ratio, 0.0), 1.0)
-        self.community_market_grid_export_price = config.get('grid_export_price', 0.0)
+        self.community_market_grid_export_price = 0.0
         weights = config.get('import_member_weights', {}) or {}
         parsed_weights = {}
         if isinstance(weights, Mapping):

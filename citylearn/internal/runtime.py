@@ -961,13 +961,12 @@ class CityLearnRuntimeService:
         else:
             local_export = np.zeros_like(exports, dtype='float64')
 
-        grid_export_price_cfg = getattr(env, 'community_market_grid_export_price', 0.0)
         market_settlement = []
 
         for idx, building in enumerate(env.buildings):
             grid_import_price = self._to_scalar(building.pricing.electricity_pricing[t], 0.0)
             local_price = ratio * grid_import_price
-            grid_export_price = self._resolve_step_value(grid_export_price_cfg, t, 0.0)
+            grid_export_price = 0.0
             counterfactual_legacy_cost = self._to_scalar(building.net_electricity_consumption_cost[t], 0.0)
 
             grid_import_remaining = max(imports[idx] - local_import[idx], 0.0)
@@ -977,7 +976,6 @@ class CityLearnRuntimeService:
                 grid_import_remaining * grid_import_price
                 + local_import[idx] * local_price
                 - local_export[idx] * local_price
-                - grid_export_remaining * grid_export_price
             )
             savings = counterfactual_legacy_cost - cost
 

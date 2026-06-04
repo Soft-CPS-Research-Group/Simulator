@@ -358,7 +358,10 @@ class Building(Environment):
     def net_electricity_consumption_cost_without_storage_and_pv(self) -> np.ndarray:
         """net_electricity_consumption_without_storage_and_pv` cost time series, in [$]."""
 
-        return self.pricing.electricity_pricing[0:self.time_step + 1] * self.net_electricity_consumption_without_storage_and_pv
+        return (
+            self.pricing.electricity_pricing[0:self.time_step + 1]
+            * np.clip(self.net_electricity_consumption_without_storage_and_pv, 0.0, None)
+        )
 
     @property
     def net_electricity_consumption_without_storage_and_pv(self) -> np.ndarray:
@@ -383,7 +386,10 @@ class Building(Environment):
     def net_electricity_consumption_cost_without_storage(self) -> np.ndarray:
         """`net_electricity_consumption_without_storage` cost time series, in [$]."""
 
-        return self.pricing.electricity_pricing[0:self.time_step + 1] * self.net_electricity_consumption_without_storage
+        return (
+            self.pricing.electricity_pricing[0:self.time_step + 1]
+            * np.clip(self.net_electricity_consumption_without_storage, 0.0, None)
+        )
 
     @property
     def net_electricity_consumption_without_storage(self) -> np.ndarray:
@@ -2760,7 +2766,10 @@ class Building(Environment):
         self.__net_electricity_consumption[self.time_step] = net_electricity_consumption
 
         # net electriciy consumption cost
-        self.__net_electricity_consumption_cost[self.time_step] = net_electricity_consumption*self.pricing.electricity_pricing[self.time_step]
+        self.__net_electricity_consumption_cost[self.time_step] = (
+            max(net_electricity_consumption, 0.0)
+            * self.pricing.electricity_pricing[self.time_step]
+        )
 
         # net electriciy consumption emission
         self.__net_electricity_consumption_emission[self.time_step] = max(0.0, net_electricity_consumption*self.carbon_intensity.carbon_intensity[self.time_step])
@@ -2913,7 +2922,10 @@ class DynamicsBuilding(Building):
     def net_electricity_consumption_cost_without_storage_and_partial_load_and_pv(self) -> np.ndarray:
         """net_electricity_consumption_without_storage_and_partial_load_and_pv` cost time series, in [$]."""
 
-        return self.pricing.electricity_pricing[0:self.time_step + 1] * self.net_electricity_consumption_without_storage_and_partial_load_and_pv
+        return (
+            self.pricing.electricity_pricing[0:self.time_step + 1]
+            * np.clip(self.net_electricity_consumption_without_storage_and_partial_load_and_pv, 0.0, None)
+        )
 
     @property
     def net_electricity_consumption_without_storage_and_partial_load_and_pv(self) -> np.ndarray:
@@ -2940,7 +2952,10 @@ class DynamicsBuilding(Building):
     def net_electricity_consumption_cost_without_storage_and_partial_load(self) -> np.ndarray:
         """`net_electricity_consumption_without_storage_and_partial_load` cost time series, in [$]."""
 
-        return self.pricing.electricity_pricing[0:self.time_step + 1] * self.net_electricity_consumption_without_storage_and_partial_load
+        return (
+            self.pricing.electricity_pricing[0:self.time_step + 1]
+            * np.clip(self.net_electricity_consumption_without_storage_and_partial_load, 0.0, None)
+        )
 
     @property
     def net_electricity_consumption_without_storage_and_partial_load(self):

@@ -58,6 +58,54 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.1 - 2026-06-04
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release da auditoria final aos KPIs de custo e solar. O settlement do mercado comunitario deixa de dar receita a energia exportada para fora da comunidade, o self-consumption solar distrital passa a contar PV consumido dentro da comunidade como autoconsumo, e os totais EV/BESS/PV deixam de virar `NaN` por causa de uma amostra nao finita isolada.
+
+### Added
+
+- Testes de regressao para preco zero de export para a rede externa no settlement do mercado comunitario.
+- Testes de regressao para self-consumption PV distrital quando um membro exporta PV e outro membro consome no mesmo timestep.
+- Testes de regressao que provam que totais EV/V2G, BESS e PV ignoram amostras nao finitas.
+
+### Changed
+
+- `district_solar_self_consumption_total_export_kwh` passa a ser export PV-backed net do distrito para fora da comunidade, em vez da soma de exports PV por membro.
+- `district_solar_self_consumption_ratio_self_consumption_ratio` passa a contar transferencias PV intra-comunidade no mesmo timestep como self-consumption distrital/comunitario.
+
+### Fixed
+
+- KPIs de custo e settlement runtime do mercado comunitario deixam de creditar energia exportada para fora da comunidade.
+- Totais de custo por building e district passam a cobrar apenas import net positivo da rede quando o mercado comunitario esta desativado.
+- Totais de EV charge/V2G, bateria estacionaria charge/discharge e PV generation/export usam soma de valores finitos para evitar propagacao de `NaN` a partir de uma amostra em falta.
+- Replay KPI para condicoes control/baseline com mercado ativo aplica a mesma regra de preco zero para export externo que o runtime settlement.
+
+### Dataset/Schema Impact
+
+- Nao exige migracao de schema nem datasets.
+- Datasets existentes com mercado comunitario ativo podem reportar valores diferentes em KPIs de custo e self-consumption solar distrital, porque a receita de export externo foi removida e o export PV distrital passa a ser community-net.
+
+### Compatibility
+
+- Patch release compativel para APIs, actions, observations e ficheiros de dataset.
+- Consumidores de KPI que interpretavam self-consumption solar distrital como soma do self-consumption individual dos buildings devem migrar para a nova interpretacao community-net.
+
+### Validation
+
+- `.venv/bin/pytest -q`: pass, `398 passed, 18 warnings`.
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict --output-dir /tmp/citylearn_audit_final`: pass.
+- `.venv/bin/python scripts/audit/audit_physics.py --output /tmp/citylearn_audit_final/physics_audit.json`: pass, `16 passed`.
+- `git diff --check`: pass.
+- Auditoria manual de KPIs de cost settlement, market replay, agregacao PV distrital, soma finita EV/BESS/PV e scorecard rows: pass.
+
+### Migration Notes
+
+- Nao e necessaria migracao de codigo. Regerar baselines de dashboards ou golden KPIs que incluam custos de mercado comunitario ou self-consumption solar distrital.
+
 ## v1.5.0 - 2026-06-01
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

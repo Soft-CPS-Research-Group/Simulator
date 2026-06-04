@@ -102,6 +102,8 @@ Community market (conditional):
 - `district_solar_self_consumption_daily_average_export_kwh`
 - `district_solar_self_consumption_ratio_self_consumption_ratio`
 
+District `export` is PV-backed net export to outside the district/community after same-timestep member imports and exports are balanced. Building `export` remains the member-level PV-backed net export.
+
 Community market (conditional):
 - `district_solar_self_consumption_community_market_import_share_ratio`
 
@@ -217,6 +219,7 @@ These are different KPIs and should not be merged.
 - KPI: `*_solar_self_consumption_ratio_self_consumption_ratio`
 - Formula: `(generation_total - export_total) / generation_total`
 - Meaning: fraction of PV generation consumed locally (solar-centric KPI)
+- District meaning: fraction of PV generation consumed inside the district/community, including same-timestep intra-community PV transfers.
 - Availability: independent of community market (exists with market ON or OFF)
 
 ### 2) Community market import share

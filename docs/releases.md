@@ -60,6 +60,54 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.1 - 2026-06-04
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release from the final KPI cost and solar audit. Community-market cost settlement no longer gives revenue for energy exported outside the community, district solar self-consumption now treats intra-community PV use as self-consumed, and EV/BESS/PV totals ignore isolated non-finite samples instead of turning whole totals into `NaN`.
+
+### Added
+
+- Regression coverage for zero external-grid export price in community-market settlement.
+- Regression coverage for district PV self-consumption when one member exports PV and another member consumes it in the same timestep.
+- Regression coverage proving EV/V2G, BESS and PV totals ignore non-finite samples.
+
+### Changed
+
+- `district_solar_self_consumption_total_export_kwh` is now PV-backed net export from the district to outside the community, rather than the sum of member-level PV exports.
+- `district_solar_self_consumption_ratio_self_consumption_ratio` now counts same-timestep intra-community PV transfers as district/community self-consumption.
+
+### Fixed
+
+- Community-market cost KPIs and runtime settlement no longer credit energy exported outside the community.
+- Building and district cost totals now charge only positive net grid import when the community market is disabled.
+- EV charge/V2G, stationary battery charge/discharge and PV generation/export totals use finite-value summation to avoid `NaN` propagation from isolated missing samples.
+- KPI replay for market-enabled control and baseline conditions applies the same zero external export price rule as runtime settlement.
+
+### Dataset/Schema Impact
+
+- No schema or dataset migration is required.
+- Existing datasets with community market enabled may report different cost and district solar self-consumption KPI values because external export revenue is removed and district PV export is now community-net.
+
+### Compatibility
+
+- Compatible patch release for APIs, actions, observations and dataset files.
+- KPI consumers that interpreted district solar self-consumption as a sum of individual building self-consumption should migrate to the new community-net interpretation.
+
+### Validation
+
+- `.venv/bin/pytest -q`: pass, `398 passed, 18 warnings`.
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict --output-dir /tmp/citylearn_audit_final`: pass.
+- `.venv/bin/python scripts/audit/audit_physics.py --output /tmp/citylearn_audit_final/physics_audit.json`: pass, `16 passed`.
+- `git diff --check`: pass.
+- Manual KPI audit across cost settlement, market replay, district PV aggregation, EV/BESS/PV finite summation and scorecard rows: pass.
+
+### Migration Notes
+
+- No code migration is needed. Rebaseline dashboards or golden KPI expectations that include community-market costs or district solar self-consumption.
+
 ## v1.5.0 - 2026-06-01
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

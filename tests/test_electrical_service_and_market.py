@@ -223,6 +223,37 @@ def test_disabled_community_market_with_string_false_keeps_legacy_costs(tmp_path
         env_disabled.close()
 
 
+def test_disabled_community_market_does_not_credit_building_exports(tmp_path: Path):
+    schema_path = _build_two_building_market_schema(tmp_path)
+    with open(schema_path, "r", encoding="utf-8") as f:
+        schema = json.load(f)
+
+    schema["community_market"]["enabled"] = False
+    schema["community_market"]["grid_export_price"] = 0.9
+    with open(schema_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f, indent=2)
+
+    env = CityLearnEnv(str(schema_path), central_agent=True, episode_time_steps=2, random_seed=0)
+
+    try:
+        env.reset()
+        env.step([np.zeros(len(env.action_names[0]), dtype="float32")])
+        t = env.time_step - 1
+
+        expected_total = 0.0
+        for building in env.buildings:
+            net = float(building.net_electricity_consumption[t])
+            price = float(building.pricing.electricity_pricing[t])
+            expected_cost = max(net, 0.0) * price
+            assert building.net_electricity_consumption_cost[t] == pytest.approx(expected_cost, abs=1e-6)
+            expected_total += expected_cost
+
+        assert expected_total > 0.0
+        assert env.net_electricity_consumption_cost[t] == pytest.approx(expected_total, abs=1e-6)
+    finally:
+        env.close()
+
+
 def test_single_phase_rejects_non_l1_assets(tmp_path: Path):
     schema_path = _clone_minute_schema(
         tmp_path,

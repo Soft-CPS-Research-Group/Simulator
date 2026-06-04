@@ -9,6 +9,7 @@ import pytest
 pytest.importorskip("gymnasium")
 
 from citylearn.citylearn import CityLearnEnv
+from citylearn.internal.kpi import CityLearnKPIService
 
 
 def _write_golden_schema(
@@ -134,7 +135,7 @@ def _write_golden_schema(
 
 
 def _series_cost(net: np.ndarray, prices: np.ndarray) -> np.ndarray:
-    return np.asarray(net, dtype="float64") * np.asarray(prices, dtype="float64")
+    return np.clip(np.asarray(net, dtype="float64"), 0.0, None) * np.asarray(prices, dtype="float64")
 
 
 def _series_emission(net: np.ndarray, carbon: np.ndarray) -> np.ndarray:
@@ -152,16 +153,19 @@ def _set_condition_series(env: CityLearnEnv, condition, building_nets: dict[str,
     prices = np.asarray(first.pricing.electricity_pricing[: len(next(iter(building_nets.values())))], dtype="float64")
     carbon = np.asarray(first.carbon_intensity.carbon_intensity[: len(prices)], dtype="float64")
     env_net = np.zeros(len(prices), dtype="float64")
+    env_cost = np.zeros(len(prices), dtype="float64")
 
     for building in env.buildings:
         net = np.asarray(building_nets[building.name], dtype="float64")
+        cost = _series_cost(net, prices)
         setattr(building, f"net_electricity_consumption{condition.value}", net)
-        setattr(building, f"net_electricity_consumption_cost{condition.value}", _series_cost(net, prices))
+        setattr(building, f"net_electricity_consumption_cost{condition.value}", cost)
         setattr(building, f"net_electricity_consumption_emission{condition.value}", _series_emission(net, carbon))
         env_net += net
+        env_cost += cost
 
     setattr(env, f"net_electricity_consumption{condition.value}", env_net)
-    setattr(env, f"net_electricity_consumption_cost{condition.value}", _series_cost(env_net, prices))
+    setattr(env, f"net_electricity_consumption_cost{condition.value}", env_cost)
     setattr(env, f"net_electricity_consumption_emission{condition.value}", _series_emission(env_net, carbon))
 
 
@@ -203,6 +207,72 @@ def _value(df: pd.DataFrame, name: str, cost_function: str):
 
 def _assert_value(df: pd.DataFrame, name: str, cost_function: str, expected: float):
     assert float(_value(df, name, cost_function)) == pytest.approx(expected, abs=1e-7)
+
+
+def test_district_pv_self_consumption_uses_net_district_export():
+    service = CityLearnKPIService(SimpleNamespace())
+    importer = SimpleNamespace(
+        name="Importer",
+        time_step=0,
+        solar_generation=np.array([0.0], dtype="float64"),
+        net_electricity_consumption=np.array([1.0], dtype="float64"),
+    )
+    exporter = SimpleNamespace(
+        name="Exporter",
+        time_step=0,
+        solar_generation=np.array([-1.0], dtype="float64"),
+        net_electricity_consumption=np.array([-1.0], dtype="float64"),
+    )
+
+    building_metrics = service._compute_pv_metrics(exporter)
+    district_metrics = service._compute_district_pv_metrics(
+        [importer, exporter],
+        {"Importer": (0, 0), "Exporter": (0, 0)},
+        final_t=0,
+    )
+
+    assert building_metrics["pv_export_total_kwh"] == pytest.approx(1.0)
+    assert building_metrics["pv_self_consumption_ratio"] == pytest.approx(0.0)
+    assert district_metrics["pv_generation_total_kwh"] == pytest.approx(1.0)
+    assert district_metrics["pv_export_total_kwh"] == pytest.approx(0.0)
+    assert district_metrics["pv_self_consumption_ratio"] == pytest.approx(1.0)
+
+
+def test_domain_metric_totals_ignore_non_finite_samples():
+    service = CityLearnKPIService(SimpleNamespace())
+    charger = SimpleNamespace(
+        electricity_consumption=np.array([1.0, np.nan, -0.5], dtype="float64"),
+        charger_simulation=SimpleNamespace(
+            electric_vehicle_charger_state=np.zeros(4, dtype="float64"),
+            electric_vehicle_required_soc_departure=np.zeros(3, dtype="float64"),
+        ),
+        past_connected_evs=[None, None, None],
+    )
+    ev_building = SimpleNamespace(time_step=2, electric_vehicle_chargers=[charger])
+    ev_metrics = service._compute_ev_metrics(ev_building)
+
+    storage = SimpleNamespace(capacity=10.0, degraded_capacity=9.0)
+    bess_building = SimpleNamespace(
+        time_step=2,
+        electrical_storage=storage,
+        electrical_storage_electricity_consumption=np.array([1.0, np.nan, -0.25], dtype="float64"),
+    )
+    bess_metrics = service._compute_bess_metrics(bess_building)
+
+    pv_building = SimpleNamespace(
+        time_step=2,
+        solar_generation=np.array([-1.0, np.nan, -2.0], dtype="float64"),
+        net_electricity_consumption=np.array([-0.5, np.nan, -1.0], dtype="float64"),
+    )
+    pv_metrics = service._compute_pv_metrics(pv_building)
+
+    assert ev_metrics["ev_charge_total_kwh"] == pytest.approx(1.0)
+    assert ev_metrics["ev_v2g_export_total_kwh"] == pytest.approx(0.5)
+    assert bess_metrics["bess_charge_total_kwh"] == pytest.approx(1.0)
+    assert bess_metrics["bess_discharge_total_kwh"] == pytest.approx(0.25)
+    assert bess_metrics["bess_throughput_total_kwh"] == pytest.approx(1.25)
+    assert pv_metrics["pv_generation_total_kwh"] == pytest.approx(3.0)
+    assert pv_metrics["pv_export_total_kwh"] == pytest.approx(1.5)
 
 
 @pytest.mark.parametrize("seconds_per_time_step", [15, 60, 300, 900, 3600])
@@ -247,8 +317,8 @@ def test_kpi_v2_golden_grid_pv_bess_ev_and_shape_metrics(tmp_path: Path, seconds
         _assert_value(df, "District", "district_energy_grid_total_net_exchange_control_kwh", 6.0 * dt)
 
         _assert_value(df, "Building_A", "building_cost_total_control_eur", 1.4 * dt)
-        _assert_value(df, "Building_B", "building_cost_total_control_eur", -0.1 * dt)
-        _assert_value(df, "District", "district_cost_total_control_eur", 1.3 * dt)
+        _assert_value(df, "Building_B", "building_cost_total_control_eur", 0.6 * dt)
+        _assert_value(df, "District", "district_cost_total_control_eur", 2.0 * dt)
         _assert_value(df, "Building_A", "building_emissions_total_control_kgco2", 2.2 * dt)
         _assert_value(df, "Building_B", "building_emissions_total_control_kgco2", 1.2 * dt)
         _assert_value(df, "District", "district_emissions_total_control_kgco2", 2.3 * dt)
@@ -257,7 +327,8 @@ def test_kpi_v2_golden_grid_pv_bess_ev_and_shape_metrics(tmp_path: Path, seconds
         _assert_value(df, "Building_B", "building_solar_self_consumption_total_export_kwh", 3.0 * dt)
         _assert_value(df, "Building_B", "building_solar_self_consumption_ratio_self_consumption_ratio", 0.0)
         _assert_value(df, "District", "district_solar_self_consumption_total_generation_kwh", 3.0 * dt)
-        _assert_value(df, "District", "district_solar_self_consumption_total_export_kwh", 3.0 * dt)
+        _assert_value(df, "District", "district_solar_self_consumption_total_export_kwh", 0.0)
+        _assert_value(df, "District", "district_solar_self_consumption_ratio_self_consumption_ratio", 1.0)
 
         _assert_value(df, "Building_A", "building_battery_total_charge_kwh", 1.25 * dt)
         _assert_value(df, "Building_A", "building_battery_total_discharge_kwh", 0.5 * dt)
@@ -332,8 +403,8 @@ def test_kpi_v2_golden_community_market_uses_bounded_local_demand_share(
                     "grid_import_kwh": 0.0,
                     "grid_export_kwh": 0.0,
                     "settled_cost_eur": -0.08 * dt,
-                    "counterfactual_cost_eur": -0.1 * dt,
-                    "market_savings_eur": -0.02 * dt,
+                    "counterfactual_cost_eur": 0.0,
+                    "market_savings_eur": 0.08 * dt,
                 },
             ],
             [
@@ -353,9 +424,9 @@ def test_kpi_v2_golden_community_market_uses_bounded_local_demand_share(
                     "local_export_kwh": 0.5 * dt,
                     "grid_import_kwh": 0.0,
                     "grid_export_kwh": 1.5 * dt,
-                    "settled_cost_eur": -0.155 * dt,
-                    "counterfactual_cost_eur": -0.4 * dt,
-                    "market_savings_eur": -0.245 * dt,
+                    "settled_cost_eur": -0.08 * dt,
+                    "counterfactual_cost_eur": 0.0,
+                    "market_savings_eur": 0.08 * dt,
                 },
             ],
         ]
@@ -378,17 +449,17 @@ def test_kpi_v2_golden_community_market_uses_bounded_local_demand_share(
         assert 0.0 <= float(_value(df, "District", "district_solar_self_consumption_community_market_import_share_ratio")) <= 1.0
 
         _assert_value(df, "Building_A", "building_cost_total_control_eur", 0.26 * dt)
-        _assert_value(df, "Building_B", "building_cost_total_control_eur", -0.235 * dt)
-        _assert_value(df, "District", "district_cost_total_control_eur", 0.025 * dt)
+        _assert_value(df, "Building_B", "building_cost_total_control_eur", -0.16 * dt)
+        _assert_value(df, "District", "district_cost_total_control_eur", 0.10 * dt)
         _assert_value(df, "District", "district_cost_total_delta_eur", 0.0)
         _assert_value(df, "Building_A", "building_energy_grid_community_market_local_import_total_kwh", 1.5 * dt)
         _assert_value(df, "Building_A", "building_cost_community_market_settled_total_eur", 0.26 * dt)
         _assert_value(df, "Building_A", "building_cost_community_market_counterfactual_total_eur", 0.3 * dt)
         _assert_value(df, "Building_A", "building_cost_community_market_savings_total_eur", 0.04 * dt)
-        _assert_value(df, "Building_B", "building_cost_community_market_savings_total_eur", -0.265 * dt)
+        _assert_value(df, "Building_B", "building_cost_community_market_savings_total_eur", 0.16 * dt)
         _assert_value(df, "District", "district_energy_grid_community_market_grid_export_after_local_total_kwh", 1.5 * dt)
-        _assert_value(df, "District", "district_cost_community_market_settled_total_eur", 0.025 * dt)
-        _assert_value(df, "District", "district_cost_community_market_counterfactual_total_eur", -0.2 * dt)
-        _assert_value(df, "District", "district_cost_community_market_savings_total_eur", -0.225 * dt)
+        _assert_value(df, "District", "district_cost_community_market_settled_total_eur", 0.10 * dt)
+        _assert_value(df, "District", "district_cost_community_market_counterfactual_total_eur", 0.3 * dt)
+        _assert_value(df, "District", "district_cost_community_market_savings_total_eur", 0.2 * dt)
     finally:
         env.close()
