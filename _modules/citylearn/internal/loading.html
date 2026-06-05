@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.loading &mdash; CityLearn 1.5.1 documentation</title>
+  <title>citylearn.internal.loading &mdash; CityLearn 1.5.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=44dfd65d"></script>
+      <script src="../../../_static/documentation_options.js?v=d75fd82e"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -141,6 +141,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_charger_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_deferrable_appliance_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dataframe_to_constructor_kwargs</span><span class="p">(</span><span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return column arrays without boxing every value into Python lists.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">column</span><span class="p">):</span> <span class="n">series</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">series</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_print_time_step_conversion_notice</span><span class="p">(</span>
@@ -479,7 +488,11 @@
             <span class="n">window</span><span class="o">=</span><span class="n">member_window</span><span class="p">,</span>
             <span class="n">source_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;buildings.</span><span class="si">{</span><span class="n">building_name</span><span class="si">}</span><span class="s1">.energy_simulation&#39;</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">energy_simulation</span> <span class="o">=</span> <span class="n">EnergySimulation</span><span class="p">(</span><span class="o">**</span><span class="n">energy_simulation</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">),</span> <span class="n">seconds_per_time_step</span><span class="o">=</span><span class="n">seconds_per_time_step</span><span class="p">,</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
+        <span class="n">energy_simulation</span> <span class="o">=</span> <span class="n">EnergySimulation</span><span class="p">(</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataframe_to_constructor_kwargs</span><span class="p">(</span><span class="n">energy_simulation</span><span class="p">),</span>
+            <span class="n">seconds_per_time_step</span><span class="o">=</span><span class="n">seconds_per_time_step</span><span class="p">,</span>
+            <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">energy_simulation</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
         <span class="n">ratios</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">energy_simulation</span><span class="p">,</span> <span class="s1">&#39;time_step_ratios&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="n">building_kwargs</span><span class="p">[</span><span class="s1">&#39;time_step_ratio&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ratios</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ratios</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span>
@@ -1136,29 +1149,35 @@
         <span class="n">noise_std</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="n">cacheable</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">noise_std</span> <span class="ow">or</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.0</span>
-        <span class="n">cache_key</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">base_cache_key</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">constructor</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filepath</span><span class="p">)),</span>
             <span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">]),</span>
             <span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_end_time_step&#39;</span><span class="p">]),</span>
             <span class="nb">int</span><span class="p">(</span><span class="n">expected_rows</span><span class="p">),</span>
-            <span class="nb">tuple</span><span class="p">(</span><span class="n">window</span><span class="p">)</span> <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">full_horizon_cache_key</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">base_cache_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">window_cache_key</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">base_cache_key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">window</span><span class="p">)</span> <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">cacheable</span> <span class="ow">and</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">cacheable</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">full_horizon_cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">[</span><span class="n">full_horizon_cache_key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">window_cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">[</span><span class="n">window_cache_key</span><span class="p">]</span>
 
         <span class="n">dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_simulation_dataframe</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+        <span class="n">full_horizon_source</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">expected_rows</span><span class="p">)</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_dynamic_timeseries_dataframe</span><span class="p">(</span>
             <span class="n">dataframe</span><span class="p">,</span>
             <span class="n">expected_rows</span><span class="o">=</span><span class="n">expected_rows</span><span class="p">,</span>
             <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
             <span class="n">source_label</span><span class="o">=</span><span class="n">source_label</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">time_series</span> <span class="o">=</span> <span class="n">constructor</span><span class="p">(</span><span class="o">**</span><span class="n">dataframe</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">),</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
+        <span class="n">time_series</span> <span class="o">=</span> <span class="n">constructor</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataframe_to_constructor_kwargs</span><span class="p">(</span><span class="n">dataframe</span><span class="p">),</span> <span class="n">noise_std</span><span class="o">=</span><span class="n">noise_std</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_step_offset</span><span class="p">(</span><span class="n">time_series</span><span class="p">,</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;simulation_start_time_step&#39;</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">cacheable</span><span class="p">:</span>
+            <span class="n">cache_key</span> <span class="o">=</span> <span class="n">full_horizon_cache_key</span> <span class="k">if</span> <span class="n">full_horizon_source</span> <span class="k">else</span> <span class="n">window_cache_key</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_series</span>
 
         <span class="k">return</span> <span class="n">time_series</span>
@@ -1374,18 +1393,28 @@
         <span class="k">if</span> <span class="n">expected_rows</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">dataframe</span>
 
-        <span class="n">df</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">expected_rows</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="n">expected_rows</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">row_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">row_count</span> <span class="o">==</span> <span class="n">expected_rows</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">RangeIndex</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">start</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span> <span class="o">==</span> <span class="n">expected_rows</span>
+                <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">step</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="n">dataframe</span>
+
+            <span class="k">return</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="n">expected_rows</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="n">row_count</span> <span class="o">&gt;</span> <span class="n">expected_rows</span> <span class="k">else</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">window</span>
         <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="n">expected_rows</span><span class="p">))</span>
         <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">end</span><span class="p">),</span> <span class="n">expected_rows</span><span class="p">))</span>
         <span class="n">active_rows</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
-        <span class="n">row_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">row_count</span> <span class="o">==</span> <span class="n">expected_rows</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">row_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">active_rows</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
