@@ -114,16 +114,29 @@ class ElectricDevice(Device):
         assert nominal_power >= 0, 'nominal_power must be >= 0.'
         self.__nominal_power = nominal_power
 
+    def _electricity_consumption_ratio(self) -> float:
+        ratio = self.time_step_ratio
+        return 1.0 if ratio is None else float(ratio)
+
     @property
     def electricity_consumption(self) -> np.ndarray:
         r"""Electricity consumption time series [kWh]."""
-        return self.__electricity_consumption * self.time_step_ratio
+        ratio = self._electricity_consumption_ratio()
+
+        if ratio == 1.0:
+            return self.__electricity_consumption
+
+        return self.__electricity_consumption * ratio
 
     @property
     def available_nominal_power(self) -> float:
         r"""Difference between `nominal_power` and `electricity_consumption` at current `time_step`."""
 
-        return None if self.nominal_power is None else self.nominal_power - self.electricity_consumption[self.time_step]
+        if self.nominal_power is None:
+            return None
+
+        consumption = self.__electricity_consumption[self.time_step] * self._electricity_consumption_ratio()
+        return self.nominal_power - consumption
 
 
     def get_metadata(self) -> Mapping[str, Any]:

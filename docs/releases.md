@@ -60,6 +60,49 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.2 - 2026-06-05
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release focused on the 15-second full-year dynamic dataset runtime stall. Full-year entity/dynamic runs no longer perform full-horizon array work inside common per-step energy accessors, bringing first-step throughput back in line with short-window runs. Initialization and memory use for full-year 15-second runs remain high because the simulator still materializes full-horizon histories.
+
+### Added
+
+- Representative local benchmark notes for `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet`, comparing a 10k-step window with the full-year dynamic run.
+
+### Changed
+
+- `ElectricDevice.available_nominal_power` now reads only the current timestep instead of materializing the full electricity-consumption vector.
+- `ElectricDevice.electricity_consumption` returns the stored array directly when `time_step_ratio == 1.0`, avoiding an unnecessary full-array multiply.
+- Building storage energy helper properties now slice the simulated history before applying `clip`, avoiding full-year array work during early timesteps.
+
+### Fixed
+
+- Fixed the main per-step stall observed on full-year 15-second entity/dynamic datasets, where repeated full-horizon vector operations made early timesteps much slower than equivalent short-window runs.
+
+### Dataset/Schema Impact
+
+- No schema or dataset migration is required.
+- Full-year 15-second datasets still allocate dense full-horizon state and observation histories. Use `simulation_start_time_step` and `simulation_end_time_step` to run smaller training windows when memory is the limiting factor.
+
+### Compatibility
+
+- Compatible patch release for APIs, actions, observations, KPIs and dataset files.
+- Numerical outputs are expected to remain unchanged; the patch changes when arrays are sliced/materialized, not the physical equations.
+
+### Validation
+
+- `.venv/bin/pytest tests/test_15_second_power_fixture.py tests/test_kpis.py::test_histories_and_kpi_consistency_with_subhour_steps tests/test_scenario_smoke.py -q`: pass, `9 passed`.
+- `.venv/bin/pytest -q`: pass, `398 passed, 18 warnings`.
+- `git diff --check`: pass.
+- Manual performance check on `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet`: 10k-step window first 100 steps `~0.010 s/step`, full-year first 100 steps after patch `~0.010 s/step`; pre-patch full-year was `~0.161 s/step` in the same local check.
+
+### Migration Notes
+
+- No code migration is needed. For memory-constrained 15-second training, prefer explicit simulation windows until a future `history_mode="training"` or online-KPI mode removes the dense full-horizon histories.
+
 ## v1.5.1 - 2026-06-04
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

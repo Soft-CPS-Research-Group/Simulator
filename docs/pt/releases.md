@@ -58,6 +58,49 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.2 - 2026-06-05
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release focada no stall de runtime do dataset dinamico full-year a 15 segundos. Runs full-year em entity/dynamic deixam de fazer trabalho de arrays full-horizon dentro de acessores comuns de energia por step, trazendo o throughput dos primeiros steps para perto das janelas curtas. A inicializacao e memoria de runs full-year a 15 segundos continuam altas porque o simulador ainda materializa historicos densos full-horizon.
+
+### Added
+
+- Notas de benchmark local representativo para `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet`, comparando janela de 10k steps com run dinamica full-year.
+
+### Changed
+
+- `ElectricDevice.available_nominal_power` passa a ler apenas o timestep atual em vez de materializar o vetor completo de electricity consumption.
+- `ElectricDevice.electricity_consumption` devolve o array guardado diretamente quando `time_step_ratio == 1.0`, evitando uma multiplicacao full-array desnecessaria.
+- Properties auxiliares de energia de storage em buildings passam a cortar o historico simulado antes de aplicar `clip`, evitando trabalho em arrays full-year durante timesteps iniciais.
+
+### Fixed
+
+- Corrigido o principal stall por step observado em datasets entity/dynamic full-year a 15 segundos, onde operacoes vetoriais full-horizon repetidas tornavam os primeiros timesteps muito mais lentos que runs equivalentes em janela curta.
+
+### Dataset/Schema Impact
+
+- Nao exige migracao de schema nem datasets.
+- Datasets full-year a 15 segundos continuam a alocar estado e historicos de observacao densos para o horizonte completo. Usar `simulation_start_time_step` e `simulation_end_time_step` para treino em janelas menores quando a memoria for o limite.
+
+### Compatibility
+
+- Patch release compativel para APIs, actions, observations, KPIs e ficheiros de dataset.
+- Os outputs numericos devem manter-se iguais; a patch muda quando os arrays sao cortados/materializados, nao as equacoes fisicas.
+
+### Validation
+
+- `.venv/bin/pytest tests/test_15_second_power_fixture.py tests/test_kpis.py::test_histories_and_kpi_consistency_with_subhour_steps tests/test_scenario_smoke.py -q`: pass, `9 passed`.
+- `.venv/bin/pytest -q`: pass, `398 passed, 18 warnings`.
+- `git diff --check`: pass.
+- Check manual de performance em `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet`: janela de 10k steps nos primeiros 100 steps `~0.010 s/step`, full-year nos primeiros 100 steps apos patch `~0.010 s/step`; antes da patch o full-year estava em `~0.161 s/step` no mesmo check local.
+
+### Migration Notes
+
+- Nao e necessaria migracao de codigo. Para treino a 15 segundos com limite de memoria, preferir janelas explicitas ate existir um futuro `history_mode="training"` ou modo de KPIs online que remova os historicos densos full-horizon.
+
 ## v1.5.1 - 2026-06-04
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

@@ -535,25 +535,25 @@ class Building(Environment):
     def energy_from_cooling_device_to_cooling_storage(self) -> np.ndarray:
         """Energy supply from `cooling_device` to `cooling_storage` time series, in [kWh]."""
 
-        return self.cooling_storage.energy_balance.clip(min=0)[:self.time_step + 1]
+        return self.cooling_storage.energy_balance[:self.time_step + 1].clip(min=0)
 
     @property
     def energy_from_heating_device_to_heating_storage(self) -> np.ndarray:
         """Energy supply from `heating_device` to `heating_storage` time series, in [kWh]."""
 
-        return self.heating_storage.energy_balance.clip(min=0)[:self.time_step + 1]
+        return self.heating_storage.energy_balance[:self.time_step + 1].clip(min=0)
 
     @property
     def energy_from_dhw_device_to_dhw_storage(self) -> np.ndarray:
         """Energy supply from `dhw_device` to `dhw_storage` time series, in [kWh]."""
 
-        return self.dhw_storage.energy_balance.clip(min=0)[:self.time_step + 1]
+        return self.dhw_storage.energy_balance[:self.time_step + 1].clip(min=0)
 
     @property
     def energy_to_electrical_storage(self) -> np.ndarray:
         """Energy supply from `electrical_device` to building time series, in [kWh]."""
 
-        return self.electrical_storage.energy_balance.clip(min=0)[:self.time_step + 1]
+        return self.electrical_storage.energy_balance[:self.time_step + 1].clip(min=0)
 
     @property
     def energy_from_cooling_device(self) -> np.ndarray:
@@ -583,25 +583,25 @@ class Building(Environment):
     def energy_from_cooling_storage(self) -> np.ndarray:
         """Energy supply from `cooling_storage` to building time series, in [kWh]."""
 
-        return self.cooling_storage.energy_balance.clip(max=0)[:self.time_step + 1] * -1
+        return self.cooling_storage.energy_balance[:self.time_step + 1].clip(max=0) * -1
 
     @property
     def energy_from_heating_storage(self) -> np.ndarray:
         """Energy supply from `heating_storage` to building time series, in [kWh]."""
 
-        return self.heating_storage.energy_balance.clip(max=0)[:self.time_step + 1] * -1
+        return self.heating_storage.energy_balance[:self.time_step + 1].clip(max=0) * -1
 
     @property
     def energy_from_dhw_storage(self) -> np.ndarray:
         """Energy supply from `dhw_storage` to building time series, in [kWh]."""
 
-        return self.dhw_storage.energy_balance.clip(max=0)[:self.time_step + 1] * -1
+        return self.dhw_storage.energy_balance[:self.time_step + 1].clip(max=0) * -1
 
     @property
     def energy_from_electrical_storage(self) -> np.ndarray:
         """Energy supply from `electrical_storage` to building time series, in [kWh]."""
 
-        return self.electrical_storage.energy_balance.clip(max=0)[:self.time_step + 1] * -1
+        return self.electrical_storage.energy_balance[:self.time_step + 1].clip(max=0) * -1
 
     @property
     def indoor_dry_bulb_temperature(self) -> np.ndarray:
