@@ -58,6 +58,50 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.3 - 2026-06-05
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release focada no custo de inicializacao dinamica full-year a 15 segundos que ainda sobrava depois da `v1.5.2`. O loader passa a evitar materializacao por listas Python para dados parquet full-year, reutiliza series partilhadas full-horizon entre janelas dinamicas de membros e ignora scans desnecessarios de schedules de chargers quando nao existe EV pool.
+
+### Added
+
+- Notas de benchmark de inicializacao representativo para `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet`.
+
+### Changed
+
+- O loader passa a entregar colunas de dataframes como arrays NumPy aos construtores, em vez de converter dados parquet full-year via `DataFrame.to_dict('list')`.
+- Series partilhadas full-horizon de weather, pricing e carbon podem agora ser reutilizadas entre janelas dinamicas de membros.
+- O alinhamento de dataframes dinamicos evita copias extra quando a fonte ja cobre todo o horizonte configurado com `RangeIndex` default.
+- O reset de topologia dinamica passa a ignorar scans completos de schedules de chargers quando o ambiente nao tem EV pool.
+
+### Fixed
+
+- Reduzido o tempo de inicializacao dinamica full-year a 15 segundos causado por boxing pandas para listas e materializacao repetida de series partilhadas.
+
+### Dataset/Schema Impact
+
+- Nao exige migracao de schema nem datasets.
+- Chamadas explicitas a `env.reset()` em full-year continuam a alocar historicos densos full-horizon; usar `simulation_start_time_step` e `simulation_end_time_step` para janelas de treino com limite de memoria.
+
+### Compatibility
+
+- Patch release compativel para APIs, actions, observations, KPIs e ficheiros de dataset.
+- Os outputs numericos devem manter-se iguais; a patch muda a estrategia de loading/materializacao, nao as equacoes fisicas.
+
+### Validation
+
+- `.venv/bin/pytest tests/test_15_second_power_fixture.py tests/test_dynamic_topology_entity_mode.py tests/test_scenario_smoke.py -q`: pass, `19 passed`.
+- `.venv/bin/pytest -q`: pass, `398 passed, 18 warnings`.
+- `git diff --check`: pass.
+- Check manual de performance em `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet`: inicializacao full-year `~24 s` e `~6.4 GB` RSS antes do reset explicito; check local anterior estava em `~90 s` e `~7.1 GB` RSS. O reset explicito ainda subiu RSS para `~10.7 GB` porque os historicos densos full-horizon continuam alocados.
+
+### Migration Notes
+
+- Nao e necessaria migracao de codigo. Para reduzir memoria full-year a 15 segundos para alem da inicializacao, o trabalho restante e uma mudanca maior de `history_mode="training"` ou reutilizacao de buffers no reset.
+
 ## v1.5.2 - 2026-06-05
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

@@ -51,6 +51,15 @@ class CityLearnLoadingService:
         self._shared_timeseries_cache: Dict[Tuple[Any, ...], Any] = {}
 
     @staticmethod
+    def _dataframe_to_constructor_kwargs(dataframe: pd.DataFrame) -> Dict[str, np.ndarray]:
+        """Return column arrays without boxing every value into Python lists."""
+
+        return {
+            str(column): series.to_numpy(copy=False)
+            for column, series in dataframe.items()
+        }
+
+    @staticmethod
     def _print_time_step_conversion_notice(
         *,
         building_name: str,
@@ -382,7 +391,11 @@ class CityLearnLoadingService:
             window=member_window,
             source_label=f'buildings.{building_name}.energy_simulation',
         )
-        energy_simulation = EnergySimulation(**energy_simulation.to_dict('list'), seconds_per_time_step=seconds_per_time_step, noise_std=noise_std)
+        energy_simulation = EnergySimulation(
+            **self._dataframe_to_constructor_kwargs(energy_simulation),
+            seconds_per_time_step=seconds_per_time_step,
+            noise_std=noise_std,
+        )
         self._set_time_step_offset(energy_simulation, schema['simulation_start_time_step'])
         ratios = getattr(energy_simulation, 'time_step_ratios', None) or []
         building_kwargs['time_step_ratio'] = ratios[-1] if len(ratios) > 0 else 1.0
@@ -1026,29 +1039,35 @@ class CityLearnLoadingService:
         noise_std: float,
     ) -> Any:
         cacheable = float(noise_std or 0.0) == 0.0
-        cache_key = (
+        base_cache_key = (
             constructor.__name__,
             os.path.abspath(str(filepath)),
             int(schema['simulation_start_time_step']),
             int(schema['simulation_end_time_step']),
             int(expected_rows),
-            tuple(window) if window is not None else None,
         )
+        full_horizon_cache_key = (*base_cache_key, None)
+        window_cache_key = (*base_cache_key, tuple(window) if window is not None else None)
 
-        if cacheable and cache_key in self._shared_timeseries_cache:
-            return self._shared_timeseries_cache[cache_key]
+        if cacheable:
+            if full_horizon_cache_key in self._shared_timeseries_cache:
+                return self._shared_timeseries_cache[full_horizon_cache_key]
+            if window_cache_key in self._shared_timeseries_cache:
+                return self._shared_timeseries_cache[window_cache_key]
 
         dataframe = self._read_simulation_dataframe(schema, filepath)
+        full_horizon_source = len(dataframe) >= int(expected_rows)
         dataframe = self._align_dynamic_timeseries_dataframe(
             dataframe,
             expected_rows=expected_rows,
             window=window,
             source_label=source_label,
         )
-        time_series = constructor(**dataframe.to_dict('list'), noise_std=noise_std)
+        time_series = constructor(**self._dataframe_to_constructor_kwargs(dataframe), noise_std=noise_std)
         self._set_time_step_offset(time_series, schema['simulation_start_time_step'])
 
         if cacheable:
+            cache_key = full_horizon_cache_key if full_horizon_source else window_cache_key
             self._shared_timeseries_cache[cache_key] = time_series
 
         return time_series
@@ -1264,18 +1283,28 @@ class CityLearnLoadingService:
         if expected_rows <= 0:
             return dataframe
 
-        df = dataframe.copy()
-        if len(df) > expected_rows:
-            df = df.iloc[:expected_rows].copy()
+        row_count = len(dataframe)
+
+        if row_count == expected_rows:
+            index = dataframe.index
+            if (
+                isinstance(index, pd.RangeIndex)
+                and int(index.start) == 0
+                and int(index.stop) == expected_rows
+                and int(index.step) == 1
+            ):
+                return dataframe
+
+            return dataframe.reset_index(drop=True)
+
+        df = dataframe.iloc[:expected_rows].copy() if row_count > expected_rows else dataframe.copy()
 
         start, end = window
         start = max(0, min(int(start), expected_rows))
         end = max(start, min(int(end), expected_rows))
         active_rows = end - start
-        row_count = len(df)
 
-        if row_count == expected_rows:
-            return df.reset_index(drop=True)
+        row_count = len(df)
 
         if active_rows <= 0:
             raise ValueError(

@@ -380,6 +380,9 @@ class CityLearnTopologyService:
     def _collect_active_ev_ids(self, buildings: Iterable[Building]) -> Set[str]:
         active_ev_ids: Set[str] = set()
 
+        if not self._ev_pool:
+            return active_ev_ids
+
         for building in buildings:
             for charger in building.electric_vehicle_chargers or []:
                 sim_ids = getattr(charger.charger_simulation, 'electric_vehicle_id', None)

@@ -60,6 +60,50 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.3 - 2026-06-05
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release focused on the remaining 15-second full-year dynamic initialization cost after `v1.5.2`. The loader now avoids Python-list materialization for full-year parquet data, reuses full-horizon shared time series across dynamic member windows, and skips unnecessary charger-schedule scans when no EV pool exists.
+
+### Added
+
+- Representative initialization benchmark notes for `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet`.
+
+### Changed
+
+- Loader construction passes dataframe columns as NumPy arrays instead of boxing full-year parquet data through `DataFrame.to_dict('list')`.
+- Full-horizon shared weather, pricing and carbon series can now be reused across dynamic member windows.
+- Dynamic dataframe alignment avoids extra copies when the source already covers the full configured horizon with a default `RangeIndex`.
+- Dynamic topology reset now skips full charger-schedule scans when the environment has no EV pool.
+
+### Fixed
+
+- Reduced full-year 15-second dynamic initialization time caused by pandas list boxing and repeated shared time-series materialization.
+
+### Dataset/Schema Impact
+
+- No schema or dataset migration is required.
+- Explicit full-year `env.reset()` calls still allocate dense full-horizon histories; use `simulation_start_time_step` and `simulation_end_time_step` for memory-constrained training windows.
+
+### Compatibility
+
+- Compatible patch release for APIs, actions, observations, KPIs and dataset files.
+- Numerical outputs are expected to remain unchanged; the patch changes loading/materialization strategy, not physical equations.
+
+### Validation
+
+- `.venv/bin/pytest tests/test_15_second_power_fixture.py tests/test_dynamic_topology_entity_mode.py tests/test_scenario_smoke.py -q`: pass, `19 passed`.
+- `.venv/bin/pytest -q`: pass, `398 passed, 18 warnings`.
+- `git diff --check`: pass.
+- Manual performance check on `citylearn_three_phase_dynamic_assets_only_demo_15s_parquet`: full-year initialization `~24 s` and `~6.4 GB` RSS before explicit reset; earlier local check was `~90 s` and `~7.1 GB` RSS. Explicit reset still raised RSS to `~10.7 GB` because dense full-horizon histories remain allocated.
+
+### Migration Notes
+
+- No code migration is needed. For full-year 15-second memory reduction beyond initialization, the remaining work is a larger `history_mode="training"` or reusable reset-buffer change.
+
 ## v1.5.2 - 2026-06-05
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
