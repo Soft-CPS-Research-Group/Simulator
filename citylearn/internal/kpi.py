@@ -441,6 +441,21 @@ class CityLearnKPIService:
         phase_kw = {phase: 0.0 for phase in self._electrical_service_phase_names(building)}
         return 0.0, phase_kw
 
+    def _ev_apply_charger_charge_deadband(self, charger, power_kw: float) -> float:
+        power_kw = max(self._to_scalar(power_kw, 0.0), 0.0)
+        if power_kw <= self.EV_DEPARTURE_EPS:
+            return 0.0
+
+        max_power_kw = max(self._to_scalar(getattr(charger, 'max_charging_power', power_kw), power_kw), 0.0)
+        min_power_kw = max(self._to_scalar(getattr(charger, 'min_charging_power', 0.0), 0.0), 0.0)
+        if max_power_kw > 0.0:
+            min_power_kw = min(min_power_kw, max_power_kw)
+
+        if min_power_kw > 0.0 and power_kw < min_power_kw:
+            return 0.0
+
+        return power_kw
+
     def _ev_constraint_limited_charge_power_kw(
         self,
         building,
@@ -454,7 +469,7 @@ class CityLearnKPIService:
             return 0.0
 
         if building is None or not getattr(building, '_charging_constraints_enabled', False):
-            return requested_power_kw
+            return self._ev_apply_charger_charge_deadband(charger, requested_power_kw)
 
         if self._ev_power_outage_at_step(building, step):
             return 0.0
@@ -489,7 +504,7 @@ class CityLearnKPIService:
                     phase_base_kw = self._to_scalar(base_phase_kw.get(phase_name, 0.0), 0.0)
                     cap_kw = min(cap_kw, max((phase_limit - phase_base_kw) / fraction, 0.0))
 
-            return max(min(requested_power_kw, cap_kw), 0.0)
+            return self._ev_apply_charger_charge_deadband(charger, min(requested_power_kw, cap_kw))
 
         cap_kw = requested_power_kw
         building_limit = self._to_scalar(getattr(building, '_building_charger_limit_kw', None), np.nan)
@@ -509,7 +524,7 @@ class CityLearnKPIService:
             if np.isfinite(phase_limit):
                 cap_kw = min(cap_kw, max(phase_limit, 0.0))
 
-        return max(min(requested_power_kw, cap_kw), 0.0)
+        return self._ev_apply_charger_charge_deadband(charger, min(requested_power_kw, cap_kw))
 
     def _ev_departure_threshold_feasible(
         self,

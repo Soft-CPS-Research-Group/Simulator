@@ -58,6 +58,59 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.4 - 2026-06-10
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release focada na semantica das observacoes de carregamento EV, na correcao do reward EV e na contabilizacao de constraints de `electrical_service`. As observacoes `available_*` de EV/BESS passam a representar setpoints absolutos admissiveis para o proximo comando, nao apenas headroom incremental residual, permitindo manter uma carga ja limitada sem oscilar entre carga e zero.
+
+### Added
+
+- Cobertura de regressao para reward EV `soc_impossible` e penalizacoes de comando em charger sem carro ligado.
+- Cobertura por cadencia para janelas entity `prev_15m`, offsets de forecast e disponibilidade de storage em 15s, 60s, 900s e 3600s.
+- Cobertura de containment da observation space para headroom de `electrical_service`.
+
+### Changed
+
+- `available_*_power_kw` e `available_*_action_normalized` de chargers EV e storage passam a considerar a potencia atualmente aplicada ao converter headroom residual em limite absoluto do proximo setpoint.
+- `charging_constraint_violation_kwh` em `electrical_service` passa a contar over-requests pre-clipping alem de violacoes fisicas residuais, alinhando pedidos clipped com a semantica legacy de penalty.
+- Headroom default e bounds de observacoes de `electrical_service` passam a incluir carga base estimada do edificio e margem dos assets controlaveis.
+- Features temporais entity `prev_1` e `prev_3` passam a usar a ultima transicao consolidada, em vez do timestep anterior ao anterior.
+
+### Fixed
+
+- Corrigido reward EV `soc_impossible` para penalizar deficits SOC inalcancaveis, nao excesso de SOC acima do target de partida.
+- Corrigidas observacoes de charger EV desconectado para expor a energia comandada, tornando a penalizacao `no_car_charging` alcancavel via `env.step`.
+- Corrigida viabilidade KPI de partidas EV para aplicar `min_charging_power` depois dos limites de SOC e headroom.
+- Corrigidos forecasts PV derivados para ler inputs futuros do dataset em vez da propriedade do edificio limitada ao tempo atual.
+- Corrigidos bounds de headroom legacy/`electrical_service` que podiam marcar observacoes negativas validas como fora da `Box`.
+
+### Dataset/Schema Impact
+
+- Nao exige migracao de schema nem datasets.
+- Os nomes das observacoes mantem-se, mas a semantica de potencia disponivel fica clarificada como setpoint absoluto do proximo comando.
+- Totais de KPI/reward de violacao de `electrical_service` podem aumentar para agentes que pedem potencia acima dos limites, porque over-requests clipped passam a contar.
+
+### Compatibility
+
+- Patch release compativel para APIs, actions, schemas e ficheiros de dataset.
+- Controllers que usavam `available_charge_action_normalized == 0` como "tenho de parar a carga atual" devem adotar a interpretacao clarificada de setpoint.
+
+### Validation
+
+- `.venv/bin/pytest tests/unit/test_ev_reward_function.py tests/test_entity_observation_bundles.py tests/test_kpi_v2.py tests/test_electrical_service_and_market.py tests/test_market_phase_invariants.py tests/unit/test_charging_constraints.py tests/test_charging_constraints_e2e.py -q`: pass, `91 passed, 8 warnings`.
+- `.venv/bin/pytest -q`: pass, `423 passed, 18 warnings`.
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass.
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass, `16 executed, 16 passed`.
+- `git diff --check`: pass.
+
+### Migration Notes
+
+- Nao e necessaria migracao de codigo para agentes CityLearn standard.
+- Se analises downstream compararem totais de violacao de `electrical_service` entre versoes, esperar uma descontinuidade quando o agente faz over-request e o simulador clipped o comando.
+
 ## v1.5.3 - 2026-06-05
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

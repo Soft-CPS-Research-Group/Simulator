@@ -516,9 +516,11 @@ class Electric_Vehicles_Reward_Function(MARL):
             contributions = {k: 0.0 for k in self.weights.keys()}
 
             if not data["connected"]:
-                if data["last_charged_kwh"] and abs(data["last_charged_kwh"]) > 0.1:
+                last_charged_kwh = data.get("last_charged_kwh", 0.0) or 0.0
+                if abs(last_charged_kwh) > 0.1:
                     contributions["no_car_charging"] += self.weights["no_car_charging"] * penalty_multiplier
                 LOGGER.debug(f"Charger {charger_id} | EV not connected | Contributions: {contributions}")
+                penalty_total += sum(contributions.values())
                 continue
 
             # Extract values
@@ -547,10 +549,11 @@ class Electric_Vehicles_Reward_Function(MARL):
                 soc_diff = soc_now - required_soc
                 soc_diff_kWh = soc_diff * capacity
 
-                max_possible_charge = max_charging_power * hours_until_departure
-                max_possible_discharge = max_discharging_power * hours_until_departure
+                max_possible_charge = max(max_charging_power, 0.0) * max(hours_until_departure, 0.0)
+                max_possible_discharge = max(max_discharging_power, 0.0) * max(hours_until_departure, 0.0)
 
-                if soc_diff_kWh > max_possible_charge:
+                soc_deficit_kwh = max(required_soc - soc_now, 0.0) * capacity
+                if soc_deficit_kwh > max_possible_charge:
                     contributions["soc_impossible"] += self.weights["soc_impossible"] * penalty_multiplier
 
                 if hours_until_departure == 0:

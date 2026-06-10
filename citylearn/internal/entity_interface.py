@@ -659,6 +659,7 @@ class CityLearnEntityInterfaceService:
                     charge_efficiency_at_max=charge_efficiency_at_max,
                     discharge_efficiency_at_max=discharge_efficiency_at_max,
                     step_hours=step_hours,
+                    current_power_kw=applied_energy / step_hours,
                 )
                 self._set_obs_value(row, self._charger_feature_cols, "commanded_power_kw", commanded_energy / step_hours)
                 self._set_obs_value(row, self._charger_feature_cols, "applied_power_kw", applied_energy / step_hours)
@@ -785,6 +786,10 @@ class CityLearnEntityInterfaceService:
                     efficiency=self._safe_scalar(getattr(storage, "efficiency", base_efficiency), base_efficiency),
                     step_hours=step_hours,
                     include_headroom=True,
+                    current_power_kw=self._safe_scalar(
+                        building.electrical_storage_electricity_consumption[endogenous_t],
+                        0.0,
+                    ) / step_hours,
                 )
                 self._set_obs_value(row, self._storage_feature_cols, "electrical_storage_soc_ratio", soc)
                 self._set_obs_value(row, self._storage_feature_cols, "max_charge_power_kw", max_charge_power)
@@ -1460,11 +1465,11 @@ class CityLearnEntityInterfaceService:
         return metrics
 
     def _build_temporal_building_metrics(self, *, building, endogenous_t: int) -> Mapping[str, float]:
-        prev_1 = max(endogenous_t - 1, 0)
+        prev_1 = max(endogenous_t, 0)
         net_prev_1 = self._safe_index(building.net_electricity_consumption, prev_1, 0.0)
         import_prev_1 = max(net_prev_1, 0.0)
         export_prev_1 = max(-net_prev_1, 0.0)
-        indices = list(range(max(endogenous_t - 3, 0), endogenous_t))
+        indices = list(range(max(endogenous_t - 2, 0), endogenous_t + 1))
         if len(indices) == 0:
             indices = [prev_1]
 
@@ -1556,6 +1561,27 @@ class CityLearnEntityInterfaceService:
             return float("inf")
         return float(min(limits))
 
+    def _setpoint_power_limit_from_headroom(
+        self,
+        headroom_limit_kw: float,
+        current_signed_power_kw: float,
+        *,
+        export: bool = False,
+    ) -> float:
+        """Convert remaining headroom into the admissible absolute setpoint for one asset."""
+
+        headroom_limit_kw = self._safe_scalar(headroom_limit_kw, np.nan)
+        if not np.isfinite(headroom_limit_kw):
+            return float("inf")
+
+        current_signed_power_kw = self._safe_scalar(current_signed_power_kw, 0.0)
+        adjusted_limit = (
+            headroom_limit_kw - current_signed_power_kw
+            if export
+            else headroom_limit_kw + current_signed_power_kw
+        )
+        return max(adjusted_limit, 0.0)
+
     def _charger_core_decision_metrics(
         self,
         *,
@@ -1573,6 +1599,7 @@ class CityLearnEntityInterfaceService:
         charge_efficiency_at_max: float,
         discharge_efficiency_at_max: float,
         step_hours: float,
+        current_power_kw: float = 0.0,
     ) -> Mapping[str, float]:
         if not connected or battery_capacity <= 0.0 or current_soc < 0.0:
             return {
@@ -1603,8 +1630,17 @@ class CityLearnEntityInterfaceService:
         charge_power_by_soc = energy_to_full / max(charge_efficiency * step_hours, 1.0e-6)
         discharge_power_by_soc = energy_available * discharge_efficiency / max(step_hours, 1.0e-6)
 
-        import_limit = self._headroom_power_limit_for_connection(building, getattr(charger, "phase_connection", None), export=False)
-        export_limit = self._headroom_power_limit_for_connection(building, getattr(charger, "phase_connection", None), export=True)
+        current_power_kw = self._safe_scalar(current_power_kw, 0.0)
+        import_limit = self._setpoint_power_limit_from_headroom(
+            self._headroom_power_limit_for_connection(building, getattr(charger, "phase_connection", None), export=False),
+            current_power_kw,
+            export=False,
+        )
+        export_limit = self._setpoint_power_limit_from_headroom(
+            self._headroom_power_limit_for_connection(building, getattr(charger, "phase_connection", None), export=True),
+            current_power_kw,
+            export=True,
+        )
         charge_candidates = [max(max_charging_power, 0.0), charge_power_by_soc]
         discharge_candidates = [max(max_discharging_power, 0.0), discharge_power_by_soc]
         if np.isfinite(import_limit):
@@ -1662,6 +1698,7 @@ class CityLearnEntityInterfaceService:
         efficiency: float,
         step_hours: float,
         include_headroom: bool = True,
+        current_power_kw: float = 0.0,
     ) -> Mapping[str, float]:
         efficiency = max(self._safe_scalar(efficiency, 1.0), 1.0e-6)
         charge_power_by_soc = energy_to_full / max(efficiency * step_hours, 1.0e-6)
@@ -1671,8 +1708,17 @@ class CityLearnEntityInterfaceService:
         discharge_candidates = [max(max_discharge_power, 0.0), discharge_power_by_soc]
         if include_headroom:
             connection = getattr(building, "electrical_storage_phase_connection", None)
-            import_limit = self._headroom_power_limit_for_connection(building, connection, export=False)
-            export_limit = self._headroom_power_limit_for_connection(building, connection, export=True)
+            current_power_kw = self._safe_scalar(current_power_kw, 0.0)
+            import_limit = self._setpoint_power_limit_from_headroom(
+                self._headroom_power_limit_for_connection(building, connection, export=False),
+                current_power_kw,
+                export=False,
+            )
+            export_limit = self._setpoint_power_limit_from_headroom(
+                self._headroom_power_limit_for_connection(building, connection, export=True),
+                current_power_kw,
+                export=True,
+            )
             if np.isfinite(import_limit):
                 charge_candidates.append(import_limit)
             if np.isfinite(export_limit):
@@ -2081,7 +2127,13 @@ class CityLearnEntityInterfaceService:
                 for appliance in building.deferrable_appliances or []
             )
         load_energy = max(non_shiftable + cooling + heating + dhw + deferrable, 0.0)
-        pv_energy = abs(self._safe_index(getattr(building, "solar_generation", []), step, 0.0))
+        try:
+            solar_generation = building._pv_generation_to_control_step([
+                self._safe_index(getattr(energy_simulation, "solar_generation", []), step, 0.0)
+            ])
+            pv_energy = abs(self._safe_index(solar_generation, 0, 0.0))
+        except Exception:
+            pv_energy = abs(self._safe_index(getattr(building, "solar_generation", []), step, 0.0))
 
         load_kw = load_energy / step_hours
         pv_kw = pv_energy / step_hours
@@ -2217,12 +2269,12 @@ class CityLearnEntityInterfaceService:
         *,
         endogenous_t: int,
     ) -> Mapping[str, float]:
-        prev_1 = max(endogenous_t - 1, 0)
+        prev_1 = max(endogenous_t, 0)
         community_net_prev_1 = sum(
             self._safe_index(building.net_electricity_consumption, prev_1, 0.0)
             for building in self.env.buildings
         )
-        indices = list(range(max(endogenous_t - 3, 0), endogenous_t))
+        indices = list(range(max(endogenous_t - 2, 0), endogenous_t + 1))
         if len(indices) == 0:
             indices = [prev_1]
 

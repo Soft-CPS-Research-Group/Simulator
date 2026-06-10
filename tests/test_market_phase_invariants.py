@@ -352,7 +352,7 @@ def test_three_phase_service_state_conserves_total_phase_power_and_headroom(tmp_
 
         building = env.buildings[0]
         _assert_phase_state_coherent(building, history_time_step=building.time_step - 1)
-        assert building._charging_constraint_last_penalty_kwh == pytest.approx(0.0, abs=1e-6)
+        assert building._charging_constraint_last_penalty_kwh > 0.0
     finally:
         env.close()
 

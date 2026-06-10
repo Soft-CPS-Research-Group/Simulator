@@ -657,6 +657,45 @@ def test_ev_departure_feasibility_respects_electrical_service_phase_headroom():
     assert metrics["departures_within_tolerance_infeasible"] == pytest.approx(1.0)
 
 
+@pytest.mark.parametrize("building_limit_kw,expected_feasible", [(0.75, 0.0), (1.0, 1.0)])
+def test_ev_departure_feasibility_applies_min_charging_power_after_headroom_limit(
+    building_limit_kw,
+    expected_feasible,
+):
+    service = CityLearnKPIService(
+        SimpleNamespace(
+            ev_departure_within_tolerance=0.0,
+            ev_departure_service_tolerance=0.0,
+            seconds_per_time_step=3600,
+        )
+    )
+    charger = _fake_feasibility_departure_charger(
+        actual_soc=0.21,
+        target_soc=0.25,
+        arrival_soc=0.20,
+        capacity_kwh=10.0,
+        max_charging_power_kw=10.0,
+    )
+    charger.min_charging_power = 1.0
+    building = SimpleNamespace(
+        name="Building_1",
+        time_step=1,
+        electric_vehicle_chargers=[charger],
+        _charging_constraints_enabled=True,
+        _electrical_service_enabled=False,
+        _building_charger_limit_kw=building_limit_kw,
+        _phase_limits=[],
+        _charger_phase_map={},
+    )
+
+    metrics = service._compute_ev_metrics(building)
+
+    assert metrics["departures_target_feasible"] == pytest.approx(expected_feasible)
+    assert metrics["departures_target_infeasible"] == pytest.approx(1.0 - expected_feasible)
+    assert metrics["departures_min_acceptable_feasible"] == pytest.approx(expected_feasible)
+    assert metrics["departures_within_tolerance_feasible"] == pytest.approx(expected_feasible)
+
+
 def test_ev_departure_feasibility_respects_charger_efficiency():
     service = CityLearnKPIService(
         SimpleNamespace(

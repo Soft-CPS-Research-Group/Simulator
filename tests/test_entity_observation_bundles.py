@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Mapping
 
 import numpy as np
@@ -11,6 +12,7 @@ import pytest
 pytest.importorskip("gymnasium")
 
 from citylearn.citylearn import CityLearnEnv
+from citylearn.internal.entity_interface import CityLearnEntityInterfaceService
 
 
 BASE_SCHEMA_PATH = Path(__file__).resolve().parents[1] / "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json"
@@ -81,6 +83,12 @@ def _zero_entity_actions(env: CityLearnEnv):
             if name in {"building", "charger", "deferrable_appliance"}
         }
     }
+
+
+def _minimal_entity_service(seconds_per_time_step: int) -> CityLearnEntityInterfaceService:
+    service = CityLearnEntityInterfaceService.__new__(CityLearnEntityInterfaceService)
+    service.env = SimpleNamespace(seconds_per_time_step=seconds_per_time_step)
+    return service
 
 
 def test_observation_bundles_default_to_disabled():
@@ -342,6 +350,45 @@ def test_temporal_bundle_toggle_changes_presence_of_temporal_features():
         on_env.close()
 
 
+def test_temporal_bundle_prev_1_uses_latest_settled_step():
+    env = CityLearnEnv(_schema_with_bundles(temporal=True), interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        obs, *_ = env.step(_zero_entity_actions(env))
+        obs, *_ = env.step(_zero_entity_actions(env))
+
+        latest_settled_step = max(env.time_step - 1, 0)
+        window = list(range(max(latest_settled_step - 2, 0), latest_settled_step + 1))
+        building_features = env.entity_specs["tables"]["building"]["features"]
+        district_features = env.entity_specs["tables"]["district"]["features"]
+        building = env.buildings[0]
+
+        assert obs["tables"]["building"][0, building_features.index("net_energy_prev_1_kwh_step")] == pytest.approx(
+            building.net_electricity_consumption[latest_settled_step]
+        )
+        assert obs["tables"]["building"][0, building_features.index("net_energy_prev_3_mean_kwh_step")] == pytest.approx(
+            float(np.mean([building.net_electricity_consumption[i] for i in window]))
+        )
+
+        expected_community_prev_1 = sum(
+            b.net_electricity_consumption[latest_settled_step]
+            for b in env.buildings
+        )
+        expected_community_prev_3 = float(np.mean([
+            sum(b.net_electricity_consumption[i] for b in env.buildings)
+            for i in window
+        ]))
+        assert obs["tables"]["district"][0, district_features.index("community_net_prev_1_kwh_step")] == pytest.approx(
+            expected_community_prev_1
+        )
+        assert obs["tables"]["district"][0, district_features.index("community_net_prev_3_mean_kwh_step")] == pytest.approx(
+            expected_community_prev_3
+        )
+    finally:
+        env.close()
+
+
 def test_derived_forecast_bundle_uses_physical_horizons(tmp_path: Path):
     schema_path = _minute_schema_with_bundles(tmp_path, derived_forecast=True)
     env = CityLearnEnv(str(schema_path), interface="entity", central_agent=True, episode_time_steps=8, random_seed=0)
@@ -357,15 +404,64 @@ def test_derived_forecast_bundle_uses_physical_horizons(tmp_path: Path):
         price_1h = float(obs["tables"]["district"][0, district_features.index("forecast_price_next_1h")])
         load_15m = float(obs["tables"]["building"][0, building_features.index("forecast_load_next_15m_kw")])
         net_15m = float(obs["tables"]["building"][0, building_features.index("forecast_net_next_15m_kw")])
+        load_1h = float(obs["tables"]["building"][0, building_features.index("forecast_load_next_1h_kw")])
+        pv_1h = float(obs["tables"]["building"][0, building_features.index("forecast_pv_next_1h_kw")])
+        net_1h = float(obs["tables"]["building"][0, building_features.index("forecast_net_next_1h_kw")])
 
         assert price_15m == pytest.approx(0.10)
         assert price_1h == pytest.approx(0.13)
         assert load_15m == pytest.approx(1.1 / 0.25)
         assert net_15m == pytest.approx(load_15m)
+        assert load_1h == pytest.approx(0.8 / 0.25)
+        assert pv_1h == pytest.approx(0.0)
+        assert net_1h == pytest.approx(load_1h - pv_1h)
         assert obs["meta"]["forecast_config"]["source"] == "actual_future"
         assert obs["meta"]["forecast_config"]["type"] == "point"
     finally:
         env.close()
+
+
+@pytest.mark.parametrize("seconds_per_time_step,expected_steps", [(15, 60), (60, 15), (900, 1), (3600, 1)])
+def test_action_feedback_prev_15m_window_uses_physical_duration(seconds_per_time_step, expected_steps):
+    service = _minimal_entity_service(seconds_per_time_step)
+    indices = service._feedback_window_indices(100)
+
+    assert indices[-1] == 100
+    assert len(indices) == expected_steps
+
+
+@pytest.mark.parametrize("seconds_per_time_step,expected_index", [(15, 60), (60, 15), (900, 1), (3600, 1)])
+def test_forecast_point_index_uses_physical_horizon(seconds_per_time_step, expected_index):
+    service = _minimal_entity_service(seconds_per_time_step)
+
+    assert service._forecast_point_index(0, 15 * 60, 1000) == expected_index
+
+
+@pytest.mark.parametrize("seconds_per_time_step", [15, 60, 900, 3600])
+def test_storage_available_energy_scales_with_step_seconds(seconds_per_time_step):
+    service = _minimal_entity_service(seconds_per_time_step)
+    step_hours = seconds_per_time_step / 3600.0
+
+    metrics = service._storage_core_decision_metrics(
+        building=SimpleNamespace(),
+        storage=SimpleNamespace(),
+        soc=0.5,
+        capacity=20.0,
+        nominal_power=4.0,
+        soc_min=0.0,
+        energy_to_full=10.0,
+        energy_available=10.0,
+        max_charge_power=4.0,
+        max_discharge_power=4.0,
+        efficiency=1.0,
+        step_hours=step_hours,
+        include_headroom=False,
+    )
+
+    assert metrics["available_charge_energy_kwh_step"] == pytest.approx(metrics["available_charge_power_kw"] * step_hours)
+    assert metrics["available_discharge_energy_kwh_step"] == pytest.approx(
+        metrics["available_discharge_power_kw"] * step_hours
+    )
 
 
 def test_action_feedback_bundle_distinguishes_requested_limited_and_applied(tmp_path: Path):
@@ -396,10 +492,58 @@ def test_action_feedback_bundle_distinguishes_requested_limited_and_applied(tmp_
         assert charger_value("last_limited_power_kw") == pytest.approx(1.0, abs=1.0e-5)
         assert 0.0 < charger_value("last_applied_power_kw") <= charger_value("last_limited_power_kw")
         assert charger_value("clip_reason_building_headroom") == pytest.approx(1.0)
+        assert charger_value("can_charge") == pytest.approx(1.0)
+        assert charger_value("available_charge_power_kw") == pytest.approx(
+            charger_value("last_applied_power_kw"),
+            abs=1.0e-5,
+        )
+        assert charger_value("available_charge_action_normalized") > 0.0
 
         storage_features = env.entity_specs["tables"]["storage"]["features"]
         assert "last_requested_action_normalized" in storage_features
         assert "last_applied_power_kw" in storage_features
+    finally:
+        env.close()
+
+
+def test_storage_available_charge_setpoint_keeps_current_limited_charge(tmp_path: Path):
+    schema_path = _minute_schema_with_bundles(tmp_path, action_feedback=True)
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["buildings"]["Building_1"]["electrical_service"] = {
+        "mode": "single_phase",
+        "limits": {"total": {"import_kw": 6.0, "export_kw": 6.0}},
+        "observations": {"headroom": True, "violation": True},
+    }
+    schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+    env = CityLearnEnv(str(schema_path), interface="entity", central_agent=True, episode_time_steps=8, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        actions = _zero_entity_actions(env)
+        building_action_features = env.entity_specs["actions"]["building"]["features"]
+        actions["tables"]["building"][0, building_action_features.index("electrical_storage")] = 1.0
+
+        obs, *_ = env.step(actions)
+        storage_features = env.entity_specs["tables"]["storage"]["features"]
+
+        def storage_value(name: str, payload=obs) -> float:
+            return float(payload["tables"]["storage"][0, storage_features.index(name)])
+
+        assert storage_value("last_limited_power_kw") > 0.0
+        assert storage_value("last_applied_power_kw") > 0.0
+        assert storage_value("clip_reason_building_headroom") == pytest.approx(1.0)
+        assert storage_value("can_charge") == pytest.approx(1.0)
+        assert storage_value("available_charge_power_kw") == pytest.approx(
+            storage_value("last_applied_power_kw"),
+            abs=1.0e-5,
+        )
+
+        actions = _zero_entity_actions(env)
+        actions["tables"]["building"][0, building_action_features.index("electrical_storage")] = storage_value(
+            "available_charge_action_normalized"
+        )
+        next_obs, *_ = env.step(actions)
+        assert storage_value("last_applied_power_kw", next_obs) > 0.0
     finally:
         env.close()
 

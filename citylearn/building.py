@@ -1200,18 +1200,27 @@ class Building(Environment):
             self._charging_constraints_state = None
             return
 
-        building_headroom = None if self._building_charger_limit_kw is None else float(self._building_charger_limit_kw)
+        base_total_kw = 0.0
+        base_phase_kw = {phase['name']: 0.0 for phase in self._phase_limits}
+        if getattr(self, '_electrical_service_enabled', False):
+            try:
+                base_total_kw, base_phase_kw = self._ops_service._estimate_base_power_at_step(self.time_step)
+            except Exception:
+                base_total_kw = 0.0
+                base_phase_kw = {phase['name']: 0.0 for phase in self._phase_limits}
+
+        building_headroom = None if self._building_charger_limit_kw is None else float(self._building_charger_limit_kw) - base_total_kw
         building_export_headroom = None
         if getattr(self, '_electrical_service_enabled', False):
             export_limit = self._electrical_service_limits.get('total', {}).get('export_kw')
-            building_export_headroom = None if export_limit is None else float(export_limit)
+            building_export_headroom = None if export_limit is None else float(export_limit) + base_total_kw
 
         phase_headroom = {
-            phase['name']: None if phase.get('import_kw') is None else float(phase.get('import_kw'))
+            phase['name']: None if phase.get('import_kw') is None else float(phase.get('import_kw')) - float(base_phase_kw.get(phase['name'], 0.0))
             for phase in self._phase_limits
         }
         phase_export_headroom = {
-            phase['name']: None if phase.get('export_kw') is None else float(phase.get('export_kw'))
+            phase['name']: None if phase.get('export_kw') is None else float(phase.get('export_kw')) + float(base_phase_kw.get(phase['name'], 0.0))
             for phase in self._phase_limits
         }
         self._charging_constraints_state = {
@@ -1219,8 +1228,8 @@ class Building(Environment):
             'building_export_headroom_kw': building_export_headroom,
             'phase_headroom_kw': phase_headroom,
             'phase_export_headroom_kw': phase_export_headroom,
-            'total_power_kw': 0.0,
-            'phase_power_kw': {phase['name']: 0.0 for phase in self._phase_limits},
+            'total_power_kw': base_total_kw,
+            'phase_power_kw': base_phase_kw,
         }
 
     def _apply_charging_constraints_to_actions(
@@ -2162,28 +2171,70 @@ class Building(Environment):
 
         timesteps = self.episode_tracker.simulation_time_steps
         if getattr(self, '_charging_constraints_enabled', False):
-            if getattr(self, '_expose_charging_constraints', False):
-                if self._building_charger_limit_kw is not None:
-                    data['charging_building_headroom_kw'] = np.full(timesteps, float(self._building_charger_limit_kw), dtype='float32')
-                if getattr(self, '_electrical_service_enabled', False):
-                    export_limit = self._electrical_service_limits.get('total', {}).get('export_kw')
-                    if export_limit is not None:
-                        data['charging_building_export_headroom_kw'] = np.full(timesteps, float(export_limit), dtype='float32')
-                for phase in self._phase_limits:
-                    import_limit = phase.get('import_kw')
-                    if import_limit is not None:
-                        key = f"charging_phase_{phase['name']}_headroom_kw"
-                        data[key] = np.full(timesteps, float(import_limit), dtype='float32')
-                    if getattr(self, '_electrical_service_enabled', False):
-                        export_limit = phase.get('export_kw')
-                        if export_limit is not None:
-                            key = f"charging_phase_{phase['name']}_export_headroom_kw"
-                            data[key] = np.full(timesteps, float(export_limit), dtype='float32')
-
             total_charger_power_kw = 0.0
             total_charger_power_kw += sum(getattr(charger, 'max_charging_power', 0.0) or 0.0 for charger in self.electric_vehicle_chargers)
             total_charger_power_kw += sum(getattr(charger, 'max_discharging_power', 0.0) or 0.0 for charger in self.electric_vehicle_chargers)
             total_storage_power_kw = float(getattr(self.electrical_storage, 'nominal_power', 0.0) or 0.0)
+            control_margin_kw = total_charger_power_kw + total_storage_power_kw
+
+            step_seconds = max(float(self.seconds_per_time_step), 1.0e-9)
+            ratio = 1.0 if self.time_step_ratio in (None, 0) else float(self.time_step_ratio)
+
+            def _energy_series_to_power_kw(values, *, already_control_step: bool = False):
+                values = np.asarray(values, dtype='float64')
+                if values.size == 0:
+                    values = np.asarray([0.0], dtype='float64')
+                if not already_control_step:
+                    values = values * ratio
+                return values * (3600.0 / step_seconds)
+
+            non_shiftable_power_kw = _energy_series_to_power_kw(data.get('non_shiftable_load', np.zeros(timesteps)))
+            solar_power_kw = -_energy_series_to_power_kw(
+                data.get('solar_generation', np.zeros(timesteps)),
+                already_control_step=True,
+            )
+            fixed_base_power_kw = non_shiftable_power_kw + solar_power_kw
+            base_power_min_kw = self._series_bound(fixed_base_power_kw, upper=False)
+            base_power_max_kw = self._series_bound(fixed_base_power_kw, upper=True)
+            base_power_max_kw += float(getattr(self.cooling_device, 'nominal_power', 0.0) or 0.0)
+            base_power_max_kw += float(getattr(self.heating_device, 'nominal_power', 0.0) or 0.0)
+            base_power_max_kw += float(getattr(self.dhw_device, 'nominal_power', 0.0) or 0.0)
+            try:
+                base_power_max_kw += max(float(self._deferrable_power_observation_high_limit()), 0.0)
+            except Exception:
+                pass
+
+            def _headroom_bounds(limit, *, export: bool = False):
+                limit = float(limit)
+                if getattr(self, '_electrical_service_enabled', False):
+                    min_total_kw = base_power_min_kw - control_margin_kw
+                    max_total_kw = base_power_max_kw + control_margin_kw
+                    if export:
+                        bounds = [limit + min_total_kw, limit + max_total_kw]
+                    else:
+                        bounds = [limit - max_total_kw, limit - min_total_kw]
+                    return np.array([min(bounds), max(bounds)], dtype='float32')
+
+                return np.array([0.0, limit], dtype='float32')
+
+            if getattr(self, '_expose_charging_constraints', False):
+                if self._building_charger_limit_kw is not None:
+                    data['charging_building_headroom_kw'] = _headroom_bounds(self._building_charger_limit_kw)
+                if getattr(self, '_electrical_service_enabled', False):
+                    export_limit = self._electrical_service_limits.get('total', {}).get('export_kw')
+                    if export_limit is not None:
+                        data['charging_building_export_headroom_kw'] = _headroom_bounds(export_limit, export=True)
+                for phase in self._phase_limits:
+                    import_limit = phase.get('import_kw')
+                    if import_limit is not None:
+                        key = f"charging_phase_{phase['name']}_headroom_kw"
+                        data[key] = _headroom_bounds(import_limit)
+                    if getattr(self, '_electrical_service_enabled', False):
+                        export_limit = phase.get('export_kw')
+                        if export_limit is not None:
+                            key = f"charging_phase_{phase['name']}_export_headroom_kw"
+                            data[key] = _headroom_bounds(export_limit, export=True)
+
             max_violation_energy = power_kw_to_energy_kwh(total_charger_power_kw + total_storage_power_kw, self.seconds_per_time_step)
             data['charging_constraint_violation_kwh'] = np.array([0.0, max_violation_energy], dtype='float32')
 

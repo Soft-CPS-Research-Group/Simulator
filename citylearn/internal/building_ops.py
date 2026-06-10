@@ -275,9 +275,13 @@ class BuildingOpsService:
                     }
 
                 else:
+                    last_charged_kwh = 0.0
+                    if 0 <= endogenous_t < len(charger.past_charging_action_values_kwh):
+                        last_charged_kwh = float(charger.past_charging_action_values_kwh[endogenous_t])
+
                     electric_vehicle_chargers_dict[charger_id] = {
                         'connected': False,
-                        'last_charged_kwh': 0.0,
+                        'last_charged_kwh': last_charged_kwh,
                         'previous_battery_soc': None,
                         'battery_soc': None,
                         'battery_capacity': None,
@@ -1211,6 +1215,36 @@ class BuildingOpsService:
 
         return total_kw, phase_kw
 
+    def _electrical_service_violation_kw(
+        self,
+        total_kw: float,
+        phase_kw: Mapping[str, float],
+        total_limits: Mapping[str, float],
+        per_phase_limits: Mapping[str, Mapping[str, float]],
+        phase_names: List[str],
+    ) -> float:
+        violation_kw = 0.0
+        total_kw = self._safe_scalar(total_kw, 0.0)
+
+        import_limit = self._safe_scalar(total_limits.get('import_kw'), np.nan)
+        export_limit = self._safe_scalar(total_limits.get('export_kw'), np.nan)
+        if np.isfinite(import_limit):
+            violation_kw += max(total_kw - import_limit, 0.0)
+        if np.isfinite(export_limit):
+            violation_kw += max(-total_kw - export_limit, 0.0)
+
+        for phase_name in phase_names:
+            phase_total = self._safe_scalar(phase_kw.get(phase_name, 0.0), 0.0)
+            phase_limit = per_phase_limits.get(phase_name, {})
+            phase_import_limit = self._safe_scalar(phase_limit.get('import_kw'), np.nan)
+            phase_export_limit = self._safe_scalar(phase_limit.get('export_kw'), np.nan)
+            if np.isfinite(phase_import_limit):
+                violation_kw += max(phase_total - phase_import_limit, 0.0)
+            if np.isfinite(phase_export_limit):
+                violation_kw += max(-phase_total - phase_export_limit, 0.0)
+
+        return float(violation_kw)
+
     def _scale_for_import_scope(self, current_value_kw, limit_kw, controls, scales, component_getter) -> bool:
         limit_kw = self._safe_scalar(limit_kw, np.nan)
         current_value_kw = self._safe_scalar(current_value_kw, 0.0)
@@ -1436,6 +1470,14 @@ class BuildingOpsService:
         scales = {control_id: 1.0 for control_id in controls}
         total_limits = building._electrical_service_limits.get('total', {})
         per_phase_limits = building._electrical_service_limits.get('per_phase', {})
+        requested_total_kw, requested_phase_kw = self._compute_totals(base_total_kw, base_phase_kw, controls, scales)
+        requested_violation_kw = self._electrical_service_violation_kw(
+            requested_total_kw,
+            requested_phase_kw,
+            total_limits,
+            per_phase_limits,
+            phase_names,
+        )
 
         for _ in range(8):
             changed = False
@@ -1495,13 +1537,16 @@ class BuildingOpsService:
             target_kw = 0.0 if storage_control is None else storage_control['request_total_kw'] * scales.get(storage_control_id, 1.0)
             adjusted_storage_action = self._storage_action_from_power_kw(target_kw)
 
-        violation_kw = 0.0
         import_limit = self._safe_scalar(total_limits.get('import_kw'), np.nan)
         export_limit = self._safe_scalar(total_limits.get('export_kw'), np.nan)
-        if np.isfinite(import_limit):
-            violation_kw += max(total_kw - import_limit, 0.0)
-        if np.isfinite(export_limit):
-            violation_kw += max(-total_kw - export_limit, 0.0)
+        residual_violation_kw = self._electrical_service_violation_kw(
+            total_kw,
+            phase_kw,
+            total_limits,
+            per_phase_limits,
+            phase_names,
+        )
+        violation_kw = max(requested_violation_kw, residual_violation_kw)
 
         phase_headroom = {}
         phase_export_headroom = {}
@@ -1513,11 +1558,6 @@ class BuildingOpsService:
 
             phase_headroom[phase_name] = None if not np.isfinite(phase_import_limit) else (phase_import_limit - phase_total)
             phase_export_headroom[phase_name] = None if not np.isfinite(phase_export_limit) else (phase_export_limit + phase_total)
-
-            if np.isfinite(phase_import_limit):
-                violation_kw += max(phase_total - phase_import_limit, 0.0)
-            if np.isfinite(phase_export_limit):
-                violation_kw += max(-phase_total - phase_export_limit, 0.0)
 
         building_headroom = None if not np.isfinite(import_limit) else (import_limit - total_kw)
         building_export_headroom = None if not np.isfinite(export_limit) else (export_limit + total_kw)

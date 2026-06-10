@@ -190,7 +190,7 @@ def test_deferrable_start_reduces_ev_headroom_in_electrical_service_constraints(
 
         assert building.deferrable_appliances_electricity_consumption[0] == pytest.approx(0.1)
         assert state["total_power_kw"] <= 5.2 + 1e-6
-        assert building._charging_constraint_last_penalty_kwh == pytest.approx(0.0, abs=1e-6)
+        assert building._charging_constraint_last_penalty_kwh > 0.0
         assert charger.past_charging_action_values_kwh[0] == pytest.approx(0.0, abs=1e-6)
     finally:
         env.close()
