@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.reward_function &mdash; CityLearn 1.5.3 documentation</title>
+  <title>citylearn.reward_function &mdash; CityLearn 1.5.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=d75fd82e"></script>
+      <script src="../../_static/documentation_options.js?v=1cd648e3"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -682,9 +682,11 @@
             <span class="n">contributions</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;connected&quot;</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;last_charged_kwh&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;last_charged_kwh&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">:</span>
+                <span class="n">last_charged_kwh</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_charged_kwh&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">0.0</span>
+                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">last_charged_kwh</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">:</span>
                     <span class="n">contributions</span><span class="p">[</span><span class="s2">&quot;no_car_charging&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="s2">&quot;no_car_charging&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">penalty_multiplier</span>
                 <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Charger </span><span class="si">{</span><span class="n">charger_id</span><span class="si">}</span><span class="s2"> | EV not connected | Contributions: </span><span class="si">{</span><span class="n">contributions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">penalty_total</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">contributions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
                 <span class="k">continue</span>
 
             <span class="c1"># Extract values</span>
@@ -713,10 +715,11 @@
                 <span class="n">soc_diff</span> <span class="o">=</span> <span class="n">soc_now</span> <span class="o">-</span> <span class="n">required_soc</span>
                 <span class="n">soc_diff_kWh</span> <span class="o">=</span> <span class="n">soc_diff</span> <span class="o">*</span> <span class="n">capacity</span>
 
-                <span class="n">max_possible_charge</span> <span class="o">=</span> <span class="n">max_charging_power</span> <span class="o">*</span> <span class="n">hours_until_departure</span>
-                <span class="n">max_possible_discharge</span> <span class="o">=</span> <span class="n">max_discharging_power</span> <span class="o">*</span> <span class="n">hours_until_departure</span>
+                <span class="n">max_possible_charge</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_charging_power</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">hours_until_departure</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">max_possible_discharge</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_discharging_power</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">hours_until_departure</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">soc_diff_kWh</span> <span class="o">&gt;</span> <span class="n">max_possible_charge</span><span class="p">:</span>
+                <span class="n">soc_deficit_kwh</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">required_soc</span> <span class="o">-</span> <span class="n">soc_now</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">capacity</span>
+                <span class="k">if</span> <span class="n">soc_deficit_kwh</span> <span class="o">&gt;</span> <span class="n">max_possible_charge</span><span class="p">:</span>
                     <span class="n">contributions</span><span class="p">[</span><span class="s2">&quot;soc_impossible&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="s2">&quot;soc_impossible&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">penalty_multiplier</span>
 
                 <span class="k">if</span> <span class="n">hours_until_departure</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
