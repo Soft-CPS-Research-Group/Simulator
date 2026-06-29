@@ -1435,6 +1435,22 @@ class CityLearnKPIService:
             dtype='float64',
         )
         weight_by_name = {name: float(weight) for name, weight in zip(building_names, weights)}
+        net_series_by_name: Dict[str, np.ndarray] = {}
+        price_series_by_name: Dict[str, np.ndarray] = {}
+
+        for building in buildings:
+            condition = condition_by_building.get(building.name)
+            if condition is None:
+                continue
+
+            net_series_by_name[building.name] = np.asarray(
+                getattr(building, f'net_electricity_consumption{condition.value}'),
+                dtype='float64',
+            )
+            price_series_by_name[building.name] = np.asarray(
+                building.pricing.electricity_pricing,
+                dtype='float64',
+            )
 
         for t in range(final_t + 1):
             net_values = []
@@ -1445,10 +1461,10 @@ class CityLearnKPIService:
                 if not (t_start <= t <= t_end):
                     continue
 
-                condition = condition_by_building.get(building.name)
-                if condition is None:
+                net_series = net_series_by_name.get(building.name)
+                if net_series is None:
                     continue
-                net_series = np.array(getattr(building, f'net_electricity_consumption{condition.value}'), dtype='float64')
+
                 net_values.append(self._to_scalar(net_series[t] if t < len(net_series) else np.nan, 0.0))
                 active_buildings_t.append(building)
                 active_weights_t.append(weight_by_name.get(building.name, 1.0))
@@ -1478,7 +1494,11 @@ class CityLearnKPIService:
                 local_export = np.zeros_like(exports, dtype='float64')
 
             for idx, building in enumerate(active_buildings_t):
-                grid_import_price = self._to_scalar(building.pricing.electricity_pricing[t], 0.0)
+                price_series = price_series_by_name.get(building.name)
+                grid_import_price = self._to_scalar(
+                    price_series[t] if price_series is not None and t < len(price_series) else np.nan,
+                    0.0,
+                )
                 local_price = ratio * grid_import_price
                 grid_import_remaining = max(imports[idx] - local_import[idx], 0.0)
 

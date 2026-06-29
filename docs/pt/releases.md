@@ -58,6 +58,54 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.5 - 2026-06-29
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release que adiciona ao simulador os baselines usados nos exemplos aplicacionais do CityLearn v3 e reforca o replay dos KPIs de settlement do mercado comunitario. A release mantem compativeis os contratos existentes de ambiente, schema e actions, tornando a API de baselines mais facil de reutilizar fora dos scripts do paper.
+
+### Added
+
+- Adicionados `ZeroActionBaselineAgent`, `ServiceOnlyBaselineAgent`, `NormalPolicy`, `NormalNoBatteryPolicy`, `RBCBasicPolicy`, `RBCSmartPolicy` e `RBCCommunityPolicy` a `citylearn.agents.baseline`.
+- Adicionados exports publicos explicitos ao modulo de baselines.
+- Adicionados os nomes retrocompativeis `GridAwareBaselineAgent` e `CommunityAwareBaselineAgent`, mapeados para os RBCs smart e community-aware.
+
+### Changed
+
+- `BusinessAsUsualAgent` passa a suportar targets de servico EV por deadline de partida quando estes existem, preservando o comportamento default de carregamento.
+- BAU e baselines derivados passam a respeitar clipping de `electrical_service` quando o dataset ativa essas constraints.
+- O replay de KPIs de settlement do mercado comunitario passa a pre-carregar series de net load e preco por edificio e a lidar defensivamente com series de preco mais curtas.
+- Pastas locais de trabalho do paper/Overleaf passam a ser ignoradas pelo Git.
+
+### Fixed
+
+- Removidas definicoes duplicadas de `GridAwareBaselineAgent` e `CommunityAwareBaselineAgent` que podiam tornar ambigua a API publica de baselines.
+- Corrigidas chamadas diretas da acao EV no baseline para passar o contexto do edificio ao charger.
+
+### Dataset/Schema Impact
+
+- Nao exige migracao de schema nem datasets.
+- Os nomes existentes de actions e observations mantem-se.
+
+### Compatibility
+
+- Patch release compativel para utilizadores existentes de `CityLearnEnv`.
+- As novas classes de baseline sao aditivas. Os imports legacy `GridAwareBaselineAgent` e `CommunityAwareBaselineAgent` continuam disponiveis.
+
+### Validation
+
+- `.venv/bin/python -m pytest tests/unit/test_business_as_usual_baseline.py tests/test_kpi_golden.py tests/test_electrical_service_and_market.py tests/test_market_phase_invariants.py`: pass, `39 passed, 10 warnings`.
+- `.venv/bin/python -m pytest`: pass, `423 passed, 18 warnings`.
+- `python3 -m py_compile citylearn/__init__.py citylearn/agents/baseline.py citylearn/internal/kpi.py`: pass.
+- `git diff --check`: pass.
+
+### Migration Notes
+
+- Nao e necessaria migracao.
+- Codigo downstream pode importar diretamente as novas classes RBC, em vez de depender de controllers locais aos scripts do paper.
+
 ## v1.5.4 - 2026-06-10
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

@@ -60,6 +60,54 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.5 - 2026-06-29
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release adding simulator-native baseline policies used by the CityLearn v3 application examples and tightening KPI settlement replay for community-market accounting. The release keeps the existing environment, schema and action contracts compatible while making the baseline API easier to reuse outside paper scripts.
+
+### Added
+
+- Added `ZeroActionBaselineAgent`, `ServiceOnlyBaselineAgent`, `NormalPolicy`, `NormalNoBatteryPolicy`, `RBCBasicPolicy`, `RBCSmartPolicy` and `RBCCommunityPolicy` to `citylearn.agents.baseline`.
+- Added explicit public exports for the baseline module.
+- Added backward-compatible `GridAwareBaselineAgent` and `CommunityAwareBaselineAgent` names that map to the smart and community-aware RBC policies.
+
+### Changed
+
+- `BusinessAsUsualAgent` now supports EV departure-service targets when available, while preserving the default day-to-day charging behavior.
+- BAU and derived baseline actions now respect electrical-service clipping when the dataset enables those constraints.
+- Community-market KPI settlement replay now preloads per-building net-load and price series and handles short price series defensively.
+- Local paper/Overleaf working folders are ignored by Git.
+
+### Fixed
+
+- Removed duplicate `GridAwareBaselineAgent` and `CommunityAwareBaselineAgent` definitions that could make the public baseline API ambiguous.
+- Fixed direct EV baseline action calls so charger service context receives the parent building.
+
+### Dataset/Schema Impact
+
+- No schema or dataset migration is required.
+- Existing action and observation names are preserved.
+
+### Compatibility
+
+- Compatible patch release for existing `CityLearnEnv` users.
+- New baseline classes are additive. The legacy `GridAwareBaselineAgent` and `CommunityAwareBaselineAgent` import names remain available.
+
+### Validation
+
+- `.venv/bin/python -m pytest tests/unit/test_business_as_usual_baseline.py tests/test_kpi_golden.py tests/test_electrical_service_and_market.py tests/test_market_phase_invariants.py`: pass, `39 passed, 10 warnings`.
+- `.venv/bin/python -m pytest`: pass, `423 passed, 18 warnings`.
+- `python3 -m py_compile citylearn/__init__.py citylearn/agents/baseline.py citylearn/internal/kpi.py`: pass.
+- `git diff --check`: pass.
+
+### Migration Notes
+
+- No migration is required.
+- Downstream code may import the new RBC baseline classes directly instead of relying on paper-local controller definitions.
+
 ## v1.5.4 - 2026-06-10
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
