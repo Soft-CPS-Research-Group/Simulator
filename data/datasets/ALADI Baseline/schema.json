@@ -127,7 +127,7 @@
       "shared_in_central_agent": false
     },
     "electrical_storage_soc": {
-      "active": true,
+      "active": false, //TODO: Activate if a battery storage system is installed in the ALADI building
       "shared_in_central_agent": false
     },
     "net_electricity_consumption": {
@@ -163,100 +163,100 @@
       "shared_in_central_agent": false
     },
     "electric_vehicle_charger_connected_state": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "connected_electric_vehicle_at_charger_battery_capacity": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "connected_electric_vehicle_at_charger_departure_time": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "connected_electric_vehicle_at_charger_required_soc_departure": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "connected_electric_vehicle_at_charger_soc": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "electric_vehicle_charger_incoming_state": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "incoming_electric_vehicle_at_charger_estimated_arrival_time": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_pending": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_running": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_can_start": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_deadline_missed": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_earliest_start_time_step": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_latest_start_time_step": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_deadline_time_step": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_hours_until_latest_start": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_hours_until_deadline": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_slack_steps": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_slack_ratio": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_urgency_ratio": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_cycle_duration_steps": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_cycle_energy_kwh": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_remaining_energy_kwh": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_current_step_energy_kwh": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     },
     "deferrable_appliance_priority": {
-      "active": true,
-      "shared_in_central_agent": true
+      "active": false,
+      "shared_in_central_agent": false
     }
   },
   "actions": {
@@ -270,7 +270,7 @@
       "active": false
     },
     "electrical_storage": {
-      "active": false
+      "active": false //TODO: Activate if a battery storage system is installed in the ALADI building
     },
     "electric_vehicle_storage": {
       "active": false
@@ -294,11 +294,11 @@
     }
   },
   "agent": {
-    "type": "citylearn.agents.rbc.BasicElectricVehicleRBC_ReferenceController",
+    "type": "citylearn.agents.baseline.NormalNoBatteryPolicy",
     "attributes": {}
   },
   "reward_function": {
-    "type": "citylearn.reward_function.Electric_Vehicles_Reward_Function",
+    "type": "citylearn.reward_function.RewardFunction",
     "attributes": {}
   },
   "buildings": {
@@ -314,7 +314,7 @@
         "type": "citylearn.energy_model.PV",
         "autosize": false,
         "attributes": {
-          "nominal_power": 12.0, //Todo: This is a placeholder value. Please update with the actual nominal power of the PV system.
+          "nominal_power": 39.6,
           "generation_mode": "absolute"
         }
       }
