@@ -4,12 +4,12 @@
   "interface": "entity",
   "central_agent": false,
   "simulation_start_time_step": 0,
-  "simulation_end_time_step": 8759, //Update to the value that is in the ERedes data
+  "simulation_end_time_step": 35039,
   "episode_time_steps": null,
   "rolling_episode_split": false,
   "random_episode_split": false,
-  "seconds_per_time_step": 3600, //Update to the value that is in the ERedes data
-  "observations": { //Desligar as que nao sao precisas 
+  "seconds_per_time_step": 900,
+  "observations": {
     "month": {
       "active": true,
       "shared_in_central_agent": true
@@ -127,7 +127,7 @@
       "shared_in_central_agent": false
     },
     "electrical_storage_soc": {
-      "active": false, //TODO: Activate if a battery storage system is installed in the ALADI building
+      "active": false,
       "shared_in_central_agent": false
     },
     "net_electricity_consumption": {
@@ -270,7 +270,7 @@
       "active": false
     },
     "electrical_storage": {
-      "active": false //TODO: Activate if a battery storage system is installed in the ALADI building
+      "active": false
     },
     "electric_vehicle_storage": {
       "active": false
