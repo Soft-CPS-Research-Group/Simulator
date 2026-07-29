@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.topology &mdash; CityLearn 1.5.5 documentation</title>
+  <title>citylearn.internal.topology &mdash; CityLearn 1.5.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=b8aeccfa"></script>
+      <script src="../../../_static/documentation_options.js?v=8f564690"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -134,6 +134,19 @@
 
 
 
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_BuildingStructureSnapshot</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Lightweight references and metadata needed to restore a building topology.&quot;&quot;&quot;</span>
+
+    <span class="n">electric_vehicle_chargers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Charger</span><span class="p">]</span>
+    <span class="n">deferrable_appliances</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DeferrableAppliance</span><span class="p">]</span>
+    <span class="n">pv</span><span class="p">:</span> <span class="n">PV</span>
+    <span class="n">electrical_storage</span><span class="p">:</span> <span class="n">Battery</span>
+    <span class="n">observation_metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span>
+    <span class="n">action_metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span>
+    <span class="n">building_override_values</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+
+
 <div class="viewcode-block" id="CityLearnTopologyService">
 <a class="viewcode-back" href="../../../api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CityLearnTopologyService</span><span class="p">:</span>
@@ -146,6 +159,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ev_pool</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ElectricVehicle</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ev_order</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initial_active_member_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_member_pool</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Building</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_member_order</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_building_structures</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_BuildingStructureSnapshot</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_member_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_ev_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_member_lifecycle</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -209,6 +225,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ev_pool</span> <span class="o">=</span> <span class="p">{</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">ev</span> <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">electric_vehicles</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ev_order</span> <span class="o">=</span> <span class="p">[</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">electric_vehicles</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_events</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_member_pool</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_member_pool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_member_order</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_member_order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_building_structures</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">member_id</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot_building_structure</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">member_id</span><span class="p">,</span> <span class="n">building</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_member_pool</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
 
         <span class="n">include_flags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_member_include_flags</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initial_active_member_ids</span> <span class="o">=</span> <span class="p">[</span>
@@ -226,6 +248,8 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
             <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_restore_initial_structure</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_member_pool</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bind_building_runtime_context</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>
@@ -264,6 +288,48 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_active_views</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_events_for_time_step</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_snapshot_building_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">:</span> <span class="n">Building</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_BuildingStructureSnapshot</span><span class="p">:</span>
+        <span class="n">override_values</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">operation</span> <span class="o">!=</span> <span class="s1">&#39;add_member&#39;</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">target_member_id</span> <span class="o">!=</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">overrides</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;chargers&#39;</span><span class="p">,</span> <span class="s1">&#39;deferrable_appliances&#39;</span><span class="p">,</span> <span class="s1">&#39;electrical_storage&#39;</span><span class="p">,</span> <span class="s1">&#39;pv&#39;</span><span class="p">}:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">override_values</span><span class="p">:</span>
+                    <span class="n">override_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">_BuildingStructureSnapshot</span><span class="p">(</span>
+            <span class="n">electric_vehicle_chargers</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span> <span class="ow">or</span> <span class="p">[]),</span>
+            <span class="n">deferrable_appliances</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">deferrable_appliances</span> <span class="ow">or</span> <span class="p">[]),</span>
+            <span class="n">pv</span><span class="o">=</span><span class="n">building</span><span class="o">.</span><span class="n">pv</span><span class="p">,</span>
+            <span class="n">electrical_storage</span><span class="o">=</span><span class="n">building</span><span class="o">.</span><span class="n">electrical_storage</span><span class="p">,</span>
+            <span class="n">observation_metadata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">observation_metadata</span><span class="p">),</span>
+            <span class="n">action_metadata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">action_metadata</span><span class="p">),</span>
+            <span class="n">building_override_values</span><span class="o">=</span><span class="n">override_values</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_restore_initial_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore the schema-loaded member pool and asset composition before reset.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_member_pool</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_member_pool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_member_order</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_member_order</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">member_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_member_order</span><span class="p">:</span>
+            <span class="n">building</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_member_pool</span><span class="p">[</span><span class="n">member_id</span><span class="p">]</span>
+            <span class="n">snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_building_structures</span><span class="p">[</span><span class="n">member_id</span><span class="p">]</span>
+            <span class="n">building</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span><span class="p">)</span>
+            <span class="n">building</span><span class="o">.</span><span class="n">deferrable_appliances</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">deferrable_appliances</span><span class="p">)</span>
+            <span class="n">building</span><span class="o">.</span><span class="n">pv</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">pv</span>
+            <span class="n">building</span><span class="o">.</span><span class="n">electrical_storage</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">electrical_storage</span>
+
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">building_override_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+            <span class="n">building</span><span class="o">.</span><span class="n">observation_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">observation_metadata</span><span class="p">)</span>
+            <span class="n">building</span><span class="o">.</span><span class="n">action_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">action_metadata</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CityLearnTopologyService.apply_events_for_time_step">
 <a class="viewcode-back" href="../../../api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService.apply_events_for_time_step">[docs]</a>
