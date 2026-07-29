@@ -60,6 +60,59 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.6 - 2026-07-29
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release fixing dynamic-topology reset semantics across repeated episodes. Dynamic environments
+now restore the schema-loaded member pool and asset composition before replaying topology events, so
+multi-episode training no longer inherits structural mutations from the previous episode.
+
+### Added
+
+- Added multi-episode regression coverage for full member/charger/PV/BESS topology timelines.
+- Added reset coverage for removed deferrable appliances and runtime-cloned members.
+
+### Changed
+
+- `CityLearnTopologyService` now keeps a lightweight structural snapshot of schema-loaded buildings.
+- Dynamic reset restores member order, member pool, chargers, deferrable appliances, PV, electrical
+  storage and topology-managed metadata without copying full building time series.
+
+### Fixed
+
+- Fixed added chargers remaining attached after `reset()` and causing later `add_asset` events to be no-ops.
+- Fixed removed chargers and deferrable appliances remaining absent in later episodes.
+- Fixed added or removed PV and electrical storage leaking into the initial state of later episodes.
+- Fixed runtime-cloned members remaining in the topology pool between episodes.
+- Fixed topology event logs and `topology_version` timelines diverging after the first episode.
+
+### Dataset/Schema Impact
+
+- No schema or dataset migration is required.
+- Existing topology event definitions and time-step semantics are unchanged.
+
+### Compatibility
+
+- Compatible patch release for static and single-episode environments.
+- Multi-episode dynamic environments now follow the intended clean-reset behavior. Workarounds that
+  reconstructed `CityLearnEnv` for every episode are no longer required.
+
+### Validation
+
+- `.venv/bin/python -m pytest -q`: pass, `426 passed, 18 warnings`.
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass.
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass, `16/16` scenarios.
+- `.venv/bin/python -m ruff check citylearn tests scripts/manual scripts/ci --select E9,F821`: pass.
+- Package build and `twine check`: pass.
+
+### Migration Notes
+
+- No migration is required. Algorithms should pin `softcpsrecsimulator>=1.5.6` when reusing a dynamic
+  environment across episodes.
+
 ## v1.5.5 - 2026-06-29
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

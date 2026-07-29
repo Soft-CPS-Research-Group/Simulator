@@ -346,3 +346,130 @@ def _assert_before_after_entity_observation_changes(snapshots: Mapping[int, Mapp
     assert "Building_12/electrical_storage" not in snapshots[7]["table_ids"]["storage"]
     assert "Building_3/electrical_storage" not in snapshots[7]["table_ids"]["storage"]
     assert "Building_3/electrical_storage" in snapshots[8]["table_ids"]["storage"]
+
+
+def _structural_signature(env: CityLearnEnv):
+    service = env._topology_service
+    assets = []
+    for member_id, building in service.member_pool.items():
+        assets.append(
+            (
+                member_id,
+                tuple(charger.charger_id for charger in building.electric_vehicle_chargers or []),
+                tuple(appliance.name for appliance in building.deferrable_appliances or []),
+                float(building.pv.nominal_power),
+                float(building.electrical_storage.capacity),
+                float(building.electrical_storage.nominal_power),
+            )
+        )
+
+    specs = env.entity_specs
+    return {
+        "pool": tuple(service.member_pool),
+        "active_members": tuple(service.active_member_ids),
+        "assets": tuple(assets),
+        "table_ids": {
+            name: tuple(table["ids"])
+            for name, table in specs["tables"].items()
+        },
+        "action_ids": {
+            name: tuple(table["ids"])
+            for name, table in specs["actions"].items()
+        },
+    }
+
+
+def _run_complete_episode(env: CityLearnEnv):
+    topology_trace = []
+
+    while True:
+        specs = env.entity_specs
+        topology_trace.append(
+            (
+                int(env.time_step),
+                int(env.topology_version),
+                tuple(env._topology_service.active_member_ids),
+                tuple(specs["tables"]["charger"]["ids"]),
+                tuple(specs["tables"]["storage"]["ids"]),
+                tuple(specs["tables"]["pv"]["ids"]),
+            )
+        )
+
+        if env.terminated or env.truncated:
+            break
+
+        env.step(_zero_entity_actions(env))
+
+    event_trace = tuple(
+        (entry["id"], entry["applied"], entry["topology_version"])
+        for entry in env.topology_event_log
+    )
+    return topology_trace, event_trace
+
+
+def test_dynamic_topology_reset_restores_structure_and_replays_identical_episode():
+    env = CityLearnEnv(
+        _load_schema(),
+        interface="entity",
+        topology_mode="dynamic",
+        episode_time_steps=12,
+        random_seed=0,
+        render_mode="none",
+    )
+
+    try:
+        env.reset(seed=0)
+        initial_structure = _structural_signature(env)
+        first_trace, first_events = _run_complete_episode(env)
+
+        assert all(applied for _, applied, _ in first_events)
+        assert first_events[-1][2] == 8
+
+        env.reset(seed=0)
+        assert _structural_signature(env) == initial_structure
+        second_trace, second_events = _run_complete_episode(env)
+
+        assert second_trace == first_trace
+        assert second_events == first_events
+    finally:
+        env.close()
+
+
+def test_dynamic_topology_reset_discards_runtime_cloned_members_before_replay():
+    schema = _load_schema()
+    schema["topology_events"] = [
+        {
+            "id": "evt_clone_member",
+            "time_step": 1,
+            "operation": "add_member",
+            "target_member_id": "Building_clone",
+            "source_member_id": "Building_1",
+        }
+    ]
+    env = CityLearnEnv(
+        schema,
+        interface="entity",
+        topology_mode="dynamic",
+        episode_time_steps=4,
+        random_seed=0,
+        render_mode="none",
+    )
+
+    try:
+        env.reset(seed=0)
+        assert "Building_clone" not in env._topology_service.member_pool
+        env.step(_zero_entity_actions(env))
+        assert "Building_clone" in env._topology_service.member_pool
+        assert env.topology_event_log[-1]["applied"] is True
+
+        while not (env.terminated or env.truncated):
+            env.step(_zero_entity_actions(env))
+
+        env.reset(seed=0)
+        assert "Building_clone" not in env._topology_service.member_pool
+        assert "Building_clone" not in env._topology_service.active_member_ids
+        env.step(_zero_entity_actions(env))
+        assert "Building_clone" in env._topology_service.active_member_ids
+        assert env.topology_event_log[-1]["applied"] is True
+    finally:
+        env.close()
