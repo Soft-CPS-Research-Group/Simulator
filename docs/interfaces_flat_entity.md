@@ -168,6 +168,12 @@ Use prefixed IDs for robust GraphRL and Transformer integrations.
 
 ## Dynamic Topology Guidance
 
+For every dynamic-topology `reset()`, the environment first restores the member pool and structural
+asset composition loaded from the schema, then applies any events scheduled at time step `0`.
+Added or removed chargers, deferrable appliances, PV systems, electrical storage and runtime-cloned
+members therefore do not leak into the next episode. Reusing one environment across training episodes
+has the same topology event timeline as recreating the environment for each episode.
+
 | Element | Agent guidance |
 |---|---|
 | `topology_version` | Re-read `entity_specs` when it changes. |

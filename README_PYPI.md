@@ -12,6 +12,10 @@ It is a fork-based project used for research and experimentation on:
 - local community market settlement and KPI analysis.
 - entity-mode RL observation contracts with derived forecasts, physical deadlines,
   feasible action capacity and requested/limited/applied action feedback.
+- dynamic member and asset topology with repeatable multi-episode reset semantics.
+
+Current source release: `1.5.6`. Dynamic environments restore their schema-loaded topology before
+replaying episode events, preventing structural state from leaking between training episodes.
 
 ## Project Positioning
 

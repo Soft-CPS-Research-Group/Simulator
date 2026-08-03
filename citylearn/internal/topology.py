@@ -44,6 +44,19 @@ class TopologyEvent:
     order: int
 
 
+@dataclass(frozen=True)
+class _BuildingStructureSnapshot:
+    """Lightweight references and metadata needed to restore a building topology."""
+
+    electric_vehicle_chargers: Sequence[Charger]
+    deferrable_appliances: Sequence[DeferrableAppliance]
+    pv: PV
+    electrical_storage: Battery
+    observation_metadata: Mapping[str, bool]
+    action_metadata: Mapping[str, bool]
+    building_override_values: Mapping[str, Any]
+
+
 class CityLearnTopologyService:
     """Schema-driven dynamic topology lifecycle and mutation service."""
 
@@ -54,6 +67,9 @@ class CityLearnTopologyService:
         self._ev_pool: Dict[str, ElectricVehicle] = {}
         self._ev_order: List[str] = []
         self._initial_active_member_ids: List[str] = []
+        self._initial_member_pool: Dict[str, Building] = {}
+        self._initial_member_order: List[str] = []
+        self._initial_building_structures: Dict[str, _BuildingStructureSnapshot] = {}
         self._active_member_ids: List[str] = []
         self._active_ev_ids: List[str] = []
         self._member_lifecycle: Dict[str, Dict[str, Any]] = {}
@@ -115,6 +131,12 @@ class CityLearnTopologyService:
         self._ev_pool = {ev.name: ev for ev in electric_vehicles}
         self._ev_order = [ev.name for ev in electric_vehicles]
         self._events = self._parse_events()
+        self._initial_member_pool = dict(self._member_pool)
+        self._initial_member_order = list(self._member_order)
+        self._initial_building_structures = {
+            member_id: self._snapshot_building_structure(building)
+            for member_id, building in self._member_pool.items()
+        }
 
         include_flags = self._initial_member_include_flags()
         self._initial_active_member_ids = [
@@ -129,6 +151,8 @@ class CityLearnTopologyService:
 
         if not self.enabled:
             return
+
+        self._restore_initial_structure()
 
         for building in self._member_pool.values():
             self._bind_building_runtime_context(building)
@@ -166,6 +190,48 @@ class CityLearnTopologyService:
 
         self._set_active_views()
         self.apply_events_for_time_step(0)
+
+    def _snapshot_building_structure(self, building: Building) -> _BuildingStructureSnapshot:
+        override_values: Dict[str, Any] = {}
+        for event in self._events:
+            if event.operation != 'add_member' or event.target_member_id != building.name:
+                continue
+
+            for key in event.overrides:
+                if key in {'name', 'chargers', 'deferrable_appliances', 'electrical_storage', 'pv'}:
+                    continue
+                if hasattr(building, key) and key not in override_values:
+                    override_values[key] = deepcopy(getattr(building, key))
+
+        return _BuildingStructureSnapshot(
+            electric_vehicle_chargers=tuple(building.electric_vehicle_chargers or []),
+            deferrable_appliances=tuple(building.deferrable_appliances or []),
+            pv=building.pv,
+            electrical_storage=building.electrical_storage,
+            observation_metadata=dict(building.observation_metadata),
+            action_metadata=dict(building.action_metadata),
+            building_override_values=override_values,
+        )
+
+    def _restore_initial_structure(self):
+        """Restore the schema-loaded member pool and asset composition before reset."""
+
+        self._member_pool = dict(self._initial_member_pool)
+        self._member_order = list(self._initial_member_order)
+
+        for member_id in self._member_order:
+            building = self._member_pool[member_id]
+            snapshot = self._initial_building_structures[member_id]
+            building.electric_vehicle_chargers = list(snapshot.electric_vehicle_chargers)
+            building.deferrable_appliances = list(snapshot.deferrable_appliances)
+            building.pv = snapshot.pv
+            building.electrical_storage = snapshot.electrical_storage
+
+            for key, value in snapshot.building_override_values.items():
+                setattr(building, key, deepcopy(value))
+
+            building.observation_metadata = dict(snapshot.observation_metadata)
+            building.action_metadata = dict(snapshot.action_metadata)
 
     def apply_events_for_time_step(self, time_step: int) -> bool:
         """Apply all schema events scheduled at `time_step`."""

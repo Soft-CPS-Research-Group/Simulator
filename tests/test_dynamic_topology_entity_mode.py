@@ -303,6 +303,41 @@ def test_dynamic_deferrable_appliance_add_start_and_remove_cancels_future_consum
         env.close()
 
 
+def test_dynamic_reset_restores_removed_deferrable_appliance_before_event_replay():
+    schema = _load_schema()
+    schema["topology_events"] = [
+        {
+            "id": "evt_remove_deferrable_b1",
+            "time_step": 1,
+            "operation": "remove_asset",
+            "target_member_id": "Building_1",
+            "target_asset_type": "deferrable_appliance",
+            "target_asset_id": "deferrable_appliance_1",
+        }
+    ]
+    env = CityLearnEnv(
+        schema,
+        interface="entity",
+        topology_mode="dynamic",
+        episode_time_steps=3,
+        random_seed=0,
+        render_mode="none",
+    )
+
+    try:
+        for _ in range(2):
+            env.reset(seed=0)
+            initial_ids = env.entity_specs["tables"]["deferrable_appliance"]["ids"]
+            assert "Building_1/deferrable_appliance_1" in initial_ids
+
+            env.step(_zero_entity_actions(env))
+            current_ids = env.entity_specs["tables"]["deferrable_appliance"]["ids"]
+            assert "Building_1/deferrable_appliance_1" not in current_ids
+            assert env.topology_event_log[-1]["applied"] is True
+    finally:
+        env.close()
+
+
 def test_dynamic_entity_layout_normalization_and_encoding_contract_stays_consistent():
     env = CityLearnEnv(_load_schema(), interface="entity", topology_mode="dynamic", episode_time_steps=16, random_seed=0)
 

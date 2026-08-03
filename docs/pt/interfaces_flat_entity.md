@@ -187,6 +187,12 @@ IDs sem prefixo tambem podem funcionar quando sao inequivocos, mas o formato com
 
 Quando `topology_mode="dynamic"`, as tabelas podem mudar de tamanho entre steps. O contrato para agentes e:
 
+Em cada `reset()`, o ambiente restaura primeiro o pool de membros e a composicao estrutural de assets
+carregada do schema e so depois aplica eventos agendados para o time step `0`. Chargers, aparelhos
+diferiveis, sistemas PV, armazenamento eletrico e membros clonados em runtime nao transitam assim para
+o episodio seguinte. Reutilizar o mesmo ambiente em varios episodios mantem a mesma timeline de eventos
+que reconstruir o ambiente para cada episodio.
+
 | Elemento | Como tratar |
 |---|---|
 | `ids` em `entity_specs` | Reconsultar quando `topology_version` muda. |

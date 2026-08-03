@@ -16,6 +16,10 @@ from citylearn.citylearn import CityLearnEnv
 
 Default documentation is in English. Portuguese documentation is available under [docs/pt](docs/pt/).
 
+Current source release: `1.5.6`. This patch restores the schema-loaded member and asset composition
+before every dynamic-topology episode, so repeated `reset()` calls replay the same topology event
+timeline instead of carrying added or removed assets forward from the previous episode.
+
 ## Start Here
 
 | Link | Portuguese | Use it for |
@@ -49,7 +53,7 @@ Additional reference: [KPI v2 naming tree](docs/KPI_V2_TREE.md).
 | Deferrables | Normalized cycle catalog plus sparse flexibility schedule. |
 | Interfaces | Flat Gymnasium vectors and entity tables/edges for offline RL, GraphRL and Transformers. |
 | Entity RL observations | Forecast bundles, physical deadline pressure, feasible action capacity and requested/limited/applied action feedback. |
-| Dynamic topology | Add/remove buildings and assets during simulation in entity mode. |
+| Dynamic topology | Add/remove buildings and assets during simulation in entity mode, with clean structural replay after each episode reset. |
 | Demand response | Dataset-driven DSO/TSO flexibility requests in entity observations, with settlement and KPIs. |
 | Multi-community | Synchronized orchestration of multiple independent communities with portfolio KPI rows. |
 | Robustness | Optional dataset-driven observation, forecast, action-channel and logical asset outages with KPIs. |

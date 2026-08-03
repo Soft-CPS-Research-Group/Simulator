@@ -58,6 +58,59 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.5.6 - 2026-07-29
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release que corrige a semantica de reset da topologia dinamica entre episodios. Ambientes
+dinamicos passam a restaurar o pool de membros e a composicao de assets carregados do schema antes
+de repetir os eventos, impedindo que treino multi-episodio herde mutacoes estruturais anteriores.
+
+### Added
+
+- Adicionada regressao multi-episodio para timelines completas de membros, chargers, PV e BESS.
+- Adicionada cobertura de reset para aparelhos diferiveis removidos e membros clonados em runtime.
+
+### Changed
+
+- `CityLearnTopologyService` passa a manter um snapshot estrutural leve dos edificios carregados.
+- O reset dinamico restaura ordem e pool de membros, chargers, aparelhos diferiveis, PV, armazenamento
+  eletrico e metadata de topologia sem copiar as series temporais completas dos edificios.
+
+### Fixed
+
+- Corrigidos chargers adicionados que permaneciam ligados depois de `reset()` e tornavam `add_asset` um no-op.
+- Corrigidos chargers e aparelhos diferiveis removidos que continuavam ausentes nos episodios seguintes.
+- Corrigidos PV e armazenamento eletrico adicionados/removidos que transitavam para o estado inicial seguinte.
+- Corrigidos membros clonados em runtime que permaneciam no pool entre episodios.
+- Corrigida a divergencia de event logs e da timeline de `topology_version` depois do primeiro episodio.
+
+### Dataset/Schema Impact
+
+- Nao exige migracao de schema nem datasets.
+- As definicoes de eventos e a semantica de time steps mantem-se.
+
+### Compatibility
+
+- Patch compativel para ambientes static e execucoes de um unico episodio.
+- Ambientes dinamicos multi-episodio passam a seguir o comportamento de clean reset pretendido. Deixa
+  de ser necessario reconstruir `CityLearnEnv` em cada episodio como workaround.
+
+### Validation
+
+- `.venv/bin/python -m pytest -q`: pass, `426 passed, 18 warnings`.
+- `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`: pass.
+- `.venv/bin/python scripts/audit/audit_physics.py`: pass, `16/16` cenarios.
+- `.venv/bin/python -m ruff check citylearn tests scripts/manual scripts/ci --select E9,F821`: pass.
+- Build do pacote e `twine check`: pass.
+
+### Migration Notes
+
+- Nao e necessaria migracao. Algorithms deve usar `softcpsrecsimulator>=1.5.6` quando reutiliza um
+  ambiente dinamico entre episodios.
+
 ## v1.5.5 - 2026-06-29
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
