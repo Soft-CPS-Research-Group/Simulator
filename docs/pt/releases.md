@@ -58,6 +58,48 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.6.1 - 2026-08-06
+
+Responsavel pela release: [@calofonseca](https://github.com/calofonseca).
+
+### Resumo
+
+Patch que adiciona controlo agregado de escadas rolantes para simulacoes energeticas de estacoes e
+o cenario final EC_Ermesinde a 15 minutos.
+
+### Adicionado
+
+- Adicionados `EscalatorSimulation` e `Escalator` com acoes normalizadas standby/slow/normal.
+- Adicionadas observacoes flat de procura, contexto de comboios, estado, potencia e servico.
+- Adicionados KPIs v2 de energia, servico de passageiros e mudancas de estado das escadas.
+- Adicionado o dataset anual `EC_Ermesinde`, o respetivo gerador reprodutivel e testes de integracao.
+
+### Alterado
+
+- O consumo eletrico liquido do edificio passa a incluir as escadas rolantes.
+- O loader expande observacoes `escalator_*` e a acao `escalator` para cada ativo configurado.
+
+### Impacto no Dataset/Schema
+
+- `EC_Ermesinde` usa passos de 900 segundos e seis CSVs de escadas rolantes.
+- Os schemas existentes nao sao afetados. O suporte e aditivo e, por agora, usa a interface flat.
+
+### Compatibilidade
+
+- Patch compativel com schemas existentes e utilizadores da interface flat.
+- Novos cenarios devem fornecer as colunas obrigatorias do CSV de escadas documentadas no schema reference.
+
+### Validacao
+
+- `.venv/bin/pytest -q tests/test_escalator_integration.py tests/test_deferrable_appliance_integration.py tests/test_scenario_smoke.py`: pass, `19 passed`.
+- Smoke simulation anual EC_Ermesinde: pass, `35 039` transicoes concluidas.
+- Comparacao standby/slow/normal: pass; slow e normal servem a procura com consumos distintos.
+
+### Notas de Migracao
+
+- Nao e necessaria migracao. Para ativar, adicionar `buildings.<id>.escalators`, os helpers de
+  observacao `escalator_*` e o helper de acao `escalator`.
+
 ## v1.5.6 - 2026-07-29
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

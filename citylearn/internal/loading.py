@@ -19,10 +19,11 @@ from citylearn.data import (
     LogisticRegressionOccupantParameters,
     Pricing,
     DeferrableApplianceSimulation,
+    EscalatorSimulation,
     Weather,
 )
 from citylearn.electric_vehicle import ElectricVehicle
-from citylearn.energy_model import Battery, DeferrableAppliance, PV
+from citylearn.energy_model import Battery, DeferrableAppliance, Escalator, PV
 from citylearn.reward_function import MultiBuildingRewardFunction, RewardFunction
 from citylearn.utilities import parse_bool
 
@@ -134,16 +135,32 @@ class CityLearnLoadingService:
             key: value for key, value in schema["actions"].items()
             if key == "deferrable_appliance" or key.startswith("deferrable_appliance_")
         }
+        schema['escalator_observations_helper'] = {
+            key: value for key, value in schema['observations'].items()
+            if key.startswith('escalator_')
+        }
+        schema['escalator_actions_helper'] = {
+            key: value for key, value in schema['actions'].items()
+            if key == 'escalator' or key.startswith('escalator_')
+        }
 
         schema['observations'] = {
             key: value
             for key, value in schema["observations"].items()
-            if key not in set(schema['chargers_observations_helper']) | set(schema['deferrable_appliance_observations_helper'])
+            if key not in (
+                set(schema['chargers_observations_helper'])
+                | set(schema['deferrable_appliance_observations_helper'])
+                | set(schema['escalator_observations_helper'])
+            )
         }
         schema['actions'] = {
             key: value
             for key, value in schema['actions'].items()
-            if key not in set(schema['chargers_actions_helper']) | set(schema['deferrable_appliance_actions_helper'])
+            if key not in (
+                set(schema['chargers_actions_helper'])
+                | set(schema['deferrable_appliance_actions_helper'])
+                | set(schema['escalator_actions_helper'])
+            )
         }
 
         schema['shared_observations'] = (
@@ -154,6 +171,7 @@ class CityLearnLoadingService:
                 for k, v in schema['observations'].items()
                 if not k.startswith("electric_vehicle_")
                 and not k.startswith("deferrable_appliance_")
+                and not k.startswith("escalator_")
                 and parse_bool(v.get('shared_in_central_agent', False), default=False, path=f'observations.{k}.shared_in_central_agent')
             ]
         )
@@ -567,12 +585,28 @@ class CityLearnLoadingService:
                 )
             )
 
+        escalators_list = []
+        for escalator_name, escalator_schema in (building_schema.get('escalators', {}) or {}).items():
+            escalators_list.append(
+                self.load_escalator(
+                    escalator_name,
+                    building_name,
+                    schema,
+                    escalator_schema,
+                    episode_tracker,
+                    expected_rows=expected_rows,
+                    window=member_window,
+                    time_step_ratio=building_kwargs['time_step_ratio'],
+                )
+            )
+
         declared_inactive_actions = self._resolve_inactive_actions(index, building_schema, kwargs)
         observation_metadata, action_metadata = self.process_metadata(
             schema,
             building_schema,
             chargers_list,
             deferrable_appliances_list,
+            escalators_list,
             index,
             energy_simulation,
             **kwargs,
@@ -581,6 +615,7 @@ class CityLearnLoadingService:
         building: Building = building_constructor(
             energy_simulation=energy_simulation,
             deferrable_appliances=deferrable_appliances_list,
+            escalators=escalators_list,
             electric_vehicle_chargers=chargers_list,
             weather=weather,
             observation_metadata=observation_metadata,
@@ -677,6 +712,7 @@ class CityLearnLoadingService:
         building_schema,
         chargers_list,
         deferrable_appliances_list,
+        escalators_list,
         index,
         energy_simulation: EnergySimulation,
         **kwargs,
@@ -700,6 +736,10 @@ class CityLearnLoadingService:
             k: parse_bool(v.get('active', False), default=False, path=f'observations.{k}.active')
             for k, v in schema['deferrable_appliance_observations_helper'].items()
         }
+        escalator_observations_metadata_helper = {
+            k: parse_bool(v.get('active', False), default=False, path=f'observations.{k}.active')
+            for k, v in schema['escalator_observations_helper'].items()
+        }
 
         if kwargs.get('active_observations') is not None:
             active_observations = kwargs['active_observations']
@@ -707,6 +747,7 @@ class CityLearnLoadingService:
             observation_metadata = {k: True if k in active_observations else False for k in observation_metadata}
             chargers_observations_metadata_helper = {k: True if k in active_observations else False for k in chargers_observations_metadata_helper}
             deferrable_appliance_observations_metadata_helper = {k: True if k in active_observations else False for k in deferrable_appliance_observations_metadata_helper}
+            escalator_observations_metadata_helper = {k: True if k in active_observations else False for k in escalator_observations_metadata_helper}
 
         if kwargs.get('inactive_observations') is not None:
             inactive_observations = kwargs['inactive_observations']
@@ -728,6 +769,10 @@ class CityLearnLoadingService:
             k: False if k in inactive_observations else deferrable_appliance_observations_metadata_helper[k]
             for k in deferrable_appliance_observations_metadata_helper
         }
+        escalator_observations_metadata_helper = {
+            k: False if k in inactive_observations else escalator_observations_metadata_helper[k]
+            for k in escalator_observations_metadata_helper
+        }
 
         action_metadata = {
             k: parse_bool(v.get('active', False), default=False, path=f'actions.{k}.active')
@@ -741,6 +786,10 @@ class CityLearnLoadingService:
             k: parse_bool(v.get('active', False), default=False, path=f'actions.{k}.active')
             for k, v in schema['deferrable_appliance_actions_helper'].items()
         }
+        escalator_actions_metadata_helper = {
+            k: parse_bool(v.get('active', False), default=False, path=f'actions.{k}.active')
+            for k, v in schema['escalator_actions_helper'].items()
+        }
 
         if kwargs.get('active_actions') is not None:
             active_actions = kwargs['active_actions']
@@ -748,12 +797,14 @@ class CityLearnLoadingService:
             action_metadata = {k: True if k in active_actions else False for k in action_metadata}
             chargers_actions_metadata_helper = {k: True if k in active_actions else False for k in chargers_actions_metadata_helper}
             deferrable_appliance_actions_metadata_helper = {k: True if k in active_actions else False for k in deferrable_appliance_actions_metadata_helper}
+            escalator_actions_metadata_helper = {k: True if k in active_actions else False for k in escalator_actions_metadata_helper}
 
         inactive_actions = self._resolve_inactive_actions(index, building_schema, kwargs)
 
         action_metadata = {k: False if k in inactive_actions else v for k, v in action_metadata.items()}
         chargers_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in chargers_actions_metadata_helper.items()}
         deferrable_appliance_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in deferrable_appliance_actions_metadata_helper.items()}
+        escalator_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in escalator_actions_metadata_helper.items()}
 
         if len(chargers_list) > 0:
             for charger in chargers_list:
@@ -795,6 +846,16 @@ class CityLearnLoadingService:
 
                 if deferrable_appliance_actions_metadata_helper.get('deferrable_appliance', False):
                     action_metadata[f'deferrable_appliance_{appliance.name}'] = True
+
+        if len(escalators_list) > 0:
+            for escalator in escalators_list:
+                for helper_name, active in escalator_observations_metadata_helper.items():
+                    if active:
+                        feature_name = helper_name.replace('escalator_', '', 1)
+                        observation_metadata[f'escalator_{escalator.name}_{feature_name}'] = True
+
+                if escalator_actions_metadata_helper.get('escalator', False):
+                    action_metadata[f'escalator_{escalator.name}'] = True
 
         return observation_metadata, action_metadata
 
@@ -912,6 +973,50 @@ class CityLearnLoadingService:
         )
 
         return appliance
+
+    def load_escalator(
+        self,
+        escalator_name: str,
+        building_name: str,
+        schema: dict,
+        escalator_schema: dict,
+        episode_tracker: EpisodeTracker,
+        *,
+        expected_rows: int,
+        window: Optional[Tuple[int, int]],
+        time_step_ratio: float,
+    ) -> Escalator:
+        """Load one aggregate escalator demand series and operating specification."""
+
+        simulation_file = escalator_schema.get('simulation') or escalator_schema.get('simulation_file')
+        if not simulation_file:
+            raise ValueError(f'buildings.{building_name}.escalators.{escalator_name}.simulation is required.')
+        filepath = os.path.join(schema['root_directory'], simulation_file)
+        dataframe = self._read_simulation_dataframe(schema, filepath)
+        dataframe = self._align_dynamic_timeseries_dataframe(
+            dataframe,
+            expected_rows=expected_rows,
+            window=window,
+            source_label=f'buildings.{building_name}.escalators.{escalator_name}.simulation',
+        )
+        source_label = f'buildings.{building_name}.escalators.{escalator_name}'
+        simulation = EscalatorSimulation.from_dataframe(dataframe, source_label=source_label)
+        self._set_time_step_offset(simulation, schema['simulation_start_time_step'])
+
+        escalator_type = escalator_schema.get('type', 'citylearn.energy_model.Escalator')
+        module_name = '.'.join(escalator_type.split('.')[:-1])
+        class_name = escalator_type.split('.')[-1]
+        constructor = getattr(importlib.import_module(module_name), class_name)
+        attributes = dict(escalator_schema.get('attributes', {}) or {})
+        return constructor(
+            escalator_simulation=simulation,
+            episode_tracker=episode_tracker,
+            name=escalator_name,
+            seconds_per_time_step=schema['seconds_per_time_step'],
+            time_step_ratio=time_step_ratio,
+            random_seed=schema['random_seed'],
+            **attributes,
+        )
 
     def load_washing_machine(self, *args, **kwargs):
         raise ValueError(

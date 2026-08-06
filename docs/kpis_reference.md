@@ -34,7 +34,7 @@ level_family_subfamily_metric_variant_unit
 | Part | Examples |
 |---|---|
 | `level` | `building`, `district`. |
-| `family` | `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`, `demand_response`, `robustness`. |
+| `family` | `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`, `escalator`, `demand_response`, `robustness`. |
 | `subfamily` | `total`, `daily_average`, `ratio_to_baseline`, `ratio_to_business_as_usual`, `shape_quality`, `service`. |
 | `metric` | `import`, `export`, `charge`, `completed_cycles`. |
 | `variant` | `control`, `baseline`, `business_as_usual`, `delta`, `delta_to_business_as_usual`, `total`, `average`, `l1`. |
@@ -51,6 +51,7 @@ Examples:
 | `district_energy_grid_shape_quality_ramping_average_to_baseline_ratio` | Ramping relative to baseline. |
 | `district_solar_self_consumption_ratio_self_consumption_ratio` | District/community solar self-consumption ratio after same-timestep member imports and exports are balanced. |
 | `building_deferrable_appliance_service_completed_cycles_count` | Completed deferrable cycles. |
+| `building_escalator_service_service_level_ratio` | Passenger demand served by escalators. |
 | `district_demand_response_compliance_ratio` | Credited DR delivery divided by valid requested energy. |
 | `district_robustness_action_dropout_count` | Number of action dropouts applied by robustness events. |
 
@@ -86,6 +87,7 @@ Safe division returns `None` or a safe placeholder when the denominator is not p
 | `equity` | building, district | Relative benefits and benefit distribution. |
 | `comfort_resilience` | building, district | Discomfort and outage/resilience events. |
 | `deferrable_appliance` | building, district | Completed/missed cycles, service level and served energy. |
+| `escalator` | building, district | Passenger demand/service, operating-state changes and electricity use. |
 | `demand_response` | building, district | Flexibility requests, delivery, shortfall and settlement economics. |
 | `robustness` | building, district | Dataset-driven observation, forecast, action and asset perturbation counters. |
 

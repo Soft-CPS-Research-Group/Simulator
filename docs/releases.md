@@ -60,6 +60,48 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.6.1 - 2026-08-06
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release adding aggregate escalator control for station-energy simulations and the final
+15-minute EC_Ermesinde scenario.
+
+### Added
+
+- Added `EscalatorSimulation` and `Escalator` with normalized standby/slow/normal actions.
+- Added flat escalator demand, train-context, state, power and service observations.
+- Added escalator electricity, passenger-service and state-change KPI v2 rows.
+- Added the annual `EC_Ermesinde` dataset, its reproducible generator and integration tests.
+
+### Changed
+
+- Building net electricity consumption now includes escalator electricity use.
+- The loader expands `escalator_*` observations and `escalator` actions per configured asset.
+
+### Dataset/Schema Impact
+
+- `EC_Ermesinde` uses 900-second steps and six escalator CSV files.
+- Existing schemas are unaffected. Escalator support is additive and currently uses the flat interface.
+
+### Compatibility
+
+- Compatible patch release for existing schemas and flat-interface users.
+- New scenarios should provide the required escalator CSV columns documented in the schema reference.
+
+### Validation
+
+- `.venv/bin/pytest -q tests/test_escalator_integration.py tests/test_deferrable_appliance_integration.py tests/test_scenario_smoke.py`: pass, `19 passed`.
+- Annual EC_Ermesinde smoke simulation: pass, `35,039` transitions completed.
+- Standby/slow/normal control comparison: pass; slow and normal serve demand while using distinct energy.
+
+### Migration Notes
+
+- No migration is required. To enable the feature, add `buildings.<id>.escalators`, the
+  `escalator_*` observation helpers and the `escalator` action helper.
+
 ## v1.5.6 - 2026-07-29
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

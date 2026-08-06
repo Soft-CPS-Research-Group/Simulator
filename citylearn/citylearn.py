@@ -1742,7 +1742,7 @@ class CityLearnEnv(Environment, Env):
             **kwargs,
         )
 
-    def process_metadata(self, schema, building_schema, chargers_list, deferrable_appliances_list, index, energy_simulation: EnergySimulation, **kwargs):
+    def process_metadata(self, schema, building_schema, chargers_list, deferrable_appliances_list, escalators_list, index, energy_simulation: EnergySimulation, **kwargs):
         """Compatibility wrapper for metadata processing service."""
 
         return self._loading_service.process_metadata(
@@ -1750,6 +1750,7 @@ class CityLearnEnv(Environment, Env):
             building_schema,
             chargers_list,
             deferrable_appliances_list,
+            escalators_list,
             index,
             energy_simulation,
             **kwargs,

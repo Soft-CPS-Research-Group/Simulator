@@ -548,6 +548,7 @@ class CityLearnRuntimeService:
             action_dict = {}
             electric_vehicle_actions = {}
             deferrable_appliance_actions = {}
+            escalator_actions = {}
 
             for action_name, action in zip(active_actions[i], building_actions[i]):
                 if 'electric_vehicle_storage' in action_name:
@@ -555,6 +556,8 @@ class CityLearnRuntimeService:
                     electric_vehicle_actions[charger_id] = action
                 elif action_name.startswith('deferrable_appliance_'):
                     deferrable_appliance_actions[action_name] = action
+                elif action_name.startswith('escalator_'):
+                    escalator_actions[action_name] = action
                 else:
                     action_dict[f'{action_name}_action'] = action
 
@@ -563,6 +566,9 @@ class CityLearnRuntimeService:
 
             if deferrable_appliance_actions:
                 action_dict['deferrable_appliance_actions'] = deferrable_appliance_actions
+
+            if escalator_actions:
+                action_dict['escalator_actions'] = escalator_actions
 
             parsed_actions.append(action_dict)
 

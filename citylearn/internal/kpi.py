@@ -2213,6 +2213,47 @@ class CityLearnKPIService:
             self._metric('deferrable_appliance_average_start_delay_hours', district_avg_delay, 'District', 'district'),
         ])
 
+        # Escalators deliberately use aggregate passenger demand rather than a
+        # queueing model. These KPIs expose the resulting energy/service tradeoff
+        # alongside the existing electricity cost metrics.
+        district_escalator = {
+            'requested_passengers': 0.0,
+            'served_passengers': 0.0,
+            'unserved_passengers': 0.0,
+            'electricity_consumption_kwh': 0.0,
+            'state_changes_count': 0.0,
+        }
+        for building in kpi_buildings:
+            building_escalator = dict.fromkeys(district_escalator, 0.0)
+            for escalator in getattr(building, 'escalators', []) or []:
+                summary = escalator.service_summary()
+                for key in building_escalator:
+                    building_escalator[key] += self._to_scalar(summary.get(key), 0.0)
+
+            requested = building_escalator['requested_passengers']
+            service_level = None if requested <= 0.0 else building_escalator['served_passengers'] / requested
+            extended_building_rows.extend([
+                self._metric('escalator_requested_passengers_total_count', requested, building.name, 'building'),
+                self._metric('escalator_served_passengers_total_count', building_escalator['served_passengers'], building.name, 'building'),
+                self._metric('escalator_unserved_passengers_total_count', building_escalator['unserved_passengers'], building.name, 'building'),
+                self._metric('escalator_service_level_ratio', service_level, building.name, 'building'),
+                self._metric('escalator_electricity_consumption_total_kwh', building_escalator['electricity_consumption_kwh'], building.name, 'building'),
+                self._metric('escalator_state_changes_count', building_escalator['state_changes_count'], building.name, 'building'),
+            ])
+            for key in district_escalator:
+                district_escalator[key] += building_escalator[key]
+
+        district_requested = district_escalator['requested_passengers']
+        district_service_level = None if district_requested <= 0.0 else district_escalator['served_passengers'] / district_requested
+        extended_district_rows.extend([
+            self._metric('escalator_requested_passengers_total_count', district_requested, 'District', 'district'),
+            self._metric('escalator_served_passengers_total_count', district_escalator['served_passengers'], 'District', 'district'),
+            self._metric('escalator_unserved_passengers_total_count', district_escalator['unserved_passengers'], 'District', 'district'),
+            self._metric('escalator_service_level_ratio', district_service_level, 'District', 'district'),
+            self._metric('escalator_electricity_consumption_total_kwh', district_escalator['electricity_consumption_kwh'], 'District', 'district'),
+            self._metric('escalator_state_changes_count', district_escalator['state_changes_count'], 'District', 'district'),
+        ])
+
         extended_building = pd.DataFrame(extended_building_rows)
         extended_district = pd.DataFrame(extended_district_rows)
 
@@ -2771,6 +2812,12 @@ class CityLearnKPIService:
             ('deferrable_appliance_served_energy_total_kwh', 'deferrable_appliance', 'service', 'served_energy_total', None, 'kwh'),
             ('deferrable_appliance_unserved_energy_total_kwh', 'deferrable_appliance', 'service', 'unserved_energy_total', None, 'kwh'),
             ('deferrable_appliance_average_start_delay_hours', 'deferrable_appliance', 'service', 'average_start_delay', None, 'hours'),
+            ('escalator_requested_passengers_total_count', 'escalator', 'service', 'requested_passengers_total', None, 'count'),
+            ('escalator_served_passengers_total_count', 'escalator', 'service', 'served_passengers_total', None, 'count'),
+            ('escalator_unserved_passengers_total_count', 'escalator', 'service', 'unserved_passengers_total', None, 'count'),
+            ('escalator_service_level_ratio', 'escalator', 'service', 'service_level', None, 'ratio'),
+            ('escalator_electricity_consumption_total_kwh', 'escalator', 'energy', 'electricity_consumption_total', None, 'kwh'),
+            ('escalator_state_changes_count', 'escalator', 'operation', 'state_changes', None, 'count'),
         ]
         for old_name, family, subfamily, metric, variant, unit in extended_map:
             map_from(extended_df, old_name, family, subfamily, metric, variant, unit)

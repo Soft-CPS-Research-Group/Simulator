@@ -136,6 +136,20 @@ Schema helper keys are expanded per charger.
 | `remaining_duration_steps` | steps | Remaining cycle duration. |
 | `remaining_average_power_kw`, `current_step_power_kw` | kW | Remaining average and current step power. |
 
+### Escalator Flat Observations
+
+`escalator_*` helper keys are expanded per escalator in the flat interface.
+
+| Feature | Unit | Meaning |
+|---|---:|---|
+| `passengers_from_trains_15min`, `background_pedestrians_15min`, `passengers_expected_15min` | passengers/step | Aggregate demand sources and total demand. |
+| `people_detected`, `available`, `service_required`, `service_met` | binary | Demand, availability and simple service indicators. |
+| `passing_trains` | count | Passing trains; source arrival/departure duplicates are not double counted. |
+| `minutes_to_next_train` | minutes | Time until next relevant train. |
+| `state`, `requested_state` | enum `0–2` | Standby, slow or normal state. |
+| `power_kw` | kW | Applied operating power. |
+| `unserved_passengers_15min` | passengers/step | Demand left unserved in standby. |
+
 ## Entity Tables
 
 Entity mode returns `tables`, `edges` and `meta`. Feature availability depends on the schema, active assets and enabled bundles.
