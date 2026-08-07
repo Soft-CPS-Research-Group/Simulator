@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 1.5.6 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 1.6.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8f564690"></script>
+      <script src="../../_static/documentation_options.js?v=d6a008b6"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1890,7 +1890,7 @@
 
 <div class="viewcode-block" id="CityLearnEnv.process_metadata">
 <a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.process_metadata">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">process_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">building_schema</span><span class="p">,</span> <span class="n">chargers_list</span><span class="p">,</span> <span class="n">deferrable_appliances_list</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">energy_simulation</span><span class="p">:</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">building_schema</span><span class="p">,</span> <span class="n">chargers_list</span><span class="p">,</span> <span class="n">deferrable_appliances_list</span><span class="p">,</span> <span class="n">escalators_list</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">energy_simulation</span><span class="p">:</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compatibility wrapper for metadata processing service.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loading_service</span><span class="o">.</span><span class="n">process_metadata</span><span class="p">(</span>
@@ -1898,6 +1898,7 @@
             <span class="n">building_schema</span><span class="p">,</span>
             <span class="n">chargers_list</span><span class="p">,</span>
             <span class="n">deferrable_appliances_list</span><span class="p">,</span>
+            <span class="n">escalators_list</span><span class="p">,</span>
             <span class="n">index</span><span class="p">,</span>
             <span class="n">energy_simulation</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>

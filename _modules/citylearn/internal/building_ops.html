@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.building_ops &mdash; CityLearn 1.5.6 documentation</title>
+  <title>citylearn.internal.building_ops &mdash; CityLearn 1.6.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8f564690"></script>
+      <script src="../../../_static/documentation_options.js?v=d6a008b6"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -154,6 +154,12 @@
             <span class="n">observations</span><span class="p">,</span>
             <span class="n">valid_observation_set</span><span class="p">,</span>
             <span class="n">building</span><span class="o">.</span><span class="n">deferrable_appliances</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">observations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_escalator_observations</span><span class="p">(</span>
+            <span class="n">observations</span><span class="p">,</span>
+            <span class="n">valid_observation_set</span><span class="p">,</span>
+            <span class="n">building</span><span class="o">.</span><span class="n">escalators</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">unknown_observations</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">observations</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">valid_observations</span><span class="p">))</span>
@@ -323,6 +329,23 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Backward-compatible wrapper for old washing-machine integrations.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_deferrable_appliance_observations</span><span class="p">(</span><span class="n">observations</span><span class="p">,</span> <span class="n">valid_observations</span><span class="p">,</span> <span class="n">washing_machines</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">observations</span></div>
+
+
+<div class="viewcode-block" id="BuildingOpsService.update_escalator_observations">
+<a class="viewcode-back" href="../../../api/citylearn.internal.building_ops.html#citylearn.internal.building_ops.BuildingOpsService.update_escalator_observations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_escalator_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">,</span> <span class="n">valid_observations</span><span class="p">,</span> <span class="n">escalators</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update flat observations for each aggregate escalator.&quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">escalator</span> <span class="ow">in</span> <span class="n">escalators</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;escalator_</span><span class="si">{</span><span class="n">escalator</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">valid_observations</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">escalator</span><span class="o">.</span><span class="n">observations</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">valid_observations</span><span class="p">:</span>
+                    <span class="n">observations</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
         <span class="k">return</span> <span class="n">observations</span></div>
 
 
@@ -531,6 +554,7 @@
         <span class="n">electrical_storage_action</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">deferrable_appliance_actions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">washing_machine_actions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">escalator_actions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">electric_vehicle_storage_actions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update demand and charge/discharge storage devices.&quot;&quot;&quot;</span>
@@ -571,6 +595,7 @@
         <span class="n">requested_deferrable_appliance_actions</span> <span class="o">=</span> <span class="p">(</span>
             <span class="kc">None</span> <span class="k">if</span> <span class="n">deferrable_appliance_actions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">deferrable_appliance_actions</span><span class="p">)</span>
         <span class="p">)</span>
+        <span class="n">requested_escalator_actions</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">escalator_actions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">escalator_actions</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">deferrable_appliance_actions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">deferrable_appliance_actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_deferrable_profile_constraints</span><span class="p">(</span><span class="n">deferrable_appliance_actions</span><span class="p">)</span>
 
@@ -646,6 +671,19 @@
                     <span class="n">deferrable_appliance_priority_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action_key</span><span class="p">)</span>
             <span class="n">priority_list</span> <span class="o">=</span> <span class="n">priority_list</span> <span class="o">+</span> <span class="n">deferrable_appliance_priority_list</span>
 
+        <span class="k">if</span> <span class="n">requested_escalator_actions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">escalator_priority_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">escalator_by_action</span> <span class="o">=</span> <span class="n">action_cache</span><span class="p">[</span><span class="s1">&#39;escalator_by_action&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">action_name</span><span class="p">,</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">requested_escalator_actions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">action_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">action_name</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">if</span> <span class="n">action_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">active_action_set</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;This action should not be applied. Verify&#39;</span><span class="p">)</span>
+                <span class="n">escalator</span> <span class="o">=</span> <span class="n">escalator_by_action</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action_key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">escalator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">actions</span><span class="p">[</span><span class="n">action_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">escalator</span><span class="o">.</span><span class="n">set_state</span><span class="p">,</span> <span class="p">(</span><span class="n">action</span><span class="p">,))</span>
+                    <span class="n">escalator_priority_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action_key</span><span class="p">)</span>
+            <span class="n">priority_list</span> <span class="o">=</span> <span class="n">priority_list</span> <span class="o">+</span> <span class="n">escalator_priority_list</span>
+
         <span class="k">if</span> <span class="n">electrical_storage_action</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;electrical_storage&#39;</span>
             <span class="n">priority_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -664,7 +702,7 @@
         <span class="n">limit_control_actions</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">power_outage</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">priority_list</span><span class="p">:</span>
             <span class="n">func</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">args</span> <span class="ow">and</span> <span class="p">(</span><span class="n">limit_control_actions</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance_&#39;</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">args</span> <span class="ow">and</span> <span class="p">(</span><span class="n">limit_control_actions</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;escalator_&#39;</span><span class="p">)):</span>
                 <span class="n">original_args</span> <span class="o">=</span> <span class="n">args</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit_outage_control_action</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">args</span> <span class="o">!=</span> <span class="n">original_args</span><span class="p">:</span>
@@ -696,10 +734,12 @@
         <span class="n">active_actions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">active_actions</span><span class="p">)</span>
         <span class="n">chargers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span> <span class="ow">or</span> <span class="p">())</span>
         <span class="n">appliances</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">deferrable_appliances</span> <span class="ow">or</span> <span class="p">())</span>
+        <span class="n">escalators</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">escalators</span> <span class="ow">or</span> <span class="p">())</span>
         <span class="n">signature</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">active_actions</span><span class="p">,</span>
             <span class="nb">tuple</span><span class="p">((</span><span class="nb">id</span><span class="p">(</span><span class="n">charger</span><span class="p">),</span> <span class="n">charger</span><span class="o">.</span><span class="n">charger_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="n">chargers</span><span class="p">),</span>
             <span class="nb">tuple</span><span class="p">((</span><span class="nb">id</span><span class="p">(</span><span class="n">appliance</span><span class="p">),</span> <span class="n">appliance</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="n">appliances</span><span class="p">),</span>
+            <span class="nb">tuple</span><span class="p">((</span><span class="nb">id</span><span class="p">(</span><span class="n">escalator</span><span class="p">),</span> <span class="n">escalator</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">escalator</span> <span class="ow">in</span> <span class="n">escalators</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="n">cache</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_apply_action_cache&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
@@ -711,11 +751,17 @@
             <span class="n">appliance_by_action</span><span class="p">[</span><span class="n">appliance</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">appliance</span>
             <span class="n">appliance_by_action</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;deferrable_appliance_</span><span class="si">{</span><span class="n">appliance</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">appliance</span>
 
+        <span class="n">escalator_by_action</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">escalator</span> <span class="ow">in</span> <span class="n">escalators</span><span class="p">:</span>
+            <span class="n">escalator_by_action</span><span class="p">[</span><span class="n">escalator</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">escalator</span>
+            <span class="n">escalator_by_action</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;escalator_</span><span class="si">{</span><span class="n">escalator</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">escalator</span>
+
         <span class="n">cache</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;signature&#39;</span><span class="p">:</span> <span class="n">signature</span><span class="p">,</span>
             <span class="s1">&#39;active_action_set&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">(</span><span class="n">active_actions</span><span class="p">),</span>
             <span class="s1">&#39;charger_by_id&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">charger</span><span class="o">.</span><span class="n">charger_id</span><span class="p">:</span> <span class="n">charger</span> <span class="k">for</span> <span class="n">charger</span> <span class="ow">in</span> <span class="n">chargers</span><span class="p">},</span>
             <span class="s1">&#39;deferrable_appliance_by_action&#39;</span><span class="p">:</span> <span class="n">appliance_by_action</span><span class="p">,</span>
+            <span class="s1">&#39;escalator_by_action&#39;</span><span class="p">:</span> <span class="n">escalator_by_action</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_action_cache</span> <span class="o">=</span> <span class="n">cache</span>
         <span class="k">return</span> <span class="n">cache</span>
@@ -932,6 +978,9 @@
             <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">args</span>
             <span class="k">return</span> <span class="n">args</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferrable_profile_feasible</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,)</span>
+
+        <span class="k">if</span> <span class="n">action_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;escalator_&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,)</span> <span class="k">if</span> <span class="n">building</span><span class="o">.</span><span class="n">power_outage</span> <span class="k">else</span> <span class="n">args</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">building</span><span class="o">.</span><span class="n">power_outage</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">args</span>

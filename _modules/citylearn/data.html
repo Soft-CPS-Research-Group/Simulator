@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.data &mdash; CityLearn 1.5.6 documentation</title>
+  <title>citylearn.data &mdash; CityLearn 1.6.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8f564690"></script>
+      <script src="../../_static/documentation_options.js?v=d6a008b6"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1131,6 +1131,88 @@
         <span class="n">normalized</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">normalized</span><span class="p">[</span><span class="n">valid</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">normalized</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span></div>
 </div>
+
+
+<div class="viewcode-block" id="EscalatorSimulation">
+<a class="viewcode-back" href="../../api/citylearn.data.html#citylearn.data.EscalatorSimulation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EscalatorSimulation</span><span class="p">(</span><span class="n">TimeSeriesData</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Time series inputs for an escalator controlled at each simulation step.</span>
+
+<span class="sd">    The model deliberately stays aggregate: passengers are a demand signal, not</span>
+<span class="sd">    individual agents or queues.  This makes it suitable for energy-management</span>
+<span class="sd">    experiments while preserving a traceable service KPI when an escalator is</span>
+<span class="sd">    left in standby while passengers are expected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">REQUIRED_COLUMNS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;time_step&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;passengers_from_trains_15min&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;background_pedestrians_15min&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;passengers_expected_15min&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;people_detected&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;arriving_trains&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;departing_trains&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;minutes_to_next_train&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;available&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="EscalatorSimulation.from_dataframe">
+<a class="viewcode-back" href="../../api/citylearn.data.html#citylearn.data.EscalatorSimulation.from_dataframe">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dataframe</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">source_label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;EscalatorSimulation&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate and construct an escalator simulation from a CSV dataframe.&quot;&quot;&quot;</span>
+
+        <span class="n">source_label</span> <span class="o">=</span> <span class="n">source_label</span> <span class="ow">or</span> <span class="s1">&#39;escalator&#39;</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">REQUIRED_COLUMNS</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">source_label</span><span class="si">}</span><span class="s1"> is missing columns: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">numeric_columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">REQUIRED_COLUMNS</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+            <span class="n">frame</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">column</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">frame</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">source_label</span><span class="si">}</span><span class="s1"> contains non-finite values in required columns.&#39;</span><span class="p">)</span>
+
+        <span class="n">time_steps</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;time_step&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">time_steps</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int64&#39;</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">source_label</span><span class="si">}</span><span class="s1">.time_step must be contiguous and start at 0.&#39;</span><span class="p">)</span>
+
+        <span class="n">non_negative</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;passengers_from_trains_15min&#39;</span><span class="p">,</span> <span class="s1">&#39;background_pedestrians_15min&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;passengers_expected_15min&#39;</span><span class="p">,</span> <span class="s1">&#39;arriving_trains&#39;</span><span class="p">,</span> <span class="s1">&#39;departing_trains&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;minutes_to_next_train&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">non_negative</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">source_label</span><span class="si">}</span><span class="s1"> has a negative demand, train-count or time-to-train value.&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;people_detected&#39;</span><span class="p">,</span> <span class="s1">&#39;available&#39;</span><span class="p">):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">source_label</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s1"> must contain only 0 or 1.&#39;</span><span class="p">)</span>
+
+        <span class="n">expected</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;passengers_from_trains_15min&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;background_pedestrians_15min&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
+            <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;passengers_expected_15min&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+            <span class="n">expected</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">),</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">source_label</span><span class="si">}</span><span class="s1">.passengers_expected_15min must equal &#39;</span>
+                <span class="s1">&#39;passengers_from_trains_15min + background_pedestrians_15min.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="n">instance</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;people_detected&#39;</span><span class="p">,</span> <span class="s1">&#39;available&#39;</span><span class="p">,</span> <span class="s1">&#39;arriving_trains&#39;</span><span class="p">,</span> <span class="s1">&#39;departing_trains&#39;</span><span class="p">,</span> <span class="s1">&#39;time_step&#39;</span><span class="p">):</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">instance</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="DeferrableApplianceSimulation">

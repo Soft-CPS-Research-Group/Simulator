@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.data module &mdash; CityLearn 1.5.6 documentation</title>
+  <title>citylearn.data module &mdash; CityLearn 1.6.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8f564690"></script>
+      <script src="../_static/documentation_options.js?v=d6a008b6"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -238,7 +238,7 @@ Defaults to -0.1 when not present.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.data.DataSet.DEFAULT_CACHE_DIRECTORY">
-<span class="sig-name descname"><span class="pre">DEFAULT_CACHE_DIRECTORY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/runner/.cache/citylearn/v1.5.6'</span></em><a class="headerlink" href="#citylearn.data.DataSet.DEFAULT_CACHE_DIRECTORY" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">DEFAULT_CACHE_DIRECTORY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/runner/.cache/citylearn/v1.6.1'</span></em><a class="headerlink" href="#citylearn.data.DataSet.DEFAULT_CACHE_DIRECTORY" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -283,7 +283,7 @@ Defaults to -0.1 when not present.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="citylearn.data.DataSet.REPOSITORY_TAG">
-<span class="sig-name descname"><span class="pre">REPOSITORY_TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'v1.5.6'</span></em><a class="headerlink" href="#citylearn.data.DataSet.REPOSITORY_TAG" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">REPOSITORY_TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'v1.6.1'</span></em><a class="headerlink" href="#citylearn.data.DataSet.REPOSITORY_TAG" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -479,6 +479,28 @@ to and subtracted from the set point to set the upper and lower bounds of comfor
 <dt class="sig sig-object py" id="citylearn.data.EnergySimulation.time_step_ratios">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_step_ratios</span></span><a class="headerlink" href="#citylearn.data.EnergySimulation.time_step_ratios" title="Link to this definition"></a></dt>
 <dd><p>Getter for the time_step_ratio variable.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="citylearn.data.EscalatorSimulation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">citylearn.data.</span></span><span class="sig-name descname"><span class="pre">EscalatorSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/data.html#EscalatorSimulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.data.EscalatorSimulation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#citylearn.data.TimeSeriesData" title="citylearn.data.TimeSeriesData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesData</span></code></a></p>
+<p>Time series inputs for an escalator controlled at each simulation step.</p>
+<p>The model deliberately stays aggregate: passengers are a demand signal, not
+individual agents or queues.  This makes it suitable for energy-management
+experiments while preserving a traceable service KPI when an escalator is
+left in standby while passengers are expected.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="citylearn.data.EscalatorSimulation.REQUIRED_COLUMNS">
+<span class="sig-name descname"><span class="pre">REQUIRED_COLUMNS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'arriving_trains',</span> <span class="pre">'available',</span> <span class="pre">'background_pedestrians_15min',</span> <span class="pre">'departing_trains',</span> <span class="pre">'minutes_to_next_train',</span> <span class="pre">'passengers_expected_15min',</span> <span class="pre">'passengers_from_trains_15min',</span> <span class="pre">'people_detected',</span> <span class="pre">'time_step'}</span></em><a class="headerlink" href="#citylearn.data.EscalatorSimulation.REQUIRED_COLUMNS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.data.EscalatorSimulation.from_dataframe">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#citylearn.data.EscalatorSimulation" title="citylearn.data.EscalatorSimulation"><span class="pre">EscalatorSimulation</span></a></span></span><a class="reference internal" href="../_modules/citylearn/data.html#EscalatorSimulation.from_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.data.EscalatorSimulation.from_dataframe" title="Link to this definition"></a></dt>
+<dd><p>Validate and construct an escalator simulation from a CSV dataframe.</p>
 </dd></dl>
 
 </dd></dl>

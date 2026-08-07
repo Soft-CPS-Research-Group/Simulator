@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model &mdash; CityLearn 1.5.6 documentation</title>
+  <title>citylearn.energy_model &mdash; CityLearn 1.6.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8f564690"></script>
+      <script src="../../_static/documentation_options.js?v=d6a008b6"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -98,7 +98,14 @@
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>  <span class="c1"># pragma: no cover - optional dependency</span>
     <span class="n">Pvwattsv8</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">EpisodeTracker</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSet</span><span class="p">,</span> <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">,</span> <span class="n">DeferrableApplianceSimulation</span><span class="p">,</span> <span class="n">EnergySimulation</span><span class="p">,</span> <span class="n">WashingMachineSimulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.data</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DataSet</span><span class="p">,</span>
+    <span class="n">ZERO_DIVISION_PLACEHOLDER</span><span class="p">,</span>
+    <span class="n">DeferrableApplianceSimulation</span><span class="p">,</span>
+    <span class="n">EnergySimulation</span><span class="p">,</span>
+    <span class="n">EscalatorSimulation</span><span class="p">,</span>
+    <span class="n">WashingMachineSimulation</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">power_kw_to_energy_kwh</span><span class="p">,</span> <span class="n">seconds_to_hours</span><span class="p">,</span> <span class="n">to_dataset_resolution_energy</span>
 <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
 
@@ -2109,6 +2116,234 @@
             <span class="n">offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_global_time_step</span><span class="p">()</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
             <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="Escalator">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.Escalator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Escalator</span><span class="p">(</span><span class="n">ElectricDevice</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate escalator with three directly controllable operating states.</span>
+
+<span class="sd">    Actions in ``[0, 1]`` map to standby, slow and normal operation.  Passenger</span>
+<span class="sd">    values are not used to force a state: they only determine whether the chosen</span>
+<span class="sd">    state meets the simple aggregate service requirement.  This deliberately</span>
+<span class="sd">    avoids an unsupported queueing model while making the energy/service tradeoff</span>
+<span class="sd">    explicit to an agent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">STATE_STANDBY</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">STATE_SLOW</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">STATE_NORMAL</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">STATE_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;standby&#39;</span><span class="p">,</span> <span class="s1">&#39;slow&#39;</span><span class="p">,</span> <span class="s1">&#39;normal&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">escalator_simulation</span><span class="p">:</span> <span class="n">EscalatorSimulation</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">standby_power</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">slow_power</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">normal_power</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">minimum_state_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">service_threshold_passengers</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">escalator_simulation</span> <span class="o">=</span> <span class="n">escalator_simulation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;escalator&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standby_power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_non_negative_power</span><span class="p">(</span><span class="n">standby_power</span><span class="p">,</span> <span class="s1">&#39;standby_power&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slow_power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_non_negative_power</span><span class="p">(</span><span class="n">slow_power</span><span class="p">,</span> <span class="s1">&#39;slow_power&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal_power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_non_negative_power</span><span class="p">(</span><span class="n">normal_power</span><span class="p">,</span> <span class="s1">&#39;normal_power&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">standby_power</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow_power</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal_power</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Escalator powers must satisfy standby_power &lt;= slow_power &lt;= normal_power.&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">minimum_state_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">minimum_state_steps</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;minimum_state_steps must be an integer &gt;= 1.&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">if</span> <span class="n">minimum_state_steps</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;minimum_state_steps must be &gt;= 1.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimum_state_steps</span> <span class="o">=</span> <span class="n">minimum_state_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_threshold_passengers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_non_negative_power</span><span class="p">(</span>
+            <span class="n">service_threshold_passengers</span><span class="p">,</span> <span class="s1">&#39;service_threshold_passengers&#39;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_STANDBY</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__requested_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_STANDBY</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__state_start_time_step</span> <span class="o">=</span> <span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">minimum_state_steps</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nominal_power</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normal_power</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_as_non_negative_power</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> must be a finite number &gt;= 0.&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> must be a finite number &gt;= 0.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__state</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">requested_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__requested_state</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_NAMES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Escalator.reset">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.Escalator.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">episode_time_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_STANDBY</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__requested_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_STANDBY</span>
+        <span class="c1"># The initial standby state is not an operator command. Allow the first</span>
+        <span class="c1"># agent action to select an operating state at timestep zero.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__state_start_time_step</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">minimum_state_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requested_state_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_required</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_met</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unserved_passengers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_changes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_applied</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">escalator_simulation</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">])</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_available</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">(</span><span class="s1">&#39;available&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.5</span>
+
+<div class="viewcode-block" id="Escalator.action_to_state">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.Escalator.action_to_state">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">action_to_state</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">action_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">action_value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">STATE_STANDBY</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">&lt;</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">STATE_SLOW</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">STATE_NORMAL</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_power_for_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">standby_power</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow_power</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal_power</span><span class="p">)[</span><span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="Escalator.set_state">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.Escalator.set_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the normalized action and record current-step power/service.&quot;&quot;&quot;</span>
+
+        <span class="n">requested</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_to_state</span><span class="p">(</span><span class="n">action_value</span><span class="p">)</span>
+        <span class="n">desired</span> <span class="o">=</span> <span class="n">requested</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_STANDBY</span>
+        <span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">desired</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__state</span><span class="p">:</span>
+            <span class="n">elapsed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__state_start_time_step</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">elapsed</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimum_state_steps</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available</span><span class="p">()</span> <span class="ow">and</span> <span class="n">desired</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_STANDBY</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__state</span> <span class="o">=</span> <span class="n">desired</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__state_start_time_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
+                <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__requested_state</span> <span class="o">=</span> <span class="n">requested</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_history</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requested_state_history</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">requested</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_changes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">changed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_applied</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">power_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_power_for_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__state</span><span class="p">)</span>
+        <span class="n">energy_kwh</span> <span class="o">=</span> <span class="n">power_kw</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3600.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_electricity_consumption</span><span class="p">(</span><span class="n">energy_kwh</span><span class="p">)</span>
+
+        <span class="n">passengers</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">(</span><span class="s1">&#39;passengers_expected_15min&#39;</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="n">passengers</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_threshold_passengers</span>
+        <span class="n">met</span> <span class="o">=</span> <span class="p">(</span><span class="ow">not</span> <span class="n">required</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__state</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_SLOW</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_required</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">required</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_met</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">met</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unserved_passengers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="k">if</span> <span class="n">met</span> <span class="k">else</span> <span class="n">passengers</span></div>
+
+
+<div class="viewcode-block" id="Escalator.observations">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.Escalator.observations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">observations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return current aggregate operating and demand observations.&quot;&quot;&quot;</span>
+
+        <span class="n">passengers</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">(</span><span class="s1">&#39;passengers_expected_15min&#39;</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">arriving</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">(</span><span class="s1">&#39;arriving_trains&#39;</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">departing</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">(</span><span class="s1">&#39;departing_trains&#39;</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_history</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;passengers_from_trains_15min&#39;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">(</span><span class="s1">&#39;passengers_from_trains_15min&#39;</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="s1">&#39;background_pedestrians_15min&#39;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">(</span><span class="s1">&#39;background_pedestrians_15min&#39;</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="s1">&#39;passengers_expected_15min&#39;</span><span class="p">:</span> <span class="n">passengers</span><span class="p">,</span>
+            <span class="s1">&#39;people_detected&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">(</span><span class="s1">&#39;people_detected&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">),</span>
+            <span class="c1"># Existing source files carry both arrival and departure flags for a</span>
+            <span class="c1"># passing train.  Avoid double counting in the control signal.</span>
+            <span class="s1">&#39;passing_trains&#39;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">arriving</span><span class="p">,</span> <span class="n">departing</span><span class="p">),</span>
+            <span class="s1">&#39;minutes_to_next_train&#39;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">(</span><span class="s1">&#39;minutes_to_next_train&#39;</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="s1">&#39;available&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_available</span><span class="p">()),</span>
+            <span class="s1">&#39;state&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">),</span>
+            <span class="s1">&#39;requested_state&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">requested_state</span><span class="p">),</span>
+            <span class="s1">&#39;power_kw&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_power_for_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">),</span>
+            <span class="s1">&#39;service_required&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service_required</span><span class="p">[</span><span class="n">current</span><span class="p">]),</span>
+            <span class="s1">&#39;service_met&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service_met</span><span class="p">[</span><span class="n">current</span><span class="p">]),</span>
+            <span class="s1">&#39;unserved_passengers_15min&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unserved_passengers</span><span class="p">[</span><span class="n">current</span><span class="p">]),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="Escalator.service_summary">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.Escalator.service_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">service_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_time_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return cumulative service and energy indicators for reporting.&quot;&quot;&quot;</span>
+
+        <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="k">if</span> <span class="n">end_time_step</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time_step</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_history</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">applied</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_applied</span><span class="p">[:</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">requested</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">escalator_simulation</span><span class="o">.</span><span class="n">passengers_expected_15min</span><span class="p">[:</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">requested</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">requested</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">*</span> <span class="n">applied</span>
+        <span class="n">unserved</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unserved_passengers</span><span class="p">[:</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">applied</span>
+        <span class="n">total_requested</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">requested</span><span class="p">))</span>
+        <span class="n">total_unserved</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">unserved</span><span class="p">))</span>
+        <span class="n">total_served</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">total_requested</span> <span class="o">-</span> <span class="n">total_unserved</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;requested_passengers&#39;</span><span class="p">:</span> <span class="n">total_requested</span><span class="p">,</span>
+            <span class="s1">&#39;served_passengers&#39;</span><span class="p">:</span> <span class="n">total_served</span><span class="p">,</span>
+            <span class="s1">&#39;unserved_passengers&#39;</span><span class="p">:</span> <span class="n">total_unserved</span><span class="p">,</span>
+            <span class="s1">&#39;service_level_ratio&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">total_requested</span> <span class="o">&lt;=</span> <span class="mf">1.0e-9</span> <span class="k">else</span> <span class="n">total_served</span> <span class="o">/</span> <span class="n">total_requested</span><span class="p">,</span>
+            <span class="s1">&#39;state_changes_count&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_changes</span><span class="p">[:</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">applied</span><span class="p">)),</span>
+            <span class="s1">&#39;standby_state_steps&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">state_history</span><span class="p">[:</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_STANDBY</span><span class="p">)</span> <span class="o">*</span> <span class="n">applied</span><span class="p">)),</span>
+            <span class="s1">&#39;slow_state_steps&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">state_history</span><span class="p">[:</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_SLOW</span><span class="p">)</span> <span class="o">*</span> <span class="n">applied</span><span class="p">)),</span>
+            <span class="s1">&#39;normal_state_steps&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">state_history</span><span class="p">[:</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATE_NORMAL</span><span class="p">)</span> <span class="o">*</span> <span class="n">applied</span><span class="p">)),</span>
+            <span class="s1">&#39;electricity_consumption_kwh&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electricity_consumption</span><span class="p">[:</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">applied</span><span class="p">)),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="Escalator.get_metadata">
+<a class="viewcode-back" href="../../api/citylearn.energy_model.html#citylearn.energy_model.Escalator.get_metadata">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="o">**</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(),</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s1">&#39;standby_power_kw&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">standby_power</span><span class="p">,</span>
+            <span class="s1">&#39;slow_power_kw&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow_power</span><span class="p">,</span>
+            <span class="s1">&#39;normal_power_kw&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal_power</span><span class="p">,</span>
+            <span class="s1">&#39;minimum_state_steps&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimum_state_steps</span><span class="p">,</span>
+            <span class="s1">&#39;service_threshold_passengers&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_threshold_passengers</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
 
 
 
