@@ -181,15 +181,32 @@ class CityLearnRuntimeService:
         env._observations_cache_time_step = -1
         timer_start = time.perf_counter() if debug_timing else 0.0
         actions = self.parse_actions(actions) if parsed_actions is None else parsed_actions
-        requested_actions = deepcopy(actions)
+        capture_entity_execution = (
+            bool(collect_info)
+            and getattr(env, 'interface', 'flat') == 'entity'
+        )
+        requested_action_records = (
+            self._entity_action_records(actions)
+            if capture_entity_execution
+            else None
+        )
         topology_log_size_before = len(getattr(env, 'topology_event_log', []) or [])
         if debug_timing:
             timings['parse_actions_time'] = time.perf_counter() - timer_start
 
         timer_start = time.perf_counter() if debug_timing else 0.0
+        actions_before_channel = actions
         if getattr(getattr(env, '_robustness_service', None), 'enabled', False):
             actions = env._robustness_service.apply_actions(actions)
-        post_channel_actions = deepcopy(actions)
+        post_channel_action_records = (
+            requested_action_records
+            if capture_entity_execution and actions is actions_before_channel
+            else (
+                self._entity_action_records(actions)
+                if capture_entity_execution
+                else None
+            )
+        )
         if debug_timing:
             timings['robustness_action_time'] = time.perf_counter() - timer_start
 
@@ -217,11 +234,18 @@ class CityLearnRuntimeService:
                 float(np.max(building_apply_action_times)) if building_apply_action_times else 0.0
             )
 
-        action_execution = self._entity_action_execution(
-            requested_actions=requested_actions,
-            post_channel_actions=post_channel_actions,
-            time_step=int(env.time_step),
+        timer_start = time.perf_counter() if debug_timing else 0.0
+        action_execution = (
+            self._entity_action_execution(
+                requested_records=requested_action_records or {},
+                post_channel_records=post_channel_action_records or {},
+                time_step=int(env.time_step),
+            )
+            if capture_entity_execution
+            else None
         )
+        if debug_timing:
+            timings['entity_action_execution_time'] = time.perf_counter() - timer_start
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         self.update_variables()
@@ -396,8 +420,8 @@ class CityLearnRuntimeService:
     def _entity_action_execution(
         self,
         *,
-        requested_actions: Sequence[Mapping[str, Any]],
-        post_channel_actions: Sequence[Mapping[str, Any]],
+        requested_records: Mapping[str, Mapping[str, Any]],
+        post_channel_records: Mapping[str, Mapping[str, Any]],
         time_step: int,
     ) -> Optional[Mapping[str, Any]]:
         """Build an entity-bound action audit for the completed transition."""
@@ -405,36 +429,25 @@ class CityLearnRuntimeService:
         env = self.env
         if getattr(env, 'interface', 'flat') != 'entity':
             return None
-        service = getattr(env, '_robustness_service', None)
-        if service is None:
-            return None
-
-        requested_descriptors = {
-            str(item.get('target_key')): item
-            for item in service._action_descriptors(requested_actions)
-        }
-        post_descriptors = {
-            str(item.get('target_key')): item
-            for item in service._action_descriptors(post_channel_actions)
+        building_by_id = {
+            str(building.name): building for building in env.buildings
         }
         entries = []
-        for target_key in sorted(set(requested_descriptors) | set(post_descriptors)):
-            requested = requested_descriptors.get(target_key)
-            post = post_descriptors.get(target_key)
+        for target_key in sorted(set(requested_records) | set(post_channel_records)):
+            requested = requested_records.get(target_key)
+            post = post_channel_records.get(target_key)
             descriptor = post or requested
             if descriptor is None:
                 continue
             building_id = str(descriptor.get('building') or '')
-            building = next(
-                (candidate for candidate in env.buildings if str(candidate.name) == building_id),
-                None,
-            )
-            requested_value = requested['get']() if requested is not None else None
-            post_channel_value = post['get']() if post is not None else None
+            building = building_by_id.get(building_id)
+            requested_value = requested.get('value') if requested is not None else None
+            post_channel_value = post.get('value') if post is not None else None
             feedback = self._action_feedback(
                 descriptor=descriptor,
                 building=building,
                 time_step=time_step,
+                post_channel_value=post_channel_value,
             )
             reasons = list(feedback.get('limitation_reasons', []))
             if (
@@ -462,6 +475,81 @@ class CityLearnRuntimeService:
             'time_step': int(time_step),
             'entries': entries,
         }
+
+    def _entity_action_records(
+        self,
+        actions: Sequence[Mapping[str, Any]],
+    ) -> Mapping[str, Mapping[str, Any]]:
+        """Capture immutable scalar intent without copying action containers."""
+
+        records = {}
+        for building, action_dict in zip(self.env.buildings, actions):
+            if not isinstance(action_dict, Mapping):
+                continue
+            building_id = str(building.name)
+            for key, value in action_dict.items():
+                if not str(key).endswith('_action'):
+                    continue
+                feature = str(key)[:-len('_action')]
+                target_type = 'storage' if feature == 'electrical_storage' else 'building'
+                target_id = building_id
+                global_id = (
+                    f'{building_id}/{feature}'
+                    if target_type == 'storage'
+                    else building_id
+                )
+                target_key = f'{target_type}:{target_id}:{feature}'
+                records[target_key] = {
+                    'target_key': target_key,
+                    'target_type': target_type,
+                    'target_id': target_id,
+                    'target_feature': feature,
+                    'building': building_id,
+                    'raw_id': feature,
+                    'global_id': global_id,
+                    'value': self._optional_float(value),
+                }
+
+            ev_actions = action_dict.get('electric_vehicle_storage_actions', {})
+            if isinstance(ev_actions, Mapping):
+                for charger_id, value in ev_actions.items():
+                    charger_id = str(charger_id)
+                    target_key = (
+                        f'charger:{building_id}:{charger_id}:'
+                        'electric_vehicle_storage'
+                    )
+                    records[target_key] = {
+                        'target_key': target_key,
+                        'target_type': 'charger',
+                        'target_id': charger_id,
+                        'target_feature': 'electric_vehicle_storage',
+                        'building': building_id,
+                        'raw_id': charger_id,
+                        'global_id': f'{building_id}/{charger_id}',
+                        'value': self._optional_float(value),
+                    }
+
+            deferrable_actions = action_dict.get('deferrable_appliance_actions', {})
+            if isinstance(deferrable_actions, Mapping):
+                for action_name, value in deferrable_actions.items():
+                    appliance_id = str(action_name).replace(
+                        'deferrable_appliance_',
+                        '',
+                    )
+                    target_key = (
+                        f'deferrable_appliance:{building_id}:{appliance_id}:start'
+                    )
+                    records[target_key] = {
+                        'target_key': target_key,
+                        'target_type': 'deferrable_appliance',
+                        'target_id': appliance_id,
+                        'target_feature': 'start',
+                        'building': building_id,
+                        'raw_id': appliance_id,
+                        'global_id': f'{building_id}/{appliance_id}',
+                        'value': self._optional_float(value),
+                    }
+        return records
 
     @staticmethod
     def _optional_float(value: Any) -> Optional[float]:
@@ -493,6 +581,7 @@ class CityLearnRuntimeService:
         descriptor: Mapping[str, Any],
         building: Any,
         time_step: int,
+        post_channel_value: Optional[float],
     ) -> Mapping[str, Any]:
         if building is None:
             return {
@@ -551,7 +640,12 @@ class CityLearnRuntimeService:
                 )
                 limited_value = applied_value
 
-        if owner is not None:
+        action_was_limited = (
+            limited_value is None
+            or post_channel_value is None
+            or abs(float(limited_value) - float(post_channel_value)) > 1.0e-12
+        )
+        if owner is not None and action_was_limited:
             for reason in (
                 'availability',
                 'power_limit',

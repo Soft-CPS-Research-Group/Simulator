@@ -483,6 +483,70 @@ def test_entity_action_execution_distinguishes_requested_and_post_channel_values
         env.close()
 
 
+def test_action_execution_capture_is_entity_only_and_reuses_nominal_snapshot(
+    tmp_path: Path,
+    monkeypatch,
+):
+    flat_schema = _copy_schema(
+        tmp_path,
+        name="runtime_execution_flat_fast_path",
+        interface="flat",
+        enabled=False,
+    )
+    _write_events(flat_schema, [_event()])
+    flat = CityLearnEnv(
+        _clean_schema(flat_schema),
+        central_agent=True,
+        episode_time_steps=4,
+        random_seed=0,
+    )
+    flat_calls = 0
+    flat_capture = flat._runtime_service._entity_action_records
+
+    def count_flat(actions):
+        nonlocal flat_calls
+        flat_calls += 1
+        return flat_capture(actions)
+
+    monkeypatch.setattr(flat._runtime_service, "_entity_action_records", count_flat)
+    try:
+        flat.reset(seed=0)
+        flat.step(_zero_actions(flat))
+        assert flat_calls == 0
+    finally:
+        flat.close()
+
+    entity_schema = _copy_schema(
+        tmp_path,
+        name="runtime_execution_entity_fast_path",
+        interface="entity",
+        enabled=False,
+    )
+    _write_events(entity_schema, [_event()])
+    entity = CityLearnEnv(
+        _clean_schema(entity_schema),
+        central_agent=True,
+        episode_time_steps=4,
+        random_seed=0,
+    )
+    entity_calls = 0
+    entity_capture = entity._runtime_service._entity_action_records
+
+    def count_entity(actions):
+        nonlocal entity_calls
+        entity_calls += 1
+        return entity_capture(actions)
+
+    monkeypatch.setattr(entity._runtime_service, "_entity_action_records", count_entity)
+    try:
+        entity.reset(seed=0)
+        _, _, _, _, info = entity.step(_zero_actions(entity))
+        assert entity_calls == 1
+        assert info["entity_action_execution"]["version"] == "entity_action_execution_v1"
+    finally:
+        entity.close()
+
+
 @pytest.mark.parametrize(
     "mode,kwargs,input_value,expected",
     [
