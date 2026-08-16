@@ -42,6 +42,17 @@ At each step, ``reset()`` and ``step()`` return:
                "endogenous": "t_minus_1_settled",
            },
            "topology_version": int,
+           "runtime_status": {
+               "version": "runtime_status_v1",
+               "emits_health_state": False,
+               "active_events": list,
+               "asset_connections": list,
+               "asset_availability": list,
+               "sensor_channels": list,
+               "actuator_channels": list,
+               "communication_links": list,
+               "value_quality": list,
+           },
        },
    }
 
@@ -53,6 +64,44 @@ At each step, ``reset()`` and ``step()`` return:
 * edge schemas,
 * topology metadata,
 * normalization/encoding policy.
+* the optional runtime-status and action-execution subcontracts.
+
+Runtime status and fault evidence
+---------------------------------
+
+``runtime_status_v1`` is an additive facts-only extension. It reports current
+entity connections, availability, channel quality, event duration, freshness
+and the original ``fault_mode``. It does not emit policy health states such as
+``HEALTHY``, ``STALE`` or ``FAILED``.
+
+Fault cause and health classification are intentionally separate. For
+example, ``fault_mode="stuck"`` says that a value is frozen; the consumer must
+use its age, semantic type and criticality to decide whether it is degraded or
+stale.
+
+The contract keeps these domains separate:
+
+* asset connection (from actual entity relations),
+* asset availability,
+* sensor channels,
+* actuator channels,
+* community/cloud communication links, and
+* value-quality perturbations.
+
+Normal charger/EV disconnection is a relation state, not an equipment failure.
+Sparse status collections use the defaults declared by
+``entity_specs["runtime_status_contract"]``.
+
+Action execution evidence
+-------------------------
+
+In entity mode, ``step()`` adds ``info["entity_action_execution"]`` with the
+``entity_action_execution_v1`` contract. Each entry preserves, where
+observable, the requested, post-channel, equipment-limited and physically
+applied command. Unobservable values are ``None`` rather than inferred.
+
+``info["topology_events_applied"]`` lists topology events applied between the
+current action and returned observation.
 
 Temporal semantics
 ------------------

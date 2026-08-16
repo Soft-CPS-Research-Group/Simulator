@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.runtime &mdash; CityLearn 1.6.1 documentation</title>
+  <title>citylearn.internal.runtime &mdash; CityLearn 1.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=d6a008b6"></script>
+      <script src="../../../_static/documentation_options.js?v=030dc6f6"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -89,7 +89,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -276,12 +276,32 @@
         <span class="n">env</span><span class="o">.</span><span class="n">_observations_cache_time_step</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">timer_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="k">if</span> <span class="n">parsed_actions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parsed_actions</span>
+        <span class="n">capture_entity_execution</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">bool</span><span class="p">(</span><span class="n">collect_info</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;interface&#39;</span><span class="p">,</span> <span class="s1">&#39;flat&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;entity&#39;</span>
+        <span class="p">)</span>
+        <span class="n">requested_action_records</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entity_action_records</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">capture_entity_execution</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="n">topology_log_size_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;topology_event_log&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">[])</span>
         <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;parse_actions_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">timer_start</span>
 
         <span class="n">timer_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">actions_before_channel</span> <span class="o">=</span> <span class="n">actions</span>
         <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;_robustness_service&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
             <span class="n">actions</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="n">post_channel_action_records</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">requested_action_records</span>
+            <span class="k">if</span> <span class="n">capture_entity_execution</span> <span class="ow">and</span> <span class="n">actions</span> <span class="ow">is</span> <span class="n">actions_before_channel</span>
+            <span class="k">else</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_entity_action_records</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">capture_entity_execution</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;robustness_action_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">timer_start</span>
 
@@ -308,6 +328,19 @@
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;building_apply_actions_max_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">building_apply_action_times</span><span class="p">))</span> <span class="k">if</span> <span class="n">building_apply_action_times</span> <span class="k">else</span> <span class="mf">0.0</span>
             <span class="p">)</span>
+
+        <span class="n">timer_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">action_execution</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entity_action_execution</span><span class="p">(</span>
+                <span class="n">requested_records</span><span class="o">=</span><span class="n">requested_action_records</span> <span class="ow">or</span> <span class="p">{},</span>
+                <span class="n">post_channel_records</span><span class="o">=</span><span class="n">post_channel_action_records</span> <span class="ow">or</span> <span class="p">{},</span>
+                <span class="n">time_step</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">time_step</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">capture_entity_execution</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
+            <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;entity_action_execution_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">timer_start</span>
 
         <span class="n">timer_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_variables</span><span class="p">()</span>
@@ -373,6 +406,9 @@
                 <span class="n">env</span><span class="o">.</span><span class="n">_refresh_action_cache</span><span class="p">()</span>
                 <span class="n">env</span><span class="o">.</span><span class="n">_entity_service</span><span class="o">.</span><span class="n">invalidate</span><span class="p">()</span>
                 <span class="n">env</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="n">env_metadata</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+        <span class="n">topology_events_applied</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;topology_event_log&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">[])[</span><span class="n">topology_log_size_before</span><span class="p">:]</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;topology_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">timer_start</span>
 
@@ -462,6 +498,9 @@
 
         <span class="n">timer_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug_timing</span> <span class="k">else</span> <span class="mf">0.0</span>
         <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get_info</span><span class="p">())</span> <span class="k">if</span> <span class="n">collect_info</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">collect_info</span> <span class="ow">and</span> <span class="n">action_execution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;entity_action_execution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">action_execution</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;topology_events_applied&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topology_events_applied</span>
         <span class="k">if</span> <span class="n">debug_timing</span><span class="p">:</span>
             <span class="n">timings</span><span class="p">[</span><span class="s1">&#39;get_info_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">timer_start</span>
             <span class="n">info</span><span class="p">[</span><span class="s1">&#39;partial_render_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial_render_time</span>
@@ -472,6 +511,274 @@
             <span class="n">info</span><span class="p">[</span><span class="s1">&#39;step_total_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">step_start</span>
 
         <span class="k">return</span> <span class="n">next_observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">truncated</span><span class="p">,</span> <span class="n">info</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_entity_action_execution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">requested_records</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+        <span class="n">post_channel_records</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+        <span class="n">time_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build an entity-bound action audit for the completed transition.&quot;&quot;&quot;</span>
+
+        <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;interface&#39;</span><span class="p">,</span> <span class="s1">&#39;flat&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;entity&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">building_by_id</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="n">building</span> <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">buildings</span>
+        <span class="p">}</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">target_key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">requested_records</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">post_channel_records</span><span class="p">)):</span>
+            <span class="n">requested</span> <span class="o">=</span> <span class="n">requested_records</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target_key</span><span class="p">)</span>
+            <span class="n">post</span> <span class="o">=</span> <span class="n">post_channel_records</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target_key</span><span class="p">)</span>
+            <span class="n">descriptor</span> <span class="o">=</span> <span class="n">post</span> <span class="ow">or</span> <span class="n">requested</span>
+            <span class="k">if</span> <span class="n">descriptor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">building_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;building&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">building</span> <span class="o">=</span> <span class="n">building_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">building_id</span><span class="p">)</span>
+            <span class="n">requested_value</span> <span class="o">=</span> <span class="n">requested</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">requested</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">post_channel_value</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">post</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">feedback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_feedback</span><span class="p">(</span>
+                <span class="n">descriptor</span><span class="o">=</span><span class="n">descriptor</span><span class="p">,</span>
+                <span class="n">building</span><span class="o">=</span><span class="n">building</span><span class="p">,</span>
+                <span class="n">time_step</span><span class="o">=</span><span class="n">time_step</span><span class="p">,</span>
+                <span class="n">post_channel_value</span><span class="o">=</span><span class="n">post_channel_value</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">reasons</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">feedback</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;limitation_reasons&#39;</span><span class="p">,</span> <span class="p">[]))</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">requested_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">post_channel_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">requested_value</span><span class="p">)</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">post_channel_value</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">1.0e-12</span>
+            <span class="p">):</span>
+                <span class="n">reasons</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;actuator_channel_modified&#39;</span><span class="p">)</span>
+            <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s1">&#39;agent_id&#39;</span><span class="p">:</span> <span class="n">building_id</span><span class="p">,</span>
+                    <span class="s1">&#39;owner_module_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owner_module_id</span><span class="p">(</span><span class="n">descriptor</span><span class="p">),</span>
+                    <span class="s1">&#39;target_entity_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_target_entity_id</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">building</span><span class="p">),</span>
+                    <span class="s1">&#39;action_name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_feature&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;requested_value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">requested_value</span><span class="p">),</span>
+                    <span class="s1">&#39;post_channel_value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">post_channel_value</span><span class="p">),</span>
+                    <span class="s1">&#39;limited_value&#39;</span><span class="p">:</span> <span class="n">feedback</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;limited_value&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;applied_value&#39;</span><span class="p">:</span> <span class="n">feedback</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;applied_value&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;applied_power_kw&#39;</span><span class="p">:</span> <span class="n">feedback</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;applied_power_kw&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;limitation_reasons&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">reasons</span><span class="p">)),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s1">&#39;entity_action_execution_v1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;time_step&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time_step</span><span class="p">),</span>
+            <span class="s1">&#39;entries&#39;</span><span class="p">:</span> <span class="n">entries</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_entity_action_records</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">actions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Capture immutable scalar intent without copying action containers.&quot;&quot;&quot;</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">building</span><span class="p">,</span> <span class="n">action_dict</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_dict</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">building_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">action_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_action&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">feature</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;_action&#39;</span><span class="p">)]</span>
+                <span class="n">target_type</span> <span class="o">=</span> <span class="s1">&#39;storage&#39;</span> <span class="k">if</span> <span class="n">feature</span> <span class="o">==</span> <span class="s1">&#39;electrical_storage&#39;</span> <span class="k">else</span> <span class="s1">&#39;building&#39;</span>
+                <span class="n">target_id</span> <span class="o">=</span> <span class="n">building_id</span>
+                <span class="n">global_id</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">building_id</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="k">if</span> <span class="n">target_type</span> <span class="o">==</span> <span class="s1">&#39;storage&#39;</span>
+                    <span class="k">else</span> <span class="n">building_id</span>
+                <span class="p">)</span>
+                <span class="n">target_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">target_type</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">target_id</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">records</span><span class="p">[</span><span class="n">target_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;target_key&#39;</span><span class="p">:</span> <span class="n">target_key</span><span class="p">,</span>
+                    <span class="s1">&#39;target_type&#39;</span><span class="p">:</span> <span class="n">target_type</span><span class="p">,</span>
+                    <span class="s1">&#39;target_id&#39;</span><span class="p">:</span> <span class="n">target_id</span><span class="p">,</span>
+                    <span class="s1">&#39;target_feature&#39;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
+                    <span class="s1">&#39;building&#39;</span><span class="p">:</span> <span class="n">building_id</span><span class="p">,</span>
+                    <span class="s1">&#39;raw_id&#39;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
+                    <span class="s1">&#39;global_id&#39;</span><span class="p">:</span> <span class="n">global_id</span><span class="p">,</span>
+                    <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
+                <span class="p">}</span>
+
+            <span class="n">ev_actions</span> <span class="o">=</span> <span class="n">action_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;electric_vehicle_storage_actions&#39;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ev_actions</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">charger_id</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ev_actions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">charger_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">charger_id</span><span class="p">)</span>
+                    <span class="n">target_key</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;charger:</span><span class="si">{</span><span class="n">building_id</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">charger_id</span><span class="si">}</span><span class="s1">:&#39;</span>
+                        <span class="s1">&#39;electric_vehicle_storage&#39;</span>
+                    <span class="p">)</span>
+                    <span class="n">records</span><span class="p">[</span><span class="n">target_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;target_key&#39;</span><span class="p">:</span> <span class="n">target_key</span><span class="p">,</span>
+                        <span class="s1">&#39;target_type&#39;</span><span class="p">:</span> <span class="s1">&#39;charger&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;target_id&#39;</span><span class="p">:</span> <span class="n">charger_id</span><span class="p">,</span>
+                        <span class="s1">&#39;target_feature&#39;</span><span class="p">:</span> <span class="s1">&#39;electric_vehicle_storage&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;building&#39;</span><span class="p">:</span> <span class="n">building_id</span><span class="p">,</span>
+                        <span class="s1">&#39;raw_id&#39;</span><span class="p">:</span> <span class="n">charger_id</span><span class="p">,</span>
+                        <span class="s1">&#39;global_id&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">building_id</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">charger_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
+                    <span class="p">}</span>
+
+            <span class="n">deferrable_actions</span> <span class="o">=</span> <span class="n">action_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;deferrable_appliance_actions&#39;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">deferrable_actions</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">action_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">deferrable_actions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">appliance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">action_name</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                        <span class="s1">&#39;deferrable_appliance_&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">target_key</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;deferrable_appliance:</span><span class="si">{</span><span class="n">building_id</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">appliance_id</span><span class="si">}</span><span class="s1">:start&#39;</span>
+                    <span class="p">)</span>
+                    <span class="n">records</span><span class="p">[</span><span class="n">target_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;target_key&#39;</span><span class="p">:</span> <span class="n">target_key</span><span class="p">,</span>
+                        <span class="s1">&#39;target_type&#39;</span><span class="p">:</span> <span class="s1">&#39;deferrable_appliance&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;target_id&#39;</span><span class="p">:</span> <span class="n">appliance_id</span><span class="p">,</span>
+                        <span class="s1">&#39;target_feature&#39;</span><span class="p">:</span> <span class="s1">&#39;start&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;building&#39;</span><span class="p">:</span> <span class="n">building_id</span><span class="p">,</span>
+                        <span class="s1">&#39;raw_id&#39;</span><span class="p">:</span> <span class="n">appliance_id</span><span class="p">,</span>
+                        <span class="s1">&#39;global_id&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">building_id</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">appliance_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
+                    <span class="p">}</span>
+        <span class="k">return</span> <span class="n">records</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_optional_float</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">result</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_owner_module_id</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;global_id&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_id&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_action_target_entity_id</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">building</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">target_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_type&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target_type</span> <span class="o">==</span> <span class="s1">&#39;charger&#39;</span> <span class="ow">and</span> <span class="n">building</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">charger</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;_charger_lookup&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;raw_id&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+            <span class="n">ev</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="s1">&#39;connected_electric_vehicle&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">charger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">ev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;global_id&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;global_id&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_id&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_action_feedback</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">descriptor</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">building</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">post_channel_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">building</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;limited_value&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;applied_value&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;applied_power_kw&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;limitation_reasons&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="p">}</span>
+
+        <span class="n">target_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_type&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">reasons</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">limited_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">applied_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">applied_power_kw</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">owner</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">reason_prefix</span> <span class="o">=</span> <span class="s1">&#39;action_feedback_&#39;</span>
+
+        <span class="k">if</span> <span class="n">target_type</span> <span class="o">==</span> <span class="s1">&#39;storage&#39;</span><span class="p">:</span>
+            <span class="n">owner</span> <span class="o">=</span> <span class="n">building</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;action_feedback_electrical_storage_&#39;</span>
+            <span class="n">limited_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_value</span><span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">limited_action_normalized&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="n">time_step</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">applied_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_value</span><span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;electrical_storage&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s1">&#39;electricity_consumption&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="n">time_step</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">applied_power_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_to_power</span><span class="p">(</span><span class="n">applied_energy</span><span class="p">)</span>
+            <span class="n">reason_prefix</span> <span class="o">=</span> <span class="n">prefix</span>
+        <span class="k">elif</span> <span class="n">target_type</span> <span class="o">==</span> <span class="s1">&#39;charger&#39;</span><span class="p">:</span>
+            <span class="n">owner</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;_charger_lookup&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;raw_id&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">owner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">limited_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_value</span><span class="p">(</span>
+                    <span class="nb">getattr</span><span class="p">(</span><span class="n">owner</span><span class="p">,</span> <span class="s1">&#39;action_feedback_limited_action_normalized&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                    <span class="n">time_step</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">applied_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_value</span><span class="p">(</span>
+                    <span class="nb">getattr</span><span class="p">(</span><span class="n">owner</span><span class="p">,</span> <span class="s1">&#39;electricity_consumption&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                    <span class="n">time_step</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">applied_power_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_to_power</span><span class="p">(</span><span class="n">applied_energy</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">target_type</span> <span class="o">==</span> <span class="s1">&#39;deferrable_appliance&#39;</span><span class="p">:</span>
+            <span class="n">owner</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">appliance</span>
+                    <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">building</span><span class="p">,</span> <span class="s1">&#39;deferrable_appliances&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">appliance</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;raw_id&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">owner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">applied_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_value</span><span class="p">(</span>
+                    <span class="nb">getattr</span><span class="p">(</span><span class="n">owner</span><span class="p">,</span> <span class="s1">&#39;action_feedback_last_start_applied&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                    <span class="n">time_step</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">limited_value</span> <span class="o">=</span> <span class="n">applied_value</span>
+
+        <span class="n">action_was_limited</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">limited_value</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">post_channel_value</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">limited_value</span><span class="p">)</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">post_channel_value</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">1.0e-12</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">owner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">action_was_limited</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">reason</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="s1">&#39;availability&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;power_limit&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;soc_limit&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;building_headroom&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;phase_headroom&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;export_headroom&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;outage&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;deferrable_window&#39;</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_value</span><span class="p">(</span>
+                    <span class="nb">getattr</span><span class="p">(</span><span class="n">owner</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">reason_prefix</span><span class="si">}</span><span class="s1">clip_reason_</span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                    <span class="n">time_step</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                    <span class="n">reasons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;limited_value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">limited_value</span><span class="p">),</span>
+            <span class="s1">&#39;applied_value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">applied_value</span><span class="p">),</span>
+            <span class="s1">&#39;applied_power_kw&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">applied_power_kw</span><span class="p">),</span>
+            <span class="s1">&#39;limitation_reasons&#39;</span><span class="p">:</span> <span class="n">reasons</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_series_value</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)])</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_energy_to_power</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">step_hours</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;seconds_per_time_step&#39;</span><span class="p">,</span> <span class="mf">3600.0</span><span class="p">))</span> <span class="o">/</span> <span class="mf">3600.0</span><span class="p">,</span> <span class="mf">1.0e-12</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span> <span class="n">step_hours</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_reward_observation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">attribute_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;required_observation_names&#39;</span><span class="p">,</span> <span class="s1">&#39;required_observations&#39;</span><span class="p">):</span>

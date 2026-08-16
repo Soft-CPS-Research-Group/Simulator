@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.robustness &mdash; CityLearn 1.6.1 documentation</title>
+  <title>citylearn.internal.robustness &mdash; CityLearn 1.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=d6a008b6"></script>
+      <script src="../../../_static/documentation_options.js?v=030dc6f6"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -129,6 +129,7 @@
     <span class="n">start_time_step</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">end_time_step</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">event_domain</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
     <span class="n">std</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
     <span class="n">min_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
@@ -165,6 +166,14 @@
         <span class="s2">&quot;ev&quot;</span><span class="p">,</span>
         <span class="s2">&quot;pv&quot;</span><span class="p">,</span>
         <span class="s2">&quot;deferrable_appliance&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">VALID_EVENT_DOMAINS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;ASSET_CONNECTION&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ASSET_AVAILABILITY&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;SENSOR_CHANNEL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ACTUATOR_CHANNEL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;COMMUNICATION_LINK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;VALUE_QUALITY&quot;</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">TELEMETRY_FEATURES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;telemetry&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">}</span>
     <span class="n">CONTROL_FEATURES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;control&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">}</span>
@@ -314,6 +323,60 @@
                 <span class="s2">&quot;action_dropout&quot;</span><span class="p">:</span> <span class="n">counts</span><span class="p">[</span><span class="s2">&quot;dropout&quot;</span><span class="p">],</span>
             <span class="p">},</span>
         <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="CityLearnRobustnessService.runtime_status">
+<a class="viewcode-back" href="../../../api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.runtime_status">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">runtime_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">current_step</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return raw runtime evidence without deriving TI-MARL health.</span>
+
+<span class="sd">        ``fault_mode`` is deliberately preserved as the simulator cause.  The</span>
+<span class="sd">        consumer decides whether the same evidence is healthy, degraded,</span>
+<span class="sd">        stale, missing or failed for its own semantic contract.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_global_time_step</span><span class="p">()</span> <span class="k">if</span> <span class="n">current_step</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_step</span><span class="p">)</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">event</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_events</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_module_enabled</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">payload</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;runtime_status_v1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;emits_health_state&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;active_events&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_runtime_event_record</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">active</span><span class="p">],</span>
+            <span class="s2">&quot;asset_connections&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;asset_availability&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;sensor_channels&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;actuator_channels&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;communication_links&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;value_quality&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>
+        <span class="n">collection_by_domain</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;ASSET_AVAILABILITY&quot;</span><span class="p">:</span> <span class="s2">&quot;asset_availability&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;SENSOR_CHANNEL&quot;</span><span class="p">:</span> <span class="s2">&quot;sensor_channels&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ACTUATOR_CHANNEL&quot;</span><span class="p">:</span> <span class="s2">&quot;actuator_channels&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;COMMUNICATION_LINK&quot;</span><span class="p">:</span> <span class="s2">&quot;communication_links&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VALUE_QUALITY&quot;</span><span class="p">:</span> <span class="s2">&quot;value_quality&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">active</span><span class="p">:</span>
+            <span class="n">collection</span> <span class="o">=</span> <span class="n">collection_by_domain</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">event_domain</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">collection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># ASSET_CONNECTION is represented from actual entity relations</span>
+                <span class="c1"># by the entity-interface service, not inferred from a fault.</span>
+                <span class="k">continue</span>
+            <span class="n">payload</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolved_runtime_status_records</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">step</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">collection_by_domain</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">payload</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target_type&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target_id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target_feature&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">payload</span></div>
 
 
 <div class="viewcode-block" id="CityLearnRobustnessService.apply_observations">
@@ -557,6 +620,23 @@
                     <span class="sa">f</span><span class="s2">&quot;for module &#39;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
                 <span class="p">)</span>
 
+            <span class="n">raw_event_domain</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;event_domain&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">raw_event_domain</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_event_domain</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;nan&quot;</span><span class="p">}:</span>
+                <span class="n">event_domain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_event_domain</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">event_domain</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_event_domain</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">event_domain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">VALID_EVENT_DOMAINS</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;robustness event &#39;</span><span class="si">{</span><span class="n">event_id</span><span class="si">}</span><span class="s2">&#39; event_domain must be one of &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VALID_EVENT_DOMAINS</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate_event_domain</span><span class="p">(</span>
+                <span class="n">event_id</span><span class="o">=</span><span class="n">event_id</span><span class="p">,</span>
+                <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                <span class="n">event_domain</span><span class="o">=</span><span class="n">event_domain</span><span class="p">,</span>
+            <span class="p">)</span>
+
             <span class="n">delay_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_int_value</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;delay_steps&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
                 <span class="mi">1</span><span class="p">,</span>
@@ -572,6 +652,7 @@
                     <span class="n">start_time_step</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
                     <span class="n">end_time_step</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
                     <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                    <span class="n">event_domain</span><span class="o">=</span><span class="n">event_domain</span><span class="p">,</span>
                     <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)),</span>
                     <span class="n">std</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;std&quot;</span><span class="p">)),</span>
                     <span class="n">min_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_optional_float</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;min_value&quot;</span><span class="p">)),</span>
@@ -583,6 +664,153 @@
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">start_time_step</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">end_time_step</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">order</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_default_event_domain</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;asset&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;ASSET_AVAILABILITY&quot;</span>
+        <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span> <span class="ow">and</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;delay&quot;</span><span class="p">,</span> <span class="s2">&quot;stuck&quot;</span><span class="p">}:</span>
+            <span class="k">return</span> <span class="s2">&quot;ACTUATOR_CHANNEL&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;VALUE_QUALITY&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_event_domain</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">event_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">event_domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event_domain</span> <span class="o">==</span> <span class="s2">&quot;ASSET_CONNECTION&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;robustness event &#39;</span><span class="si">{</span><span class="n">event_id</span><span class="si">}</span><span class="s2">&#39; cannot declare ASSET_CONNECTION; &quot;</span>
+                <span class="s2">&quot;asset connection is reported from actual entity relations.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">allowed_modules</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;ASSET_CONNECTION&quot;</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span>
+            <span class="s2">&quot;ASSET_AVAILABILITY&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asset&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;SENSOR_CHANNEL&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span> <span class="s2">&quot;forecast&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;ACTUATOR_CHANNEL&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;COMMUNICATION_LINK&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span> <span class="s2">&quot;forecast&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;VALUE_QUALITY&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span> <span class="s2">&quot;forecast&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">},</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">module</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_modules</span><span class="p">[</span><span class="n">event_domain</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;robustness event &#39;</span><span class="si">{</span><span class="n">event_id</span><span class="si">}</span><span class="s2">&#39; event_domain=&#39;</span><span class="si">{</span><span class="n">event_domain</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;is incompatible with module=&#39;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">loss_modes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;SENSOR_CHANNEL&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;missing&quot;</span><span class="p">,</span> <span class="s2">&quot;stuck&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;ACTUATOR_CHANNEL&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;delay&quot;</span><span class="p">,</span> <span class="s2">&quot;stuck&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;COMMUNICATION_LINK&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;missing&quot;</span><span class="p">,</span> <span class="s2">&quot;stuck&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;ASSET_AVAILABILITY&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;unavailable&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;ASSET_CONNECTION&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;unavailable&quot;</span><span class="p">},</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">event_domain</span> <span class="ow">in</span> <span class="n">loss_modes</span> <span class="ow">and</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">loss_modes</span><span class="p">[</span><span class="n">event_domain</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;robustness event &#39;</span><span class="si">{</span><span class="n">event_id</span><span class="si">}</span><span class="s2">&#39; mode=&#39;</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">&#39; is incompatible &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;with event_domain=&#39;</span><span class="si">{</span><span class="n">event_domain</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_runtime_event_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">RobustnessEvent</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;event_id&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">event_id</span><span class="p">,</span>
+            <span class="s2">&quot;event_domain&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">event_domain</span><span class="p">,</span>
+            <span class="s2">&quot;fault_mode&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+            <span class="s2">&quot;target_type&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span>
+            <span class="s2">&quot;target_id&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">target_id</span><span class="p">,</span>
+            <span class="s2">&quot;target_feature&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">target_feature</span><span class="p">,</span>
+            <span class="s2">&quot;start_time_step&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">start_time_step</span><span class="p">),</span>
+            <span class="s2">&quot;end_time_step&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">end_time_step</span><span class="p">),</span>
+            <span class="s2">&quot;active_duration_steps&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">start_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolved_runtime_status_records</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event</span><span class="p">:</span> <span class="n">RobustnessEvent</span><span class="p">,</span>
+        <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="n">descriptors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">module</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span> <span class="s2">&quot;forecast&quot;</span><span class="p">}:</span>
+            <span class="n">specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">entity_specs</span>
+            <span class="n">table_spec</span> <span class="o">=</span> <span class="n">specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tables&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">table_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">table_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;features&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+            <span class="k">for</span> <span class="n">row_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matching_entity_rows</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">feature_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matching_feature_indices</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">feature_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">):</span>
+                        <span class="k">continue</span>
+                    <span class="n">descriptors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_observation_descriptor</span><span class="p">(</span>
+                            <span class="n">event</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span>
+                            <span class="n">ids</span><span class="p">,</span>
+                            <span class="n">row_index</span><span class="p">,</span>
+                            <span class="n">features</span><span class="p">[</span><span class="n">feature_index</span><span class="p">],</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">module</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="s2">&quot;asset&quot;</span><span class="p">}:</span>
+            <span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">descriptor</span>
+                <span class="k">for</span> <span class="n">descriptor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validation_action_descriptors</span><span class="p">()</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_action_event_matches</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_control_event_matches</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;asset&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">descriptors</span><span class="p">:</span>
+                <span class="n">specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">entity_specs</span>
+                <span class="n">table_spec</span> <span class="o">=</span> <span class="n">specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tables&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">table_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+                <span class="k">for</span> <span class="n">row_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matching_entity_rows</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+                    <span class="n">descriptors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_observation_descriptor</span><span class="p">(</span>
+                            <span class="n">event</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span>
+                            <span class="n">ids</span><span class="p">,</span>
+                            <span class="n">row_index</span><span class="p">,</span>
+                            <span class="n">event</span><span class="o">.</span><span class="n">target_feature</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_quality_fields</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+        <span class="n">records</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">descriptor</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">:</span>
+            <span class="n">target_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;global_id&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target_id&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">target_feature</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target_feature&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">target_feature</span><span class="p">)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">target_id</span><span class="p">,</span> <span class="n">target_feature</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;event_id&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">event_id</span><span class="p">,</span>
+                    <span class="s2">&quot;event_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">event_id</span><span class="p">],</span>
+                    <span class="s2">&quot;event_domain&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">event_domain</span><span class="p">,</span>
+                    <span class="s2">&quot;fault_mode&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+                    <span class="s2">&quot;target_type&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target_type&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">target_type</span><span class="p">),</span>
+                    <span class="s2">&quot;target_id&quot;</span><span class="p">:</span> <span class="n">target_id</span><span class="p">,</span>
+                    <span class="s2">&quot;target_feature&quot;</span><span class="p">:</span> <span class="n">target_feature</span><span class="p">,</span>
+                    <span class="s2">&quot;building_id&quot;</span><span class="p">:</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;building&quot;</span><span class="p">),</span>
+                    <span class="o">**</span><span class="n">status</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">records</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_runtime_quality_fields</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">RobustnessEvent</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">unavailable</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;missing&quot;</span><span class="p">,</span> <span class="s2">&quot;dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;unavailable&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;stuck&quot;</span><span class="p">:</span>
+            <span class="n">last_fresh</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">start_time_step</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;delay&quot;</span><span class="p">:</span>
+            <span class="n">last_fresh</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">delay_steps</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">unavailable</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;noise&quot;</span><span class="p">,</span> <span class="s2">&quot;bias&quot;</span><span class="p">,</span> <span class="s2">&quot;clip&quot;</span><span class="p">}:</span>
+            <span class="n">last_fresh</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">start_time_step</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">last_fresh</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+        <span class="n">last_update</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">start_time_step</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">unavailable</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;availability&quot;</span><span class="p">:</span> <span class="s2">&quot;UNAVAILABLE&quot;</span> <span class="k">if</span> <span class="n">unavailable</span> <span class="k">else</span> <span class="s2">&quot;AVAILABLE&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;connection&quot;</span><span class="p">:</span> <span class="s2">&quot;NOT_APPLICABLE&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;quality&quot;</span><span class="p">:</span> <span class="s2">&quot;INVALID&quot;</span> <span class="k">if</span> <span class="n">unavailable</span> <span class="k">else</span> <span class="s2">&quot;IMPAIRED&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;last_update_time_step&quot;</span><span class="p">:</span> <span class="n">last_update</span><span class="p">,</span>
+            <span class="s2">&quot;last_fresh_time_step&quot;</span><span class="p">:</span> <span class="n">last_fresh</span><span class="p">,</span>
+            <span class="s2">&quot;age_steps&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="o">-</span> <span class="n">last_fresh</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="p">}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_active_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">global_time_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">RobustnessEvent</span><span class="p">]:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1034,7 +1262,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_building_for_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">table_name</span> <span class="o">==</span> <span class="s2">&quot;building&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">entity_id</span>
-        <span class="n">parts</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;/&quot;</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">return</span> <span class="kc">None</span>
