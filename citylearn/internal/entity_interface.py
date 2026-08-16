@@ -935,6 +935,7 @@ class CityLearnEntityInterfaceService:
                     if getattr(env, "_robustness_service", None) is not None
                     else {"enabled": False, "active_event_ids": []}
                 ),
+                "runtime_status": self._runtime_status_payload(),
             },
         }
         if debug_timing:
@@ -944,6 +945,60 @@ class CityLearnEntityInterfaceService:
             env._last_entity_observation_debug_timing = {}
 
         return payload
+
+    def _runtime_status_payload(self) -> Mapping[str, Any]:
+        """Return raw connection/quality evidence for typed consumers.
+
+        This payload intentionally contains no policy health classification.
+        Consumers such as the Typed Interface Compiler own that derivation.
+        """
+
+        service = getattr(self.env, "_robustness_service", None)
+        if service is not None:
+            status = dict(service.runtime_status())
+        else:
+            status = {
+                "version": "runtime_status_v1",
+                "emits_health_state": False,
+                "active_events": [],
+                "asset_connections": [],
+                "asset_availability": [],
+                "sensor_channels": [],
+                "actuator_channels": [],
+                "communication_links": [],
+                "value_quality": [],
+            }
+        status["asset_connections"] = self._asset_connection_status_records()
+        return status
+
+    def _asset_connection_status_records(self) -> List[Mapping[str, Any]]:
+        records: List[Mapping[str, Any]] = []
+        for ref in self._charger_refs:
+            connected = bool(
+                ref.row < len(self._charger_to_ev_connected_mask)
+                and self._charger_to_ev_connected_mask[ref.row] > 0.5
+            )
+            ev_id = None
+            if connected and ref.row < len(self._charger_to_ev_connected):
+                ev_row = int(self._charger_to_ev_connected[ref.row, 1])
+                if 0 <= ev_row < len(self._ev_ids):
+                    ev_id = str(self._ev_ids[ev_row])
+            records.append(
+                {
+                    "relation": "charger_to_ev_connected",
+                    "source_type": "charger",
+                    "source_id": str(ref.global_id),
+                    "target_type": "ev",
+                    "target_id": ev_id,
+                    "building_id": str(ref.building_name),
+                    "connection": "CONNECTED" if connected else "DISCONNECTED",
+                    "availability": "AVAILABLE",
+                    "quality": "NOMINAL",
+                    "fault_mode": None,
+                    "event_ids": [],
+                }
+            )
+        return records
 
     def parse_actions(self, actions: Any) -> List[Mapping[str, float]]:
         """Parse canonical entity action payload into per-building action dicts."""
@@ -2854,6 +2909,43 @@ class CityLearnEntityInterfaceService:
 
         self._specs = {
             "version": "entity_v1",
+            "runtime_status_contract": {
+                "version": "runtime_status_v1",
+                "emits_health_state": False,
+                "fault_mode_semantics": "raw_cause_not_health_state",
+                "sparse_defaults": {
+                    "availability": "AVAILABLE",
+                    "quality": "NOMINAL",
+                },
+                "event_domains": [
+                    "ASSET_CONNECTION",
+                    "ASSET_AVAILABILITY",
+                    "SENSOR_CHANNEL",
+                    "ACTUATOR_CHANNEL",
+                    "COMMUNICATION_LINK",
+                    "VALUE_QUALITY",
+                ],
+                "collections": [
+                    "active_events",
+                    "asset_connections",
+                    "asset_availability",
+                    "sensor_channels",
+                    "actuator_channels",
+                    "communication_links",
+                    "value_quality",
+                ],
+            },
+            "action_execution_contract": {
+                "version": "entity_action_execution_v1",
+                "nullable_unobservable_fields": True,
+                "stages": [
+                    "requested_value",
+                    "post_channel_value",
+                    "limited_value",
+                    "applied_value",
+                    "applied_power_kw",
+                ],
+            },
             "temporal_semantics": {
                 "exogenous": "t",
                 "endogenous": "t_minus_1_settled",

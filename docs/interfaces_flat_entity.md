@@ -94,10 +94,30 @@ Entity observations have this structure:
     "time_step": int,
     "endogenous_time_step": int,
     "spec_version": "entity_v1",
-    "topology_version": int
+    "topology_version": int,
+    "runtime_status": {
+      "version": "runtime_status_v1",
+      "emits_health_state": false,
+      "active_events": [],
+      "asset_connections": [],
+      "asset_availability": [],
+      "sensor_channels": [],
+      "actuator_channels": [],
+      "communication_links": [],
+      "value_quality": []
+    }
   }
 }
 ```
+
+`runtime_status_v1` reports simulator facts, not an RL-policy health
+classification. `fault_mode` is preserved as the original cause. In
+particular, a `stuck` event is not automatically labelled stale: a consumer
+must derive that state from freshness, duration, semantic type and criticality.
+
+Asset connection, asset availability, sensor-channel state,
+actuator-channel state and community/cloud communication state are independent
+parts of the contract. A normally disconnected EV is not a failed charger.
 
 ## `entity_specs`
 
@@ -119,6 +139,8 @@ charger_units = specs["tables"]["charger"]["units"]
 | `actions` | Action table IDs, columns and units. |
 | `edges` | Source/target table metadata. |
 | `topology` | Active IDs, lifecycle and topology version. |
+| `runtime_status_contract` | Status vocabulary, sparse defaults and explicit no-health-state boundary. |
+| `action_execution_contract` | Requested/post-channel/limited/applied action stages. |
 
 ## Temporal Semantics
 
@@ -165,6 +187,12 @@ actions = {
 ```
 
 Use prefixed IDs for robust GraphRL and Transformer integrations.
+
+After an entity-mode step, `info["entity_action_execution"]` contains stable-ID
+entries for the requested command, the value after channel perturbations, the
+equipment-limited value and the physically applied power where observable.
+Unavailable quantities are `None`. `info["topology_events_applied"]` identifies
+events applied before the returned observation.
 
 ## Dynamic Topology Guidance
 

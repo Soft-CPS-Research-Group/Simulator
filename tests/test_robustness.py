@@ -100,6 +100,7 @@ def _event(
     max_value=None,
     replacement_value=None,
     delay_steps=None,
+    event_domain=None,
 ):
     return {
         "event_id": event_id,
@@ -116,6 +117,7 @@ def _event(
         "max_value": max_value,
         "replacement_value": replacement_value,
         "delay_steps": delay_steps,
+        "event_domain": event_domain,
     }
 
 
@@ -213,6 +215,14 @@ def test_robustness_schema_validation_errors_are_clear(tmp_path: Path):
     _write_events(invalid_target_schema, [_event(target_feature="does_not_exist")])
     with pytest.raises(ValueError, match="target does not match"):
         CityLearnEnv(_clean_schema(invalid_target_schema), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    invalid_domain_schema = _copy_schema(tmp_path, name="invalid_domain")
+    _write_events(
+        invalid_domain_schema,
+        [_event(module="observation", event_domain="ACTUATOR_CHANNEL")],
+    )
+    with pytest.raises(ValueError, match="incompatible with module"):
+        CityLearnEnv(_clean_schema(invalid_domain_schema), central_agent=True, episode_time_steps=4, random_seed=0)
 
 
 def test_robustness_modules_can_be_disabled_individually(tmp_path: Path):
@@ -340,6 +350,135 @@ def test_entity_observation_bundle_and_meta_report_robustness_state(tmp_path: Pa
         assert obs["meta"]["robustness"]["enabled"] is True
         assert obs["meta"]["robustness"]["active_event_ids"] == ["event_1"]
         assert obs["meta"]["robustness"]["last_step_counts"]["observation"] == 1
+    finally:
+        env.close()
+
+
+def test_runtime_status_preserves_fault_cause_without_deriving_health(tmp_path: Path):
+    schema = _copy_schema(tmp_path, name="runtime_status_stuck", interface="entity")
+    _write_events(
+        schema,
+        [
+            _event(
+                mode="stuck",
+                start=0,
+                end=2,
+                event_domain="SENSOR_CHANNEL",
+            )
+        ],
+    )
+    env = CityLearnEnv(_clean_schema(schema), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        observations, _ = env.reset(seed=0)
+        status = observations["meta"]["runtime_status"]
+        assert status["version"] == "runtime_status_v1"
+        assert status["emits_health_state"] is False
+        assert status["active_events"][0]["fault_mode"] == "stuck"
+        record = status["sensor_channels"][0]
+        assert record["fault_mode"] == "stuck"
+        assert record["quality"] == "IMPAIRED"
+        assert record["availability"] == "AVAILABLE"
+        assert record["age_steps"] == 0
+        assert "health" not in record
+        assert "health_state" not in record
+
+        observations, *_ = env.step(_zero_actions(env))
+        record = observations["meta"]["runtime_status"]["sensor_channels"][0]
+        assert record["fault_mode"] == "stuck"
+        assert record["age_steps"] == 1
+        assert record["quality"] == "IMPAIRED"
+    finally:
+        env.close()
+
+
+def test_runtime_status_keeps_connection_availability_and_channels_separate(tmp_path: Path):
+    schema = _copy_schema(tmp_path, name="runtime_status_domains", interface="entity")
+    _write_events(
+        schema,
+        [
+            _event(
+                event_id="sensor_loss",
+                event_domain="SENSOR_CHANNEL",
+                mode="missing",
+            ),
+            _event(
+                event_id="actuator_loss",
+                module="action",
+                target_type="storage",
+                target_id="Building_1",
+                target_feature="electrical_storage",
+                mode="dropout",
+                event_domain="ACTUATOR_CHANNEL",
+            ),
+            _event(
+                event_id="community_link_loss",
+                module="forecast",
+                target_type="district",
+                target_id="*",
+                target_feature="electricity_pricing_predicted_1",
+                mode="missing",
+                event_domain="COMMUNICATION_LINK",
+            ),
+            _event(
+                event_id="asset_unavailable",
+                module="asset",
+                target_type="storage",
+                target_id="Building_1",
+                target_feature="both",
+                mode="unavailable",
+                event_domain="ASSET_AVAILABILITY",
+            ),
+        ],
+    )
+    env = CityLearnEnv(_clean_schema(schema), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        observations, _ = env.reset(seed=0)
+        status = observations["meta"]["runtime_status"]
+        assert {row["event_id"] for row in status["sensor_channels"]} == {"sensor_loss"}
+        assert {row["event_id"] for row in status["actuator_channels"]} == {"actuator_loss"}
+        assert {row["event_id"] for row in status["communication_links"]} == {"community_link_loss"}
+        assert {row["event_id"] for row in status["asset_availability"]} == {"asset_unavailable"}
+        assert status["asset_connections"]
+        assert all("health" not in row for rows in status.values() if isinstance(rows, list) for row in rows)
+    finally:
+        env.close()
+
+
+def test_entity_action_execution_distinguishes_requested_and_post_channel_values(tmp_path: Path):
+    schema = _copy_schema(tmp_path, name="runtime_action_execution", interface="entity")
+    _write_events(
+        schema,
+        [
+            _event(
+                module="action",
+                target_type="storage",
+                target_id="Building_1",
+                target_feature="electrical_storage",
+                mode="dropout",
+                event_domain="ACTUATOR_CHANNEL",
+            )
+        ],
+    )
+    env = CityLearnEnv(_clean_schema(schema), central_agent=True, episode_time_steps=4, random_seed=0)
+
+    try:
+        env.reset(seed=0)
+        _, _, _, _, info = env.step(_storage_action(env, 0.8))
+        execution = info["entity_action_execution"]
+        assert execution["version"] == "entity_action_execution_v1"
+        storage = next(
+            entry
+            for entry in execution["entries"]
+            if entry["action_name"] == "electrical_storage"
+        )
+        assert storage["requested_value"] == pytest.approx(0.8)
+        assert storage["post_channel_value"] == pytest.approx(0.0)
+        assert storage["limited_value"] == pytest.approx(0.0)
+        assert storage["applied_power_kw"] == pytest.approx(0.0)
+        assert "actuator_channel_modified" in storage["limitation_reasons"]
+        assert info["topology_events_applied"] == []
     finally:
         env.close()
 

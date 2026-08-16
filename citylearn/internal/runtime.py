@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import time
-from typing import TYPE_CHECKING, Any, List, Mapping, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Sequence, Union
 
 import numpy as np
 
@@ -181,12 +181,15 @@ class CityLearnRuntimeService:
         env._observations_cache_time_step = -1
         timer_start = time.perf_counter() if debug_timing else 0.0
         actions = self.parse_actions(actions) if parsed_actions is None else parsed_actions
+        requested_actions = deepcopy(actions)
+        topology_log_size_before = len(getattr(env, 'topology_event_log', []) or [])
         if debug_timing:
             timings['parse_actions_time'] = time.perf_counter() - timer_start
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         if getattr(getattr(env, '_robustness_service', None), 'enabled', False):
             actions = env._robustness_service.apply_actions(actions)
+        post_channel_actions = deepcopy(actions)
         if debug_timing:
             timings['robustness_action_time'] = time.perf_counter() - timer_start
 
@@ -213,6 +216,12 @@ class CityLearnRuntimeService:
             timings['building_apply_actions_max_time'] = (
                 float(np.max(building_apply_action_times)) if building_apply_action_times else 0.0
             )
+
+        action_execution = self._entity_action_execution(
+            requested_actions=requested_actions,
+            post_channel_actions=post_channel_actions,
+            time_step=int(env.time_step),
+        )
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         self.update_variables()
@@ -278,6 +287,9 @@ class CityLearnRuntimeService:
                 env._refresh_action_cache()
                 env._entity_service.invalidate()
                 env.reward_function.env_metadata = env.get_metadata()
+        topology_events_applied = list(
+            (getattr(env, 'topology_event_log', []) or [])[topology_log_size_before:]
+        )
         if debug_timing:
             timings['topology_time'] = time.perf_counter() - timer_start
 
@@ -367,6 +379,9 @@ class CityLearnRuntimeService:
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         info = dict(env.get_info()) if collect_info else {}
+        if collect_info and action_execution is not None:
+            info['entity_action_execution'] = action_execution
+            info['topology_events_applied'] = topology_events_applied
         if debug_timing:
             timings['get_info_time'] = time.perf_counter() - timer_start
             info['partial_render_time'] = partial_render_time
@@ -377,6 +392,204 @@ class CityLearnRuntimeService:
             info['step_total_time'] = time.perf_counter() - step_start
 
         return next_observations, reward, env.terminated, env.truncated, info
+
+    def _entity_action_execution(
+        self,
+        *,
+        requested_actions: Sequence[Mapping[str, Any]],
+        post_channel_actions: Sequence[Mapping[str, Any]],
+        time_step: int,
+    ) -> Optional[Mapping[str, Any]]:
+        """Build an entity-bound action audit for the completed transition."""
+
+        env = self.env
+        if getattr(env, 'interface', 'flat') != 'entity':
+            return None
+        service = getattr(env, '_robustness_service', None)
+        if service is None:
+            return None
+
+        requested_descriptors = {
+            str(item.get('target_key')): item
+            for item in service._action_descriptors(requested_actions)
+        }
+        post_descriptors = {
+            str(item.get('target_key')): item
+            for item in service._action_descriptors(post_channel_actions)
+        }
+        entries = []
+        for target_key in sorted(set(requested_descriptors) | set(post_descriptors)):
+            requested = requested_descriptors.get(target_key)
+            post = post_descriptors.get(target_key)
+            descriptor = post or requested
+            if descriptor is None:
+                continue
+            building_id = str(descriptor.get('building') or '')
+            building = next(
+                (candidate for candidate in env.buildings if str(candidate.name) == building_id),
+                None,
+            )
+            requested_value = requested['get']() if requested is not None else None
+            post_channel_value = post['get']() if post is not None else None
+            feedback = self._action_feedback(
+                descriptor=descriptor,
+                building=building,
+                time_step=time_step,
+            )
+            reasons = list(feedback.get('limitation_reasons', []))
+            if (
+                requested_value is not None
+                and post_channel_value is not None
+                and abs(float(requested_value) - float(post_channel_value)) > 1.0e-12
+            ):
+                reasons.insert(0, 'actuator_channel_modified')
+            entries.append(
+                {
+                    'agent_id': building_id,
+                    'owner_module_id': self._owner_module_id(descriptor),
+                    'target_entity_id': self._action_target_entity_id(descriptor, building),
+                    'action_name': str(descriptor.get('target_feature') or ''),
+                    'requested_value': self._optional_float(requested_value),
+                    'post_channel_value': self._optional_float(post_channel_value),
+                    'limited_value': feedback.get('limited_value'),
+                    'applied_value': feedback.get('applied_value'),
+                    'applied_power_kw': feedback.get('applied_power_kw'),
+                    'limitation_reasons': list(dict.fromkeys(reasons)),
+                }
+            )
+        return {
+            'version': 'entity_action_execution_v1',
+            'time_step': int(time_step),
+            'entries': entries,
+        }
+
+    @staticmethod
+    def _optional_float(value: Any) -> Optional[float]:
+        if value is None:
+            return None
+        try:
+            result = float(value)
+        except (TypeError, ValueError):
+            return None
+        return result if np.isfinite(result) else None
+
+    @staticmethod
+    def _owner_module_id(descriptor: Mapping[str, Any]) -> str:
+        return str(descriptor.get('global_id') or descriptor.get('target_id') or '')
+
+    @staticmethod
+    def _action_target_entity_id(descriptor: Mapping[str, Any], building: Any) -> str:
+        target_type = str(descriptor.get('target_type') or '')
+        if target_type == 'charger' and building is not None:
+            charger = getattr(building, '_charger_lookup', {}).get(str(descriptor.get('raw_id') or ''))
+            ev = getattr(charger, 'connected_electric_vehicle', None) if charger is not None else None
+            if ev is not None:
+                return str(getattr(ev, 'name', descriptor.get('global_id') or ''))
+        return str(descriptor.get('global_id') or descriptor.get('target_id') or '')
+
+    def _action_feedback(
+        self,
+        *,
+        descriptor: Mapping[str, Any],
+        building: Any,
+        time_step: int,
+    ) -> Mapping[str, Any]:
+        if building is None:
+            return {
+                'limited_value': None,
+                'applied_value': None,
+                'applied_power_kw': None,
+                'limitation_reasons': [],
+            }
+
+        target_type = str(descriptor.get('target_type') or '')
+        reasons = []
+        limited_value = None
+        applied_value = None
+        applied_power_kw = None
+        owner = None
+        reason_prefix = 'action_feedback_'
+
+        if target_type == 'storage':
+            owner = building
+            prefix = 'action_feedback_electrical_storage_'
+            limited_value = self._series_value(
+                getattr(building, f'{prefix}limited_action_normalized', None),
+                time_step,
+            )
+            applied_energy = self._series_value(
+                getattr(getattr(building, 'electrical_storage', None), 'electricity_consumption', None),
+                time_step,
+            )
+            applied_power_kw = self._energy_to_power(applied_energy)
+            reason_prefix = prefix
+        elif target_type == 'charger':
+            owner = getattr(building, '_charger_lookup', {}).get(str(descriptor.get('raw_id') or ''))
+            if owner is not None:
+                limited_value = self._series_value(
+                    getattr(owner, 'action_feedback_limited_action_normalized', None),
+                    time_step,
+                )
+                applied_energy = self._series_value(
+                    getattr(owner, 'electricity_consumption', None),
+                    time_step,
+                )
+                applied_power_kw = self._energy_to_power(applied_energy)
+        elif target_type == 'deferrable_appliance':
+            owner = next(
+                (
+                    appliance
+                    for appliance in (getattr(building, 'deferrable_appliances', None) or [])
+                    if str(getattr(appliance, 'name', '')) == str(descriptor.get('raw_id') or '')
+                ),
+                None,
+            )
+            if owner is not None:
+                applied_value = self._series_value(
+                    getattr(owner, 'action_feedback_last_start_applied', None),
+                    time_step,
+                )
+                limited_value = applied_value
+
+        if owner is not None:
+            for reason in (
+                'availability',
+                'power_limit',
+                'soc_limit',
+                'building_headroom',
+                'phase_headroom',
+                'export_headroom',
+                'outage',
+                'deferrable_window',
+            ):
+                value = self._series_value(
+                    getattr(owner, f'{reason_prefix}clip_reason_{reason}', None),
+                    time_step,
+                )
+                if value is not None and value > 0.5:
+                    reasons.append(reason)
+
+        return {
+            'limited_value': self._optional_float(limited_value),
+            'applied_value': self._optional_float(applied_value),
+            'applied_power_kw': self._optional_float(applied_power_kw),
+            'limitation_reasons': reasons,
+        }
+
+    @staticmethod
+    def _series_value(values: Any, index: int) -> Optional[float]:
+        if values is None:
+            return None
+        try:
+            return float(values[int(index)])
+        except (IndexError, TypeError, ValueError):
+            return None
+
+    def _energy_to_power(self, value: Optional[float]) -> Optional[float]:
+        if value is None:
+            return None
+        step_hours = max(float(getattr(self.env, 'seconds_per_time_step', 3600.0)) / 3600.0, 1.0e-12)
+        return float(value) / step_hours
 
     def _reward_observation_names(self):
         for attribute_name in ('required_observation_names', 'required_observations'):
