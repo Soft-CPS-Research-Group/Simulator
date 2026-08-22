@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Entity v1 Contract &mdash; CityLearn 1.7.0 documentation</title>
+  <title>Entity v1 Contract &mdash; CityLearn 1.8.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=030dc6f6"></script>
+      <script src="../_static/documentation_options.js?v=b51e6972"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -117,43 +117,43 @@
 <h2>Entity mode contract<a class="headerlink" href="#entity-mode-contract" title="Link to this heading"></a></h2>
 <p>At each step, <code class="docutils literal notranslate"><span class="pre">reset()</span></code> and <code class="docutils literal notranslate"><span class="pre">step()</span></code> return:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;tables&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;district&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>  <span class="c1"># [n_district, n_features]</span>
-        <span class="s2">&quot;building&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>  <span class="c1"># [n_buildings, n_features]</span>
-        <span class="s2">&quot;charger&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>   <span class="c1"># [n_chargers, n_features]</span>
-        <span class="s2">&quot;ev&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>        <span class="c1"># [n_evs, n_features]</span>
-        <span class="s2">&quot;storage&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>   <span class="c1"># [n_storage, n_features]</span>
-        <span class="s2">&quot;pv&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>        <span class="c1"># [n_pv, n_features]</span>
+    <span class="s2">"tables"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"district"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>  <span class="c1"># [n_district, n_features]</span>
+        <span class="s2">"building"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>  <span class="c1"># [n_buildings, n_features]</span>
+        <span class="s2">"charger"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>   <span class="c1"># [n_chargers, n_features]</span>
+        <span class="s2">"ev"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>        <span class="c1"># [n_evs, n_features]</span>
+        <span class="s2">"storage"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>   <span class="c1"># [n_storage, n_features]</span>
+        <span class="s2">"pv"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>        <span class="c1"># [n_pv, n_features]</span>
     <span class="p">},</span>
-    <span class="s2">&quot;edges&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;district_to_building&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>      <span class="c1"># [n_buildings, 2]</span>
-        <span class="s2">&quot;building_to_charger&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>       <span class="c1"># [n_chargers, 2]</span>
-        <span class="s2">&quot;building_to_storage&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>       <span class="c1"># [n_storage, 2]</span>
-        <span class="s2">&quot;building_to_pv&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>            <span class="c1"># [n_pv, 2]</span>
-        <span class="s2">&quot;charger_to_ev_connected&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>   <span class="c1"># [n_chargers, 2]</span>
-        <span class="s2">&quot;charger_to_ev_connected_mask&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="s2">&quot;charger_to_ev_incoming&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>    <span class="c1"># [n_chargers, 2]</span>
-        <span class="s2">&quot;charger_to_ev_incoming_mask&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="s2">"edges"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"district_to_building"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>      <span class="c1"># [n_buildings, 2]</span>
+        <span class="s2">"building_to_charger"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>       <span class="c1"># [n_chargers, 2]</span>
+        <span class="s2">"building_to_storage"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>       <span class="c1"># [n_storage, 2]</span>
+        <span class="s2">"building_to_pv"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>            <span class="c1"># [n_pv, 2]</span>
+        <span class="s2">"charger_to_ev_connected"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>   <span class="c1"># [n_chargers, 2]</span>
+        <span class="s2">"charger_to_ev_connected_mask"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="s2">"charger_to_ev_incoming"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>    <span class="c1"># [n_chargers, 2]</span>
+        <span class="s2">"charger_to_ev_incoming_mask"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;time_step&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="s2">&quot;endogenous_time_step&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="s2">&quot;spec_version&quot;</span><span class="p">:</span> <span class="s2">&quot;entity_v1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;temporal_semantics&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;exogenous&quot;</span><span class="p">:</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;endogenous&quot;</span><span class="p">:</span> <span class="s2">&quot;t_minus_1_settled&quot;</span><span class="p">,</span>
+    <span class="s2">"meta"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"time_step"</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="s2">"endogenous_time_step"</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="s2">"spec_version"</span><span class="p">:</span> <span class="s2">"entity_v1"</span><span class="p">,</span>
+        <span class="s2">"temporal_semantics"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"exogenous"</span><span class="p">:</span> <span class="s2">"t"</span><span class="p">,</span>
+            <span class="s2">"endogenous"</span><span class="p">:</span> <span class="s2">"t_minus_1_settled"</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;topology_version&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="s2">&quot;runtime_status&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;runtime_status_v1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;emits_health_state&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;active_events&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-            <span class="s2">&quot;asset_connections&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-            <span class="s2">&quot;asset_availability&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-            <span class="s2">&quot;sensor_channels&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-            <span class="s2">&quot;actuator_channels&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-            <span class="s2">&quot;communication_links&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-            <span class="s2">&quot;value_quality&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="s2">"topology_version"</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="s2">"runtime_status"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"version"</span><span class="p">:</span> <span class="s2">"runtime_status_v1"</span><span class="p">,</span>
+            <span class="s2">"emits_health_state"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"active_events"</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+            <span class="s2">"asset_connections"</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+            <span class="s2">"asset_availability"</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+            <span class="s2">"sensor_channels"</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+            <span class="s2">"actuator_channels"</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+            <span class="s2">"communication_links"</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+            <span class="s2">"value_quality"</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">},</span>
 <span class="p">}</span>

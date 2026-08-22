@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; CityLearn 1.7.0 documentation</title>
+  <title>Index &mdash; CityLearn 1.8.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=030dc6f6"></script>
+      <script src="_static/documentation_options.js?v=b51e6972"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1073,9 +1073,13 @@
 </li>
       <li><a href="api/citylearn.data.html#citylearn.data.ChargerSimulation.electric_vehicle_required_soc_departure">electric_vehicle_required_soc_departure (citylearn.data.ChargerSimulation attribute)</a>
 </li>
+      <li><a href="api/citylearn.data.html#citylearn.data.ChargerSimulation.electric_vehicle_session_id">electric_vehicle_session_id (citylearn.data.ChargerSimulation attribute)</a>
+</li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.electric_vehicles">electric_vehicles (citylearn.citylearn.CityLearnEnv property)</a>
 </li>
       <li><a href="api/citylearn.reward_function.html#citylearn.reward_function.Electric_Vehicles_Reward_Function">Electric_Vehicles_Reward_Function (class in citylearn.reward_function)</a>
+</li>
+      <li><a href="api/citylearn.internal.kpi.html#citylearn.internal.kpi.CityLearnKPIService.ELECTRICAL_RESIDUAL_EPS_KW">ELECTRICAL_RESIDUAL_EPS_KW (citylearn.internal.kpi.CityLearnKPIService attribute)</a>
 </li>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.electrical_service_enabled">electrical_service_enabled (citylearn.building.Building property)</a>
 </li>
@@ -1619,14 +1623,14 @@
       </ul></li>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.heating_storage">heating_storage (citylearn.building.Building property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.heating_storage_electricity_consumption">heating_storage_electricity_consumption (citylearn.building.Building property)</a>
 
       <ul>
         <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.heating_storage_electricity_consumption">(citylearn.citylearn.CityLearnEnv property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.HeatPump">HeatPump (class in citylearn.energy_model)</a>
 </li>
       <li><a href="api/citylearn.agents.marlisa.html#citylearn.agents.marlisa.MARLISA.hidden_dimension">hidden_dimension (citylearn.agents.marlisa.MARLISA property)</a>
@@ -1636,6 +1640,12 @@
 </li>
       </ul></li>
       <li><a href="api/citylearn.reward_function.html#citylearn.reward_function.ComfortReward.higher_exponent">higher_exponent (citylearn.reward_function.ComfortReward property)</a>
+</li>
+      <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService.historical_chargers">historical_chargers() (citylearn.internal.topology.CityLearnTopologyService method)</a>
+</li>
+      <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService.historical_deferrable_appliances">historical_deferrable_appliances() (citylearn.internal.topology.CityLearnTopologyService method)</a>
+</li>
+      <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService.historical_storages">historical_storages() (citylearn.internal.topology.CityLearnTopologyService method)</a>
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.history">history (citylearn.internal.robustness.CityLearnRobustnessService property)</a>
 </li>
@@ -2807,6 +2817,8 @@
       <li><a href="api/citylearn.base.html#citylearn.base.EpisodeTracker.simulation_time_steps">simulation_time_steps (citylearn.base.EpisodeTracker property)</a>
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.neighborhood.html#citylearn.end_use_load_profiles.neighborhood.NeighborhoodBuild.simulators">simulators (citylearn.end_use_load_profiles.neighborhood.NeighborhoodBuild property)</a>
+</li>
+      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.skip_cycles_before">skip_cycles_before() (citylearn.energy_model.DeferrableAppliance method)</a>
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.lstm_model.preprocessing.html#citylearn.end_use_load_profiles.lstm_model.preprocessing.sliding_windows">sliding_windows() (in module citylearn.end_use_load_profiles.lstm_model.preprocessing)</a>
 </li>

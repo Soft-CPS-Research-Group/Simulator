@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.topology module &mdash; CityLearn 1.7.0 documentation</title>
+  <title>citylearn.internal.topology module &mdash; CityLearn 1.8.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=030dc6f6"></script>
+      <script src="../_static/documentation_options.js?v=b51e6972"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -147,7 +147,12 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.internal.topology.CityLearnTopologyService.apply_events_for_time_step">
 <span class="sig-name descname"><span class="pre">apply_events_for_time_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/citylearn/internal/topology.html#CityLearnTopologyService.apply_events_for_time_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.internal.topology.CityLearnTopologyService.apply_events_for_time_step" title="Link to this definition"></a></dt>
-<dd><p>Apply all schema events scheduled at <cite>time_step</cite>.</p>
+<dd><p>Apply schema events due at the current episode-local time step.</p>
+<p>Topology-event timestamps belong to the global dataset timeline, while
+<code class="docutils literal notranslate"><span class="pre">Environment.time_step</span></code> is local to the current episode.  Replaying
+events before the episode start reconstructs the composition that must
+be visible at local step zero; events inside the episode are then
+applied when their global timestamp is reached.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -164,6 +169,32 @@
 <dt class="sig sig-object py" id="citylearn.internal.topology.CityLearnTopologyService.event_log">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_log</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#citylearn.internal.topology.CityLearnTopologyService.event_log" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.internal.topology.CityLearnTopologyService.historical_chargers">
+<span class="sig-name descname"><span class="pre">historical_chargers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="citylearn.electric_vehicle_charger.html#citylearn.electric_vehicle_charger.Charger" title="citylearn.electric_vehicle_charger.Charger"><span class="pre">Charger</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/citylearn/internal/topology.html#CityLearnTopologyService.historical_chargers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.internal.topology.CityLearnTopologyService.historical_chargers" title="Link to this definition"></a></dt>
+<dd><p>Return every distinct charger instance that was active for a member.</p>
+<p>Dynamic remove/reinstall events create a fresh runtime instance from the
+immutable schema template.  Retaining both instances is necessary for
+end-of-episode KPIs: the current building view alone otherwise drops EV
+service and energy recorded before the removal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.internal.topology.CityLearnTopologyService.historical_deferrable_appliances">
+<span class="sig-name descname"><span class="pre">historical_deferrable_appliances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance" title="citylearn.energy_model.DeferrableAppliance"><span class="pre">DeferrableAppliance</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/citylearn/internal/topology.html#CityLearnTopologyService.historical_deferrable_appliances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.internal.topology.CityLearnTopologyService.historical_deferrable_appliances" title="Link to this definition"></a></dt>
+<dd><p>Return every distinct deferrable instance active for a member.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.internal.topology.CityLearnTopologyService.historical_storages">
+<span class="sig-name descname"><span class="pre">historical_storages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.Battery" title="citylearn.energy_model.Battery"><span class="pre">Battery</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/citylearn/internal/topology.html#CityLearnTopologyService.historical_storages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.internal.topology.CityLearnTopologyService.historical_storages" title="Link to this definition"></a></dt>
+<dd><p>Return every distinct stationary-storage instance active for a member.</p>
+<p>Storage removal followed by catalogue-based recommissioning creates a
+new physical/runtime instance.  Keeping both objects prevents the KPI
+layer from silently discarding throughput and degradation accumulated
+by the instance that was removed.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.internal.topology.CityLearnTopologyService.initialize">
