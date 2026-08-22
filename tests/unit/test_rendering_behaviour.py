@@ -348,6 +348,39 @@ def test_parquet_render_format_writes_chunked_exports_and_kpis(tmp_path):
         _cleanup_env(env)
 
 
+def test_parquet_render_normalizes_mixed_numeric_string_and_numpy_scalars(tmp_path):
+    pd = pytest.importorskip("pandas")
+    pytest.importorskip("pyarrow")
+    env = CityLearnEnv(
+        str(DATASET),
+        central_agent=True,
+        episode_time_steps=2,
+        render_mode="end",
+        render_file_format="parquet",
+        render_directory=tmp_path,
+        random_seed=0,
+    )
+
+    try:
+        env.reset()
+        env._episode_exporter.ensure_output_dir()
+        env._episode_exporter.write_render_rows(
+            "mixed_numeric.parquet",
+            [
+                {"state": "-1.00", "name": ""},
+                {"state": np.float32(1.0), "name": "EV-1"},
+            ],
+        )
+        output = next(Path(env.new_folder_path).glob("mixed_numeric_part*.parquet"))
+        frame = pd.read_parquet(output)
+        assert frame["state"].tolist() == pytest.approx([-1.0, 1.0])
+        assert pd.isna(frame.loc[0, "name"])
+        assert frame.loc[1, "name"] == "EV-1"
+    finally:
+        env.close()
+        _cleanup_env(env)
+
+
 def test_render_directory_override(tmp_path):
     custom_root = tmp_path / 'custom_results'
 

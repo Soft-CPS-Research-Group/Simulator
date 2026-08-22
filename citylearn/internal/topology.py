@@ -4,6 +4,8 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set
 
+import numpy as np
+
 from citylearn.energy_model import Battery, DeferrableAppliance, PV
 from citylearn.utilities import parse_bool
 
@@ -234,25 +236,41 @@ class CityLearnTopologyService:
             building.action_metadata = dict(snapshot.action_metadata)
 
     def apply_events_for_time_step(self, time_step: int) -> bool:
-        """Apply all schema events scheduled at `time_step`."""
+        """Apply schema events due at the current episode-local time step.
+
+        Topology-event timestamps belong to the global dataset timeline, while
+        ``Environment.time_step`` is local to the current episode.  Replaying
+        events before the episode start reconstructs the composition that must
+        be visible at local step zero; events inside the episode are then
+        applied when their global timestamp is reached.
+        """
 
         if not self.enabled:
             return False
 
         changed = False
+        tracker = getattr(self.env, 'episode_tracker', None)
+        episode_start = int(
+            getattr(tracker, 'episode_start_time_step', 0) or 0
+        )
+        global_time_step = episode_start + int(time_step)
 
         while self._event_cursor < len(self._events):
             event = self._events[self._event_cursor]
 
-            if event.time_step > time_step:
+            if event.time_step > global_time_step:
                 break
 
-            if event.time_step < time_step:
-                # Defensive skip if caller advances in larger increments.
-                self._event_cursor += 1
-                continue
-
-            event_changed = self._apply_event(event, time_step)
+            # An event before the selected episode window is replayed at local
+            # step zero to establish topology state without simulating the
+            # omitted history.  In-window events use the actual local step so
+            # newly inserted assets align with the sliced time-series state.
+            event_local_time_step = (
+                int(time_step)
+                if event.time_step >= episode_start
+                else 0
+            )
+            event_changed = self._apply_event(event, event_local_time_step)
             changed = changed or event_changed
             self._event_log.append(
                 {
@@ -266,6 +284,7 @@ class CityLearnTopologyService:
                     'source_asset_id': event.source_asset_id,
                     'applied': bool(event_changed),
                     'topology_version': int(self._topology_version),
+                    'episode_time_step': event_local_time_step,
                 }
             )
             self._event_cursor += 1
@@ -300,6 +319,69 @@ class CityLearnTopologyService:
         snapshot = self._history_lookup_reference(self._active_deferrable_appliance_history, time_step, {})
         member_appliances = snapshot.get(member_id, {})
         return dict(member_appliances)
+
+    def historical_chargers(self, member_id: str) -> Sequence[Charger]:
+        """Return every distinct charger instance that was active for a member.
+
+        Dynamic remove/reinstall events create a fresh runtime instance from the
+        immutable schema template.  Retaining both instances is necessary for
+        end-of-episode KPIs: the current building view alone otherwise drops EV
+        service and energy recorded before the removal.
+        """
+
+        return tuple(self._historical_asset_instances(
+            self._active_charger_history,
+            member_id,
+        ))
+
+    def historical_deferrable_appliances(self, member_id: str) -> Sequence[DeferrableAppliance]:
+        """Return every distinct deferrable instance active for a member."""
+
+        return tuple(self._historical_asset_instances(
+            self._active_deferrable_appliance_history,
+            member_id,
+        ))
+
+    def historical_storages(self, member_id: str) -> Sequence[Battery]:
+        """Return every distinct stationary-storage instance active for a member.
+
+        Storage removal followed by catalogue-based recommissioning creates a
+        new physical/runtime instance.  Keeping both objects prevents the KPI
+        layer from silently discarding throughput and degradation accumulated
+        by the instance that was removed.
+        """
+
+        instances: List[Battery] = []
+        seen_object_ids = set()
+        for time_step in sorted(self._active_storage_history):
+            storage = self._active_storage_history[time_step].get(member_id)
+            if storage is None or id(storage) in seen_object_ids:
+                continue
+
+            seen_object_ids.add(id(storage))
+            instances.append(storage)
+
+        return tuple(instances)
+
+    @staticmethod
+    def _historical_asset_instances(
+        history: Mapping[int, Mapping[str, Mapping[str, Any]]],
+        member_id: str,
+    ) -> List[Any]:
+        instances: List[Any] = []
+        seen_object_ids = set()
+
+        for time_step in sorted(history):
+            member_assets = history[time_step].get(member_id, {})
+            for asset in member_assets.values():
+                object_id = id(asset)
+                if object_id in seen_object_ids:
+                    continue
+
+                seen_object_ids.add(object_id)
+                instances.append(asset)
+
+        return instances
 
     @staticmethod
     def _history_lookup(history: Mapping[int, Any], time_step: int, default: Any):
@@ -421,6 +503,21 @@ class CityLearnTopologyService:
         if getattr(ev, 'battery', None) is not None:
             ev.battery.time_step = time_step
 
+    @staticmethod
+    def _initialize_storage_at_activation(building: Building):
+        """Apply the declared initial SoC at a mid-episode activation boundary."""
+
+        storage = getattr(building, 'electrical_storage', None)
+        if storage is None or not hasattr(storage, 'force_set_soc'):
+            return
+        capacity = float(getattr(storage, 'capacity', 0.0) or 0.0)
+        nominal_power = float(getattr(storage, 'nominal_power', 0.0) or 0.0)
+        if capacity <= 0.0 or nominal_power <= 0.0:
+            return
+        initial_soc = float(getattr(storage, 'initial_soc', 0.0) or 0.0)
+        minimum_soc = getattr(storage, '_minimum_soc', lambda: 0.0)()
+        storage.force_set_soc(float(np.clip(initial_soc, minimum_soc, 1.0)))
+
     def _bind_ev_runtime_context(self, ev: ElectricVehicle):
         env = self.env
         ev.episode_tracker = env.episode_tracker
@@ -521,7 +618,12 @@ class CityLearnTopologyService:
         building = self._member_pool[target_member_id]
         self._bind_building_runtime_context(building)
         building.reset()
-        self._warm_start_member_state(building, time_step)
+        self._set_building_time_step(building, time_step)
+        self._initialize_storage_at_activation(building)
+        self._skip_expired_deferrable_requests(
+            building,
+            self._global_time_step(time_step),
+        )
 
         self._active_member_ids.append(target_member_id)
         lifecycle = self._member_lifecycle.setdefault(target_member_id, {'born_at': None, 'removed_at': None, 'active': False})
@@ -535,19 +637,21 @@ class CityLearnTopologyService:
         self._topology_version += 1
         return True
 
-    def _warm_start_member_state(self, building: Building, target_time_step: int):
-        """Advance a newly inserted member to current env time with zero actions."""
+    def _global_time_step(self, local_time_step: int) -> int:
+        tracker = getattr(self.env, 'episode_tracker', None)
+        episode_start = int(
+            getattr(tracker, 'episode_start_time_step', 0) or 0
+        )
+        return episode_start + int(local_time_step)
 
-        target = max(int(target_time_step), 0)
-        self._set_building_time_step(building, 0)
-        if target == 0:
-            return
-
-        zero_kwargs = self._zero_action_kwargs(building)
-        for _ in range(target):
-            building.apply_actions(**zero_kwargs)
-            building.update_variables()
-            building.next_time_step()
+    @staticmethod
+    def _skip_expired_deferrable_requests(
+        building: Building,
+        global_time_step: int,
+    ):
+        for appliance in building.deferrable_appliances or []:
+            if hasattr(appliance, 'skip_cycles_before'):
+                appliance.skip_cycles_before(global_time_step)
 
     @staticmethod
     def _zero_action_kwargs(building: Building) -> Mapping[str, Any]:
@@ -612,22 +716,24 @@ class CityLearnTopologyService:
 
         if asset_type == 'pv':
             source_building = self._resolve_source_building(event)
-            building.pv = deepcopy(source_building.pv)
+            building.pv = deepcopy(self._resolve_source_pv(source_building))
             self._apply_object_overrides(building.pv, event.overrides)
             self._bind_building_runtime_context(building)
             building.pv.reset()
             self._set_building_time_step(building, time_step)
+            building._refresh_pv_generation_from(time_step)
             self._refresh_building_after_mutation(building)
             self._topology_version += 1
             return True
 
         if asset_type == 'electrical_storage':
             source_building = self._resolve_source_building(event)
-            building.electrical_storage = deepcopy(source_building.electrical_storage)
+            building.electrical_storage = deepcopy(self._resolve_source_storage(source_building))
             self._apply_object_overrides(building.electrical_storage, event.overrides)
             self._bind_building_runtime_context(building)
             building.electrical_storage.reset()
             self._set_building_time_step(building, time_step)
+            self._initialize_storage_at_activation(building)
             self._sync_electrical_storage_metadata(building)
             self._refresh_building_after_mutation(building)
             self._topology_version += 1
@@ -685,6 +791,7 @@ class CityLearnTopologyService:
             self._bind_building_runtime_context(building)
             building.pv.reset()
             self._set_building_time_step(building, time_step)
+            building._refresh_pv_generation_from(time_step)
             self._refresh_building_after_mutation(building)
             self._topology_version += 1
             return True
@@ -750,6 +857,7 @@ class CityLearnTopologyService:
         cloned.time_step_ratio = building.time_step_ratio
         cloned.reset()
         cloned.time_step = time_step
+        cloned.skip_cycles_before(self._global_time_step(time_step))
 
         appliances = list(building.deferrable_appliances or [])
         appliances.append(cloned)
@@ -787,8 +895,7 @@ class CityLearnTopologyService:
 
         return source_building
 
-    @staticmethod
-    def _resolve_source_charger(source_building: Building, source_asset_id: str):
+    def _resolve_source_charger(self, source_building: Building, source_asset_id: str):
         if source_asset_id is None:
             raise ValueError('source_asset_id is required for charger add_asset operations.')
 
@@ -796,10 +903,19 @@ class CityLearnTopologyService:
             if charger.charger_id == source_asset_id:
                 return charger
 
+        # A remove -> reinstall sequence must be able to recover the exact
+        # schema-loaded charger, including its independent EV schedule.  The
+        # initial structure snapshot is deliberately retained across topology
+        # mutations and resets, so it is the canonical template pool when the
+        # live asset has already been removed.
+        snapshot = self._initial_building_structures.get(source_building.name)
+        for charger in (() if snapshot is None else snapshot.electric_vehicle_chargers):
+            if charger.charger_id == source_asset_id:
+                return charger
+
         raise ValueError(f"Source charger '{source_asset_id}' was not found in member '{source_building.name}'.")
 
-    @staticmethod
-    def _resolve_source_deferrable_appliance(source_building: Building, source_asset_id: str):
+    def _resolve_source_deferrable_appliance(self, source_building: Building, source_asset_id: str):
         if source_asset_id is None:
             raise ValueError('source_asset_id is required for deferrable_appliance add_asset operations.')
 
@@ -807,7 +923,37 @@ class CityLearnTopologyService:
             if appliance.name == source_asset_id:
                 return appliance
 
+        snapshot = self._initial_building_structures.get(source_building.name)
+        for appliance in (() if snapshot is None else snapshot.deferrable_appliances):
+            if appliance.name == source_asset_id:
+                return appliance
+
         raise ValueError(f"Source deferrable appliance '{source_asset_id}' was not found in member '{source_building.name}'.")
+
+    def _resolve_source_pv(self, source_building: Building) -> PV:
+        pv = getattr(source_building, 'pv', None)
+        if pv is not None and float(getattr(pv, 'nominal_power', 0.0)) > 0.0:
+            return pv
+
+        snapshot = self._initial_building_structures.get(source_building.name)
+        if snapshot is not None and float(getattr(snapshot.pv, 'nominal_power', 0.0)) > 0.0:
+            return snapshot.pv
+
+        raise ValueError(f"Source PV was not found in member '{source_building.name}'.")
+
+    def _resolve_source_storage(self, source_building: Building) -> Battery:
+        storage = getattr(source_building, 'electrical_storage', None)
+        if storage is not None and self._has_electrical_storage_asset(source_building):
+            return storage
+
+        snapshot = self._initial_building_structures.get(source_building.name)
+        if snapshot is not None:
+            capacity = float(getattr(snapshot.electrical_storage, 'capacity', 0.0))
+            nominal_power = float(getattr(snapshot.electrical_storage, 'nominal_power', 0.0))
+            if capacity > 0.0 and nominal_power > 0.0:
+                return snapshot.electrical_storage
+
+        raise ValueError(f"Source electrical storage was not found in member '{source_building.name}'.")
 
     def _refresh_building_after_mutation(self, building: Building):
         self._bind_building_runtime_context(building)

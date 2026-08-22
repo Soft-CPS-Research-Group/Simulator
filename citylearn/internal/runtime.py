@@ -1022,12 +1022,69 @@ class CityLearnRuntimeService:
                                 f"'{charger.connected_electric_vehicle.name}' but dataset requires '{ev.name}' "
                                 f"at time step {env.time_step}."
                             )
-                        is_new_connection = (
-                            just_connected and (
-                                prev_state != 1
-                                or not isinstance(prev_ev_id, str)
-                                or prev_ev_id != ev_id
+                        # ``Charger.next_time_step`` clears the live object
+                        # reference before association, so ``just_connected``
+                        # is true on every connected control step.  It must not
+                        # be used as the session boundary: doing so would force
+                        # a dataset current-SOC reference at every step and
+                        # overwrite the controller's charging decision.  The
+                        # committed runtime history distinguishes a continuing
+                        # session from a true arrival or from a charger/member
+                        # that has just appeared mid-session.
+                        previous_runtime_ev = (
+                            charger.past_connected_evs[env.time_step - 1]
+                            if env.time_step > 0
+                            and env.time_step - 1 < len(charger.past_connected_evs)
+                            else None
+                        )
+                        session_ids = getattr(
+                            sim, 'electric_vehicle_session_id', None
+                        )
+                        session_id = (
+                            session_ids[env.time_step]
+                            if session_ids is not None
+                            and env.time_step < len(session_ids)
+                            else None
+                        )
+                        previous_session_id = (
+                            session_ids[env.time_step - 1]
+                            if session_ids is not None
+                            and env.time_step > 0
+                            and env.time_step - 1 < len(session_ids)
+                            else None
+                        )
+                        has_session_identity = (
+                            isinstance(session_id, str)
+                            and session_id.strip() not in {'', 'nan'}
+                        )
+                        session_changed = (
+                            has_session_identity
+                            and isinstance(previous_session_id, str)
+                            and previous_session_id.strip() not in {'', 'nan'}
+                            and session_id != previous_session_id
+                        )
+                        # Legacy charger files do not expose session identity.
+                        # A countdown reset after a value of one is the exact
+                        # boundary-compatible fallback for a back-to-back
+                        # session of the same EV.
+                        if not session_changed and not has_session_identity and env.time_step > 0:
+                            departure_time = getattr(
+                                sim, 'electric_vehicle_departure_time', None
                             )
+                            if (
+                                departure_time is not None
+                                and env.time_step < len(departure_time)
+                            ):
+                                previous_countdown = departure_time[env.time_step - 1]
+                                current_countdown = departure_time[env.time_step]
+                                session_changed = (
+                                    np.isfinite(previous_countdown)
+                                    and np.isfinite(current_countdown)
+                                    and previous_countdown <= 1
+                                    and current_countdown > previous_countdown
+                                )
+                        is_new_connection = just_connected and (
+                            previous_runtime_ev is not ev or session_changed
                         )
                         if is_new_connection:
                             soc_value = _resolve_arrival_soc(sim, env.time_step, prev_state, prev_ev_id, ev_id)

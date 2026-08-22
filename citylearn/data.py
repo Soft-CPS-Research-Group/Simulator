@@ -894,6 +894,10 @@ class ChargerSimulation(TimeSeriesData):
             3: 'Commuting (vehicle is away)'
     electric_vehicle_id : np.array
         Identifier for the electric vehicle.
+    electric_vehicle_session_id : np.array
+        Identifier for the charging session. This remains distinct from the EV
+        identifier because the same vehicle may begin a new session without an
+        intervening disconnected charger row.
     electric_vehicle_departure_time : np.array
         Number of time steps expected until the EV departs from the charger (only for state 1).
         Defaults to -1 when not present.
@@ -918,6 +922,7 @@ class ChargerSimulation(TimeSeriesData):
         electric_vehicle_required_soc_departure: Iterable[float],
         electric_vehicle_estimated_arrival_time: Iterable[float],
         electric_vehicle_estimated_soc_arrival: Iterable[float],
+        electric_vehicle_session_id: Iterable[str] = None,
         start_time_step: int = None,
         end_time_step: int = None,
         noise_std: float = 1.0,
@@ -936,6 +941,12 @@ class ChargerSimulation(TimeSeriesData):
         ], dtype='float32')
 
         self.electric_vehicle_id = np.array(electric_vehicle_id, dtype=object)
+        self.electric_vehicle_session_id = np.array(
+            [""] * len(self.electric_vehicle_id)
+            if electric_vehicle_session_id is None
+            else electric_vehicle_session_id,
+            dtype=object,
+        )
 
 
         departure_time_arr = np.array(electric_vehicle_departure_time, dtype='float32')

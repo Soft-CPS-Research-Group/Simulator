@@ -1520,6 +1520,25 @@ class DeferrableAppliance(ElectricDevice):
             else:
                 self.__cycle_state[cycle_id] = 'pending'
 
+    def skip_cycles_before(self, global_time_step: int):
+        """Exclude requests that expired before an asset/member became active.
+
+        Dynamic topology may introduce a member or reinstall an appliance after
+        the episode has started.  Requests whose admissible start window has
+        already closed were never offered to the controller and must therefore
+        not be reported as missed service, even when their completion deadline
+        lies after activation.
+        """
+
+        activation = int(global_time_step)
+        for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
+            cycle_id = cycle['cycle_id']
+            if (
+                self.__cycle_state.get(cycle_id) == 'pending'
+                and int(cycle['latest_start_time_step']) < activation
+            ):
+                self.__cycle_state[cycle_id] = 'expired_before_activation'
+
     def next_time_step(self):
         super().next_time_step()
         self._update_cycle_states()

@@ -197,7 +197,7 @@ Entity mode retorna tabelas. As features disponiveis dependem do schema, dos ass
 | `community_net_prev_1_kwh_step` | `entity_temporal_derived` | kWh/step | Lag 1 da net community. |
 | `community_net_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | Media curta da net community. |
 | `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binario | Calendario robusto; `time_step` cru fica apenas em `meta`. |
-| `forecast_price_next_*`, `forecast_community_{load,pv,net}_next_*` | `entity_forecasts_derived` | varia | Forecasts pontuais perfeitos a 15m/1h/3h/6h/24h. |
+| `forecast_price_next_*`, `forecast_community_{load,pv,net}_next_*` | `entity_forecasts_derived` | varia | Forecasts pontuais a 15m/1h/3h/6h/24h; a origem e declarada em `meta.forecast_config`. |
 
 O `request_id` e validade da baseline de demand response ficam em `observations["meta"]["demand_response"]`, nao como colunas numericas.
 
@@ -375,7 +375,15 @@ Todas as features pertencem a `entity_base` e sao sempre por appliance.
 | `current_step_power_kw` | kW | Potencia equivalente do step atual. |
 | `last_start_requested`, `last_start_applied`, `start_blocked`, `clip_reason_*` | entity_action_feedback | varia | Feedback curto do ultimo comando de start. |
 
-Forecasts derivados usam valores futuros do dataset como forecasts pontuais perfeitos do simulador (`meta.forecast_config.source = "actual_future"`, `meta.forecast_config.type = "point"`). Em uso real, adapters externos devem preencher campos equivalentes com forecasts reais.
+Por compatibilidade, forecasts derivados usam por defeito valores futuros do
+dataset (`load_pv_method = "actual_future"`). Um schema pode escolher
+`daily_persistence`; nesse caso carga e PV usam apenas o ponto correspondente
+do dia anterior, com cold start no step atual. O preco respeita a fronteira de
+publicacao declarada para o mercado do dia seguinte: os valores OMIE realizados
+so sao expostos depois da publicacao e, antes disso, e usado o fallback causal
+do schema (persistencia diaria na suite REC anual). `meta.forecast_config`
+expoe a origem efetiva; em uso real, adapters externos devem preencher campos
+equivalentes com forecasts operacionais.
 
 ## Edges Entity
 

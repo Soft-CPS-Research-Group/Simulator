@@ -412,7 +412,7 @@ def test_dynamic_topology_reset_restores_structure_and_replays_identical_episode
         _load_schema(),
         interface="entity",
         topology_mode="dynamic",
-        episode_time_steps=12,
+        episode_time_steps=[(0, 11)],
         random_seed=0,
         render_mode="none",
     )
@@ -450,7 +450,7 @@ def test_dynamic_topology_reset_discards_runtime_cloned_members_before_replay():
         schema,
         interface="entity",
         topology_mode="dynamic",
-        episode_time_steps=4,
+        episode_time_steps=[(0, 3)],
         random_seed=0,
         render_mode="none",
     )

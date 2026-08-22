@@ -18,6 +18,7 @@ class CityLearnKPIService:
     EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT = 0.05
     EV_DEPARTURE_SERVICE_TOLERANCE_DEFAULT = 0.05
     EV_DEPARTURE_EPS = 1.0e-6
+    ELECTRICAL_RESIDUAL_EPS_KW = 1.0e-5
     SCORECARD_DEFAULT_KPIS: Tuple[str, ...] = (
         # Cost scorecard values and BAU reference.
         'district_cost_total_control_eur',
@@ -31,9 +32,11 @@ class CityLearnKPIService:
         'district_ev_performance_departure_min_acceptable_feasible_ratio',
         'district_ev_performance_departure_within_tolerance_feasible_ratio',
         'district_electrical_service_phase_violations_energy_total_kwh',
+        'district_electrical_service_phase_requested_pressure_energy_total_kwh',
         'building_ev_performance_departure_min_acceptable_feasible_ratio',
         'building_ev_performance_departure_within_tolerance_feasible_ratio',
         'building_electrical_service_phase_violations_energy_total_kwh',
+        'building_electrical_service_phase_requested_pressure_energy_total_kwh',
 
         # Battery and V2G totals with BAU reference rows.
         'district_battery_total_throughput_kwh',
@@ -237,7 +240,11 @@ class CityLearnKPIService:
 
     def _ev_connected_interval_start(self, sim, states: np.ndarray, departure_index: int) -> int:
         ev_ids = getattr(sim, 'electric_vehicle_id', None)
+        session_ids = getattr(sim, 'electric_vehicle_session_id', None)
         current_ev_id = self._normal_ev_id(self._safe_sequence_value(ev_ids, departure_index))
+        current_session_id = self._normal_ev_id(
+            self._safe_sequence_value(session_ids, departure_index)
+        )
         start = int(departure_index)
 
         while start > 0:
@@ -247,11 +254,20 @@ class CityLearnKPIService:
                 break
 
             previous_ev_id = self._normal_ev_id(self._safe_sequence_value(ev_ids, start - 1))
+            previous_session_id = self._normal_ev_id(
+                self._safe_sequence_value(session_ids, start - 1)
+            )
 
             if (
                 current_ev_id is not None
                 and previous_ev_id is not None
                 and previous_ev_id != current_ev_id
+            ):
+                break
+            if (
+                current_session_id is not None
+                and previous_session_id is not None
+                and previous_session_id != current_session_id
             ):
                 break
 
@@ -261,9 +277,14 @@ class CityLearnKPIService:
 
     def _ev_arrival_soc_for_interval(self, sim, ev, states: np.ndarray, interval_start: int) -> Optional[float]:
         estimated_soc_arrival = getattr(sim, 'electric_vehicle_estimated_soc_arrival', None)
+        current_soc_reference = getattr(sim, 'electric_vehicle_current_soc', None)
         ev_ids = getattr(sim, 'electric_vehicle_id', None)
         current_ev_id = self._normal_ev_id(self._safe_sequence_value(ev_ids, interval_start))
-        candidates = []
+        # This is the same boundary reference used by the runtime for a normal
+        # arrival, a partial-window reset, or a topology activation that exposes
+        # an already occupied charger.  It is a boundary value only, not an
+        # exogenous trajectory that may overwrite subsequent control.
+        candidates = [self._safe_sequence_value(current_soc_reference, interval_start)]
 
         if interval_start > 0:
             previous_state = self._to_scalar(states[interval_start - 1], np.nan)
@@ -870,6 +891,8 @@ class CityLearnKPIService:
                 'ev_departure_tolerance_ratio': service_tolerance,
                 'ev_charge_total_kwh': 0.0,
                 'ev_v2g_export_total_kwh': 0.0,
+                'ev_connected_soc_gain_total_kwh': 0.0,
+                'ev_energy_accounting_shortfall_kwh': 0.0,
             }
 
         departures_total = 0
@@ -891,9 +914,10 @@ class CityLearnKPIService:
         departure_absolute_error_sum = 0.0
         charge_total_kwh = 0.0
         v2g_export_total_kwh = 0.0
+        connected_soc_gain_total_kwh = 0.0
         eps = self.EV_DEPARTURE_EPS
 
-        for charger in building.electric_vehicle_chargers or []:
+        for charger in self._chargers_for_metrics(building):
             consumption = np.array(charger.electricity_consumption[t_start:t_final + 1], dtype='float64')
             charge_total_kwh += self._sum_finite(np.clip(consumption, 0.0, None))
             v2g_export_total_kwh += self._sum_finite(np.clip(-consumption, 0.0, None))
@@ -901,16 +925,82 @@ class CityLearnKPIService:
             sim = charger.charger_simulation
             states = np.array(sim.electric_vehicle_charger_state, dtype='float64')
             required_soc = np.array(sim.electric_vehicle_required_soc_departure, dtype='float64')
-            history_limit = min(t_final, len(states) - 2, len(required_soc) - 1, len(charger.past_connected_evs) - 1)
+            history_limit = min(
+                t_final,
+                len(states) - 1,
+                len(required_soc) - 1,
+                len(charger.past_connected_evs) - 1,
+            )
 
             if history_limit < t_start:
                 continue
 
             for t in range(t_start, history_limit + 1):
                 current_state = states[t]
-                next_state = states[t + 1]
+                next_state = states[t + 1] if t + 1 < len(states) else np.nan
+                ev_ids = getattr(sim, 'electric_vehicle_id', None)
+                session_ids = getattr(sim, 'electric_vehicle_session_id', None)
+                current_ev_id = self._normal_ev_id(
+                    self._safe_sequence_value(ev_ids, t)
+                )
+                next_ev_id = self._normal_ev_id(
+                    self._safe_sequence_value(ev_ids, t + 1)
+                )
+                current_session_id = self._normal_ev_id(
+                    self._safe_sequence_value(session_ids, t)
+                )
+                next_session_id = self._normal_ev_id(
+                    self._safe_sequence_value(session_ids, t + 1)
+                )
+                departure_countdown = self._to_scalar(
+                    self._safe_sequence_value(
+                        getattr(sim, 'electric_vehicle_departure_time', None),
+                        t,
+                    ),
+                    np.nan,
+                )
+                next_departure_countdown = self._to_scalar(
+                    self._safe_sequence_value(
+                        getattr(sim, 'electric_vehicle_departure_time', None),
+                        t + 1,
+                    ),
+                    np.nan,
+                )
+                terminal_departure = (
+                    t == len(states) - 1
+                    and np.isfinite(departure_countdown)
+                    and departure_countdown <= 1.0 + self.EV_DEPARTURE_EPS
+                )
+                departure_transition = t + 1 < len(states) and (
+                    next_state != 1
+                    or (
+                        current_session_id is not None
+                        and next_session_id is not None
+                        and next_session_id != current_session_id
+                    )
+                    or (
+                        current_ev_id is not None
+                        and next_ev_id is not None
+                        and next_ev_id != current_ev_id
+                    )
+                    or (
+                        current_session_id is None
+                        and next_session_id is None
+                        and np.isfinite(departure_countdown)
+                        # Legacy schedules without explicit session identity
+                        # expose a back-to-back boundary through a countdown
+                        # reset while the charger remains connected.  A plain
+                        # ``countdown <= 1`` check also counts ordinary
+                        # departures one interval early, so require the next
+                        # session's countdown to increase explicitly.
+                        and departure_countdown <= 1.0 + self.EV_DEPARTURE_EPS
+                        and np.isfinite(next_departure_countdown)
+                        and next_departure_countdown
+                        > departure_countdown + self.EV_DEPARTURE_EPS
+                    )
+                )
 
-                if current_state != 1 or next_state == 1:
+                if current_state != 1 or not (departure_transition or terminal_departure):
                     continue
 
                 ev = charger.past_connected_evs[t]
@@ -927,6 +1017,27 @@ class CityLearnKPIService:
                 actual_soc = self._to_scalar(ev.battery.soc[t], np.nan)
                 if not np.isfinite(actual_soc):
                     continue
+
+                interval_start = self._ev_connected_interval_start(sim, states, t)
+                arrival_soc = self._ev_arrival_soc_for_interval(
+                    sim,
+                    ev,
+                    states,
+                    interval_start,
+                )
+                capacity_kwh = self._to_scalar(
+                    getattr(ev.battery, 'capacity', np.nan),
+                    np.nan,
+                )
+                if (
+                    arrival_soc is not None
+                    and np.isfinite(capacity_kwh)
+                    and capacity_kwh > 0.0
+                ):
+                    connected_soc_gain_total_kwh += (
+                        max(actual_soc - float(arrival_soc), 0.0)
+                        * capacity_kwh
+                    )
 
                 departures_total += 1
                 deficit = max(target_soc - actual_soc, 0.0)
@@ -1043,7 +1154,52 @@ class CityLearnKPIService:
             'ev_departure_tolerance_ratio': service_tolerance,
             'ev_charge_total_kwh': float(charge_total_kwh),
             'ev_v2g_export_total_kwh': float(v2g_export_total_kwh),
+            'ev_connected_soc_gain_total_kwh': float(connected_soc_gain_total_kwh),
+            'ev_energy_accounting_shortfall_kwh': float(max(
+                connected_soc_gain_total_kwh - charge_total_kwh,
+                0.0,
+            )),
         }
+
+    def _chargers_for_metrics(self, building) -> Sequence:
+        topology_service = getattr(self.env, '_topology_service', None)
+        if (
+            getattr(self.env, 'topology_mode', 'static') == 'dynamic'
+            and topology_service is not None
+            and hasattr(topology_service, 'historical_chargers')
+        ):
+            chargers = list(topology_service.historical_chargers(building.name))
+            if chargers:
+                return chargers
+
+        return list(building.electric_vehicle_chargers or [])
+
+    def _deferrable_appliances_for_metrics(self, building) -> Sequence:
+        topology_service = getattr(self.env, '_topology_service', None)
+        if (
+            getattr(self.env, 'topology_mode', 'static') == 'dynamic'
+            and topology_service is not None
+            and hasattr(topology_service, 'historical_deferrable_appliances')
+        ):
+            appliances = list(topology_service.historical_deferrable_appliances(building.name))
+            if appliances:
+                return appliances
+
+        return list(getattr(building, 'deferrable_appliances', []) or [])
+
+    def _storages_for_metrics(self, building) -> Sequence:
+        topology_service = getattr(self.env, '_topology_service', None)
+        if (
+            getattr(self.env, 'topology_mode', 'static') == 'dynamic'
+            and topology_service is not None
+            and hasattr(topology_service, 'historical_storages')
+        ):
+            storages = list(topology_service.historical_storages(building.name))
+            if storages:
+                return storages
+
+        storage = getattr(building, 'electrical_storage', None)
+        return [] if storage is None else [storage]
 
     def _compute_bess_metrics(self, building, *, t_start: int = 0, t_final: Optional[int] = None) -> Dict[str, float]:
         upper = int(max(building.time_step, 0))
@@ -1061,14 +1217,45 @@ class CityLearnKPIService:
                 '_bess_degraded_capacity_kwh': capacity,
             }
 
-        storage = building.electrical_storage
-        storage_series = np.array(building.electrical_storage_electricity_consumption[t_start:t_final + 1], dtype='float64')
-        charge_total = self._sum_finite(np.clip(storage_series, 0.0, None))
-        discharge_total = self._sum_finite(np.clip(-storage_series, 0.0, None))
+        storages = [
+            storage for storage in self._storages_for_metrics(building)
+            if self._to_scalar(getattr(storage, 'capacity', 0.0), 0.0) > 0.0
+        ]
+        storage_series = []
+        for storage in storages:
+            values = getattr(storage, 'electricity_consumption', None)
+            if values is None and len(storages) == 1:
+                # Compatibility for legacy/custom building facades that expose
+                # only the aggregate storage series on the building.
+                values = getattr(
+                    building,
+                    'electrical_storage_electricity_consumption',
+                    [],
+                )
+            storage_series.append(
+                np.array(values[t_start:t_final + 1], dtype='float64')
+            )
+        charge_total = sum(
+            self._sum_finite(np.clip(values, 0.0, None))
+            for values in storage_series
+        )
+        discharge_total = sum(
+            self._sum_finite(np.clip(-values, 0.0, None))
+            for values in storage_series
+        )
         throughput_total = charge_total + discharge_total
 
-        capacity = self._to_scalar(getattr(storage, 'capacity', 0.0), 0.0)
-        degraded_capacity = self._to_scalar(getattr(storage, 'degraded_capacity', capacity), capacity)
+        capacity = sum(
+            self._to_scalar(getattr(storage, 'capacity', 0.0), 0.0)
+            for storage in storages
+        )
+        degraded_capacity = sum(
+            self._to_scalar(
+                getattr(storage, 'degraded_capacity', getattr(storage, 'capacity', 0.0)),
+                self._to_scalar(getattr(storage, 'capacity', 0.0), 0.0),
+            )
+            for storage in storages
+        )
         equivalent_cycles = None if capacity <= 0.0 else throughput_total / (2.0 * capacity)
         fade_ratio = None if capacity <= 0.0 else (capacity - degraded_capacity) / capacity
 
@@ -1166,6 +1353,8 @@ class CityLearnKPIService:
             return {
                 'electrical_service_violation_total_kwh': 0.0,
                 'electrical_service_violation_time_step_count': 0.0,
+                'electrical_service_requested_pressure_total_kwh': 0.0,
+                'electrical_service_requested_pressure_time_step_count': 0.0,
                 'phase_imbalance_ratio_average': None,
                 'phase_import_peak_kw': {},
                 'phase_export_peak_kw': {},
@@ -1180,6 +1369,8 @@ class CityLearnKPIService:
             return {
                 'electrical_service_violation_total_kwh': 0.0,
                 'electrical_service_violation_time_step_count': 0.0,
+                'electrical_service_requested_pressure_total_kwh': 0.0,
+                'electrical_service_requested_pressure_time_step_count': 0.0,
                 'phase_imbalance_ratio_average': None,
                 'phase_import_peak_kw': {},
                 'phase_export_peak_kw': {},
@@ -1187,7 +1378,57 @@ class CityLearnKPIService:
                 '_imbalance_count': 0.0,
             }
 
-        violation_history = np.array(getattr(building, '_charging_constraint_violation_history', [0.0]), dtype='float64')[t_start:t_final + 1]
+        # The constraint penalty records requested-action pressure before
+        # projection. It is useful controller feedback, but it is not evidence
+        # that post-projection power still violates the declared service limits.
+        pressure_history = np.array(
+            getattr(building, '_charging_constraint_violation_history', [0.0]),
+            dtype='float64',
+        )[t_start:t_final + 1]
+        requested_pressure_total = float(np.clip(pressure_history, 0.0, None).sum())
+        requested_pressure_count = float(np.count_nonzero(pressure_history > 1e-9))
+
+        all_total_history = np.array(
+            getattr(building, '_charging_total_power_history_kw', [0.0]),
+            dtype='float64',
+        )
+        total_history = all_total_history[t_start:t_final + 1]
+        phase_history = getattr(building, '_charging_phase_power_history_kw', {}) or {}
+        total_limits = getattr(building, '_electrical_service_limits', {}).get('total', {}) or {}
+        per_phase_limits = getattr(building, '_electrical_service_limits', {}).get('per_phase', {}) or {}
+        step_hours = max(
+            self._to_scalar(getattr(building, 'seconds_per_time_step', 3600.0), 3600.0) / 3600.0,
+            0.0,
+        )
+        residual_violation_kw = np.zeros(len(total_history), dtype='float64')
+
+        def accumulate_limit(values: np.ndarray, limits: Mapping[str, float]) -> None:
+            import_limit = self._to_scalar(limits.get('import_kw'), np.nan)
+            export_limit = self._to_scalar(limits.get('export_kw'), np.nan)
+            if np.isfinite(import_limit):
+                excess = np.clip(values - import_limit, 0.0, None)
+                excess[excess <= self.ELECTRICAL_RESIDUAL_EPS_KW] = 0.0
+                residual_violation_kw[:] += excess
+            if np.isfinite(export_limit):
+                excess = np.clip(-values - export_limit, 0.0, None)
+                excess[excess <= self.ELECTRICAL_RESIDUAL_EPS_KW] = 0.0
+                residual_violation_kw[:] += excess
+
+        accumulate_limit(total_history, total_limits)
+        for phase_name in self._electrical_service_phase_names(building):
+            full_values = np.array(
+                phase_history.get(phase_name, np.zeros(len(all_total_history))),
+                dtype='float64',
+            )
+            values = full_values[t_start:t_final + 1]
+            if len(values) != len(residual_violation_kw):
+                aligned = np.zeros(len(residual_violation_kw), dtype='float64')
+                count = min(len(values), len(aligned))
+                aligned[:count] = values[:count]
+                values = aligned
+            accumulate_limit(values, per_phase_limits.get(phase_name, {}) or {})
+
+        violation_history = residual_violation_kw * step_hours
         violation_total = float(np.clip(violation_history, 0.0, None).sum())
         violation_count = float(np.count_nonzero(violation_history > 1e-9))
 
@@ -1224,6 +1465,8 @@ class CityLearnKPIService:
         return {
             'electrical_service_violation_total_kwh': violation_total,
             'electrical_service_violation_time_step_count': violation_count,
+            'electrical_service_requested_pressure_total_kwh': requested_pressure_total,
+            'electrical_service_requested_pressure_time_step_count': requested_pressure_count,
             'phase_imbalance_ratio_average': imbalance_average,
             'phase_import_peak_kw': phase_import_peak,
             'phase_export_peak_kw': phase_export_peak,
@@ -1556,6 +1799,8 @@ class CityLearnKPIService:
         ev_absolute_error_sum = 0.0
         ev_charge_total = 0.0
         ev_v2g_total = 0.0
+        ev_connected_soc_gain_total = 0.0
+        ev_energy_accounting_shortfall_total = 0.0
 
         bess_charge_total = 0.0
         bess_discharge_total = 0.0
@@ -1565,6 +1810,8 @@ class CityLearnKPIService:
 
         phase_violation_total = 0.0
         phase_violation_count = 0.0
+        phase_requested_pressure_total = 0.0
+        phase_requested_pressure_count = 0.0
         phase_imbalance_sum = 0.0
         phase_imbalance_count = 0.0
 
@@ -1816,6 +2063,8 @@ class CityLearnKPIService:
                 self._metric('ev_departure_tolerance_ratio', ev_metrics['ev_departure_tolerance_ratio'], building.name, 'building'),
                 self._metric('ev_charge_total_kwh', ev_metrics['ev_charge_total_kwh'], building.name, 'building'),
                 self._metric('ev_v2g_export_total_kwh', ev_metrics['ev_v2g_export_total_kwh'], building.name, 'building'),
+                self._metric('ev_connected_soc_gain_total_kwh', ev_metrics['ev_connected_soc_gain_total_kwh'], building.name, 'building'),
+                self._metric('ev_energy_accounting_shortfall_kwh', ev_metrics['ev_energy_accounting_shortfall_kwh'], building.name, 'building'),
             ])
             ev_departures_total += ev_metrics['departures_total']
             ev_departures_met += ev_metrics['departures_met']
@@ -1836,6 +2085,8 @@ class CityLearnKPIService:
             ev_absolute_error_sum += ev_metrics['departure_absolute_error_sum']
             ev_charge_total += ev_metrics['ev_charge_total_kwh']
             ev_v2g_total += ev_metrics['ev_v2g_export_total_kwh']
+            ev_connected_soc_gain_total += ev_metrics['ev_connected_soc_gain_total_kwh']
+            ev_energy_accounting_shortfall_total += ev_metrics['ev_energy_accounting_shortfall_kwh']
 
             bess_metrics = self._compute_bess_metrics(building, t_start=t_start, t_final=t_end)
             extended_building_rows.extend([
@@ -1863,6 +2114,8 @@ class CityLearnKPIService:
             extended_building_rows.extend([
                 self._metric('electrical_service_violation_total_kwh', phase_metrics['electrical_service_violation_total_kwh'], building.name, 'building'),
                 self._metric('electrical_service_violation_time_step_count', phase_metrics['electrical_service_violation_time_step_count'], building.name, 'building'),
+                self._metric('electrical_service_requested_pressure_total_kwh', phase_metrics['electrical_service_requested_pressure_total_kwh'], building.name, 'building'),
+                self._metric('electrical_service_requested_pressure_time_step_count', phase_metrics['electrical_service_requested_pressure_time_step_count'], building.name, 'building'),
                 self._metric('phase_imbalance_ratio_average', phase_metrics['phase_imbalance_ratio_average'], building.name, 'building'),
             ])
             for phase_name, value in phase_metrics['phase_import_peak_kw'].items():
@@ -1872,6 +2125,8 @@ class CityLearnKPIService:
 
             phase_violation_total += phase_metrics['electrical_service_violation_total_kwh']
             phase_violation_count += phase_metrics['electrical_service_violation_time_step_count']
+            phase_requested_pressure_total += phase_metrics['electrical_service_requested_pressure_total_kwh']
+            phase_requested_pressure_count += phase_metrics['electrical_service_requested_pressure_time_step_count']
             phase_imbalance_sum += phase_metrics['_imbalance_sum']
             phase_imbalance_count += phase_metrics['_imbalance_count']
 
@@ -2014,6 +2269,8 @@ class CityLearnKPIService:
             self._metric('ev_departure_tolerance_ratio', self._ev_departure_service_tolerance(), 'District', 'district'),
             self._metric('ev_charge_total_kwh', ev_charge_total, 'District', 'district'),
             self._metric('ev_v2g_export_total_kwh', ev_v2g_total, 'District', 'district'),
+            self._metric('ev_connected_soc_gain_total_kwh', ev_connected_soc_gain_total, 'District', 'district'),
+            self._metric('ev_energy_accounting_shortfall_kwh', ev_energy_accounting_shortfall_total, 'District', 'district'),
         ])
 
         district_bess_cycles = None if bess_capacity_total <= 0.0 else bess_throughput_total / (2.0 * bess_capacity_total)
@@ -2043,6 +2300,8 @@ class CityLearnKPIService:
         extended_district_rows.extend([
             self._metric('electrical_service_violation_total_kwh', phase_violation_total, 'District', 'district'),
             self._metric('electrical_service_violation_time_step_count', phase_violation_count, 'District', 'district'),
+            self._metric('electrical_service_requested_pressure_total_kwh', phase_requested_pressure_total, 'District', 'district'),
+            self._metric('electrical_service_requested_pressure_time_step_count', phase_requested_pressure_count, 'District', 'district'),
             self._metric('phase_imbalance_ratio_average', district_phase_imbalance, 'District', 'district'),
         ])
 
@@ -2173,7 +2432,7 @@ class CityLearnKPIService:
             }
             building_delay_weighted_sum = 0.0
             building_delay_weight = 0.0
-            for appliance in getattr(building, 'deferrable_appliances', []) or []:
+            for appliance in self._deferrable_appliances_for_metrics(building):
                 summary = appliance.service_summary()
                 completed = self._to_scalar(summary.get('completed_cycles'), 0.0)
                 missed = self._to_scalar(summary.get('missed_cycles'), 0.0)
@@ -2777,6 +3036,8 @@ class CityLearnKPIService:
             ('ev_departure_tolerance_ratio', 'ev', 'performance', 'departure_tolerance', None, 'ratio'),
             ('ev_charge_total_kwh', 'ev', 'total', 'charge', None, 'kwh'),
             ('ev_v2g_export_total_kwh', 'ev', 'total', 'v2g_export', None, 'kwh'),
+            ('ev_connected_soc_gain_total_kwh', 'ev', 'energy_accounting', 'connected_soc_gain', None, 'kwh'),
+            ('ev_energy_accounting_shortfall_kwh', 'ev', 'energy_accounting', 'shortfall', None, 'kwh'),
             ('bess_charge_total_kwh', 'battery', 'total', 'charge', None, 'kwh'),
             ('bess_discharge_total_kwh', 'battery', 'total', 'discharge', None, 'kwh'),
             ('bess_throughput_total_kwh', 'battery', 'total', 'throughput', None, 'kwh'),
@@ -2784,6 +3045,8 @@ class CityLearnKPIService:
             ('bess_capacity_fade_ratio', 'battery', 'health', 'capacity_fade', None, 'ratio'),
             ('electrical_service_violation_total_kwh', 'electrical_service_phase', 'violations', 'energy_total', None, 'kwh'),
             ('electrical_service_violation_time_step_count', 'electrical_service_phase', 'violations', 'event', None, 'count'),
+            ('electrical_service_requested_pressure_total_kwh', 'electrical_service_phase', 'requested_pressure', 'energy_total', None, 'kwh'),
+            ('electrical_service_requested_pressure_time_step_count', 'electrical_service_phase', 'requested_pressure', 'event', None, 'count'),
             ('phase_imbalance_ratio_average', 'electrical_service_phase', 'imbalance', 'phase_average', None, 'ratio'),
             ('community_local_import_total_kwh', 'energy_grid', 'community_market', 'local_import', 'total', 'kwh'),
             ('community_local_export_total_kwh', 'energy_grid', 'community_market', 'local_export', 'total', 'kwh'),

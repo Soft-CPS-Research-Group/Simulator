@@ -47,6 +47,13 @@ def _copy_minute_dataset(tmp_path: Path) -> Path:
     dataset_dir = tmp_path / "minute_ev_demo"
     shutil.copytree(SOURCE_DATASET, dataset_dir)
 
+    charger_path = dataset_dir / "charger_1_1.csv"
+    charger_frame = pd.read_csv(charger_path)
+    charger_frame["electric_vehicle_current_soc"] = [
+        0.50, 0.525, 0.55, 0.575, np.nan, np.nan, np.nan, np.nan
+    ]
+    charger_frame.to_csv(charger_path, index=False)
+
     pd.DataFrame(
         [
             {
@@ -178,6 +185,10 @@ def _rollout_trace(schema_path: Path):
                 raw_schedule_rows,
             ),
             "episode_starts": [env.episode_tracker.episode_start_time_step],
+            "reset_ev_soc": float(
+                building.electric_vehicle_chargers[0]
+                .connected_electric_vehicle.battery.soc[env.time_step]
+            ),
             "net": [],
             "cost": [],
             "emission": [],
@@ -215,6 +226,8 @@ def test_windowed_loader_reads_only_simulation_window_and_parquet_matches_csv(tm
     assert csv_trace["raw_rows"] == (5, 5, 5, 5, 5, 2, 2)
     assert parquet_trace["raw_rows"] == csv_trace["raw_rows"]
     assert parquet_trace["episode_starts"] == csv_trace["episode_starts"]
+    assert csv_trace["reset_ev_soc"] == pytest.approx(0.55)
+    assert parquet_trace["reset_ev_soc"] == pytest.approx(0.55)
     np.testing.assert_allclose(parquet_trace["reset_observations"], csv_trace["reset_observations"])
     np.testing.assert_allclose(parquet_trace["net"], csv_trace["net"])
     np.testing.assert_allclose(parquet_trace["cost"], csv_trace["cost"])

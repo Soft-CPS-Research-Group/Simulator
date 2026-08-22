@@ -1742,6 +1742,32 @@ class Building(Environment):
 
         return generation
 
+    def _refresh_pv_generation_from(self, time_step: int) -> None:
+        """Commit the current PV asset's production from ``time_step`` onward.
+
+        Dynamic topology events replace the physical :class:`PV` instance at
+        runtime.  ``__solar_generation`` is otherwise calculated only during
+        reset, so changing ``self.pv`` without refreshing this series would
+        alter the topology metadata while leaving the old PV production in the
+        electrical balance.  Only the present and future are rewritten: past
+        production remains an immutable record for KPI accounting.
+        """
+
+        start = int(max(time_step, 0))
+        if start >= len(self.__solar_generation):
+            return
+
+        generation = (
+            self._pv_generation_to_control_step(self.energy_simulation.solar_generation)
+            * -1.0
+        )
+        upper = min(len(self.__solar_generation), len(generation))
+        if start < upper:
+            self.__solar_generation[start:upper] = generation[start:upper]
+
+        if upper < len(self.__solar_generation):
+            self.__solar_generation[max(start, upper):] = 0.0
+
     def _clip_outage_electric_loads_to_local_supply(self):
         """Clip initial electric loads to locally available islanded supply."""
 

@@ -437,6 +437,60 @@ def test_forecast_point_index_uses_physical_horizon(seconds_per_time_step, expec
     assert service._forecast_point_index(0, 15 * 60, 1000) == expected_index
 
 
+def test_daily_persistence_derived_forecast_never_reads_future_truth():
+    service = _minimal_entity_service(900)
+    service.env.schema = {
+        "derived_forecasts": {
+            "load_pv_method": "daily_persistence",
+            "persistence_period_seconds": 86_400,
+            "cold_start": "current_step",
+        }
+    }
+
+    # At t=100, a 15-minute forecast uses the corresponding point on the
+    # previous day: (100 + 1) - 96 = 5.
+    assert service._derived_forecast_point_index_from_steps(100, 1, 1000) == 5
+    # During the first day no causal daily reference exists, so cold start is
+    # the current observation, never the future target.
+    assert service._derived_forecast_point_index_from_steps(10, 24, 1000) == 10
+    metadata = service._forecast_config_meta()
+    assert metadata["source"] == "mixed_causal"
+    assert metadata["load_pv_method"] == "daily_persistence"
+
+
+def test_publication_aware_price_bundle_never_reads_future_truth():
+    service = _minimal_entity_service(900)
+    service.env.schema = {
+        "derived_forecasts": {
+            "load_pv_method": "daily_persistence",
+            "persistence_period_seconds": 86_400,
+            "cold_start": "current_step",
+            "price_source": "publication_aware_day_ahead_market_input",
+            "price_horizon_steps": [4, 24, 96],
+        }
+    }
+    pricing = SimpleNamespace(
+        electricity_pricing=np.arange(1_000, dtype="float64") + 10_000.0,
+        electricity_pricing_predicted_1=np.arange(1_000, dtype="float64") + 100.0,
+        electricity_pricing_predicted_2=np.arange(1_000, dtype="float64") + 200.0,
+        electricity_pricing_predicted_3=np.arange(1_000, dtype="float64") + 300.0,
+    )
+
+    # Exact declared horizons read the forecast issued at the current step.
+    assert service._derived_price_forecast_value(pricing, 100, 4) == pytest.approx(200.0)
+    assert service._derived_price_forecast_value(pricing, 100, 24) == pytest.approx(300.0)
+    assert service._derived_price_forecast_value(pricing, 100, 96) == pytest.approx(400.0)
+    # Intermediate horizons use an earlier issue of the shortest declared
+    # forecast that targets the requested delivery step, never actual[t+h].
+    assert service._derived_price_forecast_value(pricing, 100, 1) == pytest.approx(197.0)
+    assert service._derived_price_forecast_value(pricing, 100, 12) == pytest.approx(288.0)
+    # Before a sufficiently old issue exists, cold start is the current price.
+    assert service._derived_price_forecast_value(pricing, 1, 1) == pytest.approx(10_001.0)
+    assert service._forecast_config_meta()["price_source"] == (
+        "publication_aware_day_ahead_market_input"
+    )
+
+
 @pytest.mark.parametrize("seconds_per_time_step", [15, 60, 900, 3600])
 def test_storage_available_energy_scales_with_step_seconds(seconds_per_time_step):
     service = _minimal_entity_service(seconds_per_time_step)

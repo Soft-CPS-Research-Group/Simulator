@@ -407,6 +407,12 @@ def test_three_phase_limits_clip_controllable_actions(tmp_path: Path):
         charger = building.electric_vehicle_chargers[0]
         commanded_kwh = charger.past_charging_action_values_kwh[t]
         assert commanded_kwh < (charger.max_charging_power * (building.seconds_per_time_step / 3600.0))
+
+        district = env.evaluate_v2()
+        district = district[(district["level"] == "district") & (district["name"] == "District")]
+        values = district.set_index("cost_function")["value"]
+        assert values["district_electrical_service_phase_requested_pressure_energy_total_kwh"] > 0.0
+        assert values["district_electrical_service_phase_violations_energy_total_kwh"] == pytest.approx(0.0, abs=1e-6)
     finally:
         env.close()
 
@@ -439,6 +445,12 @@ def test_residual_violation_when_non_controllable_exceeds_limit(tmp_path: Path):
         assert state["total_power_kw"] > 0.1
         obs = building.observations(include_all=True, normalize=False, periodic_normalization=False)
         assert obs["charging_constraint_violation_kwh"] > 0.0
+
+        district = env.evaluate_v2()
+        district = district[(district["level"] == "district") & (district["name"] == "District")]
+        values = district.set_index("cost_function")["value"]
+        assert values["district_electrical_service_phase_requested_pressure_energy_total_kwh"] > 0.0
+        assert values["district_electrical_service_phase_violations_energy_total_kwh"] > 0.0
     finally:
         env.close()
 

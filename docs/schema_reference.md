@@ -108,11 +108,29 @@ Entity-only configuration:
 | `entity_core_electrical` | `false` | Power, step energy, PV, BESS, EV, efficiency and building electrical metrics. |
 | `entity_community_operational` | `false` | District/community aggregates, headroom, counts and topology version. |
 | `entity_forecasts_existing` | `false` | Forecasts already present in the dataset. |
-| `entity_forecasts_derived` | `false` | Compact perfect-simulation point forecasts for price, load, PV and net demand. |
+| `entity_forecasts_derived` | `false` | Compact point forecasts for price, load, PV and net demand. |
 | `entity_demand_response` | `false` | Current district DR request fields, frozen baseline and previous-step delivery/shortfall. |
 | `entity_robustness` | `false` | Active robustness state and previous-step corruption counters in the district table. |
 | `entity_temporal_derived` | `false` | Short lags, rolling means and calendar sin/cos features. |
 | `entity_action_feedback` | `false` | Requested, limited and applied action feedback plus clipping-reason flags. |
+
+Load/PV sources for the derived bundle are configurable:
+
+```json
+"derived_forecasts": {
+  "load_pv_method": "daily_persistence",
+  "persistence_period_seconds": 86400,
+  "cold_start": "current_step",
+  "price_source": "publication_aware_day_ahead_market_input",
+  "price_publication_time_local": "13:00",
+  "price_unpublished_fallback": "daily_persistence",
+  "price_horizon_steps": [4, 24, 96]
+}
+```
+
+`actual_future` remains the backward-compatible load/PV default. Use
+`daily_persistence` for causal algorithm benchmarks that must not expose future
+load or PV truth.
 
 ## `buildings`
 

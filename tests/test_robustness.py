@@ -660,8 +660,13 @@ def test_asset_unavailable_telemetry_and_control_without_dynamic_topology(tmp_pa
         env.step(_storage_action(env, 1.0))
         assert env.buildings[0].electrical_storage_electricity_consumption[0] == pytest.approx(0.0)
         counts = env._robustness_service.history[0]
-        assert len(counts["asset"]) >= 1
+        assert len(counts["asset"]) == 1
         assert len(counts["dropout"]) >= 1
+        kpis = env.evaluate_v2(include_business_as_usual=False)
+        assert _kpi_value(
+            kpis,
+            "district_robustness_asset_unavailable_time_step_count",
+        ) == pytest.approx(1.0)
     finally:
         env.close()
 

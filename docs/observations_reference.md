@@ -178,7 +178,7 @@ Entity mode returns `tables`, `edges` and `meta`. Feature availability depends o
 | `dr_previous_shortfall_power_kw` | `entity_demand_response` | kW | Shortfall power settled at the previous active DR step. |
 | `community_net_prev_1_kwh_step`, `community_net_prev_3_mean_kwh_step` | `entity_temporal_derived` | kWh/step | District lag features. |
 | `hour_sin/cos`, `day_type_sin/cos`, `month_sin/cos`, `seconds_of_day_sin/cos`, `is_weekend` | `entity_temporal_derived` | ratio/binary | Calendar features; raw `time_step` remains only in payload `meta`. |
-| `forecast_price_next_*`, `forecast_community_{load,pv,net}_next_*` | `entity_forecasts_derived` | mixed | Perfect-simulation point forecasts at 15m/1h/3h/6h/24h. |
+| `forecast_price_next_*`, `forecast_community_{load,pv,net}_next_*` | `entity_forecasts_derived` | mixed | Point forecasts at 15m/1h/3h/6h/24h; their source is declared in `meta.forecast_config`. |
 
 Demand-response `request_id` and baseline validity are exposed in `observations["meta"]["demand_response"]`, not as numeric table columns.
 
@@ -274,7 +274,15 @@ Only present when `entity_core_electrical` is enabled.
 
 Base deferrable features are in `entity_base`; see the flat deferrable table above for definitions. Entity deferrables also include `remaining_duration_hours`, `cycle_remaining_fraction_ratio`, `hours_until_earliest_start`, `start_window_width_hours`, `start_energy_kwh_step`, `start_power_kw` and `must_start_now` for RL deadline pressure. With `entity_action_feedback`, deferrables also expose `last_start_requested`, `last_start_applied`, `start_blocked` and `clip_reason_*`.
 
-Derived forecasts use future dataset values as perfect simulator point forecasts (`meta.forecast_config.source = "actual_future"`, `meta.forecast_config.type = "point"`). They are intended as a simulator contract; real-world adapters should populate equivalent fields from real forecasts.
+Derived forecasts default to future dataset values for backward compatibility
+(`load_pv_method = "actual_future"`). A schema can instead set
+`derived_forecasts.load_pv_method = "daily_persistence"`; load and PV then use
+only the corresponding previous-day observation, with a current-step cold
+start. Price respects the declared day-ahead publication boundary: realised
+OMIE values are exposed only after publication and otherwise use the schema's
+causal fallback (daily persistence in the annual REC suite). The exact sources
+are exposed in `meta.forecast_config`; real-world adapters should populate
+equivalent fields from operational forecasts.
 
 ## Entity Edges
 

@@ -543,7 +543,36 @@ class CityLearnLoadingService:
                     source_label=f'buildings.{building_name}.chargers.{charger_name}.charger_simulation',
                 )
 
-                charger_simulation = ChargerSimulation(*charger_simulation_file.values.T, noise_std=noise_std)
+                # Keep the constructor contract stable when charger datasets add
+                # optional telemetry columns.  Passing the complete dataframe
+                # positionally would silently reinterpret a seventh column as
+                # ``start_time_step``.
+                charger_columns = (
+                    'electric_vehicle_charger_state',
+                    'electric_vehicle_id',
+                    'electric_vehicle_departure_time',
+                    'electric_vehicle_required_soc_departure',
+                    'electric_vehicle_estimated_arrival_time',
+                    'electric_vehicle_estimated_soc_arrival',
+                )
+                missing_charger_columns = [
+                    column for column in charger_columns
+                    if column not in charger_simulation_file.columns
+                ]
+                if missing_charger_columns:
+                    raise ValueError(
+                        f"Charger simulation '{charger_simulation_filepath}' is missing "
+                        f"required columns: {missing_charger_columns}."
+                    )
+                charger_simulation = ChargerSimulation(
+                    *(charger_simulation_file[column].to_numpy() for column in charger_columns),
+                    electric_vehicle_session_id=(
+                        charger_simulation_file['electric_vehicle_session_id'].to_numpy()
+                        if 'electric_vehicle_session_id' in charger_simulation_file.columns
+                        else None
+                    ),
+                    noise_std=noise_std,
+                )
                 self._set_time_step_offset(charger_simulation, schema['simulation_start_time_step'])
                 if 'electric_vehicle_current_soc' in charger_simulation_file.columns:
                     current_soc_raw = pd.to_numeric(charger_simulation_file['electric_vehicle_current_soc'], errors='coerce').to_numpy(dtype='float32')
@@ -1041,10 +1070,82 @@ class CityLearnLoadingService:
     def _read_simulation_dataframe(self, schema: Mapping[str, Any], filepath: Union[str, os.PathLike]) -> pd.DataFrame:
         """Read only the configured simulation window from a CSV or Parquet time series file."""
 
-        return self._read_timeseries_dataframe(
+        dataframe = self._read_timeseries_dataframe(
             filepath,
             start_time_step=int(schema['simulation_start_time_step']),
             end_time_step=int(schema['simulation_end_time_step']),
+        )
+        if not parse_bool(
+            schema.get('terminal_observation_padding', False),
+            default=False,
+            path='terminal_observation_padding',
+        ):
+            return dataframe
+
+        expected_rows = (
+            int(schema['simulation_end_time_step'])
+            - int(schema['simulation_start_time_step'])
+            + 1
+        )
+        if len(dataframe) == expected_rows:
+            return dataframe
+        if len(dataframe) != expected_rows - 1 or dataframe.empty:
+            raise ValueError(
+                'terminal_observation_padding may add exactly one terminal state '
+                f'after the available data; expected {expected_rows - 1} source rows '
+                f'but read {len(dataframe)} from {filepath}.'
+            )
+
+        terminal = dataframe.iloc[-1].copy()
+        # The padded row is a terminal observation, not an additional physical
+        # interval. Calendar fields describe the next quarter-hour boundary.
+        if {'month', 'hour', 'minutes', 'day_type'}.issubset(dataframe.columns):
+            minutes = int(terminal['minutes']) + int(
+                round(float(schema.get('seconds_per_time_step', 3600)) / 60.0)
+            )
+            hour_increment, terminal['minutes'] = divmod(minutes, 60)
+            hour = int(terminal['hour']) + hour_increment
+            day_increment, terminal['hour'] = divmod(hour, 24)
+            if day_increment:
+                terminal['day_type'] = (int(terminal['day_type']) % 7) + 1
+                if int(terminal['month']) == 12:
+                    terminal['month'] = 1
+
+        # A vehicle whose countdown reaches one leaves at the boundary after
+        # the final controlled interval. Make that transition observable to the
+        # KPI layer without inventing a 2024 charging interval.
+        if {
+            'electric_vehicle_charger_state',
+            'electric_vehicle_departure_time',
+        }.issubset(dataframe.columns):
+            state = pd.to_numeric(
+                pd.Series([terminal['electric_vehicle_charger_state']]),
+                errors='coerce',
+            ).iloc[0]
+            departure = pd.to_numeric(
+                pd.Series([terminal['electric_vehicle_departure_time']]),
+                errors='coerce',
+            ).iloc[0]
+            if state == 1 and np.isfinite(departure) and float(departure) <= 1.0:
+                terminal['electric_vehicle_charger_state'] = 3
+                for column in (
+                    'electric_vehicle_session_id',
+                    'electric_vehicle_departure_time',
+                    'electric_vehicle_required_soc_departure',
+                    'electric_vehicle_current_soc',
+                ):
+                    if column in dataframe.columns:
+                        terminal[column] = np.nan
+
+        terminal_frame = pd.DataFrame(
+            {
+                column: pd.Series([terminal[column]], dtype=dtype)
+                for column, dtype in dataframe.dtypes.items()
+            }
+        )
+        return pd.concat(
+            [dataframe, terminal_frame],
+            ignore_index=True,
         )
 
     def _read_timeseries_dataframe(

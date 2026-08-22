@@ -1162,7 +1162,20 @@ class CityLearnRobustnessService:
             },
         )
         target_key = str(descriptor.get("target_key", ""))
-        application_key = f"{event.event_id}:{kind}:{target_key}"
+        if kind == "asset":
+            # An availability event is applied to every observation field and
+            # control port of the affected asset.  Those field-level effects
+            # remain separate observation/action corruption records, but the
+            # asset-time KPI must count the physical entity once per step.
+            asset_identity = str(
+                descriptor.get("global_id")
+                or descriptor.get("raw_id")
+                or descriptor.get("target_id")
+                or target_key
+            )
+            application_key = f"{event.event_id}:{kind}:{asset_identity}"
+        else:
+            application_key = f"{event.event_id}:{kind}:{target_key}"
         already_recorded = application_key in record.get(kind, set())
         record["event_ids"].add(event.event_id)
         record["modules"].add(event.module)

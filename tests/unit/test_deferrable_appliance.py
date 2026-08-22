@@ -210,6 +210,34 @@ def test_start_before_window_or_too_late_is_rejected_and_missed():
     assert appliance.observations()["deadline_missed"] == 1.0
 
 
+def test_requests_expired_before_dynamic_activation_are_not_missed_service():
+    appliance = _appliance(
+        _simulation(profile=[0.3], earliest=1, latest=2, deadline=2),
+        episode_time_steps=8,
+    )
+
+    appliance.skip_cycles_before(global_time_step=3)
+
+    assert appliance.cycle_state["cycle_1"] == "expired_before_activation"
+    assert appliance.service_summary()["completed_cycles"] == 0.0
+    assert appliance.service_summary()["missed_cycles"] == 0.0
+    assert appliance.service_summary()["unserved_energy_kwh"] == 0.0
+
+
+def test_request_with_closed_start_window_is_excluded_even_before_deadline():
+    appliance = _appliance(
+        _simulation(profile=[0.1, 0.2], earliest=1, latest=2, deadline=4),
+        episode_time_steps=8,
+    )
+
+    appliance.skip_cycles_before(global_time_step=3)
+
+    assert appliance.cycle_state["cycle_1"] == "expired_before_activation"
+    assert appliance.service_summary()["completed_cycles"] == 0.0
+    assert appliance.service_summary()["missed_cycles"] == 0.0
+    assert appliance.service_summary()["unserved_energy_kwh"] == 0.0
+
+
 def test_15_second_cycle_keeps_small_kwh_values_exact():
     appliance = _appliance(
         _simulation(profile=[0.001, 0.002], earliest=0, latest=0),

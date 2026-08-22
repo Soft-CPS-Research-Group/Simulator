@@ -58,6 +58,102 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.8.0 - 2026-08-22
+
+Responsável pela release: [@calofonseca](https://github.com/calofonseca).
+
+### Resumo
+
+- Minor release que introduz a suite canónica anual de benchmarks REC e os
+  contratos de runtime, topologia e KPIs necessários para a avaliar de forma
+  reprodutível.
+- Separa a pressão do pedido do controlador da violação residual após projeção,
+  evitando que a ativação do limitador seja reportada como falha de segurança
+  da potência aplicada.
+
+### Adicionado
+
+- Quatro famílias determinísticas de datasets REC de 2023 a 15 minutos:
+  `MICRO-4-Q`, `CORE-15-STRIPPED`, `CORE-30` e `PREMIUM-100`, num total de nove
+  schemas clean, safety, health, dynamic e combined.
+- Gerador reprodutível da suite anual com preços oficiais do mercado diário
+  OMIE Portugal de 2023 e auditorias estrutural, científica, de diversidade,
+  regeneração determinística e smoke de execução.
+- Identidades separadas para membro, charger físico, EV e sessão; vários
+  chargers por membro; contratos de deferrables; limites de potência contratada
+  e margem por fase; settlement e contrafactual grid-only.
+- Forecasts causais de load/PV por persistência diária e forecasts OMIE que
+  respeitam a publicação do mercado diário.
+- Opção `terminal_observation_padding`, que fornece uma fronteira final apenas
+  de observação após os intervalos de controlo pedidos para completar a
+  contabilização de serviço terminal.
+- Agregação histórica de assets dinâmicos nos KPIs de chargers, baterias
+  estacionárias e deferrables, incluindo ciclos de remoção e reinstalação.
+- KPIs v2 `*_electrical_service_phase_requested_pressure_energy_total_kwh` e
+  `*_electrical_service_phase_requested_pressure_event_count`.
+- Evidência de ganho de SOC ligado e de défice na contabilização energética dos
+  EVs.
+- Testes causais para um pedido controlável limitado e para carga não
+  controlável estruturalmente acima do limite.
+- Cobertura de regressão que exige uma única contagem por identidade física e
+  passo temporal, independentemente do número de features e portas de ação que
+  expõem a indisponibilidade.
+
+### Alterado
+
+- A topologia dinâmica passa a repetir eventos anteriores à janela na fronteira
+  do episódio, inicializa novos membros e assets sem simular o histórico omitido,
+  ignora pedidos deferrable já expirados e preserva instâncias anteriores para
+  os KPIs finais.
+- A contabilização de chegada e partida dos EVs passa a respeitar a identidade
+  da sessão, sessões consecutivas e partidas terminais. O current SOC é uma
+  referência de fronteira e não substitui a trajetória de SOC controlada.
+- Os forecasts derivados podem usar persistência causal em vez de valores
+  futuros perfeitos de load/PV. Os schemas existentes mantêm o default anterior.
+- `*_electrical_service_phase_violations_*` mede agora a excedência residual nos
+  históricos de potência ativa total e por fase após projeção.
+- A observação e penalização legadas `charging_constraint_violation_kwh`
+  mantêm a semântica de pressão antes da projeção por compatibilidade.
+- `robustness_asset_unavailable_time_step_count` conta agora pares únicos de
+  identidade do asset e passo temporal, em vez de aplicações por feature.
+
+### Impacto no Dataset/Schema
+
+- A suite anual contém 35 040 passos de 900 segundos ao longo de 2023, com
+  timestamps UTC e atributos de calendário/DST `Europe/Lisbon`.
+- Os schemas variantes partilham os dados físicos congelados e diferem apenas
+  na dimensão experimental declarada. `file_checksums.sha256` fixa todos os
+  ficheiros gerados de cada família.
+- Estes são benchmarks híbridos calibrados, não amostras estatisticamente
+  ajustadas de comunidades portuguesas. Safety cobre potência ativa, ligação e
+  margem por fase, não tensão, potência reativa, proteção ou power flow.
+
+### Compatibilidade
+
+- Os schemas flat e entity existentes continuam funcionais; os novos forecasts
+  e a fronteira terminal são opt-in.
+- Quem interpretava `*_electrical_service_phase_violations_*` como pressão de
+  clipping do pedido deve migrar para os novos KPIs `*_requested_pressure_*`.
+- Os datasets anuais são assets de benchmark do repositório. Utilizadores do
+  pacote PyPI devem fornecer um checkout ou path montado para os utilizar.
+
+### Validação
+
+- `.venv/bin/pytest -q`: aprovado, `457 passed, 18 warnings`.
+- Lint crítico, compatibilidade sintática com Python 3.9 e smoke de desempenho
+  do CI: aprovados.
+- Auditorias estrutural, de diversidade, científica e de regeneração
+  determinística da suite anual REC: aprovadas.
+- Smoke das nove schemas: aprovado, com `6 048` transições regulares, os `120`
+  efeitos topológicos e `31 565` features causais de preço verificados.
+
+### Notas de Migração
+
+- Não é necessária migração para cenários existentes que não ativem as novas
+  funcionalidades.
+- Ambientes de algoritmos que usem os novos contratos de fronteira terminal,
+  histórico dinâmico ou KPIs devem fixar `softcpsrecsimulator==1.8.0`.
+
 ## v1.6.1 - 2026-08-06
 
 Responsavel pela release: [@calofonseca](https://github.com/calofonseca).
