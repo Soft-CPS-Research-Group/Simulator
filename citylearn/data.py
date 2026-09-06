@@ -894,6 +894,10 @@ class ChargerSimulation(TimeSeriesData):
             3: 'Commuting (vehicle is away)'
     electric_vehicle_id : np.array
         Identifier for the electric vehicle.
+    electric_vehicle_session_id : np.array
+        Identifier for the charging session. This remains distinct from the EV
+        identifier because the same vehicle may begin a new session without an
+        intervening disconnected charger row.
     electric_vehicle_departure_time : np.array
         Number of time steps expected until the EV departs from the charger (only for state 1).
         Defaults to -1 when not present.
@@ -918,6 +922,7 @@ class ChargerSimulation(TimeSeriesData):
         electric_vehicle_required_soc_departure: Iterable[float],
         electric_vehicle_estimated_arrival_time: Iterable[float],
         electric_vehicle_estimated_soc_arrival: Iterable[float],
+        electric_vehicle_session_id: Iterable[str] = None,
         start_time_step: int = None,
         end_time_step: int = None,
         noise_std: float = 1.0,
@@ -936,6 +941,12 @@ class ChargerSimulation(TimeSeriesData):
         ], dtype='float32')
 
         self.electric_vehicle_id = np.array(electric_vehicle_id, dtype=object)
+        self.electric_vehicle_session_id = np.array(
+            [""] * len(self.electric_vehicle_id)
+            if electric_vehicle_session_id is None
+            else electric_vehicle_session_id,
+            dtype=object,
+        )
 
 
         departure_time_arr = np.array(electric_vehicle_departure_time, dtype='float32')
@@ -985,6 +996,82 @@ class ChargerSimulation(TimeSeriesData):
 
         normalized[valid] = np.clip(normalized[valid], 0.0, 1.0)
         return normalized.astype('float32')
+
+class EscalatorSimulation(TimeSeriesData):
+    """Time series inputs for an escalator controlled at each simulation step.
+
+    The model deliberately stays aggregate: passengers are a demand signal, not
+    individual agents or queues.  This makes it suitable for energy-management
+    experiments while preserving a traceable service KPI when an escalator is
+    left in standby while passengers are expected.
+    """
+
+    REQUIRED_COLUMNS = {
+        'time_step',
+        'passengers_from_trains_15min',
+        'background_pedestrians_15min',
+        'passengers_expected_15min',
+        'people_detected',
+        'arriving_trains',
+        'departing_trains',
+        'minutes_to_next_train',
+        'available',
+    }
+
+    @classmethod
+    def from_dataframe(cls, dataframe: pd.DataFrame, source_label: str = None) -> 'EscalatorSimulation':
+        """Validate and construct an escalator simulation from a CSV dataframe."""
+
+        source_label = source_label or 'escalator'
+        missing = cls.REQUIRED_COLUMNS.difference(dataframe.columns)
+        if missing:
+            raise ValueError(f'{source_label} is missing columns: {sorted(missing)}.')
+
+        frame = dataframe.copy()
+        numeric_columns = list(cls.REQUIRED_COLUMNS)
+        for column in numeric_columns:
+            frame[column] = pd.to_numeric(frame[column], errors='coerce')
+
+        if frame[numeric_columns].isna().any().any() or not np.isfinite(frame[numeric_columns].to_numpy(dtype='float64')).all():
+            raise ValueError(f'{source_label} contains non-finite values in required columns.')
+
+        time_steps = frame['time_step'].to_numpy(dtype='int64')
+        if not np.array_equal(time_steps, np.arange(len(frame), dtype='int64')):
+            raise ValueError(f'{source_label}.time_step must be contiguous and start at 0.')
+
+        non_negative = (
+            'passengers_from_trains_15min', 'background_pedestrians_15min',
+            'passengers_expected_15min', 'arriving_trains', 'departing_trains',
+            'minutes_to_next_train',
+        )
+        if (frame[list(non_negative)] < 0.0).any().any():
+            raise ValueError(f'{source_label} has a negative demand, train-count or time-to-train value.')
+
+        for column in ('people_detected', 'available'):
+            values = frame[column].to_numpy(dtype='float64')
+            if not np.isin(values, (0.0, 1.0)).all():
+                raise ValueError(f'{source_label}.{column} must contain only 0 or 1.')
+
+        expected = frame['passengers_from_trains_15min'] + frame['background_pedestrians_15min']
+        if not np.allclose(
+            frame['passengers_expected_15min'].to_numpy(dtype='float64'),
+            expected.to_numpy(dtype='float64'), rtol=1.0e-5, atol=1.0e-4,
+        ):
+            raise ValueError(
+                f'{source_label}.passengers_expected_15min must equal '
+                'passengers_from_trains_15min + background_pedestrians_15min.'
+            )
+
+        instance = cls()
+        for column in dataframe.columns:
+            values = frame[column].to_numpy(copy=False)
+            if column in ('people_detected', 'available', 'arriving_trains', 'departing_trains', 'time_step'):
+                values = values.astype('int32')
+            elif np.issubdtype(values.dtype, np.number):
+                values = values.astype('float32')
+            setattr(instance, column, values)
+        return instance
+
 
 class DeferrableApplianceSimulation:
     """Sparse deferrable-appliance cycle catalogue and flexibility schedule.

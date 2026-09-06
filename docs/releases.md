@@ -60,6 +60,146 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.8.0 - 2026-08-22
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+- Minor release introducing the canonical annual REC benchmark suite and the
+  runtime, topology and KPI contracts required to evaluate it reproducibly.
+- Separates controller-request pressure from post-projection electrical-service
+  violations, so constraint activation is no longer reported as an applied-power
+  safety failure.
+
+### Added
+
+- Four deterministic 2023 quarter-hour REC dataset families: `MICRO-4-Q`,
+  `CORE-15-STRIPPED`, `CORE-30` and `PREMIUM-100`, comprising nine clean,
+  safety, health, dynamic and combined schemas.
+- A reproducible annual-suite generator using official 2023 Portuguese OMIE
+  day-ahead prices, together with structural, scientific, diversity,
+  deterministic-regeneration and execution-smoke audits.
+- Separate member, physical-charger, EV and charging-session identities;
+  multiple chargers per member; deferrable-service contracts; Portuguese
+  connection-power and phase-headroom surrogates; settlement and grid-only
+  counterfactuals.
+- Causal daily-persistence load/PV forecasts and publication-aware OMIE price
+  forecasts for benchmark schemas.
+- Optional `terminal_observation_padding`, providing one observation-only
+  boundary after the requested control intervals for complete terminal service
+  accounting.
+- Historical dynamic-asset aggregation for charger, stationary-storage and
+  deferrable KPIs, including remove/reinstall lifecycles.
+- `*_electrical_service_phase_requested_pressure_energy_total_kwh` and
+  `*_electrical_service_phase_requested_pressure_event_count` KPI v2 rows.
+- EV connected-SOC-gain and energy-accounting-shortfall evidence.
+- Causal tests for a clipped controllable request and for a structurally
+  infeasible non-controllable load.
+- Regression coverage requiring asset-unavailability KPIs to count one
+  physical asset once per affected time step, independently of how many entity
+  features and action ports expose the outage.
+
+### Changed
+
+- Dynamic topology now replays pre-window events at the episode boundary,
+  initializes newly activated members and assets without simulating omitted
+  history, skips expired deferrable requests and preserves prior runtime
+  instances for end-of-episode evidence.
+- EV arrival and departure accounting now respects explicit session identity,
+  back-to-back sessions and terminal departures. Current-SOC telemetry is used
+  as a connection-boundary reference and does not overwrite controlled SOC
+  trajectories.
+- Derived entity forecasts can select causal persistence instead of simulator-
+  perfect future load/PV values. Existing schemas retain their previous default.
+- `*_electrical_service_phase_violations_*` now measures residual exceedance in
+  the post-projection total and phase active-power histories.
+- The legacy `charging_constraint_violation_kwh` observation and reward penalty
+  retain pre-projection pressure semantics for controller feedback and backward
+  compatibility.
+- `robustness_asset_unavailable_time_step_count` now counts unique
+  asset-identity/time-step pairs instead of target-field applications.
+
+### Dataset/Schema Impact
+
+- The annual suite uses 35,040 steps at 900 seconds over calendar year 2023,
+  with UTC timestamps and `Europe/Lisbon` calendar/DST attributes.
+- Variant schemas share frozen physical data and differ only in the declared
+  experimental dimension. `file_checksums.sha256` freezes every generated
+  family file.
+- The scenarios are calibrated hybrid benchmarks, not statistically fitted
+  samples of Portuguese communities. Electrical safety covers active-power
+  connection and phase headroom, not feeder voltage, reactive power,
+  protection or power flow.
+
+### Compatibility
+
+- Existing flat and entity schemas remain loadable; new forecast and terminal-
+  boundary behaviour is opt-in.
+- Consumers that previously interpreted
+  `*_electrical_service_phase_violations_*` as requested-action clipping pressure
+  must migrate to the new `*_requested_pressure_*` rows.
+- The annual datasets are repository benchmark assets. Consumers of the PyPI
+  package should provide a checkout or mounted dataset path when using them.
+
+### Validation
+
+- `.venv/bin/pytest -q`: pass, `457 passed, 18 warnings`.
+- Critical lint, Python 3.9 syntax targeting and the CI performance smoke: pass.
+- Annual REC structural, diversity, scientific and deterministic-generation
+  audits: pass.
+- Nine-schema annual REC smoke: pass, `6,048` regular transitions, all `120`
+  topology-event effects and `31,565` causal price features checked.
+
+### Migration Notes
+
+- No migration is needed for existing scenarios that do not opt into the new
+  features.
+- Pin `softcpsrecsimulator==1.8.0` in algorithm environments that use the new
+  terminal-boundary, dynamic-history or KPI contracts.
+
+## v1.6.1 - 2026-08-06
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+### Summary
+
+Patch release adding aggregate escalator control for station-energy simulations and the final
+15-minute EC_Ermesinde scenario.
+
+### Added
+
+- Added `EscalatorSimulation` and `Escalator` with normalized standby/slow/normal actions.
+- Added flat escalator demand, train-context, state, power and service observations.
+- Added escalator electricity, passenger-service and state-change KPI v2 rows.
+- Added the annual `EC_Ermesinde` dataset, its reproducible generator and integration tests.
+
+### Changed
+
+- Building net electricity consumption now includes escalator electricity use.
+- The loader expands `escalator_*` observations and `escalator` actions per configured asset.
+
+### Dataset/Schema Impact
+
+- `EC_Ermesinde` uses 900-second steps and six escalator CSV files.
+- Existing schemas are unaffected. Escalator support is additive and currently uses the flat interface.
+
+### Compatibility
+
+- Compatible patch release for existing schemas and flat-interface users.
+- New scenarios should provide the required escalator CSV columns documented in the schema reference.
+
+### Validation
+
+- `.venv/bin/pytest -q tests/test_escalator_integration.py tests/test_deferrable_appliance_integration.py tests/test_scenario_smoke.py`: pass, `19 passed`.
+- Annual EC_Ermesinde smoke simulation: pass, `35,039` transitions completed.
+- Standby/slow/normal control comparison: pass; slow and normal serve demand while using distinct energy.
+
+### Migration Notes
+
+- No migration is required. To enable the feature, add `buildings.<id>.escalators`, the
+  `escalator_*` observation helpers and the `escalator` action helper.
+
 ## v1.5.6 - 2026-07-29
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

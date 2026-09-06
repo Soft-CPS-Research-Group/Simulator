@@ -935,6 +935,7 @@ class CityLearnEntityInterfaceService:
                     if getattr(env, "_robustness_service", None) is not None
                     else {"enabled": False, "active_event_ids": []}
                 ),
+                "runtime_status": self._runtime_status_payload(),
             },
         }
         if debug_timing:
@@ -944,6 +945,60 @@ class CityLearnEntityInterfaceService:
             env._last_entity_observation_debug_timing = {}
 
         return payload
+
+    def _runtime_status_payload(self) -> Mapping[str, Any]:
+        """Return raw connection/quality evidence for typed consumers.
+
+        This payload intentionally contains no policy health classification.
+        Consumers such as the Typed Interface Compiler own that derivation.
+        """
+
+        service = getattr(self.env, "_robustness_service", None)
+        if service is not None:
+            status = dict(service.runtime_status())
+        else:
+            status = {
+                "version": "runtime_status_v1",
+                "emits_health_state": False,
+                "active_events": [],
+                "asset_connections": [],
+                "asset_availability": [],
+                "sensor_channels": [],
+                "actuator_channels": [],
+                "communication_links": [],
+                "value_quality": [],
+            }
+        status["asset_connections"] = self._asset_connection_status_records()
+        return status
+
+    def _asset_connection_status_records(self) -> List[Mapping[str, Any]]:
+        records: List[Mapping[str, Any]] = []
+        for ref in self._charger_refs:
+            connected = bool(
+                ref.row < len(self._charger_to_ev_connected_mask)
+                and self._charger_to_ev_connected_mask[ref.row] > 0.5
+            )
+            ev_id = None
+            if connected and ref.row < len(self._charger_to_ev_connected):
+                ev_row = int(self._charger_to_ev_connected[ref.row, 1])
+                if 0 <= ev_row < len(self._ev_ids):
+                    ev_id = str(self._ev_ids[ev_row])
+            records.append(
+                {
+                    "relation": "charger_to_ev_connected",
+                    "source_type": "charger",
+                    "source_id": str(ref.global_id),
+                    "target_type": "ev",
+                    "target_id": ev_id,
+                    "building_id": str(ref.building_name),
+                    "connection": "CONNECTED" if connected else "DISCONNECTED",
+                    "availability": "AVAILABLE",
+                    "quality": "NOMINAL",
+                    "fault_mode": None,
+                    "event_ids": [],
+                }
+            )
+        return records
 
     def parse_actions(self, actions: Any) -> List[Mapping[str, float]]:
         """Parse canonical entity action payload into per-building action dicts."""
@@ -1306,12 +1361,83 @@ class CityLearnEntityInterfaceService:
         return features
 
     def _forecast_config_meta(self) -> Mapping[str, Any]:
+        config = self._derived_forecast_config()
+        method = config["method"]
         return {
-            "source": "actual_future",
+            "source": "actual_future" if method == "actual_future" else "mixed_causal",
             "type": "point",
+            "load_pv_method": method,
+            "price_source": config["price_source"],
+            "price_horizon_steps": list(config["price_horizon_steps"]),
+            "price_intermediate_horizon_alignment": (
+                "realized_target"
+                if config["price_source"] == "known_future_market_input"
+                else "earliest_declared_horizon_with_historical_issue_time"
+            ),
+            "persistence_period_seconds": config["period_seconds"],
+            "cold_start": config["cold_start"],
             "horizons": [label for label, _ in self.FORECAST_HORIZONS],
             "building_signals": list(self.DERIVED_FORECAST_BUILDING_SIGNALS),
             "district_signals": ["price", *[f"community_{signal}" for signal in self.DERIVED_FORECAST_DISTRICT_SIGNALS]],
+        }
+
+    def _derived_forecast_config(self) -> Mapping[str, Any]:
+        schema = getattr(self.env, "schema", {}) or {}
+        raw = schema.get("derived_forecasts", {}) if isinstance(schema, Mapping) else {}
+        raw = raw if isinstance(raw, Mapping) else {}
+        method = str(raw.get("load_pv_method", raw.get("method", "actual_future"))).strip().lower()
+        if method not in {"actual_future", "daily_persistence"}:
+            raise ValueError(
+                "derived_forecasts.load_pv_method must be one of "
+                "{'actual_future', 'daily_persistence'}."
+            )
+
+        period_seconds = float(raw.get("persistence_period_seconds", 24 * 60 * 60))
+        if not np.isfinite(period_seconds) or period_seconds <= 0.0:
+            raise ValueError("derived_forecasts.persistence_period_seconds must be > 0.")
+
+        cold_start = str(raw.get("cold_start", "current_step")).strip().lower()
+        if cold_start != "current_step":
+            raise ValueError("derived_forecasts.cold_start currently supports only 'current_step'.")
+
+        price_source = str(
+            raw.get("price_source", "known_future_market_input")
+        ).strip().lower()
+        if price_source not in {
+            "known_future_market_input",
+            "publication_aware_day_ahead_market_input",
+            "daily_persistence",
+        }:
+            raise ValueError(
+                "derived_forecasts.price_source must be one of "
+                "{'known_future_market_input', "
+                "'publication_aware_day_ahead_market_input', "
+                "'daily_persistence'}."
+            )
+
+        raw_price_horizons = raw.get("price_horizon_steps", [1, 2, 3])
+        try:
+            price_horizon_steps = tuple(int(value) for value in raw_price_horizons)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "derived_forecasts.price_horizon_steps must be an ordered sequence of positive integers."
+            ) from exc
+        if (
+            len(price_horizon_steps) != 3
+            or any(value <= 0 for value in price_horizon_steps)
+            or tuple(sorted(price_horizon_steps)) != price_horizon_steps
+            or len(set(price_horizon_steps)) != len(price_horizon_steps)
+        ):
+            raise ValueError(
+                "derived_forecasts.price_horizon_steps must contain three strictly increasing positive integers."
+            )
+
+        return {
+            "method": method,
+            "period_seconds": period_seconds,
+            "cold_start": cold_start,
+            "price_source": price_source,
+            "price_horizon_steps": price_horizon_steps,
         }
 
     @staticmethod
@@ -2083,6 +2209,95 @@ class CityLearnEntityInterfaceService:
 
         return min(max(int(time_step) + int(steps_ahead), 0), length - 1)
 
+    def _derived_forecast_point_index_from_steps(
+        self,
+        time_step: int,
+        steps_ahead: int,
+        length: int,
+    ) -> int:
+        """Resolve a load/PV forecast source without accidental future leakage."""
+
+        target = self._forecast_point_index_from_steps(time_step, steps_ahead, length)
+        if target < 0:
+            return target
+
+        config = self._derived_forecast_config()
+        if config["method"] == "actual_future":
+            return target
+
+        step_seconds = max(
+            float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0),
+            1.0,
+        )
+        period_steps = max(1, int(round(config["period_seconds"] / step_seconds)))
+        source = target - period_steps
+        current = min(max(int(time_step), 0), length - 1)
+        if source < 0 or source > current:
+            return current
+
+        return source
+
+    def _derived_price_forecast_value(
+        self,
+        pricing,
+        time_step: int,
+        steps_ahead: int,
+    ) -> float:
+        """Return a price forecast without reading unpublished future truth.
+
+        Publication-aware datasets expose three declared forecast horizons.
+        A requested intermediate horizon is aligned to the shortest available
+        horizon that can target the same delivery step, issued far enough in
+        the past that its array index is no later than the current step.  This
+        makes 15-minute and 3-hour entity features causal even though the base
+        CityLearn pricing contract stores only three forecast columns.
+        """
+
+        actual = getattr(pricing, "electricity_pricing", [])
+        length = len(actual)
+        target = self._forecast_point_index_from_steps(
+            time_step,
+            steps_ahead,
+            length,
+        )
+        if target < 0:
+            return 0.0
+
+        config = self._derived_forecast_config()
+        price_source = config["price_source"]
+        if price_source == "known_future_market_input":
+            return self._safe_index(actual, target, 0.0)
+
+        current = min(max(int(time_step), 0), length - 1)
+        if price_source == "publication_aware_day_ahead_market_input":
+            forecast_series = (
+                getattr(pricing, "electricity_pricing_predicted_1", []),
+                getattr(pricing, "electricity_pricing_predicted_2", []),
+                getattr(pricing, "electricity_pricing_predicted_3", []),
+            )
+            for declared_horizon, values in zip(
+                config["price_horizon_steps"],
+                forecast_series,
+            ):
+                if declared_horizon < int(steps_ahead):
+                    continue
+
+                issue_step = current - (declared_horizon - int(steps_ahead))
+                if issue_step >= 0 and len(values) == length:
+                    return self._safe_index(values, issue_step, 0.0)
+
+        period_steps = max(
+            1,
+            int(round(
+                config["period_seconds"]
+                / max(float(getattr(self.env, "seconds_per_time_step", 3600.0) or 3600.0), 1.0)
+            )),
+        )
+        source = target - period_steps
+        if source < 0 or source > current:
+            source = current
+        return self._safe_index(actual, source, 0.0)
+
     def _building_forecast_components_at_step(
         self,
         building,
@@ -2145,7 +2360,11 @@ class CityLearnEntityInterfaceService:
         length = len(getattr(building.energy_simulation, "non_shiftable_load", []))
 
         for label, steps_ahead in self._forecast_step_offsets:
-            point_index = self._forecast_point_index_from_steps(time_step, steps_ahead, length)
+            point_index = self._derived_forecast_point_index_from_steps(
+                time_step,
+                steps_ahead,
+                length,
+            )
             load_kw, pv_kw, net_kw = (
                 self._building_forecast_components_at_step(building, point_index, include_deferrable=True)
                 if point_index >= 0 else (0.0, 0.0, 0.0)
@@ -2168,21 +2387,20 @@ class CityLearnEntityInterfaceService:
         first = self.env.buildings[0]
 
         for label, steps_ahead in self._forecast_step_offsets:
-            price_index = self._forecast_point_index_from_steps(
+            metrics[f"forecast_price_next_{label}"] = self._derived_price_forecast_value(
+                first.pricing,
                 time_step,
                 steps_ahead,
-                len(getattr(first.pricing, "electricity_pricing", [])),
-            )
-            metrics[f"forecast_price_next_{label}"] = self._safe_index(
-                getattr(first.pricing, "electricity_pricing", []),
-                price_index,
-                0.0,
             )
             if community_values is None:
                 label_values = {signal: 0.0 for signal in self.DERIVED_FORECAST_DISTRICT_SIGNALS}
                 for building in self.env.buildings:
                     length = len(getattr(building.energy_simulation, "non_shiftable_load", []))
-                    point_index = self._forecast_point_index_from_steps(time_step, steps_ahead, length)
+                    point_index = self._derived_forecast_point_index_from_steps(
+                        time_step,
+                        steps_ahead,
+                        length,
+                    )
                     if point_index < 0:
                         continue
                     load_kw, pv_kw, net_kw = self._building_forecast_components_at_step(
@@ -2854,6 +3072,43 @@ class CityLearnEntityInterfaceService:
 
         self._specs = {
             "version": "entity_v1",
+            "runtime_status_contract": {
+                "version": "runtime_status_v1",
+                "emits_health_state": False,
+                "fault_mode_semantics": "raw_cause_not_health_state",
+                "sparse_defaults": {
+                    "availability": "AVAILABLE",
+                    "quality": "NOMINAL",
+                },
+                "event_domains": [
+                    "ASSET_CONNECTION",
+                    "ASSET_AVAILABILITY",
+                    "SENSOR_CHANNEL",
+                    "ACTUATOR_CHANNEL",
+                    "COMMUNICATION_LINK",
+                    "VALUE_QUALITY",
+                ],
+                "collections": [
+                    "active_events",
+                    "asset_connections",
+                    "asset_availability",
+                    "sensor_channels",
+                    "actuator_channels",
+                    "communication_links",
+                    "value_quality",
+                ],
+            },
+            "action_execution_contract": {
+                "version": "entity_action_execution_v1",
+                "nullable_unobservable_fields": True,
+                "stages": [
+                    "requested_value",
+                    "post_channel_value",
+                    "limited_value",
+                    "applied_value",
+                    "applied_power_kw",
+                ],
+            },
             "temporal_semantics": {
                 "exogenous": "t",
                 "endogenous": "t_minus_1_settled",

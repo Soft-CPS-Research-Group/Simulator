@@ -19,10 +19,11 @@ from citylearn.data import (
     LogisticRegressionOccupantParameters,
     Pricing,
     DeferrableApplianceSimulation,
+    EscalatorSimulation,
     Weather,
 )
 from citylearn.electric_vehicle import ElectricVehicle
-from citylearn.energy_model import Battery, DeferrableAppliance, PV
+from citylearn.energy_model import Battery, DeferrableAppliance, Escalator, PV
 from citylearn.reward_function import MultiBuildingRewardFunction, RewardFunction
 from citylearn.utilities import parse_bool
 
@@ -134,16 +135,32 @@ class CityLearnLoadingService:
             key: value for key, value in schema["actions"].items()
             if key == "deferrable_appliance" or key.startswith("deferrable_appliance_")
         }
+        schema['escalator_observations_helper'] = {
+            key: value for key, value in schema['observations'].items()
+            if key.startswith('escalator_')
+        }
+        schema['escalator_actions_helper'] = {
+            key: value for key, value in schema['actions'].items()
+            if key == 'escalator' or key.startswith('escalator_')
+        }
 
         schema['observations'] = {
             key: value
             for key, value in schema["observations"].items()
-            if key not in set(schema['chargers_observations_helper']) | set(schema['deferrable_appliance_observations_helper'])
+            if key not in (
+                set(schema['chargers_observations_helper'])
+                | set(schema['deferrable_appliance_observations_helper'])
+                | set(schema['escalator_observations_helper'])
+            )
         }
         schema['actions'] = {
             key: value
             for key, value in schema['actions'].items()
-            if key not in set(schema['chargers_actions_helper']) | set(schema['deferrable_appliance_actions_helper'])
+            if key not in (
+                set(schema['chargers_actions_helper'])
+                | set(schema['deferrable_appliance_actions_helper'])
+                | set(schema['escalator_actions_helper'])
+            )
         }
 
         schema['shared_observations'] = (
@@ -154,6 +171,7 @@ class CityLearnLoadingService:
                 for k, v in schema['observations'].items()
                 if not k.startswith("electric_vehicle_")
                 and not k.startswith("deferrable_appliance_")
+                and not k.startswith("escalator_")
                 and parse_bool(v.get('shared_in_central_agent', False), default=False, path=f'observations.{k}.shared_in_central_agent')
             ]
         )
@@ -525,7 +543,36 @@ class CityLearnLoadingService:
                     source_label=f'buildings.{building_name}.chargers.{charger_name}.charger_simulation',
                 )
 
-                charger_simulation = ChargerSimulation(*charger_simulation_file.values.T, noise_std=noise_std)
+                # Keep the constructor contract stable when charger datasets add
+                # optional telemetry columns.  Passing the complete dataframe
+                # positionally would silently reinterpret a seventh column as
+                # ``start_time_step``.
+                charger_columns = (
+                    'electric_vehicle_charger_state',
+                    'electric_vehicle_id',
+                    'electric_vehicle_departure_time',
+                    'electric_vehicle_required_soc_departure',
+                    'electric_vehicle_estimated_arrival_time',
+                    'electric_vehicle_estimated_soc_arrival',
+                )
+                missing_charger_columns = [
+                    column for column in charger_columns
+                    if column not in charger_simulation_file.columns
+                ]
+                if missing_charger_columns:
+                    raise ValueError(
+                        f"Charger simulation '{charger_simulation_filepath}' is missing "
+                        f"required columns: {missing_charger_columns}."
+                    )
+                charger_simulation = ChargerSimulation(
+                    *(charger_simulation_file[column].to_numpy() for column in charger_columns),
+                    electric_vehicle_session_id=(
+                        charger_simulation_file['electric_vehicle_session_id'].to_numpy()
+                        if 'electric_vehicle_session_id' in charger_simulation_file.columns
+                        else None
+                    ),
+                    noise_std=noise_std,
+                )
                 self._set_time_step_offset(charger_simulation, schema['simulation_start_time_step'])
                 if 'electric_vehicle_current_soc' in charger_simulation_file.columns:
                     current_soc_raw = pd.to_numeric(charger_simulation_file['electric_vehicle_current_soc'], errors='coerce').to_numpy(dtype='float32')
@@ -567,12 +614,28 @@ class CityLearnLoadingService:
                 )
             )
 
+        escalators_list = []
+        for escalator_name, escalator_schema in (building_schema.get('escalators', {}) or {}).items():
+            escalators_list.append(
+                self.load_escalator(
+                    escalator_name,
+                    building_name,
+                    schema,
+                    escalator_schema,
+                    episode_tracker,
+                    expected_rows=expected_rows,
+                    window=member_window,
+                    time_step_ratio=building_kwargs['time_step_ratio'],
+                )
+            )
+
         declared_inactive_actions = self._resolve_inactive_actions(index, building_schema, kwargs)
         observation_metadata, action_metadata = self.process_metadata(
             schema,
             building_schema,
             chargers_list,
             deferrable_appliances_list,
+            escalators_list,
             index,
             energy_simulation,
             **kwargs,
@@ -581,6 +644,7 @@ class CityLearnLoadingService:
         building: Building = building_constructor(
             energy_simulation=energy_simulation,
             deferrable_appliances=deferrable_appliances_list,
+            escalators=escalators_list,
             electric_vehicle_chargers=chargers_list,
             weather=weather,
             observation_metadata=observation_metadata,
@@ -677,6 +741,7 @@ class CityLearnLoadingService:
         building_schema,
         chargers_list,
         deferrable_appliances_list,
+        escalators_list,
         index,
         energy_simulation: EnergySimulation,
         **kwargs,
@@ -700,6 +765,10 @@ class CityLearnLoadingService:
             k: parse_bool(v.get('active', False), default=False, path=f'observations.{k}.active')
             for k, v in schema['deferrable_appliance_observations_helper'].items()
         }
+        escalator_observations_metadata_helper = {
+            k: parse_bool(v.get('active', False), default=False, path=f'observations.{k}.active')
+            for k, v in schema['escalator_observations_helper'].items()
+        }
 
         if kwargs.get('active_observations') is not None:
             active_observations = kwargs['active_observations']
@@ -707,6 +776,7 @@ class CityLearnLoadingService:
             observation_metadata = {k: True if k in active_observations else False for k in observation_metadata}
             chargers_observations_metadata_helper = {k: True if k in active_observations else False for k in chargers_observations_metadata_helper}
             deferrable_appliance_observations_metadata_helper = {k: True if k in active_observations else False for k in deferrable_appliance_observations_metadata_helper}
+            escalator_observations_metadata_helper = {k: True if k in active_observations else False for k in escalator_observations_metadata_helper}
 
         if kwargs.get('inactive_observations') is not None:
             inactive_observations = kwargs['inactive_observations']
@@ -728,6 +798,10 @@ class CityLearnLoadingService:
             k: False if k in inactive_observations else deferrable_appliance_observations_metadata_helper[k]
             for k in deferrable_appliance_observations_metadata_helper
         }
+        escalator_observations_metadata_helper = {
+            k: False if k in inactive_observations else escalator_observations_metadata_helper[k]
+            for k in escalator_observations_metadata_helper
+        }
 
         action_metadata = {
             k: parse_bool(v.get('active', False), default=False, path=f'actions.{k}.active')
@@ -741,6 +815,10 @@ class CityLearnLoadingService:
             k: parse_bool(v.get('active', False), default=False, path=f'actions.{k}.active')
             for k, v in schema['deferrable_appliance_actions_helper'].items()
         }
+        escalator_actions_metadata_helper = {
+            k: parse_bool(v.get('active', False), default=False, path=f'actions.{k}.active')
+            for k, v in schema['escalator_actions_helper'].items()
+        }
 
         if kwargs.get('active_actions') is not None:
             active_actions = kwargs['active_actions']
@@ -748,12 +826,14 @@ class CityLearnLoadingService:
             action_metadata = {k: True if k in active_actions else False for k in action_metadata}
             chargers_actions_metadata_helper = {k: True if k in active_actions else False for k in chargers_actions_metadata_helper}
             deferrable_appliance_actions_metadata_helper = {k: True if k in active_actions else False for k in deferrable_appliance_actions_metadata_helper}
+            escalator_actions_metadata_helper = {k: True if k in active_actions else False for k in escalator_actions_metadata_helper}
 
         inactive_actions = self._resolve_inactive_actions(index, building_schema, kwargs)
 
         action_metadata = {k: False if k in inactive_actions else v for k, v in action_metadata.items()}
         chargers_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in chargers_actions_metadata_helper.items()}
         deferrable_appliance_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in deferrable_appliance_actions_metadata_helper.items()}
+        escalator_actions_metadata_helper = {k: False if k in inactive_actions else v for k, v in escalator_actions_metadata_helper.items()}
 
         if len(chargers_list) > 0:
             for charger in chargers_list:
@@ -795,6 +875,16 @@ class CityLearnLoadingService:
 
                 if deferrable_appliance_actions_metadata_helper.get('deferrable_appliance', False):
                     action_metadata[f'deferrable_appliance_{appliance.name}'] = True
+
+        if len(escalators_list) > 0:
+            for escalator in escalators_list:
+                for helper_name, active in escalator_observations_metadata_helper.items():
+                    if active:
+                        feature_name = helper_name.replace('escalator_', '', 1)
+                        observation_metadata[f'escalator_{escalator.name}_{feature_name}'] = True
+
+                if escalator_actions_metadata_helper.get('escalator', False):
+                    action_metadata[f'escalator_{escalator.name}'] = True
 
         return observation_metadata, action_metadata
 
@@ -913,6 +1003,50 @@ class CityLearnLoadingService:
 
         return appliance
 
+    def load_escalator(
+        self,
+        escalator_name: str,
+        building_name: str,
+        schema: dict,
+        escalator_schema: dict,
+        episode_tracker: EpisodeTracker,
+        *,
+        expected_rows: int,
+        window: Optional[Tuple[int, int]],
+        time_step_ratio: float,
+    ) -> Escalator:
+        """Load one aggregate escalator demand series and operating specification."""
+
+        simulation_file = escalator_schema.get('simulation') or escalator_schema.get('simulation_file')
+        if not simulation_file:
+            raise ValueError(f'buildings.{building_name}.escalators.{escalator_name}.simulation is required.')
+        filepath = os.path.join(schema['root_directory'], simulation_file)
+        dataframe = self._read_simulation_dataframe(schema, filepath)
+        dataframe = self._align_dynamic_timeseries_dataframe(
+            dataframe,
+            expected_rows=expected_rows,
+            window=window,
+            source_label=f'buildings.{building_name}.escalators.{escalator_name}.simulation',
+        )
+        source_label = f'buildings.{building_name}.escalators.{escalator_name}'
+        simulation = EscalatorSimulation.from_dataframe(dataframe, source_label=source_label)
+        self._set_time_step_offset(simulation, schema['simulation_start_time_step'])
+
+        escalator_type = escalator_schema.get('type', 'citylearn.energy_model.Escalator')
+        module_name = '.'.join(escalator_type.split('.')[:-1])
+        class_name = escalator_type.split('.')[-1]
+        constructor = getattr(importlib.import_module(module_name), class_name)
+        attributes = dict(escalator_schema.get('attributes', {}) or {})
+        return constructor(
+            escalator_simulation=simulation,
+            episode_tracker=episode_tracker,
+            name=escalator_name,
+            seconds_per_time_step=schema['seconds_per_time_step'],
+            time_step_ratio=time_step_ratio,
+            random_seed=schema['random_seed'],
+            **attributes,
+        )
+
     def load_washing_machine(self, *args, **kwargs):
         raise ValueError(
             "Legacy 'washing_machines' schemas are no longer supported. "
@@ -936,10 +1070,82 @@ class CityLearnLoadingService:
     def _read_simulation_dataframe(self, schema: Mapping[str, Any], filepath: Union[str, os.PathLike]) -> pd.DataFrame:
         """Read only the configured simulation window from a CSV or Parquet time series file."""
 
-        return self._read_timeseries_dataframe(
+        dataframe = self._read_timeseries_dataframe(
             filepath,
             start_time_step=int(schema['simulation_start_time_step']),
             end_time_step=int(schema['simulation_end_time_step']),
+        )
+        if not parse_bool(
+            schema.get('terminal_observation_padding', False),
+            default=False,
+            path='terminal_observation_padding',
+        ):
+            return dataframe
+
+        expected_rows = (
+            int(schema['simulation_end_time_step'])
+            - int(schema['simulation_start_time_step'])
+            + 1
+        )
+        if len(dataframe) == expected_rows:
+            return dataframe
+        if len(dataframe) != expected_rows - 1 or dataframe.empty:
+            raise ValueError(
+                'terminal_observation_padding may add exactly one terminal state '
+                f'after the available data; expected {expected_rows - 1} source rows '
+                f'but read {len(dataframe)} from {filepath}.'
+            )
+
+        terminal = dataframe.iloc[-1].copy()
+        # The padded row is a terminal observation, not an additional physical
+        # interval. Calendar fields describe the next quarter-hour boundary.
+        if {'month', 'hour', 'minutes', 'day_type'}.issubset(dataframe.columns):
+            minutes = int(terminal['minutes']) + int(
+                round(float(schema.get('seconds_per_time_step', 3600)) / 60.0)
+            )
+            hour_increment, terminal['minutes'] = divmod(minutes, 60)
+            hour = int(terminal['hour']) + hour_increment
+            day_increment, terminal['hour'] = divmod(hour, 24)
+            if day_increment:
+                terminal['day_type'] = (int(terminal['day_type']) % 7) + 1
+                if int(terminal['month']) == 12:
+                    terminal['month'] = 1
+
+        # A vehicle whose countdown reaches one leaves at the boundary after
+        # the final controlled interval. Make that transition observable to the
+        # KPI layer without inventing a 2024 charging interval.
+        if {
+            'electric_vehicle_charger_state',
+            'electric_vehicle_departure_time',
+        }.issubset(dataframe.columns):
+            state = pd.to_numeric(
+                pd.Series([terminal['electric_vehicle_charger_state']]),
+                errors='coerce',
+            ).iloc[0]
+            departure = pd.to_numeric(
+                pd.Series([terminal['electric_vehicle_departure_time']]),
+                errors='coerce',
+            ).iloc[0]
+            if state == 1 and np.isfinite(departure) and float(departure) <= 1.0:
+                terminal['electric_vehicle_charger_state'] = 3
+                for column in (
+                    'electric_vehicle_session_id',
+                    'electric_vehicle_departure_time',
+                    'electric_vehicle_required_soc_departure',
+                    'electric_vehicle_current_soc',
+                ):
+                    if column in dataframe.columns:
+                        terminal[column] = np.nan
+
+        terminal_frame = pd.DataFrame(
+            {
+                column: pd.Series([terminal[column]], dtype=dtype)
+                for column, dtype in dataframe.dtypes.items()
+            }
+        )
+        return pd.concat(
+            [dataframe, terminal_frame],
+            ignore_index=True,
         )
 
     def _read_timeseries_dataframe(

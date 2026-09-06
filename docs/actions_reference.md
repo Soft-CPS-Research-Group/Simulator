@@ -12,6 +12,7 @@ Portuguese version: [pt/actions_reference.md](pt/actions_reference.md).
 | Storage actions | Positive charges, negative discharges. |
 | EV charger actions | Positive charges the EV, negative discharges/V2G if enabled. |
 | Deferrable actions | Binary start command. `action > trigger_threshold` attempts to start the next pending cycle (`trigger_threshold` default: `0.5`). |
+| Escalator actions | Three states: standby (`[0, 1/3[`), slow (`[1/3, 2/3[`) and normal (`[2/3, 1]`). |
 | Internal energy | Applied step energy is `kWh/step`. |
 | Power limits | Device ratings and service limits are `kW`. |
 | Constraints | Charging/electrical service constraints may clip actions before application. |
@@ -29,6 +30,7 @@ Portuguese version: [pt/actions_reference.md](pt/actions_reference.md).
 | `electrical_storage` | `[-1, 1]` | building | Controls the building BESS. |
 | `electric_vehicle_storage_{charger_id}` | `[-1, 1]` or `[0, 1]` | charger | Controls the EV connected to a charger. Negative bound depends on `max_discharging_power`. |
 | `deferrable_appliance_{appliance_id}` | `[0, 1]` | appliance | Binary start command (`0` off, `1` on) for the next feasible cycle. |
+| `escalator_{escalator_id}` | `[0, 1]` | escalator | Selects standby, slow or normal operation. |
 
 ## Physical Conversion
 
@@ -62,6 +64,14 @@ A cycle starts only when all conditions hold:
 If the agent tries too late, the start is rejected. If `latest_start_time_step` passes with no valid start, the cycle is marked as missed.
 
 Controller recommendation: use `deferrable_appliance_can_start` as the readiness signal and emit `1.0` only when a start is intended.
+
+## Escalator Control
+
+An escalator action is continuous only for agent compatibility; it is discretized
+into three operating states. `standby` consumes standby power and leaves any
+passenger demand above `service_threshold_passengers` unserved. Both `slow` and
+`normal` serve aggregate demand. `available=0` forces standby. This model does
+not simulate passenger queues or capacity limits.
 
 ## Entity Actions
 
@@ -107,6 +117,7 @@ The simplified building action order is:
 6. Update BESS.
 7. Update EV chargers.
 8. Update deferrable appliances.
-9. Update net balance, rewards, KPIs and observations.
+9. Update escalators.
+10. Update net balance, rewards, KPIs and observations.
 
 When `electrical_storage_action < 0`, BESS discharge is prioritized before other electrical consumption.

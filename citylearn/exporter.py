@@ -632,6 +632,30 @@ class EpisodeExporter:
 
         dataframe = pd.DataFrame(rows)
         dataframe = dataframe.where(dataframe.ne(''), np.nan)
+        # Render dictionaries historically mix numeric strings used by the CSV
+        # path with NumPy scalars used while an asset is active.  PyArrow cannot
+        # infer a stable type for such object columns (for example charger state
+        # is ``"-1.00"`` while idle and ``np.float32(1)`` while occupied).
+        # Promote wholly numeric-like object columns to numbers before writing;
+        # keep genuinely textual columns textual and normalize NumPy scalars.
+        for column in dataframe.select_dtypes(include=['object']).columns:
+            series = dataframe[column]
+            non_null = series.dropna()
+            if non_null.empty:
+                continue
+
+            numeric = pd.to_numeric(non_null, errors='coerce')
+            if numeric.notna().all():
+                dataframe[column] = pd.to_numeric(series, errors='coerce')
+                continue
+
+            dataframe[column] = series.map(
+                lambda value: (
+                    value.item()
+                    if isinstance(value, np.generic)
+                    else value
+                )
+            )
         dataframe.to_parquet(part_path, index=False)
 
     def ensure_output_dir(self, *, ensure_exists: bool = True):

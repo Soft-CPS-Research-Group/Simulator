@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import time
-from typing import TYPE_CHECKING, Any, List, Mapping, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Sequence, Union
 
 import numpy as np
 
@@ -181,12 +181,32 @@ class CityLearnRuntimeService:
         env._observations_cache_time_step = -1
         timer_start = time.perf_counter() if debug_timing else 0.0
         actions = self.parse_actions(actions) if parsed_actions is None else parsed_actions
+        capture_entity_execution = (
+            bool(collect_info)
+            and getattr(env, 'interface', 'flat') == 'entity'
+        )
+        requested_action_records = (
+            self._entity_action_records(actions)
+            if capture_entity_execution
+            else None
+        )
+        topology_log_size_before = len(getattr(env, 'topology_event_log', []) or [])
         if debug_timing:
             timings['parse_actions_time'] = time.perf_counter() - timer_start
 
         timer_start = time.perf_counter() if debug_timing else 0.0
+        actions_before_channel = actions
         if getattr(getattr(env, '_robustness_service', None), 'enabled', False):
             actions = env._robustness_service.apply_actions(actions)
+        post_channel_action_records = (
+            requested_action_records
+            if capture_entity_execution and actions is actions_before_channel
+            else (
+                self._entity_action_records(actions)
+                if capture_entity_execution
+                else None
+            )
+        )
         if debug_timing:
             timings['robustness_action_time'] = time.perf_counter() - timer_start
 
@@ -213,6 +233,19 @@ class CityLearnRuntimeService:
             timings['building_apply_actions_max_time'] = (
                 float(np.max(building_apply_action_times)) if building_apply_action_times else 0.0
             )
+
+        timer_start = time.perf_counter() if debug_timing else 0.0
+        action_execution = (
+            self._entity_action_execution(
+                requested_records=requested_action_records or {},
+                post_channel_records=post_channel_action_records or {},
+                time_step=int(env.time_step),
+            )
+            if capture_entity_execution
+            else None
+        )
+        if debug_timing:
+            timings['entity_action_execution_time'] = time.perf_counter() - timer_start
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         self.update_variables()
@@ -278,6 +311,9 @@ class CityLearnRuntimeService:
                 env._refresh_action_cache()
                 env._entity_service.invalidate()
                 env.reward_function.env_metadata = env.get_metadata()
+        topology_events_applied = list(
+            (getattr(env, 'topology_event_log', []) or [])[topology_log_size_before:]
+        )
         if debug_timing:
             timings['topology_time'] = time.perf_counter() - timer_start
 
@@ -367,6 +403,9 @@ class CityLearnRuntimeService:
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         info = dict(env.get_info()) if collect_info else {}
+        if collect_info and action_execution is not None:
+            info['entity_action_execution'] = action_execution
+            info['topology_events_applied'] = topology_events_applied
         if debug_timing:
             timings['get_info_time'] = time.perf_counter() - timer_start
             info['partial_render_time'] = partial_render_time
@@ -377,6 +416,274 @@ class CityLearnRuntimeService:
             info['step_total_time'] = time.perf_counter() - step_start
 
         return next_observations, reward, env.terminated, env.truncated, info
+
+    def _entity_action_execution(
+        self,
+        *,
+        requested_records: Mapping[str, Mapping[str, Any]],
+        post_channel_records: Mapping[str, Mapping[str, Any]],
+        time_step: int,
+    ) -> Optional[Mapping[str, Any]]:
+        """Build an entity-bound action audit for the completed transition."""
+
+        env = self.env
+        if getattr(env, 'interface', 'flat') != 'entity':
+            return None
+        building_by_id = {
+            str(building.name): building for building in env.buildings
+        }
+        entries = []
+        for target_key in sorted(set(requested_records) | set(post_channel_records)):
+            requested = requested_records.get(target_key)
+            post = post_channel_records.get(target_key)
+            descriptor = post or requested
+            if descriptor is None:
+                continue
+            building_id = str(descriptor.get('building') or '')
+            building = building_by_id.get(building_id)
+            requested_value = requested.get('value') if requested is not None else None
+            post_channel_value = post.get('value') if post is not None else None
+            feedback = self._action_feedback(
+                descriptor=descriptor,
+                building=building,
+                time_step=time_step,
+                post_channel_value=post_channel_value,
+            )
+            reasons = list(feedback.get('limitation_reasons', []))
+            if (
+                requested_value is not None
+                and post_channel_value is not None
+                and abs(float(requested_value) - float(post_channel_value)) > 1.0e-12
+            ):
+                reasons.insert(0, 'actuator_channel_modified')
+            entries.append(
+                {
+                    'agent_id': building_id,
+                    'owner_module_id': self._owner_module_id(descriptor),
+                    'target_entity_id': self._action_target_entity_id(descriptor, building),
+                    'action_name': str(descriptor.get('target_feature') or ''),
+                    'requested_value': self._optional_float(requested_value),
+                    'post_channel_value': self._optional_float(post_channel_value),
+                    'limited_value': feedback.get('limited_value'),
+                    'applied_value': feedback.get('applied_value'),
+                    'applied_power_kw': feedback.get('applied_power_kw'),
+                    'limitation_reasons': list(dict.fromkeys(reasons)),
+                }
+            )
+        return {
+            'version': 'entity_action_execution_v1',
+            'time_step': int(time_step),
+            'entries': entries,
+        }
+
+    def _entity_action_records(
+        self,
+        actions: Sequence[Mapping[str, Any]],
+    ) -> Mapping[str, Mapping[str, Any]]:
+        """Capture immutable scalar intent without copying action containers."""
+
+        records = {}
+        for building, action_dict in zip(self.env.buildings, actions):
+            if not isinstance(action_dict, Mapping):
+                continue
+            building_id = str(building.name)
+            for key, value in action_dict.items():
+                if not str(key).endswith('_action'):
+                    continue
+                feature = str(key)[:-len('_action')]
+                target_type = 'storage' if feature == 'electrical_storage' else 'building'
+                target_id = building_id
+                global_id = (
+                    f'{building_id}/{feature}'
+                    if target_type == 'storage'
+                    else building_id
+                )
+                target_key = f'{target_type}:{target_id}:{feature}'
+                records[target_key] = {
+                    'target_key': target_key,
+                    'target_type': target_type,
+                    'target_id': target_id,
+                    'target_feature': feature,
+                    'building': building_id,
+                    'raw_id': feature,
+                    'global_id': global_id,
+                    'value': self._optional_float(value),
+                }
+
+            ev_actions = action_dict.get('electric_vehicle_storage_actions', {})
+            if isinstance(ev_actions, Mapping):
+                for charger_id, value in ev_actions.items():
+                    charger_id = str(charger_id)
+                    target_key = (
+                        f'charger:{building_id}:{charger_id}:'
+                        'electric_vehicle_storage'
+                    )
+                    records[target_key] = {
+                        'target_key': target_key,
+                        'target_type': 'charger',
+                        'target_id': charger_id,
+                        'target_feature': 'electric_vehicle_storage',
+                        'building': building_id,
+                        'raw_id': charger_id,
+                        'global_id': f'{building_id}/{charger_id}',
+                        'value': self._optional_float(value),
+                    }
+
+            deferrable_actions = action_dict.get('deferrable_appliance_actions', {})
+            if isinstance(deferrable_actions, Mapping):
+                for action_name, value in deferrable_actions.items():
+                    appliance_id = str(action_name).replace(
+                        'deferrable_appliance_',
+                        '',
+                    )
+                    target_key = (
+                        f'deferrable_appliance:{building_id}:{appliance_id}:start'
+                    )
+                    records[target_key] = {
+                        'target_key': target_key,
+                        'target_type': 'deferrable_appliance',
+                        'target_id': appliance_id,
+                        'target_feature': 'start',
+                        'building': building_id,
+                        'raw_id': appliance_id,
+                        'global_id': f'{building_id}/{appliance_id}',
+                        'value': self._optional_float(value),
+                    }
+        return records
+
+    @staticmethod
+    def _optional_float(value: Any) -> Optional[float]:
+        if value is None:
+            return None
+        try:
+            result = float(value)
+        except (TypeError, ValueError):
+            return None
+        return result if np.isfinite(result) else None
+
+    @staticmethod
+    def _owner_module_id(descriptor: Mapping[str, Any]) -> str:
+        return str(descriptor.get('global_id') or descriptor.get('target_id') or '')
+
+    @staticmethod
+    def _action_target_entity_id(descriptor: Mapping[str, Any], building: Any) -> str:
+        target_type = str(descriptor.get('target_type') or '')
+        if target_type == 'charger' and building is not None:
+            charger = getattr(building, '_charger_lookup', {}).get(str(descriptor.get('raw_id') or ''))
+            ev = getattr(charger, 'connected_electric_vehicle', None) if charger is not None else None
+            if ev is not None:
+                return str(getattr(ev, 'name', descriptor.get('global_id') or ''))
+        return str(descriptor.get('global_id') or descriptor.get('target_id') or '')
+
+    def _action_feedback(
+        self,
+        *,
+        descriptor: Mapping[str, Any],
+        building: Any,
+        time_step: int,
+        post_channel_value: Optional[float],
+    ) -> Mapping[str, Any]:
+        if building is None:
+            return {
+                'limited_value': None,
+                'applied_value': None,
+                'applied_power_kw': None,
+                'limitation_reasons': [],
+            }
+
+        target_type = str(descriptor.get('target_type') or '')
+        reasons = []
+        limited_value = None
+        applied_value = None
+        applied_power_kw = None
+        owner = None
+        reason_prefix = 'action_feedback_'
+
+        if target_type == 'storage':
+            owner = building
+            prefix = 'action_feedback_electrical_storage_'
+            limited_value = self._series_value(
+                getattr(building, f'{prefix}limited_action_normalized', None),
+                time_step,
+            )
+            applied_energy = self._series_value(
+                getattr(getattr(building, 'electrical_storage', None), 'electricity_consumption', None),
+                time_step,
+            )
+            applied_power_kw = self._energy_to_power(applied_energy)
+            reason_prefix = prefix
+        elif target_type == 'charger':
+            owner = getattr(building, '_charger_lookup', {}).get(str(descriptor.get('raw_id') or ''))
+            if owner is not None:
+                limited_value = self._series_value(
+                    getattr(owner, 'action_feedback_limited_action_normalized', None),
+                    time_step,
+                )
+                applied_energy = self._series_value(
+                    getattr(owner, 'electricity_consumption', None),
+                    time_step,
+                )
+                applied_power_kw = self._energy_to_power(applied_energy)
+        elif target_type == 'deferrable_appliance':
+            owner = next(
+                (
+                    appliance
+                    for appliance in (getattr(building, 'deferrable_appliances', None) or [])
+                    if str(getattr(appliance, 'name', '')) == str(descriptor.get('raw_id') or '')
+                ),
+                None,
+            )
+            if owner is not None:
+                applied_value = self._series_value(
+                    getattr(owner, 'action_feedback_last_start_applied', None),
+                    time_step,
+                )
+                limited_value = applied_value
+
+        action_was_limited = (
+            limited_value is None
+            or post_channel_value is None
+            or abs(float(limited_value) - float(post_channel_value)) > 1.0e-12
+        )
+        if owner is not None and action_was_limited:
+            for reason in (
+                'availability',
+                'power_limit',
+                'soc_limit',
+                'building_headroom',
+                'phase_headroom',
+                'export_headroom',
+                'outage',
+                'deferrable_window',
+            ):
+                value = self._series_value(
+                    getattr(owner, f'{reason_prefix}clip_reason_{reason}', None),
+                    time_step,
+                )
+                if value is not None and value > 0.5:
+                    reasons.append(reason)
+
+        return {
+            'limited_value': self._optional_float(limited_value),
+            'applied_value': self._optional_float(applied_value),
+            'applied_power_kw': self._optional_float(applied_power_kw),
+            'limitation_reasons': reasons,
+        }
+
+    @staticmethod
+    def _series_value(values: Any, index: int) -> Optional[float]:
+        if values is None:
+            return None
+        try:
+            return float(values[int(index)])
+        except (IndexError, TypeError, ValueError):
+            return None
+
+    def _energy_to_power(self, value: Optional[float]) -> Optional[float]:
+        if value is None:
+            return None
+        step_hours = max(float(getattr(self.env, 'seconds_per_time_step', 3600.0)) / 3600.0, 1.0e-12)
+        return float(value) / step_hours
 
     def _reward_observation_names(self):
         for attribute_name in ('required_observation_names', 'required_observations'):
@@ -548,6 +855,7 @@ class CityLearnRuntimeService:
             action_dict = {}
             electric_vehicle_actions = {}
             deferrable_appliance_actions = {}
+            escalator_actions = {}
 
             for action_name, action in zip(active_actions[i], building_actions[i]):
                 if 'electric_vehicle_storage' in action_name:
@@ -555,6 +863,8 @@ class CityLearnRuntimeService:
                     electric_vehicle_actions[charger_id] = action
                 elif action_name.startswith('deferrable_appliance_'):
                     deferrable_appliance_actions[action_name] = action
+                elif action_name.startswith('escalator_'):
+                    escalator_actions[action_name] = action
                 else:
                     action_dict[f'{action_name}_action'] = action
 
@@ -563,6 +873,9 @@ class CityLearnRuntimeService:
 
             if deferrable_appliance_actions:
                 action_dict['deferrable_appliance_actions'] = deferrable_appliance_actions
+
+            if escalator_actions:
+                action_dict['escalator_actions'] = escalator_actions
 
             parsed_actions.append(action_dict)
 
@@ -709,12 +1022,69 @@ class CityLearnRuntimeService:
                                 f"'{charger.connected_electric_vehicle.name}' but dataset requires '{ev.name}' "
                                 f"at time step {env.time_step}."
                             )
-                        is_new_connection = (
-                            just_connected and (
-                                prev_state != 1
-                                or not isinstance(prev_ev_id, str)
-                                or prev_ev_id != ev_id
+                        # ``Charger.next_time_step`` clears the live object
+                        # reference before association, so ``just_connected``
+                        # is true on every connected control step.  It must not
+                        # be used as the session boundary: doing so would force
+                        # a dataset current-SOC reference at every step and
+                        # overwrite the controller's charging decision.  The
+                        # committed runtime history distinguishes a continuing
+                        # session from a true arrival or from a charger/member
+                        # that has just appeared mid-session.
+                        previous_runtime_ev = (
+                            charger.past_connected_evs[env.time_step - 1]
+                            if env.time_step > 0
+                            and env.time_step - 1 < len(charger.past_connected_evs)
+                            else None
+                        )
+                        session_ids = getattr(
+                            sim, 'electric_vehicle_session_id', None
+                        )
+                        session_id = (
+                            session_ids[env.time_step]
+                            if session_ids is not None
+                            and env.time_step < len(session_ids)
+                            else None
+                        )
+                        previous_session_id = (
+                            session_ids[env.time_step - 1]
+                            if session_ids is not None
+                            and env.time_step > 0
+                            and env.time_step - 1 < len(session_ids)
+                            else None
+                        )
+                        has_session_identity = (
+                            isinstance(session_id, str)
+                            and session_id.strip() not in {'', 'nan'}
+                        )
+                        session_changed = (
+                            has_session_identity
+                            and isinstance(previous_session_id, str)
+                            and previous_session_id.strip() not in {'', 'nan'}
+                            and session_id != previous_session_id
+                        )
+                        # Legacy charger files do not expose session identity.
+                        # A countdown reset after a value of one is the exact
+                        # boundary-compatible fallback for a back-to-back
+                        # session of the same EV.
+                        if not session_changed and not has_session_identity and env.time_step > 0:
+                            departure_time = getattr(
+                                sim, 'electric_vehicle_departure_time', None
                             )
+                            if (
+                                departure_time is not None
+                                and env.time_step < len(departure_time)
+                            ):
+                                previous_countdown = departure_time[env.time_step - 1]
+                                current_countdown = departure_time[env.time_step]
+                                session_changed = (
+                                    np.isfinite(previous_countdown)
+                                    and np.isfinite(current_countdown)
+                                    and previous_countdown <= 1
+                                    and current_countdown > previous_countdown
+                                )
+                        is_new_connection = just_connected and (
+                            previous_runtime_ev is not ev or session_changed
                         )
                         if is_new_connection:
                             soc_value = _resolve_arrival_soc(sim, env.time_step, prev_state, prev_ev_id, ev_id)

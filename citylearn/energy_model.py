@@ -11,7 +11,14 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - optional dependency
     Pvwattsv8 = None
 from citylearn.base import Environment, EpisodeTracker
-from citylearn.data import DataSet, ZERO_DIVISION_PLACEHOLDER, DeferrableApplianceSimulation, EnergySimulation, WashingMachineSimulation
+from citylearn.data import (
+    DataSet,
+    ZERO_DIVISION_PLACEHOLDER,
+    DeferrableApplianceSimulation,
+    EnergySimulation,
+    EscalatorSimulation,
+    WashingMachineSimulation,
+)
 from citylearn.internal.units import power_kw_to_energy_kwh, seconds_to_hours, to_dataset_resolution_energy
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -1513,6 +1520,25 @@ class DeferrableAppliance(ElectricDevice):
             else:
                 self.__cycle_state[cycle_id] = 'pending'
 
+    def skip_cycles_before(self, global_time_step: int):
+        """Exclude requests that expired before an asset/member became active.
+
+        Dynamic topology may introduce a member or reinstall an appliance after
+        the episode has started.  Requests whose admissible start window has
+        already closed were never offered to the controller and must therefore
+        not be reported as missed service, even when their completion deadline
+        lies after activation.
+        """
+
+        activation = int(global_time_step)
+        for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
+            cycle_id = cycle['cycle_id']
+            if (
+                self.__cycle_state.get(cycle_id) == 'pending'
+                and int(cycle['latest_start_time_step']) < activation
+            ):
+                self.__cycle_state[cycle_id] = 'expired_before_activation'
+
     def next_time_step(self):
         super().next_time_step()
         self._update_cycle_states()
@@ -1867,6 +1893,213 @@ class DeferrableAppliance(ElectricDevice):
             offset = max(self._current_global_time_step() - int(start), 0)
             return max(len(profile) - int(offset), 0)
         return 0
+
+
+class Escalator(ElectricDevice):
+    """Aggregate escalator with three directly controllable operating states.
+
+    Actions in ``[0, 1]`` map to standby, slow and normal operation.  Passenger
+    values are not used to force a state: they only determine whether the chosen
+    state meets the simple aggregate service requirement.  This deliberately
+    avoids an unsupported queueing model while making the energy/service tradeoff
+    explicit to an agent.
+    """
+
+    STATE_STANDBY = 0
+    STATE_SLOW = 1
+    STATE_NORMAL = 2
+    STATE_NAMES = ('standby', 'slow', 'normal')
+
+    def __init__(
+        self,
+        escalator_simulation: EscalatorSimulation,
+        name: str = None,
+        standby_power: float = 0.0,
+        slow_power: float = 0.0,
+        normal_power: float = 0.0,
+        minimum_state_steps: int = 1,
+        service_threshold_passengers: float = 0.5,
+        **kwargs,
+    ):
+        self.escalator_simulation = escalator_simulation
+        self.name = str(name) if name is not None else 'escalator'
+        self.standby_power = self._as_non_negative_power(standby_power, 'standby_power')
+        self.slow_power = self._as_non_negative_power(slow_power, 'slow_power')
+        self.normal_power = self._as_non_negative_power(normal_power, 'normal_power')
+        if not self.standby_power <= self.slow_power <= self.normal_power:
+            raise ValueError('Escalator powers must satisfy standby_power <= slow_power <= normal_power.')
+        try:
+            minimum_state_steps = int(minimum_state_steps)
+        except (TypeError, ValueError) as exc:
+            raise ValueError('minimum_state_steps must be an integer >= 1.') from exc
+        if minimum_state_steps < 1:
+            raise ValueError('minimum_state_steps must be >= 1.')
+        self.minimum_state_steps = minimum_state_steps
+        self.service_threshold_passengers = self._as_non_negative_power(
+            service_threshold_passengers, 'service_threshold_passengers'
+        )
+        self.__state = self.STATE_STANDBY
+        self.__requested_state = self.STATE_STANDBY
+        self.__state_start_time_step = -int(minimum_state_steps)
+        super().__init__(nominal_power=self.normal_power, **kwargs)
+
+    @staticmethod
+    def _as_non_negative_power(value, name: str) -> float:
+        try:
+            value = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f'{name} must be a finite number >= 0.') from exc
+        if not np.isfinite(value) or value < 0.0:
+            raise ValueError(f'{name} must be a finite number >= 0.')
+        return value
+
+    @property
+    def state(self) -> int:
+        return int(self.__state)
+
+    @property
+    def requested_state(self) -> int:
+        return int(self.__requested_state)
+
+    @property
+    def state_name(self) -> str:
+        return self.STATE_NAMES[self.state]
+
+    def reset(self):
+        super().reset()
+        steps = self.episode_tracker.episode_time_steps
+        self.__state = self.STATE_STANDBY
+        self.__requested_state = self.STATE_STANDBY
+        # The initial standby state is not an operator command. Allow the first
+        # agent action to select an operating state at timestep zero.
+        self.__state_start_time_step = -self.minimum_state_steps
+        self.state_history = np.zeros(steps, dtype='int8')
+        self.requested_state_history = np.zeros(steps, dtype='int8')
+        self.service_required = np.zeros(steps, dtype=bool)
+        self.service_met = np.ones(steps, dtype=bool)
+        self.unserved_passengers = np.zeros(steps, dtype='float32')
+        self.state_changes = np.zeros(steps, dtype=bool)
+        self.action_applied = np.zeros(steps, dtype=bool)
+
+    def _value(self, name: str, default: float = 0.0) -> float:
+        values = getattr(self.escalator_simulation, name, None)
+        if values is None or self.time_step >= len(values):
+            return float(default)
+        try:
+            value = float(values[self.time_step])
+        except (TypeError, ValueError, IndexError):
+            return float(default)
+        return value if np.isfinite(value) else float(default)
+
+    def _available(self) -> bool:
+        return self._value('available', 1.0) >= 0.5
+
+    @classmethod
+    def action_to_state(cls, action_value: float) -> int:
+        try:
+            action = float(action_value)
+        except (TypeError, ValueError):
+            action = 0.0
+        if not np.isfinite(action):
+            action = 0.0
+        action = float(np.clip(action, 0.0, 1.0))
+        if action < 1.0 / 3.0:
+            return cls.STATE_STANDBY
+        if action < 2.0 / 3.0:
+            return cls.STATE_SLOW
+        return cls.STATE_NORMAL
+
+    def _power_for_state(self, state: int) -> float:
+        return (self.standby_power, self.slow_power, self.normal_power)[int(state)]
+
+    def set_state(self, action_value: float):
+        """Apply the normalized action and record current-step power/service."""
+
+        requested = self.action_to_state(action_value)
+        desired = requested if self._available() else self.STATE_STANDBY
+        changed = False
+        if desired != self.__state:
+            elapsed = int(self.time_step) - int(self.__state_start_time_step)
+            if elapsed >= self.minimum_state_steps or (not self._available() and desired == self.STATE_STANDBY):
+                self.__state = desired
+                self.__state_start_time_step = int(self.time_step)
+                changed = True
+
+        self.__requested_state = requested
+        self.state_history[self.time_step] = self.__state
+        self.requested_state_history[self.time_step] = requested
+        self.state_changes[self.time_step] = changed
+        self.action_applied[self.time_step] = True
+        power_kw = self._power_for_state(self.__state)
+        energy_kwh = power_kw * float(self.seconds_per_time_step) / 3600.0
+        self.set_electricity_consumption(energy_kwh)
+
+        passengers = max(self._value('passengers_expected_15min'), 0.0)
+        required = passengers > self.service_threshold_passengers
+        met = (not required) or (self.__state >= self.STATE_SLOW and self._available())
+        self.service_required[self.time_step] = required
+        self.service_met[self.time_step] = met
+        self.unserved_passengers[self.time_step] = 0.0 if met else passengers
+
+    def observations(self) -> Mapping[str, float]:
+        """Return current aggregate operating and demand observations."""
+
+        passengers = max(self._value('passengers_expected_15min'), 0.0)
+        arriving = max(self._value('arriving_trains'), 0.0)
+        departing = max(self._value('departing_trains'), 0.0)
+        current = min(int(self.time_step), len(self.state_history) - 1)
+        return {
+            'passengers_from_trains_15min': max(self._value('passengers_from_trains_15min'), 0.0),
+            'background_pedestrians_15min': max(self._value('background_pedestrians_15min'), 0.0),
+            'passengers_expected_15min': passengers,
+            'people_detected': float(self._value('people_detected') >= 0.5),
+            # Existing source files carry both arrival and departure flags for a
+            # passing train.  Avoid double counting in the control signal.
+            'passing_trains': max(arriving, departing),
+            'minutes_to_next_train': max(self._value('minutes_to_next_train'), 0.0),
+            'available': float(self._available()),
+            'state': float(self.state),
+            'requested_state': float(self.requested_state),
+            'power_kw': self._power_for_state(self.state),
+            'service_required': float(self.service_required[current]),
+            'service_met': float(self.service_met[current]),
+            'unserved_passengers_15min': float(self.unserved_passengers[current]),
+        }
+
+    def service_summary(self, end_time_step: int = None) -> Mapping[str, float]:
+        """Return cumulative service and energy indicators for reporting."""
+
+        end = self.time_step if end_time_step is None else int(end_time_step)
+        end = min(max(end, 0), len(self.state_history) - 1)
+        applied = np.asarray(self.action_applied[:end + 1], dtype=bool)
+        requested = np.asarray(self.escalator_simulation.passengers_expected_15min[:end + 1], dtype='float64')
+        requested = np.clip(requested, 0.0, None) * applied
+        unserved = np.asarray(self.unserved_passengers[:end + 1], dtype='float64') * applied
+        total_requested = float(np.sum(requested))
+        total_unserved = float(np.sum(unserved))
+        total_served = max(total_requested - total_unserved, 0.0)
+        return {
+            'requested_passengers': total_requested,
+            'served_passengers': total_served,
+            'unserved_passengers': total_unserved,
+            'service_level_ratio': 1.0 if total_requested <= 1.0e-9 else total_served / total_requested,
+            'state_changes_count': float(np.sum(self.state_changes[:end + 1] * applied)),
+            'standby_state_steps': float(np.sum((self.state_history[:end + 1] == self.STATE_STANDBY) * applied)),
+            'slow_state_steps': float(np.sum((self.state_history[:end + 1] == self.STATE_SLOW) * applied)),
+            'normal_state_steps': float(np.sum((self.state_history[:end + 1] == self.STATE_NORMAL) * applied)),
+            'electricity_consumption_kwh': float(np.sum(self.electricity_consumption[:end + 1] * applied)),
+        }
+
+    def get_metadata(self) -> Mapping[str, Any]:
+        return {
+            **super().get_metadata(),
+            'name': self.name,
+            'standby_power_kw': self.standby_power,
+            'slow_power_kw': self.slow_power,
+            'normal_power_kw': self.normal_power,
+            'minimum_state_steps': self.minimum_state_steps,
+            'service_threshold_passengers': self.service_threshold_passengers,
+        }
 
 
 class WashingMachine(ElectricDevice):

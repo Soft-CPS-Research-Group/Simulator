@@ -16,9 +16,8 @@ from citylearn.citylearn import CityLearnEnv
 
 Default documentation is in English. Portuguese documentation is available under [docs/pt](docs/pt/).
 
-Current source release: `1.5.6`. This patch restores the schema-loaded member and asset composition
-before every dynamic-topology episode, so repeated `reset()` calls replay the same topology event
-timeline instead of carrying added or removed assets forward from the previous episode.
+Current source release: `1.6.1`. This patch adds aggregate escalator assets with three operating
+states, energy/service observations and KPIs, together with the 15-minute EC_Ermesinde scenario.
 
 ## Start Here
 
@@ -51,6 +50,7 @@ Additional reference: [KPI v2 naming tree](docs/KPI_V2_TREE.md).
 | PV | `per_kw` normalized profile mode and `absolute` measured-energy mode. |
 | EVs | Charger-centric schedules, connected/incoming EVs, SOC requirements and V2G-capable actions. |
 | Deferrables | Normalized cycle catalog plus sparse flexibility schedule. |
+| Escalators | Aggregate standby/slow/normal control with passenger-service signals and KPIs. |
 | Interfaces | Flat Gymnasium vectors and entity tables/edges for offline RL, GraphRL and Transformers. |
 | Entity RL observations | Forecast bundles, physical deadline pressure, feasible action capacity and requested/limited/applied action feedback. |
 | Dynamic topology | Add/remove buildings and assets during simulation in entity mode, with clean structural replay after each episode reset. |

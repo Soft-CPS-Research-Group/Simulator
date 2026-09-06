@@ -142,6 +142,8 @@ Community market (conditional):
 ### `electrical_service_phase`
 - `district_electrical_service_phase_violations_energy_total_kwh`
 - `district_electrical_service_phase_violations_event_count`
+- `district_electrical_service_phase_requested_pressure_energy_total_kwh`
+- `district_electrical_service_phase_requested_pressure_event_count`
 - `district_electrical_service_phase_imbalance_phase_average_ratio`
 - `district_electrical_service_phase_phase_peaks_import_peak_l1_kw`
 - `district_electrical_service_phase_phase_peaks_import_peak_l2_kw`
@@ -149,6 +151,14 @@ Community market (conditional):
 - `district_electrical_service_phase_phase_peaks_export_peak_l1_kw`
 - `district_electrical_service_phase_phase_peaks_export_peak_l2_kw`
 - `district_electrical_service_phase_phase_peaks_export_peak_l3_kw`
+
+The `violations` rows measure post-projection residual exceedance of the
+declared total and per-phase active-power limits. The `requested_pressure`
+rows instead measure how far the controller's unprojected request would have
+exceeded those limits. Keeping both prevents constraint activation from being
+misreported as an applied-power safety failure. Post-projection exceedances at
+or below `1e-5 kW` per checked limit are treated as numerical noise from the
+single-precision runtime histories.
 
 ### `equity`
 - `district_equity_distribution_gini_benefit_ratio`

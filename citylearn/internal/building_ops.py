@@ -65,6 +65,12 @@ class BuildingOpsService:
             building.deferrable_appliances,
         )
 
+        observations = self.update_escalator_observations(
+            observations,
+            valid_observation_set,
+            building.escalators,
+        )
+
         unknown_observations = set(observations.keys()).difference(set(valid_observations))
         assert len(unknown_observations) == 0, f'Unknown observations: {unknown_observations}'
 
@@ -220,6 +226,20 @@ class BuildingOpsService:
         """Backward-compatible wrapper for old washing-machine integrations."""
 
         return self.update_deferrable_appliance_observations(observations, valid_observations, washing_machines)
+        return observations
+
+    def update_escalator_observations(self, observations, valid_observations, escalators):
+        """Update flat observations for each aggregate escalator."""
+
+        for escalator in escalators or []:
+            prefix = f'escalator_{escalator.name}_'
+            if not any(key.startswith(prefix) for key in valid_observations):
+                continue
+            for name, value in escalator.observations().items():
+                key = f'{prefix}{name}'
+                if key in valid_observations:
+                    observations[key] = value
+
         return observations
 
     def get_observations_data(
@@ -422,6 +442,7 @@ class BuildingOpsService:
         electrical_storage_action: float = None,
         deferrable_appliance_actions: dict = None,
         washing_machine_actions: dict = None,
+        escalator_actions: dict = None,
         electric_vehicle_storage_actions: dict = None,
     ):
         """Update demand and charge/discharge storage devices."""
@@ -462,6 +483,7 @@ class BuildingOpsService:
         requested_deferrable_appliance_actions = (
             None if deferrable_appliance_actions is None else dict(deferrable_appliance_actions)
         )
+        requested_escalator_actions = None if escalator_actions is None else dict(escalator_actions)
         if deferrable_appliance_actions is not None:
             deferrable_appliance_actions = self._apply_deferrable_profile_constraints(deferrable_appliance_actions)
 
@@ -537,6 +559,19 @@ class BuildingOpsService:
                     deferrable_appliance_priority_list.append(action_key)
             priority_list = priority_list + deferrable_appliance_priority_list
 
+        if requested_escalator_actions is not None:
+            escalator_priority_list = []
+            escalator_by_action = action_cache['escalator_by_action']
+            for action_name, action in requested_escalator_actions.items():
+                action_key = f'{action_name}'
+                if action_key not in active_action_set:
+                    raise ValueError('This action should not be applied. Verify')
+                escalator = escalator_by_action.get(action_key)
+                if escalator is not None:
+                    actions[action_key] = (escalator.set_state, (action,))
+                    escalator_priority_list.append(action_key)
+            priority_list = priority_list + escalator_priority_list
+
         if electrical_storage_action < 0.0:
             key = 'electrical_storage'
             priority_list.remove(key)
@@ -555,7 +590,7 @@ class BuildingOpsService:
         limit_control_actions = bool(building.power_outage)
         for key in priority_list:
             func, args = actions[key]
-            if args and (limit_control_actions or key.startswith('deferrable_appliance_')):
+            if args and (limit_control_actions or key.startswith('deferrable_appliance_') or key.startswith('escalator_')):
                 original_args = args
                 args = self._limit_outage_control_action(key, func, args)
                 if args != original_args:
@@ -586,10 +621,12 @@ class BuildingOpsService:
         active_actions = tuple(building.active_actions)
         chargers = tuple(building.electric_vehicle_chargers or ())
         appliances = tuple(building.deferrable_appliances or ())
+        escalators = tuple(building.escalators or ())
         signature = (
             active_actions,
             tuple((id(charger), charger.charger_id) for charger in chargers),
             tuple((id(appliance), appliance.name) for appliance in appliances),
+            tuple((id(escalator), escalator.name) for escalator in escalators),
         )
         cache = getattr(self, '_apply_action_cache', None)
 
@@ -601,11 +638,17 @@ class BuildingOpsService:
             appliance_by_action[appliance.name] = appliance
             appliance_by_action[f'deferrable_appliance_{appliance.name}'] = appliance
 
+        escalator_by_action = {}
+        for escalator in escalators:
+            escalator_by_action[escalator.name] = escalator
+            escalator_by_action[f'escalator_{escalator.name}'] = escalator
+
         cache = {
             'signature': signature,
             'active_action_set': set(active_actions),
             'charger_by_id': {charger.charger_id: charger for charger in chargers},
             'deferrable_appliance_by_action': appliance_by_action,
+            'escalator_by_action': escalator_by_action,
         }
         self._apply_action_cache = cache
         return cache
@@ -822,6 +865,9 @@ class BuildingOpsService:
             if profile.size <= 0:
                 return args
             return args if self._deferrable_profile_feasible(profile) else (0.0,)
+
+        if action_key.startswith('escalator_'):
+            return (0.0,) if building.power_outage else args
 
         if not building.power_outage:
             return args

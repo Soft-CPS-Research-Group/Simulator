@@ -12,7 +12,7 @@ from citylearn.base import Environment, EpisodeTracker
 from citylearn.data import CarbonIntensity, EnergySimulation, Pricing, TOLERANCE, Weather, ZERO_DIVISION_PLACEHOLDER
 from citylearn.dynamics import Dynamics, LSTMDynamics
 from citylearn.electric_vehicle_charger import Charger
-from citylearn.energy_model import Battery, DeferrableAppliance, ElectricDevice, ElectricHeater, HeatPump, PV, StorageDevice, StorageTank, WashingMachine
+from citylearn.energy_model import Battery, DeferrableAppliance, ElectricDevice, ElectricHeater, Escalator, HeatPump, PV, StorageDevice, StorageTank, WashingMachine
 from citylearn.internal.building_ops import BuildingOpsService
 from citylearn.internal.units import (
     normalized_capacity_action_to_energy_kwh,
@@ -104,6 +104,7 @@ class Building(Environment):
         stochastic_power_outage: bool = None, stochastic_power_outage_model: PowerOutage = None,
         electric_vehicle_chargers: List[Charger] = None, time_step_ratio: int = None,
         deferrable_appliances: List[DeferrableAppliance] = None, washing_machines: List[WashingMachine] = None,
+        escalators: List[Escalator] = None,
         **kwargs: Any
     ):
         charging_constraints = kwargs.pop('charging_constraints', None)
@@ -130,6 +131,7 @@ class Building(Environment):
         self.algorithm_action_based_time_step_hours_ratio = self.seconds_per_time_step / 3600
         self.stochastic_power_outage_model = stochastic_power_outage_model
         self.deferrable_appliances = deferrable_appliances if deferrable_appliances is not None else washing_machines
+        self.escalators = escalators
         self.electric_vehicle_chargers = electric_vehicle_chargers
         self.energy_simulation = energy_simulation
         self.weather = weather
@@ -284,6 +286,12 @@ class Building(Environment):
         """Backward-compatible alias for deferrable appliances."""
 
         return self.deferrable_appliances
+
+    @property
+    def escalators(self) -> List[Escalator]:
+        """Aggregate escalators associated with the building."""
+
+        return self.__escalators
 
     @property
     def name(self) -> str:
@@ -530,6 +538,12 @@ class Building(Environment):
         """Backward-compatible alias for deferrable appliance electricity consumption."""
 
         return self.deferrable_appliances_electricity_consumption
+
+    @property
+    def escalators_electricity_consumption(self) -> np.ndarray:
+        """Electricity consumption of escalators in [kWh]."""
+
+        return self.__escalators_electricity_consumption[:self.time_step + 1]
 
     @property
     def energy_from_cooling_device_to_cooling_storage(self) -> np.ndarray:
@@ -801,6 +815,10 @@ class Building(Environment):
     @deferrable_appliances.setter
     def deferrable_appliances(self, deferrable_appliances: List[DeferrableAppliance]):
         self.__deferrable_appliances = deferrable_appliances if deferrable_appliances is not None else []
+
+    @escalators.setter
+    def escalators(self, escalators: List[Escalator]):
+        self.__escalators = escalators if escalators is not None else []
 
     @washing_machines.setter
     def washing_machines(self, washing_machines: List[WashingMachine]):
@@ -1411,6 +1429,15 @@ class Building(Environment):
 
         return self.update_deferrable_appliance_observations(observations, valid_observations, washing_machines)
 
+    def update_escalator_observations(self, observations, valid_observations, escalators):
+        """Compatibility wrapper for escalator observation service."""
+
+        return self._ops_service.update_escalator_observations(
+            observations,
+            valid_observations,
+            escalators,
+        )
+
     def _get_observations_data(self, include_all: bool = False) -> Mapping[str, Union[float, int]]:
         """Compatibility wrapper for base observation data service."""
 
@@ -1462,6 +1489,7 @@ class Building(Environment):
         cooling_storage_action: float = None, heating_storage_action: float = None,
         dhw_storage_action: float = None, electrical_storage_action: float = None,
         deferrable_appliance_actions: dict = None, washing_machine_actions: dict = None,
+        escalator_actions: dict = None,
         electric_vehicle_storage_actions: dict = None,
     ):
         r"""Update cooling and heating demand for next timestep and charge/discharge storage devices."""
@@ -1475,6 +1503,7 @@ class Building(Environment):
             dhw_storage_action=dhw_storage_action,
             electrical_storage_action=electrical_storage_action,
             deferrable_appliance_actions=deferrable_appliance_actions if deferrable_appliance_actions is not None else washing_machine_actions,
+            escalator_actions=escalator_actions,
             electric_vehicle_storage_actions=electric_vehicle_storage_actions,
         )
 
@@ -1713,6 +1742,32 @@ class Building(Environment):
 
         return generation
 
+    def _refresh_pv_generation_from(self, time_step: int) -> None:
+        """Commit the current PV asset's production from ``time_step`` onward.
+
+        Dynamic topology events replace the physical :class:`PV` instance at
+        runtime.  ``__solar_generation`` is otherwise calculated only during
+        reset, so changing ``self.pv`` without refreshing this series would
+        alter the topology metadata while leaving the old PV production in the
+        electrical balance.  Only the present and future are rewritten: past
+        production remains an immutable record for KPI accounting.
+        """
+
+        start = int(max(time_step, 0))
+        if start >= len(self.__solar_generation):
+            return
+
+        generation = (
+            self._pv_generation_to_control_step(self.energy_simulation.solar_generation)
+            * -1.0
+        )
+        upper = min(len(self.__solar_generation), len(generation))
+        if start < upper:
+            self.__solar_generation[start:upper] = generation[start:upper]
+
+        if upper < len(self.__solar_generation):
+            self.__solar_generation[max(start, upper):] = 0.0
+
     def _clip_outage_electric_loads_to_local_supply(self):
         """Clip initial electric loads to locally available islanded supply."""
 
@@ -1922,6 +1977,10 @@ class Building(Environment):
         heating_device_energy_limit = power_kw_to_energy_kwh(self.heating_device.nominal_power, self.seconds_per_time_step)
         dhw_device_energy_limit = power_kw_to_energy_kwh(self.dhw_device.nominal_power, self.seconds_per_time_step)
         electrical_storage_energy_limit = power_kw_to_energy_kwh(self.electrical_storage.nominal_power, self.seconds_per_time_step)
+        escalators_energy_limit = sum(
+            power_kw_to_energy_kwh(escalator.normal_power, self.seconds_per_time_step)
+            for escalator in self.escalators or []
+        )
 
         for key in observation_names:
             if key.startswith('charging_phase_one_hot_'):
@@ -1942,10 +2001,11 @@ class Building(Environment):
                 )
                 high_limits = data['non_shiftable_load'] \
                     + cooling_device_energy_limit \
-                        + heating_device_energy_limit \
-                            + dhw_device_energy_limit \
-                                + electrical_storage_energy_limit \
-                                    - data['solar_generation']
+                                + heating_device_energy_limit \
+                                    + dhw_device_energy_limit \
+                                        + electrical_storage_energy_limit \
+                                            + escalators_energy_limit \
+                                            - data['solar_generation']
                 low_limit[key] = min(low_limits.min(), 0.0)
                 high_limit[key] = high_limits.max()
 
@@ -2017,6 +2077,31 @@ class Building(Environment):
                         elif any(value in key for value in [f'connected_electric_vehicle_at_charger_{charger.charger_id}_battery_capacity']):
                             low_limit[key] = -1
                             high_limit[key] = 100
+
+            elif key.startswith('escalator_'):
+                low_limit[key] = 0.0
+                if key.endswith(('_state', '_requested_state')):
+                    high_limit[key] = 2.0
+                elif key.endswith(('people_detected', 'available', 'service_required', 'service_met')):
+                    high_limit[key] = 1.0
+                elif key.endswith('_power_kw'):
+                    high_limit[key] = max((e.normal_power for e in self.escalators or []), default=0.0)
+                else:
+                    source = 'minutes_to_next_train'
+                    if 'passengers_from_trains' in key:
+                        source = 'passengers_from_trains_15min'
+                    elif 'background_pedestrians' in key:
+                        source = 'background_pedestrians_15min'
+                    elif 'passengers_expected' in key or 'unserved_passengers' in key:
+                        source = 'passengers_expected_15min'
+                    elif key.endswith('passing_trains'):
+                        source = 'arriving_trains'
+                    values = [
+                        np.max(getattr(e.escalator_simulation, source))
+                        for e in self.escalators or []
+                        if getattr(e.escalator_simulation, source, None) is not None
+                    ]
+                    high_limit[key] = max([float(v) for v in values] or [1.0])
 
             elif 'deferrable_appliance' in key:
                 low_limit[key] = -1.0
@@ -2292,6 +2377,10 @@ class Building(Environment):
                             low_limit.append(discharging_limit)  # For charging limit
             
             elif key.startswith('deferrable_appliance_'):
+                low_limit.append(0.0)
+                high_limit.append(1.0)
+
+            elif key.startswith('escalator_'):
                 low_limit.append(0.0)
                 high_limit.append(1.0)
 
@@ -2605,6 +2694,9 @@ class Building(Environment):
         for appliance in self.deferrable_appliances or []:
             appliance.next_time_step()
 
+        for escalator in self.escalators or []:
+            escalator.next_time_step()
+
         super().next_time_step()
 
     def reset(self):
@@ -2631,6 +2723,9 @@ class Building(Environment):
         for appliance in self.deferrable_appliances or []:
             appliance.reset()
 
+        for escalator in self.escalators or []:
+            escalator.reset()
+
         # variable reset
         self.reset_dynamic_variables()
         self.reset_data_sets()
@@ -2646,6 +2741,7 @@ class Building(Environment):
         self.__power_outage_signal = self.reset_power_outage_signal()
         self.__chargers_electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.__deferrable_appliances_electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.__escalators_electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.action_feedback_electrical_storage_requested_action_normalized = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.action_feedback_electrical_storage_limited_action_normalized = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.action_feedback_electrical_storage_requested_power_kw = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
@@ -2721,6 +2817,9 @@ class Building(Environment):
 
         for charger in self.electric_vehicle_chargers or []:
             set_data_window(charger.charger_simulation, start_time_step, end_time_step)
+
+        for escalator in self.escalators or []:
+            set_data_window(escalator.escalator_simulation, start_time_step, end_time_step)
 
         # Deferrable appliance schedules use global time-step indices and are sparse,
         # so no dense data-window adjustment is needed here.
@@ -2799,6 +2898,12 @@ class Building(Environment):
 
         self.__deferrable_appliances_electricity_consumption[self.time_step] = building_deferrable_appliances_total_electricity_consumption
 
+        building_escalators_total_electricity_consumption = 0.0
+        for escalator in self.escalators or []:
+            building_escalators_total_electricity_consumption += escalator.electricity_consumption[self.time_step]
+
+        self.__escalators_electricity_consumption[self.time_step] = building_escalators_total_electricity_consumption
+
         # net electricity consumption
         net_electricity_consumption = 0.0
 
@@ -2809,8 +2914,9 @@ class Building(Environment):
                                                 + self.non_shiftable_load_device.electricity_consumption[self.time_step] \
                                                     + self.electrical_storage.electricity_consumption[self.time_step] \
                                                         + self.solar_generation[self.time_step] \
-                                                            + self.__chargers_electricity_consumption[self.time_step] \
-                                                                + self.__deferrable_appliances_electricity_consumption[self.time_step]
+                                                                + self.__chargers_electricity_consumption[self.time_step] \
+                                                                + self.__deferrable_appliances_electricity_consumption[self.time_step] \
+                                                                + self.__escalators_electricity_consumption[self.time_step]
         else:
             pass
 

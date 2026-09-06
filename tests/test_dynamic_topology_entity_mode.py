@@ -256,6 +256,214 @@ def test_removed_charger_action_id_is_invalid_after_topology_removal():
         env.close()
 
 
+def test_removed_charger_can_be_reinstalled_from_its_initial_template():
+    schema = _load_schema()
+    schema["topology_events"] = [
+        {
+            "id": "remove_charger",
+            # The first catalogue session departs before removal, while the
+            # second departs after recommissioning.  This makes the test cover
+            # end-of-episode KPI aggregation across both runtime instances.
+            "time_step": 16,
+            "operation": "remove_asset",
+            "target_member_id": "Building_5",
+            "target_asset_type": "charger",
+            "target_asset_id": "charger_5_1",
+        },
+        {
+            "id": "reinstall_charger",
+            "time_step": 18,
+            "operation": "add_asset",
+            "target_member_id": "Building_5",
+            "target_asset_type": "charger",
+            "target_asset_id": "charger_5_1",
+            "source_member_id": "Building_5",
+            "source_asset_id": "charger_5_1",
+        },
+    ]
+    env = CityLearnEnv(
+        schema,
+        interface="entity",
+        topology_mode="dynamic",
+        episode_time_steps=42,
+        random_seed=0,
+    )
+
+    try:
+        env.reset(seed=0)
+        charger_id = "Building_5/charger_5_1"
+        initial_charger = env._topology_service.member_pool["Building_5"].electric_vehicle_chargers[0]
+        assert charger_id in env.entity_specs["tables"]["charger"]["ids"]
+
+        _step_until(env, 16)
+        assert charger_id not in env.entity_specs["tables"]["charger"]["ids"]
+
+        _step_until(env, 18)
+        assert charger_id in env.entity_specs["tables"]["charger"]["ids"]
+        assert [event["applied"] for event in env.topology_event_log] == [True, True]
+        restored_charger = env._topology_service.member_pool["Building_5"].electric_vehicle_chargers[0]
+        historical_chargers = env._topology_service.historical_chargers("Building_5")
+        assert restored_charger is not initial_charger
+        assert historical_chargers == (initial_charger, restored_charger)
+        assert env._kpi_service._chargers_for_metrics(
+            env._topology_service.member_pool["Building_5"]
+        ) == list(historical_chargers)
+        _step_until(env, 40)
+        ev_metrics = env._kpi_service._compute_ev_metrics(
+            env._topology_service.member_pool["Building_5"],
+            t_start=0,
+            t_final=env.time_step,
+        )
+        assert ev_metrics["departures_total"] == 2.0
+    finally:
+        env.close()
+
+
+def test_removed_pv_storage_and_deferrable_can_be_restored_from_same_member_templates():
+    schema = _load_schema()
+    schema["buildings"]["Building_12"]["electrical_storage"]["attributes"][
+        "initial_soc"
+    ] = 0.55
+    schema["topology_events"] = [
+        {
+            "id": "remove_pv",
+            "time_step": 1,
+            "operation": "remove_asset",
+            "target_member_id": "Building_11",
+            "target_asset_type": "pv",
+            "target_asset_id": "pv",
+        },
+        {
+            "id": "remove_storage",
+            "time_step": 1,
+            "operation": "remove_asset",
+            "target_member_id": "Building_12",
+            "target_asset_type": "electrical_storage",
+            "target_asset_id": "electrical_storage",
+        },
+        {
+            "id": "remove_deferrable",
+            "time_step": 1,
+            "operation": "remove_asset",
+            "target_member_id": "Building_1",
+            "target_asset_type": "deferrable_appliance",
+            "target_asset_id": "deferrable_appliance_1",
+        },
+        {
+            "id": "restore_pv",
+            "time_step": 2,
+            "operation": "add_asset",
+            "target_member_id": "Building_11",
+            "target_asset_type": "pv",
+            "target_asset_id": "pv",
+            "source_member_id": "Building_11",
+            "source_asset_id": "pv",
+        },
+        {
+            "id": "restore_storage",
+            "time_step": 2,
+            "operation": "add_asset",
+            "target_member_id": "Building_12",
+            "target_asset_type": "electrical_storage",
+            "target_asset_id": "electrical_storage",
+            "source_member_id": "Building_12",
+            "source_asset_id": "electrical_storage",
+        },
+        {
+            "id": "restore_deferrable",
+            "time_step": 2,
+            "operation": "add_asset",
+            "target_member_id": "Building_1",
+            "target_asset_type": "deferrable_appliance",
+            "target_asset_id": "deferrable_appliance_1",
+            "source_member_id": "Building_1",
+            "source_asset_id": "deferrable_appliance_1",
+        },
+    ]
+    env = CityLearnEnv(
+        schema,
+        interface="entity",
+        topology_mode="dynamic",
+        episode_time_steps=5,
+        random_seed=0,
+    )
+
+    try:
+        env.reset(seed=0)
+        pv_member = env._topology_service.member_pool["Building_11"]
+        storage_member = env._topology_service.member_pool["Building_12"]
+        initial_pv_power = float(pv_member.pv.nominal_power)
+        expected_pv_generation = (
+            pv_member._pv_generation_to_control_step(
+                pv_member.energy_simulation.solar_generation
+            )
+            * -1.0
+        )
+        initial_storage = storage_member.electrical_storage
+        initial_storage_capacity = float(storage_member.electrical_storage.capacity)
+        initial_storage_soc = float(initial_storage.initial_soc)
+        initial_storage.set_electricity_consumption(
+            1.0,
+            time_step=0,
+            enforce_polarity=False,
+        )
+        initial_deferrable = env._topology_service.member_pool["Building_1"].deferrable_appliances[0]
+
+        _step_until(env, 1)
+        assert float(pv_member.pv.nominal_power) == pytest.approx(0.0)
+        committed_pv_generation = getattr(
+            pv_member,
+            "_Building__solar_generation",
+        )
+        assert np.allclose(committed_pv_generation[1:], 0.0)
+        assert float(storage_member.electrical_storage.capacity) == pytest.approx(0.0)
+        assert "Building_1/deferrable_appliance_1" not in env.entity_specs["tables"]["deferrable_appliance"]["ids"]
+
+        _step_until(env, 2)
+        assert float(pv_member.pv.nominal_power) == pytest.approx(initial_pv_power)
+        committed_pv_generation = getattr(
+            pv_member,
+            "_Building__solar_generation",
+        )
+        assert np.allclose(committed_pv_generation[2:], expected_pv_generation[2:])
+        assert float(storage_member.electrical_storage.capacity) == pytest.approx(initial_storage_capacity)
+        restored_storage = storage_member.electrical_storage
+        assert restored_storage is not initial_storage
+        assert float(restored_storage.soc[restored_storage.time_step]) == pytest.approx(
+            initial_storage_soc
+        )
+        restored_storage.set_electricity_consumption(
+            -0.5,
+            time_step=restored_storage.time_step,
+            enforce_polarity=False,
+        )
+        historical_storages = env._topology_service.historical_storages("Building_12")
+        assert historical_storages == (initial_storage, restored_storage)
+        bess_metrics = env._kpi_service._compute_bess_metrics(
+            storage_member,
+            t_start=0,
+            t_final=restored_storage.time_step,
+        )
+        assert bess_metrics["bess_charge_total_kwh"] == pytest.approx(1.0)
+        assert bess_metrics["bess_discharge_total_kwh"] == pytest.approx(0.5)
+        assert bess_metrics["bess_throughput_total_kwh"] == pytest.approx(1.5)
+        assert bess_metrics["_bess_capacity_kwh"] == pytest.approx(
+            2.0 * initial_storage_capacity
+        )
+        assert "Building_1/deferrable_appliance_1" in env.entity_specs["tables"]["deferrable_appliance"]["ids"]
+        assert [event["applied"] for event in env.topology_event_log] == [True] * 6
+
+        restored_deferrable = env._topology_service.member_pool["Building_1"].deferrable_appliances[0]
+        historical_deferrables = env._topology_service.historical_deferrable_appliances("Building_1")
+        assert restored_deferrable is not initial_deferrable
+        assert historical_deferrables == (initial_deferrable, restored_deferrable)
+        assert env._kpi_service._deferrable_appliances_for_metrics(
+            env._topology_service.member_pool["Building_1"]
+        ) == list(historical_deferrables)
+    finally:
+        env.close()
+
+
 def test_dynamic_deferrable_appliance_add_start_and_remove_cancels_future_consumption():
     schema = _load_schema()
     schema["topology_events"] = [
@@ -319,7 +527,10 @@ def test_dynamic_reset_restores_removed_deferrable_appliance_before_event_replay
         schema,
         interface="entity",
         topology_mode="dynamic",
-        episode_time_steps=3,
+        # Repeated resets deliberately select the same global window.  Integer
+        # episode lengths normally advance to the next non-overlapping window,
+        # where the global event at t=1 must already have been replayed.
+        episode_time_steps=[(0, 2)],
         random_seed=0,
         render_mode="none",
     )
@@ -411,6 +622,65 @@ def test_event_order_is_deterministic_for_same_time_step():
         _step_until(env, 2)
         event_ids = [entry["id"] for entry in env.topology_event_log if entry["time_step"] == 2]
         assert event_ids[:2] == ["evt_add_member_18", "evt_add_charger_to_b2"]
+    finally:
+        env.close()
+
+
+def test_global_topology_events_are_replayed_and_offset_in_partial_window():
+    schema = _load_schema()
+    env = CityLearnEnv(
+        schema,
+        interface="entity",
+        topology_mode="dynamic",
+        simulation_start_time_step=3,
+        simulation_end_time_step=6,
+        episode_time_steps=4,
+        random_seed=0,
+    )
+
+    try:
+        env.reset(seed=0)
+
+        # The events at global steps 2 and 3 must already define the topology
+        # visible at local step zero of a window that starts at global step 3.
+        assert "Building_18" in env._topology_service.active_member_ids
+        assert "Building_2/charger_2_dyn_1" in env.entity_specs["tables"]["charger"]["ids"]
+        assert [entry["time_step"] for entry in env.topology_event_log] == [2, 3]
+        assert [entry["episode_time_step"] for entry in env.topology_event_log] == [0, 0]
+
+        # The event at global step 4 is reached after one local transition.
+        _step_until(env, 1)
+        assert "Building_5/charger_5_1" not in env.entity_specs["tables"]["charger"]["ids"]
+        assert env.topology_event_log[-1]["time_step"] == 4
+        assert env.topology_event_log[-1]["episode_time_step"] == 1
+    finally:
+        env.close()
+
+
+def test_added_member_does_not_inherit_missed_pre_membership_requests():
+    schema = _load_schema()
+    add_member = dict(schema["topology_events"][0])
+    add_member["time_step"] = 1019
+    schema["topology_events"] = [add_member]
+    env = CityLearnEnv(
+        schema,
+        interface="entity",
+        topology_mode="dynamic",
+        simulation_start_time_step=1000,
+        simulation_end_time_step=1025,
+        episode_time_steps=26,
+        random_seed=0,
+    )
+
+    try:
+        env.reset(seed=0)
+        _step_until(env, 20)
+
+        member = env._topology_service.member_pool["Building_18"]
+        summary = member.deferrable_appliances[0].service_summary()
+        assert summary["completed_cycles"] == 0.0
+        assert summary["missed_cycles"] == 0.0
+        assert summary["unserved_energy_kwh"] == 0.0
     finally:
         env.close()
 

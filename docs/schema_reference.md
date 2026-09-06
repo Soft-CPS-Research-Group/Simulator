@@ -1,6 +1,6 @@
 # Schema Reference
 
-This page documents the `schema.json` contract. The schema is the source of truth for buildings, devices, EVs, deferrable appliances, interfaces, observation bundles, demand response, robustness, dynamic topology and local market configuration.
+This page documents the `schema.json` contract. The schema is the source of truth for buildings, devices, EVs, deferrable appliances, escalators, interfaces, observation bundles, demand response, robustness, dynamic topology and local market configuration.
 
 Portuguese version: [pt/schema_reference.md](pt/schema_reference.md).
 
@@ -69,7 +69,7 @@ Portuguese version: [pt/schema_reference.md](pt/schema_reference.md).
 | `active` | bool | `false` | Enables the flat observation. |
 | `shared_in_central_agent` | bool | `false` | Includes a common observation once in central-agent vectors. |
 
-Observation names with prefix `electric_vehicle_` are expanded per charger. Names with prefix `deferrable_appliance_` are expanded per deferrable appliance.
+Observation names with prefix `electric_vehicle_` are expanded per charger. Names with prefix `deferrable_appliance_` are expanded per deferrable appliance. Names with prefix `escalator_` are expanded per escalator.
 
 ## `actions`
 
@@ -83,7 +83,7 @@ Observation names with prefix `electric_vehicle_` are expanded per charger. Name
 |---|---:|---:|---|
 | `active` | bool | `false` | Enables the action. |
 
-`electric_vehicle_storage` expands to `electric_vehicle_storage_{charger_id}`. `deferrable_appliance` expands to `deferrable_appliance_{appliance_id}`.
+`electric_vehicle_storage` expands to `electric_vehicle_storage_{charger_id}`. `deferrable_appliance` expands to `deferrable_appliance_{appliance_id}`. `escalator` expands to `escalator_{escalator_id}`.
 
 ## `observation_bundles`
 
@@ -108,11 +108,29 @@ Entity-only configuration:
 | `entity_core_electrical` | `false` | Power, step energy, PV, BESS, EV, efficiency and building electrical metrics. |
 | `entity_community_operational` | `false` | District/community aggregates, headroom, counts and topology version. |
 | `entity_forecasts_existing` | `false` | Forecasts already present in the dataset. |
-| `entity_forecasts_derived` | `false` | Compact perfect-simulation point forecasts for price, load, PV and net demand. |
+| `entity_forecasts_derived` | `false` | Compact point forecasts for price, load, PV and net demand. |
 | `entity_demand_response` | `false` | Current district DR request fields, frozen baseline and previous-step delivery/shortfall. |
 | `entity_robustness` | `false` | Active robustness state and previous-step corruption counters in the district table. |
 | `entity_temporal_derived` | `false` | Short lags, rolling means and calendar sin/cos features. |
 | `entity_action_feedback` | `false` | Requested, limited and applied action feedback plus clipping-reason flags. |
+
+Load/PV sources for the derived bundle are configurable:
+
+```json
+"derived_forecasts": {
+  "load_pv_method": "daily_persistence",
+  "persistence_period_seconds": 86400,
+  "cold_start": "current_step",
+  "price_source": "publication_aware_day_ahead_market_input",
+  "price_publication_time_local": "13:00",
+  "price_unpublished_fallback": "daily_persistence",
+  "price_horizon_steps": [4, 24, 96]
+}
+```
+
+`actual_future` remains the backward-compatible load/PV default. Use
+`daily_persistence` for causal algorithm benchmarks that must not expose future
+load or PV truth.
 
 ## `buildings`
 
@@ -290,6 +308,38 @@ EV battery standby loss is intentionally isolated from stationary storage defaul
 | `cycle_profiles_file` | yes | Physical cycle profile catalog. |
 | `flexibility_schedule_file` | yes | Flexibility requests/windows. |
 | `attributes.trigger_threshold` | no | Start action threshold (default `0.5`; `action > threshold` is interpreted as ON). |
+
+## Escalators (flat interface)
+
+```json
+"escalators": {
+  "EscadaRolante_1": {
+    "type": "citylearn.energy_model.Escalator",
+    "simulation": "EscadaRolante_1.csv",
+    "attributes": {
+      "standby_power": 0.08,
+      "slow_power": 0.42,
+      "normal_power": 2.10,
+      "minimum_state_steps": 1,
+      "service_threshold_passengers": 0.5
+    }
+  }
+}
+```
+
+| Field | Required | Purpose |
+|---|---:|---|
+| `type` | no | Escalator class. Default: `citylearn.energy_model.Escalator`. |
+| `simulation` | yes | CSV with one row per simulation step. |
+| `attributes.standby_power`, `slow_power`, `normal_power` | yes | Non-negative kW powers; must be non-decreasing. |
+| `attributes.minimum_state_steps` | no | Minimum residence in a state; default `1`. |
+| `attributes.service_threshold_passengers` | no | Passenger demand above which service is required; default `0.5`. |
+
+The CSV requires `time_step`, `passengers_from_trains_15min`,
+`background_pedestrians_15min`, `passengers_expected_15min`, `people_detected`,
+`arriving_trains`, `departing_trains`, `minutes_to_next_train` and `available`.
+`passengers_expected_15min` must equal the sum of the two passenger components.
+Escalator support is currently exposed through the flat interface.
 
 ## Dynamic Topology
 

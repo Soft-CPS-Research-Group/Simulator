@@ -118,6 +118,148 @@ def _fake_feasibility_departure_charger(
     )
 
 
+def test_ev_energy_accounting_detects_soc_gain_without_charger_energy():
+    charger = _fake_feasibility_departure_charger(
+        actual_soc=0.80,
+        arrival_soc=0.20,
+        capacity_kwh=10.0,
+    )
+    building = SimpleNamespace(
+        name="Building_1",
+        time_step=1,
+        electric_vehicle_chargers=[charger],
+    )
+    service = CityLearnKPIService(SimpleNamespace(topology_mode="static"))
+
+    metrics = service._compute_ev_metrics(building)
+
+    assert metrics["ev_connected_soc_gain_total_kwh"] == pytest.approx(6.0)
+    assert metrics["ev_charge_total_kwh"] == pytest.approx(0.0)
+    assert metrics["ev_energy_accounting_shortfall_kwh"] == pytest.approx(6.0)
+
+
+def test_ev_energy_accounting_accepts_charger_energy_above_soc_gain():
+    charger = _fake_feasibility_departure_charger(
+        actual_soc=0.80,
+        arrival_soc=0.20,
+        capacity_kwh=10.0,
+    )
+    charger.electricity_consumption = np.array([6.5, 0.0], dtype="float64")
+    building = SimpleNamespace(
+        name="Building_1",
+        time_step=1,
+        electric_vehicle_chargers=[charger],
+    )
+    service = CityLearnKPIService(SimpleNamespace(topology_mode="static"))
+
+    metrics = service._compute_ev_metrics(building)
+
+    assert metrics["ev_connected_soc_gain_total_kwh"] == pytest.approx(6.0)
+    assert metrics["ev_charge_total_kwh"] == pytest.approx(6.5)
+    assert metrics["ev_energy_accounting_shortfall_kwh"] == pytest.approx(0.0)
+
+
+def test_ev_departure_at_terminal_episode_boundary_is_counted():
+    charger = _fake_feasibility_departure_charger(
+        actual_soc=0.80,
+        arrival_soc=0.20,
+        capacity_kwh=10.0,
+    )
+    charger.electricity_consumption = np.array([6.5], dtype="float64")
+    charger.charger_simulation.electric_vehicle_charger_state = np.array(
+        [1.0], dtype="float64"
+    )
+    charger.charger_simulation.electric_vehicle_id = np.array(["EV_1"])
+    charger.charger_simulation.electric_vehicle_required_soc_departure = np.array(
+        [0.80], dtype="float64"
+    )
+    charger.charger_simulation.electric_vehicle_estimated_soc_arrival = np.array(
+        [0.20], dtype="float64"
+    )
+    charger.charger_simulation.electric_vehicle_departure_time = np.array(
+        [1.0], dtype="float64"
+    )
+    charger.past_connected_evs = [charger.past_connected_evs[0]]
+    charger.past_connected_evs[0].battery.soc = [0.80]
+    building = SimpleNamespace(
+        name="Building_1",
+        time_step=0,
+        electric_vehicle_chargers=[charger],
+    )
+    service = CityLearnKPIService(SimpleNamespace(topology_mode="static"))
+
+    metrics = service._compute_ev_metrics(building)
+
+    assert metrics["departures_total"] == 1.0
+    assert metrics["departures_met"] == 1.0
+    assert metrics["ev_connected_soc_gain_total_kwh"] == pytest.approx(6.0)
+    assert metrics["ev_charge_total_kwh"] == pytest.approx(6.5)
+    assert metrics["ev_energy_accounting_shortfall_kwh"] == pytest.approx(0.0)
+
+
+def test_connected_ev_without_terminal_departure_is_not_counted():
+    charger = _fake_feasibility_departure_charger(actual_soc=0.80)
+    charger.charger_simulation.electric_vehicle_charger_state = np.array(
+        [1.0], dtype="float64"
+    )
+    charger.charger_simulation.electric_vehicle_id = np.array(["EV_1"])
+    charger.charger_simulation.electric_vehicle_required_soc_departure = np.array(
+        [0.80], dtype="float64"
+    )
+    charger.charger_simulation.electric_vehicle_estimated_soc_arrival = np.array(
+        [0.20], dtype="float64"
+    )
+    charger.charger_simulation.electric_vehicle_departure_time = np.array(
+        [2.0], dtype="float64"
+    )
+    charger.past_connected_evs = [charger.past_connected_evs[0]]
+    charger.past_connected_evs[0].battery.soc = [0.80]
+    building = SimpleNamespace(
+        name="Building_1",
+        time_step=0,
+        electric_vehicle_chargers=[charger],
+    )
+    service = CityLearnKPIService(SimpleNamespace(topology_mode="static"))
+
+    metrics = service._compute_ev_metrics(building)
+
+    assert metrics["departures_total"] == 0.0
+
+
+@pytest.mark.parametrize("explicit_session_identity", [False, True])
+def test_back_to_back_session_change_of_same_ev_counts_both_departures(
+    explicit_session_identity: bool,
+):
+    ev = SimpleNamespace(battery=SimpleNamespace(soc=[0.80, 0.80, 0.80]))
+    simulation = SimpleNamespace(
+        electric_vehicle_charger_state=np.array([1.0, 1.0, 0.0]),
+        electric_vehicle_id=np.array(["EV_1", "EV_1", "EV_1"], dtype=object),
+        electric_vehicle_departure_time=np.array([1.0, 4.0, -1.0]),
+        electric_vehicle_required_soc_departure=np.array([0.80, 0.80, 0.80]),
+    )
+    if explicit_session_identity:
+        simulation.electric_vehicle_session_id = np.array(
+            ["SESSION_1", "SESSION_2", "SESSION_2"], dtype=object
+        )
+    charger = SimpleNamespace(
+        charger_id="shared_charger",
+        electricity_consumption=np.zeros(3, dtype="float64"),
+        charger_simulation=simulation,
+        past_connected_evs=[ev, ev, None],
+    )
+    building = SimpleNamespace(
+        name="Building_1",
+        time_step=2,
+        electric_vehicle_chargers=[charger],
+    )
+    service = CityLearnKPIService(SimpleNamespace(topology_mode="static"))
+
+    metrics = service._compute_ev_metrics(building)
+
+    assert metrics["departures_total"] == 2.0
+    assert metrics["departures_met"] == 2.0
+
+
 def _fake_ev_building(actual_socs: list[float], *, name: str = "Building_1"):
     return SimpleNamespace(
         name=name,
@@ -948,6 +1090,7 @@ def test_phase_kpis_are_present_only_when_electrical_service_is_enabled():
         assert "district_electrical_service_phase_phase_peaks_import_peak_l2_kw" in phase_keys
         assert "district_electrical_service_phase_phase_peaks_import_peak_l3_kw" in phase_keys
         assert "district_electrical_service_phase_violations_energy_total_kwh" in phase_keys
+        assert "district_electrical_service_phase_requested_pressure_energy_total_kwh" in phase_keys
 
         assert "district_electrical_service_phase_phase_peaks_import_peak_l2_kw" not in legacy_keys
         assert "district_electrical_service_phase_phase_peaks_import_peak_l3_kw" not in legacy_keys

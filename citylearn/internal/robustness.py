@@ -40,6 +40,7 @@ class RobustnessEvent:
     start_time_step: int
     end_time_step: int
     mode: str
+    event_domain: str
     value: Optional[float]
     std: Optional[float]
     min_value: Optional[float]
@@ -73,6 +74,14 @@ class CityLearnRobustnessService:
         "ev",
         "pv",
         "deferrable_appliance",
+    }
+    VALID_EVENT_DOMAINS = {
+        "ASSET_CONNECTION",
+        "ASSET_AVAILABILITY",
+        "SENSOR_CHANNEL",
+        "ACTUATOR_CHANNEL",
+        "COMMUNICATION_LINK",
+        "VALUE_QUALITY",
     }
     TELEMETRY_FEATURES = {"telemetry", "both", "*"}
     CONTROL_FEATURES = {"control", "both", "*"}
@@ -208,6 +217,57 @@ class CityLearnRobustnessService:
                 "action_dropout": counts["dropout"],
             },
         }
+
+    def runtime_status(self, *, current_step: Optional[int] = None) -> Mapping[str, Any]:
+        """Return raw runtime evidence without deriving TI-MARL health.
+
+        ``fault_mode`` is deliberately preserved as the simulator cause.  The
+        consumer decides whether the same evidence is healthy, degraded,
+        stale, missing or failed for its own semantic contract.
+        """
+
+        step = self._global_time_step() if current_step is None else int(current_step)
+        active = [
+            event
+            for event in self._active_events(step)
+            if self._module_enabled(event.module)
+        ]
+        payload: Dict[str, Any] = {
+            "version": "runtime_status_v1",
+            "emits_health_state": False,
+            "active_events": [self._runtime_event_record(event, step) for event in active],
+            "asset_connections": [],
+            "asset_availability": [],
+            "sensor_channels": [],
+            "actuator_channels": [],
+            "communication_links": [],
+            "value_quality": [],
+        }
+        collection_by_domain = {
+            "ASSET_AVAILABILITY": "asset_availability",
+            "SENSOR_CHANNEL": "sensor_channels",
+            "ACTUATOR_CHANNEL": "actuator_channels",
+            "COMMUNICATION_LINK": "communication_links",
+            "VALUE_QUALITY": "value_quality",
+        }
+        for event in active:
+            collection = collection_by_domain.get(event.event_domain)
+            if collection is None:
+                # ASSET_CONNECTION is represented from actual entity relations
+                # by the entity-interface service, not inferred from a fault.
+                continue
+            payload[collection].extend(self._resolved_runtime_status_records(event, step))
+
+        for key in collection_by_domain.values():
+            payload[key].sort(
+                key=lambda row: (
+                    str(row.get("target_type", "")),
+                    str(row.get("target_id", "")),
+                    str(row.get("target_feature", "")),
+                    str(row.get("event_id", "")),
+                )
+            )
+        return payload
 
     def apply_observations(self, observations: Any) -> Any:
         """Apply observation/forecast/telemetry events to the agent-facing payload."""
@@ -435,6 +495,23 @@ class CityLearnRobustnessService:
                     f"for module '{module}'."
                 )
 
+            raw_event_domain = row.get("event_domain")
+            if raw_event_domain is None or str(raw_event_domain).strip().lower() in {"", "nan"}:
+                event_domain = self._default_event_domain(module, mode)
+            else:
+                event_domain = str(raw_event_domain).strip().upper()
+            if event_domain not in self.VALID_EVENT_DOMAINS:
+                raise ValueError(
+                    f"robustness event '{event_id}' event_domain must be one of "
+                    f"{sorted(self.VALID_EVENT_DOMAINS)}."
+                )
+            self._validate_event_domain(
+                event_id=event_id,
+                module=module,
+                mode=mode,
+                event_domain=event_domain,
+            )
+
             delay_steps = max(
                 self._int_value(row.get("delay_steps", 1), default=1),
                 1,
@@ -450,6 +527,7 @@ class CityLearnRobustnessService:
                     start_time_step=start,
                     end_time_step=end,
                     mode=mode,
+                    event_domain=event_domain,
                     value=self._optional_float(row.get("value")),
                     std=self._optional_float(row.get("std")),
                     min_value=self._optional_float(row.get("min_value")),
@@ -461,6 +539,153 @@ class CityLearnRobustnessService:
             )
 
         return sorted(events, key=lambda item: (item.start_time_step, item.end_time_step, item.order))
+
+    @staticmethod
+    def _default_event_domain(module: str, mode: str) -> str:
+        if module == "asset":
+            return "ASSET_AVAILABILITY"
+        if module == "action" and mode in {"dropout", "delay", "stuck"}:
+            return "ACTUATOR_CHANNEL"
+        return "VALUE_QUALITY"
+
+    @staticmethod
+    def _validate_event_domain(*, event_id: str, module: str, mode: str, event_domain: str) -> None:
+        if event_domain == "ASSET_CONNECTION":
+            raise ValueError(
+                f"robustness event '{event_id}' cannot declare ASSET_CONNECTION; "
+                "asset connection is reported from actual entity relations."
+            )
+        allowed_modules = {
+            "ASSET_CONNECTION": set(),
+            "ASSET_AVAILABILITY": {"asset"},
+            "SENSOR_CHANNEL": {"observation", "forecast"},
+            "ACTUATOR_CHANNEL": {"action"},
+            "COMMUNICATION_LINK": {"observation", "forecast"},
+            "VALUE_QUALITY": {"observation", "forecast", "action"},
+        }
+        if module not in allowed_modules[event_domain]:
+            raise ValueError(
+                f"robustness event '{event_id}' event_domain='{event_domain}' "
+                f"is incompatible with module='{module}'."
+            )
+        loss_modes = {
+            "SENSOR_CHANNEL": {"missing", "stuck"},
+            "ACTUATOR_CHANNEL": {"dropout", "delay", "stuck"},
+            "COMMUNICATION_LINK": {"missing", "stuck"},
+            "ASSET_AVAILABILITY": {"unavailable"},
+            "ASSET_CONNECTION": {"unavailable"},
+        }
+        if event_domain in loss_modes and mode not in loss_modes[event_domain]:
+            raise ValueError(
+                f"robustness event '{event_id}' mode='{mode}' is incompatible "
+                f"with event_domain='{event_domain}'."
+            )
+
+    def _runtime_event_record(self, event: RobustnessEvent, step: int) -> Mapping[str, Any]:
+        return {
+            "event_id": event.event_id,
+            "event_domain": event.event_domain,
+            "fault_mode": event.mode,
+            "target_type": event.target_type,
+            "target_id": event.target_id,
+            "target_feature": event.target_feature,
+            "start_time_step": int(event.start_time_step),
+            "end_time_step": int(event.end_time_step),
+            "active_duration_steps": max(int(step) - int(event.start_time_step) + 1, 0),
+        }
+
+    def _resolved_runtime_status_records(
+        self,
+        event: RobustnessEvent,
+        step: int,
+    ) -> List[Mapping[str, Any]]:
+        descriptors: List[Mapping[str, Any]] = []
+        if event.module in {"observation", "forecast"}:
+            specs = self.env.entity_specs
+            table_spec = specs.get("tables", {}).get(event.target_type, {})
+            ids = list(table_spec.get("ids", []))
+            features = list(table_spec.get("features", []))
+            for row_index in self._matching_entity_rows(event, event.target_type, ids):
+                for feature_index in self._matching_feature_indices(event, features):
+                    if feature_index >= len(features):
+                        continue
+                    descriptors.append(
+                        self._entity_observation_descriptor(
+                            event.target_type,
+                            ids,
+                            row_index,
+                            features[feature_index],
+                        )
+                    )
+        elif event.module in {"action", "asset"}:
+            descriptors = [
+                descriptor
+                for descriptor in self._validation_action_descriptors()
+                if (
+                    self._action_event_matches(event, descriptor)
+                    if event.module == "action"
+                    else self._asset_control_event_matches(event, descriptor)
+                )
+            ]
+            if event.module == "asset" and not descriptors:
+                specs = self.env.entity_specs
+                table_spec = specs.get("tables", {}).get(event.target_type, {})
+                ids = list(table_spec.get("ids", []))
+                for row_index in self._matching_entity_rows(event, event.target_type, ids):
+                    descriptors.append(
+                        self._entity_observation_descriptor(
+                            event.target_type,
+                            ids,
+                            row_index,
+                            event.target_feature,
+                        )
+                    )
+
+        status = self._runtime_quality_fields(event, step)
+        records: List[Mapping[str, Any]] = []
+        seen = set()
+        for descriptor in descriptors:
+            target_id = str(descriptor.get("global_id") or descriptor.get("target_id") or "")
+            target_feature = str(descriptor.get("target_feature") or event.target_feature)
+            key = (target_id, target_feature)
+            if key in seen:
+                continue
+            seen.add(key)
+            records.append(
+                {
+                    "event_id": event.event_id,
+                    "event_ids": [event.event_id],
+                    "event_domain": event.event_domain,
+                    "fault_mode": event.mode,
+                    "target_type": str(descriptor.get("target_type") or event.target_type),
+                    "target_id": target_id,
+                    "target_feature": target_feature,
+                    "building_id": descriptor.get("building"),
+                    **status,
+                }
+            )
+        return records
+
+    @staticmethod
+    def _runtime_quality_fields(event: RobustnessEvent, step: int) -> Mapping[str, Any]:
+        unavailable = event.mode in {"missing", "dropout", "unavailable"}
+        if event.mode == "stuck":
+            last_fresh = int(event.start_time_step)
+        elif event.mode == "delay":
+            last_fresh = max(int(step) - max(int(event.delay_steps), 1), 0)
+        elif unavailable or event.mode in {"noise", "bias", "clip"}:
+            last_fresh = max(int(event.start_time_step) - 1, 0)
+        else:
+            last_fresh = int(step)
+        last_update = max(int(event.start_time_step) - 1, 0) if unavailable else int(step)
+        return {
+            "availability": "UNAVAILABLE" if unavailable else "AVAILABLE",
+            "connection": "NOT_APPLICABLE",
+            "quality": "INVALID" if unavailable else "IMPAIRED",
+            "last_update_time_step": last_update,
+            "last_fresh_time_step": last_fresh,
+            "age_steps": max(int(step) - last_fresh, 0),
+        }
 
     def _active_events(self, global_time_step: int) -> List[RobustnessEvent]:
         if not self.enabled or len(self._events) == 0:
@@ -912,7 +1137,10 @@ class CityLearnRobustnessService:
     def _building_for_entity(self, table_name: str, entity_id: str) -> Optional[str]:
         if table_name == "building":
             return entity_id
-        parts = str(entity_id).split(":")
+        raw = str(entity_id)
+        if "/" in raw:
+            return raw.split("/", 1)[0]
+        parts = raw.split(":")
         if len(parts) >= 2:
             return parts[1]
         return None
@@ -934,7 +1162,20 @@ class CityLearnRobustnessService:
             },
         )
         target_key = str(descriptor.get("target_key", ""))
-        application_key = f"{event.event_id}:{kind}:{target_key}"
+        if kind == "asset":
+            # An availability event is applied to every observation field and
+            # control port of the affected asset.  Those field-level effects
+            # remain separate observation/action corruption records, but the
+            # asset-time KPI must count the physical entity once per step.
+            asset_identity = str(
+                descriptor.get("global_id")
+                or descriptor.get("raw_id")
+                or descriptor.get("target_id")
+                or target_key
+            )
+            application_key = f"{event.event_id}:{kind}:{asset_identity}"
+        else:
+            application_key = f"{event.event_id}:{kind}:{target_key}"
         already_recorded = application_key in record.get(kind, set())
         record["event_ids"].add(event.event_id)
         record["modules"].add(event.module)

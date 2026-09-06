@@ -67,6 +67,14 @@ def test_entity_interface_shapes_and_specs_are_consistent():
         assert specs["normalization"]["policy"] == "external_running_stats"
         assert specs["normalization"]["simulator_applies_normalization"] is False
         assert specs["normalization"]["dynamic_topology"]["stable_ids"] is True
+        assert specs["runtime_status_contract"]["version"] == "runtime_status_v1"
+        assert specs["runtime_status_contract"]["emits_health_state"] is False
+        assert specs["action_execution_contract"]["version"] == "entity_action_execution_v1"
+        runtime_status = observations["meta"]["runtime_status"]
+        assert runtime_status["version"] == "runtime_status_v1"
+        assert runtime_status["emits_health_state"] is False
+        assert len(runtime_status["asset_connections"]) == len(specs["tables"]["charger"]["ids"])
+        assert all("health" not in record for record in runtime_status["asset_connections"])
     finally:
         env.close()
 

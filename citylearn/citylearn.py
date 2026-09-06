@@ -1150,8 +1150,14 @@ class CityLearnEnv(Environment, Env):
 
             if schema_path.is_file():
                 schema = FileHandler.read_json(schema_path)
-                schema['root_directory'] = os.path.split(schema_path.absolute())[0] if schema['root_directory'] is None \
-                    else schema['root_directory']
+                configured_root = schema.get('root_directory')
+                if configured_root is None:
+                    schema['root_directory'] = os.path.split(schema_path.absolute())[0]
+                else:
+                    configured_root = Path(configured_root).expanduser()
+                    if not configured_root.is_absolute():
+                        configured_root = schema_path.absolute().parent / configured_root
+                    schema['root_directory'] = str(configured_root.resolve())
 
             elif isinstance(schema, str):
                 try:
@@ -1742,7 +1748,7 @@ class CityLearnEnv(Environment, Env):
             **kwargs,
         )
 
-    def process_metadata(self, schema, building_schema, chargers_list, deferrable_appliances_list, index, energy_simulation: EnergySimulation, **kwargs):
+    def process_metadata(self, schema, building_schema, chargers_list, deferrable_appliances_list, escalators_list, index, energy_simulation: EnergySimulation, **kwargs):
         """Compatibility wrapper for metadata processing service."""
 
         return self._loading_service.process_metadata(
@@ -1750,6 +1756,7 @@ class CityLearnEnv(Environment, Env):
             building_schema,
             chargers_list,
             deferrable_appliances_list,
+            escalators_list,
             index,
             energy_simulation,
             **kwargs,
