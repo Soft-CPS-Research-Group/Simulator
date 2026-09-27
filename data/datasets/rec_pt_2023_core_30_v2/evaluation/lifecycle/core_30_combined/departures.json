@@ -1,0 +1,25 @@
+[
+  {
+    "member_id": "Member_008",
+    "exit_step": 4320,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_011",
+    "exit_step": 13160,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_001",
+    "exit_step": 30520,
+    "owned_ev_ids": [
+      "EV-M001-01"
+    ],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  }
+]

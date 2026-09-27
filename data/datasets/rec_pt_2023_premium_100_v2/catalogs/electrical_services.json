@@ -1,0 +1,3168 @@
+{
+  "Member_001": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 3.838162066239956,
+    "native_peak_export_kw": 2.959100639468333,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 5.996,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 5.996,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_002": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 0.9034550320253136,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_003": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 3.8368014995621635,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 10.35
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 7.36,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L3"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_004": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 4.6,
+    "original_sampled_contracted_power_kva": 4.6,
+    "native_peak_import_kw": 1.7414417445874273,
+    "native_peak_export_kw": 3.6334563129952477,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 4.6,
+    "total_export_limit_kw": 4.6,
+    "per_phase_import_limits_kw": {
+      "L1": 4.6,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 4.6,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_005": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.536115589168901,
+    "native_peak_export_kw": 4.370865058416187,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 6.9,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_006": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 13.8,
+    "original_sampled_contracted_power_kva": 13.8,
+    "native_peak_import_kw": 1.1682161699828615,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 13.8,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 4.6000000000000005,
+      "L2": 4.6000000000000005,
+      "L3": 4.6000000000000005
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      },
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_007": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.124025290889604,
+    "native_peak_export_kw": 1.5432212594886534,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 1.909,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 1.909,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_008": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.3985813800593574,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_009": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.4610219748524271,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_010": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 17.25,
+    "original_sampled_contracted_power_kva": 17.25,
+    "native_peak_import_kw": 2.371750788328291,
+    "native_peak_export_kw": 4.133269818090134,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 17.25,
+    "total_export_limit_kw": 9.964,
+    "per_phase_import_limits_kw": {
+      "L1": 5.75,
+      "L2": 5.75,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 3.3213333333333335,
+      "L2": 3.3213333333333335,
+      "L3": 3.3213333333333335
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_011": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.6107354063156833,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_012": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 4.6,
+    "original_sampled_contracted_power_kva": 4.6,
+    "native_peak_import_kw": 2.17664993602083,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 4.6,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 4.6
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_013": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 5.198628268517052,
+    "native_peak_export_kw": 3.737066162234019,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 7.1419999999999995,
+    "per_phase_import_limits_kw": {
+      "L1": 10.35,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 7.1419999999999995,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_014": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.1955768506145261,
+    "native_peak_export_kw": 2.4694316257292495,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 5.615,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.75,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.615,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_015": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.803667994400648,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 6.9
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_016": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 13.8,
+    "original_sampled_contracted_power_kva": 13.8,
+    "native_peak_import_kw": 2.4707181620100074,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 13.8,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 4.6000000000000005,
+      "L2": 4.6000000000000005,
+      "L3": 4.6000000000000005
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      },
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_017": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 2.727331137465563,
+    "native_peak_export_kw": 1.565893290714888,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 1.909,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.75,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 1.909,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_018": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 1.2995639858678443,
+    "native_peak_export_kw": 3.615679450228303,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 9.2,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 10.35
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 9.2
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 7.36,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L3"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_019": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.4152145405198464,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 5.75,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_020": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.561380339934429,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_021": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 2.602515985781374,
+    "native_peak_export_kw": 2.6364349175400497,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 3.055,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 3.055
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_022": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 1.5417506336840276,
+    "native_peak_export_kw": 4.806964316149964,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 6.9,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_023": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.8176423095314216,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.75,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_024": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 3.0044404526927586,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 10.35
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 7.36,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L3"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_025": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.372259146806335,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_026": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 1.4076291831096301,
+    "native_peak_export_kw": 3.765647045158719,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 6.9,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_027": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.7469262773751368,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_028": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.141003766072947,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_029": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 4.6,
+    "original_sampled_contracted_power_kva": 4.6,
+    "native_peak_import_kw": 2.029514850722159,
+    "native_peak_export_kw": 1.7343504177978741,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 4.6,
+    "total_export_limit_kw": 2.291,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 4.6,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 2.291,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_030": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 17.25,
+    "original_sampled_contracted_power_kva": 17.25,
+    "native_peak_import_kw": 1.3067069693755746,
+    "native_peak_export_kw": 4.3351675899146285,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 17.25,
+    "total_export_limit_kw": 9.964,
+    "per_phase_import_limits_kw": {
+      "L1": 5.75,
+      "L2": 5.75,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 3.3213333333333335,
+      "L2": 3.3213333333333335,
+      "L3": 3.3213333333333335
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_031": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 4.6,
+    "original_sampled_contracted_power_kva": 4.6,
+    "native_peak_import_kw": 0.7596916333845115,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 4.6,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 4.6,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_032": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 4.6,
+    "original_sampled_contracted_power_kva": 4.6,
+    "native_peak_import_kw": 2.2390881997376653,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 4.6,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 4.6,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_033": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 4.6,
+    "original_sampled_contracted_power_kva": 4.6,
+    "native_peak_import_kw": 2.5507816445083984,
+    "native_peak_export_kw": 3.6953035265796625,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 4.6,
+    "total_export_limit_kw": 4.2,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 4.6
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 4.2
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_034": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 0.6437750249742973,
+    "native_peak_export_kw": 2.329656384894657,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 2.673,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 2.673,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_035": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.5872989153660484,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.75,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_036": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 4.6,
+    "original_sampled_contracted_power_kva": 4.6,
+    "native_peak_import_kw": 1.849106044597018,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 4.6,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 4.6
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_037": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.195066971927291,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_038": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 0.8318411092444238,
+    "native_peak_export_kw": 2.7743045970311666,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 5.615,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.615,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_039": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.6534572595133143,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 6.9
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_040": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 13.8,
+    "original_sampled_contracted_power_kva": 13.8,
+    "native_peak_import_kw": 1.8818757430458954,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 13.8,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 4.6000000000000005,
+      "L2": 4.6000000000000005,
+      "L3": 4.6000000000000005
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      },
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_041": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 3.1309323500148647,
+    "native_peak_export_kw": 2.5515351749806707,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 3.055,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.75,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 3.055,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_042": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 1.8531779708705123,
+    "native_peak_export_kw": 4.569650036470447,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 4.964,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 10.35
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 4.964
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 7.36,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L3"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_043": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 3.907618234479328,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_044": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.675979589035365,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_045": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.7029040979023815,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 6.9
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_046": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 0.7770568059146729,
+    "native_peak_export_kw": 2.994571741998882,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 5.996,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 5.996,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_047": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.199465346693039,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_048": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 3.674202276710771,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 10.35
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 7.36,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L3"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_049": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.145323505589554,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_050": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 17.25,
+    "original_sampled_contracted_power_kva": 17.25,
+    "native_peak_import_kw": 2.007113527316524,
+    "native_peak_export_kw": 4.534513593509443,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 17.25,
+    "total_export_limit_kw": 10.344999999999999,
+    "per_phase_import_limits_kw": {
+      "L1": 5.75,
+      "L2": 5.75,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 3.448333333333333,
+      "L2": 3.448333333333333,
+      "L3": 3.448333333333333
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_051": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 3.335269589800869,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_052": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.3483555553698188,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_053": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 2.8393604434897046,
+    "native_peak_export_kw": 1.782278214566311,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 2.291,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.75,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 2.291,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_054": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 1.5717720481728046,
+    "native_peak_export_kw": 4.230383666514619,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 5.345,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 10.35
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 5.345
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 7.36,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L3"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_055": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 4.950044507499606,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 10.35,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_056": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 13.8,
+    "original_sampled_contracted_power_kva": 13.8,
+    "native_peak_import_kw": 3.181549469366918,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 13.8,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 4.6000000000000005,
+      "L2": 4.6000000000000005,
+      "L3": 4.6000000000000005
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      },
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_057": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 3.4421260278741608,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_058": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.2788760270149426,
+    "native_peak_export_kw": 2.3600918997064566,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 2.673,
+    "per_phase_import_limits_kw": {
+      "L1": 5.75,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 2.673,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_059": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.342101481435505,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_060": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 2.361373306448221,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 10.35
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 7.36,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L3"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_061": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 3.1085575375658823,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 5.75,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_062": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 1.0126517812716627,
+    "native_peak_export_kw": 3.4661741163533355,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 6.378,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.378,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_063": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 3.8476290666333273,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 6.9
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_064": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 4.6,
+    "original_sampled_contracted_power_kva": 4.6,
+    "native_peak_import_kw": 1.859727458661667,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 4.6,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 4.6,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_065": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 3.8091904326211417,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_066": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.8348359018928113,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_067": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.324980900858056,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_068": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 3.0550166847222293,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_069": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 3.919988704865524,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 6.9
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_070": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 17.25,
+    "original_sampled_contracted_power_kva": 17.25,
+    "native_peak_import_kw": 1.2972426837467932,
+    "native_peak_export_kw": 4.1597051999528665,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 17.25,
+    "total_export_limit_kw": 9.582,
+    "per_phase_import_limits_kw": {
+      "L1": 5.75,
+      "L2": 5.75,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 3.1940000000000004,
+      "L2": 3.1940000000000004,
+      "L3": 3.1940000000000004
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_071": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.3386788776560845,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_072": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 10.35,
+    "original_sampled_contracted_power_kva": 10.35,
+    "native_peak_import_kw": 2.823369417297441,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 10.35,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 10.35
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 7.36,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L3"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_073": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.365968591206222,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_074": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.9918974660536852,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.75,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_075": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.024664936374668,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 6.9
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_076": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.384321988971731,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L1"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_077": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 3.2266237222650846,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 5.75,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_078": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L3",
+    "asset_phase_connection": "L3",
+    "contracted_power_kva": 5.75,
+    "original_sampled_contracted_power_kva": 5.75,
+    "native_peak_import_kw": 1.1613222051505703,
+    "native_peak_export_kw": 1.8721157466104257,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 5.75,
+    "total_export_limit_kw": 2.291,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 5.75
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 2.291
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_bi"
+  },
+  "Member_079": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L1",
+    "asset_phase_connection": "L1",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 4.562753781300252,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.9,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_simple"
+  },
+  "Member_080": {
+    "connection_type": "single_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "L2",
+    "asset_phase_connection": "L2",
+    "contracted_power_kva": 6.9,
+    "original_sampled_contracted_power_kva": 6.9,
+    "native_peak_import_kw": 2.816647991080898,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": null,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 6.9,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 0.0,
+      "L2": 6.9,
+      "L3": 0.0
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 3.68,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "L2"
+      }
+    ],
+    "tariff_id": "btn_bi"
+  },
+  "Member_081": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 82.8,
+    "original_sampled_contracted_power_kva": 82.8,
+    "native_peak_import_kw": 13.367757133849015,
+    "native_peak_export_kw": 27.167950613331097,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 82.8,
+    "total_export_limit_kw": 35.665,
+    "per_phase_import_limits_kw": {
+      "L1": 27.599999999999998,
+      "L2": 27.599999999999998,
+      "L3": 27.599999999999998
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 11.888333333333334,
+      "L2": 11.888333333333334,
+      "L3": 11.888333333333334
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 22.08,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "bte_daily"
+  },
+  "Member_082": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 5.055574594955956,
+    "native_peak_export_kw": 6.735232990520634,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 13.902000000000001,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 4.634,
+      "L2": 4.634,
+      "L3": 4.634
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_083": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 5.080572702195354,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_084": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 4.4408718842068255,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_085": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 3.071882633076096,
+    "native_peak_export_kw": 4.448576422130262,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 5.345,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 1.7816666666666665,
+      "L2": 1.7816666666666665,
+      "L3": 1.7816666666666665
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_tri"
+  },
+  "Member_086": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 41.4,
+    "original_sampled_contracted_power_kva": 41.4,
+    "native_peak_import_kw": 5.3616035959695285,
+    "native_peak_export_kw": 9.431606522959623,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 41.4,
+    "total_export_limit_kw": 16.193,
+    "per_phase_import_limits_kw": {
+      "L1": 13.799999999999999,
+      "L2": 13.799999999999999,
+      "L3": 13.799999999999999
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 5.397666666666667,
+      "L2": 5.397666666666667,
+      "L3": 5.397666666666667
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 22.08,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_large_tri"
+  },
+  "Member_087": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 6.011677447711084,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_tri"
+  },
+  "Member_088": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 4.28182088809648,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_089": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 5.335862778472173,
+    "native_peak_export_kw": 7.948276780433539,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 9.927,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 3.3089999999999997,
+      "L2": 3.3089999999999997,
+      "L3": 3.3089999999999997
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_tri"
+  },
+  "Member_090": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 7.427532228694066,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_091": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 7.28834096713374,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 22.08,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_tri"
+  },
+  "Member_092": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 4.171702070539613,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_093": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 3.7676963970040123,
+    "native_peak_export_kw": 5.504261934614871,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 6.109,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 2.0363333333333333,
+      "L2": 2.0363333333333333,
+      "L3": 2.0363333333333333
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_094": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 10.898636395755783,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_095": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 7.2986068852783035,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_096": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 7.149756002270076,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_097": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 20.7,
+    "original_sampled_contracted_power_kva": 20.7,
+    "native_peak_import_kw": 4.118542073506133,
+    "native_peak_export_kw": 0.0,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 20.7,
+    "total_export_limit_kw": 0.0,
+    "per_phase_import_limits_kw": {
+      "L1": 6.8999999999999995,
+      "L2": 6.8999999999999995,
+      "L3": 6.8999999999999995
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 0.0,
+      "L2": 0.0,
+      "L3": 0.0
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_tri"
+  },
+  "Member_098": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 41.4,
+    "original_sampled_contracted_power_kva": 41.4,
+    "native_peak_import_kw": 12.15601504751988,
+    "native_peak_export_kw": 31.124460419025592,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 41.4,
+    "total_export_limit_kw": 41.4,
+    "per_phase_import_limits_kw": {
+      "L1": 13.799999999999999,
+      "L2": 13.799999999999999,
+      "L3": 13.799999999999999
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 13.799999999999999,
+      "L2": 13.799999999999999,
+      "L3": 13.799999999999999
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_large_tri"
+  },
+  "Member_099": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 34.5,
+    "original_sampled_contracted_power_kva": 34.5,
+    "native_peak_import_kw": 19.086596255558913,
+    "native_peak_export_kw": 18.226660294179432,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 34.5,
+    "total_export_limit_kw": 27.873,
+    "per_phase_import_limits_kw": {
+      "L1": 11.5,
+      "L2": 11.5,
+      "L3": 11.5
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 9.291,
+      "L2": 9.291,
+      "L3": 9.291
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      },
+      {
+        "max_charging_power_kw": 11.04,
+        "max_discharging_power_kw": 0.0,
+        "phase_connection": "all_phases"
+      }
+    ],
+    "tariff_id": "btn_large_tri"
+  },
+  "Member_100": {
+    "connection_type": "three_phase",
+    "simulator_mode": "three_phase",
+    "default_split": "balanced",
+    "asset_phase_connection": "all_phases",
+    "contracted_power_kva": 41.4,
+    "original_sampled_contracted_power_kva": 41.4,
+    "native_peak_import_kw": 17.3141187989999,
+    "native_peak_export_kw": 37.34612641660626,
+    "native_feasibility_margin": 0.3,
+    "contract_level_upgraded_for_native_feasibility": false,
+    "active_power_factor_assumption": 1.0,
+    "total_import_limit_kw": 41.4,
+    "total_export_limit_kw": 41.4,
+    "per_phase_import_limits_kw": {
+      "L1": 13.799999999999999,
+      "L2": 13.799999999999999,
+      "L3": 13.799999999999999
+    },
+    "per_phase_export_limits_kw": {
+      "L1": 13.799999999999999,
+      "L2": 13.799999999999999,
+      "L3": 13.799999999999999
+    },
+    "source_class": "Portuguese power levels; synthetic service design; PF=1; no voltage-flow model",
+    "charger_specs": [],
+    "tariff_id": "btn_large_tri"
+  }
+}

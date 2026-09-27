@@ -1,0 +1,106 @@
+[
+  {
+    "id": "development_grid_0_daylight",
+    "start_time_step": 4180,
+    "end_time_step": 4187,
+    "period": "daylight",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_004",
+      "Member_081",
+      "Member_098"
+    ]
+  },
+  {
+    "id": "development_grid_0_night",
+    "start_time_step": 4232,
+    "end_time_step": 4239,
+    "period": "night",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_004",
+      "Member_081",
+      "Member_098"
+    ]
+  },
+  {
+    "id": "development_grid_1_daylight",
+    "start_time_step": 13008,
+    "end_time_step": 13015,
+    "period": "daylight",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_004",
+      "Member_081",
+      "Member_098"
+    ]
+  },
+  {
+    "id": "development_grid_1_night",
+    "start_time_step": 12964,
+    "end_time_step": 12971,
+    "period": "night",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_004",
+      "Member_081",
+      "Member_098"
+    ]
+  },
+  {
+    "id": "development_grid_2_daylight",
+    "start_time_step": 21744,
+    "end_time_step": 21751,
+    "period": "daylight",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_004",
+      "Member_081",
+      "Member_098"
+    ]
+  },
+  {
+    "id": "development_grid_2_night",
+    "start_time_step": 21700,
+    "end_time_step": 21707,
+    "period": "night",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_004",
+      "Member_081",
+      "Member_098"
+    ]
+  },
+  {
+    "id": "development_grid_3_daylight",
+    "start_time_step": 30484,
+    "end_time_step": 30491,
+    "period": "daylight",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_004",
+      "Member_081",
+      "Member_098"
+    ]
+  },
+  {
+    "id": "development_grid_3_night",
+    "start_time_step": 30536,
+    "end_time_step": 30543,
+    "period": "night",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_004",
+      "Member_081",
+      "Member_098"
+    ]
+  }
+]

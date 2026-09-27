@@ -1,0 +1,13 @@
+{
+  "version": "portugal-native-978be68b-v2.1",
+  "engine_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
+  "source_version": "portugal-v2.3",
+  "tariff_policy": "common",
+  "active_pricing_file": "shared/pricing_btn_bi.parquet",
+  "market_configuration_scope": "experiment schema; disabled in dataset schemas",
+  "current_configurations": [
+    "premium_100_normal",
+    "premium_100_allin"
+  ],
+  "validation": "construction only; static integrity checks, no controller or usage evaluation for this revision"
+}

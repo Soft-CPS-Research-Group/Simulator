@@ -1,0 +1,342 @@
+{
+  "Member_001": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 2.56
+  },
+  "Member_002": {
+    "enabled": false
+  },
+  "Member_003": {
+    "enabled": false
+  },
+  "Member_004": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 2.56
+  },
+  "Member_005": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 2.56
+  },
+  "Member_006": {
+    "enabled": false
+  },
+  "Member_007": {
+    "enabled": false
+  },
+  "Member_008": {
+    "enabled": false
+  },
+  "Member_009": {
+    "enabled": false
+  },
+  "Member_010": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 5.0
+  },
+  "Member_011": {
+    "enabled": false
+  },
+  "Member_012": {
+    "enabled": false
+  },
+  "Member_013": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 2.56
+  },
+  "Member_014": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 2.56
+  },
+  "Member_015": {
+    "enabled": false
+  },
+  "Member_016": {
+    "enabled": false
+  },
+  "Member_017": {
+    "enabled": false
+  },
+  "Member_018": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 5.0
+  },
+  "Member_019": {
+    "enabled": false
+  },
+  "Member_020": {
+    "enabled": false
+  },
+  "Member_021": {
+    "enabled": false
+  },
+  "Member_022": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 5.0
+  },
+  "Member_023": {
+    "enabled": false
+  },
+  "Member_024": {
+    "enabled": false
+  },
+  "Member_025": {
+    "enabled": false
+  },
+  "Member_026": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 2.56
+  },
+  "Member_027": {
+    "enabled": false
+  },
+  "Member_028": {
+    "enabled": false
+  },
+  "Member_029": {
+    "enabled": false
+  },
+  "Member_030": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 5.0
+  },
+  "Member_031": {
+    "enabled": false
+  },
+  "Member_032": {
+    "enabled": false
+  },
+  "Member_033": {
+    "enabled": false
+  },
+  "Member_034": {
+    "enabled": false
+  },
+  "Member_035": {
+    "enabled": false
+  },
+  "Member_036": {
+    "enabled": false
+  },
+  "Member_037": {
+    "enabled": false
+  },
+  "Member_038": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 2.56
+  },
+  "Member_039": {
+    "enabled": false
+  },
+  "Member_040": {
+    "enabled": false
+  },
+  "Member_041": {
+    "enabled": false
+  },
+  "Member_042": {
+    "enabled": false
+  },
+  "Member_043": {
+    "enabled": false
+  },
+  "Member_044": {
+    "enabled": false
+  },
+  "Member_045": {
+    "enabled": false
+  },
+  "Member_046": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 2.56
+  },
+  "Member_047": {
+    "enabled": false
+  },
+  "Member_048": {
+    "enabled": false
+  },
+  "Member_049": {
+    "enabled": false
+  },
+  "Member_050": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 5.0
+  },
+  "Member_051": {
+    "enabled": false
+  },
+  "Member_052": {
+    "enabled": false
+  },
+  "Member_053": {
+    "enabled": false
+  },
+  "Member_054": {
+    "enabled": false
+  },
+  "Member_055": {
+    "enabled": false
+  },
+  "Member_056": {
+    "enabled": false
+  },
+  "Member_057": {
+    "enabled": false
+  },
+  "Member_058": {
+    "enabled": false
+  },
+  "Member_059": {
+    "enabled": false
+  },
+  "Member_060": {
+    "enabled": false
+  },
+  "Member_061": {
+    "enabled": false
+  },
+  "Member_062": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 2.56
+  },
+  "Member_063": {
+    "enabled": false
+  },
+  "Member_064": {
+    "enabled": false
+  },
+  "Member_065": {
+    "enabled": false
+  },
+  "Member_066": {
+    "enabled": false
+  },
+  "Member_067": {
+    "enabled": false
+  },
+  "Member_068": {
+    "enabled": false
+  },
+  "Member_069": {
+    "enabled": false
+  },
+  "Member_070": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 5.0
+  },
+  "Member_071": {
+    "enabled": false
+  },
+  "Member_072": {
+    "enabled": false
+  },
+  "Member_073": {
+    "enabled": false
+  },
+  "Member_074": {
+    "enabled": false
+  },
+  "Member_075": {
+    "enabled": false
+  },
+  "Member_076": {
+    "enabled": false
+  },
+  "Member_077": {
+    "enabled": false
+  },
+  "Member_078": {
+    "enabled": false
+  },
+  "Member_079": {
+    "enabled": false
+  },
+  "Member_080": {
+    "enabled": false
+  },
+  "Member_081": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 5.12
+  },
+  "Member_082": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 5.12
+  },
+  "Member_083": {
+    "enabled": false
+  },
+  "Member_084": {
+    "enabled": false
+  },
+  "Member_085": {
+    "enabled": false
+  },
+  "Member_086": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 5.12
+  },
+  "Member_087": {
+    "enabled": false
+  },
+  "Member_088": {
+    "enabled": false
+  },
+  "Member_089": {
+    "enabled": false
+  },
+  "Member_090": {
+    "enabled": false
+  },
+  "Member_091": {
+    "enabled": false
+  },
+  "Member_092": {
+    "enabled": false
+  },
+  "Member_093": {
+    "enabled": false
+  },
+  "Member_094": {
+    "enabled": false
+  },
+  "Member_095": {
+    "enabled": false
+  },
+  "Member_096": {
+    "enabled": false
+  },
+  "Member_097": {
+    "enabled": false
+  },
+  "Member_098": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 20.0
+  },
+  "Member_099": {
+    "enabled": false
+  },
+  "Member_100": {
+    "enabled": true,
+    "grid_forming_source": "electrical_storage",
+    "backup_power_kw": 20.0
+  }
+}

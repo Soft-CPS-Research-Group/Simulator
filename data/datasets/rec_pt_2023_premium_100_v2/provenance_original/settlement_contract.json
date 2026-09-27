@@ -1,0 +1,9 @@
+{
+  "grid_import": "installation-specific indexed variable cost, pre-VAT",
+  "buyer_price": "0.8 * own grid import price",
+  "seller_price": "sum(buyer local kWh * buyer price) / sum(seller local kWh)",
+  "grid_export_price_eur_kwh": 0.0,
+  "fixed_charges": "catalogs/fixed_access_charges.parquet; outside marginal KPI",
+  "signed_prices": true,
+  "scope": "benchmark cash settlement; excludes legal REC network allocation/fees; not a Coopernico export tariff"
+}

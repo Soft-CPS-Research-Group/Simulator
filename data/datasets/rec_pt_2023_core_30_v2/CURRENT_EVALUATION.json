@@ -1,0 +1,88 @@
+{
+  "version": "portugal-native-978be68b-v2.1",
+  "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
+  "status": "dataset_construction_only",
+  "tariff_policy": "common",
+  "variants": [
+    {
+      "family": "core_30",
+      "variant": "core_30_normal",
+      "label": "Core-30 Normal",
+      "purpose": "reference",
+      "factors": {
+        "T": false,
+        "E": false,
+        "H": false,
+        "G": false,
+        "D": false
+      },
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
+      "sha256": "0903647e1017231dbc61f6ac9192de49b7faedbdd36a5ea1757562522a048c86",
+      "source_physical_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
+    },
+    {
+      "family": "core_30",
+      "variant": "core_30_topology",
+      "label": "Core-30 Topologia",
+      "purpose": "scalability and adaptation",
+      "factors": {
+        "T": true,
+        "E": false,
+        "H": false,
+        "G": false,
+        "D": false
+      },
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
+      "sha256": "28a8a08f557fa9b0f3592b4d9baab7e42f96f86a84b429289029248913d4372a",
+      "source_physical_fingerprint": "e40b0db00c9846a3e689f6a759be05b4769e816f6b3bc20c853707cbbbcf76db"
+    },
+    {
+      "family": "core_30",
+      "variant": "core_30_safety",
+      "label": "Core-30 Safety",
+      "purpose": "safety",
+      "factors": {
+        "T": false,
+        "E": true,
+        "H": false,
+        "G": false,
+        "D": false
+      },
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
+      "sha256": "7bb6ba92e7299a0ed81fd330e20c2127d4db6052e9ec9920284fa4e863887f9a",
+      "source_physical_fingerprint": "ae7c92cd7704b8cdb52e74c64a404563d9801fd17af70f4a7eadd9d7ec189a05"
+    },
+    {
+      "family": "core_30",
+      "variant": "core_30_robustness",
+      "label": "Core-30 Robustness",
+      "purpose": "robustness",
+      "factors": {
+        "T": false,
+        "E": false,
+        "H": true,
+        "G": true,
+        "D": false
+      },
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
+      "sha256": "788d43de85bd5f7e7887c6745e403af818286cef0d0394ecc423e85a07353a83",
+      "source_physical_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
+    },
+    {
+      "family": "core_30",
+      "variant": "core_30_combined",
+      "label": "Core-30 Combinado",
+      "purpose": "integrated operation and deployability workload",
+      "factors": {
+        "T": true,
+        "E": true,
+        "H": true,
+        "G": true,
+        "D": false
+      },
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
+      "sha256": "44aba9c0419838eda41338479e8ff51a44ab370809a2210844a00c3fa13d86d3",
+      "source_physical_fingerprint": "e93c0b8171be8a312d2f9578d38b31378ef7092d838db1865f751769e3f192c1"
+    }
+  ]
+}

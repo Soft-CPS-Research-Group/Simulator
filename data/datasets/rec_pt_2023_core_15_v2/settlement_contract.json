@@ -1,0 +1,12 @@
+{
+  "runtime_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
+  "tariff_policy": "common",
+  "active_pricing_file": "shared/pricing_btn_bi.parquet",
+  "grid_export_price": 0,
+  "dataset_market_enabled": false,
+  "price_series_contains_local_discount": false,
+  "configuration_scope": "enable community_market and set local_price_ratio_to_grid_import=0.8 in the experiment schema",
+  "native_rule": "local price = common grid purchase price times experiment ratio",
+  "cash_conservation": "common price for buyers and sellers; use original simulator settlement",
+  "not_external_rebalanced": true
+}

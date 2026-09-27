@@ -202,3 +202,6 @@ data/datasets/citylearn_three_phase_dynamic_assets_only_demo_15s/
 data/datasets/citylearn_three_phase_electrical_service_demo_15s/
 data/datasets/citylearn_three_phase_dynamic_assets_only_demo_15s_parquet/
 data/datasets/citylearn_three_phase_electrical_service_demo_15s_parquet/
+
+# Rebuildable Portugal delivery package
+docs/portugal_rec_native.zip

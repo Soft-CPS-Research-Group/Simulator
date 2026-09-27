@@ -1,0 +1,34 @@
+{
+  "year": 2023,
+  "timezone_axis": "UTC; source OMIE Europe/Madrid; REN and tariffs Europe/Lisbon; DST resolved",
+  "tariffs": [
+    "btn_simple",
+    "btn_bi",
+    "btn_tri",
+    "btn_large_tri",
+    "bte_daily"
+  ],
+  "formula": "(OMIE + MIBEL + 0.004 + 0.010)*1.15 + TAR_energy + BTE_peak_equivalent + IEC_0.001; EUR/kWh pre-VAT",
+  "commercial_scope": "Coopernico BASE Jan2023-inspired benchmark; same margin/loss convention extended to BTE, not an actual BTE offer",
+  "exclusions": [
+    "VAT, audiovisual fee, DGEG fee",
+    "fixed contracted-power charges: reported separately, excluded from marginal control KPI",
+    "reactive energy: unity power factor in simulator",
+    "no guarantees-of-origin surcharge; no 2024 supplier TSE charge"
+  ],
+  "negative_prices": "preserved; multiplying a negative price by 0.8 is not a 20 percent saving",
+  "forecasts": "OMIE after conservative 14:00 Madrid publication; definitive MIBEL estimated by last-day same-issue-hour persistence, never future realized values",
+  "carbon": {
+    "effective_thermal_factor_kg_kwh": 0.403257583977838,
+    "apa_mainland_generation_weighted_kg_kwh": 0.09200000000000001,
+    "delivered_mean_kg_kwh": 0.11233722214761165,
+    "balance_residual_abs_p99_mw": 24.199999999999548,
+    "method": "REN 15-minute production shares; uniform fossil coefficient calibrated to APA mainland 2023 0.092 kg/kWh; imports use REE peninsular daily operational intensity; 1.15 delivery factor",
+    "limitations": [
+      "derived operational average, not measured 15-minute emissions or marginal emissions",
+      "no lifecycle emissions or attribution of stored hydro carbon",
+      "imports use Spanish production average, not full cross-border flow tracing",
+      "REN telemetering/estimation and APA inventory have different accounting boundaries; calibration is a scenario reconciliation, not independent validation"
+    ]
+  }
+}

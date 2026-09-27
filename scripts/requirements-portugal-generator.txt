@@ -1,0 +1,4 @@
+# Scientific generator, in addition to the simulator's environment
+pvlib==0.15.2
+# Archived XLSX-to-CSV conversion (generation consumes the archived CSV):
+openpyxl>=3.1,<4

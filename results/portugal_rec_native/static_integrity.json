@@ -1,0 +1,456 @@
+{
+  "version": "portugal-native-978be68b-v2.1",
+  "scope": "Static data integrity and two-session feasibility; no annual/controller evaluation",
+  "checks": [
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_15_v2/README.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_15_v2/dataset_manifest.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_15_v2/CURRENT_EVALUATION.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_15_v2/schema.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_15_v2/MEMBER_STORIES.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_15_v2/file_checksums.sha256",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_15_v2/catalogs/members.parquet",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_15_v2/evaluation/core_15.json",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2 catalogue stories common",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2 all non-story member fields unchanged",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_15_v2/MEMBER_STORIES.md common tariff",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_15_v2/schema.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_15_v2/evaluation/core_15.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2 complete checksums",
+      "passed": true
+    },
+    {
+      "name": "core_15 indexed schema",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/native_input_corrections.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/README.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/dataset_manifest.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/CURRENT_EVALUATION.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/schema.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/MEMBER_STORIES.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/file_checksums.sha256",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/catalogs/members.parquet",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/catalogs/charging_sessions.parquet",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/evaluation/MEMBER_STORIES.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_core_30_v2/chargers/CHG-M028-01.parquet",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2 catalogue stories common",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2 all non-story member fields unchanged",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_30_v2/MEMBER_STORIES.md common tariff",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_30_v2/evaluation/MEMBER_STORIES.md common tariff",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_30_v2/schema.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2 complete checksums",
+      "passed": true
+    },
+    {
+      "name": "core_30_normal indexed schema",
+      "passed": true
+    },
+    {
+      "name": "core_30_topology indexed schema",
+      "passed": true
+    },
+    {
+      "name": "core_30_safety indexed schema",
+      "passed": true
+    },
+    {
+      "name": "core_30_robustness indexed schema",
+      "passed": true
+    },
+    {
+      "name": "core_30_combined indexed schema",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_micro_4_v2/README.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_micro_4_v2/dataset_manifest.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_micro_4_v2/CURRENT_EVALUATION.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_micro_4_v2/schema.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_micro_4_v2/MEMBER_STORIES.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_micro_4_v2/file_checksums.sha256",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_micro_4_v2/catalogs/members.parquet",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2 catalogue stories common",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2 all non-story member fields unchanged",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_micro_4_v2/MEMBER_STORIES.md common tariff",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_micro_4_v2/schema.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2 complete checksums",
+      "passed": true
+    },
+    {
+      "name": "core_4 indexed schema",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/README.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/dataset_manifest.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/CURRENT_EVALUATION.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/schema.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/MEMBER_STORIES.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/file_checksums.sha256",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/catalogs/members.parquet",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/evaluation/MEMBER_STORIES.md",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json",
+      "passed": true
+    },
+    {
+      "name": "allowed change data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2 catalogue stories common",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2 all non-story member fields unchanged",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_premium_100_v2/MEMBER_STORIES.md common tariff",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/MEMBER_STORIES.md common tariff",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_premium_100_v2/schema.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json schema unchanged except version",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2 complete checksums",
+      "passed": true
+    },
+    {
+      "name": "premium_100_normal indexed schema",
+      "passed": true
+    },
+    {
+      "name": "premium_100_allin indexed schema",
+      "passed": true
+    },
+    {
+      "name": "only two departure values changed",
+      "passed": true
+    },
+    {
+      "name": "targets arrivals and other session metadata unchanged",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0092 six connected rows",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0092 consistent departure countdown",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0092 correct target",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0092 Sunday closing respected",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0092 no overlap with vehicle or next charger booking",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0092 no travel or external charge while connected",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0109 six connected rows",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0109 consistent departure countdown",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0109 correct target",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0109 Sunday closing respected",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0109 no overlap with vehicle or next charger booking",
+      "passed": true
+    },
+    {
+      "name": "EV-V028-01-1-S0109 no travel or external charge while connected",
+      "passed": true
+    },
+    {
+      "name": "all other charger rows unchanged",
+      "passed": true
+    },
+    {
+      "name": "Premium atlas common tariff",
+      "passed": true
+    },
+    {
+      "name": "native two-session certificates passed",
+      "passed": true
+    },
+    {
+      "name": "core unchanged",
+      "passed": true
+    }
+  ],
+  "failed": [],
+  "changed_files": [
+    "data/datasets/rec_pt_2023_core_15_v2/README.md",
+    "data/datasets/rec_pt_2023_core_15_v2/dataset_manifest.json",
+    "data/datasets/rec_pt_2023_core_15_v2/CURRENT_EVALUATION.json",
+    "data/datasets/rec_pt_2023_core_15_v2/schema.json",
+    "data/datasets/rec_pt_2023_core_15_v2/MEMBER_STORIES.md",
+    "data/datasets/rec_pt_2023_core_15_v2/file_checksums.sha256",
+    "data/datasets/rec_pt_2023_core_15_v2/catalogs/members.parquet",
+    "data/datasets/rec_pt_2023_core_15_v2/evaluation/core_15.json",
+    "data/datasets/rec_pt_2023_core_30_v2/native_input_corrections.json",
+    "data/datasets/rec_pt_2023_core_30_v2/README.md",
+    "data/datasets/rec_pt_2023_core_30_v2/dataset_manifest.json",
+    "data/datasets/rec_pt_2023_core_30_v2/CURRENT_EVALUATION.json",
+    "data/datasets/rec_pt_2023_core_30_v2/schema.json",
+    "data/datasets/rec_pt_2023_core_30_v2/MEMBER_STORIES.md",
+    "data/datasets/rec_pt_2023_core_30_v2/file_checksums.sha256",
+    "data/datasets/rec_pt_2023_core_30_v2/catalogs/members.parquet",
+    "data/datasets/rec_pt_2023_core_30_v2/catalogs/charging_sessions.parquet",
+    "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
+    "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
+    "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
+    "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
+    "data/datasets/rec_pt_2023_core_30_v2/evaluation/MEMBER_STORIES.md",
+    "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
+    "data/datasets/rec_pt_2023_core_30_v2/chargers/CHG-M028-01.parquet",
+    "data/datasets/rec_pt_2023_micro_4_v2/README.md",
+    "data/datasets/rec_pt_2023_micro_4_v2/dataset_manifest.json",
+    "data/datasets/rec_pt_2023_micro_4_v2/CURRENT_EVALUATION.json",
+    "data/datasets/rec_pt_2023_micro_4_v2/schema.json",
+    "data/datasets/rec_pt_2023_micro_4_v2/MEMBER_STORIES.md",
+    "data/datasets/rec_pt_2023_micro_4_v2/file_checksums.sha256",
+    "data/datasets/rec_pt_2023_micro_4_v2/catalogs/members.parquet",
+    "data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
+    "data/datasets/rec_pt_2023_premium_100_v2/README.md",
+    "data/datasets/rec_pt_2023_premium_100_v2/dataset_manifest.json",
+    "data/datasets/rec_pt_2023_premium_100_v2/CURRENT_EVALUATION.json",
+    "data/datasets/rec_pt_2023_premium_100_v2/schema.json",
+    "data/datasets/rec_pt_2023_premium_100_v2/MEMBER_STORIES.md",
+    "data/datasets/rec_pt_2023_premium_100_v2/file_checksums.sha256",
+    "data/datasets/rec_pt_2023_premium_100_v2/catalogs/members.parquet",
+    "data/datasets/rec_pt_2023_premium_100_v2/evaluation/MEMBER_STORIES.md",
+    "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json",
+    "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json"
+  ],
+  "unchanged_files": 1494,
+  "member_stories_checked": 149,
+  "dataset_story_markdown_files": 6,
+  "short_session_windows": 10,
+  "annual_runs": 0
+}

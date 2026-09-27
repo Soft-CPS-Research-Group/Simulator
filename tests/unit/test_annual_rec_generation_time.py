@@ -1,6 +1,6 @@
 import pandas as pd
 
-from scripts.generate_annual_rec_suite import TIMEZONE, _local_at
+from scripts.portugal_rec_common import TIMEZONE, _local_at
 
 
 def test_local_at_preserves_wall_clock_after_dst_transitions():

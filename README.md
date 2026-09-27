@@ -1,3 +1,5 @@
+> **Portugal — motor original `978be68b`:** nove configurações, tarifa comum e documentação em [catálogo dos datasets](docs/portugal_rec_native/README.md). A revisão corrente apenas constrói os dados; as avaliações anteriores são históricas.
+
 # CityLearn
 
 CityLearn is an open-source Farama Foundation Gymnasium environment for building energy coordination, demand response and multi-agent reinforcement learning. This repository is a research fork that extends the upstream simulator with EVs, normalized deferrable appliances, sub-hourly physics, entity observations, dataset-driven demand response, robustness events, dynamic topology, three-phase electrical service, community KPIs and performance work for large datasets.
@@ -193,3 +195,7 @@ CityLearn UI is a visual dashboard for inspecting simulation data and KPIs:
 | Open-source UI | <https://github.com/Soft-CPS-Research-Group/citylearn-ui> |
 
 The KPI export consumed by the UI is generated from `evaluate_v2()` by default, while `evaluate()` remains available for legacy workflows.
+
+## Portugal REC datasets
+
+The current annual REC suite is **Portugal, original runtime 978be68b**. See [datasets, report and reproduction instructions](docs/portugal_rec_native/README.md). Previous annual-suite datasets have been removed from the working tree.

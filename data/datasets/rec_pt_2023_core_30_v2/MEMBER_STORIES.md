@@ -1,0 +1,121 @@
+# Atlas de membros fictícios
+
+## Member_001
+
+Ana Silva · agregado 001: 3 pessoa(s), moradia de 93 m²; trabalho diurno fora de casa. Férias de 11 dias a partir do dia 228 do ano, com atividade doméstica reduzida. Equipamento: 13 módulos de 420 Wp (5.46 kWp), inversor 4.96 kW; bateria fixa de 10.24 kWh / 5.00 kW; 1 carregador(es), 2 lugares de estacionamento no cenário. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Automóveis residentes: EV-M001-01 (50 kWh úteis, AC até 11.04 kW, preferência reserve_80). Os pedidos variam por sessão, entre 50% e 100%. O mesmo automóvel pode carregar em casa e em Member_025, com itinerários descritos nos dados; o SOC é prescrito em cada chegada, sem balanço longitudinal das viagens no motor original. Nas variantes dinâmicas: sai definitivamente da REC em 2023-10-18; retira definitivamente BESS-M001-01 em 2023-06-05; a bateria substituta tem uma nova identidade física e SOC de entrada registado; quem sai deixa o cenário com todos os seus ativos; não existe carregamento privado posterior no cenário. Personagens e instalações são fictícias.
+
+## Member_002
+
+João Santos · agregado 002: 2 pessoa(s), apartamento de 128 m²; teletrabalho às terças e quintas e deslocações nos restantes dias úteis. Férias de 9 dias a partir do dia 246 do ano, com atividade doméstica reduzida. Equipamento: ciclos de lavagem programáveis, com janela alargada. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_003
+
+Inês Ferreira · agregado 003: 2 pessoa(s), moradia de 107 m²; turnos noturnos em blocos de quatro noites, com regresso de manhã. Férias de 9 dias a partir do dia 198 do ano, com atividade doméstica reduzida. Equipamento: 1 carregador(es), 2 lugares de estacionamento no cenário. Ligação monofásica, 10.35 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Automóveis residentes: EV-M003-01 (60 kWh úteis, AC até 11.04 kW, preferência high_90). Os pedidos variam por sessão, entre 50% e 100%. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_004
+
+Miguel Pereira · agregado 004: 2 pessoa(s), apartamento de 89 m²; rotinas de levar e buscar crianças, com regressos intermédios a casa. Pelo menos uma das pessoas é uma criança em idade escolar. Férias de 15 dias a partir do dia 241 do ano, com atividade doméstica reduzida. Equipamento: 1 carregador(es), 2 lugares de estacionamento no cenário. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Automóveis residentes: EV-M004-01 (50 kWh úteis, AC até 11.04 kW, preferência needs_50). Os pedidos variam por sessão, entre 50% e 100%. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_005
+
+Sofia Costa · agregado 005: 1 pessoa(s), moradia de 56 m²; presença diurna e deslocações curtas sem horário laboral fixo. Férias de 8 dias a partir do dia 221 do ano, com atividade doméstica reduzida. Equipamento: 8 módulos de 420 Wp (3.36 kWp), inversor 3.06 kW; 1 carregador(es), 2 lugares de estacionamento no cenário. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Automóveis residentes: EV-M005-01 (60 kWh úteis, AC até 11.04 kW, preferência balanced_70). Os pedidos variam por sessão, entre 50% e 100%. Nas variantes dinâmicas: adere à REC em 2023-05-15; quem sai deixa o cenário com todos os seus ativos; não existe carregamento privado posterior no cenário. Personagens e instalações são fictícias.
+
+## Member_006
+
+Pedro Rodrigues · agregado 006: 2 pessoa(s), moradia de 69 m²; trabalho até tarde e consumo doméstico deslocado para o fim da noite. Férias de 13 dias a partir do dia 216 do ano, com atividade doméstica reduzida. Equipamento: 2 carregador(es), 2 lugares de estacionamento no cenário; ciclos de lavagem programáveis, com janela curta. Ligação trifásica, 13.80 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Automóveis residentes: EV-M006-01 (77 kWh úteis, AC até 11.04 kW, preferência reserve_80); EV-M006-02 (95 kWh úteis, AC até 11.04 kW, preferência reserve_80). Os pedidos variam por sessão, entre 50% e 100%. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_007
+
+Marta Martins · agregado 007: 3 pessoa(s), apartamento de 129 m²; trabalho diurno fora de casa. Férias de 17 dias a partir do dia 188 do ano, com atividade doméstica reduzida. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas: adere à REC em 2023-02-20. Personagens e instalações são fictícias.
+
+## Member_008
+
+Rui Sousa · agregado 008: 2 pessoa(s), apartamento de 90 m²; teletrabalho às terças e quintas e deslocações nos restantes dias úteis. Férias de 12 dias a partir do dia 192 do ano, com atividade doméstica reduzida. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação monofásica, 4.60 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas: sai definitivamente da REC em 2023-04-10. Personagens e instalações são fictícias.
+
+## Member_009
+
+Leonor Fernandes · agregado 009: 2 pessoa(s), moradia de 129 m²; turnos noturnos em blocos de quatro noites, com regresso de manhã. Férias de 8 dias a partir do dia 191 do ano, com atividade doméstica reduzida. Equipamento: ciclos de lavagem programáveis, com janela curta. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_010
+
+Diogo Gonçalves · agregado 010: 4 pessoa(s), moradia de 96 m²; rotinas de levar e buscar crianças, com regressos intermédios a casa. Pelo menos uma das pessoas é uma criança em idade escolar. Férias de 9 dias a partir do dia 203 do ano, com atividade doméstica reduzida. Equipamento: 10 módulos de 420 Wp (4.20 kWp), inversor 3.82 kW. Ligação monofásica, 5.75 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_011
+
+Teresa Gomes · agregado 011: 2 pessoa(s), apartamento de 110 m²; presença diurna e deslocações curtas sem horário laboral fixo. Férias de 17 dias a partir do dia 245 do ano, com atividade doméstica reduzida. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação monofásica, 5.75 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas: sai definitivamente da REC em 2023-07-17. Personagens e instalações são fictícias.
+
+## Member_012
+
+António Lopes · agregado 012: 2 pessoa(s), moradia de 103 m²; trabalho até tarde e consumo doméstico deslocado para o fim da noite. Férias de 17 dias a partir do dia 227 do ano, com atividade doméstica reduzida. Equipamento: ciclos de lavagem programáveis, com janela curta. Ligação monofásica, 5.75 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_013
+
+Ana Marques · agregado 013: 4 pessoa(s), apartamento de 97 m²; trabalho diurno fora de casa. Férias de 10 dias a partir do dia 197 do ano, com atividade doméstica reduzida. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_014
+
+João Alves · agregado 014: 3 pessoa(s), moradia de 89 m²; teletrabalho às terças e quintas e deslocações nos restantes dias úteis. Férias de 12 dias a partir do dia 229 do ano, com atividade doméstica reduzida. Equipamento: 10 módulos de 420 Wp (4.20 kWp), inversor 3.82 kW; bateria fixa de 5.12 kWh / 2.56 kW; ciclos de lavagem programáveis, com janela alargada. Ligação monofásica, 5.75 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas: instala BESS-M014-01 em 2023-03-20; retira definitivamente DEF-M014-01 em 2023-07-31; as lavagens seguintes passam para uma lavandaria externa, mantendo os prazos. Personagens e instalações são fictícias.
+
+## Member_015
+
+Inês Almeida · agregado 015: 2 pessoa(s), moradia de 90 m²; turnos noturnos em blocos de quatro noites, com regresso de manhã. Férias de 15 dias a partir do dia 205 do ano, com atividade doméstica reduzida. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_016
+
+Miguel Ribeiro · agregado 016: 1 pessoa(s), moradia de 78 m²; rotinas de levar e buscar crianças, com regressos intermédios a casa. O residente acompanha netos que vivem noutro agregado. Férias de 15 dias a partir do dia 188 do ano, com atividade doméstica reduzida. Equipamento: 6 módulos de 420 Wp (2.52 kWp), inversor 2.29 kW. Ligação monofásica, 4.60 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_017
+
+Sofia Pinto · agregado 017: 2 pessoa(s), apartamento de 65 m²; presença diurna e deslocações curtas sem horário laboral fixo. Férias de 8 dias a partir do dia 206 do ano, com atividade doméstica reduzida. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação monofásica, 5.75 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_018
+
+Pedro Carvalho · agregado 018: 1 pessoa(s), moradia de 83 m²; trabalho até tarde e consumo doméstico deslocado para o fim da noite. Férias de 9 dias a partir do dia 230 do ano, com atividade doméstica reduzida. Equipamento: 12 módulos de 420 Wp (5.04 kWp), inversor 4.58 kW; 1 carregador(es), 2 lugares de estacionamento no cenário; ciclos de lavagem programáveis, com janela curta. Ligação monofásica, 10.35 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Automóveis residentes: EV-M018-01 (77 kWh úteis, AC até 11.04 kW, preferência high_90). Os pedidos variam por sessão, entre 50% e 100%. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_019
+
+Marta Teixeira · agregado 019: 4 pessoa(s), apartamento de 129 m²; trabalho diurno fora de casa. Férias de 8 dias a partir do dia 229 do ano, com atividade doméstica reduzida. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_020
+
+Rui Moreira · agregado 020: 1 pessoa(s), apartamento de 103 m²; teletrabalho às terças e quintas e deslocações nos restantes dias úteis. Férias de 14 dias a partir do dia 241 do ano, com atividade doméstica reduzida. Equipamento: 1 carregador(es), 2 lugares de estacionamento no cenário. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Automóveis residentes: EV-M020-01 (82 kWh úteis, AC até 11.04 kW, preferência balanced_70). Os pedidos variam por sessão, entre 50% e 100%. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_021
+
+Leonor Silva · agregado 021: 4 pessoa(s), moradia de 148 m²; turnos noturnos em blocos de quatro noites, com regresso de manhã. Férias de 9 dias a partir do dia 198 do ano, com atividade doméstica reduzida. Equipamento: ciclos de lavagem programáveis, com janela curta. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas: adere à REC em 2023-08-20. Personagens e instalações são fictícias.
+
+## Member_022
+
+Diogo Santos · agregado 022: 1 pessoa(s), moradia de 74 m²; rotinas de levar e buscar crianças, com regressos intermédios a casa. O residente acompanha netos que vivem noutro agregado. Férias de 16 dias a partir do dia 225 do ano, com atividade doméstica reduzida. Equipamento: 8 módulos de 420 Wp (3.36 kWp), inversor 3.06 kW; 1 carregador(es), 2 lugares de estacionamento no cenário; ciclos de lavagem programáveis, com janela intermédia. Ligação monofásica, 6.90 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Automóveis residentes: EV-M022-01 (60 kWh úteis, AC até 11.04 kW, preferência reserve_80). Os pedidos variam por sessão, entre 50% e 100%. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_023
+
+Teresa Ferreira · agregado 023: 2 pessoa(s), moradia de 78 m²; presença diurna e deslocações curtas sem horário laboral fixo. Férias de 16 dias a partir do dia 223 do ano, com atividade doméstica reduzida. Equipamento: 7 módulos de 420 Wp (2.94 kWp), inversor 2.67 kW. Ligação monofásica, 4.60 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas: instala PV-M023-01 em 2023-09-05. Personagens e instalações são fictícias.
+
+## Member_024
+
+António Pereira · agregado 024: 4 pessoa(s), moradia de 119 m²; trabalho até tarde e consumo doméstico deslocado para o fim da noite. Férias de 17 dias a partir do dia 232 do ano, com atividade doméstica reduzida. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação monofásica, 5.75 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_025
+
+Office 025: estabelecimento de 230 m², 2.ª-6.ª 08-19h; fecha fins de semana, feriados e férias; os consumos elétricos incluem usos de serviço, sem pressupor equivalência com uma habitação. Equipamento: 32 módulos de 420 Wp (13.44 kWp), inversor 12.22 kW; bateria fixa de 10.24 kWh / 5.12 kW; 4 carregador(es), 12 lugares de estacionamento no cenário. Ligação trifásica, 41.40 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_026
+
+Retail 026: estabelecimento de 183 m², 2.ª-6.ª 09-20h; sábado 09:30-19h; domingos/feriados 10-17h, exceto Ano Novo/Natal; os consumos elétricos incluem usos de serviço, sem pressupor equivalência com uma habitação. Equipamento: ciclos de lavagem programáveis, com janela alargada. Ligação trifásica, 20.70 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_027
+
+Clinic 027: estabelecimento de 252 m², 2.ª-6.ª 08-20h; sábado 09-13h; fecha domingos e feriados; os consumos elétricos incluem usos de serviço, sem pressupor equivalência com uma habitação. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação trifásica, 20.70 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas: adere à REC em 2023-11-05. Personagens e instalações são fictícias.
+
+## Member_028
+
+Cafe 028: estabelecimento de 144 m², 2.ª-sábado 07-22h; domingos/feriados 08-15h; fecha Ano Novo/Natal; os consumos elétricos incluem usos de serviço, sem pressupor equivalência com uma habitação. Equipamento: 2 carregador(es), 8 lugares de estacionamento no cenário. Ligação trifásica, 20.70 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas: retira definitivamente CHG-M028-02 em 2023-09-08. Personagens e instalações são fictícias.
+
+## Member_029
+
+Workshop 029: estabelecimento de 181 m², 2.ª-6.ª 08-18h; sábado 09-13h; fecha domingos, feriados e férias; os consumos elétricos incluem usos de serviço, sem pressupor equivalência com uma habitação. Apenas consumo; sem PV, bateria, EV ligado à comunidade ou eletrodomésticos controláveis. Ligação trifásica, 20.70 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.
+
+## Member_030
+
+Sports Centre 030: estabelecimento de 750 m², dias úteis 07-23h; fim de semana/feriados 08-20h; fecha Ano Novo/Natal; os consumos elétricos incluem usos de serviço, sem pressupor equivalência com uma habitação. Equipamento: 107 módulos de 420 Wp (44.94 kWp), inversor 40.85 kW; ciclos de lavagem programáveis, com janela curta. Ligação trifásica, 34.50 kVA, fases e limites explícitos. Tarifa de referência comum a todos os membros: btn_bi, indexada a OMIE 2023. Nas variantes dinâmicas mantém a adesão durante todo o ano. Personagens e instalações são fictícias.

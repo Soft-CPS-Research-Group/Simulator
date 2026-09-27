@@ -1,0 +1,56 @@
+[
+  {
+    "variant": "core_4",
+    "initially_absent_assets": 0,
+    "native_events": 0,
+    "tariff": "common"
+  },
+  {
+    "variant": "core_15",
+    "initially_absent_assets": 0,
+    "native_events": 0,
+    "tariff": "common"
+  },
+  {
+    "variant": "core_30_normal",
+    "initially_absent_assets": 0,
+    "native_events": 0,
+    "tariff": "common"
+  },
+  {
+    "variant": "core_30_topology",
+    "initially_absent_assets": 2,
+    "native_events": 13,
+    "tariff": "common"
+  },
+  {
+    "variant": "core_30_safety",
+    "initially_absent_assets": 0,
+    "native_events": 0,
+    "tariff": "common"
+  },
+  {
+    "variant": "core_30_robustness",
+    "initially_absent_assets": 0,
+    "native_events": 0,
+    "tariff": "common"
+  },
+  {
+    "variant": "core_30_combined",
+    "initially_absent_assets": 2,
+    "native_events": 13,
+    "tariff": "common"
+  },
+  {
+    "variant": "premium_100_normal",
+    "initially_absent_assets": 0,
+    "native_events": 0,
+    "tariff": "common"
+  },
+  {
+    "variant": "premium_100_allin",
+    "initially_absent_assets": 3,
+    "native_events": 47,
+    "tariff": "common"
+  }
+]

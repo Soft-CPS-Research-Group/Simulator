@@ -1,0 +1,12 @@
+{
+  "version": "portugal-native-978be68b-v2.1",
+  "stage_matches_published": true,
+  "algorithms_manifest_matches": true,
+  "dataset_file_count": 1536,
+  "builder_sha256": "b03308c5d1f18fbf8b900ed44d46f6853154a19dbb4558ac2ce5ebb703f1d52a",
+  "session_checker_sha256": "ed990f37eba40dd9488a8e26f63e48e96855f09b673ea41b2acc5791de5bd241",
+  "source_archive_sha256": "bc2f1430d851ea724e1a23928e8e8021faf92f13fb8fa4d14133fb2fe9ac3eb6",
+  "short_feasibility_windows": 10,
+  "annual_runs": 0,
+  "narrative_cleanup_reproduced": true
+}

@@ -1,0 +1,40 @@
+{
+  "version": "portugal-native-978be68b-v2.1",
+  "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
+  "status": "dataset_construction_only",
+  "tariff_policy": "common",
+  "variants": [
+    {
+      "family": "premium_100",
+      "variant": "premium_100_normal",
+      "label": "Premium Normal",
+      "purpose": "larger-scale reference",
+      "factors": {
+        "T": false,
+        "E": false,
+        "H": false,
+        "G": false,
+        "D": false
+      },
+      "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json",
+      "sha256": "921958b768595082b0194d4d4947bedde52e028c4278c25006fe4e511702988a",
+      "source_physical_fingerprint": "96fde91f842e7183f0b1667f630e3afd4e4a56013aa298873d7f93b49b1a6400"
+    },
+    {
+      "family": "premium_100",
+      "variant": "premium_100_allin",
+      "label": "Premium All-in",
+      "purpose": "integrated operation with demand response",
+      "factors": {
+        "T": true,
+        "E": false,
+        "H": true,
+        "G": true,
+        "D": true
+      },
+      "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
+      "sha256": "0aaf746099f376191def125fab93f637b159967cb643c241e8cc556924b1450c",
+      "source_physical_fingerprint": "c463b8d036405c1961bc33868a234564e0a30ef662e13572f635bbb453f146ee"
+    }
+  ]
+}

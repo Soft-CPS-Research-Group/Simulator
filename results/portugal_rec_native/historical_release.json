@@ -1,0 +1,8 @@
+{
+  "current": "portugal-native-978be68b-v2.1",
+  "previous": "portugal-native-978be68b-v1",
+  "archive": "/home/tiago/dev/Simulator-recovery-archive/2026-09-27-common-tariff/individual-v1",
+  "previous_results_apply_to_current_tariff": false,
+  "archive_checksum_index_sha256": "05aca35bc8fc27939839e259c876aaada27452b99ee3fb4bf11ba472e2ac4975",
+  "previous_common_tariff_release": "/home/tiago/dev/Simulator-recovery-archive/2026-09-27-tariff-stories-soc/common-v2"
+}

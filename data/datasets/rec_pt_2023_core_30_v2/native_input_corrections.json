@@ -1,0 +1,28 @@
+{
+  "version": "portugal-native-978be68b-v2.1",
+  "visitor_sessions": [
+    {
+      "session_id": "EV-V028-01-1-S0092",
+      "member_id": "Member_028",
+      "charger_id": "CHG-M028-01",
+      "arrival_time_step": 19538,
+      "original_departure_time_step": 19543,
+      "departure_time_step": 19544,
+      "arrival_soc": 0.6772605076388439,
+      "target_soc": 0.9065825759812153,
+      "reason": "75 minutes cannot deliver requested energy at native charger/battery efficiencies; extend cafe visit to 90 minutes, ending at 15:00 local"
+    },
+    {
+      "session_id": "EV-V028-01-1-S0109",
+      "member_id": "Member_028",
+      "charger_id": "CHG-M028-01",
+      "arrival_time_step": 22898,
+      "original_departure_time_step": 22903,
+      "departure_time_step": 22904,
+      "arrival_soc": 0.7041939203822782,
+      "target_soc": 0.9082406771816146,
+      "reason": "75 minutes cannot deliver requested energy at native charger/battery efficiencies; extend cafe visit to 90 minutes, ending at 15:00 local"
+    }
+  ],
+  "mobility_reference_scope": "Unchanged mobility/reference_soc is historical source metadata, not a native longitudinal SOC trajectory."
+}

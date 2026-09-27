@@ -1,0 +1,88 @@
+[
+  {
+    "member_id": "Member_007",
+    "exit_step": 4128,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_009",
+    "exit_step": 4320,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_019",
+    "exit_step": 4512,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_023",
+    "exit_step": 12984,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_037",
+    "exit_step": 13272,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_001",
+    "exit_step": 21648,
+    "owned_ev_ids": [
+      "EV-M001-01"
+    ],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_051",
+    "exit_step": 21840,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_057",
+    "exit_step": 30360,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_063",
+    "exit_step": 30456,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_069",
+    "exit_step": 30600,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_084",
+    "exit_step": 30744,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  },
+  {
+    "member_id": "Member_095",
+    "exit_step": 30792,
+    "owned_ev_ids": [],
+    "post_exit_demand": "none",
+    "pending_cycles": "cancelled"
+  }
+]

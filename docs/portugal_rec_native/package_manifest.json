@@ -1,0 +1,12 @@
+{
+  "version": "portugal-native-978be68b-v2.1",
+  "package": "docs/portugal_rec_native.zip",
+  "sha256": "dd3f479ed5744975a2d6fa0e9122e2875bee16ea9b5a1178aae52dbecf8d89c7",
+  "bytes": 320254650,
+  "files": 2322,
+  "configurations": 9,
+  "families": 4,
+  "tariff": "common btn_bi",
+  "scope": "datasets, atlas, sources, static integrity and two-session feasibility witnesses; no annual or controller evaluation",
+  "core_not_bundled": "Use Simulator commit 978be68b0e0740deab15ecf536805f323b86fa57 without extensions."
+}

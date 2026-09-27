@@ -1,0 +1,58 @@
+{
+  "year": 2023,
+  "corrections": [
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "member": "Member_001",
+      "field": "story"
+    },
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "member": "Member_005",
+      "field": "story"
+    },
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "member": "Member_001",
+      "field": "dynamic_membership_story"
+    },
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "member": "Member_005",
+      "field": "dynamic_membership_story"
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "member": "Member_001",
+      "field": "story"
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "member": "Member_026",
+      "field": "story"
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "member": "Member_038",
+      "field": "story"
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "member": "Member_050",
+      "field": "story"
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "member": "Member_001",
+      "field": "dynamic_membership_story"
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "member": "Member_026",
+      "field": "dynamic_membership_story"
+    }
+  ],
+  "dr_impossible_stress_retained": true,
+  "physical_data_unchanged": true,
+  "simulator_unchanged": true
+}

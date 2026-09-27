@@ -1,0 +1,90 @@
+[
+  {
+    "id": "confirmation_grid_0_daylight",
+    "start_time_step": 6964,
+    "end_time_step": 6975,
+    "period": "daylight",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_014"
+    ]
+  },
+  {
+    "id": "confirmation_grid_0_night",
+    "start_time_step": 6920,
+    "end_time_step": 6931,
+    "period": "night",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_014"
+    ]
+  },
+  {
+    "id": "confirmation_grid_1_daylight",
+    "start_time_step": 15696,
+    "end_time_step": 15707,
+    "period": "daylight",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_014"
+    ]
+  },
+  {
+    "id": "confirmation_grid_1_night",
+    "start_time_step": 15652,
+    "end_time_step": 15663,
+    "period": "night",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_014"
+    ]
+  },
+  {
+    "id": "confirmation_grid_2_daylight",
+    "start_time_step": 24432,
+    "end_time_step": 24443,
+    "period": "daylight",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_014"
+    ]
+  },
+  {
+    "id": "confirmation_grid_2_night",
+    "start_time_step": 24484,
+    "end_time_step": 24495,
+    "period": "night",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_014"
+    ]
+  },
+  {
+    "id": "confirmation_grid_3_daylight",
+    "start_time_step": 33172,
+    "end_time_step": 33183,
+    "period": "daylight",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_014"
+    ]
+  },
+  {
+    "id": "confirmation_grid_3_night",
+    "start_time_step": 33224,
+    "end_time_step": 33235,
+    "period": "night",
+    "members": [
+      "Member_001",
+      "Member_002",
+      "Member_014"
+    ]
+  }
+]
