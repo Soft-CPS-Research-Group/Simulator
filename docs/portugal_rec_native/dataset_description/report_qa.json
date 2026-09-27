@@ -1,0 +1,12 @@
+{
+  "dataset_version": "portugal-native-2023-2024-v3.1",
+  "pages": 33,
+  "figures": 28,
+  "pdf_sha256": "bfdfa50ac7e4e14824ecc0f58864bedd85dbd5d808380e22c645808938a0d30f",
+  "descriptive_checks_passed": 34,
+  "page_titles_match_index": true,
+  "replacement_or_black_square_glyphs": 0,
+  "text_outside_horizontal_margins": [],
+  "visual_review": "All 33 pages rendered with system Poppler and visually reviewed; dense chart/table pages inspected separately.",
+  "scope": "Input description only; no dataset, simulator or controller changes."
+}

@@ -1,0 +1,10 @@
+# Descriptive report only; does not require CityLearn.
+numpy>=1.24,<3
+pandas>=2.0,<3
+pyarrow>=14
+matplotlib>=3.6,<4
+reportlab>=4,<5
+Pillow>=10
+# Optional document QA:
+pypdf>=5
+pdfplumber>=0.11

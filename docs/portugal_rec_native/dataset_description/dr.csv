@@ -1,0 +1,9 @@
+request_id,issuer,direction,start_time_step,end_time_step,target_power_kw,activation_price_eur_per_kwh,shortfall_penalty_eur_per_kwh,tolerance_power_kw,stratum,activation_source,variant
+development_dr_1,dso,down,4392,4395,80.0,0.12,0.06,4.0,service_candidate,explicit_request,premium_100_allin
+development_dr_2,dso,up,13164,13167,40.0,0.12,0.06,2.0,service_candidate,explicit_request,premium_100_allin
+development_dr_3,dso,down,21956,21959,80.0,0.12,0.06,4.0,service_candidate,explicit_request,premium_100_allin
+development_dr_4,dso,down,30696,30711,1500.0,0.12,0.06,75.0,impossible_stress,explicit_request,premium_100_allin
+development_dr_1_2024,dso,down,39336,39339,80.0,0.12,0.06,4.0,service_candidate,explicit_request,premium_100_allin
+development_dr_2_2024,dso,up,48108,48111,40.0,0.12,0.06,2.0,service_candidate,explicit_request,premium_100_allin
+development_dr_3_2024,dso,down,56900,56903,80.0,0.12,0.06,4.0,service_candidate,explicit_request,premium_100_allin
+development_dr_4_2024,dso,down,65640,65655,1500.0,0.12,0.06,75.0,impossible_stress,explicit_request,premium_100_allin

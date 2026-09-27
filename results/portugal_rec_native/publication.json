@@ -19,7 +19,7 @@
     "scripts/prepare_portugal_reference_2024.py": "b0faecd6d2715f62fe464f47870d5ccdf717a0accdcaeeb433560d02f487d6da",
     "scripts/portugal_site_calendar.py": "3d26220f194ca8ab66bbb1e18ddd3045456ee5054051bde5ce927bd29333375c",
     "scripts/audit/verify_portugal_two_year_inputs.py": "5793cd1c0cc37e84bc8f624b83667bc8202cc73ab2e809b03b2af7721038507f",
-    "scripts/package_portugal_native.py": "9bc94d42ade1f7679bb7671946f0f3c9b7d4654f851308529115d1e8391e4442",
+    "scripts/package_portugal_native.py": "3a08669132a761963d60201b547aa566f6f38356ffd5c2ed19c55058e2572cee",
     "scripts/portugal_lifecycle_stories.py": "9a3fd9834e7aefdacbc360bd2d97aaafe00fb9867e93d7e7bd2c3a39d6e2bf41",
     "scripts/audit/verify_portugal_forecasts_stories.py": "478f0fed1485d4143bff6f2f8e537dd7fa6612c47e68693385e7f6a4e7e93d01"
   },
@@ -27,5 +27,18 @@
   "fresh_reconstruction_matches": true,
   "forecast_story_checks": 213,
   "reconstruction_scope": "Constructed afresh from frozen 2023 with offline sources; all delivered data, manifest and newly generated audit files equal staged reconstruction. Original physical files additionally compared byte-for-byte to v3.",
-  "native_forecast_boundary_limitation": "Derived load/PV forecasts still clip the destination to the last loaded episode row. Original simulator unchanged."
+  "native_forecast_boundary_limitation": "Derived load/PV forecasts still clip the destination to the last loaded episode row. Original simulator unchanged.",
+  "descriptive_report": {
+    "path": "docs/portugal_rec_native/Portugal_REC_Dataset_Report.pdf",
+    "sha256": "bfdfa50ac7e4e14824ecc0f58864bedd85dbd5d808380e22c645808938a0d30f",
+    "pages": 33,
+    "figures": 28,
+    "consistency_checks_passed": 34,
+    "scope": "Descriptive input statistics only; no dataset or simulator changes and no controller runs.",
+    "builders": {
+      "scripts/build_portugal_dataset_description.py": "c9d8bfc7c68aac48ff0e94da3840131b518c466a142899c0ceaeff67404f79b7",
+      "scripts/render_portugal_dataset_report.py": "a57ed19e622066ebe9127c9ab9716f15d9815c31202cf6b87afcb5c64fb0519b",
+      "scripts/requirements-portugal-report.txt": "8bf584e33fb8cd6d629f9937a965db1c7fce5f5bd6ba237d1321bd2f29558ce4"
+    }
+  }
 }

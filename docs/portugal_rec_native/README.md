@@ -24,6 +24,8 @@ A tarifa de compra à rede é comum a todos: `shared/pricing_btn_bi.parquet`, co
 
 ## Consultar
 
+- [Relatório descritivo em inglês, com gráficos](Portugal_REC_Dataset_Report.pdf) e [versão editável](Portugal_REC_Dataset_Report.md).
+- [Tabelas, estatísticas e reprodução do relatório](dataset_description/README.md).
 - [Extensão de 2024 e verificações](Extensao_2024.md).
 - [Histórias, previsões e variabilidade](Previsoes_e_historias.md).
 - [Reproduzir os dois anos](Reproduzir.md).

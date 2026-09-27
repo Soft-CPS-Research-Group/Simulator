@@ -8,10 +8,14 @@
   "configurations": 9,
   "families": 4,
   "package": "docs/portugal_rec_native.zip",
-  "sha256": "c07eb40f2a6de3b2436063ef0182bbce22b9e5354f3c61e9e47c20d6453eb77e",
-  "bytes": 539829186,
-  "files": 3937,
+  "sha256": "4535e99862f258ac8150e8c53d24bad637377de19ab4eac706a5308c9bd27062",
+  "bytes": 549407098,
+  "files": 4015,
   "simulator_core": "978be68b0e0740deab15ecf536805f323b86fa57",
   "frozen_2023_commit": "393cd200bb66b671d8904eba00688d56d91f08d3",
-  "scope": "Data, public sources, atlas, offline reconstruction and static input checks; no annual/controller evaluation."
+  "scope": "Data, public sources, atlas, offline reconstruction and static input checks; no annual/controller evaluation.",
+  "english_descriptive_report": {
+    "path": "docs/portugal_rec_native/Portugal_REC_Dataset_Report.pdf",
+    "sha256": "bfdfa50ac7e4e14824ecc0f58864bedd85dbd5d808380e22c645808938a0d30f"
+  }
 }

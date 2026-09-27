@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="702.47952pt" height="292.07952pt" viewBox="0 0 702.47952 292.07952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-27T21:04:27.318585</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.0, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 292.07952 
+L 702.47952 292.07952 
+L 702.47952 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="text_1">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(29.195986 73.926716)">Battery retired</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(29.195986 88.543825)">BESS-M001-01</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(29.195986 103.160935)">14 May 2023, 19:00</text>
+   </g>
+   <g id="patch_2">
+    <path d="M 216.203094 85.78445 
+Q 231.333284 85.78445 245.34544 85.78445 
+" style="fill: none; stroke: #9daab1; stroke-linecap: round"/>
+    <path d="M 241.34544 83.78445 
+L 245.34544 85.78445 
+L 241.34544 87.78445 
+" style="fill: none; stroke: #9daab1; stroke-linecap: round"/>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(262.163822 73.926716)">Replacement installed</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(262.163822 88.543825)">BESS-M001-02</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(262.163822 103.160935)">16 May 2023, 11:00</text>
+   </g>
+   <g id="patch_3">
+    <path d="M 449.170931 85.78445 
+Q 464.301121 85.78445 478.313277 85.78445 
+" style="fill: none; stroke: #9daab1; stroke-linecap: round"/>
+    <path d="M 474.313277 83.78445 
+L 478.313277 85.78445 
+L 474.313277 87.78445 
+" style="fill: none; stroke: #9daab1; stroke-linecap: round"/>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(495.131659 73.926716)">Member leaves permanently</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(495.131659 88.543825)">All assets leave with the member</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(495.131659 103.160935)">14 Nov 2023, 22:00</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 600; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b4b" x="8.64" y="17.758125" transform="rotate(-0 8.64 17.758125)">Core-30 Topology / Combined</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="text_5">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(29.195986 214.326716)">Battery retired</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(29.195986 228.943825)">BESS-M001-01</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(29.195986 243.560935)">16 May 2023, 19:00</text>
+   </g>
+   <g id="patch_4">
+    <path d="M 216.203094 226.18445 
+Q 231.333284 226.18445 245.34544 226.18445 
+" style="fill: none; stroke: #9daab1; stroke-linecap: round"/>
+    <path d="M 241.34544 224.18445 
+L 245.34544 226.18445 
+L 241.34544 228.18445 
+" style="fill: none; stroke: #9daab1; stroke-linecap: round"/>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(262.163822 214.326716)">Replacement installed</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(262.163822 228.943825)">BESS-M001-02</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(262.163822 243.560935)">17 May 2023, 19:00</text>
+   </g>
+   <g id="patch_5">
+    <path d="M 449.170931 226.18445 
+Q 464.301121 226.18445 478.313277 226.18445 
+" style="fill: none; stroke: #9daab1; stroke-linecap: round"/>
+    <path d="M 474.313277 224.18445 
+L 478.313277 226.18445 
+L 474.313277 228.18445 
+" style="fill: none; stroke: #9daab1; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(495.131659 214.326716)">Member leaves permanently</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(495.131659 228.943825)">All assets leave with the member</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #203b4b" transform="translate(495.131659 243.560935)">14 Aug 2023, 13:00</text>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 600; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203b4b" x="8.64" y="158.158125" transform="rotate(-0 8.64 158.158125)">Premium All-in</text>
+   </g>
+  </g>
+ </g>
+</svg>

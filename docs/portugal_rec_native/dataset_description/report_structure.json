@@ -1,0 +1,278 @@
+{
+  "pages": [
+    {
+      "page": 1,
+      "title": "Portugal REC datasets"
+    },
+    {
+      "page": 2,
+      "title": "Reading the collection"
+    },
+    {
+      "page": 3,
+      "title": "The nine configurations"
+    },
+    {
+      "page": 4,
+      "title": "Inventory at a glance"
+    },
+    {
+      "page": 5,
+      "title": "From sources to community data"
+    },
+    {
+      "page": 6,
+      "title": "Households and premises"
+    },
+    {
+      "page": 7,
+      "title": "Daily life and opening calendars"
+    },
+    {
+      "page": 8,
+      "title": "Ownership and mixed participation"
+    },
+    {
+      "page": 9,
+      "title": "Electricity demand and end uses"
+    },
+    {
+      "page": 10,
+      "title": "Demand through the seasons"
+    },
+    {
+      "page": 11,
+      "title": "Weekdays, weekends and holidays"
+    },
+    {
+      "page": 12,
+      "title": "The distribution of demand"
+    },
+    {
+      "page": 13,
+      "title": "PV installations and physical ratings"
+    },
+    {
+      "page": 14,
+      "title": "Solar seasonality and daylight"
+    },
+    {
+      "page": 15,
+      "title": "Stationary battery inventory"
+    },
+    {
+      "page": 16,
+      "title": "Electrical connections and phases"
+    },
+    {
+      "page": 17,
+      "title": "Electric vehicles and battery sizes"
+    },
+    {
+      "page": 18,
+      "title": "Where charging infrastructure sits"
+    },
+    {
+      "page": 19,
+      "title": "Arrivals and departures"
+    },
+    {
+      "page": 20,
+      "title": "Requested SOC and connection duration"
+    },
+    {
+      "page": 21,
+      "title": "Connection availability across the week"
+    },
+    {
+      "page": 22,
+      "title": "Home-work links and recurring visitors"
+    },
+    {
+      "page": 23,
+      "title": "Appliance programmes and cycles"
+    },
+    {
+      "page": 24,
+      "title": "Windows for starting a cycle"
+    },
+    {
+      "page": 25,
+      "title": "A community that changes over time"
+    },
+    {
+      "page": 26,
+      "title": "Events behind the member stories"
+    },
+    {
+      "page": 27,
+      "title": "Health events and measurement noise"
+    },
+    {
+      "page": 28,
+      "title": "Scheduled grid interruptions"
+    },
+    {
+      "page": 29,
+      "title": "Explicit demand-response requests"
+    },
+    {
+      "page": 30,
+      "title": "Electricity prices and carbon intensity"
+    },
+    {
+      "page": 31,
+      "title": "Weather variation and forecast inputs"
+    },
+    {
+      "page": 32,
+      "title": "Files, units and reproducibility"
+    },
+    {
+      "page": 33,
+      "title": "Sources and construction references"
+    }
+  ],
+  "figures": [
+    {
+      "number": 1,
+      "file": "00_cover",
+      "caption": "The Premium-100 solar calendar in 2024. Each column is one civil day and each row a local quarter-hour. Colour shows aggregate PV power. Seasonal daylight and day-to-day weather are visible in the inputs."
+    },
+    {
+      "number": 2,
+      "file": "01_overview",
+      "caption": "Residential/service composition and the scale of PV and stationary storage. Bubble area increases with connector count; exact totals are given in the table."
+    },
+    {
+      "number": 3,
+      "file": "02_households",
+      "caption": "Household-size distributions and residential floor-area distributions. Boxes show the median and interquartile range; isolated boxplot outliers are hidden for readability."
+    },
+    {
+      "number": 4,
+      "file": "03_routines",
+      "caption": "Premium residential archetypes and mean opening hours by weekday in 2024. The opening-hour summary includes holidays; it is an average over actual civil days."
+    },
+    {
+      "number": 5,
+      "file": "04_ownership",
+      "caption": "Premium ownership by member and asset-ownership shares across all four bases. The horizontal line after Premium member 080 separates households from services. Consumption-only means no PV, stationary battery, EV connector or controllable appliance."
+    },
+    {
+      "number": 6,
+      "file": "05_energy",
+      "caption": "The 2024 non-shiftable demand ledger and each member's annual load/PV position in its static base. These annual totals do not estimate self-consumption or grid exports."
+    },
+    {
+      "number": 7,
+      "file": "06_seasonal_load",
+      "caption": "Monthly mean non-shiftable demand per catalogue member. Dashed lines are 2023; solid lines are 2024. Dividing by days in each month avoids treating a longer month as higher daily demand."
+    },
+    {
+      "number": 8,
+      "file": "07_daily_load",
+      "caption": "Premium mean non-shiftable power per site in 2024, separated by residential/services and mutually exclusive day classes. Public holidays take precedence over weekend classification."
+    },
+    {
+      "number": 9,
+      "file": "08_concentration",
+      "caption": "Cumulative 2024 non-shiftable demand, with members ranked from largest to smallest, and the eight largest Premium demand sites. The dotted line represents equal demand per member."
+    },
+    {
+      "number": 10,
+      "file": "09_pv_fleet",
+      "caption": "PV array nameplate capacity by base and Premium DC/AC ratings. Each point is an installation. The dotted line marks equal DC array and AC inverter ratings."
+    },
+    {
+      "number": 11,
+      "file": "10_pv_seasons",
+      "caption": "Premium monthly specific PV yield and mean January/July 2024 power profiles. Solid intraday curves show PV; dashed curves show non-shiftable load. They are descriptive averages, not a dispatch or sharing calculation."
+    },
+    {
+      "number": 12,
+      "file": "11_batteries",
+      "caption": "Stationary battery capacities and energy/power pairs. Repeated products may overlap in the scatter plot; the table gives the exact counts."
+    },
+    {
+      "number": 13,
+      "file": "12_connections",
+      "caption": "Single/three-phase site proportions and the selected Core-30 import-limit changes in Safety. Points below the dotted line have a reduced limit; overlapping points correspond to repeated connection levels."
+    },
+    {
+      "number": 14,
+      "file": "13_ev_fleet",
+      "caption": "EV usable-capacity distributions and the split between resident vehicles and external visitors. Cumulative curves count vehicle identities, not charging sessions."
+    },
+    {
+      "number": 15,
+      "file": "14_chargers",
+      "caption": "The ten Premium sites with the most connectors, and connector counts by rated charging power and phase assignment. all_phases denotes a three-phase connection."
+    },
+    {
+      "number": 16,
+      "file": "15_ev_times",
+      "caption": "Premium 2024 arrival and departure hours for complete sessions in the Normal input files. Histograms use one-hour bins in Lisbon civil time. Sessions crossing the start or end of the two-year record are excluded here."
+    },
+    {
+      "number": 17,
+      "file": "16_soc_dwell",
+      "caption": "Premium 2024 target-SOC bands and cumulative connection-duration distributions for complete sessions. The final SOC band is exactly 100%. The duration axis displays the first 36 hours; residential parking has a longer tail."
+    },
+    {
+      "number": 18,
+      "file": "17_connection_calendar",
+      "caption": "Mean fraction of Premium connectors with a vehicle connected, by local hour and weekday in 2024. Residential and service connectors use separate denominators. These are scheduled connections, not charging utilisation."
+    },
+    {
+      "number": 19,
+      "file": "18_mobility_links",
+      "caption": "The four resident vehicle identities with a home-work link in Premium. Each edge joins a home member to the designated work member; repeated daily journeys are not drawn separately."
+    },
+    {
+      "number": 20,
+      "file": "19_appliances",
+      "caption": "Illustrative Premium washing-machine and dishwasher programmes, and the energy/duration distribution of all controllable programme profiles. Powers are interval averages obtained from the stored quarter-hour cycle energy."
+    },
+    {
+      "number": 21,
+      "file": "20_flexibility",
+      "caption": "Allowed start-time slack in 2024: latest start minus earliest start. Left: distribution by base. Right: Premium weekday/weekend/holiday requests. Boxplots show medians, quartiles and non-outlier whiskers."
+    },
+    {
+      "number": 22,
+      "file": "21_topology",
+      "caption": "Active member trajectories and the Premium All-in asset inventory. Asset counts include only active members. The unchanged 2024 segment carries forward the state reached in 2023."
+    },
+    {
+      "number": 23,
+      "file": "22_member_history",
+      "caption": "Two histories for member 001, with Lisbon civil timestamps. The matching member label belongs to a different base in each row; the dates are not assumed to be identical."
+    },
+    {
+      "number": 24,
+      "file": "23_health_calendar",
+      "caption": "Development schedules across both years. Thin events are marked with points for visibility; marker width is not event duration. Core-30 Robustness has continuous measurement noise; Premium All-in has seasonal campaigns."
+    },
+    {
+      "number": 25,
+      "file": "24_outages",
+      "caption": "Premium All-in outage timing and cumulative scheduled site-hours in the three configurations containing outages. A site-hour counts one affected site for one hour; simultaneous sites are counted separately."
+    },
+    {
+      "number": 26,
+      "file": "25_dr",
+      "caption": "The operational-candidate requests in 2023 and 2024. Positive values request increased demand; negative values request a reduction. The separate 1,500 kW stress request is omitted from this axis to preserve the operational scale."
+    },
+    {
+      "number": 27,
+      "file": "26_price_carbon",
+      "caption": "Daily mean price and carbon intensity over both years. Shading gives the within-day 10th-90th percentile. Price units are cents/kWh; carbon units are gCO2e/kWh."
+    },
+    {
+      "number": 28,
+      "file": "27_weather",
+      "caption": "Daily mean air temperature in both years and Premium daily PV energy in 2024. The PV record contains day-to-day fluctuations within the seasonal envelope."
+    }
+  ]
+}
