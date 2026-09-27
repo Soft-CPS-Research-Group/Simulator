@@ -1,7 +1,7 @@
 {
   "dataset_id": "PREMIUM-100-NORMAL",
   "dataset_family": "PT-PREMIUM-100",
-  "dataset_contract_version": "portugal-native-2023-2024-v3",
+  "dataset_contract_version": "portugal-native-2023-2024-v3.1",
   "random_seed": 2023,
   "root_directory": "..",
   "central_agent": false,
@@ -11539,7 +11539,7 @@
   "physics_invariant_checks": true,
   "topology_mode": "static",
   "experimental_design": {
-    "version": "portugal-native-2023-2024-v3",
+    "version": "portugal-native-2023-2024-v3.1",
     "name": "premium_100_normal",
     "label": "Premium Normal",
     "purpose": "larger-scale reference",

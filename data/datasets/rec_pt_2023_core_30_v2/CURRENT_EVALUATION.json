@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3",
+  "version": "portugal-native-2023-2024-v3.1",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "status": "dataset_construction_only",
   "years": [
@@ -20,7 +20,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
-      "sha256": "da61cb5c90a779119924e9adb8e218254915d0a3c9bc342ff9ebbaf102dcbb45",
+      "sha256": "120c038dcfc62dddb65dc7cde0642262cfd7d440e75eb0de50f07d9c0477bbc4",
       "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
@@ -36,7 +36,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
-      "sha256": "7686f4a3cb818a73d90dd8daed6f9eec775a91e468367bc9ccdbe9a5f1af622a",
+      "sha256": "cce0ff10d9ad6a797af843084ecbffcd2511041cc8726416212c9dc9aba8f8f2",
       "frozen_2023_source_fingerprint": "e40b0db00c9846a3e689f6a759be05b4769e816f6b3bc20c853707cbbbcf76db"
     },
     {
@@ -52,7 +52,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
-      "sha256": "fc87545ed7e852772e8d333659e898b487bbace78d468e4faa075b46711a837d",
+      "sha256": "3eb8cbd7abeec8ccea3824a2a2a139f771e4139c0336addc048c9091272b1282",
       "frozen_2023_source_fingerprint": "ae7c92cd7704b8cdb52e74c64a404563d9801fd17af70f4a7eadd9d7ec189a05"
     },
     {
@@ -68,7 +68,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
-      "sha256": "40db2cb18c2a0790fd33140d7155ec9f69b7a7f7fc13f9baab93c2af26a37c90",
+      "sha256": "a7bc8710dfb5b0b7b112d364073b37b828bf846b979a8010a5181c6db8cf7dc5",
       "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
@@ -84,7 +84,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
-      "sha256": "39e03ce5376866d4dc671270fa167698de8dde851e27248d5479e1a249c60936",
+      "sha256": "b6202ccae4c7440dc2ff51c50be80870f48ddfc7010d488bff4efaa3752a3476",
       "frozen_2023_source_fingerprint": "e93c0b8171be8a312d2f9578d38b31378ef7092d838db1865f751769e3f192c1"
     }
   ]

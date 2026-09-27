@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3",
+  "version": "portugal-native-2023-2024-v3.1",
   "scope": "static input validation only; no annual controller or usage evaluation; isolated EV energy bounds do not establish joint site/event feasibility",
   "simulator_core": "978be68b0e0740deab15ecf536805f323b86fa57",
   "annual_runs": 0,

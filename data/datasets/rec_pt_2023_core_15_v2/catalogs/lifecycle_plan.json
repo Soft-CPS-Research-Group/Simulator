@@ -1,0 +1,32 @@
+{
+  "source": "evaluation/*.json: start_date + time_step * seconds_per_time_step",
+  "timezone": "Europe/Lisbon",
+  "years": [
+    2023,
+    2024
+  ],
+  "variants": {
+    "core_15": {
+      "schema": "evaluation/core_15.json",
+      "initial_membership": {
+        "Member_001": true,
+        "Member_002": true,
+        "Member_003": true,
+        "Member_004": true,
+        "Member_005": true,
+        "Member_006": true,
+        "Member_007": true,
+        "Member_008": true,
+        "Member_009": true,
+        "Member_010": true,
+        "Member_011": true,
+        "Member_012": true,
+        "Member_013": true,
+        "Member_014": true,
+        "Member_015": true
+      },
+      "events": [],
+      "excluded_template_registration": []
+    }
+  }
+}

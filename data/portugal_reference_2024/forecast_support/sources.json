@@ -1,0 +1,37 @@
+[
+  {
+    "file": "omie_2025-01-02.txt",
+    "url": "https://www.omie.es/en/file-download?parents=marginalpdbcpt&filename=marginalpdbcpt_20250102.1",
+    "sha256": "e807ffad7dab9aa1190c958d5ae934b1c55b1da19951a181ce16bec1114f2191",
+    "bytes": 711,
+    "retrieved_utc": "2026-09-27T19:11:48.627418+00:00"
+  },
+  {
+    "file": "erse_tarifas_2025.pdf",
+    "url": "https://www.erse.pt/media/xczdo4as/tep-se-2025.pdf",
+    "sha256": "3420e93bfd380db72e8b87e547abcc0bde2100ef492c75b5629076d726f89fb2",
+    "bytes": 4435313,
+    "retrieved_utc": "2026-09-27T19:11:53.276983+00:00"
+  },
+  {
+    "file": "erse_anuncio_tarifas_2025.pdf",
+    "url": "https://www.erse.pt/media/jbyluyci/comunicado_tarifas-ee-2025.pdf",
+    "sha256": "a1247d3fe70de61b6eb42c8c087226692514048f96f0adac13e3c42cb24530de",
+    "bytes": 896848,
+    "retrieved_utc": "2026-09-27T19:11:54.643143+00:00"
+  },
+  {
+    "file": "erse_tse_2025.html",
+    "url": "https://www.erse.pt/comunicacao/destaques/erse-aprova-diretivas-de-reparticao-do-financiamento-dos-custos-com-a-tarifa-social-de-eletricidade-de-2025/",
+    "sha256": "4aab038de1da7a456a9514286ff674d8b6121d98820d4d3e3a4a664fb0a3c64c",
+    "bytes": 50610,
+    "retrieved_utc": "2026-09-27T19:11:54.790081+00:00"
+  },
+  {
+    "file": "../raw_2024/omie_2025-01-01.txt",
+    "url": "https://www.omie.es/en/file-download?parents=marginalpdbcpt&filename=marginalpdbcpt_20250101.1",
+    "sha256": "22bd9a729813f5856ab0be265873326eb024d315e1a25444b3c09e48ebecc113",
+    "bytes": 697,
+    "note": "Already archived for 2024 alignment; reused for support day."
+  }
+]

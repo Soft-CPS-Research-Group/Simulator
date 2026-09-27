@@ -12,9 +12,10 @@ import pandas as pd
 import pvlib
 import portugal_profiles_2024 as profiles
 from portugal_site_calendar import opening_series
+from portugal_lifecycle_stories import synchronize
 ROOT=Path(__file__).resolve().parents[1]
 N23=35040;N24=35136;TOTAL=N23+N24
-VERSION='portugal-native-2023-2024-v3'
+VERSION='portugal-native-2023-2024-v3.1'
 COMMIT='978be68b0e0740deab15ecf536805f323b86fa57'
 def dump(p,v):p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,ensure_ascii=False,indent=2,default=str)+'\n')
 def write(p,f):p.parent.mkdir(parents=True,exist_ok=True);f.to_parquet(p,index=False,compression='zstd')
@@ -197,6 +198,7 @@ def family(src,dst,ref,entries):
     for col in ['story']:
         members[col]=members[col].str.replace('indexada a OMIE 2023','indexada a OMIE 2023–2024',regex=False)
     write(dst/'catalogs/members.parquet',members)
+    synchronize(dst)
     # Mark historical catalogue/event sources explicitly; runtime schemas rule.
     (dst/'README.md').write_text(f'''# Portugal — 2023 e 2024\n\nMesma comunidade e equipamentos, {TOTAL} registos de 15 minutos.\nOs caminhos com «2023» conservam o nome histórico; os inputs correntes abrangem os dois anos.\nOs schemas em evaluation/ são a fonte executável. As saídas de membros/ativos\nmantêm-se definitivas em 2024; não se repetem os eventos de topologia.\nVer extension_2024.json e docs/portugal_rec_native/Extensao_2024.md.\nOs campos annual_* dos catálogos e os ficheiros antigos em events/ são proveniência de 2023,\nnão contagens atualizadas nem eventos executados. O mercado continua desligado.\n''')
     for entry in entries:

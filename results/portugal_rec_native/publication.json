@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3",
+  "version": "portugal-native-2023-2024-v3.1",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "frozen_2023_commit": "393cd200bb66b671d8904eba00688d56d91f08d3",
   "years": [
@@ -14,13 +14,18 @@
   "annual_controller_runs": 0,
   "builders": {
     "scripts/build_portugal_native_suite.py": "b03308c5d1f18fbf8b900ed44d46f6853154a19dbb4558ac2ce5ebb703f1d52a",
-    "scripts/extend_portugal_2024.py": "fa101708b2f486a0d576a9587133d48d88f5c5e9068fc84605a8a8399ddc5677",
+    "scripts/extend_portugal_2024.py": "0bb7a27d16aa574ef3b0924bfde183507d16081baf0c8cf948464468bcdab2ef",
     "scripts/portugal_profiles_2024.py": "25944af0dc9a2723dde4a6b2b2701c6119856ebe55566c9b8a611200f9495b5f",
-    "scripts/prepare_portugal_reference_2024.py": "f8e0e3553f95f579c67ee0f3763321bd7f4d8544ddc0f85d362ea6c36d8a6bbf",
+    "scripts/prepare_portugal_reference_2024.py": "b0faecd6d2715f62fe464f47870d5ccdf717a0accdcaeeb433560d02f487d6da",
     "scripts/portugal_site_calendar.py": "3d26220f194ca8ab66bbb1e18ddd3045456ee5054051bde5ce927bd29333375c",
-    "scripts/audit/verify_portugal_two_year_inputs.py": "29c2276c6ab0ac313014e73c8939ac86a42ddd0dad0957bd91d861553d64790e",
-    "scripts/package_portugal_native.py": "eef97e2c46d16818ed2d48157f913d30a39b189656d2ef20f0541016d09bd996"
+    "scripts/audit/verify_portugal_two_year_inputs.py": "5793cd1c0cc37e84bc8f624b83667bc8202cc73ab2e809b03b2af7721038507f",
+    "scripts/package_portugal_native.py": "9bc94d42ade1f7679bb7671946f0f3c9b7d4654f851308529115d1e8391e4442",
+    "scripts/portugal_lifecycle_stories.py": "9a3fd9834e7aefdacbc360bd2d97aaafe00fb9867e93d7e7bd2c3a39d6e2bf41",
+    "scripts/audit/verify_portugal_forecasts_stories.py": "478f0fed1485d4143bff6f2f8e537dd7fa6612c47e68693385e7f6a4e7e93d01"
   },
-  "reconstruction_checked_files": 1989,
-  "fresh_reconstruction_matches": true
+  "reconstruction_checked_files": 2000,
+  "fresh_reconstruction_matches": true,
+  "forecast_story_checks": 213,
+  "reconstruction_scope": "Constructed afresh from frozen 2023 with offline sources; all delivered data, manifest and newly generated audit files equal staged reconstruction. Original physical files additionally compared byte-for-byte to v3.",
+  "native_forecast_boundary_limitation": "Derived load/PV forecasts still clip the destination to the last loaded episode row. Original simulator unchanged."
 }

@@ -19,7 +19,8 @@ def verify(repo,source,engine):
  for root in sorted((repo/'data/datasets').glob('rec_pt_2023_*_v2')):
   label=root.name;oldroot=source/'data/datasets'/root.name
   members=read(root/'catalogs/members.parquet');oldm=read(oldroot/'catalogs/members.parquet')
-  check(label+': same members and equipment',members.drop(columns=['story']).equals(oldm.drop(columns=['story'])))
+  narrative_fields=['story','dynamic_membership_story']
+  check(label+': same members and equipment',members.drop(columns=narrative_fields,errors='ignore').equals(oldm.drop(columns=narrative_fields,errors='ignore')))
   cal=read(root/'shared/calendar.parquet');expected=pd.date_range('2023-01-01','2025-01-01',freq='15min',inclusive='left',tz='UTC')
   check(label+': complete regular UTC axis',pd.DatetimeIndex(cal.timestamp_utc).equals(expected) and np.array_equal(cal.time_step,np.arange(TOTAL)))
   local=expected.tz_convert('Europe/Lisbon');check(label+': leap day',sum(local.strftime('%Y-%m-%d')=='2024-02-29')==96)

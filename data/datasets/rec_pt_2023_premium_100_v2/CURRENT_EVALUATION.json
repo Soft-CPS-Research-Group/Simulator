@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3",
+  "version": "portugal-native-2023-2024-v3.1",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "status": "dataset_construction_only",
   "years": [
@@ -20,7 +20,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json",
-      "sha256": "2f1633e51b18a57f82e160d82a37acae0156af4e9972193049bdd39fe153fa09",
+      "sha256": "e23df84b0cd50e49a54c8e37bbb7b986bb0aacc9547197a29f41710fa1264f6c",
       "frozen_2023_source_fingerprint": "96fde91f842e7183f0b1667f630e3afd4e4a56013aa298873d7f93b49b1a6400"
     },
     {
@@ -36,7 +36,7 @@
         "D": true
       },
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
-      "sha256": "79677dadb3253bbc1a11db2388e1605cf7f5ecedb666a144102ea345561d774d",
+      "sha256": "61abdacb8aff59c93a75240d7989aeb5b1c2a9222d1288ef31d8b8aba3741e50",
       "frozen_2023_source_fingerprint": "c463b8d036405c1961bc33868a234564e0a30ef662e13572f635bbb453f146ee"
     }
   ]

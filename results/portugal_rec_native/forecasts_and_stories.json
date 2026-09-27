@@ -1,0 +1,2844 @@
+{
+  "version": "portugal-native-2023-2024-v3.1",
+  "scope": "Static forecast input errors; no controller or runtime forecast evaluation; errors exclude health overlays.",
+  "checks": [
+    {
+      "name": "rec_pt_2023_core_15_v2: catalogue derived from all executable variants",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_001",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_002",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_003",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_004",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_005",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_006",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_007",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_008",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_009",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_010",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_011",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_012",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_013",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_014",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: dated story Member_015",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: root stories synchronized",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: all actual prices unchanged",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: earlier forecasts unchanged 4",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: earlier forecasts unchanged 24",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: earlier forecasts unchanged 96",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: all other data files byte-identical",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_15_v2: executable schema unchanged core_15",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: catalogue derived from all executable variants",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_001",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_002",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_003",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_004",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_005",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_006",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_007",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_008",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_009",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_010",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_011",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_012",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_013",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_014",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_015",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_016",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_017",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_018",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_019",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_020",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_021",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_022",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_023",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_024",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_025",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_026",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_027",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_028",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_029",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: dated story Member_030",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: root stories synchronized",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: evaluation stories synchronized",
+      "passed": true
+    },
+    {
+      "name": "Core-30 requested exit correction",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: all actual prices unchanged",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: earlier forecasts unchanged 4",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: earlier forecasts unchanged 24",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: earlier forecasts unchanged 96",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: all other data files byte-identical",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_safety",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_combined",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_robustness",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_normal",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_topology",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: catalogue derived from all executable variants",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: dated story Member_001",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: dated story Member_002",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: dated story Member_003",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: dated story Member_004",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: root stories synchronized",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: all actual prices unchanged",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: earlier forecasts unchanged 4",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: earlier forecasts unchanged 24",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: earlier forecasts unchanged 96",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: all other data files byte-identical",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_micro_4_v2: executable schema unchanged core_4",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: catalogue derived from all executable variants",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_001",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_002",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_003",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_004",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_005",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_006",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_007",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_008",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_009",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_010",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_011",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_012",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_013",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_014",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_015",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_016",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_017",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_018",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_019",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_020",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_021",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_022",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_023",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_024",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_025",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_026",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_027",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_028",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_029",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_030",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_031",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_032",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_033",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_034",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_035",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_036",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_037",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_038",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_039",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_040",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_041",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_042",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_043",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_044",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_045",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_046",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_047",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_048",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_049",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_050",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_051",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_052",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_053",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_054",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_055",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_056",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_057",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_058",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_059",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_060",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_061",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_062",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_063",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_064",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_065",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_066",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_067",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_068",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_069",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_070",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_071",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_072",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_073",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_074",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_075",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_076",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_077",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_078",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_079",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_080",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_081",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_082",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_083",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_084",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_085",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_086",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_087",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_088",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_089",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_090",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_091",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_092",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_093",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_094",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_095",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_096",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_097",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_098",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_099",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: dated story Member_100",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: root stories synchronized",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: evaluation stories synchronized",
+      "passed": true
+    },
+    {
+      "name": "Premium requested exit correction",
+      "passed": true
+    },
+    {
+      "name": "Atlas is the same narrative as catalogue",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: all actual prices unchanged",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: earlier forecasts unchanged 4",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: earlier forecasts unchanged 24",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: earlier forecasts unchanged 96",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: all other data files byte-identical",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: executable schema unchanged premium_100_normal",
+      "passed": true
+    },
+    {
+      "name": "rec_pt_2023_premium_100_v2: executable schema unchanged premium_100_allin",
+      "passed": true
+    },
+    {
+      "name": "2023 humidity is the documented synthetic proxy",
+      "passed": true
+    },
+    {
+      "name": "support is exactly one external day",
+      "passed": true
+    },
+    {
+      "name": "simulation period still two years",
+      "passed": true
+    },
+    {
+      "name": "124 final forecast targets recorded",
+      "passed": true
+    },
+    {
+      "name": "unclipped targets 4",
+      "passed": true
+    },
+    {
+      "name": "publication-aware boundary prices 4",
+      "passed": true
+    },
+    {
+      "name": "no unpublished OMIE leakage 4",
+      "passed": true
+    },
+    {
+      "name": "boundary audit source dates 4",
+      "passed": true
+    },
+    {
+      "name": "weather has full final horizon outdoor_dry_bulb_temperature 4",
+      "passed": true
+    },
+    {
+      "name": "weather has full final horizon outdoor_relative_humidity 4",
+      "passed": true
+    },
+    {
+      "name": "unclipped targets 24",
+      "passed": true
+    },
+    {
+      "name": "publication-aware boundary prices 24",
+      "passed": true
+    },
+    {
+      "name": "no unpublished OMIE leakage 24",
+      "passed": true
+    },
+    {
+      "name": "boundary audit source dates 24",
+      "passed": true
+    },
+    {
+      "name": "weather has full final horizon outdoor_dry_bulb_temperature 24",
+      "passed": true
+    },
+    {
+      "name": "weather has full final horizon outdoor_relative_humidity 24",
+      "passed": true
+    },
+    {
+      "name": "unclipped targets 96",
+      "passed": true
+    },
+    {
+      "name": "publication-aware boundary prices 96",
+      "passed": true
+    },
+    {
+      "name": "no unpublished OMIE leakage 96",
+      "passed": true
+    },
+    {
+      "name": "boundary audit source dates 96",
+      "passed": true
+    },
+    {
+      "name": "weather has full final horizon outdoor_dry_bulb_temperature 96",
+      "passed": true
+    },
+    {
+      "name": "weather has full final horizon outdoor_relative_humidity 96",
+      "passed": true
+    }
+  ],
+  "failed": [],
+  "forecast_metrics": [
+    {
+      "signal": "outdoor_dry_bulb_temperature",
+      "label": "Temperatura",
+      "unit": "°C",
+      "year": 2023,
+      "horizon_hours": 1.0,
+      "n": 34944,
+      "mae": 1.1602122783660889,
+      "rmse": 1.549825668334961,
+      "bias": 0.007902332581579685,
+      "p95_absolute_error": 3.20910415649414,
+      "predicted_std": 4.813026428222656,
+      "actual_std": 4.81776237487793,
+      "nmae_mean_pct": 6.53376579284668
+    },
+    {
+      "signal": "outdoor_dry_bulb_temperature",
+      "label": "Temperatura",
+      "unit": "°C",
+      "year": 2024,
+      "horizon_hours": 1.0,
+      "n": 35040,
+      "mae": 1.2522138357162476,
+      "rmse": 1.6598451137542725,
+      "bias": 0.007490599527955055,
+      "p95_absolute_error": 3.4375,
+      "predicted_std": 3.5821800231933594,
+      "actual_std": 3.59432053565979,
+      "nmae_mean_pct": 7.4401430785655975
+    },
+    {
+      "signal": "outdoor_dry_bulb_temperature",
+      "label": "Temperatura",
+      "unit": "°C",
+      "year": 2023,
+      "horizon_hours": 6.0,
+      "n": 34944,
+      "mae": 1.1590176820755005,
+      "rmse": 1.5475295782089233,
+      "bias": 0.006707880645990372,
+      "p95_absolute_error": 3.2007701396942134,
+      "predicted_std": 4.814413070678711,
+      "actual_std": 4.819039821624756,
+      "nmae_mean_pct": 6.527410447597504
+    },
+    {
+      "signal": "outdoor_dry_bulb_temperature",
+      "label": "Temperatura",
+      "unit": "°C",
+      "year": 2024,
+      "horizon_hours": 6.0,
+      "n": 35040,
+      "mae": 1.251368522644043,
+      "rmse": 1.6591969728469849,
+      "bias": 0.0060973563231527805,
+      "p95_absolute_error": 3.4375,
+      "predicted_std": 3.5864782333374023,
+      "actual_std": 3.596405029296875,
+      "nmae_mean_pct": 7.435598969459534
+    },
+    {
+      "signal": "outdoor_dry_bulb_temperature",
+      "label": "Temperatura",
+      "unit": "°C",
+      "year": 2023,
+      "horizon_hours": 24.0,
+      "n": 34944,
+      "mae": 1.1560226678848267,
+      "rmse": 1.5434415340423584,
+      "bias": 0.002632484305649996,
+      "p95_absolute_error": 3.1874376296997062,
+      "predicted_std": 4.817596912384033,
+      "actual_std": 4.820635795593262,
+      "nmae_mean_pct": 6.5110839903354645
+    },
+    {
+      "signal": "outdoor_dry_bulb_temperature",
+      "label": "Temperatura",
+      "unit": "°C",
+      "year": 2024,
+      "horizon_hours": 24.0,
+      "n": 35040,
+      "mae": 1.2501426935195923,
+      "rmse": 1.6580238342285156,
+      "bias": 0.0044178045354783535,
+      "p95_absolute_error": 3.4375,
+      "predicted_std": 3.593947649002075,
+      "actual_std": 3.6010138988494873,
+      "nmae_mean_pct": 7.4296921491622925
+    },
+    {
+      "signal": "outdoor_relative_humidity",
+      "label": "Humidade",
+      "unit": "p.p.",
+      "year": 2023,
+      "horizon_hours": 1.0,
+      "n": 34944,
+      "mae": 1.9725232124328613,
+      "rmse": 2.6348989009857178,
+      "bias": -0.013596512377262115,
+      "p95_absolute_error": 5.45547637939453,
+      "predicted_std": 8.182144165039062,
+      "actual_std": 8.190418243408203,
+      "nmae_mean_pct": 2.754422090947628
+    },
+    {
+      "signal": "outdoor_relative_humidity",
+      "label": "Humidade",
+      "unit": "p.p.",
+      "year": 2024,
+      "horizon_hours": 1.0,
+      "n": 35040,
+      "mae": 7.318902492523193,
+      "rmse": 9.827116966247559,
+      "bias": -0.00011759022163460031,
+      "p95_absolute_error": 20.375,
+      "predicted_std": 12.139811515808105,
+      "actual_std": 12.148650169372559,
+      "nmae_mean_pct": 9.16648879647255
+    },
+    {
+      "signal": "outdoor_relative_humidity",
+      "label": "Humidade",
+      "unit": "p.p.",
+      "year": 2023,
+      "horizon_hours": 6.0,
+      "n": 34944,
+      "mae": 1.9719493389129639,
+      "rmse": 2.6337151527404785,
+      "bias": -0.013022555969655514,
+      "p95_absolute_error": 5.451225662231444,
+      "predicted_std": 8.184501647949219,
+      "actual_std": 8.194962501525879,
+      "nmae_mean_pct": 2.7534984052181244
+    },
+    {
+      "signal": "outdoor_relative_humidity",
+      "label": "Humidade",
+      "unit": "p.p.",
+      "year": 2024,
+      "horizon_hours": 6.0,
+      "n": 35040,
+      "mae": 7.31697416305542,
+      "rmse": 9.826244354248047,
+      "bias": 0.00466475123539567,
+      "p95_absolute_error": 20.375,
+      "predicted_std": 12.141616821289062,
+      "actual_std": 12.148682594299316,
+      "nmae_mean_pct": 9.164073318243027
+    },
+    {
+      "signal": "outdoor_relative_humidity",
+      "label": "Humidade",
+      "unit": "p.p.",
+      "year": 2023,
+      "horizon_hours": 24.0,
+      "n": 34944,
+      "mae": 1.9733500480651855,
+      "rmse": 2.638640880584717,
+      "bias": -0.0031628345604985952,
+      "p95_absolute_error": 5.45547637939453,
+      "predicted_std": 8.189915657043457,
+      "actual_std": 8.199897766113281,
+      "nmae_mean_pct": 2.755470760166645
+    },
+    {
+      "signal": "outdoor_relative_humidity",
+      "label": "Humidade",
+      "unit": "p.p.",
+      "year": 2024,
+      "horizon_hours": 24.0,
+      "n": 35040,
+      "mae": 7.311643600463867,
+      "rmse": 9.823165893554688,
+      "bias": 0.008162100799381733,
+      "p95_absolute_error": 20.375,
+      "predicted_std": 12.148706436157227,
+      "actual_std": 12.152275085449219,
+      "nmae_mean_pct": 9.15830135345459
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2023,
+      "horizon_hours": 1.0,
+      "n": 17528,
+      "mae": 179.5122528076172,
+      "rmse": 277.345703125,
+      "bias": -0.11643791943788528,
+      "p95_absolute_error": 647.9612213134761,
+      "predicted_std": 310.7968444824219,
+      "actual_std": 310.65618896484375,
+      "nmae_mean_pct": 38.12164068222046
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "horizon_hours": 1.0,
+      "n": 17571,
+      "mae": 186.20631408691406,
+      "rmse": 283.02972412109375,
+      "bias": -1.3126951456069946,
+      "p95_absolute_error": 654.5369262695312,
+      "predicted_std": 306.57720947265625,
+      "actual_std": 306.2172546386719,
+      "nmae_mean_pct": 41.70776903629303
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 1,
+      "horizon_hours": 1.0,
+      "n": 1192,
+      "mae": 237.8313751220703,
+      "rmse": 317.12640380859375,
+      "bias": -17.354324340820312,
+      "p95_absolute_error": 657.4114593505859,
+      "predicted_std": 288.310546875,
+      "actual_std": 289.085693359375,
+      "nmae_mean_pct": 73.22551012039185
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 2,
+      "horizon_hours": 1.0,
+      "n": 1233,
+      "mae": 253.38706970214844,
+      "rmse": 348.5492248535156,
+      "bias": 5.520240783691406,
+      "p95_absolute_error": 744.0951538085931,
+      "predicted_std": 298.3055419921875,
+      "actual_std": 297.9157409667969,
+      "nmae_mean_pct": 66.04620814323425
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 3,
+      "horizon_hours": 1.0,
+      "n": 1464,
+      "mae": 235.23187255859375,
+      "rmse": 308.7562255859375,
+      "bias": -3.4093875885009766,
+      "p95_absolute_error": 629.8196624755858,
+      "predicted_std": 255.8107452392578,
+      "actual_std": 254.24668884277344,
+      "nmae_mean_pct": 81.53805136680603
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 4,
+      "horizon_hours": 1.0,
+      "n": 1568,
+      "mae": 226.8004150390625,
+      "rmse": 331.51654052734375,
+      "bias": 8.45594310760498,
+      "p95_absolute_error": 771.130581665039,
+      "predicted_std": 318.3540344238281,
+      "actual_std": 323.4273681640625,
+      "nmae_mean_pct": 44.42877173423767
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 5,
+      "horizon_hours": 1.0,
+      "n": 1754,
+      "mae": 189.9652557373047,
+      "rmse": 288.9437561035156,
+      "bias": -18.8979434967041,
+      "p95_absolute_error": 683.2742248535154,
+      "predicted_std": 303.8484802246094,
+      "actual_std": 300.20721435546875,
+      "nmae_mean_pct": 37.30783760547638
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 6,
+      "horizon_hours": 1.0,
+      "n": 1767,
+      "mae": 180.72763061523438,
+      "rmse": 283.5581970214844,
+      "bias": 16.087791442871094,
+      "p95_absolute_error": 675.2251464843741,
+      "predicted_std": 321.59051513671875,
+      "actual_std": 318.6263427734375,
+      "nmae_mean_pct": 43.46142113208771
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 7,
+      "horizon_hours": 1.0,
+      "n": 1785,
+      "mae": 162.15748596191406,
+      "rmse": 287.7627868652344,
+      "bias": -10.031050682067871,
+      "p95_absolute_error": 742.0206420898436,
+      "predicted_std": 278.9332580566406,
+      "actual_std": 275.8744201660156,
+      "nmae_mean_pct": 27.499470114707947
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 8,
+      "horizon_hours": 1.0,
+      "n": 1664,
+      "mae": 61.905277252197266,
+      "rmse": 119.67247772216797,
+      "bias": 2.7603888511657715,
+      "p95_absolute_error": 258.68135681152336,
+      "predicted_std": 253.1183624267578,
+      "actual_std": 253.21861267089844,
+      "nmae_mean_pct": 10.154736042022705
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 9,
+      "horizon_hours": 1.0,
+      "n": 1472,
+      "mae": 118.0908203125,
+      "rmse": 199.28724670410156,
+      "bias": -2.239081382751465,
+      "p95_absolute_error": 510.4486145019531,
+      "predicted_std": 266.17388916015625,
+      "actual_std": 265.7771911621094,
+      "nmae_mean_pct": 22.2245916724205
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 10,
+      "horizon_hours": 1.0,
+      "n": 1359,
+      "mae": 248.3082275390625,
+      "rmse": 325.148193359375,
+      "bias": 6.652706146240234,
+      "p95_absolute_error": 636.7049438476556,
+      "predicted_std": 258.1142883300781,
+      "actual_std": 255.24169921875,
+      "nmae_mean_pct": 83.35261344909668
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 11,
+      "horizon_hours": 1.0,
+      "n": 1189,
+      "mae": 217.07342529296875,
+      "rmse": 296.3838806152344,
+      "bias": 10.055449485778809,
+      "p95_absolute_error": 615.2837768554688,
+      "predicted_std": 277.3564147949219,
+      "actual_std": 274.2465515136719,
+      "nmae_mean_pct": 71.47379517555237
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 12,
+      "horizon_hours": 1.0,
+      "n": 1124,
+      "mae": 143.70098876953125,
+      "rmse": 229.56851196289062,
+      "bias": -15.233139991760254,
+      "p95_absolute_error": 561.3483642578122,
+      "predicted_std": 296.0531921386719,
+      "actual_std": 295.18157958984375,
+      "nmae_mean_pct": 31.139391660690308
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2023,
+      "horizon_hours": 6.0,
+      "n": 17528,
+      "mae": 179.5122528076172,
+      "rmse": 277.345703125,
+      "bias": -0.11643791943788528,
+      "p95_absolute_error": 647.9612213134761,
+      "predicted_std": 310.7968444824219,
+      "actual_std": 310.65618896484375,
+      "nmae_mean_pct": 38.12164068222046
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "horizon_hours": 6.0,
+      "n": 17571,
+      "mae": 186.20631408691406,
+      "rmse": 283.02972412109375,
+      "bias": -1.3126951456069946,
+      "p95_absolute_error": 654.5369262695312,
+      "predicted_std": 306.57720947265625,
+      "actual_std": 306.2172546386719,
+      "nmae_mean_pct": 41.70776903629303
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 1,
+      "horizon_hours": 6.0,
+      "n": 1192,
+      "mae": 237.8313751220703,
+      "rmse": 317.12640380859375,
+      "bias": -17.354324340820312,
+      "p95_absolute_error": 657.4114593505859,
+      "predicted_std": 288.310546875,
+      "actual_std": 289.085693359375,
+      "nmae_mean_pct": 73.22551012039185
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 2,
+      "horizon_hours": 6.0,
+      "n": 1233,
+      "mae": 253.38706970214844,
+      "rmse": 348.5492248535156,
+      "bias": 5.520240783691406,
+      "p95_absolute_error": 744.0951538085931,
+      "predicted_std": 298.3055419921875,
+      "actual_std": 297.9157409667969,
+      "nmae_mean_pct": 66.04620814323425
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 3,
+      "horizon_hours": 6.0,
+      "n": 1464,
+      "mae": 235.23187255859375,
+      "rmse": 308.7562255859375,
+      "bias": -3.4093875885009766,
+      "p95_absolute_error": 629.8196624755858,
+      "predicted_std": 255.8107452392578,
+      "actual_std": 254.24668884277344,
+      "nmae_mean_pct": 81.53805136680603
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 4,
+      "horizon_hours": 6.0,
+      "n": 1569,
+      "mae": 226.7633819580078,
+      "rmse": 331.4382629394531,
+      "bias": 8.343042373657227,
+      "p95_absolute_error": 771.1298095703125,
+      "predicted_std": 318.4879455566406,
+      "actual_std": 323.4176940917969,
+      "nmae_mean_pct": 44.43860352039337
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 5,
+      "horizon_hours": 6.0,
+      "n": 1756,
+      "mae": 189.68408203125,
+      "rmse": 288.7523193359375,
+      "bias": -18.74909210205078,
+      "p95_absolute_error": 683.1061706542969,
+      "predicted_std": 303.779052734375,
+      "actual_std": 300.3169250488281,
+      "nmae_mean_pct": 37.284114956855774
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 6,
+      "horizon_hours": 6.0,
+      "n": 1767,
+      "mae": 180.7743377685547,
+      "rmse": 283.5645446777344,
+      "bias": 15.978952407836914,
+      "p95_absolute_error": 675.2251464843741,
+      "predicted_std": 321.8503723144531,
+      "actual_std": 318.7646789550781,
+      "nmae_mean_pct": 43.488872051239014
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 7,
+      "horizon_hours": 6.0,
+      "n": 1783,
+      "mae": 162.28561401367188,
+      "rmse": 287.9184875488281,
+      "bias": -9.988531112670898,
+      "p95_absolute_error": 742.2731079101559,
+      "predicted_std": 278.456787109375,
+      "actual_std": 275.4706726074219,
+      "nmae_mean_pct": 27.493873238563538
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 8,
+      "horizon_hours": 6.0,
+      "n": 1663,
+      "mae": 61.91751480102539,
+      "rmse": 119.7041244506836,
+      "bias": 2.787029981613159,
+      "p95_absolute_error": 258.7264343261717,
+      "predicted_std": 252.77142333984375,
+      "actual_std": 252.93238830566406,
+      "nmae_mean_pct": 10.151215642690659
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 9,
+      "horizon_hours": 6.0,
+      "n": 1472,
+      "mae": 118.0908203125,
+      "rmse": 199.28724670410156,
+      "bias": -2.239081382751465,
+      "p95_absolute_error": 510.4486145019531,
+      "predicted_std": 266.17388916015625,
+      "actual_std": 265.7771911621094,
+      "nmae_mean_pct": 22.2245916724205
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 10,
+      "horizon_hours": 6.0,
+      "n": 1359,
+      "mae": 248.3082275390625,
+      "rmse": 325.148193359375,
+      "bias": 6.652706146240234,
+      "p95_absolute_error": 636.7049438476556,
+      "predicted_std": 258.1142883300781,
+      "actual_std": 255.24169921875,
+      "nmae_mean_pct": 83.35261344909668
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 11,
+      "horizon_hours": 6.0,
+      "n": 1189,
+      "mae": 217.07342529296875,
+      "rmse": 296.3838806152344,
+      "bias": 10.055449485778809,
+      "p95_absolute_error": 615.2837768554688,
+      "predicted_std": 277.3564147949219,
+      "actual_std": 274.2465515136719,
+      "nmae_mean_pct": 71.47379517555237
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 12,
+      "horizon_hours": 6.0,
+      "n": 1124,
+      "mae": 143.70098876953125,
+      "rmse": 229.56851196289062,
+      "bias": -15.233139991760254,
+      "p95_absolute_error": 561.3483642578122,
+      "predicted_std": 296.0531921386719,
+      "actual_std": 295.18157958984375,
+      "nmae_mean_pct": 31.139391660690308
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2023,
+      "horizon_hours": 24.0,
+      "n": 17528,
+      "mae": 179.44039916992188,
+      "rmse": 277.1300964355469,
+      "bias": -0.044581905007362366,
+      "p95_absolute_error": 647.8069946289061,
+      "predicted_std": 310.7974853515625,
+      "actual_std": 310.5606689453125,
+      "nmae_mean_pct": 38.11369240283966
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "horizon_hours": 24.0,
+      "n": 17571,
+      "mae": 185.58995056152344,
+      "rmse": 282.17535400390625,
+      "bias": 0.24471285939216614,
+      "p95_absolute_error": 652.3194580078125,
+      "predicted_std": 306.2996520996094,
+      "actual_std": 306.2311096191406,
+      "nmae_mean_pct": 41.59829318523407
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 1,
+      "horizon_hours": 24.0,
+      "n": 1196,
+      "mae": 224.89073181152344,
+      "rmse": 301.501953125,
+      "bias": -5.100264072418213,
+      "p95_absolute_error": 633.7030944824219,
+      "predicted_std": 289.2104187011719,
+      "actual_std": 291.1079406738281,
+      "nmae_mean_pct": 68.39596629142761
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 2,
+      "horizon_hours": 24.0,
+      "n": 1237,
+      "mae": 257.9499816894531,
+      "rmse": 352.0343322753906,
+      "bias": 10.097249031066895,
+      "p95_absolute_error": 743.175964355469,
+      "predicted_std": 298.2301025390625,
+      "actual_std": 295.04644775390625,
+      "nmae_mean_pct": 69.28302049636841
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 3,
+      "horizon_hours": 24.0,
+      "n": 1469,
+      "mae": 232.2090301513672,
+      "rmse": 305.864501953125,
+      "bias": -6.448157787322998,
+      "p95_absolute_error": 629.4020141601561,
+      "predicted_std": 254.36917114257812,
+      "actual_std": 256.62432861328125,
+      "nmae_mean_pct": 78.99351716041565
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 4,
+      "horizon_hours": 24.0,
+      "n": 1573,
+      "mae": 234.2818603515625,
+      "rmse": 337.8877868652344,
+      "bias": -2.571150064468384,
+      "p95_absolute_error": 772.6173828124995,
+      "predicted_std": 324.18890380859375,
+      "actual_std": 321.7553405761719,
+      "nmae_mean_pct": 45.809224247932434
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 5,
+      "horizon_hours": 24.0,
+      "n": 1757,
+      "mae": 178.73843383789062,
+      "rmse": 279.1687316894531,
+      "bias": -6.160137176513672,
+      "p95_absolute_error": 679.610070800781,
+      "predicted_std": 300.68658447265625,
+      "actual_std": 302.2650451660156,
+      "nmae_mean_pct": 34.7419798374176
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 6,
+      "horizon_hours": 24.0,
+      "n": 1768,
+      "mae": 194.95718383789062,
+      "rmse": 298.8311462402344,
+      "bias": -0.18976686894893646,
+      "p95_absolute_error": 698.1280029296869,
+      "predicted_std": 318.68963623046875,
+      "actual_std": 319.2121887207031,
+      "nmae_mean_pct": 46.88847362995148
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 7,
+      "horizon_hours": 24.0,
+      "n": 1782,
+      "mae": 151.27442932128906,
+      "rmse": 275.0877380371094,
+      "bias": 1.2387079000473022,
+      "p95_absolute_error": 729.7474609374999,
+      "predicted_std": 275.22406005859375,
+      "actual_std": 275.49188232421875,
+      "nmae_mean_pct": 25.668445229530334
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 8,
+      "horizon_hours": 24.0,
+      "n": 1659,
+      "mae": 60.9320182800293,
+      "rmse": 114.5823974609375,
+      "bias": 4.701411247253418,
+      "p95_absolute_error": 242.1797805786131,
+      "predicted_std": 251.61668395996094,
+      "actual_std": 254.1344757080078,
+      "nmae_mean_pct": 10.04398986697197
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 9,
+      "horizon_hours": 24.0,
+      "n": 1468,
+      "mae": 127.03539276123047,
+      "rmse": 215.24754333496094,
+      "bias": 12.493319511413574,
+      "p95_absolute_error": 541.7517547607418,
+      "predicted_std": 265.07403564453125,
+      "actual_std": 269.9173889160156,
+      "nmae_mean_pct": 24.425597488880157
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 10,
+      "horizon_hours": 24.0,
+      "n": 1353,
+      "mae": 245.0226593017578,
+      "rmse": 319.9285583496094,
+      "bias": 1.3908097743988037,
+      "p95_absolute_error": 625.4514038085935,
+      "predicted_std": 255.17970275878906,
+      "actual_std": 254.9950408935547,
+      "nmae_mean_pct": 82.30716586112976
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 11,
+      "horizon_hours": 24.0,
+      "n": 1186,
+      "mae": 211.63253784179688,
+      "rmse": 290.875,
+      "bias": 4.8782548904418945,
+      "p95_absolute_error": 607.085205078125,
+      "predicted_std": 274.3723449707031,
+      "actual_std": 275.66680908203125,
+      "nmae_mean_pct": 70.68924307823181
+    },
+    {
+      "signal": "direct_solar_irradiance",
+      "label": "Irradiância direta — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "month": 12,
+      "horizon_hours": 24.0,
+      "n": 1123,
+      "mae": 146.858642578125,
+      "rmse": 234.45071411132812,
+      "bias": -11.95858383178711,
+      "p95_absolute_error": 561.8088195800781,
+      "predicted_std": 294.991455078125,
+      "actual_std": 288.8745422363281,
+      "nmae_mean_pct": 30.99290132522583
+    },
+    {
+      "signal": "diffuse_solar_irradiance",
+      "label": "Irradiância difusa — diurna",
+      "unit": "W/m²",
+      "year": 2023,
+      "horizon_hours": 1.0,
+      "n": 17528,
+      "mae": 37.55089569091797,
+      "rmse": 63.39131164550781,
+      "bias": -0.11816201359033585,
+      "p95_absolute_error": 152.63748626708966,
+      "predicted_std": 78.36937713623047,
+      "actual_std": 78.32872772216797,
+      "nmae_mean_pct": 28.737348318099976
+    },
+    {
+      "signal": "diffuse_solar_irradiance",
+      "label": "Irradiância difusa — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "horizon_hours": 1.0,
+      "n": 17571,
+      "mae": 38.89912033081055,
+      "rmse": 66.73604583740234,
+      "bias": 0.1097540482878685,
+      "p95_absolute_error": 154.33950805664062,
+      "predicted_std": 85.55237579345703,
+      "actual_std": 85.5498046875,
+      "nmae_mean_pct": 28.470847010612488
+    },
+    {
+      "signal": "diffuse_solar_irradiance",
+      "label": "Irradiância difusa — diurna",
+      "unit": "W/m²",
+      "year": 2023,
+      "horizon_hours": 6.0,
+      "n": 17528,
+      "mae": 37.55089569091797,
+      "rmse": 63.39131164550781,
+      "bias": -0.11816201359033585,
+      "p95_absolute_error": 152.63748626708966,
+      "predicted_std": 78.36937713623047,
+      "actual_std": 78.32872772216797,
+      "nmae_mean_pct": 28.737348318099976
+    },
+    {
+      "signal": "diffuse_solar_irradiance",
+      "label": "Irradiância difusa — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "horizon_hours": 6.0,
+      "n": 17571,
+      "mae": 38.89912033081055,
+      "rmse": 66.73604583740234,
+      "bias": 0.1097540482878685,
+      "p95_absolute_error": 154.33950805664062,
+      "predicted_std": 85.55237579345703,
+      "actual_std": 85.5498046875,
+      "nmae_mean_pct": 28.470847010612488
+    },
+    {
+      "signal": "diffuse_solar_irradiance",
+      "label": "Irradiância difusa — diurna",
+      "unit": "W/m²",
+      "year": 2023,
+      "horizon_hours": 24.0,
+      "n": 17528,
+      "mae": 37.5947265625,
+      "rmse": 63.43063735961914,
+      "bias": -0.052622828632593155,
+      "p95_absolute_error": 152.63748626708966,
+      "predicted_std": 78.37089538574219,
+      "actual_std": 78.3206787109375,
+      "nmae_mean_pct": 28.76570224761963
+    },
+    {
+      "signal": "diffuse_solar_irradiance",
+      "label": "Irradiância difusa — diurna",
+      "unit": "W/m²",
+      "year": 2024,
+      "horizon_hours": 24.0,
+      "n": 17571,
+      "mae": 38.88040542602539,
+      "rmse": 66.7325210571289,
+      "bias": -0.06758187711238861,
+      "p95_absolute_error": 154.33950805664062,
+      "predicted_std": 85.57064819335938,
+      "actual_std": 85.55107879638672,
+      "nmae_mean_pct": 28.445935249328613
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2023,
+      "horizon_hours": 1.0,
+      "n": 34944,
+      "mae": 0.03148045763373375,
+      "rmse": 0.112876296043396,
+      "bias": -0.0001590200117789209,
+      "p95_absolute_error": 0.2380499631166458,
+      "predicted_std": 6.3481926918029785,
+      "actual_std": 6.357454299926758,
+      "nmae_mean_pct": 0.513147097080946,
+      "omie_published_pct": 100.0,
+      "fallback_mae": null
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "horizon_hours": 1.0,
+      "n": 35040,
+      "mae": 0.02762087807059288,
+      "rmse": 0.09627685695886612,
+      "bias": -0.02762087807059288,
+      "p95_absolute_error": 0.3355879783630371,
+      "predicted_std": 6.475514888763428,
+      "actual_std": 6.444954872131348,
+      "nmae_mean_pct": 0.19790863152593374,
+      "omie_published_pct": 100.0,
+      "fallback_mae": null
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 1,
+      "horizon_hours": 1.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.171161651611328,
+      "actual_std": 4.171161651611328,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 2,
+      "horizon_hours": 1.0,
+      "n": 2784,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.0096354484558105,
+      "actual_std": 4.0096354484558105,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 3,
+      "horizon_hours": 1.0,
+      "n": 2976,
+      "mae": 0.0009021185687743127,
+      "rmse": 0.017399432137608528,
+      "bias": -0.0009021185687743127,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 3.8568499088287354,
+      "actual_std": 3.8557798862457275,
+      "nmae_mean_pct": 0.012209761189296842
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 4,
+      "horizon_hours": 1.0,
+      "n": 2880,
+      "mae": 0.33512184023857117,
+      "rmse": 0.3353548049926758,
+      "bias": -0.33512184023857117,
+      "p95_absolute_error": 0.3355884552001953,
+      "predicted_std": 3.0758583545684814,
+      "actual_std": 3.0760674476623535,
+      "nmae_mean_pct": 4.8070017248392105
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 5,
+      "horizon_hours": 1.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 2.9095542430877686,
+      "actual_std": 2.9095542430877686,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 6,
+      "horizon_hours": 1.0,
+      "n": 2880,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.716120719909668,
+      "actual_std": 4.716120719909668,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 7,
+      "horizon_hours": 1.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.238297462463379,
+      "actual_std": 4.238297462463379,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 8,
+      "horizon_hours": 1.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.449770450592041,
+      "actual_std": 4.449770450592041,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 9,
+      "horizon_hours": 1.0,
+      "n": 2880,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 5.217936992645264,
+      "actual_std": 5.217936992645264,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 10,
+      "horizon_hours": 1.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 5.402198314666748,
+      "actual_std": 5.402198314666748,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 11,
+      "horizon_hours": 1.0,
+      "n": 2880,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 5.644752025604248,
+      "actual_std": 5.644752025604248,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 12,
+      "horizon_hours": 1.0,
+      "n": 2880,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 6.267969608306885,
+      "actual_std": 6.267969608306885,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2023,
+      "horizon_hours": 6.0,
+      "n": 34944,
+      "mae": 0.03893150016665459,
+      "rmse": 0.13429230451583862,
+      "bias": -7.556143827969208e-05,
+      "p95_absolute_error": 0.3080275058746321,
+      "predicted_std": 6.333718776702881,
+      "actual_std": 6.353030681610107,
+      "nmae_mean_pct": 0.6339294370263815,
+      "omie_published_pct": 100.0,
+      "fallback_mae": null
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "horizon_hours": 6.0,
+      "n": 35040,
+      "mae": 0.027812425047159195,
+      "rmse": 0.09661010652780533,
+      "bias": -0.027812425047159195,
+      "p95_absolute_error": 0.3355879783630371,
+      "predicted_std": 6.4752631187438965,
+      "actual_std": 6.444408893585205,
+      "nmae_mean_pct": 0.19918805919587612,
+      "omie_published_pct": 100.0,
+      "fallback_mae": null
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 1,
+      "horizon_hours": 6.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.157063961029053,
+      "actual_std": 4.157063961029053,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 2,
+      "horizon_hours": 6.0,
+      "n": 2784,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.051446914672852,
+      "actual_std": 4.051446914672852,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 3,
+      "horizon_hours": 6.0,
+      "n": 2976,
+      "mae": 0.0031574140302836895,
+      "rmse": 0.032551348209381104,
+      "bias": -0.0031574140302836895,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 3.857309103012085,
+      "actual_std": 3.853578805923462,
+      "nmae_mean_pct": 0.04272335208952427
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 4,
+      "horizon_hours": 6.0,
+      "n": 2880,
+      "mae": 0.33512184023857117,
+      "rmse": 0.3353548049926758,
+      "bias": -0.33512184023857117,
+      "p95_absolute_error": 0.3355884552001953,
+      "predicted_std": 3.0618975162506104,
+      "actual_std": 3.062167167663574,
+      "nmae_mean_pct": 4.796923324465752
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 5,
+      "horizon_hours": 6.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 2.9220175743103027,
+      "actual_std": 2.9220175743103027,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 6,
+      "horizon_hours": 6.0,
+      "n": 2880,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.6459245681762695,
+      "actual_std": 4.6459245681762695,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 7,
+      "horizon_hours": 6.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.2153849601745605,
+      "actual_std": 4.2153849601745605,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 8,
+      "horizon_hours": 6.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.448461532592773,
+      "actual_std": 4.448461532592773,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 9,
+      "horizon_hours": 6.0,
+      "n": 2880,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 5.219201564788818,
+      "actual_std": 5.219201564788818,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 10,
+      "horizon_hours": 6.0,
+      "n": 2976,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 5.408054828643799,
+      "actual_std": 5.408054828643799,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 11,
+      "horizon_hours": 6.0,
+      "n": 2880,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 5.615959644317627,
+      "actual_std": 5.615959644317627,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 12,
+      "horizon_hours": 6.0,
+      "n": 2880,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 6.2577691078186035,
+      "actual_std": 6.2577691078186035,
+      "nmae_mean_pct": 0.0
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2023,
+      "horizon_hours": 24.0,
+      "n": 34944,
+      "mae": 1.3905538320541382,
+      "rmse": 2.613504409790039,
+      "bias": 0.012988202273845673,
+      "p95_absolute_error": 5.973100185394287,
+      "predicted_std": 6.340830326080322,
+      "actual_std": 6.353541851043701,
+      "nmae_mean_pct": 22.636964917182922,
+      "omie_published_pct": 41.66666666666667,
+      "fallback_mae": 2.3495070934295654
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "horizon_hours": 24.0,
+      "n": 35040,
+      "mae": 1.2819368839263916,
+      "rmse": 2.5045809745788574,
+      "bias": -0.04741011559963226,
+      "p95_absolute_error": 5.971912670135477,
+      "predicted_std": 6.485434532165527,
+      "actual_std": 6.46064567565918,
+      "nmae_mean_pct": 9.160402417182922,
+      "omie_published_pct": 41.66666666666667,
+      "fallback_mae": 2.1772477626800537
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 1,
+      "horizon_hours": 24.0,
+      "n": 2976,
+      "mae": 1.2340154647827148,
+      "rmse": 2.293086051940918,
+      "bias": -0.07030472159385681,
+      "p95_absolute_error": 5.467079162597656,
+      "predicted_std": 4.16185998916626,
+      "actual_std": 4.105721950531006,
+      "nmae_mean_pct": 8.964835107326508
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 2,
+      "horizon_hours": 24.0,
+      "n": 2784,
+      "mae": 0.7210666537284851,
+      "rmse": 1.4416768550872803,
+      "bias": 0.15035000443458557,
+      "p95_absolute_error": 3.568682003021232,
+      "predicted_std": 3.9483187198638916,
+      "actual_std": 3.9990100860595703,
+      "nmae_mean_pct": 7.67880454659462
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 3,
+      "horizon_hours": 24.0,
+      "n": 2976,
+      "mae": 0.7552767395973206,
+      "rmse": 1.7458149194717407,
+      "bias": -0.009506845846772194,
+      "p95_absolute_error": 4.041439533233643,
+      "predicted_std": 3.856407403945923,
+      "actual_std": 3.8517491817474365,
+      "nmae_mean_pct": 10.203561931848526
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 4,
+      "horizon_hours": 24.0,
+      "n": 2880,
+      "mae": 0.8998268842697144,
+      "rmse": 1.6903951168060303,
+      "bias": -0.3575839698314667,
+      "p95_absolute_error": 4.199583029746993,
+      "predicted_std": 3.083744764328003,
+      "actual_std": 3.0624818801879883,
+      "nmae_mean_pct": 12.858803570270538
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 5,
+      "horizon_hours": 24.0,
+      "n": 2976,
+      "mae": 0.9957992434501648,
+      "rmse": 1.8216229677200317,
+      "bias": 0.019235098734498024,
+      "p95_absolute_error": 4.169039726257324,
+      "predicted_std": 2.896562337875366,
+      "actual_std": 2.92699933052063,
+      "nmae_mean_pct": 11.148558557033539
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 6,
+      "horizon_hours": 24.0,
+      "n": 2880,
+      "mae": 1.6126866340637207,
+      "rmse": 2.887773275375366,
+      "bias": -0.11863578855991364,
+      "p95_absolute_error": 6.323914527893056,
+      "predicted_std": 4.718388557434082,
+      "actual_std": 4.5817670822143555,
+      "nmae_mean_pct": 11.15945354104042
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 7,
+      "horizon_hours": 24.0,
+      "n": 2976,
+      "mae": 1.2562083005905151,
+      "rmse": 2.421473741531372,
+      "bias": -0.12158481776714325,
+      "p95_absolute_error": 5.71299934387207,
+      "predicted_std": 4.287337303161621,
+      "actual_std": 4.274001121520996,
+      "nmae_mean_pct": 7.688552141189575
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 8,
+      "horizon_hours": 24.0,
+      "n": 2976,
+      "mae": 1.5421169996261597,
+      "rmse": 3.076540231704712,
+      "bias": 0.016807524487376213,
+      "p95_absolute_error": 7.947159767150879,
+      "predicted_std": 4.467957496643066,
+      "actual_std": 4.457259178161621,
+      "nmae_mean_pct": 8.44116061925888
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 9,
+      "horizon_hours": 24.0,
+      "n": 2880,
+      "mae": 1.276790976524353,
+      "rmse": 2.440309524536133,
+      "bias": 0.025431357324123383,
+      "p95_absolute_error": 5.880735993385305,
+      "predicted_std": 5.243199348449707,
+      "actual_std": 5.248205661773682,
+      "nmae_mean_pct": 7.911796867847443
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 10,
+      "horizon_hours": 24.0,
+      "n": 2976,
+      "mae": 1.7717955112457275,
+      "rmse": 3.0310564041137695,
+      "bias": 0.03935422748327255,
+      "p95_absolute_error": 7.268560409545898,
+      "predicted_std": 5.367088794708252,
+      "actual_std": 5.363034725189209,
+      "nmae_mean_pct": 11.345526576042175
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 11,
+      "horizon_hours": 24.0,
+      "n": 2880,
+      "mae": 1.658577799797058,
+      "rmse": 3.2267303466796875,
+      "bias": -0.0979362279176712,
+      "p95_absolute_error": 7.806973361968949,
+      "predicted_std": 5.705199718475342,
+      "actual_std": 5.657978534698486,
+      "nmae_mean_pct": 8.282682299613953
+    },
+    {
+      "signal": "electricity_pricing",
+      "label": "Preço",
+      "unit": "cêntimos/kWh",
+      "year": 2024,
+      "month": 12,
+      "horizon_hours": 24.0,
+      "n": 2880,
+      "mae": 1.6449331045150757,
+      "rmse": 3.066403865814209,
+      "bias": -0.04323739930987358,
+      "p95_absolute_error": 7.442966103553744,
+      "predicted_std": 6.2581400871276855,
+      "actual_std": 6.252276420593262,
+      "nmae_mean_pct": 7.995046675205231
+    }
+  ],
+  "exogenous_persistence": [
+    {
+      "family": "rec_pt_2023_core_15_v2",
+      "signal": "non_shiftable_load",
+      "year": 2023,
+      "unit": "kW",
+      "n": 34848,
+      "mae": 0.7444726228713989,
+      "rmse": 1.2256333827972412,
+      "bias": -0.0014698415761813521,
+      "p95_absolute_error": 2.820391058921815,
+      "predicted_std": 2.233825922012329,
+      "actual_std": 2.234847068786621,
+      "nmae_mean_pct": 14.894673228263855
+    },
+    {
+      "family": "rec_pt_2023_core_15_v2",
+      "signal": "non_shiftable_load",
+      "year": 2024,
+      "unit": "kW",
+      "n": 35040,
+      "mae": 0.687437891960144,
+      "rmse": 1.1171581745147705,
+      "bias": -0.0006008483469486237,
+      "p95_absolute_error": 2.5733311891555783,
+      "predicted_std": 2.050097942352295,
+      "actual_std": 2.050576686859131,
+      "nmae_mean_pct": 14.193134009838104
+    },
+    {
+      "family": "rec_pt_2023_core_15_v2",
+      "signal": "solar_generation",
+      "year": 2023,
+      "unit": "kW",
+      "n": 17496,
+      "mae": 1.1582938432693481,
+      "rmse": 2.0484390258789062,
+      "bias": 0.006755719427019358,
+      "p95_absolute_error": 4.97397243976593,
+      "predicted_std": 3.8850467205047607,
+      "actual_std": 3.885922908782959,
+      "nmae_mean_pct": 20.16681134700775
+    },
+    {
+      "family": "rec_pt_2023_core_15_v2",
+      "signal": "solar_generation",
+      "year": 2024,
+      "unit": "kW",
+      "n": 17575,
+      "mae": 1.2543220520019531,
+      "rmse": 2.1375441551208496,
+      "bias": -0.007932069711387157,
+      "p95_absolute_error": 5.0940013885498026,
+      "predicted_std": 3.8253674507141113,
+      "actual_std": 3.8231818675994873,
+      "nmae_mean_pct": 22.25416749715805
+    },
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "signal": "non_shiftable_load",
+      "year": 2023,
+      "unit": "kW",
+      "n": 34848,
+      "mae": 3.0649330615997314,
+      "rmse": 5.052948951721191,
+      "bias": 0.01855861023068428,
+      "p95_absolute_error": 10.983492088317877,
+      "predicted_std": 11.105306625366211,
+      "actual_std": 11.094944953918457,
+      "nmae_mean_pct": 16.26885235309601
+    },
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "signal": "non_shiftable_load",
+      "year": 2024,
+      "unit": "kW",
+      "n": 35040,
+      "mae": 2.8508660793304443,
+      "rmse": 4.558584690093994,
+      "bias": -0.02495698072016239,
+      "p95_absolute_error": 9.977881908416737,
+      "predicted_std": 9.833961486816406,
+      "actual_std": 9.855679512023926,
+      "nmae_mean_pct": 15.827633440494537
+    },
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "signal": "solar_generation",
+      "year": 2023,
+      "unit": "kW",
+      "n": 17496,
+      "mae": 5.964715957641602,
+      "rmse": 10.610119819641113,
+      "bias": 0.028920099139213562,
+      "p95_absolute_error": 25.9341402053833,
+      "predicted_std": 20.09937858581543,
+      "actual_std": 20.10370635986328,
+      "nmae_mean_pct": 19.906321167945862
+    },
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "signal": "solar_generation",
+      "year": 2024,
+      "unit": "kW",
+      "n": 17575,
+      "mae": 6.542829513549805,
+      "rmse": 11.19964599609375,
+      "bias": -0.037747807800769806,
+      "p95_absolute_error": 27.28151397705078,
+      "predicted_std": 19.77320671081543,
+      "actual_std": 19.760066986083984,
+      "nmae_mean_pct": 22.307483851909637
+    },
+    {
+      "family": "rec_pt_2023_micro_4_v2",
+      "signal": "non_shiftable_load",
+      "year": 2023,
+      "unit": "kW",
+      "n": 34848,
+      "mae": 0.2913866639137268,
+      "rmse": 0.5210464000701904,
+      "bias": -0.0009489539079368114,
+      "p95_absolute_error": 1.2534218966960908,
+      "predicted_std": 0.7007313966751099,
+      "actual_std": 0.7018877863883972,
+      "nmae_mean_pct": 21.111711859703064
+    },
+    {
+      "family": "rec_pt_2023_micro_4_v2",
+      "signal": "non_shiftable_load",
+      "year": 2024,
+      "unit": "kW",
+      "n": 35040,
+      "mae": 0.2729697525501251,
+      "rmse": 0.4862987697124481,
+      "bias": 0.0005182921304367483,
+      "p95_absolute_error": 1.1994491934776286,
+      "predicted_std": 0.6569748520851135,
+      "actual_std": 0.6561014652252197,
+      "nmae_mean_pct": 20.354780554771423
+    },
+    {
+      "family": "rec_pt_2023_micro_4_v2",
+      "signal": "solar_generation",
+      "year": 2023,
+      "unit": "kW",
+      "n": 17496,
+      "mae": 0.26693734526634216,
+      "rmse": 0.481020987033844,
+      "bias": 0.0017340320628136396,
+      "p95_absolute_error": 1.186619222164154,
+      "predicted_std": 0.8853234052658081,
+      "actual_std": 0.8853343725204468,
+      "nmae_mean_pct": 21.53782993555069
+    },
+    {
+      "family": "rec_pt_2023_micro_4_v2",
+      "signal": "solar_generation",
+      "year": 2024,
+      "unit": "kW",
+      "n": 17575,
+      "mae": 0.28457364439964294,
+      "rmse": 0.49531468749046326,
+      "bias": -0.0019776569679379463,
+      "p95_absolute_error": 1.2029850482940672,
+      "predicted_std": 0.87107253074646,
+      "actual_std": 0.8708204627037048,
+      "nmae_mean_pct": 23.328755795955658
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "signal": "non_shiftable_load",
+      "year": 2023,
+      "unit": "kW",
+      "n": 34848,
+      "mae": 9.63167667388916,
+      "rmse": 16.460634231567383,
+      "bias": 0.05473800003528595,
+      "p95_absolute_error": 36.140820312500004,
+      "predicted_std": 35.62468338012695,
+      "actual_std": 35.587554931640625,
+      "nmae_mean_pct": 14.44619596004486
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "signal": "non_shiftable_load",
+      "year": 2024,
+      "unit": "kW",
+      "n": 35040,
+      "mae": 8.552284240722656,
+      "rmse": 14.30126953125,
+      "bias": -0.07080763578414917,
+      "p95_absolute_error": 32.23943977355952,
+      "predicted_std": 30.8468017578125,
+      "actual_std": 30.9156551361084,
+      "nmae_mean_pct": 13.424381613731384
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "signal": "solar_generation",
+      "year": 2023,
+      "unit": "kW",
+      "n": 17496,
+      "mae": 22.57674789428711,
+      "rmse": 39.70109558105469,
+      "bias": 0.1409151554107666,
+      "p95_absolute_error": 97.37580871582031,
+      "predicted_std": 73.03565979003906,
+      "actual_std": 73.04888153076172,
+      "nmae_mean_pct": 20.774587988853455
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "signal": "solar_generation",
+      "year": 2024,
+      "unit": "kW",
+      "n": 17575,
+      "mae": 24.52227210998535,
+      "rmse": 41.478973388671875,
+      "bias": -0.16515925526618958,
+      "p95_absolute_error": 98.86891555786133,
+      "predicted_std": 71.86643981933594,
+      "actual_std": 71.82737731933594,
+      "nmae_mean_pct": 23.006805777549744
+    }
+  ],
+  "forecast_fault_campaigns": [
+    {
+      "variant": "core_30_robustness",
+      "phase": "development",
+      "rows": 22,
+      "unique_campaign_hours": 12.0,
+      "elapsed_time_pct": 0.06839945280437756,
+      "features": [
+        "electricity_pricing_predicted_1",
+        "electricity_pricing_predicted_2",
+        "electricity_pricing_predicted_3",
+        "forecast_price_next_15m",
+        "forecast_price_next_1h",
+        "forecast_price_next_24h",
+        "forecast_price_next_3h",
+        "forecast_price_next_6h"
+      ],
+      "values": [
+        0.025
+      ],
+      "modes": [
+        "bias"
+      ]
+    },
+    {
+      "variant": "core_30_robustness",
+      "phase": "confirmation",
+      "rows": 22,
+      "unique_campaign_hours": 16.0,
+      "elapsed_time_pct": 0.09119927040583675,
+      "features": [
+        "electricity_pricing_predicted_1",
+        "electricity_pricing_predicted_2",
+        "electricity_pricing_predicted_3",
+        "forecast_price_next_15m",
+        "forecast_price_next_1h",
+        "forecast_price_next_24h",
+        "forecast_price_next_3h",
+        "forecast_price_next_6h"
+      ],
+      "values": [
+        -0.035
+      ],
+      "modes": [
+        "bias"
+      ]
+    },
+    {
+      "variant": "core_30_combined",
+      "phase": "development",
+      "rows": 22,
+      "unique_campaign_hours": 12.0,
+      "elapsed_time_pct": 0.06839945280437756,
+      "features": [
+        "electricity_pricing_predicted_1",
+        "electricity_pricing_predicted_2",
+        "electricity_pricing_predicted_3",
+        "forecast_price_next_15m",
+        "forecast_price_next_1h",
+        "forecast_price_next_24h",
+        "forecast_price_next_3h",
+        "forecast_price_next_6h"
+      ],
+      "values": [
+        0.025
+      ],
+      "modes": [
+        "bias"
+      ]
+    },
+    {
+      "variant": "core_30_combined",
+      "phase": "confirmation",
+      "rows": 22,
+      "unique_campaign_hours": 16.0,
+      "elapsed_time_pct": 0.09119927040583675,
+      "features": [
+        "electricity_pricing_predicted_1",
+        "electricity_pricing_predicted_2",
+        "electricity_pricing_predicted_3",
+        "forecast_price_next_15m",
+        "forecast_price_next_1h",
+        "forecast_price_next_24h",
+        "forecast_price_next_3h",
+        "forecast_price_next_6h"
+      ],
+      "values": [
+        -0.035
+      ],
+      "modes": [
+        "bias"
+      ]
+    },
+    {
+      "variant": "premium_100_allin",
+      "phase": "development",
+      "rows": 22,
+      "unique_campaign_hours": 12.0,
+      "elapsed_time_pct": 0.06839945280437756,
+      "features": [
+        "electricity_pricing_predicted_1",
+        "electricity_pricing_predicted_2",
+        "electricity_pricing_predicted_3",
+        "forecast_price_next_15m",
+        "forecast_price_next_1h",
+        "forecast_price_next_24h",
+        "forecast_price_next_3h",
+        "forecast_price_next_6h"
+      ],
+      "values": [
+        0.025
+      ],
+      "modes": [
+        "bias"
+      ]
+    },
+    {
+      "variant": "premium_100_allin",
+      "phase": "confirmation",
+      "rows": 22,
+      "unique_campaign_hours": 16.0,
+      "elapsed_time_pct": 0.09119927040583675,
+      "features": [
+        "electricity_pricing_predicted_1",
+        "electricity_pricing_predicted_2",
+        "electricity_pricing_predicted_3",
+        "forecast_price_next_15m",
+        "forecast_price_next_1h",
+        "forecast_price_next_24h",
+        "forecast_price_next_3h",
+        "forecast_price_next_6h"
+      ],
+      "values": [
+        -0.035
+      ],
+      "modes": [
+        "bias"
+      ]
+    }
+  ],
+  "previous_revision_checked": true,
+  "native_boundary_limitation": "Original engine clips target before persistence for derived load/PV at episode end; file padding is removed by the loader. No engine changes made.",
+  "uncertainty_model": "Deterministic daily persistence, not calibrated probabilistic forecasts or archived numerical weather predictions. Shared weather and price across families; no independent member forecast-skill distribution."
+}

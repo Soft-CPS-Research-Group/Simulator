@@ -11,6 +11,7 @@ def main():
     roots=[docs,results,ROOT/'data/portugal_reference_2023',ROOT/'data/portugal_reference_2024',*sorted((ROOT/'data/datasets').glob('rec_pt_2023_*_v2'))]
     files=[p for root in roots for p in root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.name not in ('package_checksums.sha256','package_manifest.json')]
     files += [ROOT/name for name in ['data/portugal_native_source_v23.tar.gz','scripts/build_portugal_native_suite.py','scripts/portugal_rec_common.py','scripts/portugal_site_calendar.py','scripts/prepare_portugal_reference.py','scripts/prepare_portugal_reference_2024.py','scripts/portugal_profiles_2024.py','scripts/extend_portugal_2024.py','scripts/package_portugal_native.py','scripts/requirements-portugal-generator.txt','scripts/audit/verify_portugal_two_year_inputs.py','scripts/audit/verify_portugal_core30_sessions.py']]
+    files += [ROOT/'scripts/portugal_lifecycle_stories.py', ROOT/'scripts/audit/verify_portugal_forecasts_stories.py']
     files=sorted(set(files));checks=docs/'package_checksums.sha256';checks.write_text(''.join(f'{digest(p)}  {p.relative_to(ROOT)}\n' for p in files))
     archive=ROOT/'docs/portugal_rec_native.zip'
     with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=3) as z:

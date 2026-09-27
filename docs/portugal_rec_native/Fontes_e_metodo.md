@@ -65,3 +65,9 @@ As fontes seguintes suportam exclusivamente o ano acrescentado. Os originais e o
 - [Calendário escolar 2024/25](https://www.dgeste.mec.pt/wp-content/uploads/2024/07/despacho8368-2024-07-25-calendario-escolar-2024-25-2027-28.pdf); para 2023/24, Despacho 8356/2022. A data de início dentro do intervalo permitido é uma escolha da escola fictícia.
 
 Ver [Extensão de 2024](Extensao_2024.md) para diferenças de método, lacunas, incerteza e limites de validação. Os dados são cenários sintéticos informados por fontes públicas; não são registos das famílias narradas.
+
+## Apoio às previsões no fim de 2024
+
+Os preços de apoio cobrem apenas 01/01/2025 UTC e não entram no período simulado. OMIE e anúncios ERSE de dezembro de 2024, com ficheiros, URLs e hashes, estão em `data/portugal_reference_2024/forecast_support`. TAR BTN bi-horária: 0,0149/0,0830 €/kWh; TSE: 0,0016574 €/kWh. Restantes componentes da referência comum mantidas. Ver Previsoes_e_historias.md para as fontes, causalidade e métricas.
+
+A humidade de 2023 é uma aproximação sintética a partir da temperatura; a de 2024 vem de ERA5. Esta diferença de origem foi preservada e está explicitada na análise das previsões; o erro entre anos não mede apenas diferenças de clima.

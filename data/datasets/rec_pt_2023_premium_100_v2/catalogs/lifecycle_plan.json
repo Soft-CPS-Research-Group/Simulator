@@ -1,395 +1,713 @@
 {
-  "applies_to": "dynamic variants only; CLEAN/NOMINAL contain the complete static catalogue",
-  "initially_inactive_members": [
-    "Member_071",
-    "Member_013",
-    "Member_017",
-    "Member_021",
-    "Member_026",
-    "Member_033",
-    "Member_041",
-    "Member_053",
-    "Member_058",
-    "Member_078",
-    "Member_025",
-    "Member_043",
-    "Member_045",
-    "Member_047",
-    "Member_055",
-    "Member_059",
-    "Member_061",
-    "Member_065",
-    "Member_067",
-    "Member_073"
+  "source": "evaluation/*.json: start_date + time_step * seconds_per_time_step",
+  "timezone": "Europe/Lisbon",
+  "years": [
+    2023,
+    2024
   ],
-  "events": [
-    {
-      "id": "add_member_71",
-      "time_step": 3360,
-      "operation": "add_member",
-      "target_member_id": "Member_071",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-02-05T00:00:00+00:00"
-    },
-    {
-      "id": "remove_member_7",
-      "time_step": 4320,
-      "operation": "remove_member",
-      "target_member_id": "Member_007",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-02-15T00:00:00+00:00"
-    },
-    {
-      "id": "add_member_13",
-      "time_step": 4800,
-      "operation": "add_member",
-      "target_member_id": "Member_013",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-02-20T00:00:00+00:00"
-    },
-    {
-      "id": "add_member_17",
-      "time_step": 6240,
-      "operation": "add_member",
-      "target_member_id": "Member_017",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-03-07T00:00:00+00:00"
-    },
-    {
-      "id": "add_member_21",
-      "time_step": 7680,
-      "operation": "add_member",
-      "target_member_id": "Member_021",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-03-22T00:00:00+00:00"
-    },
-    {
-      "id": "remove_member_9",
-      "time_step": 7968,
-      "operation": "remove_member",
-      "target_member_id": "Member_009",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-03-25T00:00:00+00:00"
-    },
-    {
-      "id": "commissioning_86_CHG-M086-04",
-      "time_step": 9020,
-      "operation": "add_asset",
-      "target_member_id": "Member_086",
-      "target_asset_type": "charger",
-      "target_asset_id": "CHG-M086-04",
-      "purpose": "commissioning",
-      "source_member_id": "Member_086",
-      "source_asset_id": "CHG-M086-04",
-      "timestamp_local": "2023-04-05T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_26",
-      "time_step": 9116,
-      "operation": "add_member",
-      "target_member_id": "Member_026",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-04-06T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_33",
-      "time_step": 10556,
-      "operation": "add_member",
-      "target_member_id": "Member_033",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-04-21T00:00:00+01:00"
-    },
-    {
-      "id": "remove_member_19",
-      "time_step": 11228,
-      "operation": "remove_member",
-      "target_member_id": "Member_019",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-04-28T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_41",
-      "time_step": 11996,
-      "operation": "add_member",
-      "target_member_id": "Member_041",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-05-06T00:00:00+01:00"
-    },
-    {
-      "id": "commissioning_50_BESS-M050-01",
-      "time_step": 13088,
-      "operation": "add_asset",
-      "target_member_id": "Member_050",
-      "target_asset_type": "electrical_storage",
-      "target_asset_id": "BESS-M050-01",
-      "purpose": "commissioning",
-      "source_member_id": "Member_050",
-      "source_asset_id": "BESS-M050-01",
-      "overrides": {
-        "initial_soc": 0.1
+  "variants": {
+    "premium_100_allin": {
+      "schema": "evaluation/premium_100_allin.json",
+      "initial_membership": {
+        "Member_001": true,
+        "Member_002": true,
+        "Member_003": true,
+        "Member_004": true,
+        "Member_005": true,
+        "Member_006": true,
+        "Member_007": true,
+        "Member_008": true,
+        "Member_009": true,
+        "Member_010": true,
+        "Member_011": true,
+        "Member_012": true,
+        "Member_013": false,
+        "Member_014": true,
+        "Member_015": true,
+        "Member_016": true,
+        "Member_017": false,
+        "Member_018": true,
+        "Member_019": true,
+        "Member_020": true,
+        "Member_021": false,
+        "Member_022": true,
+        "Member_023": true,
+        "Member_024": true,
+        "Member_025": false,
+        "Member_026": false,
+        "Member_027": true,
+        "Member_028": true,
+        "Member_029": true,
+        "Member_030": true,
+        "Member_031": true,
+        "Member_032": true,
+        "Member_033": false,
+        "Member_034": true,
+        "Member_035": true,
+        "Member_036": true,
+        "Member_037": true,
+        "Member_038": true,
+        "Member_039": true,
+        "Member_040": true,
+        "Member_041": false,
+        "Member_042": true,
+        "Member_043": false,
+        "Member_044": true,
+        "Member_045": false,
+        "Member_046": true,
+        "Member_047": false,
+        "Member_048": true,
+        "Member_049": true,
+        "Member_050": true,
+        "Member_051": true,
+        "Member_052": true,
+        "Member_053": false,
+        "Member_054": true,
+        "Member_055": false,
+        "Member_056": true,
+        "Member_057": true,
+        "Member_058": false,
+        "Member_059": false,
+        "Member_060": true,
+        "Member_061": false,
+        "Member_062": true,
+        "Member_063": true,
+        "Member_064": true,
+        "Member_065": false,
+        "Member_066": true,
+        "Member_067": false,
+        "Member_068": true,
+        "Member_069": true,
+        "Member_070": true,
+        "Member_071": false,
+        "Member_072": true,
+        "Member_073": false,
+        "Member_074": true,
+        "Member_075": true,
+        "Member_076": true,
+        "Member_077": true,
+        "Member_078": false,
+        "Member_079": true,
+        "Member_080": true,
+        "Member_081": true,
+        "Member_082": true,
+        "Member_083": true,
+        "Member_084": true,
+        "Member_085": true,
+        "Member_086": true,
+        "Member_087": true,
+        "Member_088": true,
+        "Member_089": true,
+        "Member_090": true,
+        "Member_091": true,
+        "Member_092": true,
+        "Member_093": true,
+        "Member_094": true,
+        "Member_095": true,
+        "Member_096": true,
+        "Member_097": true,
+        "Member_098": true,
+        "Member_099": true,
+        "Member_100": true
       },
-      "timestamp_local": "2023-05-17T09:00:00+01:00"
+      "events": [
+        {
+          "id": "add_member_71",
+          "time_step": 4080,
+          "operation": "add_member",
+          "target_member_id": "Member_071",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-02-12T12:00:00+00:00",
+          "timestamp_utc": "2023-02-12T12:00:00+00:00"
+        },
+        {
+          "id": "remove_member_7",
+          "time_step": 4128,
+          "operation": "remove_member",
+          "target_member_id": "Member_007",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-02-13T00:00:00+00:00",
+          "timestamp_utc": "2023-02-13T00:00:00+00:00"
+        },
+        {
+          "id": "add_member_13",
+          "time_step": 4176,
+          "operation": "add_member",
+          "target_member_id": "Member_013",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-02-13T12:00:00+00:00",
+          "timestamp_utc": "2023-02-13T12:00:00+00:00"
+        },
+        {
+          "id": "add_member_17",
+          "time_step": 4224,
+          "operation": "add_member",
+          "target_member_id": "Member_017",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-02-14T00:00:00+00:00",
+          "timestamp_utc": "2023-02-14T00:00:00+00:00"
+        },
+        {
+          "id": "add_member_21",
+          "time_step": 4272,
+          "operation": "add_member",
+          "target_member_id": "Member_021",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-02-14T12:00:00+00:00",
+          "timestamp_utc": "2023-02-14T12:00:00+00:00"
+        },
+        {
+          "id": "exit_cancel_DEF-M009-01",
+          "time_step": 4320,
+          "operation": "remove_asset",
+          "target_member_id": "Member_009",
+          "target_asset_type": "deferrable_appliance",
+          "target_asset_id": "DEF-M009-01",
+          "purpose": "permanent_departure",
+          "timestamp_utc": "2023-02-15T00:00:00+00:00",
+          "timestamp_local": "2023-02-15T00:00:00+00:00"
+        },
+        {
+          "id": "exit_cancel_DEF-M009-02",
+          "time_step": 4320,
+          "operation": "remove_asset",
+          "target_member_id": "Member_009",
+          "target_asset_type": "deferrable_appliance",
+          "target_asset_id": "DEF-M009-02",
+          "purpose": "permanent_departure",
+          "timestamp_utc": "2023-02-15T00:00:00+00:00",
+          "timestamp_local": "2023-02-15T00:00:00+00:00"
+        },
+        {
+          "id": "remove_member_9",
+          "time_step": 4320,
+          "operation": "remove_member",
+          "target_member_id": "Member_009",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-02-15T00:00:00+00:00",
+          "timestamp_utc": "2023-02-15T00:00:00+00:00"
+        },
+        {
+          "id": "commissioning_86_CHG-M086-04",
+          "time_step": 4368,
+          "operation": "add_asset",
+          "target_member_id": "Member_086",
+          "target_asset_type": "charger",
+          "target_asset_id": "CHG-M086-04",
+          "purpose": "commissioning",
+          "source_member_id": "Member_086",
+          "source_asset_id": "NATIVE_TEMPLATE__CHG-M086-04",
+          "timestamp_local": "2023-02-15T12:00:00+00:00",
+          "timestamp_utc": "2023-02-15T12:00:00+00:00"
+        },
+        {
+          "id": "add_member_26",
+          "time_step": 4416,
+          "operation": "add_member",
+          "target_member_id": "Member_026",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-02-16T00:00:00+00:00",
+          "timestamp_utc": "2023-02-16T00:00:00+00:00"
+        },
+        {
+          "id": "add_member_33",
+          "time_step": 4464,
+          "operation": "add_member",
+          "target_member_id": "Member_033",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-02-16T12:00:00+00:00",
+          "timestamp_utc": "2023-02-16T12:00:00+00:00"
+        },
+        {
+          "id": "exit_cancel_DEF-M019-01",
+          "time_step": 4512,
+          "operation": "remove_asset",
+          "target_member_id": "Member_019",
+          "target_asset_type": "deferrable_appliance",
+          "target_asset_id": "DEF-M019-01",
+          "purpose": "permanent_departure",
+          "timestamp_utc": "2023-02-17T00:00:00+00:00",
+          "timestamp_local": "2023-02-17T00:00:00+00:00"
+        },
+        {
+          "id": "exit_cancel_DEF-M019-02",
+          "time_step": 4512,
+          "operation": "remove_asset",
+          "target_member_id": "Member_019",
+          "target_asset_type": "deferrable_appliance",
+          "target_asset_id": "DEF-M019-02",
+          "purpose": "permanent_departure",
+          "timestamp_utc": "2023-02-17T00:00:00+00:00",
+          "timestamp_local": "2023-02-17T00:00:00+00:00"
+        },
+        {
+          "id": "remove_member_19",
+          "time_step": 4512,
+          "operation": "remove_member",
+          "target_member_id": "Member_019",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-02-17T00:00:00+00:00",
+          "timestamp_utc": "2023-02-17T00:00:00+00:00"
+        },
+        {
+          "id": "add_member_41",
+          "time_step": 12840,
+          "operation": "add_member",
+          "target_member_id": "Member_041",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-05-14T19:00:00+01:00",
+          "timestamp_utc": "2023-05-14T18:00:00+00:00"
+        },
+        {
+          "id": "commissioning_50_BESS-M050-01",
+          "time_step": 12888,
+          "operation": "add_asset",
+          "target_member_id": "Member_050",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M050-01",
+          "purpose": "commissioning",
+          "source_member_id": "Member_001",
+          "source_asset_id": "BESS-M050-01",
+          "overrides": {
+            "capacity": 10.24,
+            "nominal_power": 5.0,
+            "efficiency": 0.94,
+            "initial_soc": 0.1,
+            "depth_of_discharge": 0.9,
+            "loss_coefficient": 2.805892205981486e-05,
+            "capacity_loss_coefficient": 0.0,
+            "power_efficiency_curve": [
+              [
+                0,
+                0.94
+              ],
+              [
+                1,
+                0.94
+              ]
+            ],
+            "capacity_power_curve": [
+              [
+                0,
+                1
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          },
+          "timestamp_local": "2023-05-15T07:00:00+01:00",
+          "timestamp_utc": "2023-05-15T06:00:00+00:00"
+        },
+        {
+          "id": "add_member_53",
+          "time_step": 12936,
+          "operation": "add_member",
+          "target_member_id": "Member_053",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-05-15T19:00:00+01:00",
+          "timestamp_utc": "2023-05-15T18:00:00+00:00"
+        },
+        {
+          "id": "exit_cancel_DEF-M023-01",
+          "time_step": 12984,
+          "operation": "remove_asset",
+          "target_member_id": "Member_023",
+          "target_asset_type": "deferrable_appliance",
+          "target_asset_id": "DEF-M023-01",
+          "purpose": "permanent_departure",
+          "timestamp_utc": "2023-05-16T06:00:00+00:00",
+          "timestamp_local": "2023-05-16T07:00:00+01:00"
+        },
+        {
+          "id": "exit_cancel_DEF-M023-02",
+          "time_step": 12984,
+          "operation": "remove_asset",
+          "target_member_id": "Member_023",
+          "target_asset_type": "deferrable_appliance",
+          "target_asset_id": "DEF-M023-02",
+          "purpose": "permanent_departure",
+          "timestamp_utc": "2023-05-16T06:00:00+00:00",
+          "timestamp_local": "2023-05-16T07:00:00+01:00"
+        },
+        {
+          "id": "remove_member_23",
+          "time_step": 12984,
+          "operation": "remove_member",
+          "target_member_id": "Member_023",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-05-16T07:00:00+01:00",
+          "timestamp_utc": "2023-05-16T06:00:00+00:00"
+        },
+        {
+          "id": "replacement_out_1_BESS-M001-01",
+          "time_step": 13032,
+          "operation": "remove_asset",
+          "target_member_id": "Member_001",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M001-01",
+          "purpose": "replacement_out",
+          "timestamp_local": "2023-05-16T19:00:00+01:00",
+          "timestamp_utc": "2023-05-16T18:00:00+00:00"
+        },
+        {
+          "id": "add_member_58",
+          "time_step": 13080,
+          "operation": "add_member",
+          "target_member_id": "Member_058",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-05-17T07:00:00+01:00",
+          "timestamp_utc": "2023-05-17T06:00:00+00:00"
+        },
+        {
+          "id": "replacement_in_1_BESS-M001-02",
+          "time_step": 13128,
+          "operation": "add_asset",
+          "target_member_id": "Member_001",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M001-02",
+          "purpose": "replacement_in",
+          "source_member_id": "Member_001",
+          "source_asset_id": "BESS-M001-01",
+          "overrides": {
+            "initial_soc": 0.1
+          },
+          "timestamp_local": "2023-05-17T19:00:00+01:00",
+          "timestamp_utc": "2023-05-17T18:00:00+00:00"
+        },
+        {
+          "id": "commissioning_99_PV-M099-01",
+          "time_step": 13176,
+          "operation": "add_asset",
+          "target_member_id": "Member_099",
+          "target_asset_type": "pv",
+          "target_asset_id": "PV-M099-01",
+          "purpose": "commissioning",
+          "source_member_id": "Member_001",
+          "source_asset_id": "PV-M099-01",
+          "timestamp_local": "2023-05-18T07:00:00+01:00",
+          "overrides": {
+            "nominal_power": 30.66,
+            "generation_mode": "absolute"
+          },
+          "timestamp_utc": "2023-05-18T06:00:00+00:00"
+        },
+        {
+          "id": "add_member_78",
+          "time_step": 13224,
+          "operation": "add_member",
+          "target_member_id": "Member_078",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-05-18T19:00:00+01:00",
+          "timestamp_utc": "2023-05-18T18:00:00+00:00"
+        },
+        {
+          "id": "remove_member_37",
+          "time_step": 13272,
+          "operation": "remove_member",
+          "target_member_id": "Member_037",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-05-19T07:00:00+01:00",
+          "timestamp_utc": "2023-05-19T06:00:00+00:00"
+        },
+        {
+          "id": "add_member_25",
+          "time_step": 21600,
+          "operation": "add_member",
+          "target_member_id": "Member_025",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-08-14T01:00:00+01:00",
+          "timestamp_utc": "2023-08-14T00:00:00+00:00"
+        },
+        {
+          "id": "remove_member_1",
+          "time_step": 21648,
+          "operation": "remove_member",
+          "target_member_id": "Member_001",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-08-14T13:00:00+01:00",
+          "timestamp_utc": "2023-08-14T12:00:00+00:00"
+        },
+        {
+          "id": "add_member_43",
+          "time_step": 21696,
+          "operation": "add_member",
+          "target_member_id": "Member_043",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-08-15T01:00:00+01:00",
+          "timestamp_utc": "2023-08-15T00:00:00+00:00"
+        },
+        {
+          "id": "permanent_retirement_external_laundry_14_DEF-M014-01",
+          "time_step": 21744,
+          "operation": "remove_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "deferrable_appliance",
+          "target_asset_id": "DEF-M014-01",
+          "purpose": "permanent_retirement_external_laundry",
+          "timestamp_local": "2023-08-15T13:00:00+01:00",
+          "timestamp_utc": "2023-08-15T12:00:00+00:00"
+        },
+        {
+          "id": "add_member_45",
+          "time_step": 21792,
+          "operation": "add_member",
+          "target_member_id": "Member_045",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-08-16T01:00:00+01:00",
+          "timestamp_utc": "2023-08-16T00:00:00+00:00"
+        },
+        {
+          "id": "remove_member_51",
+          "time_step": 21840,
+          "operation": "remove_member",
+          "target_member_id": "Member_051",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-08-16T13:00:00+01:00",
+          "timestamp_utc": "2023-08-16T12:00:00+00:00"
+        },
+        {
+          "id": "add_member_47",
+          "time_step": 21888,
+          "operation": "add_member",
+          "target_member_id": "Member_047",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-08-17T01:00:00+01:00",
+          "timestamp_utc": "2023-08-17T00:00:00+00:00"
+        },
+        {
+          "id": "add_member_55",
+          "time_step": 21936,
+          "operation": "add_member",
+          "target_member_id": "Member_055",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-08-17T13:00:00+01:00",
+          "timestamp_utc": "2023-08-17T12:00:00+00:00"
+        },
+        {
+          "id": "permanent_retirement_85_CHG-M085-01",
+          "time_step": 21984,
+          "operation": "remove_asset",
+          "target_member_id": "Member_085",
+          "target_asset_type": "charger",
+          "target_asset_id": "CHG-M085-01",
+          "purpose": "permanent_retirement",
+          "timestamp_local": "2023-08-18T01:00:00+01:00",
+          "timestamp_utc": "2023-08-18T00:00:00+00:00"
+        },
+        {
+          "id": "add_member_59",
+          "time_step": 22032,
+          "operation": "add_member",
+          "target_member_id": "Member_059",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-08-18T13:00:00+01:00",
+          "timestamp_utc": "2023-08-18T12:00:00+00:00"
+        },
+        {
+          "id": "remove_member_57",
+          "time_step": 30360,
+          "operation": "remove_member",
+          "target_member_id": "Member_057",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-11-13T06:00:00+00:00",
+          "timestamp_utc": "2023-11-13T06:00:00+00:00"
+        },
+        {
+          "id": "add_member_61",
+          "time_step": 30408,
+          "operation": "add_member",
+          "target_member_id": "Member_061",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-11-13T18:00:00+00:00",
+          "timestamp_utc": "2023-11-13T18:00:00+00:00"
+        },
+        {
+          "id": "remove_member_63",
+          "time_step": 30456,
+          "operation": "remove_member",
+          "target_member_id": "Member_063",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-11-14T06:00:00+00:00",
+          "timestamp_utc": "2023-11-14T06:00:00+00:00"
+        },
+        {
+          "id": "add_member_65",
+          "time_step": 30504,
+          "operation": "add_member",
+          "target_member_id": "Member_065",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-11-14T18:00:00+00:00",
+          "timestamp_utc": "2023-11-14T18:00:00+00:00"
+        },
+        {
+          "id": "add_member_67",
+          "time_step": 30552,
+          "operation": "add_member",
+          "target_member_id": "Member_067",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-11-15T06:00:00+00:00",
+          "timestamp_utc": "2023-11-15T06:00:00+00:00"
+        },
+        {
+          "id": "remove_member_69",
+          "time_step": 30600,
+          "operation": "remove_member",
+          "target_member_id": "Member_069",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-11-15T18:00:00+00:00",
+          "timestamp_utc": "2023-11-15T18:00:00+00:00"
+        },
+        {
+          "id": "add_member_73",
+          "time_step": 30648,
+          "operation": "add_member",
+          "target_member_id": "Member_073",
+          "purpose": "first_admission",
+          "timestamp_local": "2023-11-16T06:00:00+00:00",
+          "timestamp_utc": "2023-11-16T06:00:00+00:00"
+        },
+        {
+          "id": "permanent_retirement_93_PV-M093-01",
+          "time_step": 30696,
+          "operation": "remove_asset",
+          "target_member_id": "Member_093",
+          "target_asset_type": "pv",
+          "target_asset_id": "PV-M093-01",
+          "purpose": "permanent_retirement",
+          "timestamp_local": "2023-11-16T18:00:00+00:00",
+          "timestamp_utc": "2023-11-16T18:00:00+00:00"
+        },
+        {
+          "id": "remove_member_84",
+          "time_step": 30744,
+          "operation": "remove_member",
+          "target_member_id": "Member_084",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-11-17T06:00:00+00:00",
+          "timestamp_utc": "2023-11-17T06:00:00+00:00"
+        },
+        {
+          "id": "remove_member_95",
+          "time_step": 30792,
+          "operation": "remove_member",
+          "target_member_id": "Member_095",
+          "purpose": "permanent_departure",
+          "timestamp_local": "2023-11-17T18:00:00+00:00",
+          "timestamp_utc": "2023-11-17T18:00:00+00:00"
+        }
+      ],
+      "excluded_template_registration": [
+        "native_template_registration_CHG-M086-04"
+      ]
     },
-    {
-      "id": "add_member_53",
-      "time_step": 13532,
-      "operation": "add_member",
-      "target_member_id": "Member_053",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-05-22T00:00:00+01:00"
-    },
-    {
-      "id": "remove_member_23",
-      "time_step": 13628,
-      "operation": "remove_member",
-      "target_member_id": "Member_023",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-05-23T00:00:00+01:00"
-    },
-    {
-      "id": "replacement_out_1_BESS-M001-01",
-      "time_step": 14912,
-      "operation": "remove_asset",
-      "target_member_id": "Member_001",
-      "target_asset_type": "electrical_storage",
-      "target_asset_id": "BESS-M001-01",
-      "purpose": "replacement_out",
-      "timestamp_local": "2023-06-05T09:00:00+01:00"
-    },
-    {
-      "id": "add_member_58",
-      "time_step": 14972,
-      "operation": "add_member",
-      "target_member_id": "Member_058",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-06-06T00:00:00+01:00"
-    },
-    {
-      "id": "replacement_in_1_BESS-M001-02",
-      "time_step": 15584,
-      "operation": "add_asset",
-      "target_member_id": "Member_001",
-      "target_asset_type": "electrical_storage",
-      "target_asset_id": "BESS-M001-02",
-      "purpose": "replacement_in",
-      "source_member_id": "Member_001",
-      "source_asset_id": "BESS-M001-01",
-      "overrides": {
-        "initial_soc": 0.1
+    "premium_100_normal": {
+      "schema": "evaluation/premium_100_normal.json",
+      "initial_membership": {
+        "Member_001": true,
+        "Member_002": true,
+        "Member_003": true,
+        "Member_004": true,
+        "Member_005": true,
+        "Member_006": true,
+        "Member_007": true,
+        "Member_008": true,
+        "Member_009": true,
+        "Member_010": true,
+        "Member_011": true,
+        "Member_012": true,
+        "Member_013": true,
+        "Member_014": true,
+        "Member_015": true,
+        "Member_016": true,
+        "Member_017": true,
+        "Member_018": true,
+        "Member_019": true,
+        "Member_020": true,
+        "Member_021": true,
+        "Member_022": true,
+        "Member_023": true,
+        "Member_024": true,
+        "Member_025": true,
+        "Member_026": true,
+        "Member_027": true,
+        "Member_028": true,
+        "Member_029": true,
+        "Member_030": true,
+        "Member_031": true,
+        "Member_032": true,
+        "Member_033": true,
+        "Member_034": true,
+        "Member_035": true,
+        "Member_036": true,
+        "Member_037": true,
+        "Member_038": true,
+        "Member_039": true,
+        "Member_040": true,
+        "Member_041": true,
+        "Member_042": true,
+        "Member_043": true,
+        "Member_044": true,
+        "Member_045": true,
+        "Member_046": true,
+        "Member_047": true,
+        "Member_048": true,
+        "Member_049": true,
+        "Member_050": true,
+        "Member_051": true,
+        "Member_052": true,
+        "Member_053": true,
+        "Member_054": true,
+        "Member_055": true,
+        "Member_056": true,
+        "Member_057": true,
+        "Member_058": true,
+        "Member_059": true,
+        "Member_060": true,
+        "Member_061": true,
+        "Member_062": true,
+        "Member_063": true,
+        "Member_064": true,
+        "Member_065": true,
+        "Member_066": true,
+        "Member_067": true,
+        "Member_068": true,
+        "Member_069": true,
+        "Member_070": true,
+        "Member_071": true,
+        "Member_072": true,
+        "Member_073": true,
+        "Member_074": true,
+        "Member_075": true,
+        "Member_076": true,
+        "Member_077": true,
+        "Member_078": true,
+        "Member_079": true,
+        "Member_080": true,
+        "Member_081": true,
+        "Member_082": true,
+        "Member_083": true,
+        "Member_084": true,
+        "Member_085": true,
+        "Member_086": true,
+        "Member_087": true,
+        "Member_088": true,
+        "Member_089": true,
+        "Member_090": true,
+        "Member_091": true,
+        "Member_092": true,
+        "Member_093": true,
+        "Member_094": true,
+        "Member_095": true,
+        "Member_096": true,
+        "Member_097": true,
+        "Member_098": true,
+        "Member_099": true,
+        "Member_100": true
       },
-      "timestamp_local": "2023-06-12T09:00:00+01:00"
-    },
-    {
-      "id": "commissioning_99_PV-M099-01",
-      "time_step": 15872,
-      "operation": "add_asset",
-      "target_member_id": "Member_099",
-      "target_asset_type": "pv",
-      "target_asset_id": "PV-M099-01",
-      "purpose": "commissioning",
-      "source_member_id": "Member_099",
-      "source_asset_id": "PV-M099-01",
-      "timestamp_local": "2023-06-15T09:00:00+01:00"
-    },
-    {
-      "id": "add_member_78",
-      "time_step": 16412,
-      "operation": "add_member",
-      "target_member_id": "Member_078",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-06-21T00:00:00+01:00"
-    },
-    {
-      "id": "remove_member_37",
-      "time_step": 16796,
-      "operation": "remove_member",
-      "target_member_id": "Member_037",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-06-25T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_25",
-      "time_step": 17852,
-      "operation": "add_member",
-      "target_member_id": "Member_025",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-07-06T00:00:00+01:00"
-    },
-    {
-      "id": "remove_member_1",
-      "time_step": 19196,
-      "operation": "remove_member",
-      "target_member_id": "Member_001",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-07-20T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_43",
-      "time_step": 19292,
-      "operation": "add_member",
-      "target_member_id": "Member_043",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-07-21T00:00:00+01:00"
-    },
-    {
-      "id": "permanent_retirement_external_laundry_14_DEF-M014-01",
-      "time_step": 20252,
-      "operation": "remove_asset",
-      "target_member_id": "Member_014",
-      "target_asset_type": "deferrable_appliance",
-      "target_asset_id": "DEF-M014-01",
-      "purpose": "permanent_retirement_external_laundry",
-      "timestamp_local": "2023-07-31T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_45",
-      "time_step": 20732,
-      "operation": "add_member",
-      "target_member_id": "Member_045",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-08-05T00:00:00+01:00"
-    },
-    {
-      "id": "remove_member_51",
-      "time_step": 21692,
-      "operation": "remove_member",
-      "target_member_id": "Member_051",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-08-15T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_47",
-      "time_step": 22268,
-      "operation": "add_member",
-      "target_member_id": "Member_047",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-08-21T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_55",
-      "time_step": 23708,
-      "operation": "add_member",
-      "target_member_id": "Member_055",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-09-05T00:00:00+01:00"
-    },
-    {
-      "id": "permanent_retirement_85_CHG-M085-01",
-      "time_step": 23996,
-      "operation": "remove_asset",
-      "target_member_id": "Member_085",
-      "target_asset_type": "charger",
-      "target_asset_id": "CHG-M085-01",
-      "purpose": "permanent_retirement",
-      "timestamp_local": "2023-09-08T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_59",
-      "time_step": 25148,
-      "operation": "add_member",
-      "target_member_id": "Member_059",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-09-20T00:00:00+01:00"
-    },
-    {
-      "id": "remove_member_57",
-      "time_step": 25148,
-      "operation": "remove_member",
-      "target_member_id": "Member_057",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-09-20T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_61",
-      "time_step": 26588,
-      "operation": "add_member",
-      "target_member_id": "Member_061",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-10-05T00:00:00+01:00"
-    },
-    {
-      "id": "remove_member_63",
-      "time_step": 27068,
-      "operation": "remove_member",
-      "target_member_id": "Member_063",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-10-10T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_65",
-      "time_step": 28028,
-      "operation": "add_member",
-      "target_member_id": "Member_065",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-10-20T00:00:00+01:00"
-    },
-    {
-      "id": "add_member_67",
-      "time_step": 29472,
-      "operation": "add_member",
-      "target_member_id": "Member_067",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-11-04T00:00:00+00:00"
-    },
-    {
-      "id": "remove_member_69",
-      "time_step": 30240,
-      "operation": "remove_member",
-      "target_member_id": "Member_069",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-11-12T00:00:00+00:00"
-    },
-    {
-      "id": "add_member_73",
-      "time_step": 31008,
-      "operation": "add_member",
-      "target_member_id": "Member_073",
-      "purpose": "first_admission",
-      "timestamp_local": "2023-11-20T00:00:00+00:00"
-    },
-    {
-      "id": "permanent_retirement_93_PV-M093-01",
-      "time_step": 31524,
-      "operation": "remove_asset",
-      "target_member_id": "Member_093",
-      "target_asset_type": "pv",
-      "target_asset_id": "PV-M093-01",
-      "purpose": "permanent_retirement",
-      "timestamp_local": "2023-11-25T09:00:00+00:00"
-    },
-    {
-      "id": "remove_member_84",
-      "time_step": 32160,
-      "operation": "remove_member",
-      "target_member_id": "Member_084",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-12-02T00:00:00+00:00"
-    },
-    {
-      "id": "remove_member_95",
-      "time_step": 33792,
-      "operation": "remove_member",
-      "target_member_id": "Member_095",
-      "purpose": "permanent_departure",
-      "timestamp_local": "2023-12-19T00:00:00+00:00"
+      "events": [],
+      "excluded_template_registration": []
     }
-  ],
-  "initially_absent_assets": [
-    {
-      "member_id": "Member_086",
-      "asset_type": "charger",
-      "asset_id": "CHG-M086-04"
-    },
-    {
-      "member_id": "Member_050",
-      "asset_type": "electrical_storage",
-      "asset_id": "BESS-M050-01"
-    },
-    {
-      "member_id": "Member_099",
-      "asset_type": "pv",
-      "asset_id": "PV-M099-01"
-    }
-  ],
-  "departures_are_permanent": true
+  }
 }

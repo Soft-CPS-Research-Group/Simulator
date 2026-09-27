@@ -1,0 +1,21 @@
+{
+  "source": "evaluation/*.json: start_date + time_step * seconds_per_time_step",
+  "timezone": "Europe/Lisbon",
+  "years": [
+    2023,
+    2024
+  ],
+  "variants": {
+    "core_4": {
+      "schema": "evaluation/core_4.json",
+      "initial_membership": {
+        "Member_001": true,
+        "Member_002": true,
+        "Member_003": true,
+        "Member_004": true
+      },
+      "events": [],
+      "excluded_template_registration": []
+    }
+  }
+}

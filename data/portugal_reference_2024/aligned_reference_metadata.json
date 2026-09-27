@@ -13,5 +13,18 @@
   "eredes": "Published chronological local interval ends (92/100 slots on DST transition days), aligned by row order to UTC after checking every civil date. Profile is a synthetic demand prior, not measured household consumption.",
   "forecast": "Causal persistence for weather; published day-ahead OMIE (14:00 Madrid cutoff), prior-day fallback; retroactive TSE excluded until May 1 publication known.",
   "grid_price_min": 0.026439999999999998,
-  "grid_price_max": 0.33047588
+  "grid_price_max": 0.33047588,
+  "forecast_support": {
+    "period_utc": "2025-01-01 00:00 through 23:45",
+    "records": 96,
+    "simulated": false,
+    "scope": "Market forecast targets only; meteorological persistence already uses full horizons. Internal native load/PV boundary clipping is unchanged.",
+    "tar_2025_eur_kwh": {
+      "off_peak": 0.0149,
+      "other": 0.083
+    },
+    "tse_2025_eur_kwh": 0.0016574,
+    "contract": "Same common BTN benchmark margin, CGS, losses and IEC; future TAR/TSE known from ERSE announcements of 16 and 20 December 2024.",
+    "sources": "forecast_support/sources.json"
+  }
 }

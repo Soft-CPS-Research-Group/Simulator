@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3",
+  "version": "portugal-native-2023-2024-v3.1",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "status": "dataset_construction_only",
   "years": [
@@ -20,7 +20,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_15_v2/evaluation/core_15.json",
-      "sha256": "d2feebf0c960f9dc82f3e440dd35a5e0b752fcf47b7d7f43df4c71a04e803d2d",
+      "sha256": "fefeee02ab41ad3fde01ef500d1e661978ad05e41ab949af91ad077be84339be",
       "frozen_2023_source_fingerprint": "eb0f77cf0f59eaa767cd3ed83fa42886ed70201b17bd63bd2852f000d46b5878"
     }
   ]

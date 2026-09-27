@@ -31,7 +31,7 @@ def eredes(root):
 
 def market(root):
     blocks=[]
-    for p in sorted((root/'raw_2024').glob('omie_*.txt')):
+    for p in sorted([*(root/'raw_2024').glob('omie_*.txt'), *(root/'forecast_support').glob('omie_*.txt')]):
         day=p.stem.removeprefix('omie_');rows=[]
         for line in p.read_text().splitlines():
             f=line.split(';')
@@ -41,7 +41,9 @@ def market(root):
         idx=civil_day(day,'Europe/Madrid','h');assert len(f)==len(idx),(day,len(f))
         assert f.market_period.tolist()==list(range(1,len(idx)+1))
         f['timestamp_utc']=idx.tz_convert('UTC');f['market_date']=day;blocks.append(f)
-    h=pd.concat(blocks).set_index('timestamp_utc').sort_index().reindex(UTC[::4]);assert h.notna().all().all()
+    hourly=pd.concat(blocks).set_index('timestamp_utc').sort_index()
+    assert hourly.index.is_unique
+    h=hourly.reindex(UTC[::4]);assert h.notna().all().all()
     h.reset_index().to_parquet(root/'omie_2024_hourly.parquet',index=False)
     c=pd.DataFrame(index=UTC);c['omie_eur_kwh']=h.price_portugal_eur_per_mwh.reindex(UTC,method='ffill')/1000;c['mibel_eur_kwh']=0.
     local=UTC.tz_convert('Europe/Lisbon');off=(local.hour<8)|(local.hour>=22)
@@ -52,10 +54,23 @@ def market(root):
     c['electricity_pricing']=(c.omie_eur_kwh+.014+c.tse_eur_kwh)*1.16+c.access_energy_eur_kwh+.001
     c.reset_index(names='timestamp_utc').to_parquet(root/'price_components_btn_bi.parquet',index=False)
     past23=pd.read_parquet(ROOT/'data/portugal_reference_2023/price_components_btn_bi.parquet').set_index('timestamp_utc')
-    both=pd.concat([past23,c]);offset=len(past23);idx=pd.DatetimeIndex(both.index);madrid=idx.tz_convert('Europe/Madrid')
+    # One support day outside the simulation window. January 2's first Madrid
+    # market hour supplies January 1 at 23:00 UTC; no 2025 simulation rows added.
+    support_clock=pd.date_range('2025-01-01','2025-01-02',freq='15min',inclusive='left',tz='UTC')
+    support=pd.DataFrame(index=support_clock)
+    support['omie_eur_kwh']=hourly.price_portugal_eur_per_mwh.reindex(support_clock,method='ffill')/1000
+    assert hourly.reindex(support_clock[::4]).notna().all().all(), 'Missing support market hours'
+    off=(support_clock.hour<8)|(support_clock.hour>=22)
+    support['access_energy_eur_kwh']=np.where(off,.0149,.0830)
+    support['tse_eur_kwh']=.0016574
+    support['electricity_pricing']=(support.omie_eur_kwh+.014+support.tse_eur_kwh)*1.16+support.access_energy_eur_kwh+.001
+    support.reset_index(names='timestamp_utc').to_parquet(root/'forecast_support/price_components.parquet',index=False)
+    both=pd.concat([past23,c,support]);offset=len(past23);idx=pd.DatetimeIndex(both.index);madrid=idx.tz_convert('Europe/Madrid')
     out=pd.DataFrame({'electricity_pricing':c.electricity_pricing.to_numpy()});issue=np.arange(len(c))+offset
+    boundary=[]
     for k,horizon in enumerate((4,24,96),1):
-        target=np.minimum(issue+horizon,len(both)-1)
+        target=issue+horizon
+        assert target.max()<len(both)
         pub=(madrid[target].tz_localize(None).normalize()-pd.Timedelta(days=1)+pd.Timedelta(hours=14)).tz_localize('Europe/Madrid').tz_convert('UTC')
         earlier=np.minimum(target-96,issue)
         omie=np.where(UTC>=pub,both.omie_eur_kwh.to_numpy()[target],both.omie_eur_kwh.to_numpy()[earlier])
@@ -63,6 +78,13 @@ def market(root):
         # know that surcharge during April; conservatively use it from May 1.
         tse=np.where(UTC>=pd.Timestamp('2024-05-01',tz='Europe/Lisbon'),both.tse_eur_kwh.fillna(0).to_numpy()[target],0.)
         out[f'electricity_pricing_predicted_{k}']=(omie+.014+tse)*1.16+both.access_energy_eur_kwh.to_numpy()[target]+.001
+        mask=target>=offset+len(c)
+        boundary.append(pd.DataFrame({'issue_utc':UTC[mask], 'target_utc':idx[target[mask]],
+            'horizon_steps':horizon, 'publication_utc':pub[mask],
+            'omie_source_utc':idx[np.where(UTC>=pub,target,earlier)[mask]],
+            'day_ahead_available':(UTC>=pub)[mask],
+            'forecast_eur_kwh':out.loc[mask,f'electricity_pricing_predicted_{k}'].to_numpy()}))
+    pd.concat(boundary,ignore_index=True).to_parquet(root/'forecast_support/boundary_forecasts.parquet',index=False)
     out.astype('float32').to_parquet(root/'pricing_btn_bi.parquet',index=False)
     return c
 
@@ -131,5 +153,6 @@ def weather(root):
 def main():
     root=ROOT/'data/portugal_reference_2024';eredes(root);c=market(root);co=carbon(root);weather(root)
     m={'year':2024,'records':35136,'formula':'(OMIE + 0.004 + 0.010 + TSE)*1.16 + TAR_BTN_bi + 0.001; EUR/kWh pre-VAT; TSE=0.002893 from April 1 retrospectively; zero MIBEL','tariff':'Common reference, variable energy only; excludes fixed charges, VAT and audiovisual/DGEG fees. Not a reconstruction of an individual bill. Negative prices preserved.','carbon':co,'weather':'PVGIS6 SARAH-3 hourly horizontal irradiation; ERA5 temperature, humidity and wind via Open-Meteo; 38.72N -9.14E. 15-minute values interpolated, night masked astronomically; no fabricated weather noise.','eredes':'Published chronological local interval ends (92/100 slots on DST transition days), aligned by row order to UTC after checking every civil date. Profile is a synthetic demand prior, not measured household consumption.','forecast':'Causal persistence for weather; published day-ahead OMIE (14:00 Madrid cutoff), prior-day fallback; retroactive TSE excluded until May 1 publication known.','grid_price_min':float(c.electricity_pricing.min()),'grid_price_max':float(c.electricity_pricing.max())}
+    m['forecast_support']={'period_utc':'2025-01-01 00:00 through 23:45','records':96,'simulated':False,'scope':'Market forecast targets only; meteorological persistence already uses full horizons. Internal native load/PV boundary clipping is unchanged.','tar_2025_eur_kwh':{'off_peak':.0149,'other':.0830},'tse_2025_eur_kwh':.0016574,'contract':'Same common BTN benchmark margin, CGS, losses and IEC; future TAR/TSE known from ERSE announcements of 16 and 20 December 2024.','sources':'forecast_support/sources.json'}
     (root/'aligned_reference_metadata.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n');print(json.dumps(m,ensure_ascii=False,indent=2))
 if __name__=='__main__':main()

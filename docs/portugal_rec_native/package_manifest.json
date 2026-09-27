@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3",
+  "version": "portugal-native-2023-2024-v3.1",
   "years": [
     2023,
     2024
@@ -8,9 +8,9 @@
   "configurations": 9,
   "families": 4,
   "package": "docs/portugal_rec_native.zip",
-  "sha256": "057238b0d2e9f7d4b9671aa15b30bfe920d01080f83e9e4fce3a561e9c75157e",
-  "bytes": 535696944,
-  "files": 3919,
+  "sha256": "c07eb40f2a6de3b2436063ef0182bbce22b9e5354f3c61e9e47c20d6453eb77e",
+  "bytes": 539829186,
+  "files": 3937,
   "simulator_core": "978be68b0e0740deab15ecf536805f323b86fa57",
   "frozen_2023_commit": "393cd200bb66b671d8904eba00688d56d91f08d3",
   "scope": "Data, public sources, atlas, offline reconstruction and static input checks; no annual/controller evaluation."

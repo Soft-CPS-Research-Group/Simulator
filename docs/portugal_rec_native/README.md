@@ -1,6 +1,6 @@
 # Portugal REC — 2023 e 2024
 
-Versão **portugal-native-2023-2024-v3**. As mesmas **quatro bases físicas e nove configurações**, agora com **70 176 registos de 15 minutos**, de 1 de janeiro de 2023 a 31 de dezembro de 2024. Os caminhos mantêm «2023» por estabilidade; os inputs correntes incluem ambos os anos.
+Versão **portugal-native-2023-2024-v3.1**. As mesmas **quatro bases físicas e nove configurações**, agora com **70 176 registos de 15 minutos**, de 1 de janeiro de 2023 a 31 de dezembro de 2024. Os caminhos mantêm «2023» por estabilidade; os inputs correntes incluem ambos os anos.
 
 2024 continua cronologicamente 2023. Quem saiu não regressa; os equipamentos retirados permanecem retirados. Os eventos de entrada/saída de 2023 não são repetidos. Não foram acrescentados membros, equipamentos ou variantes. Nas configurações estáticas mantém-se o catálogo completo; nas dinâmicas mantém-se a composição existente no fim de 2023.
 
@@ -25,6 +25,7 @@ A tarifa de compra à rede é comum a todos: `shared/pricing_btn_bi.parquet`, co
 ## Consultar
 
 - [Extensão de 2024 e verificações](Extensao_2024.md).
+- [Histórias, previsões e variabilidade](Previsoes_e_historias.md).
 - [Reproduzir os dois anos](Reproduzir.md).
 - [Atlas de membros Premium](Atlas_Membros_Premium.md).
 - [Tarifas e mercado](Tarifas_e_mercado.md).
@@ -40,3 +41,5 @@ O fecho de 2023 está no commit `393cd200bb66b671d8904eba00688d56d91f08d3` e no 
 Os consumos, rotinas e famílias são sintéticos, apoiados nas fontes documentadas. A meteorologia e o mercado usam fontes do ano correspondente. Os pedidos EV foram verificados individualmente face a duração, potência, perdas e redução de potência perto de carga completa; isto não prova viabilidade conjunta sob limites da instalação, falhas, cortes e decisões de controlo.
 
 Mantêm-se as capacidades do simulador original: SOC prescrito à chegada de cada sessão EV, fases das máquinas por instalação, backup agregado, possível exposição dos eventos de health e DR com média da hora anterior. Os itinerários não constituem um balanço longitudinal de viagens executado pelo motor. Não existe atividade privada após saída de um membro.
+
+Nesta revisão, as histórias são geradas dos eventos por configuração. O apoio de um dia de janeiro de 2025 completa as previsões de preço no fim de 2024, sem alargar a simulação. As previsões derivadas de consumo/PV continuam sujeitas ao corte de horizonte do motor original no fim de cada episódio; ver o relatório de previsões.
