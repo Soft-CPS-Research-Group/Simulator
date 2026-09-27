@@ -1,8 +1,11 @@
 {
-  "version": "portugal-native-978be68b-v2.1",
+  "version": "portugal-native-2023-2024-v3",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "status": "dataset_construction_only",
-  "tariff_policy": "common",
+  "years": [
+    2023,
+    2024
+  ],
   "variants": [
     {
       "family": "micro_4",
@@ -17,8 +20,8 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
-      "sha256": "3733c186a8b6195d90f3cadfe49029f06b0653ec0d002fe2ff15a3d3ead760a3",
-      "source_physical_fingerprint": "c073ab395a0a6340dfb4ababec167aeab2c733e22c2eff70facc09a90dc2596a"
+      "sha256": "d347f9a3895efe360b0ca7a9c2b89b87804d5220c5b89a03e22f3bd11943f9e4",
+      "frozen_2023_source_fingerprint": "c073ab395a0a6340dfb4ababec167aeab2c733e22c2eff70facc09a90dc2596a"
     }
   ]
 }

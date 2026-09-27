@@ -1,3 +1,5 @@
+> Evidência do fecho de 2023. Os comprovativos desta secção estão agora em `results/portugal_rec_native/frozen_2023_evidence/`.
+
 # Fecho das tarifas e das duas sessões EV
 
 Revisão `portugal-native-978be68b-v2.1`, 27 de setembro de 2026.

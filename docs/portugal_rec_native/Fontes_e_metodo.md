@@ -48,3 +48,20 @@ access does not establish unrestricted redistribution rights.
 ## Native-runtime recovery
 
 The physical inputs and source tariff series above are retained. The current dataset schemas all select the same BTN bi-hourly reference, `shared/pricing_btn_bi.parquet`; other tariff files are provenance only. Dataset prices are full variable grid purchase prices. The 0.8 local-market factor belongs in the experiment schema and uses the original simulator settlement. Dataset schemas leave this market disabled. Source provenance is not evidence of longitudinal EV simulation, calibrated DR or added inverter constraints. No new usage evaluation accompanies this tariff revision.
+
+
+## Extensão 2024
+
+As fontes seguintes suportam exclusivamente o ano acrescentado. Os originais e os pedidos de aquisição estão em `data/portugal_reference_2024`.
+
+- [E-REDES, perfis de consumo 2024](https://www.e-redes.pt/sites/eredes/files/2023-12/E-REDES_Perfil_Consumo_2024.xlsx).
+- [OMIE, descarga de preços marginais](https://www.omie.es/en/file-download?parents=marginalpdbcpt&filename=marginalpdbcpt_20240101.1): 366 dias de mercado e a primeira hora relevante do dia seguinte ao ano.
+- [ERSE, tarifas 2024](https://www.erse.pt/media/kqyhsv1v/tarifas-e-pre%C3%A7os-2024.pdf) e [revisão extraordinária de junho](https://www.erse.pt/media/3khpzpvk/tarifas-e-pre%C3%A7os-se-extra-2024.pdf).
+- [Coopérnico, fórmula e encargo TSE de 2024](https://www.coopernico.org/artigo/366): convenção de perda indicativa de 16%, não perdas horárias reais de uma instalação. O encargo retroativo de abril não é revelado às previsões antes da publicação; adota-se conservadoramente 1 de maio.
+- [PVGIS6](https://photovoltaic-geographic-information-system.ec.europa.eu/en/about-pvgis-6), SARAH-3 até 2024; [API](https://photovoltaic-geographic-information-system.ec.europa.eu/api/v6/redoc).
+- [Open-Meteo, arquivo ERA5](https://open-meteo.com/en/docs/historical-weather-api): temperatura, vento, humidade e apenas os preenchimentos solares documentados. Dados de reanálise, não medições residenciais.
+- REN Data Hub: séries diárias oficiais de produção e intercâmbios, em `raw_2024/ren_*.json.gz`, incluindo o URL de cada pedido.
+- REE: intensidade operacional diária peninsular, conservada com o URL de aquisição nos ficheiros `ree_emissions_*`.
+- [Calendário escolar 2024/25](https://www.dgeste.mec.pt/wp-content/uploads/2024/07/despacho8368-2024-07-25-calendario-escolar-2024-25-2027-28.pdf); para 2023/24, Despacho 8356/2022. A data de início dentro do intervalo permitido é uma escolha da escola fictícia.
+
+Ver [Extensão de 2024](Extensao_2024.md) para diferenças de método, lacunas, incerteza e limites de validação. Os dados são cenários sintéticos informados por fontes públicas; não são registos das famílias narradas.

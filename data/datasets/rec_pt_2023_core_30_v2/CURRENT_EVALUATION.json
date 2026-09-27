@@ -1,8 +1,11 @@
 {
-  "version": "portugal-native-978be68b-v2.1",
+  "version": "portugal-native-2023-2024-v3",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "status": "dataset_construction_only",
-  "tariff_policy": "common",
+  "years": [
+    2023,
+    2024
+  ],
   "variants": [
     {
       "family": "core_30",
@@ -17,8 +20,8 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
-      "sha256": "0903647e1017231dbc61f6ac9192de49b7faedbdd36a5ea1757562522a048c86",
-      "source_physical_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
+      "sha256": "da61cb5c90a779119924e9adb8e218254915d0a3c9bc342ff9ebbaf102dcbb45",
+      "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
       "family": "core_30",
@@ -33,8 +36,8 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
-      "sha256": "28a8a08f557fa9b0f3592b4d9baab7e42f96f86a84b429289029248913d4372a",
-      "source_physical_fingerprint": "e40b0db00c9846a3e689f6a759be05b4769e816f6b3bc20c853707cbbbcf76db"
+      "sha256": "7686f4a3cb818a73d90dd8daed6f9eec775a91e468367bc9ccdbe9a5f1af622a",
+      "frozen_2023_source_fingerprint": "e40b0db00c9846a3e689f6a759be05b4769e816f6b3bc20c853707cbbbcf76db"
     },
     {
       "family": "core_30",
@@ -49,8 +52,8 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
-      "sha256": "7bb6ba92e7299a0ed81fd330e20c2127d4db6052e9ec9920284fa4e863887f9a",
-      "source_physical_fingerprint": "ae7c92cd7704b8cdb52e74c64a404563d9801fd17af70f4a7eadd9d7ec189a05"
+      "sha256": "fc87545ed7e852772e8d333659e898b487bbace78d468e4faa075b46711a837d",
+      "frozen_2023_source_fingerprint": "ae7c92cd7704b8cdb52e74c64a404563d9801fd17af70f4a7eadd9d7ec189a05"
     },
     {
       "family": "core_30",
@@ -65,8 +68,8 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
-      "sha256": "788d43de85bd5f7e7887c6745e403af818286cef0d0394ecc423e85a07353a83",
-      "source_physical_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
+      "sha256": "40db2cb18c2a0790fd33140d7155ec9f69b7a7f7fc13f9baab93c2af26a37c90",
+      "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
       "family": "core_30",
@@ -81,8 +84,8 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
-      "sha256": "44aba9c0419838eda41338479e8ff51a44ab370809a2210844a00c3fa13d86d3",
-      "source_physical_fingerprint": "e93c0b8171be8a312d2f9578d38b31378ef7092d838db1865f751769e3f192c1"
+      "sha256": "39e03ce5376866d4dc671270fa167698de8dde851e27248d5479e1a249c60936",
+      "frozen_2023_source_fingerprint": "e93c0b8171be8a312d2f9578d38b31378ef7092d838db1865f751769e3f192c1"
     }
   ]
 }

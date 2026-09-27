@@ -1,0 +1,238 @@
+{
+  "version": "portugal-native-2023-2024-v3",
+  "years": [
+    2023,
+    2024
+  ],
+  "records": 70176,
+  "frozen_2023_records": 35040,
+  "continuity": "same members/equipment; 2023 topology permanent; no fresh admissions or topology replay in 2024",
+  "year_end_session_bridges": [
+    {
+      "charger_id": "CHG-M001-01",
+      "session_id": "EV-M001-01-S0623",
+      "continued_slots_2024": 40,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M002-01",
+      "session_id": "EV-M002-01-S0259",
+      "continued_slots_2024": 223,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M003-01",
+      "session_id": "EV-M003-01-S0291",
+      "continued_slots_2024": 83,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M005-01",
+      "session_id": "EV-M005-01-S0198",
+      "continued_slots_2024": 43,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M006-01",
+      "session_id": "EV-M006-01-S0315",
+      "continued_slots_2024": 142,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M006-02",
+      "session_id": "EV-M006-02-S0315",
+      "continued_slots_2024": 54,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M008-01",
+      "session_id": "EV-M008-01-S0261",
+      "continued_slots_2024": 144,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M010-01",
+      "session_id": "EV-M010-01-S0475",
+      "continued_slots_2024": 225,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M016-01",
+      "session_id": "EV-M016-01-S0464",
+      "continued_slots_2024": 56,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M016-02",
+      "session_id": "EV-M016-02-S0317",
+      "continued_slots_2024": 127,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M018-01",
+      "session_id": "EV-M018-01-S0325",
+      "continued_slots_2024": 53,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M020-01",
+      "session_id": "EV-M020-01-S0264",
+      "continued_slots_2024": 144,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M022-01",
+      "session_id": "EV-M022-01-S0461",
+      "continued_slots_2024": 150,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M024-01",
+      "session_id": "EV-M024-01-S0314",
+      "continued_slots_2024": 37,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M026-01",
+      "session_id": "EV-M026-01-S0445",
+      "continued_slots_2024": 227,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M028-01",
+      "session_id": "EV-M028-01-S0468",
+      "continued_slots_2024": 37,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M030-01",
+      "session_id": "EV-M030-01-S0315",
+      "continued_slots_2024": 52,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M034-01",
+      "session_id": "EV-M034-01-S0455",
+      "continued_slots_2024": 45,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M038-01",
+      "session_id": "EV-M038-01-S0447",
+      "continued_slots_2024": 37,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M040-01",
+      "session_id": "EV-M040-01-S0472",
+      "continued_slots_2024": 36,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M040-02",
+      "session_id": "EV-M040-02-S0316",
+      "continued_slots_2024": 40,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M042-01",
+      "session_id": "EV-M042-01-S0311",
+      "continued_slots_2024": 146,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M044-01",
+      "session_id": "EV-M044-01-S0258",
+      "continued_slots_2024": 144,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M046-01",
+      "session_id": "EV-M046-01-S0466",
+      "continued_slots_2024": 47,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M048-01",
+      "session_id": "EV-M048-01-S0314",
+      "continued_slots_2024": 43,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M050-01",
+      "session_id": "EV-M050-01-S0456",
+      "continued_slots_2024": 54,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M052-01",
+      "session_id": "EV-M052-01-S0466",
+      "continued_slots_2024": 36,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M054-01",
+      "session_id": "EV-M054-01-S0305",
+      "continued_slots_2024": 53,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M056-01",
+      "session_id": "EV-M056-01-S0268",
+      "continued_slots_2024": 52,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M056-02",
+      "session_id": "EV-M056-02-S0319",
+      "continued_slots_2024": 42,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M060-01",
+      "session_id": "EV-M060-01-S0316",
+      "continued_slots_2024": 146,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M062-01",
+      "session_id": "EV-M062-01-S0258",
+      "continued_slots_2024": 224,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M068-01",
+      "session_id": "EV-M068-01-S0257",
+      "continued_slots_2024": 144,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M070-01",
+      "session_id": "EV-M070-01-S0461",
+      "continued_slots_2024": 124,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M072-01",
+      "session_id": "EV-M072-01-S0320",
+      "continued_slots_2024": 55,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M076-01",
+      "session_id": "EV-M076-01-S0457",
+      "continued_slots_2024": 44,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M080-01",
+      "session_id": "EV-M080-01-S0261",
+      "continued_slots_2024": 224,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    }
+  ],
+  "physical_equipment_resized": false,
+  "profile_generation": "New 2024 operating draws; frozen appliance profiles and EV specs; true 2024 source weather/prices/calendar. Thermal annual budgets respond to degree-hour ratio.",
+  "source_reference": "data/portugal_reference_2024",
+  "source_history": "2023 annual_* catalogue fields and mobility ledgers are frozen/synthetic diagnostics, not runtime trajectories."
+}

@@ -43,3 +43,17 @@ a uniformização é uma convenção de preços, não uma uniformização das in
 
 As simulações da versão anterior não avaliam esta revisão. Nenhuma nova avaliação
 de utilização ou controlador foi realizada nesta alteração.
+
+
+## Ano de 2024
+
+A mesma tarifa comum usa o OMIE de 2024 e `P = (OMIE + 0,004 + 0,010 + TSE) × 1,16 + TAR + 0,001`, em €/kWh, antes de IVA. TSE é zero até março e 0,002893 desde 1 de abril, por aplicação retroativa. O mecanismo MIBEL é zero em 2024.
+
+| Período | TAR vazio | TAR fora de vazio |
+|---|---:|---:|
+| Janeiro–maio | 0,0092 | 0,0502 |
+| Junho–dezembro | 0,0157 | 0,0860 |
+
+Vazio diário: 22h–8h, hora de Lisboa. A referência exclui componentes fixas e não pretende reconstruir uma fatura particular. A perda de 16% é a indicação média publicada para 2024; 2023 conserva 15%. Preços realizados negativos não são cortados. O menor preço final de 2024 nesta referência é 0,02644 €/kWh.
+
+A fonte e a distinção entre realização e informação disponível nas previsões estão documentadas em [Fontes e método](Fontes_e_metodo.md). Exportação a zero, mercado desligado e 80% apenas na experiência mantêm-se nos dois anos.

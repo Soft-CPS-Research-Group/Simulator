@@ -21,7 +21,7 @@ CSV e Parquet sao intercambiaveis se:
 Motor corrente: `978be68b0e0740deab15ecf536805f323b86fa57`, sem extensões.
 Nove configurações: Core-4, Core-15, Core-30 Normal/Topologia/Safety/Robustness/Combinado e Premium Normal/All-in. DR apenas no All-in. Consultar `CURRENT_EVALUATION.json` em cada família; os schemas executáveis estão em `evaluation/`.
 
-Os perfis de origem mantêm o cenário Portugal 2023. Os EV nativos usam SOC prescrito por sessão, as máquinas seguem as fases da instalação e a DR usa a média anterior ao pedido. Todos os schemas usam a mesma tarifa completa de compra à rede. O mercado está desligado nos schemas de dados; a liquidação original e o fator 0,8 ativam-se no schema da experiência. A exportação à rede vale zero. Não existe serviço privado depois da saída de um membro. Esta revisão apenas constrói dados, sem novas avaliações de utilização.
+As mesmas nove configurações Portugal abrangem agora 2023 e 2024 em sequência, preservando as saídas definitivas e a identidade dos equipamentos. Os EV nativos usam SOC prescrito por sessão, as máquinas seguem as fases da instalação e a DR usa a média anterior ao pedido. Todos os schemas usam a mesma tarifa completa de compra à rede. O mercado está desligado nos schemas de dados; a liquidação original e o fator 0,8 ativam-se no schema da experiência. A exportação à rede vale zero. Não existe serviço privado depois da saída de um membro. Esta revisão apenas constrói dados, sem novas avaliações de utilização.
 
 [Catálogo / catalogue and reproduction](../portugal_rec_native/README.md).
 

@@ -1,0 +1,27 @@
+[
+  {
+    "path": "E-REDES_Perfil_Consumo_2024.xlsx",
+    "url": "https://www.e-redes.pt/sites/eredes/files/2023-12/E-REDES_Perfil_Consumo_2024.xlsx",
+    "sha256": "6f04074aa7c9e4f42a3346f5547d9f9f0f407902f2c50d6558b5816615213deb"
+  },
+  {
+    "path": "erse_tarifas_2024_jan.pdf",
+    "url": "https://www.erse.pt/media/kqyhsv1v/tarifas-e-pre%C3%A7os-2024.pdf",
+    "sha256": "18f899a233a81602c4e8f557423e95b9108b12150885c5b33958c49eef7125e1"
+  },
+  {
+    "path": "erse_tarifas_2024_jun.pdf",
+    "url": "https://www.erse.pt/media/3khpzpvk/tarifas-e-pre%C3%A7os-se-extra-2024.pdf",
+    "sha256": "6bb23f9fcd2a815a2f02674df590e75f8ce366bbfb39fe1f52e0eefe61e8dd34"
+  },
+  {
+    "path": "coopernico_tse_2024.html",
+    "url": "https://www.coopernico.org/artigo/366",
+    "sha256": "6e4fd92cafdcb6aad953d6d3be63b76ed3b7c8d450f7e0e833e8839d79151eff"
+  },
+  {
+    "path": "pvgis_v6_openapi.json",
+    "url": "https://photovoltaic-geographic-information-system.ec.europa.eu/api/v6/openapi.json",
+    "sha256": "f044105c193554bcee264c175aadf7ba61da31feb49b75d147644c8f6ecc9008"
+  }
+]

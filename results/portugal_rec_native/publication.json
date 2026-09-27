@@ -1,12 +1,26 @@
 {
-  "version": "portugal-native-978be68b-v2.1",
-  "stage_matches_published": true,
-  "algorithms_manifest_matches": true,
-  "dataset_file_count": 1536,
-  "builder_sha256": "b03308c5d1f18fbf8b900ed44d46f6853154a19dbb4558ac2ce5ebb703f1d52a",
-  "session_checker_sha256": "ed990f37eba40dd9488a8e26f63e48e96855f09b673ea41b2acc5791de5bd241",
-  "source_archive_sha256": "bc2f1430d851ea724e1a23928e8e8021faf92f13fb8fa4d14133fb2fe9ac3eb6",
-  "short_feasibility_windows": 10,
-  "annual_runs": 0,
-  "narrative_cleanup_reproduced": true
+  "version": "portugal-native-2023-2024-v3",
+  "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
+  "frozen_2023_commit": "393cd200bb66b671d8904eba00688d56d91f08d3",
+  "years": [
+    2023,
+    2024
+  ],
+  "records": 70176,
+  "families": 4,
+  "configurations": 9,
+  "static_checks": 2828,
+  "failed": [],
+  "annual_controller_runs": 0,
+  "builders": {
+    "scripts/build_portugal_native_suite.py": "b03308c5d1f18fbf8b900ed44d46f6853154a19dbb4558ac2ce5ebb703f1d52a",
+    "scripts/extend_portugal_2024.py": "fa101708b2f486a0d576a9587133d48d88f5c5e9068fc84605a8a8399ddc5677",
+    "scripts/portugal_profiles_2024.py": "25944af0dc9a2723dde4a6b2b2701c6119856ebe55566c9b8a611200f9495b5f",
+    "scripts/prepare_portugal_reference_2024.py": "f8e0e3553f95f579c67ee0f3763321bd7f4d8544ddc0f85d362ea6c36d8a6bbf",
+    "scripts/portugal_site_calendar.py": "3d26220f194ca8ab66bbb1e18ddd3045456ee5054051bde5ce927bd29333375c",
+    "scripts/audit/verify_portugal_two_year_inputs.py": "29c2276c6ab0ac313014e73c8939ac86a42ddd0dad0957bd91d861553d64790e",
+    "scripts/package_portugal_native.py": "eef97e2c46d16818ed2d48157f913d30a39b189656d2ef20f0541016d09bd996"
+  },
+  "reconstruction_checked_files": 1989,
+  "fresh_reconstruction_matches": true
 }

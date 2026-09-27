@@ -1,0 +1,70 @@
+{
+  "version": "portugal-native-2023-2024-v3",
+  "years": [
+    2023,
+    2024
+  ],
+  "records": 70176,
+  "frozen_2023_records": 35040,
+  "continuity": "same members/equipment; 2023 topology permanent; no fresh admissions or topology replay in 2024",
+  "year_end_session_bridges": [
+    {
+      "charger_id": "CHG-M001-01",
+      "session_id": "EV-M001-01-S0631",
+      "continued_slots_2024": 128,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M003-01",
+      "session_id": "EV-M003-01-S0296",
+      "continued_slots_2024": 85,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M004-01",
+      "session_id": "EV-M004-01-S0468",
+      "continued_slots_2024": 51,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M005-01",
+      "session_id": "EV-M005-01-S0215",
+      "continued_slots_2024": 45,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M006-01",
+      "session_id": "EV-M006-01-S0315",
+      "continued_slots_2024": 145,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M006-02",
+      "session_id": "EV-M006-02-S0303",
+      "continued_slots_2024": 127,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M018-01",
+      "session_id": "EV-M018-01-S0321",
+      "continued_slots_2024": 39,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M020-01",
+      "session_id": "EV-M020-01-S0261",
+      "continued_slots_2024": 225,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    },
+    {
+      "charger_id": "CHG-M022-01",
+      "session_id": "EV-M022-01-S0465",
+      "continued_slots_2024": 139,
+      "scope": "Uncensor year-end departure countdown only; preserve 2023 state/SOC/target"
+    }
+  ],
+  "physical_equipment_resized": false,
+  "profile_generation": "New 2024 operating draws; frozen appliance profiles and EV specs; true 2024 source weather/prices/calendar. Thermal annual budgets respond to degree-hour ratio.",
+  "source_reference": "data/portugal_reference_2024",
+  "source_history": "2023 annual_* catalogue fields and mobility ledgers are frozen/synthetic diagnostics, not runtime trajectories."
+}

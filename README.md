@@ -198,4 +198,4 @@ The KPI export consumed by the UI is generated from `evaluate_v2()` by default, 
 
 ## Portugal REC datasets
 
-The current annual REC suite is **Portugal, original runtime 978be68b**. See [datasets, report and reproduction instructions](docs/portugal_rec_native/README.md). Previous annual-suite datasets have been removed from the working tree.
+The current REC suite spans **Portugal 2023–2024, original runtime 978be68b**. See [datasets, report and reproduction instructions](docs/portugal_rec_native/README.md). Previous annual-suite datasets have been removed from the working tree.

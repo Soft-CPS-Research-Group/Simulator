@@ -1,0 +1,17 @@
+{
+  "year": 2024,
+  "records": 35136,
+  "formula": "(OMIE + 0.004 + 0.010 + TSE)*1.16 + TAR_BTN_bi + 0.001; EUR/kWh pre-VAT; TSE=0.002893 from April 1 retrospectively; zero MIBEL",
+  "tariff": "Common reference, variable energy only; excludes fixed charges, VAT and audiovisual/DGEG fees. Not a reconstruction of an individual bill. Negative prices preserved.",
+  "carbon": {
+    "effective_thermal_factor_kg_kwh": 0.403257583977838,
+    "calibration_year": 2023,
+    "method": "Fixed 2023 APA-calibrated fossil coefficient; actual 2024 REN generation and daily REE imports; delivery multiplier 1.16. Derived operational estimate, not an APA-certified 2024 factor or marginal emissions.",
+    "delivered_mean_kg_kwh": 0.06275415913388155
+  },
+  "weather": "PVGIS6 SARAH-3 hourly horizontal irradiation; ERA5 temperature, humidity and wind via Open-Meteo; 38.72N -9.14E. 15-minute values interpolated, night masked astronomically; no fabricated weather noise.",
+  "eredes": "Published chronological local interval ends (92/100 slots on DST transition days), aligned by row order to UTC after checking every civil date. Profile is a synthetic demand prior, not measured household consumption.",
+  "forecast": "Causal persistence for weather; published day-ahead OMIE (14:00 Madrid cutoff), prior-day fallback; retroactive TSE excluded until May 1 publication known.",
+  "grid_price_min": 0.026439999999999998,
+  "grid_price_max": 0.33047588
+}

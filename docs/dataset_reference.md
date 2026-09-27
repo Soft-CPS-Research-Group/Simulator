@@ -18,7 +18,7 @@ CSV and Parquet are interchangeable when the schema path is updated and columns,
 Current runtime: `978be68b0e0740deab15ecf536805f323b86fa57`, without extensions.
 Nine configurations: Core-4, Core-15, Core-30 Normal/Topology/Safety/Robustness/Combined and Premium Normal/All-in. DR only in All-in. Use each family's `CURRENT_EVALUATION.json`; executable variants are in `evaluation/`.
 
-The physical source profiles remain Portugal-oriented 2023 scenarios. Native EVs use prescribed arrival SOC per session, native machines use the building phase split, and DR uses the original pre-event average. All current schemas use the same full grid purchase tariff. The market is disabled in dataset schemas; enable original settlement and its 0.8 ratio in experiment schemas. Grid exports have zero value. No private service continues after member exit. This revision constructs data only, with no new usage evaluations.
+The same nine Portugal-oriented configurations now span 2023 and 2024 continuously, preserving permanent departures and equipment identities. Native EVs use prescribed arrival SOC per session, native machines use the building phase split, and DR uses the original pre-event average. All current schemas use the same full grid purchase tariff. The market is disabled in dataset schemas; enable original settlement and its 0.8 ratio in experiment schemas. Grid exports have zero value. No private service continues after member exit. This revision constructs data only, with no new usage evaluations.
 
 [Catálogo / catalogue and reproduction](portugal_rec_native/README.md).
 

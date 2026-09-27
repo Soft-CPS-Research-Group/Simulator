@@ -1,16 +1,10 @@
-# Portugal REC — catálogo corrente
+# Portugal REC — 2023 e 2024
 
-Versão **portugal-native-978be68b-v2.1**. Nove configurações sobre quatro bases
-físicas de **2023**, com intervalos de **15 minutos**. O motor permanece no commit
-`978be68b0e0740deab15ecf536805f323b86fa57`, sem alterações ao pacote `citylearn`.
-As designações `_v2` nos diretórios são mantidas para estabilidade dos caminhos.
+Versão **portugal-native-2023-2024-v3**. As mesmas **quatro bases físicas e nove configurações**, agora com **70 176 registos de 15 minutos**, de 1 de janeiro de 2023 a 31 de dezembro de 2024. Os caminhos mantêm «2023» por estabilidade; os inputs correntes incluem ambos os anos.
 
-O trabalho atual é a construção dos datasets. Nesta revisão foram verificadas a integridade dos ficheiros e a coerência dos
-schemas. Duas sessões EV foram verificadas em janelas de 90 minutos no motor
-original, para comprovar viabilidade dos pedidos. Não houve campanha anual,
-comparação de controladores ou avaliação de desempenho.
+2024 continua cronologicamente 2023. Quem saiu não regressa; os equipamentos retirados permanecem retirados. Os eventos de entrada/saída de 2023 não são repetidos. Não foram acrescentados membros, equipamentos ou variantes. Nas configurações estáticas mantém-se o catálogo completo; nas dinâmicas mantém-se a composição existente no fim de 2023.
 
-## Configurações
+O motor permanece exatamente no commit `978be68b0e0740deab15ecf536805f323b86fa57`. Apenas dados, ferramentas de preparação e documentação foram alterados. Não foi executada uma campanha de controladores nem uma avaliação anual de utilização.
 
 | Configuração | Schema relativo à raiz do Simulator |
 |---|---|
@@ -24,46 +18,25 @@ comparação de controladores ou avaliação de desempenho.
 | Premium Normal | `data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json` |
 | Premium All-in | `data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json` |
 
-DR apenas no Premium All-in. Os quatro `schema.json` são atalhos para o normal
-de cada família, não configurações adicionais. `CURRENT_EVALUATION.json` é o
-índice de configurações; o nome histórico do ficheiro não significa que exista
-uma avaliação desta revisão. A composição efetiva segue os eventos de cada schema.
+DR apenas no Premium All-in; o pedido deliberadamente impossível de 1500 kW durante quatro horas foi mantido, com ocorrência nos dois anos. Health, cortes e ruído conservam as configurações e os níveis anteriores, com campanhas sazonais em 2024. A topologia não é reiniciada no novo ano.
 
-## Tarifa e mercado
+A tarifa de compra à rede é comum a todos: `shared/pricing_btn_bi.parquet`, com OMIE e componentes próprias de cada ano. A exportação à rede vale zero. O mercado interno fica desligado; os 80% configuram-se posteriormente no schema da experiência, usando a liquidação original.
 
-Todos os membros, em todas as configurações, usam a mesma série de compra à rede:
-`shared/pricing_btn_bi.parquet`, referência BTN bi-horária indexada a OMIE 2023.
-Os valores em EUR/kWh e as previsões foram preservados, sem multiplicação por 0,8.
-A série representa o preço variável documentado nas fontes, não uma fatura completa.
+## Consultar
 
-O mercado interno está desligado nos schemas de dados. Nas experiências,
-ativa-se o settlement original e configura-se o fator de **80%** no schema.
-A exportação à rede vale **zero**. Ver [Tarifas e mercado](Tarifas_e_mercado.md).
-
-## Ficheiros e documentação
-
-- [Reprodução dos dados](Reproduzir.md).
-- [Atlas das famílias e instalações](Atlas_Membros_Premium.md).
+- [Extensão de 2024 e verificações](Extensao_2024.md).
+- [Reproduzir os dois anos](Reproduzir.md).
+- [Atlas de membros Premium](Atlas_Membros_Premium.md).
+- [Tarifas e mercado](Tarifas_e_mercado.md).
 - [Fontes e método](Fontes_e_metodo.md).
-- [Correções de tarifas e das duas sessões EV](Fecho_Tarifas_SOC.md).
-- [Histórico e arquivo da revisão anterior](Historico.md).
-- Manifesto: `results/portugal_rec_native/manifest.json`.
-- Verificação estática: `results/portugal_rec_native/static_integrity.json`.
-- Pacote corrente: `docs/portugal_rec_native.zip`.
+- [Fecho imutável de 2023](Fecho_2023.md).
 
-Os perfis de carga, PV, meteorologia, carbono, rotinas, equipamentos e eventos
-mantêm-se, exceto duas visitas EV do Core-30 prolongadas em 15 minutos para
-cumprir o SOC solicitado. Os catálogos e as histórias indicam a tarifa comum;
-`source_tariff_id` conserva a atribuição anterior apenas como proveniência.
-As outras séries de tarifas preservadas em `shared/` não são usadas pelos schemas.
+O manifesto corrente está em `results/portugal_rec_native/manifest.json`; a verificação dos inputs em `two_year_integrity.json`, na mesma pasta. O pacote corrente é `docs/portugal_rec_native.zip`.
 
-## Semântica do motor original
+O fecho de 2023 está no commit `393cd200bb66b671d8904eba00688d56d91f08d3` e no pacote separado `Simulator-recovery-archive/2026-09-27-final-2023/portugal_rec_2023_frozen.zip`. Esse arquivo é proveniência, não mais um dataset ativo.
 
-EVs usam SOC prescrito por sessão; as histórias e os itinerários não constituem
-um balanço longitudinal simulado. As máquinas usam a repartição de fases da
-instalação. O backup é o modelo agregado original. Os metadados de health podem
-revelar eventos. A DR usa a média da hora anterior, sem qualificação comercial.
-Quem sai deixa de ter atividade no cenário, juntamente com os seus ativos.
-Estas fronteiras constam também de `native_compatibility` em cada schema.
+## Limites da afirmação de fecho
 
-[Fecho de 2023](Fecho_2023.md): histórias revistas e pedido extremo de DR mantido.
+Os consumos, rotinas e famílias são sintéticos, apoiados nas fontes documentadas. A meteorologia e o mercado usam fontes do ano correspondente. Os pedidos EV foram verificados individualmente face a duração, potência, perdas e redução de potência perto de carga completa; isto não prova viabilidade conjunta sob limites da instalação, falhas, cortes e decisões de controlo.
+
+Mantêm-se as capacidades do simulador original: SOC prescrito à chegada de cada sessão EV, fases das máquinas por instalação, backup agregado, possível exposição dos eventos de health e DR com média da hora anterior. Os itinerários não constituem um balanço longitudinal de viagens executado pelo motor. Não existe atividade privada após saída de um membro.

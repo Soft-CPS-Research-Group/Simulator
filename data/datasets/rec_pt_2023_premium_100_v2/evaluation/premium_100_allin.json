@@ -1,13 +1,13 @@
 {
   "dataset_id": "PREMIUM-100-ALLIN",
   "dataset_family": "PT-PREMIUM-100",
-  "dataset_contract_version": "2023-pt-q15-v2.3",
+  "dataset_contract_version": "portugal-native-2023-2024-v3",
   "random_seed": 2023,
   "root_directory": "..",
   "central_agent": false,
   "interface": "entity",
   "simulation_start_time_step": 0,
-  "simulation_end_time_step": 35039,
+  "simulation_end_time_step": 70175,
   "episode_time_steps": null,
   "rolling_episode_split": false,
   "random_episode_split": false,
@@ -3794,7 +3794,7 @@
       "chargers": {
         "CHG-M001-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "evaluation/lifecycle/premium_100_allin/CHG-M001-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M001-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -3867,7 +3867,7 @@
       "chargers": {
         "CHG-M002-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M002-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M002-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -3925,7 +3925,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M002-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M002-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M002-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -3934,7 +3934,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M002-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M002-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M002-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -3960,7 +3960,7 @@
       "chargers": {
         "CHG-M003-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M003-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M003-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -4168,7 +4168,7 @@
       "chargers": {
         "CHG-M005-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M005-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M005-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -4241,7 +4241,7 @@
       "chargers": {
         "CHG-M006-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M006-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M006-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -4257,7 +4257,7 @@
         },
         "CHG-M006-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M006-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M006-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -4315,7 +4315,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M006-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M006-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M006-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -4324,7 +4324,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M006-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M006-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M006-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -4413,7 +4413,7 @@
       "chargers": {
         "CHG-M008-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M008-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M008-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -4526,7 +4526,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M009-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M009-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M009-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -4535,7 +4535,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M009-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M009-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M009-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -4601,7 +4601,7 @@
       "chargers": {
         "CHG-M010-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M010-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M010-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -4714,7 +4714,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M011-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M011-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M011-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -4723,7 +4723,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M011-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M011-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M011-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -4979,7 +4979,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M014-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M014-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M014-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -4988,7 +4988,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M014-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M014-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M014-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5054,7 +5054,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M015-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M015-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M015-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5063,7 +5063,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M015-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M015-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M015-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5089,7 +5089,7 @@
       "chargers": {
         "CHG-M016-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M016-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M016-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -5105,7 +5105,7 @@
         },
         "CHG-M016-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M016-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M016-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -5281,7 +5281,7 @@
       "chargers": {
         "CHG-M018-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M018-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M018-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -5339,7 +5339,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M018-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M018-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M018-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5348,7 +5348,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M018-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M018-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M018-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5414,7 +5414,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M019-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M019-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M019-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5423,7 +5423,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M019-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M019-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M019-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5449,7 +5449,7 @@
       "chargers": {
         "CHG-M020-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M020-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M020-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -5625,7 +5625,7 @@
       "chargers": {
         "CHG-M022-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M022-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M022-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -5683,7 +5683,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M022-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M022-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M022-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5692,7 +5692,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M022-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M022-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M022-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5758,7 +5758,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M023-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M023-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M023-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5767,7 +5767,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M023-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M023-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M023-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -5793,7 +5793,7 @@
       "chargers": {
         "CHG-M024-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M024-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M024-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -5961,7 +5961,7 @@
       "chargers": {
         "CHG-M026-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M026-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M026-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -6019,7 +6019,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M026-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M026-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M026-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6028,7 +6028,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M026-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M026-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M026-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6094,7 +6094,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M027-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M027-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M027-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6103,7 +6103,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M027-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M027-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M027-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6129,7 +6129,7 @@
       "chargers": {
         "CHG-M028-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M028-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M028-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -6305,7 +6305,7 @@
       "chargers": {
         "CHG-M030-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M030-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M030-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -6363,7 +6363,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M030-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M030-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M030-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6372,7 +6372,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M030-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M030-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M030-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6438,7 +6438,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M031-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M031-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M031-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6447,7 +6447,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M031-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M031-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M031-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6599,7 +6599,7 @@
       "chargers": {
         "CHG-M034-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M034-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M034-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -6657,7 +6657,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M034-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M034-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M034-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6666,7 +6666,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M034-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M034-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M034-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6732,7 +6732,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M035-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M035-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M035-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6741,7 +6741,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M035-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M035-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M035-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6917,7 +6917,7 @@
       "chargers": {
         "CHG-M038-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M038-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M038-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -6975,7 +6975,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M038-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M038-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M038-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -6984,7 +6984,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M038-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M038-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M038-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -7050,7 +7050,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M039-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M039-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M039-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -7059,7 +7059,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M039-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M039-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M039-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -7085,7 +7085,7 @@
       "chargers": {
         "CHG-M040-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M040-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M040-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -7101,7 +7101,7 @@
         },
         "CHG-M040-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M040-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M040-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -7245,7 +7245,7 @@
       "chargers": {
         "CHG-M042-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M042-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M042-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -7303,7 +7303,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M042-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M042-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M042-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -7312,7 +7312,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M042-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M042-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M042-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -7393,7 +7393,7 @@
       "chargers": {
         "CHG-M044-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M044-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M044-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -7561,7 +7561,7 @@
       "chargers": {
         "CHG-M046-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M046-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M046-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -7619,7 +7619,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M046-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M046-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M046-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -7628,7 +7628,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M046-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M046-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M046-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -7709,7 +7709,7 @@
       "chargers": {
         "CHG-M048-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M048-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M048-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -7877,7 +7877,7 @@
       "chargers": {
         "CHG-M050-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M050-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M050-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -7935,7 +7935,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M050-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M050-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M050-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -7944,7 +7944,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M050-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M050-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M050-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -8025,7 +8025,7 @@
       "chargers": {
         "CHG-M052-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M052-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M052-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -8169,7 +8169,7 @@
       "chargers": {
         "CHG-M054-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M054-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M054-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -8227,7 +8227,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M054-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M054-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M054-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -8236,7 +8236,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M054-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M054-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M054-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -8317,7 +8317,7 @@
       "chargers": {
         "CHG-M056-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M056-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M056-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -8333,7 +8333,7 @@
         },
         "CHG-M056-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M056-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M056-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -8509,7 +8509,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M058-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M058-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M058-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -8518,7 +8518,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M058-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M058-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M058-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -8599,7 +8599,7 @@
       "chargers": {
         "CHG-M060-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M060-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M060-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -8767,7 +8767,7 @@
       "chargers": {
         "CHG-M062-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M062-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M062-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -8825,7 +8825,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M062-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M062-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M062-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -8834,7 +8834,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M062-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M062-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M062-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -9065,7 +9065,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M066-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M066-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M066-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -9074,7 +9074,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M066-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M066-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M066-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -9155,7 +9155,7 @@
       "chargers": {
         "CHG-M068-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M068-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M068-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -9323,7 +9323,7 @@
       "chargers": {
         "CHG-M070-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M070-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M070-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -9381,7 +9381,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M070-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M070-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M070-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -9390,7 +9390,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M070-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M070-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M070-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -9471,7 +9471,7 @@
       "chargers": {
         "CHG-M072-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M072-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M072-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -9639,7 +9639,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M074-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M074-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M074-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -9648,7 +9648,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M074-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M074-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M074-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -9729,7 +9729,7 @@
       "chargers": {
         "CHG-M076-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M076-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M076-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -9905,7 +9905,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M078-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M078-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M078-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -9914,7 +9914,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M078-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M078-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M078-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -9995,7 +9995,7 @@
       "chargers": {
         "CHG-M080-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M080-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M080-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10108,7 +10108,7 @@
       "chargers": {
         "CHG-M081-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "evaluation/lifecycle/premium_100_allin/CHG-M081-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10124,7 +10124,7 @@
         },
         "CHG-M081-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10140,7 +10140,7 @@
         },
         "CHG-M081-03": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-03.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-03.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10156,7 +10156,7 @@
         },
         "CHG-M081-04": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-04.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-04.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10172,7 +10172,7 @@
         },
         "CHG-M081-05": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-05.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-05.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10188,7 +10188,7 @@
         },
         "CHG-M081-06": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-06.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-06.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10204,7 +10204,7 @@
         },
         "CHG-M081-07": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-07.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-07.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10220,7 +10220,7 @@
         },
         "CHG-M081-08": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-08.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-08.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10236,7 +10236,7 @@
         },
         "CHG-M081-09": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-09.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-09.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10252,7 +10252,7 @@
         },
         "CHG-M081-10": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-10.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-10.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10268,7 +10268,7 @@
         },
         "CHG-M081-11": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-11.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-11.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10284,7 +10284,7 @@
         },
         "CHG-M081-12": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M081-12.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M081-12.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10342,7 +10342,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M081-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M081-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M081-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -10503,7 +10503,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M083-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M083-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M083-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -10650,7 +10650,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M085-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M085-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M085-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -10716,7 +10716,7 @@
       "chargers": {
         "CHG-M086-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M086-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M086-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10732,7 +10732,7 @@
         },
         "CHG-M086-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M086-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M086-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10748,7 +10748,7 @@
         },
         "CHG-M086-03": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M086-03.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M086-03.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10764,7 +10764,7 @@
         },
         "NATIVE_TEMPLATE__CHG-M086-04": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M086-04.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M086-04.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10837,7 +10837,7 @@
       "chargers": {
         "CHG-M087-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M087-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M087-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10853,7 +10853,7 @@
         },
         "CHG-M087-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M087-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M087-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -10989,7 +10989,7 @@
       "chargers": {
         "CHG-M089-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M089-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M089-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -11047,7 +11047,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M089-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M089-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M089-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -11128,7 +11128,7 @@
       "chargers": {
         "CHG-M091-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M091-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M091-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -11144,7 +11144,7 @@
         },
         "CHG-M091-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M091-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M091-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -11595,7 +11595,7 @@
       "chargers": {
         "CHG-M098-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M098-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M098-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -11611,7 +11611,7 @@
         },
         "CHG-M098-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M098-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M098-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -11627,7 +11627,7 @@
         },
         "CHG-M098-03": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M098-03.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M098-03.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -11643,7 +11643,7 @@
         },
         "CHG-M098-04": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M098-04.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M098-04.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -11701,7 +11701,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M098-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M098-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M098-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -11710,7 +11710,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M098-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M098-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M098-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -11744,7 +11744,7 @@
       "chargers": {
         "CHG-M099-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M099-01.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M099-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -11760,7 +11760,7 @@
         },
         "CHG-M099-02": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "chargers/CHG-M099-02.parquet",
+          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M099-02.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -11913,7 +11913,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M100-01_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M100-01_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M100-01_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -11922,7 +11922,7 @@
           "type": "citylearn.energy_model.DeferrableAppliance",
           "autosize": false,
           "cycle_profiles_file": "deferrables/DEF-M100-02_profiles.parquet",
-          "flexibility_schedule_file": "deferrables/DEF-M100-02_schedule.parquet",
+          "flexibility_schedule_file": "evaluation/native_inputs/premium_100_allin/DEF-M100-02_schedule.parquet",
           "attributes": {
             "trigger_threshold": 0.5
           }
@@ -12412,7 +12412,7 @@
     "allow_overlapping_requests": false
   },
   "experimental_design": {
-    "version": "portugal-native-978be68b-v2.1",
+    "version": "portugal-native-2023-2024-v3",
     "name": "premium_100_allin",
     "label": "Premium All-in",
     "purpose": "integrated operation with demand response",
@@ -12519,7 +12519,7 @@
       "distribution": "independent Gaussian channel errors; domain clipping; fixed seed",
       "power_std_w": 20,
       "soc_std_percentage_points": 0.5,
-      "temporal_exposure": "four 14-day campaigns around seasonal stress; clean historical days retained for existing DR qualification",
+      "temporal_exposure": "Seasonal campaigns in both years; raw telemetry only; no commercial DR baseline qualification.",
       "schedules": {
         "development": [
           {
@@ -12537,6 +12537,22 @@
           {
             "start_time_step": 30320,
             "end_time_step": 31663
+          },
+          {
+            "start_time_step": 38856,
+            "end_time_step": 40199
+          },
+          {
+            "start_time_step": 47684,
+            "end_time_step": 49027
+          },
+          {
+            "start_time_step": 56420,
+            "end_time_step": 57763
+          },
+          {
+            "start_time_step": 65264,
+            "end_time_step": 66607
           }
         ],
         "confirmation": [
@@ -12555,6 +12571,22 @@
           {
             "start_time_step": 32956,
             "end_time_step": 34299
+          },
+          {
+            "start_time_step": 41544,
+            "end_time_step": 42887
+          },
+          {
+            "start_time_step": 50372,
+            "end_time_step": 51715
+          },
+          {
+            "start_time_step": 59108,
+            "end_time_step": 60451
+          },
+          {
+            "start_time_step": 67900,
+            "end_time_step": 69243
           }
         ]
       },
@@ -12591,7 +12623,22 @@
     "mobility_semantics": "independent arrivals; SOC prescribed per session; no longitudinal trip-energy claim",
     "tariff_policy": "common",
     "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
-    "source_physical_fingerprint": "c463b8d036405c1961bc33868a234564e0a30ef662e13572f635bbb453f146ee"
+    "years": [
+      2023,
+      2024
+    ],
+    "year_windows": {
+      "2023": [
+        0,
+        35039
+      ],
+      "2024": [
+        35040,
+        70175
+      ]
+    },
+    "continuation": "Topology is not replayed. Permanent exits and retired assets remain absent; same equipment and members.",
+    "frozen_2023_source_fingerprint": "c463b8d036405c1961bc33868a234564e0a30ef662e13572f635bbb453f146ee"
   },
   "native_compatibility": {
     "engine_commit": "978be68b0e0740deab15ecf536805f323b86fa57",

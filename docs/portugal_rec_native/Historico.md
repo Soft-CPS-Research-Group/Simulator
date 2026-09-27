@@ -21,3 +21,5 @@ foi acrescentada depois da decisão de trabalhar apenas na construção dos dado
 
 A revisão comum `v2`, anterior às correções documentais e das duas visitas EV,
 foi preservada em `/home/tiago/dev/Simulator-recovery-archive/2026-09-27-tariff-stories-soc/common-v2`. A revisão `v2.1` substitui-a no catálogo corrente.
+
+Em 27 de setembro de 2026, 2023 foi fechado no commit `393cd200`. A edição corrente acrescenta 2024 em sequência, preservando o fecho anual em arquivo. As únicas adaptações retroativas no conjunto contínuo são as contagens de partida EV que atravessam o ano e as previsões de preços que passam a apontar para 2024. Os perfis físicos de 2023 foram preservados.

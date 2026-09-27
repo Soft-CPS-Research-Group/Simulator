@@ -32,7 +32,7 @@ def service_hours(member, day):
     i = member["member_index"]
     dow = day.dayofweek
     md = day.strftime("%m-%d")
-    holiday = md in HOLIDAYS
+    holiday = md in (HOLIDAYS if day.year == 2023 else (HOLIDAYS - {"04-07", "04-09", "06-08"}) | {"03-29", "03-31", "05-30"})
     vacation = (
         member["vacation_start_day"]
         <= day.dayofyear

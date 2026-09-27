@@ -1,0 +1,98 @@
+[
+  {
+    "timestamp_utc": "2024-05-27 08:10:05.559593439+00:00",
+    "component": "beam_horizontal",
+    "value": 401.62366765909337,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-06-27 07:10:05.559593439+00:00",
+    "component": "beam_horizontal",
+    "value": 147.82573281322667,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 13:10:05.559593439+00:00",
+    "component": "beam_horizontal",
+    "value": 801.2993580398934,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 14:10:05.559593439+00:00",
+    "component": "beam_horizontal",
+    "value": 743.884175136,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 15:10:05.559593439+00:00",
+    "component": "beam_horizontal",
+    "value": 636.1418362248534,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 16:10:05.559593439+00:00",
+    "component": "beam_horizontal",
+    "value": 486.74981829376,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 17:10:05.559593439+00:00",
+    "component": "beam_horizontal",
+    "value": 311.38559833002665,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-05-27 08:10:05.559593439+00:00",
+    "component": "diffuse_horizontal",
+    "value": 85.35495397461334,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-06-27 07:10:05.559593439+00:00",
+    "component": "diffuse_horizontal",
+    "value": 73.05096294016,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 13:10:05.559593439+00:00",
+    "component": "diffuse_horizontal",
+    "value": 102.0,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 14:10:05.559593439+00:00",
+    "component": "diffuse_horizontal",
+    "value": 99.32715600725334,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 15:10:05.559593439+00:00",
+    "component": "diffuse_horizontal",
+    "value": 93.99073401088,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 16:10:05.559593439+00:00",
+    "component": "diffuse_horizontal",
+    "value": 85.31789001813334,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-08-17 17:10:05.559593439+00:00",
+    "component": "diffuse_horizontal",
+    "value": 71.30862402901333,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-10-15 05:10:05.559593439+00:00",
+    "component": "diffuse_horizontal",
+    "value": 0.0,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  },
+  {
+    "timestamp_utc": "2024-10-29 22:10:05.559593439+00:00",
+    "component": "diffuse_horizontal",
+    "value": 0.0,
+    "source": "ERA5 hourly preceding-interval mean, assigned to interval midpoint"
+  }
+]
