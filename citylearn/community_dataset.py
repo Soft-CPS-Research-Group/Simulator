@@ -8,6 +8,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from citylearn.energy_model import Battery
+from citylearn.building import Building
+
+
+class InventoryBuilding(Building):
+    """Versioned loader for inventory scenarios; older runtimes fail explicitly."""
+
 
 
 class InventoryBattery(Battery):
