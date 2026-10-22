@@ -338,3 +338,20 @@ For real production datasets, `absolute` is the recommended mode.
 8. Prefer Parquet for annual or sub-minute datasets.
 9. Run a smoke episode and `evaluate_v2()`.
 10. Run `audit_physics.py` for new critical datasets.
+
+## Inventory-derived community datasets (1.8.1)
+
+The optional `citylearn.community_dataset.InventoryBattery` translates declared
+capacity, asymmetric charge/discharge powers, minimum/maximum SOC, initial SOC,
+directional efficiencies and standby losses. Its schema attributes use kWh, kW
+and fractions. Existing `Battery` schemas retain their behaviour.
+
+A community market with `settlement_version: 2` accepts `tariff_files`, a mapping
+from building name to a relative CSV path containing `grid_export_price`,
+`community_buy_price` and `community_sell_price` in EUR/kWh. Every file covers the
+full dataset timeline; episode offsets are applied when reading prices.
+`local_trading_enabled: false` disables internal exchange while retaining grid
+export settlement. `operator_balance_eur` records the difference between internal
+buyer payments and seller receipts, including different household tariffs.
+Runtime costs and counterfactual KPI settlement use the same price resolver.
+Legacy settlement (the default) retains its historical zero grid export price.

@@ -1720,7 +1720,7 @@ class CityLearnKPIService:
             exports = np.clip(-net_values, 0.0, None)
             total_import = float(imports.sum())
             total_export = float(exports.sum())
-            traded_kwh = min(total_import, total_export)
+            traded_kwh = min(total_import, total_export) if getattr(env, 'community_market_local_enabled', True) else 0.0
 
             if total_import > 0.0 and traded_kwh > 0.0:
                 local_import = self._allocate_weighted_share_import(
@@ -1742,13 +1742,16 @@ class CityLearnKPIService:
                     price_series[t] if price_series is not None and t < len(price_series) else np.nan,
                     0.0,
                 )
-                local_price = ratio * grid_import_price
+                from citylearn.community_dataset import settlement_prices
+                grid_export_price, local_buy_price, local_sell_price = settlement_prices(env, building.name, t, grid_import_price)
+                grid_export_remaining = max(exports[idx] - local_export[idx], 0.0)
                 grid_import_remaining = max(imports[idx] - local_import[idx], 0.0)
 
                 cost = (
                     grid_import_remaining * grid_import_price
-                    + local_import[idx] * local_price
-                    - local_export[idx] * local_price
+                    + local_import[idx] * local_buy_price
+                    - local_export[idx] * local_sell_price
+                    - grid_export_remaining * grid_export_price
                 )
                 totals[building.name] += float(cost)
 

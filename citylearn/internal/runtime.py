@@ -1314,7 +1314,7 @@ class CityLearnRuntimeService:
 
         total_import = float(imports.sum())
         total_export = float(exports.sum())
-        traded_kwh = min(total_import, total_export)
+        traded_kwh = min(total_import, total_export) if getattr(env, 'community_market_local_enabled', True) else 0.0
         weights_cfg = getattr(env, 'community_market_import_member_weights', {}) or {}
         weights = np.array(
             [self._to_scalar(weights_cfg.get(building.name, 1.0), 1.0) for building in env.buildings],
@@ -1335,8 +1335,9 @@ class CityLearnRuntimeService:
 
         for idx, building in enumerate(env.buildings):
             grid_import_price = self._to_scalar(building.pricing.electricity_pricing[t], 0.0)
-            local_price = ratio * grid_import_price
-            grid_export_price = 0.0
+            from citylearn.community_dataset import settlement_prices
+            grid_export_price, local_buy_price, local_sell_price = settlement_prices(env, building.name, t, grid_import_price)
+            local_price = local_buy_price
             counterfactual_legacy_cost = self._to_scalar(building.net_electricity_consumption_cost[t], 0.0)
 
             grid_import_remaining = max(imports[idx] - local_import[idx], 0.0)
@@ -1344,8 +1345,9 @@ class CityLearnRuntimeService:
 
             cost = (
                 grid_import_remaining * grid_import_price
-                + local_import[idx] * local_price
-                - local_export[idx] * local_price
+                + local_import[idx] * local_buy_price
+                - local_export[idx] * local_sell_price
+                - grid_export_remaining * grid_export_price
             )
             savings = counterfactual_legacy_cost - cost
 
@@ -1358,6 +1360,9 @@ class CityLearnRuntimeService:
                     'grid_import_kwh': float(grid_import_remaining),
                     'grid_export_kwh': float(grid_export_remaining),
                     'local_price': float(local_price),
+                    'local_buy_price': float(local_buy_price),
+                    'local_sell_price': float(local_sell_price),
+                    'operator_balance_eur': float(local_import[idx]*local_buy_price-local_export[idx]*local_sell_price),
                     'grid_import_price': float(grid_import_price),
                     'grid_export_price': float(grid_export_price),
                     'counterfactual_cost_eur': float(counterfactual_legacy_cost),
