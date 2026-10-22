@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.runtime &mdash; CityLearn 1.8.0 documentation</title>
+  <title>citylearn.internal.runtime &mdash; CityLearn 1.8.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=b51e6972"></script>
+      <script src="../../../_static/documentation_options.js?v=1166ed6b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1427,7 +1427,7 @@
 
         <span class="n">total_import</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">imports</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
         <span class="n">total_export</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">exports</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-        <span class="n">traded_kwh</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">total_import</span><span class="p">,</span> <span class="n">total_export</span><span class="p">)</span>
+        <span class="n">traded_kwh</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">total_import</span><span class="p">,</span> <span class="n">total_export</span><span class="p">)</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">'community_market_local_enabled'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.0</span>
         <span class="n">weights_cfg</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">'community_market_import_member_weights'</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">weights_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">building</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">],</span>
@@ -1448,8 +1448,9 @@
 
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">building</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">buildings</span><span class="p">):</span>
             <span class="n">grid_import_price</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">electricity_pricing</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
-            <span class="n">local_price</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="n">grid_import_price</span>
-            <span class="n">grid_export_price</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.community_dataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">settlement_prices</span>
+            <span class="n">grid_export_price</span><span class="p">,</span> <span class="n">local_buy_price</span><span class="p">,</span> <span class="n">local_sell_price</span> <span class="o">=</span> <span class="n">settlement_prices</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">building</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">grid_import_price</span><span class="p">)</span>
+            <span class="n">local_price</span> <span class="o">=</span> <span class="n">local_buy_price</span>
             <span class="n">counterfactual_legacy_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">net_electricity_consumption_cost</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
 
             <span class="n">grid_import_remaining</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">imports</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">local_import</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
@@ -1457,8 +1458,9 @@
 
             <span class="n">cost</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">grid_import_remaining</span> <span class="o">*</span> <span class="n">grid_import_price</span>
-                <span class="o">+</span> <span class="n">local_import</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">local_price</span>
-                <span class="o">-</span> <span class="n">local_export</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">local_price</span>
+                <span class="o">+</span> <span class="n">local_import</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">local_buy_price</span>
+                <span class="o">-</span> <span class="n">local_export</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">local_sell_price</span>
+                <span class="o">-</span> <span class="n">grid_export_remaining</span> <span class="o">*</span> <span class="n">grid_export_price</span>
             <span class="p">)</span>
             <span class="n">savings</span> <span class="o">=</span> <span class="n">counterfactual_legacy_cost</span> <span class="o">-</span> <span class="n">cost</span>
 
@@ -1471,6 +1473,9 @@
                     <span class="s1">'grid_import_kwh'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">grid_import_remaining</span><span class="p">),</span>
                     <span class="s1">'grid_export_kwh'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">grid_export_remaining</span><span class="p">),</span>
                     <span class="s1">'local_price'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">local_price</span><span class="p">),</span>
+                    <span class="s1">'local_buy_price'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">local_buy_price</span><span class="p">),</span>
+                    <span class="s1">'local_sell_price'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">local_sell_price</span><span class="p">),</span>
+                    <span class="s1">'operator_balance_eur'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">local_import</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">*</span><span class="n">local_buy_price</span><span class="o">-</span><span class="n">local_export</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">*</span><span class="n">local_sell_price</span><span class="p">),</span>
                     <span class="s1">'grid_import_price'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">grid_import_price</span><span class="p">),</span>
                     <span class="s1">'grid_export_price'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">grid_export_price</span><span class="p">),</span>
                     <span class="s1">'counterfactual_cost_eur'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">counterfactual_legacy_cost</span><span class="p">),</span>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; CityLearn 1.8.0 documentation</title>
+  <title>Index &mdash; CityLearn 1.8.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=b51e6972"></script>
+      <script src="_static/documentation_options.js?v=1166ed6b"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -433,9 +433,11 @@
         <li><a href="api/citylearn.reward_function.html#citylearn.reward_function.RewardFunction.central_agent">(citylearn.reward_function.RewardFunction property)</a>
 </li>
       </ul></li>
-      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.charge">charge() (citylearn.energy_model.Battery method)</a>
+      <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.InventoryBattery.charge">charge() (citylearn.community_dataset.InventoryBattery method)</a>
 
       <ul>
+        <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.charge">(citylearn.energy_model.Battery method)</a>
+</li>
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.charge">(citylearn.energy_model.StorageDevice method)</a>
 </li>
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageTank.charge">(citylearn.energy_model.StorageTank method)</a>
@@ -550,6 +552,13 @@
 </li>
       </ul></li>
       <li>
+    citylearn.community_dataset
+
+      <ul>
+        <li><a href="api/citylearn.community_dataset.html#module-citylearn.community_dataset">module</a>
+</li>
+      </ul></li>
+      <li>
     citylearn.cost_function
 
       <ul>
@@ -647,6 +656,8 @@
         <li><a href="api/citylearn.end_use_load_profiles.simulate.html#module-citylearn.end_use_load_profiles.simulate">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     citylearn.energy_model
 
@@ -654,8 +665,6 @@
         <li><a href="api/citylearn.energy_model.html#module-citylearn.energy_model">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     citylearn.exporter
 
@@ -860,6 +869,8 @@
       <li><a href="api/citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.community_ids">community_ids (citylearn.multi_community.MultiCommunityEnv property)</a>
 </li>
       <li><a href="api/citylearn.agents.baseline.html#citylearn.agents.baseline.CommunityAwareBaselineAgent">CommunityAwareBaselineAgent (class in citylearn.agents.baseline)</a>
+</li>
+      <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.configure_tariffs">configure_tariffs() (in module citylearn.community_dataset)</a>
 </li>
       <li><a href="api/citylearn.electric_vehicle_charger.html#citylearn.electric_vehicle_charger.Charger.connected_electric_vehicle">connected_electric_vehicle (citylearn.electric_vehicle_charger.Charger property)</a>
 </li>
@@ -1419,8 +1430,12 @@
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.HeatPump.get_cop">get_cop() (citylearn.energy_model.HeatPump method)</a>
 </li>
-      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.get_current_efficiency">get_current_efficiency() (citylearn.energy_model.Battery method)</a>
+      <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.InventoryBattery.get_current_efficiency">get_current_efficiency() (citylearn.community_dataset.InventoryBattery method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.get_current_efficiency">(citylearn.energy_model.Battery method)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.data.html#citylearn.data.DataSet.get_dataset">get_dataset() (citylearn.data.DataSet method)</a>
 </li>
       <li><a href="api/citylearn.data.html#citylearn.data.DataSet.get_dataset_names">get_dataset_names() (citylearn.data.DataSet method)</a>
@@ -1475,11 +1490,17 @@
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.neighborhood.html#citylearn.end_use_load_profiles.neighborhood.Neighborhood.get_lstm_training_data">get_lstm_training_data() (citylearn.end_use_load_profiles.neighborhood.Neighborhood method)</a>
 </li>
-      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.get_max_input_power">get_max_input_power() (citylearn.energy_model.Battery method)</a>
-</li>
-      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.get_max_output_power">get_max_output_power() (citylearn.energy_model.Battery method)</a>
+      <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.InventoryBattery.get_max_input_power">get_max_input_power() (citylearn.community_dataset.InventoryBattery method)</a>
 
       <ul>
+        <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.get_max_input_power">(citylearn.energy_model.Battery method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.InventoryBattery.get_max_output_power">get_max_output_power() (citylearn.community_dataset.InventoryBattery method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.get_max_output_power">(citylearn.energy_model.Battery method)</a>
+</li>
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.ElectricHeater.get_max_output_power">(citylearn.energy_model.ElectricHeater method)</a>
 </li>
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.HeatPump.get_max_output_power">(citylearn.energy_model.HeatPump method)</a>
@@ -1491,6 +1512,8 @@
         <li><a href="api/citylearn.building.html#citylearn.building.Building.get_metadata">(citylearn.building.Building method)</a>
 </li>
         <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.get_metadata">(citylearn.citylearn.CityLearnEnv method)</a>
+</li>
+        <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.InventoryBattery.get_metadata">(citylearn.community_dataset.InventoryBattery method)</a>
 </li>
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.get_metadata">(citylearn.energy_model.Battery method)</a>
 </li>
@@ -1687,8 +1710,6 @@
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.initial_soc">(citylearn.energy_model.StorageDevice property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.initialize">initialize() (citylearn.internal.demand_response.CityLearnDemandResponseService method)</a>
 
       <ul>
@@ -1697,6 +1718,8 @@
         <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService.initialize">(citylearn.internal.topology.CityLearnTopologyService method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.WashingMachine.initiated">initiated (citylearn.energy_model.WashingMachine property)</a>
 </li>
       <li><a href="api/citylearn.dynamics.html#citylearn.dynamics.LSTMDynamics.input_size">input_size (citylearn.dynamics.LSTMDynamics property)</a>
@@ -1710,6 +1733,10 @@
 </li>
       </ul></li>
       <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.invalidate">invalidate() (citylearn.internal.entity_interface.CityLearnEntityInterfaceService method)</a>
+</li>
+      <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.InventoryBattery">InventoryBattery (class in citylearn.community_dataset)</a>
+</li>
+      <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.InventoryBuilding">InventoryBuilding (class in citylearn.community_dataset)</a>
 </li>
       <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest.issuer">issuer (citylearn.internal.demand_response.DemandResponseRequest attribute)</a>
 </li>
@@ -1874,6 +1901,8 @@
         <li><a href="api/citylearn.building.html#module-citylearn.building">citylearn.building</a>
 </li>
         <li><a href="api/citylearn.citylearn.html#module-citylearn.citylearn">citylearn.citylearn</a>
+</li>
+        <li><a href="api/citylearn.community_dataset.html#module-citylearn.community_dataset">citylearn.community_dataset</a>
 </li>
         <li><a href="api/citylearn.cost_function.html#module-citylearn.cost_function">citylearn.cost_function</a>
 </li>
@@ -2781,6 +2810,8 @@
       <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.settle_current_time_step">settle_current_time_step() (citylearn.internal.demand_response.CityLearnDemandResponseService method)</a>
 </li>
       <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.settlement_history">settlement_history (citylearn.internal.demand_response.CityLearnDemandResponseService property)</a>
+</li>
+      <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.settlement_prices">settlement_prices() (in module citylearn.community_dataset)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.shared_observations">shared_observations (citylearn.citylearn.CityLearnEnv property)</a>
 

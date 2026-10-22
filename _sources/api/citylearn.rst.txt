@@ -25,6 +25,7 @@ Submodules
    citylearn.base
    citylearn.building
    citylearn.citylearn
+   citylearn.community_dataset
    citylearn.cost_function
    citylearn.data
    citylearn.dynamics
