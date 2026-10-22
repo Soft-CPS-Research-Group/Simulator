@@ -1649,7 +1649,12 @@ class CityLearnEnv(Environment, Env):
             ratio = 0.8
 
         self.community_market_sell_ratio = min(max(ratio, 0.0), 1.0)
-        self.community_market_grid_export_price = 0.0
+        export_price = float(config.get('grid_export_price', 0.0)) if config.get('settlement_version') == 2 else 0.0
+        if not np.isfinite(export_price):
+            raise ValueError('grid_export_price must be finite')
+        self.community_market_grid_export_price = export_price
+        from citylearn.community_dataset import configure_tariffs
+        configure_tariffs(self, config)
         weights = config.get('import_member_weights', {}) or {}
         parsed_weights = {}
         if isinstance(weights, Mapping):
