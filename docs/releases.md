@@ -60,6 +60,24 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.8.2 - 2026-10-23
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+EV battery loading now honours the declared Battery subclass. InventoryBattery
+preserves directional efficiencies and powers, including zero discharge for a
+vehicle without V2G permission. InventoryEVBuilding identifies community exports
+that require this loader and fails explicitly on older runtimes.
+
+Existing schemas without an explicit EV battery type keep Battery and the same
+defaults. New EV exports require simulator 1.8.2 in both validation and job images;
+no algorithm or wrapper migration is required. No new action or observation names
+are introduced.
+
+Validation: 455 simulator tests passed (5 skipped); generated EV scenarios verify
+charging limits, separate losses, no-V2G behaviour and departure schedules. The
+backend export tests also exercise complete EV and appliance episodes.
+
 ## v1.8.0 - 2026-08-22
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
