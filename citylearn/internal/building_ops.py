@@ -161,7 +161,8 @@ class BuildingOpsService:
                 if req_soc_key in valid_observations:
                     observations[req_soc_key] = float(sim.electric_vehicle_required_soc_departure[t])
                 if soc_key in valid_observations:
-                    observations[soc_key] = charger.connected_electric_vehicle.battery.soc[endogenous_t]
+                    ev = charger.connected_electric_vehicle
+                    observations[soc_key] = ev.battery.soc[ev.observation_soc_index(endogenous_t)]
                 if capacity_key in valid_observations:
                     observations[capacity_key] = float(charger.connected_electric_vehicle.battery.capacity)
             else:
@@ -270,7 +271,7 @@ class BuildingOpsService:
                     if 0 <= endogenous_t < len(charger.past_charging_action_values_kwh):
                         last_charged_kwh = float(charger.past_charging_action_values_kwh[endogenous_t])
 
-                    battery_soc = connected_car.battery.soc[endogenous_t]
+                    battery_soc = connected_car.battery.soc[connected_car.observation_soc_index(endogenous_t)]
                     previous_battery_soc = connected_car.battery.initial_soc if endogenous_t == 0 else connected_car.battery.soc[endogenous_t - 1]
 
                     required_soc = charger.charger_simulation.electric_vehicle_required_soc_departure[t]

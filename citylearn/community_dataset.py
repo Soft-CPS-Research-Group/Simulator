@@ -19,6 +19,10 @@ class InventoryEVBuilding(InventoryBuilding):
     """Requires the EV battery loader contract introduced in version 1.8.2."""
 
 
+class RuntimeEVBuilding(InventoryEVBuilding):
+    """Runtime EV datasets require arrival observations fixed in version 1.8.3."""
+
+
 class InventoryBattery(Battery):
     """Battery with declared asymmetric powers, SOC range and efficiencies."""
     def __init__(self, max_charge_kw, max_discharge_kw, min_soc=0.0, max_soc=1.0,

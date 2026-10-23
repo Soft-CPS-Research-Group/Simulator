@@ -1090,6 +1090,7 @@ class CityLearnRuntimeService:
                             soc_value = _resolve_arrival_soc(sim, env.time_step, prev_state, prev_ev_id, ev_id)
                             if soc_value is not None:
                                 ev.battery.force_set_soc(soc_value)
+                                ev._arrival_soc_time_step = env.time_step
                     elif state == 2:
                         charger.associate_incoming_car(ev)
 

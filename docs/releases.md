@@ -60,6 +60,22 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 - ...
 ```
 
+## v1.8.3 - 2026-10-23
+
+A measured EV arrival SOC now appears immediately in flat and entity observations,
+including charger feasibility features. Previously the battery received the new
+SOC but the observation still read the previous, possibly forecast, state for one
+step. Continuing connections keep the preceding controlled state; revised
+forecasts do not reset the battery. Reset clears the arrival marker.
+
+`RuntimeEVBuilding` is an additive loader marker for Mongo-vintage EV datasets.
+Existing schemas remain compatible. Initial arrival observations can change
+policy decisions, as intended. Validation: 455 tests passed (5 optional skips),
+including the physical-arrival regression; the backend runtime fixture exercises
+incoming/revised/cleared plans, arrivals and reconnection in both interfaces.
+The existing dynamic-topology physics-audit boundary issue remains tracked
+separately; this patch does not change electrical dynamics.
+
 ## v1.8.2 - 2026-10-23
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
