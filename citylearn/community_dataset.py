@@ -15,6 +15,9 @@ class InventoryBuilding(Building):
     """Versioned loader for inventory scenarios; older runtimes fail explicitly."""
 
 
+class InventoryEVBuilding(InventoryBuilding):
+    """Requires the EV battery loader contract introduced in version 1.8.2."""
+
 
 class InventoryBattery(Battery):
     """Battery with declared asymmetric powers, SOC range and efficiencies."""
@@ -24,7 +27,7 @@ class InventoryBattery(Battery):
                   charging_efficiency, discharging_efficiency]
         if not all(math.isfinite(float(v)) for v in values):
             raise ValueError('Battery parameters must be finite')
-        if min(max_charge_kw, max_discharge_kw) <= 0 or not 0 <= min_soc < max_soc <= 1:
+        if max_charge_kw <= 0 or max_discharge_kw < 0 or not 0 <= min_soc < max_soc <= 1:
             raise ValueError('Invalid battery power or SOC limits')
         if not 0 < charging_efficiency <= 1 or not 0 < discharging_efficiency <= 1:
             raise ValueError('Battery efficiencies must be in (0, 1]')
