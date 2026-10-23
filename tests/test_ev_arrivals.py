@@ -324,6 +324,13 @@ def test_ev_current_soc_overrides_arrival_estimate_when_present():
     connected_ev = target_charger.connected_electric_vehicle
     assert connected_ev is not None, "Expected EV to be connected at the transition step."
     assert float(connected_ev.battery.soc[env.time_step]) == pytest.approx(forced_soc, abs=1e-6)
+    building=next(b for b in env.buildings if target_charger in (b.electric_vehicle_chargers or []))
+    key=f'connected_electric_vehicle_at_charger_{target_charger.charger_id}_soc'
+    building.observation_metadata[key]=True
+    assert building.observations()[key]==pytest.approx(forced_soc,abs=1e-6)
+    env.step(_zero_actions(env))
+    assert building.observations()[key]==pytest.approx(connected_ev.battery.soc[env.time_step-1],abs=1e-6)
+    env.close()
 
 
 def test_current_soc_initializes_runtime_reconnection_inside_occupied_window():
@@ -365,3 +372,4 @@ def test_current_soc_initializes_runtime_reconnection_inside_occupied_window():
 def test_negative_soc_sentinels_remain_missing_values():
     values = ChargerSimulation.normalize_soc_series([-1.0, -0.1, np.nan, 0.0, 1.0, 80.0, 150.0])
     assert values.tolist() == pytest.approx([-0.1, -0.1, -0.1, 0.0, 1.0, 0.8, 1.0])
+

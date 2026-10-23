@@ -1639,3 +1639,13 @@ Antes da consolidacao dos deferrables normalizados, o fork introduziu EVs/charge
 | Chargers | Acoes de charging/discharging e schedules por charger. |
 | Washing machines | Primeira versao de appliances flexiveis. |
 | Algorithms integration | Preparacao para RBC/MADDPG e repos externos. |
+
+## v1.8.3 - 2026-10-23
+
+O SOC observado à chegada fica imediatamente disponível nas observações flat e
+entity. Durante a ligação, continua a usar-se o estado resultante do controlo
+anterior. O novo marcador `RuntimeEVBuilding` permite rejeitar runtimes antigos
+para datasets temporais de EVs. Sem alteração da dinâmica elétrica ou do formato
+das tabelas. Validação: 455 testes passaram, 5 opcionais omitidos; o caso Mongo
+no backend cobre previsões revistas/apagadas e chegadas/reconexões. A falha
+preexistente da auditoria física de topologia dinâmica continua separada.
