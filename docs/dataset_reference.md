@@ -355,3 +355,17 @@ export settlement. `operator_balance_eur` records the difference between interna
 buyer payments and seller receipts, including different household tariffs.
 Runtime costs and counterfactual KPI settlement use the same price resolver.
 Legacy settlement (the default) retains its historical zero grid export price.
+
+
+### Inventory EV batteries (1.8.2)
+
+An EV definition can declare `battery.type` as
+`citylearn.community_dataset.InventoryBattery`, with `capacity`, `nominal_power`,
+`initial_soc`, `max_charge_kw`, `max_discharge_kw`, `charging_efficiency` and
+`discharging_efficiency` in `battery.attributes`. Power is kW, capacity is kWh,
+and SOC/efficiency use fractions. A zero discharge limit disables V2G; charge
+power remains positive. Charger limits and conversion efficiency still apply.
+Use `citylearn.community_dataset.InventoryEVBuilding` for buildings containing
+these vehicles so older loaders fail rather than silently replacing the model.
+Arrival SOC belongs in the optional `electric_vehicle_current_soc` charger column
+at session boundaries. Subsequent SOC evolves through the battery model.
