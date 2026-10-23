@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.building_ops &mdash; CityLearn 1.8.2 documentation</title>
+  <title>citylearn.internal.building_ops &mdash; CityLearn 1.8.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=269e6701"></script>
+      <script src="../../../_static/documentation_options.js?v=82e6e318"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -255,7 +255,8 @@
                 <span class="k">if</span> <span class="n">req_soc_key</span> <span class="ow">in</span> <span class="n">valid_observations</span><span class="p">:</span>
                     <span class="n">observations</span><span class="p">[</span><span class="n">req_soc_key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">electric_vehicle_required_soc_departure</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
                 <span class="k">if</span> <span class="n">soc_key</span> <span class="ow">in</span> <span class="n">valid_observations</span><span class="p">:</span>
-                    <span class="n">observations</span><span class="p">[</span><span class="n">soc_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">endogenous_t</span><span class="p">]</span>
+                    <span class="n">ev</span> <span class="o">=</span> <span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span>
+                    <span class="n">observations</span><span class="p">[</span><span class="n">soc_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">ev</span><span class="o">.</span><span class="n">observation_soc_index</span><span class="p">(</span><span class="n">endogenous_t</span><span class="p">)]</span>
                 <span class="k">if</span> <span class="n">capacity_key</span> <span class="ow">in</span> <span class="n">valid_observations</span><span class="p">:</span>
                     <span class="n">observations</span><span class="p">[</span><span class="n">capacity_key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">connected_electric_vehicle</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -379,7 +380,7 @@
                     <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">endogenous_t</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">past_charging_action_values_kwh</span><span class="p">):</span>
                         <span class="n">last_charged_kwh</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">charger</span><span class="o">.</span><span class="n">past_charging_action_values_kwh</span><span class="p">[</span><span class="n">endogenous_t</span><span class="p">])</span>
 
-                    <span class="n">battery_soc</span> <span class="o">=</span> <span class="n">connected_car</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">endogenous_t</span><span class="p">]</span>
+                    <span class="n">battery_soc</span> <span class="o">=</span> <span class="n">connected_car</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">connected_car</span><span class="o">.</span><span class="n">observation_soc_index</span><span class="p">(</span><span class="n">endogenous_t</span><span class="p">)]</span>
                     <span class="n">previous_battery_soc</span> <span class="o">=</span> <span class="n">connected_car</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">initial_soc</span> <span class="k">if</span> <span class="n">endogenous_t</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">connected_car</span><span class="o">.</span><span class="n">battery</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">endogenous_t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
                     <span class="n">required_soc</span> <span class="o">=</span> <span class="n">charger</span><span class="o">.</span><span class="n">charger_simulation</span><span class="o">.</span><span class="n">electric_vehicle_required_soc_departure</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
