@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.loading &mdash; CityLearn 1.8.1 documentation</title>
+  <title>citylearn.internal.loading &mdash; CityLearn 1.8.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=1166ed6b"></script>
+      <script src="../../../_static/documentation_options.js?v=269e6701"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1036,13 +1036,22 @@
             <span class="s1">'capacity_loss_coefficient'</span><span class="p">,</span>
             <span class="s1">'power_efficiency_curve'</span><span class="p">,</span>
             <span class="s1">'capacity_power_curve'</span><span class="p">,</span>
+            <span class="s1">'max_charge_kw'</span><span class="p">,</span>
+            <span class="s1">'max_discharge_kw'</span><span class="p">,</span>
+            <span class="s1">'min_soc'</span><span class="p">,</span>
+            <span class="s1">'max_soc'</span><span class="p">,</span>
+            <span class="s1">'charging_efficiency'</span><span class="p">,</span>
+            <span class="s1">'discharging_efficiency'</span><span class="p">,</span>
         <span class="p">]:</span>
             <span class="k">if</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
                 <span class="n">battery_kwargs</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span>
 
-        <span class="n">battery</span> <span class="o">=</span> <span class="n">Battery</span><span class="p">(</span>
-            <span class="o">**</span><span class="n">battery_kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">battery_type</span> <span class="o">=</span> <span class="n">electric_vehicle_schema</span><span class="p">[</span><span class="s1">'battery'</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'type'</span><span class="p">,</span> <span class="s1">'citylearn.energy_model.Battery'</span><span class="p">)</span>
+        <span class="n">module</span><span class="p">,</span> <span class="n">class_name</span> <span class="o">=</span> <span class="n">battery_type</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">'.'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">battery_constructor</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">battery_constructor</span><span class="p">,</span> <span class="n">Battery</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'An electric vehicle battery must extend Battery'</span><span class="p">)</span>
+        <span class="n">battery</span> <span class="o">=</span> <span class="n">battery_constructor</span><span class="p">(</span><span class="o">**</span><span class="n">battery_kwargs</span><span class="p">)</span>
 
         <span class="n">electric_vehicle_type</span> <span class="o">=</span> <span class="s1">'citylearn.citylearn.ElectricVehicle'</span> <span class="k">if</span> <span class="n">electric_vehicle_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'type'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">electric_vehicle_schema</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span>
         <span class="n">electric_vehicle_type_module</span> <span class="o">=</span> <span class="s1">'.'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">electric_vehicle_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
