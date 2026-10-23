@@ -372,4 +372,3 @@ def test_current_soc_initializes_runtime_reconnection_inside_occupied_window():
 def test_negative_soc_sentinels_remain_missing_values():
     values = ChargerSimulation.normalize_soc_series([-1.0, -0.1, np.nan, 0.0, 1.0, 80.0, 150.0])
     assert values.tolist() == pytest.approx([-0.1, -0.1, -0.1, 0.0, 1.0, 0.8, 1.0])
-
