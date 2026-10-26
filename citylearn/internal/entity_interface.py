@@ -589,7 +589,7 @@ class CityLearnEntityInterfaceService:
 
             if connected:
                 connected_ev = charger.connected_electric_vehicle
-                current_soc = self._safe_scalar(connected_ev.battery.soc[endogenous_t], -0.1)
+                current_soc = self._safe_scalar(connected_ev.battery.soc[connected_ev.observation_soc_index(endogenous_t)], -0.1)
                 battery_capacity = self._safe_scalar(connected_ev.battery.capacity, -1.0)
                 hours_until_departure = max(departure_steps, 0.0) * step_hours
                 if core_bundle_enabled:
@@ -700,7 +700,7 @@ class CityLearnEntityInterfaceService:
 
         for i, ev in enumerate(env.electric_vehicles):
             row = self._ev_obs[i]
-            soc = self._safe_scalar(ev.battery.soc[endogenous_t], 0.0)
+            soc = self._safe_scalar(ev.battery.soc[ev.observation_soc_index(endogenous_t)], 0.0)
             capacity = self._safe_scalar(ev.battery.capacity, 0.0)
             depth_of_discharge = self._safe_scalar(ev.battery.depth_of_discharge, 0.0)
             self._set_obs_value(row, self._ev_feature_cols, "soc", soc)

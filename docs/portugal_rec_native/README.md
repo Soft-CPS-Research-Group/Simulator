@@ -4,7 +4,7 @@ Versão **portugal-native-2023-2024-v3.1**. As mesmas **quatro bases físicas e 
 
 2024 continua cronologicamente 2023. Quem saiu não regressa; os equipamentos retirados permanecem retirados. Os eventos de entrada/saída de 2023 não são repetidos. Não foram acrescentados membros, equipamentos ou variantes. Nas configurações estáticas mantém-se o catálogo completo; nas dinâmicas mantém-se a composição existente no fim de 2023.
 
-O motor permanece exatamente no commit `978be68b0e0740deab15ecf536805f323b86fa57`. Apenas dados, ferramentas de preparação e documentação foram alterados. Não foi executada uma campanha de controladores nem uma avaliação anual de utilização.
+A preparação original destes dados manteve o motor no commit `978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0). Essa é a referência histórica dos relatórios arquivados. Desde a consolidação de 26/10/2026, a pasta de trabalho combina estes mesmos dados com o motor 1.8.3 e as alterações locais descritas em [Releases](../releases.md). Os ficheiros dos datasets foram preservados. Esta integração não constitui uma nova campanha anual de controladores.
 
 | Configuração | Schema relativo à raiz do Simulator |
 |---|---|

@@ -933,13 +933,22 @@ class CityLearnLoadingService:
             'capacity_loss_coefficient',
             'power_efficiency_curve',
             'capacity_power_curve',
+            'max_charge_kw',
+            'max_discharge_kw',
+            'min_soc',
+            'max_soc',
+            'charging_efficiency',
+            'discharging_efficiency',
         ]:
             if attribute in attrs:
                 battery_kwargs[attribute] = attrs[attribute]
 
-        battery = Battery(
-            **battery_kwargs,
-        )
+        battery_type = electric_vehicle_schema['battery'].get('type', 'citylearn.energy_model.Battery')
+        module, class_name = battery_type.rsplit('.', 1)
+        battery_constructor = getattr(importlib.import_module(module), class_name)
+        if not issubclass(battery_constructor, Battery):
+            raise ValueError('An electric vehicle battery must extend Battery')
+        battery = battery_constructor(**battery_kwargs)
 
         electric_vehicle_type = 'citylearn.citylearn.ElectricVehicle' if electric_vehicle_schema.get('type', None) is None else electric_vehicle_schema['type']
         electric_vehicle_type_module = '.'.join(electric_vehicle_type.split('.')[0:-1])

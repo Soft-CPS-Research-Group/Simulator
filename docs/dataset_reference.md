@@ -13,9 +13,12 @@ Portuguese version: [pt/dataset_reference.md](pt/dataset_reference.md).
 
 CSV and Parquet are interchangeable when the schema path is updated and columns, units and types remain equivalent.
 
-## Portugal: simulador original / original runtime
+## Portugal: consolidated runtime and frozen provenance
 
-Current runtime: `978be68b0e0740deab15ecf536805f323b86fa57`, without extensions.
+The current working tree combines the 1.8.3 runtime with the Portuguese 2023–2024
+datasets. Their original preparation was frozen against runtime
+`978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0); that remains the provenance of
+the archived reports, not the runtime of this consolidated checkout.
 Nine configurations: Core-4, Core-15, Core-30 Normal/Topology/Safety/Robustness/Combined and Premium Normal/All-in. DR only in All-in. Use each family's `CURRENT_EVALUATION.json`; executable variants are in `evaluation/`.
 
 The same nine Portugal-oriented configurations now span 2023 and 2024 continuously, preserving permanent departures and equipment identities. Native EVs use prescribed arrival SOC per session, native machines use the building phase split, and DR uses the original pre-event average. All current schemas use the same full grid purchase tariff. The market is disabled in dataset schemas; enable original settlement and its 0.8 ratio in experiment schemas. Grid exports have zero value. No private service continues after member exit. This revision constructs data only, with no new usage evaluations.
@@ -238,4 +241,33 @@ For real production datasets, `absolute` is the recommended mode.
 9. Run a smoke episode and `evaluate_v2()`.
 10. Run `audit_physics.py` for new critical datasets.
 
+## Inventory-derived community datasets (1.8.1)
 
+The optional `citylearn.community_dataset.InventoryBattery` translates declared
+capacity, asymmetric charge/discharge powers, minimum/maximum SOC, initial SOC,
+directional efficiencies and standby losses. Its schema attributes use kWh, kW
+and fractions. Existing `Battery` schemas retain their behaviour.
+
+A community market with `settlement_version: 2` accepts `tariff_files`, a mapping
+from building name to a relative CSV path containing `grid_export_price`,
+`community_buy_price` and `community_sell_price` in EUR/kWh. Every file covers the
+full dataset timeline; episode offsets are applied when reading prices.
+`local_trading_enabled: false` disables internal exchange while retaining grid
+export settlement. `operator_balance_eur` records the difference between internal
+buyer payments and seller receipts, including different household tariffs.
+Runtime costs and counterfactual KPI settlement use the same price resolver.
+Legacy settlement (the default) retains its historical zero grid export price.
+
+
+### Inventory EV batteries (1.8.2)
+
+An EV definition can declare `battery.type` as
+`citylearn.community_dataset.InventoryBattery`, with `capacity`, `nominal_power`,
+`initial_soc`, `max_charge_kw`, `max_discharge_kw`, `charging_efficiency` and
+`discharging_efficiency` in `battery.attributes`. Power is kW, capacity is kWh,
+and SOC/efficiency use fractions. A zero discharge limit disables V2G; charge
+power remains positive. Charger limits and conversion efficiency still apply.
+Use `citylearn.community_dataset.InventoryEVBuilding` for buildings containing
+these vehicles so older loaders fail rather than silently replacing the model.
+Arrival SOC belongs in the optional `electric_vehicle_current_soc` charger column
+at session boundaries. Subsequent SOC evolves through the battery model.

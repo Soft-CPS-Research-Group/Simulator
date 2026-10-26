@@ -14,8 +14,9 @@ It is a fork-based project used for research and experimentation on:
   feasible action capacity and requested/limited/applied action feedback.
 - dynamic member and asset topology with repeatable multi-episode reset semantics.
 
-Current source release: `1.5.6`. Dynamic environments restore their schema-loaded topology before
-replaying episode events, preventing structural state from leaking between training episodes.
+Current source release: `1.8.3`. EV arrival SOC is visible immediately in flat and
+entity observations. Runtime community datasets preserve the flexibility known
+at each historical timestamp through their exported charger time series.
 
 ## Project Positioning
 

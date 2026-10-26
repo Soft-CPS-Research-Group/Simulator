@@ -6,6 +6,17 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## Unreleased — local consolidation, 2026-10-26
+
+- Combine the published 1.8.3 runtime (`be1e10af`) with the Portuguese 2023–2024
+  dataset work (`b8d5da84`), preserving both histories and the dataset files.
+- Distinguish the original 1.8.0 dataset/report provenance from the runtime in
+  the consolidated working tree. Retain the inventory battery, EV loading and
+  arrival-observation improvements from 1.8.1–1.8.3.
+- Keep the package version at 1.8.3 during local preparation. This entry does
+  not constitute a new tag, package publication or deployment; identify local
+  experiments by their Git commit as well as the package version.
+
 ## Version Policy
 
 | Type | Use when | Example |
@@ -59,6 +70,40 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 ### Migration Notes
 - ...
 ```
+
+## v1.8.3 - 2026-10-23
+
+A measured EV arrival SOC now appears immediately in flat and entity observations,
+including charger feasibility features. Previously the battery received the new
+SOC but the observation still read the previous, possibly forecast, state for one
+step. Continuing connections keep the preceding controlled state; revised
+forecasts do not reset the battery. Reset clears the arrival marker.
+
+`RuntimeEVBuilding` is an additive loader marker for Mongo-vintage EV datasets.
+Existing schemas remain compatible. Initial arrival observations can change
+policy decisions, as intended. Validation: 455 tests passed (5 optional skips),
+including the physical-arrival regression; the backend runtime fixture exercises
+incoming/revised/cleared plans, arrivals and reconnection in both interfaces.
+The existing dynamic-topology physics-audit boundary issue remains tracked
+separately; this patch does not change electrical dynamics.
+
+## v1.8.2 - 2026-10-23
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+EV battery loading now honours the declared Battery subclass. InventoryBattery
+preserves directional efficiencies and powers, including zero discharge for a
+vehicle without V2G permission. InventoryEVBuilding identifies community exports
+that require this loader and fails explicitly on older runtimes.
+
+Existing schemas without an explicit EV battery type keep Battery and the same
+defaults. New EV exports require simulator 1.8.2 in both validation and job images;
+no algorithm or wrapper migration is required. No new action or observation names
+are introduced.
+
+Validation: 455 simulator tests passed (5 skipped); generated EV scenarios verify
+charging limits, separate losses, no-V2G behaviour and departure schedules. The
+backend export tests also exercise complete EV and appliance episodes.
 
 ## v1.8.0 - 2026-08-22
 
