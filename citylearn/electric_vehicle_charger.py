@@ -359,6 +359,7 @@ class Charger(Environment):
             # Without this, SOC at `time_step` can remain the zero-initialized default.
             if self.connected_electric_vehicle is not None:
                 self.connected_electric_vehicle.battery.charge(0.0)
+            self.__past_charging_action_values_kwh[self.time_step] = 0
             return
 
         if charging:
@@ -382,7 +383,7 @@ class Charger(Environment):
             )
             battery_energy_kwh = commanded_energy_kwh / max(efficiency, ZERO_DIVISION_PLACEHOLDER)
 
-        self.__past_charging_action_values_kwh[self.time_step] += commanded_energy_kwh
+        self.__past_charging_action_values_kwh[self.time_step] = commanded_energy_kwh
 
         if self.connected_electric_vehicle:
             electric_vehicle = self.connected_electric_vehicle
