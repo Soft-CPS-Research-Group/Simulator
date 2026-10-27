@@ -213,6 +213,8 @@ class CityLearnRuntimeService:
         timer_start = time.perf_counter() if debug_timing else 0.0
         clear_step_electric_loads_time = 0.0
         building_apply_action_times = []
+        if bool(getattr(env, 'physics_invariant_checks', False)):
+            env._physics_invariant_service.capture_battery_energy_before_actions(int(env.time_step))
         for building, building_actions in zip(env.buildings, actions):
             if int(env.time_step) == 0:
                 clear_start = time.perf_counter() if debug_timing else 0.0
@@ -739,6 +741,8 @@ class CityLearnRuntimeService:
         if getattr(getattr(env, '_robustness_service', None), 'enabled', False):
             actions = env._robustness_service.apply_actions(actions)
 
+        if bool(getattr(env, 'physics_invariant_checks', False)):
+            env._physics_invariant_service.capture_battery_energy_before_actions(int(env.time_step))
         for building, building_actions in zip(env.buildings, actions):
             if int(env.time_step) == 0:
                 building.clear_step_electric_loads_for_action()

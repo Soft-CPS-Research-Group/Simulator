@@ -13,9 +13,31 @@ Default release owner for this fork: [@calofonseca](https://github.com/calofonse
 - Distinguish the original 1.8.0 dataset/report provenance from the runtime in
   the consolidated working tree. Retain the inventory battery, EV loading and
   arrival-observation improvements from 1.8.1–1.8.3.
+- Preserve physical battery SOC below the operational discharge reserve at
+  initialization, EV arrival and subsequent steps. Charging supplies the actual
+  recovery energy; discharge is blocked below the reserve. Standby losses can
+  reduce SOC below that reserve and are not replenished for free.
+- With `physics_invariant_checks=True`, compare actual stored battery energy
+  before and after actions against terminal energy and efficiency. This check
+  covers stationary batteries and EVs in both normal and feedback-free steps,
+  taking arrivals and standby losses into account before the snapshot. Multiple
+  transfers within one step are accumulated with each operation's efficiency.
+- Compatibility: schemas and action layouts are unchanged. Results may change
+  for initial/arrival SOC below a positive reserve or standby losses reaching
+  that reserve; rerun affected experiments rather than treating those results
+  as equivalent to published 1.8.3. The Portuguese EV schemas use zero reserve.
 - Keep the package version at 1.8.3 during local preparation. This entry does
   not constitute a new tag, package publication or deployment; identify local
   experiments by their Git commit as well as the package version.
+
+Validation (completed 2026-10-27): 487 tests passed, including 23 reserve and
+conservation regressions; 83 independent analytical cases passed; all 18
+Portuguese windows (nine configurations, 2023/2024, 1,710 transitions) passed
+with physics checks enabled. The entity contract audit passed without snapshot
+drift. The physics matrix retains eight pre-existing topology-boundary flags;
+after refining the multi-transfer check, the four affected dynamic asset cases
+were repeated and their failures match the previous audit exactly. Those
+topology diagnostics remain a separate task, rather than a green physics audit.
 
 ## Version Policy
 

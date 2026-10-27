@@ -774,8 +774,7 @@ class StorageDevice(Device):
 
     @property
     def energy_init(self) -> float:
-        r"""Latest energy level available at the current time step in [kWh]."""
-        minimum_energy = self._minimum_energy()
+        r"""Physical stored energy in [kWh], including states below the reserve."""
         initialized = getattr(self, '_StorageDevice__soc_initialized', None)
         if (
             initialized is not None
@@ -783,8 +782,19 @@ class StorageDevice(Device):
             and self.time_step < len(initialized)
             and not bool(initialized[self.time_step])
         ):
-            return max(minimum_energy, self.__soc[self.time_step - 1]*self.capacity)
-        return max(minimum_energy, self.__soc[self.time_step]*self.capacity)
+            return max(0.0, self.__soc[self.time_step - 1]*self.capacity)
+        return max(0.0, self.__soc[self.time_step]*self.capacity)
+
+    @property
+    def stored_energy_transfer(self) -> float:
+        """Cumulative terminal-flow contribution to stored kWh in this step.
+
+        Includes every charge/discharge call at its own efficiency. Excludes
+        standby losses and exogenous SOC assignments such as vehicle arrivals.
+        """
+        if getattr(self, '_StorageDevice__transfer_time_step', None) != self.time_step:
+            return 0.0
+        return self.__stored_energy_transfer
 
     @property
     def energy_balance(self) -> np.ndarray:
@@ -837,7 +847,7 @@ class StorageDevice(Device):
         super().next_time_step()
 
         if np.isfinite(previous_soc) and self.time_step < len(self.__soc):
-            next_soc = float(np.clip(previous_soc * (1.0 - self.loss_coefficient), self._minimum_soc(), 1.0))
+            next_soc = float(np.clip(previous_soc * (1.0 - self.loss_coefficient), 0.0, 1.0))
             self.__soc[self.time_step] = next_soc
             self.__soc_initialized[self.time_step] = True
 
@@ -869,9 +879,9 @@ class StorageDevice(Device):
         energy = energy * self.time_step_ratio
         energy_init = self.energy_init if energy_init is None else energy_init
         round_trip_efficiency = self.round_trip_efficiency
-        # The initial State Of Charge (SOC) is the previous SOC minus the energy losses
+        # A reserve limits discharge; it must never raise the measured stored energy.
         energy_final = min(energy_init + energy*round_trip_efficiency, self.capacity) if energy >= 0\
-            else max(self._minimum_energy(), energy_init + energy/round_trip_efficiency)
+            else max(min(self._minimum_energy(), energy_init), energy_init + energy/round_trip_efficiency)
 
         self.__soc[self.time_step] = energy_final/max(self.capacity, ZERO_DIVISION_PLACEHOLDER)
         self.__soc_initialized[self.time_step] = True
@@ -879,6 +889,11 @@ class StorageDevice(Device):
         self.__energy_balance[self.time_step] = (
             delta_energy / round_trip_efficiency if delta_energy >= 0 else delta_energy * round_trip_efficiency
         )
+        terminal_energy = float(self.__energy_balance[self.time_step])
+        stored_change = (terminal_energy * round_trip_efficiency if terminal_energy >= 0.0
+                         else terminal_energy / round_trip_efficiency)
+        self.__stored_energy_transfer = self.stored_energy_transfer + stored_change
+        self.__transfer_time_step = self.time_step
 
     def force_set_soc(self, soc: float):
         self.__soc[self.time_step] = soc
@@ -948,10 +963,12 @@ class StorageDevice(Device):
 
         super().reset()
         self.__soc = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
-        self.__soc[0] = max(self.initial_soc, self._minimum_soc())
+        self.__soc[0] = self.initial_soc
         self.__soc_initialized = np.zeros(self.episode_tracker.episode_time_steps, dtype=bool)
         self.__soc_initialized[0] = True
         self.__energy_balance = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.__stored_energy_transfer = 0.0
+        self.__transfer_time_step = self.time_step
 
 class StorageTank(StorageDevice):
     r"""Base thermal energy storage class.

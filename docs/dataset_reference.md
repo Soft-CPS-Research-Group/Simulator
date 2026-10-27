@@ -271,3 +271,12 @@ Use `citylearn.community_dataset.InventoryEVBuilding` for buildings containing
 these vehicles so older loaders fail rather than silently replacing the model.
 Arrival SOC belongs in the optional `electric_vehicle_current_soc` charger column
 at session boundaries. Subsequent SOC evolves through the battery model.
+
+In the local unreleased runtime, an observed arrival SOC below the operational
+discharge reserve is preserved. The reserve prevents further controlled
+discharge; it does not add stored energy. Charging must supply the recovery
+energy, including conversion losses. Standby losses may also take a battery
+below its reserve. `InventoryBattery` still validates its configured
+`initial_soc` against the declared range; this is distinct from a measured
+arrival during operation. Enable `physics_invariant_checks` to check stored
+energy changes independently of the battery's internal initial-energy helper.
