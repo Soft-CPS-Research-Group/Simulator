@@ -8,6 +8,16 @@ Default release owner for this fork: [@calofonseca](https://github.com/calofonse
 
 ## Unreleased — local consolidation, 2026-10-26
 
+- Economic audit, 2026-10-27: the community-market counterfactual now credits
+  all member surplus at the configured external export tariff. Market savings
+  compare the same grid tariffs with and without local sharing, so disabling
+  local trading yields zero market savings even when grid export is paid.
+  Settlement costs, prices and the usual 80% local / zero grid export setup
+  remain unchanged. Regression coverage includes positive/negative import
+  prices, zero/positive export prices and explicit per-member tariffs.
+  Validation after this correction: 495 tests passed, including eight new
+  counterfactual cases; the four paid-export regressions failed before the fix.
+
 - Combine the published 1.8.3 runtime (`be1e10af`) with the Portuguese 2023–2024
   dataset work (`b8d5da84`), preserving both histories and the dataset files.
 - Distinguish the original 1.8.0 dataset/report provenance from the runtime in

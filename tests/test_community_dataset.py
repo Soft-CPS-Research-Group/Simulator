@@ -20,6 +20,9 @@ def test_explicit_tariffs_and_operator_balance(tmp_path):
     a,b=rows
     assert a['settled_cost_eur']==pytest.approx(.6)
     assert b['settled_cost_eur']==pytest.approx(-.5)
+    assert a['counterfactual_cost_eur']==pytest.approx(1.)
+    assert b['counterfactual_cost_eur']==pytest.approx(-.2)
+    assert sum(r['market_savings_eur'] for r in rows)==pytest.approx(.7)
     assert sum(r['operator_balance_eur'] for r in rows)==pytest.approx(.1)
     # With internal trading disabled, grid exports are still remunerated.
     schema['community_market']['local_trading_enabled']=False
@@ -28,6 +31,7 @@ def test_explicit_tariffs_and_operator_balance(tmp_path):
     rows=env._community_market_settlement_history[-1]
     assert rows[0]['settled_cost_eur']==pytest.approx(1)
     assert rows[1]['settled_cost_eur']==pytest.approx(-.2)
+    assert all(r['market_savings_eur']==pytest.approx(0.) for r in rows)
 
 
 def test_inventory_battery_limits_and_directional_efficiency(tmp_path):

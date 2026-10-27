@@ -198,7 +198,7 @@ Condicionais a `community_market.enabled=true`.
 | local traded daily average | district | kWh/day | Media diaria local. |
 | community import share | district | ratio | Share da demanda servida localmente. |
 | settled cost | building/district | eur | Custo apos settlement local. |
-| counterfactual cost | building/district | eur | Custo sem mercado local. |
+| counterfactual cost | building/district | eur | Custo sem trocas locais, com as mesmas tarifas de compra e venda à rede. |
 | market savings | building/district | eur | Diferenca entre counterfactual e settled. |
 
 ## Export

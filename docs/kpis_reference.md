@@ -201,7 +201,7 @@ Available when `community_market.enabled=true`.
 | local traded daily average | district | kWh/day | Daily average local trade. |
 | community import share | district | ratio | Share of demand served locally. |
 | settled cost | building/district | eur | Cost after local settlement. |
-| counterfactual cost | building/district | eur | Cost without local market settlement. |
+| counterfactual cost | building/district | eur | Cost without local trading, using the same grid import and export tariffs. |
 | market savings | building/district | eur | Counterfactual minus settled cost. |
 
 ## Export

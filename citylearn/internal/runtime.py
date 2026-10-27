@@ -1344,6 +1344,10 @@ class CityLearnRuntimeService:
             grid_export_price, local_buy_price, local_sell_price = settlement_prices(env, building.name, t, grid_import_price)
             local_price = local_buy_price
             counterfactual_legacy_cost = self._to_scalar(building.net_electricity_consumption_cost[t], 0.0)
+            # Without sharing, all surplus is exported at the same external
+            # tariff. Export revenue is not a benefit created by local trading.
+            # Subtracting it preserves the historical zero-export-price case.
+            counterfactual_grid_cost = counterfactual_legacy_cost - exports[idx] * grid_export_price
 
             grid_import_remaining = max(imports[idx] - local_import[idx], 0.0)
             grid_export_remaining = max(exports[idx] - local_export[idx], 0.0)
@@ -1354,7 +1358,7 @@ class CityLearnRuntimeService:
                 - local_export[idx] * local_sell_price
                 - grid_export_remaining * grid_export_price
             )
-            savings = counterfactual_legacy_cost - cost
+            savings = counterfactual_grid_cost - cost
 
             building.set_net_electricity_consumption_cost(cost, time_step=t)
             market_settlement.append(
@@ -1370,7 +1374,7 @@ class CityLearnRuntimeService:
                     'operator_balance_eur': float(local_import[idx]*local_buy_price-local_export[idx]*local_sell_price),
                     'grid_import_price': float(grid_import_price),
                     'grid_export_price': float(grid_export_price),
-                    'counterfactual_cost_eur': float(counterfactual_legacy_cost),
+                    'counterfactual_cost_eur': float(counterfactual_grid_cost),
                     'settled_cost_eur': float(cost),
                     'market_savings_eur': float(savings),
                 }
