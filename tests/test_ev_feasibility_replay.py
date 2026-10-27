@@ -67,3 +67,17 @@ def test_replay_matches_real_trajectory_at_departure(seconds):
     for threshold, expected in [(target-1e-4, True), (target+1e-4, False)]:
         assert service._ev_departure_threshold_feasible(
             None, charger, sim, NS(battery=b), np.ones(4), 2, threshold) is expected
+
+
+def test_historical_capacity_is_available_even_without_a_charge_call_on_arrival():
+    b, sim, charger = setup()
+    b.capacity_loss_coefficient = .5
+    b.charge(6.)
+    assert b.degraded_capacity == pytest.approx(8.5)
+    b.next_time_step()
+    b.force_set_soc(.2)
+    # The new session has no real charge call yet; its capacity still must be known.
+    assert b.capacity_before_step[1] == pytest.approx(8.5)
+    service = CityLearnKPIService(NS(seconds_per_time_step=3600))
+    assert not service._ev_departure_threshold_feasible(
+        None, charger, sim, NS(battery=b), np.array([0., 1., 0., 0.]), 1, .9)

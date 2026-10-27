@@ -1277,6 +1277,11 @@ class Battery(StorageDevice, ElectricDevice):
     def _minimum_soc(self) -> float:
         return float(np.clip(1.0 - self.depth_of_discharge, 0.0, 1.0))
 
+    def next_time_step(self):
+        super().next_time_step()
+        if self.time_step < len(self.capacity_before_step):
+            self.capacity_before_step[self.time_step] = self.degraded_capacity
+
     def get_max_output_power(self, energy_init: float = None) -> float:
         r"""Get maximum output power while considering `capacity_power_curve` limitations if defined otherwise, returns `nominal_power`.
 
@@ -1471,6 +1476,7 @@ class Battery(StorageDevice, ElectricDevice):
         self._efficiency_history = self._efficiency_history[0:1]
         self._capacity_history = self._capacity_history[0:1]
         self.capacity_before_step = np.full(self.episode_tracker.episode_time_steps, np.nan)
+        self.capacity_before_step[0] = self.degraded_capacity
 
 class DeferrableAppliance(ElectricDevice):
     """Generic deferrable appliance with sparse cycle requests and fixed kWh/step profiles."""
