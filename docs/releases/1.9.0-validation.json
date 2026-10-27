@@ -1,0 +1,624 @@
+{
+  "version": "1.9.0",
+  "date": "2026-10-27",
+  "implementation_commit": "5014da55cc3f5ff7cff7461ecc0cf75724a33954",
+  "tests": {
+    "full_suite_passed": 520,
+    "followup_ev_storage_kpi_passed": 71,
+    "followup_audit_entrypoints_passed": 3,
+    "distinct_tests_after_followup_additions": 522,
+    "note": "CI runs the full suite on the release commit in Python 3.9 and 3.10."
+  },
+  "independent_analytical": {
+    "cases": 88,
+    "passed": 88,
+    "failed": 0
+  },
+  "physics": {
+    "total": 16,
+    "executed": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "hard_failures": 0
+  },
+  "catalog": {
+    "total": 63,
+    "passed": 63,
+    "failed": 0
+  },
+  "catalog_unsupported_checks": [
+    {
+      "dataset": "EC_Ermesinde",
+      "check": "rollout_entity",
+      "reason": "Escalator actions are currently supported only by the flat interface."
+    },
+    {
+      "dataset": "citylearn_challenge_2022_phase_all_demand_response",
+      "check": "rollout_flat",
+      "reason": "Demand response requires the entity interface."
+    },
+    {
+      "dataset": "citylearn_three_phase_dynamic_asset_changes_demo_15s_parquet",
+      "check": "rollout_flat",
+      "reason": "Not feasible: topology_mode='dynamic' requires interface='entity'."
+    },
+    {
+      "dataset": "citylearn_three_phase_dynamic_assets_only_demo",
+      "check": "rollout_flat",
+      "reason": "Not feasible: topology_mode='dynamic' requires interface='entity'."
+    },
+    {
+      "dataset": "citylearn_three_phase_dynamic_assets_only_demo_15s",
+      "check": "rollout_flat",
+      "reason": "Not feasible: topology_mode='dynamic' requires interface='entity'."
+    },
+    {
+      "dataset": "citylearn_three_phase_dynamic_assets_only_demo_15s_parquet",
+      "check": "rollout_flat",
+      "reason": "Not feasible: topology_mode='dynamic' requires interface='entity'."
+    },
+    {
+      "dataset": "citylearn_three_phase_dynamic_topology_demo",
+      "check": "rollout_flat",
+      "reason": "Not feasible: topology_mode='dynamic' requires interface='entity'."
+    },
+    {
+      "dataset": "rec_pt_2023_core_30_v2/core_30_combined",
+      "check": "rollout_flat",
+      "reason": "Not feasible: topology_mode='dynamic' requires interface='entity'."
+    },
+    {
+      "dataset": "rec_pt_2023_core_30_v2/core_30_robustness",
+      "check": "rollout_flat",
+      "reason": "Robustness targets declared for entity are not translated automatically into flat observations."
+    },
+    {
+      "dataset": "rec_pt_2023_core_30_v2/core_30_topology",
+      "check": "rollout_flat",
+      "reason": "Not feasible: topology_mode='dynamic' requires interface='entity'."
+    },
+    {
+      "dataset": "rec_pt_2023_premium_100_v2/premium_100_allin",
+      "check": "rollout_flat",
+      "reason": "Not feasible: topology_mode='dynamic' requires interface='entity'."
+    }
+  ],
+  "portugal_windows": [
+    {
+      "configuration": "core_15",
+      "window": "winter2023",
+      "status": "pass",
+      "initial_active_members": 15,
+      "transitions": 191,
+      "total_seconds": 7.06,
+      "ledger_ms_per_step": 0.393,
+      "ledger_aggregates_kib": 118.78,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 9.709310688776895e-09,
+        "grid_balance_residual_kwh": -5.684341886080802e-14,
+        "pv_balance_residual_kwh": 0.0,
+        "carbon_balance_residual_kgco2": -2.1316282072803006e-14,
+        "storage_max_residual_kwh": 4.487930027607945e-10,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_15",
+      "window": "summer2024",
+      "status": "pass",
+      "initial_active_members": 15,
+      "transitions": 191,
+      "total_seconds": 7.054,
+      "ledger_ms_per_step": 0.451,
+      "ledger_aggregates_kib": 123.52,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.6715375750209205e-09,
+        "grid_balance_residual_kwh": 1.1368683772161603e-13,
+        "pv_balance_residual_kwh": 2.7491324772199732e-09,
+        "carbon_balance_residual_kgco2": 0.0,
+        "storage_max_residual_kwh": 1.2668763815781858e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_combined",
+      "window": "winter2023",
+      "status": "pass",
+      "initial_active_members": 26,
+      "transitions": 191,
+      "total_seconds": 8.078,
+      "ledger_ms_per_step": 0.704,
+      "ledger_aggregates_kib": 322.37,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.469106791773811e-08,
+        "grid_balance_residual_kwh": 0.0,
+        "pv_balance_residual_kwh": 2.618207872728817e-10,
+        "carbon_balance_residual_kgco2": 2.842170943040401e-14,
+        "storage_max_residual_kwh": 2.8251179173821583e-10,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_combined",
+      "window": "summer2024",
+      "status": "pass",
+      "initial_active_members": 27,
+      "transitions": 191,
+      "total_seconds": 9.662,
+      "ledger_ms_per_step": 0.8265,
+      "ledger_aggregates_kib": 328.8,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 3.4515323932282627e-10,
+        "grid_balance_residual_kwh": -5.684341886080802e-14,
+        "pv_balance_residual_kwh": 1.5264276953530498e-08,
+        "carbon_balance_residual_kgco2": -7.105427357601002e-15,
+        "storage_max_residual_kwh": 1.2636292012757622e-10,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_normal",
+      "window": "winter2023",
+      "status": "pass",
+      "initial_active_members": 30,
+      "transitions": 191,
+      "total_seconds": 14.59,
+      "ledger_ms_per_step": 1.0261,
+      "ledger_aggregates_kib": 420.84,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.6174453776329756e-08,
+        "grid_balance_residual_kwh": -2.2737367544323206e-13,
+        "pv_balance_residual_kwh": 7.4353465606691316e-09,
+        "carbon_balance_residual_kgco2": 5.684341886080802e-14,
+        "storage_max_residual_kwh": 2.5224977662219317e-10,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_normal",
+      "window": "summer2024",
+      "status": "pass",
+      "initial_active_members": 30,
+      "transitions": 191,
+      "total_seconds": 14.414,
+      "ledger_ms_per_step": 1.078,
+      "ledger_aggregates_kib": 458.99,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 6.961272447369993e-09,
+        "grid_balance_residual_kwh": 6.821210263296962e-11,
+        "pv_balance_residual_kwh": 2.673357357707573e-08,
+        "carbon_balance_residual_kgco2": 4.135358722123783e-12,
+        "storage_max_residual_kwh": 6.747207237367547e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_robustness",
+      "window": "winter2023",
+      "status": "pass",
+      "initial_active_members": 30,
+      "transitions": 191,
+      "total_seconds": 17.594,
+      "ledger_ms_per_step": 1.0805,
+      "ledger_aggregates_kib": 420.84,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.6174453776329756e-08,
+        "grid_balance_residual_kwh": -2.2737367544323206e-13,
+        "pv_balance_residual_kwh": 7.4353465606691316e-09,
+        "carbon_balance_residual_kgco2": 5.684341886080802e-14,
+        "storage_max_residual_kwh": 2.5224977662219317e-10,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_robustness",
+      "window": "summer2024",
+      "status": "pass",
+      "initial_active_members": 30,
+      "transitions": 191,
+      "total_seconds": 18.27,
+      "ledger_ms_per_step": 1.2186,
+      "ledger_aggregates_kib": 458.99,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 6.961272447369993e-09,
+        "grid_balance_residual_kwh": 6.821210263296962e-11,
+        "pv_balance_residual_kwh": 2.673357357707573e-08,
+        "carbon_balance_residual_kgco2": 4.135358722123783e-12,
+        "storage_max_residual_kwh": 6.747207237367547e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_safety",
+      "window": "winter2023",
+      "status": "pass",
+      "initial_active_members": 30,
+      "transitions": 191,
+      "total_seconds": 17.006,
+      "ledger_ms_per_step": 1.1535,
+      "ledger_aggregates_kib": 420.84,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.6174453776329756e-08,
+        "grid_balance_residual_kwh": -2.2737367544323206e-13,
+        "pv_balance_residual_kwh": 7.435119186993688e-09,
+        "carbon_balance_residual_kgco2": 5.684341886080802e-14,
+        "storage_max_residual_kwh": 2.5224977662219317e-10,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_safety",
+      "window": "summer2024",
+      "status": "pass",
+      "initial_active_members": 30,
+      "transitions": 191,
+      "total_seconds": 16.312,
+      "ledger_ms_per_step": 1.2323,
+      "ledger_aggregates_kib": 458.99,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 6.961272447369993e-09,
+        "grid_balance_residual_kwh": 6.832578947069123e-11,
+        "pv_balance_residual_kwh": 2.673357357707573e-08,
+        "carbon_balance_residual_kgco2": 4.135358722123783e-12,
+        "storage_max_residual_kwh": 6.747207237367547e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_topology",
+      "window": "winter2023",
+      "status": "pass",
+      "initial_active_members": 26,
+      "transitions": 191,
+      "total_seconds": 9.278,
+      "ledger_ms_per_step": 0.868,
+      "ledger_aggregates_kib": 322.37,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.469106791773811e-08,
+        "grid_balance_residual_kwh": 0.0,
+        "pv_balance_residual_kwh": 2.617071004351601e-10,
+        "carbon_balance_residual_kgco2": 0.0,
+        "storage_max_residual_kwh": 2.8251179173821583e-10,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_topology",
+      "window": "summer2024",
+      "status": "pass",
+      "initial_active_members": 27,
+      "transitions": 191,
+      "total_seconds": 10.659,
+      "ledger_ms_per_step": 0.9404,
+      "ledger_aggregates_kib": 328.8,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 3.4515323932282627e-10,
+        "grid_balance_residual_kwh": -5.684341886080802e-14,
+        "pv_balance_residual_kwh": 1.526439064036822e-08,
+        "carbon_balance_residual_kgco2": -7.105427357601002e-15,
+        "storage_max_residual_kwh": 1.2636292012757622e-10,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_4",
+      "window": "winter2023",
+      "status": "pass",
+      "initial_active_members": 4,
+      "transitions": 191,
+      "total_seconds": 2.065,
+      "ledger_ms_per_step": 0.1534,
+      "ledger_aggregates_kib": 20.67,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 2.842170943040401e-14,
+        "grid_balance_residual_kwh": 3.035438567167148e-11,
+        "pv_balance_residual_kwh": 7.105427357601002e-15,
+        "carbon_balance_residual_kgco2": 4.362732397567015e-12,
+        "storage_max_residual_kwh": 1.4210854715202004e-14,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_4",
+      "window": "summer2024",
+      "status": "pass",
+      "initial_active_members": 4,
+      "transitions": 191,
+      "total_seconds": 2.214,
+      "ledger_ms_per_step": 0.1756,
+      "ledger_aggregates_kib": 20.95,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 2.842170943040401e-14,
+        "grid_balance_residual_kwh": 0.0,
+        "pv_balance_residual_kwh": 3.552713678800501e-15,
+        "carbon_balance_residual_kgco2": 0.0,
+        "storage_max_residual_kwh": 1.4210854715202004e-14,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "premium_100_allin",
+      "window": "winter2023",
+      "status": "pass",
+      "initial_active_members": 80,
+      "transitions": 191,
+      "total_seconds": 31.451,
+      "ledger_ms_per_step": 4.5674,
+      "ledger_aggregates_kib": 2904.93,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.2238160707056522e-07,
+        "grid_balance_residual_kwh": 9.094947017729282e-13,
+        "pv_balance_residual_kwh": 1.5267960407072678e-07,
+        "carbon_balance_residual_kgco2": -1.1368683772161603e-13,
+        "storage_max_residual_kwh": 4.97563945600632e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "premium_100_allin",
+      "window": "summer2024",
+      "status": "pass",
+      "initial_active_members": 88,
+      "transitions": 191,
+      "total_seconds": 36.778,
+      "ledger_ms_per_step": 6.5979,
+      "ledger_aggregates_kib": 3750.31,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.232629074365832e-07,
+        "grid_balance_residual_kwh": 1.0695657692849636e-09,
+        "pv_balance_residual_kwh": 2.539190973038785e-07,
+        "carbon_balance_residual_kgco2": 5.825029347761301e-11,
+        "storage_max_residual_kwh": 6.87509071894965e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "premium_100_normal",
+      "window": "winter2023",
+      "status": "pass",
+      "initial_active_members": 100,
+      "transitions": 191,
+      "total_seconds": 56.712,
+      "ledger_ms_per_step": 8.4881,
+      "ledger_aggregates_kib": 4544.3,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.4277975424192846e-07,
+        "grid_balance_residual_kwh": 3.1989657145459205e-08,
+        "pv_balance_residual_kwh": 2.5917961465893313e-07,
+        "carbon_balance_residual_kgco2": 3.947434379369952e-09,
+        "storage_max_residual_kwh": 2.2729409465682693e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "premium_100_normal",
+      "window": "summer2024",
+      "status": "pass",
+      "initial_active_members": 100,
+      "transitions": 191,
+      "total_seconds": 50.776,
+      "ledger_ms_per_step": 8.6209,
+      "ledger_aggregates_kib": 4647.5,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.1950214684475213e-07,
+        "grid_balance_residual_kwh": 2.5025201466633007e-08,
+        "pv_balance_residual_kwh": 2.621168277983088e-07,
+        "carbon_balance_residual_kgco2": 1.4654801816504914e-09,
+        "storage_max_residual_kwh": 5.912177414302278e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    }
+  ],
+  "long_runs": [
+    {
+      "configuration": "core_30_combined",
+      "window": "long2023",
+      "status": "pass",
+      "initial_active_members": 26,
+      "transitions": 2880,
+      "total_seconds": 115.41,
+      "ledger_ms_per_step": 0.8552,
+      "ledger_aggregates_kib": 307.27,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 3.068998921662569e-08,
+        "grid_balance_residual_kwh": -5.4569682106375694e-12,
+        "pv_balance_residual_kwh": 1.0351959645049646e-07,
+        "carbon_balance_residual_kgco2": -3.410605131648481e-13,
+        "storage_max_residual_kwh": 4.846818058013014e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_normal",
+      "window": "long2023",
+      "status": "pass",
+      "initial_active_members": 30,
+      "transitions": 2880,
+      "total_seconds": 154.667,
+      "ledger_ms_per_step": 1.1363,
+      "ledger_aggregates_kib": 455.47,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 4.0363374864682555e-08,
+        "grid_balance_residual_kwh": 2.510205376893282e-10,
+        "pv_balance_residual_kwh": 2.0239804143784568e-07,
+        "carbon_balance_residual_kgco2": 1.2164491636212915e-11,
+        "storage_max_residual_kwh": 4.359435479273088e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_robustness",
+      "window": "long2023",
+      "status": "pass",
+      "initial_active_members": 30,
+      "transitions": 2880,
+      "total_seconds": 160.066,
+      "ledger_ms_per_step": 0.9306,
+      "ledger_aggregates_kib": 455.47,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 4.0363374864682555e-08,
+        "grid_balance_residual_kwh": 2.510205376893282e-10,
+        "pv_balance_residual_kwh": 2.0239804143784568e-07,
+        "carbon_balance_residual_kgco2": 1.2164491636212915e-11,
+        "storage_max_residual_kwh": 4.359435479273088e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_safety",
+      "window": "long2023",
+      "status": "pass",
+      "initial_active_members": 30,
+      "transitions": 2880,
+      "total_seconds": 152.531,
+      "ledger_ms_per_step": 1.107,
+      "ledger_aggregates_kib": 455.47,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 4.0363374864682555e-08,
+        "grid_balance_residual_kwh": 2.546585164964199e-10,
+        "pv_balance_residual_kwh": 2.0239804143784568e-07,
+        "carbon_balance_residual_kgco2": 1.2391865311656147e-11,
+        "storage_max_residual_kwh": 4.359435479273088e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_30_topology",
+      "window": "long2023",
+      "status": "pass",
+      "initial_active_members": 26,
+      "transitions": 2880,
+      "total_seconds": 97.842,
+      "ledger_ms_per_step": 0.7408,
+      "ledger_aggregates_kib": 307.27,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 3.068998921662569e-08,
+        "grid_balance_residual_kwh": -5.4569682106375694e-12,
+        "pv_balance_residual_kwh": 1.0351868695579469e-07,
+        "carbon_balance_residual_kgco2": -4.547473508864641e-13,
+        "storage_max_residual_kwh": 4.846818058013014e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "core_4",
+      "window": "long2023",
+      "status": "pass",
+      "initial_active_members": 4,
+      "transitions": 2880,
+      "total_seconds": 23.928,
+      "ledger_ms_per_step": 0.1672,
+      "ledger_aggregates_kib": 21.3,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 1.1027623258996755e-08,
+        "grid_balance_residual_kwh": 9.512405085843056e-09,
+        "pv_balance_residual_kwh": 9.313225746154785e-10,
+        "carbon_balance_residual_kgco2": 4.896207883575698e-10,
+        "storage_max_residual_kwh": 3.200213427589915e-10,
+        "bus_max_residual_kwh": 0.0
+      }
+    },
+    {
+      "configuration": "premium_100_allin",
+      "window": "long2023",
+      "status": "pass",
+      "initial_active_members": 80,
+      "transitions": 2880,
+      "total_seconds": 371.55,
+      "ledger_ms_per_step": 5.5283,
+      "ledger_aggregates_kib": 3321.57,
+      "accounting_residuals": {
+        "unknown_balance_residual_kwh": 4.3446198105812073e-07,
+        "grid_balance_residual_kwh": 2.5526242097839713e-07,
+        "pv_balance_residual_kwh": 4.282515874365345e-06,
+        "carbon_balance_residual_kgco2": 1.3724275049753487e-08,
+        "storage_max_residual_kwh": 8.455302236143325e-09,
+        "bus_max_residual_kwh": 0.0
+      }
+    }
+  ],
+  "long_runs_note": "Seven completed 30-day runs. Dynamic 30/100-member configurations begin with fewer active members. The static 100-member footprint was measured in both 48-hour windows; no annual controller campaign is claimed.",
+  "memory_note": "Retained provenance aggregates only, excluding physical model buffers, runtime libraries and shared data. Wall times were measured locally with other audit processes running.",
+  "performance": {
+    "none": {
+      "render_mode": "none",
+      "interface": "flat",
+      "configured_steps": 600,
+      "executed_steps": 599,
+      "seconds_per_time_step": 60,
+      "init_s": 0.5507,
+      "reset_s": 0.056,
+      "rollout_s": 5.1201,
+      "avg_step_ms": 8.5447,
+      "p95_step_ms": 9.4736,
+      "raw_avg_step_ms": 8.5447,
+      "raw_p95_step_ms": 9.4736,
+      "end_export_s": 0.0,
+      "final_kpi_export_s": 0.0,
+      "terminal_export_s": 0.0
+    },
+    "end": {
+      "render_mode": "end",
+      "interface": "flat",
+      "configured_steps": 600,
+      "executed_steps": 599,
+      "seconds_per_time_step": 60,
+      "init_s": 0.5389,
+      "reset_s": 0.0522,
+      "rollout_s": 14.0594,
+      "avg_step_ms": 8.9736,
+      "p95_step_ms": 10.1447,
+      "raw_avg_step_ms": 23.4682,
+      "raw_p95_step_ms": 10.1576,
+      "end_export_s": 0.464,
+      "final_kpi_export_s": 8.2183,
+      "terminal_export_s": 8.6823
+    },
+    "entity_none": {
+      "render_mode": "none",
+      "interface": "entity",
+      "configured_steps": 600,
+      "executed_steps": 599,
+      "seconds_per_time_step": 60,
+      "init_s": 0.5018,
+      "reset_s": 0.0572,
+      "rollout_s": 10.0294,
+      "avg_step_ms": 16.7408,
+      "p95_step_ms": 17.611,
+      "raw_avg_step_ms": 16.7408,
+      "raw_p95_step_ms": 17.611,
+      "end_export_s": 0.0,
+      "final_kpi_export_s": 0.0,
+      "terminal_export_s": 0.0
+    }
+  },
+  "build": "wheel and sdist built; both passed twine check",
+  "entity_contract": "passed without snapshot drift",
+  "report_receipts": {
+    "physics": {
+      "file": "physics.json",
+      "sha256": "a29a6781aff59207f9d06fe1aedaabf5511bc56218d10a37389603b9108fbac6"
+    },
+    "portugal_windows": {
+      "file": "portugal_windows.json",
+      "sha256": "72ee488a57eac3163d494d5d3ce675aac35ac92febc7f926ddab1214b0c9be2f"
+    },
+    "long_runs": {
+      "file": "long_runs.json",
+      "sha256": "8f97edb35171bb8a66e8eec1e014b7f6f766c0e39ec960f4646ccb9b9fb2b1ba"
+    },
+    "catalog": {
+      "file": "catalog.json",
+      "sha256": "37e96980e74a6d8953fddfb005024f88a8a5e4cf34431767713b90891cc40174"
+    },
+    "performance": {
+      "file": "performance.json",
+      "sha256": "af062940f344de858439513b87a949746a8d841d3e36e7ef950249e2c1d25aec"
+    },
+    "entity_contract": {
+      "file": "entity_contract.json",
+      "sha256": "a1a9a0d049430f58754ee7254718279bcc0160faae3101a21d1d64b0e68ecc76"
+    }
+  }
+}

@@ -4,6 +4,63 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.0 — 2026-10-27
+
+Responsável: [@calofonseca](https://github.com/calofonseca).
+
+### O que ficou feito
+
+- Reunidas a versão pública 1.8.3, os dados portugueses de 2023–2024 e as correções
+  da reserva das baterias e da comparação económica. Um SOC inferior à reserva
+  não passa a ganhar energia gratuitamente. A poupança da partilha compara as
+  mesmas tarifas externas com e sem partilha.
+- Corrigida a viabilidade de partida dos EV: usa o modelo concreto da bateria,
+  limites de carga e SOC, perdas do carregador, curvas, degradação, perdas em
+  repouso e limites da instalação. Continua depois de um bloqueio temporário e
+  verifica o SOC à partida sem alterar o veículo real.
+- Implementado o rastreio da origem e destino da energia através das baterias,
+  EV e partilha. Distingue consumo útil, exportação posterior, perdas, energia
+  ainda armazenada, entrega à mobilidade e saída de ativos/membros. A energia
+  inicial ou atribuída externamente mantém origem desconhecida.
+- Acrescentados indicadores de utilização solar e emissões na fronteira externa,
+  com referências BAU da mesma definição. Os indicadores antigos mantêm o seu
+  significado, explicitamente documentado. A energia comprada à rede conserva a
+  informação de carbono ao atravessar uma bateria.
+- Exportações de KPIs passam a incluir um manifesto com configuração efetiva,
+  mercado, seed, intervalo, versão das definições, commit quando disponível,
+  hashes dos dados e balanços por origem/destino.
+- Corrigido o instante da auditoria física em comunidades dinâmicas; descoberta
+  dos nove pontos de entrada portugueses, leitura BOM, continuação após erros,
+  quatro atalhos da raiz e três caminhos Parquet. Atualizados os checksums dos
+  schemas alterados. As combinações não suportadas ficam identificadas.
+- Integradas as auditorias física, portuguesa e de catálogo na CI. Mantidos os
+  testes, verificações de código e controlo de desempenho.
+
+### Validação
+
+Os resultados e a medição de tempo/memória para 4, 30 e 100 membros constam da
+[evidência da versão](../releases/1.9.0-validation.json). As regressões incluem os
+quatro erros EV, solar guardado e depois exportado, mistura solar/rede, partilha,
+perdas, V2G, chegadas/partidas, atribuições externas de SOC, remoções, reset,
+avaliação repetida e passos sem feedback. Para as mesmas ações, o registo passivo
+preserva trajetórias físicas e custos. [Definições](../energy_provenance.md).
+
+### O que não ficou feito e limitações
+
+- Não foi implementado um escalonamento conjunto de todos os EV. A viabilidade
+  é uma repetição individual de carga máxima, com os limites declarados.
+- A entrega de energia à mobilidade não prova consumo na viagem. Não foram
+  acrescentados modelos eletroquímicos/térmicos detalhados da bateria, fluxos de
+  potência da rede, rastreio de calor útil ou validação em campo.
+- Escadas rolantes em entity continuam não suportadas; DR e topologia dinâmica
+  exigem entity. Não se alteraram as políticas com informação futura nem se
+  trabalharam SAC/MARLISA ou uma campanha anual de comparação de controladores.
+- Os novos KPIs têm nomes próprios. Experiências antigas sem registo da origem
+  devem ser repetidas para calcular estes resultados. Os casos afetados pelas
+  correções de reserva e viabilidade também exigem nova avaliação.
+- Mantêm-se a venda à rede a zero e o preço interno a 80% quando assim
+  configurados. Os layouts de ações e observações mantêm-se compatíveis.
+
 ## Politica de Versao
 
 | Tipo | Quando usar | Exemplo |

@@ -14,9 +14,12 @@ It is a fork-based project used for research and experimentation on:
   feasible action capacity and requested/limited/applied action feedback.
 - dynamic member and asset topology with repeatable multi-episode reset semantics.
 
-Current source release: `1.8.3`. EV arrival SOC is visible immediately in flat and
-entity observations. Runtime community datasets preserve the flexibility known
-at each historical timestamp through their exported charger time series.
+Current source release: `1.9.0`. This release adds passive energy provenance
+through stationary batteries, EVs and community sharing, useful solar-energy
+indicators and carbon accounting at the external grid boundary. EV departure
+feasibility uses the concrete battery physics. KPI exports include reproducibility
+manifests. Existing instantaneous PV and gross-import emissions remain available
+with their historical meanings. See the release notes for validation and limits.
 
 ## Project Positioning
 

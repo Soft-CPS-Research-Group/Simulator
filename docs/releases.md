@@ -6,48 +6,66 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
-## Unreleased — local consolidation, 2026-10-26
+## v1.9.0 — 2026-10-27
 
-- Economic audit, 2026-10-27: the community-market counterfactual now credits
-  all member surplus at the configured external export tariff. Market savings
-  compare the same grid tariffs with and without local sharing, so disabling
-  local trading yields zero market savings even when grid export is paid.
-  Settlement costs, prices and the usual 80% local / zero grid export setup
-  remain unchanged. Regression coverage includes positive/negative import
-  prices, zero/positive export prices and explicit per-member tariffs.
-  Validation after this correction: 495 tests passed, including eight new
-  counterfactual cases; the four paid-export regressions failed before the fix.
+Release owner: [@calofonseca](https://github.com/calofonseca).
 
-- Combine the published 1.8.3 runtime (`be1e10af`) with the Portuguese 2023–2024
-  dataset work (`b8d5da84`), preserving both histories and the dataset files.
-- Distinguish the original 1.8.0 dataset/report provenance from the runtime in
-  the consolidated working tree. Retain the inventory battery, EV loading and
-  arrival-observation improvements from 1.8.1–1.8.3.
-- Preserve physical battery SOC below the operational discharge reserve at
-  initialization, EV arrival and subsequent steps. Charging supplies the actual
-  recovery energy; discharge is blocked below the reserve. Standby losses can
-  reduce SOC below that reserve and are not replenished for free.
-- With `physics_invariant_checks=True`, compare actual stored battery energy
-  before and after actions against terminal energy and efficiency. This check
-  covers stationary batteries and EVs in both normal and feedback-free steps,
-  taking arrivals and standby losses into account before the snapshot. Multiple
-  transfers within one step are accumulated with each operation's efficiency.
-- Compatibility: schemas and action layouts are unchanged. Results may change
-  for initial/arrival SOC below a positive reserve or standby losses reaching
-  that reserve; rerun affected experiments rather than treating those results
-  as equivalent to published 1.8.3. The Portuguese EV schemas use zero reserve.
-- Keep the package version at 1.8.3 during local preparation. This entry does
-  not constitute a new tag, package publication or deployment; identify local
-  experiments by their Git commit as well as the package version.
+### Completed
 
-Validation (completed 2026-10-27): 487 tests passed, including 23 reserve and
-conservation regressions; 83 independent analytical cases passed; all 18
-Portuguese windows (nine configurations, 2023/2024, 1,710 transitions) passed
-with physics checks enabled. The entity contract audit passed without snapshot
-drift. The physics matrix retains eight pre-existing topology-boundary flags;
-after refining the multi-transfer check, the four affected dynamic asset cases
-were repeated and their failures match the previous audit exactly. Those
-topology diagnostics remain a separate task, rather than a green physics audit.
+- Consolidate published 1.8.3 with the Portuguese 2023–2024 datasets and the
+  battery-reserve and economic-counterfactual corrections. Initialization,
+  arrivals and standby losses no longer create energy below the reserve.
+  Sharing savings compare the same external tariffs with and without sharing.
+- Replay native EV battery physics for departure feasibility: asymmetric powers,
+  maximum SOC, charger AC losses, battery efficiency, degradation at arrival,
+  standby losses and service headroom. Continue after temporary outages and
+  check the final departure SOC without mutating the real vehicle.
+- Add a passive proportional energy ledger through stationary batteries, EVs,
+  local sharing, losses, delayed export, departures and asset/member changes.
+  Multiple transfers retain their own conversion losses; charger energy totals
+  accumulate transfers while its command history retains the latest command.
+- Add useful PV consumption, mobility delivery, remaining stock, losses and
+  external export KPIs, plus external acquisition and use-attributed carbon.
+  Initial/external inventory remains unknown. Existing instantaneous-PV and
+  gross-member-import emissions keep their historical definitions.
+- Use the same definitions in the BAU sidecar; expose new indicators in the
+  scorecard and add reproducibility manifests to KPI exports (configuration,
+  market settings, seed, timestep, definitions, source commit when available,
+  input-file hashes and source/destination totals).
+- Check settled physics before changing topology. Read BOM schemas consistently,
+  continue catalogue reports after bad inputs, discover all nine Portuguese
+  evaluation entries, correct four root shortcuts and three Parquet root paths,
+  and report unsupported interface combinations explicitly. Short catalogue
+  probes allocate short episodes. Refresh affected schema checksums.
+- Add the physical matrix, Portuguese windows and dataset catalogue to CI,
+  alongside the existing tests, lint and performance checks.
+
+### Validation
+
+Machine-readable results and the measured 4/30/100-member accounting footprint
+are recorded in [release evidence](releases/1.9.0-validation.json). Analytical
+regressions cover solar stored then exported, mixed origins, carbon retained
+through storage, multiple transfers, charger losses, departures, external SOC
+assignments, removals, reset, repeated evaluation and the feedback-free path.
+Physical trajectories and costs match with accounting enabled or muted for the
+same seeded actions. See [definitions and examples](energy_provenance.md).
+
+### Compatibility and work not included
+
+- Normal settlement remains zero grid-export price and 80% internal price when
+  configured that way. No new action/observation layout is introduced. Historical
+  studies affected by reserve or feasibility bugs must be rerun.
+- PV useful-use and external-carbon KPIs are additive, not replacements under old
+  names. Aggregated historical data cannot reconstruct missing energy origins.
+- EV feasibility is individual maximum-charge replay, not a joint scheduling or
+  arbitrary nonlinear global optimality proof. Legacy incomplete adapters retain
+  their documented compatibility approximation.
+- Mobility delivery does not measure road-trip consumption. Thermal storage is
+  not traced as useful heat; detailed battery electrochemistry/temperature,
+  distribution power flow and field validation are not added.
+- DR and dynamic topology require entity; escalator control in entity remains
+  unsupported and is explicitly reported. No future-data policy redesign,
+  SAC/MARLISA work or full annual multi-controller research campaign is claimed.
 
 ## Version Policy
 

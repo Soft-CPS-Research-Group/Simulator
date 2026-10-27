@@ -1,5 +1,8 @@
 > **Portugal — motor original `978be68b`:** nove configurações, tarifa comum e documentação em [catálogo dos datasets](docs/portugal_rec_native/README.md). A revisão corrente apenas constrói os dados; as avaliações anteriores são históricas.
 
+Version **1.9.0** adds [energy provenance and external carbon accounting](docs/energy_provenance.md).
+See [completed work, validation and remaining limitations](docs/releases.md).
+
 # CityLearn
 
 CityLearn is an open-source Farama Foundation Gymnasium environment for building energy coordination, demand response and multi-agent reinforcement learning. This repository is a research fork that extends the upstream simulator with EVs, normalized deferrable appliances, sub-hourly physics, entity observations, dataset-driven demand response, robustness events, dynamic topology, three-phase electrical service, community KPIs and performance work for large datasets.
