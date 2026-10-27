@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+from copy import copy
+from types import SimpleNamespace
+from array import array
+
+from citylearn.energy_model import Battery
+
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
@@ -590,9 +596,6 @@ class CityLearnKPIService:
         if arrival_soc is None:
             return True
 
-        if arrival_soc + self.EV_DEPARTURE_EPS >= threshold_soc:
-            return True
-
         seconds_per_time_step = self._to_scalar(
             getattr(
                 charger,
@@ -609,36 +612,44 @@ class CityLearnKPIService:
         soc = float(arrival_soc)
         connected_steps = max(int(departure_index) - int(interval_start) + 1, 0)
 
+        # Replay the concrete battery implementation in compact, isolated buffers.
+        # No real state, RNG, degradation history or episode tracker is advanced.
+        replay = None
+        if isinstance(battery, Battery):
+            replay = copy(battery)
+            replay.episode_tracker = SimpleNamespace(episode_time_steps=max(connected_steps, 1))
+            replay.reset()
+            capacities = getattr(battery, 'capacity_before_step', [])
+            capacity = self._safe_sequence_value(capacities, interval_start)
+            if capacity is not None and np.isfinite(capacity):
+                replay._capacity_history = array('d', [float(capacity)])
+            replay.force_set_soc(arrival_soc)
+
         for offset in range(connected_steps):
-            if soc + self.EV_DEPARTURE_EPS >= threshold_soc:
-                return True
-
             step = int(interval_start) + offset
-            battery_limited_power_kw = self._ev_battery_max_input_power_kw(battery, charger_power_kw, soc)
+            # Service limits apply at the AC charger inlet; battery limits apply
+            # downstream of charger losses, inside Battery.charge().
             power_kw = self._ev_constraint_limited_charge_power_kw(
-                building,
-                charger,
-                step,
-                battery_limited_power_kw,
+                building, charger, step, charger_power_kw,
             )
-
-            if power_kw <= self.EV_DEPARTURE_EPS:
-                break
-
             charger_efficiency = self._ev_charger_charge_efficiency(charger, power_kw, charger_power_kw)
-            battery_round_trip_efficiency = self._ev_battery_charge_round_trip_efficiency(battery, power_kw)
-            delta_soc = (
-                power_kw
-                * step_hours
-                * charger_efficiency
-                * battery_round_trip_efficiency
-                / capacity_kwh
-            )
-
-            if delta_soc <= self.EV_DEPARTURE_EPS:
-                break
-
-            soc = float(np.clip(soc + delta_soc, 0.0, 1.0))
+            if replay is not None:
+                if offset:
+                    replay.next_time_step()
+                ratio = replay.time_step_ratio or 1.0
+                replay.charge(power_kw * step_hours * charger_efficiency / ratio)
+                soc = float(replay.soc[offset])
+            else:
+                # Compatibility for legacy battery adapters without a physical
+                # charge method; never used for native Battery/InventoryBattery.
+                if offset:
+                    soc *= 1.0 - float(getattr(battery, 'loss_coefficient', 0.0))
+                battery_power = self._ev_battery_max_input_power_kw(
+                    battery, power_kw * charger_efficiency, soc,
+                )
+                eta = self._ev_battery_charge_round_trip_efficiency(battery, battery_power)
+                soc = float(np.clip(soc + battery_power * step_hours * eta / capacity_kwh,
+                                    0.0, getattr(battery, 'max_soc', 1.0)))
 
         return bool(soc + self.EV_DEPARTURE_EPS >= threshold_soc)
 

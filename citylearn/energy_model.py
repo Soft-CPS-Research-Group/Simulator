@@ -1206,6 +1206,8 @@ class Battery(StorageDevice, ElectricDevice):
         energy : float
             Energy to charge if (+) or discharge if (-) in [kWh].
         """
+        if np.isnan(self.capacity_before_step[self.time_step]):
+            self.capacity_before_step[self.time_step] = self.degraded_capacity
         # Public control paths pass dataset-resolution kWh; physical limits are per control step.
         ratio = self.time_step_ratio if self.time_step_ratio not in (None, 0) else 1.0
         requested_energy = float(energy) * ratio
@@ -1443,6 +1445,7 @@ class Battery(StorageDevice, ElectricDevice):
         super().reset()
         self._efficiency_history = self._efficiency_history[0:1]
         self._capacity_history = self._capacity_history[0:1]
+        self.capacity_before_step = np.full(self.episode_tracker.episode_time_steps, np.nan)
 
 class DeferrableAppliance(ElectricDevice):
     """Generic deferrable appliance with sparse cycle requests and fixed kWh/step profiles."""
