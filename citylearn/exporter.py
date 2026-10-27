@@ -172,6 +172,9 @@ class EpisodeExporter:
             kpis.fillna('').to_csv(file_path, index=False, encoding='utf-8')
         if include_business_as_usual and export_business_as_usual_timeseries:
             self.export_business_as_usual_timeseries(export_env)
+        from citylearn.internal.experiment import experiment_manifest
+        from citylearn.utils.file_handler import FileHandler
+        FileHandler.write_json(str(Path(file_path).with_suffix('.manifest.json')), experiment_manifest(export_env))
         env._final_kpis_exported = True
 
     def export_business_as_usual_timeseries(self, source_env: "CityLearnEnv" = None):

@@ -26,6 +26,13 @@ class CityLearnKPIService:
     EV_DEPARTURE_EPS = 1.0e-6
     ELECTRICAL_RESIDUAL_EPS_KW = 1.0e-5
     SCORECARD_DEFAULT_KPIS: Tuple[str, ...] = (
+        # Final destinations and external carbon use the versioned ledger.
+        'district_energy_provenance_pv_useful_building_ratio',
+        'district_energy_provenance_pv_useful_with_mobility_ratio',
+        'district_energy_provenance_pv_stored_kwh',
+        'district_energy_provenance_pv_grid_export_kwh',
+        'district_energy_provenance_external_purchase_emissions_kgco2',
+        'district_energy_provenance_external_purchase_emissions_business_as_usual_kgco2',
         # Cost scorecard values and BAU reference.
         'district_cost_total_control_eur',
         'district_cost_total_business_as_usual_eur',
@@ -2593,6 +2600,19 @@ class CityLearnKPIService:
             for _, row in bau_df.iterrows()
         }
 
+        # These references use the same provenance definition and physical
+        # boundary because the BAU sidecar executes the same passive ledger.
+        for (level, name, metric), record in list(records.items()):
+            if metric.startswith(f'{level}_energy_provenance_'):
+                reference = bau_lookup.get((level, name, metric))
+                stem, unit = metric.rsplit('_', 1)
+                reference_key = f'{stem}_business_as_usual_{unit}'
+                records[(level, name, reference_key)] = dict(record, cost_function=reference_key, value=reference)
+                a, b = self._to_scalar(record['value'], np.nan), self._to_scalar(reference, np.nan)
+                delta_key = f'{stem}_delta_to_business_as_usual_{unit}'
+                records[(level, name, delta_key)] = dict(record, cost_function=delta_key,
+                    value=float(a-b) if np.isfinite(a) and np.isfinite(b) else None)
+
         def put(level: str, name: str, cost_function: str, value):
             records[(level, name, cost_function)] = {
                 'cost_function': cost_function,
@@ -3350,6 +3370,15 @@ class CityLearnKPIService:
         put('district', 'District', v2('district', 'equity', 'distribution', 'losers', None, 'percent'), equity_distribution['equity_losers_percent'])
         put('district', 'District', v2('district', 'equity', 'distribution', 'bpr_asset_poor_over_rich', None, 'ratio'), equity_bpr)
 
+        provenance = getattr(env, '_provenance_service', None)
+        if provenance is not None:
+            members, district = provenance.summary()
+            for name, metrics in members.items():
+                for metric, value in metrics.items():
+                    put('building', name, f'building_energy_provenance_{metric}', value)
+            for metric, value in district.items():
+                put('district', 'District', f'district_energy_provenance_{metric}', value)
+
         if include_business_as_usual and not bool(getattr(env, '_business_as_usual_sidecar', False)):
             self._add_business_as_usual_records(
                 records,
@@ -3360,6 +3389,8 @@ class CityLearnKPIService:
             )
 
         output = pd.DataFrame(list(records.values()))
+        if provenance is not None:
+            output.attrs['energy_accounting'] = provenance.get_metadata()
         if output.empty:
             return pd.DataFrame(columns=['cost_function', 'value', 'name', 'level'])
 

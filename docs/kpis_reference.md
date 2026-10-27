@@ -1,5 +1,7 @@
 # KPIs Reference
 
+Version 1.9.0 adds [energy provenance and external-boundary carbon accounting](energy_provenance.md). Legacy instantaneous PV absorption and pre-sharing emissions keep their existing meanings.
+
 The simulator exposes two KPI APIs.
 
 Portuguese version: [pt/kpis_reference.md](pt/kpis_reference.md).
