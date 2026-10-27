@@ -90,3 +90,26 @@ jobs:
           name: perf-smoke-report
           path: ${{ runner.temp }}/perf/perf_smoke_report.json
           if-no-files-found: ignore
+
+  accounting-audit:
+    needs: lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install audit dependencies
+        run: pip install -r requirements.txt -r test_requirements.txt pyarrow -e .
+      - name: Audit physical time steps and topology boundaries
+        run: python scripts/audit/audit_physics.py --output outputs/audit/physics.json
+      - name: Audit Portuguese winter and summer windows
+        run: python scripts/audit/audit_portugal_windows.py --output outputs/audit/portugal.json
+      - name: Audit supported dataset interfaces
+        run: python scripts/audit/audit_datasets.py --offline --max-steps 8 --output outputs/audit/datasets.json
+      - name: Upload accounting audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accounting-audit
+          path: outputs/audit/*.json

@@ -122,5 +122,6 @@ reports the commit as unavailable rather than borrowing an unrelated revision.
 Provenance does not add electrochemical battery temperature, detailed road-trip
 energy, distribution power flow or field validation. Vehicle returns with imposed
 SOC start a new unknown cohort. Escalators remain unsupported in the entity
-interface; DR and dynamic topology require entity. Future-data access by some
+interface; DR and dynamic topology require entity. Robustness catalogues targeting
+entity features are not automatically translated into flat observations. Future-data access by some
 reference policies and controller-quality comparisons are separate work.

@@ -101,6 +101,7 @@ class CityLearnPhysicsInvariantService:
             + self._safe_index(building.solar_generation, t, 0.0)
             + self._safe_index(building.chargers_electricity_consumption, t, 0.0)
             + self._safe_index(building.deferrable_appliances_electricity_consumption, t, 0.0)
+            + self._safe_index(getattr(building, 'escalators_electricity_consumption', []), t, 0.0)
         )
 
         assert abs(net - terms) <= self.ENERGY_EPS, (
@@ -130,6 +131,7 @@ class CityLearnPhysicsInvariantService:
             + max(storage_energy, 0.0)
             + max(charger_energy, 0.0)
             + self._safe_index(building.deferrable_appliances_electricity_consumption, t, 0.0)
+            + self._safe_index(getattr(building, 'escalators_electricity_consumption', []), t, 0.0)
         )
 
         assert local_loads <= local_sources + self.ENERGY_EPS, (

@@ -435,6 +435,7 @@ def _check_net_balance(env, settled_time_step: int) -> Tuple[bool, List[str], in
                 + float(building.solar_generation[t])
                 + float(building.chargers_electricity_consumption[t])
                 + float(building.deferrable_appliances_electricity_consumption[t])
+                + float(building.escalators_electricity_consumption[t])
             )
         except Exception as exc:
             errors.append(f"{name} net balance unavailable at t={t}: {exc}")
@@ -661,6 +662,7 @@ def _run_scenario(CityLearnEnv, scenario: Scenario) -> Dict[str, Any]:
     steps_executed = 0
     start = time.perf_counter()
     final_topology_version: Optional[int] = None
+    accounting = {}
 
     try:
         env_kwargs = {
@@ -683,6 +685,25 @@ def _run_scenario(CityLearnEnv, scenario: Scenario) -> Dict[str, Any]:
         if not ok:
             checks["runtime_invariants"]["failures"] += 1
             failures.append(message)
+
+        original_assert = env._physics_invariant_service.assert_step_invariants
+
+        def audit_settled_interval(settled_step):
+            original_assert(settled_step)
+            checks["runtime_invariants"]["calls"] += 1
+            for check_name, check in (
+                ("soc_bounds", _check_soc_bounds),
+                ("net_balance", _check_net_balance),
+                ("component_power_limits", _check_component_power_limits),
+            ):
+                checks[check_name]["calls"] += 1
+                ok, errors, checked = check(env, settled_step)
+                checks[check_name]["checked"] += checked
+                if not ok:
+                    checks[check_name]["failures"] += len(errors)
+                    failures.extend(errors)
+
+        env._physics_invariant_service.assert_step_invariants = audit_settled_interval
 
         while True:
             checks["finite_observations"]["calls"] += 1
@@ -708,35 +729,6 @@ def _run_scenario(CityLearnEnv, scenario: Scenario) -> Dict[str, Any]:
 
             observation, _reward, terminated, truncated, _step_info = env.step(action)
             steps_executed += 1
-            settled_step = int(max(getattr(env, "time_step", 0) - 1, 0))
-
-            checks["runtime_invariants"]["calls"] += 1
-            ok, message = _call_runtime_invariants(env, settled_step)
-            if not ok:
-                checks["runtime_invariants"]["failures"] += 1
-                failures.append(message)
-
-            checks["soc_bounds"]["calls"] += 1
-            ok, errors, checked = _check_soc_bounds(env, settled_step)
-            checks["soc_bounds"]["checked"] += checked
-            if not ok:
-                checks["soc_bounds"]["failures"] += len(errors)
-                failures.extend(errors)
-
-            checks["net_balance"]["calls"] += 1
-            ok, errors, checked = _check_net_balance(env, settled_step)
-            checks["net_balance"]["checked"] += checked
-            if not ok:
-                checks["net_balance"]["failures"] += len(errors)
-                failures.extend(errors)
-
-            checks["component_power_limits"]["calls"] += 1
-            ok, errors, checked = _check_component_power_limits(env, settled_step)
-            checks["component_power_limits"]["checked"] += checked
-            if not ok:
-                checks["component_power_limits"]["failures"] += len(errors)
-                failures.extend(errors)
-
             if terminated or truncated:
                 break
 
@@ -747,6 +739,12 @@ def _run_scenario(CityLearnEnv, scenario: Scenario) -> Dict[str, Any]:
             checks["kpi_evaluation"]["failures"] += len(errors)
             failures.extend(errors)
 
+        _, accounting = env._provenance_service.summary()
+        for key in ('pv_balance_residual_kwh', 'grid_balance_residual_kwh',
+                    'unknown_balance_residual_kwh', 'carbon_balance_residual_kgco2',
+                    'storage_max_residual_kwh', 'bus_max_residual_kwh'):
+            if abs(accounting.get(key, 0.0)) > 1e-3:
+                failures.append(f"Provenance reconciliation failed: {key}={accounting[key]}")
         final_topology_version = int(getattr(env, "topology_version", 0))
 
     except Exception as exc:
@@ -770,6 +768,7 @@ def _run_scenario(CityLearnEnv, scenario: Scenario) -> Dict[str, Any]:
         "duration_s": round(float(elapsed), 4),
         "avg_step_ms": round(float(avg_step_ms), 4),
         "final_topology_version": final_topology_version,
+        "energy_accounting": accounting,
         "checks": checks,
         "failures": failures,
     }
