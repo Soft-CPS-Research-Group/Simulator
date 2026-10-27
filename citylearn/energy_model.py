@@ -797,6 +797,23 @@ class StorageDevice(Device):
         return self.__stored_energy_transfer
 
     @property
+    def energy_provenance_events(self):
+        """Actual operations in the current step, with AC/storage boundaries.
+
+        This bounded journal is passive: it never feeds the physical model.
+        """
+        if getattr(self, '_energy_event_step', None) != self.time_step:
+            return []
+        return self._energy_events
+
+    def _record_energy_event(self, kind, before, after, terminal=0.0):
+        if getattr(self, '_energy_event_step', None) != self.time_step:
+            self._energy_events = []
+            self._energy_event_step = self.time_step
+        self._energy_events.append(dict(kind=kind, before=float(before), after=float(after),
+                                       terminal=float(terminal), bus=float(terminal)))
+
+    @property
     def energy_balance(self) -> np.ndarray:
         r"""Charged/discharged energy time series in [kWh]."""
 
@@ -850,6 +867,8 @@ class StorageDevice(Device):
             next_soc = float(np.clip(previous_soc * (1.0 - self.loss_coefficient), 0.0, 1.0))
             self.__soc[self.time_step] = next_soc
             self.__soc_initialized[self.time_step] = True
+            self._record_energy_event('standby', previous_soc*self.capacity,
+                                      float(self.__soc[self.time_step])*self.capacity)
 
     def get_metadata(self) -> Mapping[str, Any]:
         return {
@@ -895,9 +914,13 @@ class StorageDevice(Device):
         self.__stored_energy_transfer = self.stored_energy_transfer + stored_change
         self.__transfer_time_step = self.time_step
 
+        self._record_energy_event('transfer', energy_init, self.energy_init, terminal_energy)
+
     def force_set_soc(self, soc: float):
+        before = self.energy_init
         self.__soc[self.time_step] = soc
         self.__soc_initialized[self.time_step] = True
+        self._record_energy_event('external', before, self.energy_init)
 
     def set_energy_balance(self, energy: float, energy_init:float) -> float:
         r"""Calculate energy balance.
@@ -969,6 +992,8 @@ class StorageDevice(Device):
         self.__energy_balance = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.__stored_energy_transfer = 0.0
         self.__transfer_time_step = self.time_step
+        self._energy_events = []
+        self._energy_event_step = self.time_step
 
 class StorageTank(StorageDevice):
     r"""Base thermal energy storage class.

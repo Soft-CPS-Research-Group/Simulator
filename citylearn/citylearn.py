@@ -23,6 +23,7 @@ from citylearn.internal.kpi import CityLearnKPIService
 from citylearn.internal.loading import CityLearnLoadingService
 from citylearn.internal.baseline import CityLearnBusinessAsUsualBaselineService
 from citylearn.internal.physics_invariants import CityLearnPhysicsInvariantService
+from citylearn.internal.provenance import CityLearnProvenanceService
 from citylearn.internal.runtime import CityLearnRuntimeService
 from citylearn.internal.entity_interface import CityLearnEntityInterfaceService
 from citylearn.internal.topology import CityLearnTopologyService
@@ -296,6 +297,7 @@ class CityLearnEnv(Environment, Env):
         self._kpi_service = CityLearnKPIService(self)
         self._business_as_usual_baseline_service = CityLearnBusinessAsUsualBaselineService(self)
         self._physics_invariant_service = CityLearnPhysicsInvariantService(self)
+        self._provenance_service = CityLearnProvenanceService(self)
         self._entity_service = CityLearnEntityInterfaceService(self)
         self._topology_service = CityLearnTopologyService(self)
         self._demand_response_service = CityLearnDemandResponseService(self)
@@ -1295,6 +1297,7 @@ class CityLearnEnv(Environment, Env):
             'topology_version': self.topology_version,
             'topology_event_log': self.topology_event_log,
             'physics_invariant_checks': bool(getattr(self, 'physics_invariant_checks', False)),
+            'energy_accounting': self._provenance_service.get_metadata(),
             'ev_departure_within_tolerance': self.ev_departure_within_tolerance,
             'ev_departure_service_tolerance': self.ev_departure_service_tolerance,
             'reward_function': self.reward_function.__class__.__name__,
@@ -1305,6 +1308,8 @@ class CityLearnEnv(Environment, Env):
                 'local_price_ratio_to_grid_import': self.community_market_sell_ratio,
                 'intra_community_sell_ratio': self.community_market_sell_ratio,
                 'grid_export_price': self.community_market_grid_export_price,
+                'local_trading_enabled': getattr(self, 'community_market_local_enabled', True),
+                'settlement_version': (self.schema.get('community_market') or {}).get('settlement_version', 1),
                 'import_member_weights': self.community_market_import_member_weights,
                 'kpis': {
                     'community_local_traded_enabled': self.community_market_kpi_local_traded_enabled,
@@ -1605,6 +1610,7 @@ class CityLearnEnv(Environment, Env):
         self._demand_response_service.reset()
         self._robustness_service.reset()
         self.associate_chargers_to_electric_vehicles()
+        self._provenance_service.reset()
 
         # reset reward function (does nothing by default)
         self.reward_function.reset()

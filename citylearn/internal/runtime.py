@@ -213,6 +213,7 @@ class CityLearnRuntimeService:
         timer_start = time.perf_counter() if debug_timing else 0.0
         clear_step_electric_loads_time = 0.0
         building_apply_action_times = []
+        env._provenance_service.begin_step()
         if bool(getattr(env, 'physics_invariant_checks', False)):
             env._physics_invariant_service.capture_battery_energy_before_actions(int(env.time_step))
         for building, building_actions in zip(env.buildings, actions):
@@ -251,6 +252,7 @@ class CityLearnRuntimeService:
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         self.update_variables()
+        env._provenance_service.settle()
         if debug_timing:
             timings['update_variables_time'] = time.perf_counter() - timer_start
             timings.update(getattr(env, '_last_update_variables_debug_timing', {}))
@@ -313,6 +315,7 @@ class CityLearnRuntimeService:
                 env._refresh_action_cache()
                 env._entity_service.invalidate()
                 env.reward_function.env_metadata = env.get_metadata()
+        env._provenance_service.synchronize()
         topology_events_applied = list(
             (getattr(env, 'topology_event_log', []) or [])[topology_log_size_before:]
         )
@@ -741,6 +744,7 @@ class CityLearnRuntimeService:
         if getattr(getattr(env, '_robustness_service', None), 'enabled', False):
             actions = env._robustness_service.apply_actions(actions)
 
+        env._provenance_service.begin_step()
         if bool(getattr(env, 'physics_invariant_checks', False)):
             env._physics_invariant_service.capture_battery_energy_before_actions(int(env.time_step))
         for building, building_actions in zip(env.buildings, actions):
@@ -749,6 +753,7 @@ class CityLearnRuntimeService:
             building.apply_actions(**building_actions)
 
         self.update_variables()
+        env._provenance_service.settle()
         if getattr(getattr(env, '_demand_response_service', None), 'enabled', False):
             env._demand_response_service.settle_current_time_step()
         if bool(getattr(env, 'physics_invariant_checks', False)):
@@ -764,6 +769,7 @@ class CityLearnRuntimeService:
                 env._entity_service.invalidate()
                 env.reward_function.env_metadata = env.get_metadata()
 
+        env._provenance_service.synchronize()
         return env.terminated, env.truncated
 
     def parse_actions(self, actions) -> List[Mapping[str, float]]:
