@@ -6,6 +6,17 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.1 — packaging correction
+
+- Include `citylearn.utils` in the wheel and source distribution. Version 1.9.0
+  omitted this package, so final-KPI manifest export failed after writing the CSV
+  when installed from PyPI. Editable source installs hid the omission.
+- Test a short episode and KPI, native BAU timeseries and provenance manifest
+  export with an installed wheel outside the checkout on Python 3.9 and 3.10.
+  Publishing runs the same check on Python 3.11 before uploading to PyPI.
+- Local validation: the rebuilt wheel completed this export check on Python 3.10.
+  No changes to physics, policies, datasets, schemas or KPI definitions.
+
 ## v1.9.0 — 2026-10-27
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
