@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; CityLearn 1.8.3 documentation</title>
+  <title>Index &mdash; CityLearn 1.9.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=82e6e318"></script>
+      <script src="_static/documentation_options.js?v=60b3a732"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -203,6 +203,8 @@
 </li>
       <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService.active_storage_at">active_storage_at() (citylearn.internal.topology.CityLearnTopologyService method)</a>
 </li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.add">add() (in module citylearn.internal.provenance)</a>
+</li>
       <li><a href="api/citylearn.end_use_load_profiles.simulate.html#citylearn.end_use_load_profiles.simulate.EndUseLoadProfilesEnergyPlusPartialLoadSimulator.add_other_equipment">add_other_equipment() (citylearn.end_use_load_profiles.simulate.EndUseLoadProfilesEnergyPlusPartialLoadSimulator method)</a>
 </li>
   </ul></td>
@@ -255,6 +257,8 @@
       </ul></li>
       <li><a href="api/citylearn.internal.physics_invariants.html#citylearn.internal.physics_invariants.CityLearnPhysicsInvariantService.assert_step_invariants">assert_step_invariants() (citylearn.internal.physics_invariants.CityLearnPhysicsInvariantService method)</a>
 </li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.assets">assets() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>
+</li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.associate_chargers_to_electric_vehicles">associate_chargers_to_electric_vehicles() (citylearn.citylearn.CityLearnEnv method)</a>
 
       <ul>
@@ -301,6 +305,8 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.Stock.bag">bag (citylearn.internal.provenance.Stock attribute)</a>
+</li>
       <li><a href="api/citylearn.reward_function.html#citylearn.reward_function.ComfortReward.band">band (citylearn.reward_function.ComfortReward property)</a>
 </li>
       <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.BASE_BUNDLE">BASE_BUNDLE (citylearn.internal.entity_interface.CityLearnEntityInterfaceService attribute)</a>
@@ -324,10 +330,16 @@
 </li>
       </ul></li>
       <li><a href="api/citylearn.electric_vehicle.html#citylearn.electric_vehicle.ElectricVehicle.battery">battery (citylearn.electric_vehicle.ElectricVehicle property)</a>
+
+      <ul>
+        <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.Stock.battery">(citylearn.internal.provenance.Stock attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery">Battery (class in citylearn.energy_model)</a>
 </li>
       <li><a href="api/citylearn.data.html#citylearn.data.DataSet.BATTERY_CHOICES_FILENAME">BATTERY_CHOICES_FILENAME (citylearn.data.DataSet attribute)</a>
+</li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.begin_step">begin_step() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.clustering.html#citylearn.end_use_load_profiles.clustering.Clustering.bldg_ids">bldg_ids (citylearn.end_use_load_profiles.clustering.Clustering property)</a>
 
@@ -418,6 +430,8 @@
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.capacity_loss_coefficient">capacity_loss_coefficient (citylearn.energy_model.Battery property)</a>
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.capacity_power_curve">capacity_power_curve (citylearn.energy_model.Battery property)</a>
+</li>
+      <li><a href="api/citylearn.internal.physics_invariants.html#citylearn.internal.physics_invariants.CityLearnPhysicsInvariantService.capture_battery_energy_before_actions">capture_battery_energy_before_actions() (citylearn.internal.physics_invariants.CityLearnPhysicsInvariantService method)</a>
 </li>
       <li><a href="api/citylearn.cost_function.html#citylearn.cost_function.CostFunction.carbon_emissions">carbon_emissions() (citylearn.cost_function.CostFunction static method)</a>
 </li>
@@ -656,8 +670,6 @@
         <li><a href="api/citylearn.end_use_load_profiles.simulate.html#module-citylearn.end_use_load_profiles.simulate">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     citylearn.energy_model
 
@@ -686,11 +698,20 @@
         <li><a href="api/citylearn.internal.baseline.html#module-citylearn.internal.baseline">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     citylearn.internal.building_ops
 
       <ul>
         <li><a href="api/citylearn.internal.building_ops.html#module-citylearn.internal.building_ops">module</a>
+</li>
+      </ul></li>
+      <li>
+    citylearn.internal.capabilities
+
+      <ul>
+        <li><a href="api/citylearn.internal.capabilities.html#module-citylearn.internal.capabilities">module</a>
 </li>
       </ul></li>
       <li>
@@ -705,6 +726,13 @@
 
       <ul>
         <li><a href="api/citylearn.internal.entity_interface.html#module-citylearn.internal.entity_interface">module</a>
+</li>
+      </ul></li>
+      <li>
+    citylearn.internal.experiment
+
+      <ul>
+        <li><a href="api/citylearn.internal.experiment.html#module-citylearn.internal.experiment">module</a>
 </li>
       </ul></li>
       <li>
@@ -726,6 +754,13 @@
 
       <ul>
         <li><a href="api/citylearn.internal.physics_invariants.html#module-citylearn.internal.physics_invariants">module</a>
+</li>
+      </ul></li>
+      <li>
+    citylearn.internal.provenance
+
+      <ul>
+        <li><a href="api/citylearn.internal.provenance.html#module-citylearn.internal.provenance">module</a>
 </li>
       </ul></li>
       <li>
@@ -806,6 +841,34 @@
 </li>
       </ul></li>
       <li>
+    citylearn.utils
+
+      <ul>
+        <li><a href="api/citylearn.utils.html#module-citylearn.utils">module</a>
+</li>
+      </ul></li>
+      <li>
+    citylearn.utils.file_handler
+
+      <ul>
+        <li><a href="api/citylearn.utils.file_handler.html#module-citylearn.utils.file_handler">module</a>
+</li>
+      </ul></li>
+      <li>
+    citylearn.utils.noise
+
+      <ul>
+        <li><a href="api/citylearn.utils.noise.html#module-citylearn.utils.noise">module</a>
+</li>
+      </ul></li>
+      <li>
+    citylearn.utils.paths
+
+      <ul>
+        <li><a href="api/citylearn.utils.paths.html#module-citylearn.utils.paths">module</a>
+</li>
+      </ul></li>
+      <li>
     citylearn.wrappers
 
       <ul>
@@ -831,6 +894,8 @@
       <li><a href="api/citylearn.internal.loading.html#citylearn.internal.loading.CityLearnLoadingService">CityLearnLoadingService (class in citylearn.internal.loading)</a>
 </li>
       <li><a href="api/citylearn.internal.physics_invariants.html#citylearn.internal.physics_invariants.CityLearnPhysicsInvariantService">CityLearnPhysicsInvariantService (class in citylearn.internal.physics_invariants)</a>
+</li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService">CityLearnProvenanceService (class in citylearn.internal.provenance)</a>
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService">CityLearnRobustnessService (class in citylearn.internal.robustness)</a>
 </li>
@@ -874,6 +939,8 @@
 </li>
       <li><a href="api/citylearn.electric_vehicle_charger.html#citylearn.electric_vehicle_charger.Charger.connected_electric_vehicle">connected_electric_vehicle (citylearn.electric_vehicle_charger.Charger property)</a>
 </li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.Stock.connection">connection (citylearn.internal.provenance.Stock attribute)</a>
+</li>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.consume_charging_constraint_penalty">consume_charging_constraint_penalty() (citylearn.building.Building method)</a>
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.CONTROL_FEATURES">CONTROL_FEATURES (citylearn.internal.robustness.CityLearnRobustnessService attribute)</a>
@@ -913,6 +980,8 @@
       <li><a href="api/citylearn.cost_function.html#citylearn.cost_function.CostFunction.cost">cost() (citylearn.cost_function.CostFunction static method)</a>
 </li>
       <li><a href="api/citylearn.cost_function.html#citylearn.cost_function.CostFunction">CostFunction (class in citylearn.cost_function)</a>
+</li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.Stock.cursor">cursor (citylearn.internal.provenance.Stock attribute)</a>
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.cycle_state">cycle_state (citylearn.energy_model.DeferrableAppliance property)</a>
 </li>
@@ -1138,6 +1207,8 @@
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.simulate.html#citylearn.end_use_load_profiles.simulate.EndUseLoadProfilesEnergyPlusPartialLoadSimulator">EndUseLoadProfilesEnergyPlusPartialLoadSimulator (class in citylearn.end_use_load_profiles.simulate)</a>
 </li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.energy">energy() (in module citylearn.internal.provenance)</a>
+</li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.energy_balance">energy_balance (citylearn.energy_model.StorageDevice property)</a>
 </li>
       <li><a href="api/citylearn.internal.physics_invariants.html#citylearn.internal.physics_invariants.CityLearnPhysicsInvariantService.ENERGY_EPS">ENERGY_EPS (citylearn.internal.physics_invariants.CityLearnPhysicsInvariantService attribute)</a>
@@ -1205,6 +1276,8 @@
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.energy_init">energy_init (citylearn.energy_model.StorageDevice property)</a>
 </li>
       <li><a href="api/citylearn.internal.units.html#citylearn.internal.units.energy_kwh_to_power_kw">energy_kwh_to_power_kw() (in module citylearn.internal.units)</a>
+</li>
+      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.energy_provenance_events">energy_provenance_events (citylearn.energy_model.StorageDevice property)</a>
 </li>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.energy_simulation">energy_simulation (citylearn.building.Building property)</a>
 </li>
@@ -1350,6 +1423,8 @@
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.events">events (citylearn.internal.robustness.CityLearnRobustnessService property)</a>
 </li>
+      <li><a href="api/citylearn.internal.experiment.html#citylearn.internal.experiment.experiment_manifest">experiment_manifest() (in module citylearn.internal.experiment)</a>
+</li>
       <li><a href="api/citylearn.reward_function.html#citylearn.reward_function.RewardFunction.exponent">exponent (citylearn.reward_function.RewardFunction property)</a>
 </li>
       <li><a href="api/citylearn.exporter.html#citylearn.exporter.EpisodeExporter.export_business_as_usual_timeseries">export_business_as_usual_timeseries() (citylearn.exporter.EpisodeExporter method)</a>
@@ -1381,7 +1456,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.FileHandler">FileHandler (class in citylearn.utilities)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler">(class in citylearn.utils.file_handler)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.flat_action_space">flat_action_space (citylearn.citylearn.CityLearnEnv property)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.flat_observation_space">flat_observation_space (citylearn.citylearn.CityLearnEnv property)</a>
@@ -1394,10 +1473,10 @@
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.force_set_soc">(citylearn.energy_model.StorageDevice method)</a>
 </li>
       </ul></li>
-      <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.FORECAST_BUNDLE">FORECAST_BUNDLE (citylearn.internal.entity_interface.CityLearnEntityInterfaceService attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.FORECAST_BUNDLE">FORECAST_BUNDLE (citylearn.internal.entity_interface.CityLearnEntityInterfaceService attribute)</a>
+</li>
       <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.FORECAST_HORIZONS">FORECAST_HORIZONS (citylearn.internal.entity_interface.CityLearnEntityInterfaceService attribute)</a>
 </li>
       <li><a href="api/citylearn.dynamics.html#citylearn.dynamics.LSTMDynamics.forward">forward() (citylearn.dynamics.LSTMDynamics method)</a>
@@ -1421,9 +1500,17 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.NoiseUtils.generate_gaussian_noise">generate_gaussian_noise() (citylearn.utilities.NoiseUtils static method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.noise.html#citylearn.utils.noise.Noise.generate_gaussian_noise">(citylearn.utils.noise.Noise static method)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.NoiseUtils.generate_scaled_noise">generate_scaled_noise() (citylearn.utilities.NoiseUtils static method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.noise.html#citylearn.utils.noise.Noise.generate_scaled_noise">(citylearn.utils.noise.Noise static method)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.PV.generation_mode">generation_mode (citylearn.energy_model.PV property)</a>
 </li>
       <li><a href="api/citylearn.data.html#citylearn.data.DataSet.get_battery_sizing_data">get_battery_sizing_data() (citylearn.data.DataSet method)</a>
@@ -1530,6 +1617,8 @@
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.get_metadata">(citylearn.energy_model.StorageDevice method)</a>
 </li>
         <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.get_metadata">(citylearn.internal.demand_response.CityLearnDemandResponseService method)</a>
+</li>
+        <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.get_metadata">(citylearn.internal.provenance.CityLearnProvenanceService method)</a>
 </li>
         <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.get_metadata">(citylearn.internal.robustness.CityLearnRobustnessService method)</a>
 </li>
@@ -1753,13 +1842,19 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.FileHandler.join_url">join_url() (citylearn.utilities.FileHandler static method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler.join_url">(citylearn.utils.file_handler.FileHandler static method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.Stock.kind">kind (citylearn.internal.provenance.Stock attribute)</a>
+</li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.KPI_KEYS">KPI_KEYS (citylearn.internal.robustness.CityLearnRobustnessService attribute)</a>
 </li>
   </ul></td>
@@ -1944,15 +2039,21 @@
 </li>
         <li><a href="api/citylearn.internal.building_ops.html#module-citylearn.internal.building_ops">citylearn.internal.building_ops</a>
 </li>
+        <li><a href="api/citylearn.internal.capabilities.html#module-citylearn.internal.capabilities">citylearn.internal.capabilities</a>
+</li>
         <li><a href="api/citylearn.internal.demand_response.html#module-citylearn.internal.demand_response">citylearn.internal.demand_response</a>
 </li>
         <li><a href="api/citylearn.internal.entity_interface.html#module-citylearn.internal.entity_interface">citylearn.internal.entity_interface</a>
+</li>
+        <li><a href="api/citylearn.internal.experiment.html#module-citylearn.internal.experiment">citylearn.internal.experiment</a>
 </li>
         <li><a href="api/citylearn.internal.kpi.html#module-citylearn.internal.kpi">citylearn.internal.kpi</a>
 </li>
         <li><a href="api/citylearn.internal.loading.html#module-citylearn.internal.loading">citylearn.internal.loading</a>
 </li>
         <li><a href="api/citylearn.internal.physics_invariants.html#module-citylearn.internal.physics_invariants">citylearn.internal.physics_invariants</a>
+</li>
+        <li><a href="api/citylearn.internal.provenance.html#module-citylearn.internal.provenance">citylearn.internal.provenance</a>
 </li>
         <li><a href="api/citylearn.internal.robustness.html#module-citylearn.internal.robustness">citylearn.internal.robustness</a>
 </li>
@@ -1975,6 +2076,14 @@
         <li><a href="api/citylearn.rl.html#module-citylearn.rl">citylearn.rl</a>
 </li>
         <li><a href="api/citylearn.utilities.html#module-citylearn.utilities">citylearn.utilities</a>
+</li>
+        <li><a href="api/citylearn.utils.html#module-citylearn.utils">citylearn.utils</a>
+</li>
+        <li><a href="api/citylearn.utils.file_handler.html#module-citylearn.utils.file_handler">citylearn.utils.file_handler</a>
+</li>
+        <li><a href="api/citylearn.utils.noise.html#module-citylearn.utils.noise">citylearn.utils.noise</a>
+</li>
+        <li><a href="api/citylearn.utils.paths.html#module-citylearn.utils.paths">citylearn.utils.paths</a>
 </li>
         <li><a href="api/citylearn.wrappers.html#module-citylearn.wrappers">citylearn.wrappers</a>
 </li>
@@ -2128,6 +2237,8 @@
 </li>
         <li><a href="api/citylearn.electric_vehicle_charger.html#citylearn.electric_vehicle_charger.Charger.next_time_step">(citylearn.electric_vehicle_charger.Charger method)</a>
 </li>
+        <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.next_time_step">(citylearn.energy_model.Battery method)</a>
+</li>
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.next_time_step">(citylearn.energy_model.DeferrableAppliance method)</a>
 </li>
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.next_time_step">(citylearn.energy_model.StorageDevice method)</a>
@@ -2137,6 +2248,8 @@
         <li><a href="api/citylearn.internal.runtime.html#citylearn.internal.runtime.CityLearnRuntimeService.next_time_step">(citylearn.internal.runtime.CityLearnRuntimeService method)</a>
 </li>
       </ul></li>
+      <li><a href="api/citylearn.utils.noise.html#citylearn.utils.noise.Noise">Noise (class in citylearn.utils.noise)</a>
+</li>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.NoiseUtils">NoiseUtils (class in citylearn.utilities)</a>
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.ElectricDevice.nominal_power">nominal_power (citylearn.energy_model.ElectricDevice property)</a>
@@ -2241,14 +2354,14 @@
       </ul></li>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.observation_space_limit_delta">observation_space_limit_delta (citylearn.building.Building property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.observation_values">observation_values() (citylearn.internal.demand_response.CityLearnDemandResponseService method)</a>
 
       <ul>
         <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.observation_values">(citylearn.internal.robustness.CityLearnRobustnessService method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.observations">observations (citylearn.citylearn.CityLearnEnv property)</a>
 
       <ul>
@@ -2304,6 +2417,8 @@
       <li><a href="api/citylearn.exporter.html#citylearn.exporter.EpisodeExporter.override_render_time_step">override_render_time_step() (citylearn.exporter.EpisodeExporter method)</a>
 </li>
       <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.TopologyEvent.overrides">overrides (citylearn.internal.topology.TopologyEvent attribute)</a>
+</li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.Stock.owner">owner (citylearn.internal.provenance.Stock attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2484,11 +2599,23 @@
       <li><a href="api/citylearn.agents.baseline.html#citylearn.agents.baseline.RBCSmartPolicy">RBCSmartPolicy (class in citylearn.agents.baseline)</a>
 </li>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.FileHandler.read_json">read_json() (citylearn.utilities.FileHandler static method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler.read_json">(citylearn.utils.file_handler.FileHandler static method)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.FileHandler.read_pickle">read_pickle() (citylearn.utilities.FileHandler static method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler.read_pickle">(citylearn.utils.file_handler.FileHandler static method)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.FileHandler.read_yaml">read_yaml() (citylearn.utilities.FileHandler static method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler.read_yaml">(citylearn.utils.file_handler.FileHandler static method)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.agents.marlisa.html#citylearn.agents.marlisa.MARLISA.regression_buffer_capacity">regression_buffer_capacity (citylearn.agents.marlisa.MARLISA property)</a>
 </li>
       <li><a href="api/citylearn.agents.marlisa.html#citylearn.agents.marlisa.MARLISA.regression_frequency">regression_frequency (citylearn.agents.marlisa.MARLISA property)</a>
@@ -2593,6 +2720,8 @@
         <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.reset">(citylearn.internal.demand_response.CityLearnDemandResponseService method)</a>
 </li>
         <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.reset">(citylearn.internal.entity_interface.CityLearnEntityInterfaceService method)</a>
+</li>
+        <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.reset">(citylearn.internal.provenance.CityLearnProvenanceService method)</a>
 </li>
         <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.reset">(citylearn.internal.robustness.CityLearnRobustnessService method)</a>
 </li>
@@ -2731,6 +2860,8 @@
 </li>
       <li><a href="api/citylearn.exporter.html#citylearn.exporter.EpisodeExporter.save_to_csv">save_to_csv() (citylearn.exporter.EpisodeExporter method)</a>
 </li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.scaled">scaled() (in module citylearn.internal.provenance)</a>
+</li>
       <li><a href="api/citylearn.data.html#citylearn.data.DeferrableApplianceSimulation.SCHEDULE_REQUIRED_COLUMNS">SCHEDULE_REQUIRED_COLUMNS (citylearn.data.DeferrableApplianceSimulation attribute)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.schema">schema (citylearn.citylearn.CityLearnEnv property)</a>
@@ -2813,6 +2944,8 @@
 </li>
       <li><a href="api/citylearn.occupant.html#citylearn.occupant.LogisticRegressionOccupant.setpoint_increase_model_filepath">setpoint_increase_model_filepath (citylearn.occupant.LogisticRegressionOccupant property)</a>
 </li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.settle">settle() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>
+</li>
       <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.settle_current_time_step">settle_current_time_step() (citylearn.internal.demand_response.CityLearnDemandResponseService method)</a>
 </li>
       <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.settlement_history">settlement_history (citylearn.internal.demand_response.CityLearnDemandResponseService property)</a>
@@ -2837,8 +2970,6 @@
       </ul></li>
       <li><a href="api/citylearn.end_use_load_profiles.neighborhood.html#citylearn.end_use_load_profiles.neighborhood.Neighborhood.simulate_energy_plus">simulate_energy_plus() (citylearn.end_use_load_profiles.neighborhood.Neighborhood method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.simulate_power_outage">simulate_power_outage (citylearn.building.Building property)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.simulate_unconnected_ev_soc">simulate_unconnected_ev_soc() (citylearn.citylearn.CityLearnEnv method)</a>
@@ -2847,6 +2978,8 @@
         <li><a href="api/citylearn.internal.runtime.html#citylearn.internal.runtime.CityLearnRuntimeService.simulate_unconnected_ev_soc">(citylearn.internal.runtime.CityLearnRuntimeService method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.base.html#citylearn.base.EpisodeTracker.simulation_end_time_step">simulation_end_time_step (citylearn.base.EpisodeTracker property)</a>
 </li>
       <li><a href="api/citylearn.base.html#citylearn.base.EpisodeTracker.simulation_start_time_step">simulation_start_time_step (citylearn.base.EpisodeTracker property)</a>
@@ -2854,6 +2987,8 @@
       <li><a href="api/citylearn.base.html#citylearn.base.EpisodeTracker.simulation_time_steps">simulation_time_steps (citylearn.base.EpisodeTracker property)</a>
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.neighborhood.html#citylearn.end_use_load_profiles.neighborhood.NeighborhoodBuild.simulators">simulators (citylearn.end_use_load_profiles.neighborhood.NeighborhoodBuild property)</a>
+</li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.sink">sink() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.skip_cycles_before">skip_cycles_before() (citylearn.energy_model.DeferrableAppliance method)</a>
 </li>
@@ -2875,7 +3010,11 @@
 </li>
       <li><a href="api/citylearn.reward_function.html#citylearn.reward_function.SolarPenaltyReward">SolarPenaltyReward (class in citylearn.reward_function)</a>
 </li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.source">source() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>
+</li>
       <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.TopologyEvent.source_asset_id">source_asset_id (citylearn.internal.topology.TopologyEvent attribute)</a>
+</li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.source_destinations">source_destinations() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>
 </li>
       <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.TopologyEvent.source_member_id">source_member_id (citylearn.internal.topology.TopologyEvent attribute)</a>
 </li>
@@ -2923,6 +3062,8 @@
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.RobustnessEvent.std">std (citylearn.internal.robustness.RobustnessEvent attribute)</a>
 </li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.Stock.step">step (citylearn.internal.provenance.Stock attribute)</a>
+</li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.step">step() (citylearn.citylearn.CityLearnEnv method)</a>
 
       <ul>
@@ -2945,6 +3086,8 @@
 </li>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.stochastic_power_outage_model">stochastic_power_outage_model (citylearn.building.Building property)</a>
 </li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.Stock">Stock (class in citylearn.internal.provenance)</a>
+</li>
       <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.StorageRef.storage_id">storage_id (citylearn.internal.entity_interface.StorageRef attribute)</a>
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice">StorageDevice (class in citylearn.energy_model)</a>
@@ -2952,6 +3095,8 @@
       <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.StorageRef">StorageRef (class in citylearn.internal.entity_interface)</a>
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageTank">StorageTank (class in citylearn.energy_model)</a>
+</li>
+      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.StorageDevice.stored_energy_transfer">stored_energy_transfer (citylearn.energy_model.StorageDevice property)</a>
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.clustering.html#citylearn.end_use_load_profiles.clustering.Clustering.sum_of_squares_error_minimum_percent_change">sum_of_squares_error_minimum_percent_change (citylearn.end_use_load_profiles.clustering.Clustering property)</a>
 </li>
@@ -2961,6 +3106,10 @@
         <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.summarize">(citylearn.internal.robustness.CityLearnRobustnessService method)</a>
 </li>
       </ul></li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.summary">summary() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>
+</li>
+      <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.synchronize">synchronize() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -3101,6 +3250,8 @@
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.UnknownSchemaError">UnknownSchemaError</a>
 </li>
+      <li><a href="api/citylearn.internal.capabilities.html#citylearn.internal.capabilities.unsupported_reason">unsupported_reason() (in module citylearn.internal.capabilities)</a>
+</li>
       <li><a href="api/citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.unwrapped">unwrapped (citylearn.multi_community.MultiCommunityEnv property)</a>
 </li>
       <li><a href="api/citylearn.agents.base.html#citylearn.agents.base.Agent.update">update() (citylearn.agents.base.Agent method)</a>
@@ -3235,12 +3386,12 @@
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.EvaluationCondition.WITH_STORAGE_AND_PARTIAL_LOAD_AND_PV">WITH_STORAGE_AND_PARTIAL_LOAD_AND_PV (citylearn.citylearn.EvaluationCondition attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.EvaluationCondition.WITH_STORAGE_AND_PV">WITH_STORAGE_AND_PV (citylearn.citylearn.EvaluationCondition attribute)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.EvaluationCondition.WITHOUT_STORAGE_AND_PARTIAL_LOAD_AND_PV">WITHOUT_STORAGE_AND_PARTIAL_LOAD_AND_PV (citylearn.citylearn.EvaluationCondition attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.EvaluationCondition.WITHOUT_STORAGE_AND_PARTIAL_LOAD_BUT_WITH_PV">WITHOUT_STORAGE_AND_PARTIAL_LOAD_BUT_WITH_PV (citylearn.citylearn.EvaluationCondition attribute)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.EvaluationCondition.WITHOUT_STORAGE_AND_PV">WITHOUT_STORAGE_AND_PV (citylearn.citylearn.EvaluationCondition attribute)</a>
@@ -3250,13 +3401,25 @@
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.EvaluationCondition.WITHOUT_STORAGE_BUT_WITH_PV">WITHOUT_STORAGE_BUT_WITH_PV (citylearn.citylearn.EvaluationCondition attribute)</a>
 </li>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.FileHandler.write_json">write_json() (citylearn.utilities.FileHandler static method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler.write_json">(citylearn.utils.file_handler.FileHandler static method)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.FileHandler.write_pickle">write_pickle() (citylearn.utilities.FileHandler static method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler.write_pickle">(citylearn.utils.file_handler.FileHandler static method)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.exporter.html#citylearn.exporter.EpisodeExporter.write_render_rows">write_render_rows() (citylearn.exporter.EpisodeExporter method)</a>
 </li>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.FileHandler.write_yaml">write_yaml() (citylearn.utilities.FileHandler static method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler.write_yaml">(citylearn.utils.file_handler.FileHandler static method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.kpi &mdash; CityLearn 1.8.3 documentation</title>
+  <title>citylearn.internal.kpi &mdash; CityLearn 1.9.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=82e6e318"></script>
+      <script src="../../../_static/documentation_options.js?v=60b3a732"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -87,6 +87,12 @@
   <h1>Source code for citylearn.internal.kpi</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleNamespace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">array</span><span class="w"> </span><span class="kn">import</span> <span class="n">array</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.energy_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Battery</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -109,6 +115,13 @@
     <span class="n">EV_DEPARTURE_EPS</span> <span class="o">=</span> <span class="mf">1.0e-6</span>
     <span class="n">ELECTRICAL_RESIDUAL_EPS_KW</span> <span class="o">=</span> <span class="mf">1.0e-5</span>
     <span class="n">SCORECARD_DEFAULT_KPIS</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="c1"># Final destinations and external carbon use the versioned ledger.</span>
+        <span class="s1">'district_energy_provenance_pv_useful_building_ratio'</span><span class="p">,</span>
+        <span class="s1">'district_energy_provenance_pv_useful_with_mobility_ratio'</span><span class="p">,</span>
+        <span class="s1">'district_energy_provenance_pv_stored_kwh'</span><span class="p">,</span>
+        <span class="s1">'district_energy_provenance_pv_grid_export_kwh'</span><span class="p">,</span>
+        <span class="s1">'district_energy_provenance_external_purchase_emissions_kgco2'</span><span class="p">,</span>
+        <span class="s1">'district_energy_provenance_external_purchase_emissions_business_as_usual_kgco2'</span><span class="p">,</span>
         <span class="c1"># Cost scorecard values and BAU reference.</span>
         <span class="s1">'district_cost_total_control_eur'</span><span class="p">,</span>
         <span class="s1">'district_cost_total_business_as_usual_eur'</span><span class="p">,</span>
@@ -679,9 +692,6 @@
         <span class="k">if</span> <span class="n">arrival_soc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="n">arrival_soc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span> <span class="o">&gt;=</span> <span class="n">threshold_soc</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-
         <span class="n">seconds_per_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span>
             <span class="nb">getattr</span><span class="p">(</span>
                 <span class="n">charger</span><span class="p">,</span>
@@ -698,36 +708,44 @@
         <span class="n">soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">arrival_soc</span><span class="p">)</span>
         <span class="n">connected_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">departure_index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">interval_start</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
+        <span class="c1"># Replay the concrete battery implementation in compact, isolated buffers.</span>
+        <span class="c1"># No real state, RNG, degradation history or episode tracker is advanced.</span>
+        <span class="n">replay</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="n">Battery</span><span class="p">):</span>
+            <span class="n">replay</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">battery</span><span class="p">)</span>
+            <span class="n">replay</span><span class="o">.</span><span class="n">episode_tracker</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="n">episode_time_steps</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">connected_steps</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">replay</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="n">capacities</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">'capacity_before_step'</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">capacity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_sequence_value</span><span class="p">(</span><span class="n">capacities</span><span class="p">,</span> <span class="n">interval_start</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">capacity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">capacity</span><span class="p">):</span>
+                <span class="n">replay</span><span class="o">.</span><span class="n">_capacity_history</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="s1">'d'</span><span class="p">,</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">capacity</span><span class="p">)])</span>
+            <span class="n">replay</span><span class="o">.</span><span class="n">force_set_soc</span><span class="p">(</span><span class="n">arrival_soc</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">connected_steps</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">soc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span> <span class="o">&gt;=</span> <span class="n">threshold_soc</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span>
-
             <span class="n">step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">interval_start</span><span class="p">)</span> <span class="o">+</span> <span class="n">offset</span>
-            <span class="n">battery_limited_power_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_battery_max_input_power_kw</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="n">charger_power_kw</span><span class="p">,</span> <span class="n">soc</span><span class="p">)</span>
+            <span class="c1"># Service limits apply at the AC charger inlet; battery limits apply</span>
+            <span class="c1"># downstream of charger losses, inside Battery.charge().</span>
             <span class="n">power_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_constraint_limited_charge_power_kw</span><span class="p">(</span>
-                <span class="n">building</span><span class="p">,</span>
-                <span class="n">charger</span><span class="p">,</span>
-                <span class="n">step</span><span class="p">,</span>
-                <span class="n">battery_limited_power_kw</span><span class="p">,</span>
+                <span class="n">building</span><span class="p">,</span> <span class="n">charger</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">charger_power_kw</span><span class="p">,</span>
             <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">power_kw</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span><span class="p">:</span>
-                <span class="k">break</span>
-
             <span class="n">charger_efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_charger_charge_efficiency</span><span class="p">(</span><span class="n">charger</span><span class="p">,</span> <span class="n">power_kw</span><span class="p">,</span> <span class="n">charger_power_kw</span><span class="p">)</span>
-            <span class="n">battery_round_trip_efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_battery_charge_round_trip_efficiency</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="n">power_kw</span><span class="p">)</span>
-            <span class="n">delta_soc</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">power_kw</span>
-                <span class="o">*</span> <span class="n">step_hours</span>
-                <span class="o">*</span> <span class="n">charger_efficiency</span>
-                <span class="o">*</span> <span class="n">battery_round_trip_efficiency</span>
-                <span class="o">/</span> <span class="n">capacity_kwh</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">delta_soc</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span><span class="p">:</span>
-                <span class="k">break</span>
-
-            <span class="n">soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">soc</span> <span class="o">+</span> <span class="n">delta_soc</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">replay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">offset</span><span class="p">:</span>
+                    <span class="n">replay</span><span class="o">.</span><span class="n">next_time_step</span><span class="p">()</span>
+                <span class="n">ratio</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="ow">or</span> <span class="mf">1.0</span>
+                <span class="n">replay</span><span class="o">.</span><span class="n">charge</span><span class="p">(</span><span class="n">power_kw</span> <span class="o">*</span> <span class="n">step_hours</span> <span class="o">*</span> <span class="n">charger_efficiency</span> <span class="o">/</span> <span class="n">ratio</span><span class="p">)</span>
+                <span class="n">soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">soc</span><span class="p">[</span><span class="n">offset</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Compatibility for legacy battery adapters without a physical</span>
+                <span class="c1"># charge method; never used for native Battery/InventoryBattery.</span>
+                <span class="k">if</span> <span class="n">offset</span><span class="p">:</span>
+                    <span class="n">soc</span> <span class="o">*=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">'loss_coefficient'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+                <span class="n">battery_power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_battery_max_input_power_kw</span><span class="p">(</span>
+                    <span class="n">battery</span><span class="p">,</span> <span class="n">power_kw</span> <span class="o">*</span> <span class="n">charger_efficiency</span><span class="p">,</span> <span class="n">soc</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">eta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ev_battery_charge_round_trip_efficiency</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="n">battery_power</span><span class="p">)</span>
+                <span class="n">soc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">soc</span> <span class="o">+</span> <span class="n">battery_power</span> <span class="o">*</span> <span class="n">step_hours</span> <span class="o">*</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">capacity_kwh</span><span class="p">,</span>
+                                    <span class="mf">0.0</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">battery</span><span class="p">,</span> <span class="s1">'max_soc'</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span>
 
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">soc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EV_DEPARTURE_EPS</span> <span class="o">&gt;=</span> <span class="n">threshold_soc</span><span class="p">)</span>
 
@@ -2677,6 +2695,19 @@
             <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">bau_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()</span>
         <span class="p">}</span>
 
+        <span class="c1"># These references use the same provenance definition and physical</span>
+        <span class="c1"># boundary because the BAU sidecar executes the same passive ledger.</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">metric</span><span class="p">),</span> <span class="n">record</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">records</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s1">_energy_provenance_'</span><span class="p">):</span>
+                <span class="n">reference</span> <span class="o">=</span> <span class="n">bau_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">level</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+                <span class="n">stem</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">'_'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">reference_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s1">_business_as_usual_</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">records</span><span class="p">[(</span><span class="n">level</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">reference_key</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">cost_function</span><span class="o">=</span><span class="n">reference_key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">reference</span><span class="p">)</span>
+                <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s1">'value'</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scalar</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                <span class="n">delta_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s1">_delta_to_business_as_usual_</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">records</span><span class="p">[(</span><span class="n">level</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">delta_key</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">cost_function</span><span class="o">=</span><span class="n">delta_key</span><span class="p">,</span>
+                    <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">b</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+
         <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cost_function</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
             <span class="n">records</span><span class="p">[(</span><span class="n">level</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cost_function</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s1">'cost_function'</span><span class="p">:</span> <span class="n">cost_function</span><span class="p">,</span>
@@ -3436,6 +3467,15 @@
         <span class="n">put</span><span class="p">(</span><span class="s1">'district'</span><span class="p">,</span> <span class="s1">'District'</span><span class="p">,</span> <span class="n">v2</span><span class="p">(</span><span class="s1">'district'</span><span class="p">,</span> <span class="s1">'equity'</span><span class="p">,</span> <span class="s1">'distribution'</span><span class="p">,</span> <span class="s1">'losers'</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">'percent'</span><span class="p">),</span> <span class="n">equity_distribution</span><span class="p">[</span><span class="s1">'equity_losers_percent'</span><span class="p">])</span>
         <span class="n">put</span><span class="p">(</span><span class="s1">'district'</span><span class="p">,</span> <span class="s1">'District'</span><span class="p">,</span> <span class="n">v2</span><span class="p">(</span><span class="s1">'district'</span><span class="p">,</span> <span class="s1">'equity'</span><span class="p">,</span> <span class="s1">'distribution'</span><span class="p">,</span> <span class="s1">'bpr_asset_poor_over_rich'</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">'ratio'</span><span class="p">),</span> <span class="n">equity_bpr</span><span class="p">)</span>
 
+        <span class="n">provenance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">'_provenance_service'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">provenance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">members</span><span class="p">,</span> <span class="n">district</span> <span class="o">=</span> <span class="n">provenance</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="n">members</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">put</span><span class="p">(</span><span class="s1">'building'</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'building_energy_provenance_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">district</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">put</span><span class="p">(</span><span class="s1">'district'</span><span class="p">,</span> <span class="s1">'District'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'district_energy_provenance_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">include_business_as_usual</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">'_business_as_usual_sidecar'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_add_business_as_usual_records</span><span class="p">(</span>
                 <span class="n">records</span><span class="p">,</span>
@@ -3446,6 +3486,8 @@
             <span class="p">)</span>
 
         <span class="n">output</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">records</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">provenance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">'energy_accounting'</span><span class="p">]</span> <span class="o">=</span> <span class="n">provenance</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">output</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'cost_function'</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">,</span> <span class="s1">'level'</span><span class="p">])</span>
 

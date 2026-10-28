@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn package &mdash; CityLearn 1.8.3 documentation</title>
+  <title>citylearn package &mdash; CityLearn 1.9.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=82e6e318"></script>
+      <script src="../_static/documentation_options.js?v=60b3a732"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,6 +63,7 @@
 <li class="toctree-l4"><a class="reference internal" href="citylearn.agents.html">citylearn.agents package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.end_use_load_profiles.html">citylearn.end_use_load_profiles package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.internal.html">citylearn.internal package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.utils.html">citylearn.utils package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a><ul>
@@ -217,6 +218,10 @@
 <li class="toctree-l4"><a class="reference internal" href="citylearn.internal.building_ops.html#citylearn.internal.building_ops.BuildingOpsService"><code class="docutils literal notranslate"><span class="pre">BuildingOpsService</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.internal.capabilities.html">citylearn.internal.capabilities module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.internal.capabilities.html#citylearn.internal.capabilities.unsupported_reason"><code class="docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html">citylearn.internal.demand_response module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService"><code class="docutils literal notranslate"><span class="pre">CityLearnDemandResponseService</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest"><code class="docutils literal notranslate"><span class="pre">DemandResponseRequest</span></code></a></li>
@@ -230,6 +235,10 @@
 <li class="toctree-l4"><a class="reference internal" href="citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.StorageRef"><code class="docutils literal notranslate"><span class="pre">StorageRef</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.internal.experiment.html">citylearn.internal.experiment module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.internal.experiment.html#citylearn.internal.experiment.experiment_manifest"><code class="docutils literal notranslate"><span class="pre">experiment_manifest()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.kpi.html">citylearn.internal.kpi module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.internal.kpi.html#citylearn.internal.kpi.CityLearnKPIService"><code class="docutils literal notranslate"><span class="pre">CityLearnKPIService</span></code></a></li>
 </ul>
@@ -241,6 +250,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.physics_invariants.html">citylearn.internal.physics_invariants module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="citylearn.internal.physics_invariants.html#citylearn.internal.physics_invariants.CityLearnPhysicsInvariantService"><code class="docutils literal notranslate"><span class="pre">CityLearnPhysicsInvariantService</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.internal.provenance.html">citylearn.internal.provenance module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService"><code class="docutils literal notranslate"><span class="pre">CityLearnProvenanceService</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.internal.provenance.html#citylearn.internal.provenance.Stock"><code class="docutils literal notranslate"><span class="pre">Stock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.internal.provenance.html#citylearn.internal.provenance.add"><code class="docutils literal notranslate"><span class="pre">add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.internal.provenance.html#citylearn.internal.provenance.energy"><code class="docutils literal notranslate"><span class="pre">energy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.internal.provenance.html#citylearn.internal.provenance.scaled"><code class="docutils literal notranslate"><span class="pre">scaled()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.robustness.html">citylearn.internal.robustness module</a><ul>
@@ -266,6 +283,21 @@
 <li class="toctree-l4"><a class="reference internal" href="citylearn.internal.units.html#citylearn.internal.units.to_dataset_resolution_energy"><code class="docutils literal notranslate"><span class="pre">to_dataset_resolution_energy()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citylearn.utils.html">citylearn.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="citylearn.utils.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.utils.file_handler.html">citylearn.utils.file_handler module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler"><code class="docutils literal notranslate"><span class="pre">FileHandler</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.utils.noise.html">citylearn.utils.noise module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="citylearn.utils.noise.html#citylearn.utils.noise.Noise"><code class="docutils literal notranslate"><span class="pre">Noise</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.utils.paths.html">citylearn.utils.paths module</a></li>
 </ul>
 </li>
 </ul>
@@ -798,6 +830,7 @@
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.Battery.get_max_output_power"><code class="docutils literal notranslate"><span class="pre">Battery.get_max_output_power()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.Battery.get_metadata"><code class="docutils literal notranslate"><span class="pre">Battery.get_metadata()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.Battery.initial_soc"><code class="docutils literal notranslate"><span class="pre">Battery.initial_soc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.Battery.next_time_step"><code class="docutils literal notranslate"><span class="pre">Battery.next_time_step()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.Battery.power_efficiency_curve"><code class="docutils literal notranslate"><span class="pre">Battery.power_efficiency_curve</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.Battery.reset"><code class="docutils literal notranslate"><span class="pre">Battery.reset()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.Battery.time_step_ratio"><code class="docutils literal notranslate"><span class="pre">Battery.time_step_ratio</span></code></a></li>
@@ -885,6 +918,7 @@
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.efficiency"><code class="docutils literal notranslate"><span class="pre">StorageDevice.efficiency</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.energy_balance"><code class="docutils literal notranslate"><span class="pre">StorageDevice.energy_balance</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.energy_init"><code class="docutils literal notranslate"><span class="pre">StorageDevice.energy_init</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.energy_provenance_events"><code class="docutils literal notranslate"><span class="pre">StorageDevice.energy_provenance_events</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.force_set_soc"><code class="docutils literal notranslate"><span class="pre">StorageDevice.force_set_soc()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.get_metadata"><code class="docutils literal notranslate"><span class="pre">StorageDevice.get_metadata()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.initial_soc"><code class="docutils literal notranslate"><span class="pre">StorageDevice.initial_soc</span></code></a></li>
@@ -894,6 +928,7 @@
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.round_trip_efficiency"><code class="docutils literal notranslate"><span class="pre">StorageDevice.round_trip_efficiency</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.set_energy_balance"><code class="docutils literal notranslate"><span class="pre">StorageDevice.set_energy_balance()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.soc"><code class="docutils literal notranslate"><span class="pre">StorageDevice.soc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.stored_energy_transfer"><code class="docutils literal notranslate"><span class="pre">StorageDevice.stored_energy_transfer</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.energy_model.html#citylearn.energy_model.StorageDevice.time_step_ratio"><code class="docutils literal notranslate"><span class="pre">StorageDevice.time_step_ratio</span></code></a></li>
 </ul>
 </li>

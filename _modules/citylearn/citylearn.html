@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 1.8.3 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 1.9.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=82e6e318"></script>
+      <script src="../../_static/documentation_options.js?v=60b3a732"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -110,6 +110,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.loading</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnLoadingService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.baseline</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnBusinessAsUsualBaselineService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.physics_invariants</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnPhysicsInvariantService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.provenance</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnProvenanceService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.runtime</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnRuntimeService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.entity_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnEntityInterfaceService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.topology</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnTopologyService</span>
@@ -388,6 +389,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_kpi_service</span> <span class="o">=</span> <span class="n">CityLearnKPIService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_business_as_usual_baseline_service</span> <span class="o">=</span> <span class="n">CityLearnBusinessAsUsualBaselineService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_physics_invariant_service</span> <span class="o">=</span> <span class="n">CityLearnPhysicsInvariantService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_provenance_service</span> <span class="o">=</span> <span class="n">CityLearnProvenanceService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_service</span> <span class="o">=</span> <span class="n">CityLearnEntityInterfaceService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_topology_service</span> <span class="o">=</span> <span class="n">CityLearnTopologyService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_demand_response_service</span> <span class="o">=</span> <span class="n">CityLearnDemandResponseService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1389,6 +1391,7 @@
             <span class="s1">'topology_version'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">topology_version</span><span class="p">,</span>
             <span class="s1">'topology_event_log'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">topology_event_log</span><span class="p">,</span>
             <span class="s1">'physics_invariant_checks'</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'physics_invariant_checks'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
+            <span class="s1">'energy_accounting'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_provenance_service</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(),</span>
             <span class="s1">'ev_departure_within_tolerance'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ev_departure_within_tolerance</span><span class="p">,</span>
             <span class="s1">'ev_departure_service_tolerance'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ev_departure_service_tolerance</span><span class="p">,</span>
             <span class="s1">'reward_function'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
@@ -1399,6 +1402,8 @@
                 <span class="s1">'local_price_ratio_to_grid_import'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_market_sell_ratio</span><span class="p">,</span>
                 <span class="s1">'intra_community_sell_ratio'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_market_sell_ratio</span><span class="p">,</span>
                 <span class="s1">'grid_export_price'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_market_grid_export_price</span><span class="p">,</span>
+                <span class="s1">'local_trading_enabled'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'community_market_local_enabled'</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="s1">'settlement_version'</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'community_market'</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'settlement_version'</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                 <span class="s1">'import_member_weights'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_market_import_member_weights</span><span class="p">,</span>
                 <span class="s1">'kpis'</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s1">'community_local_traded_enabled'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_market_kpi_local_traded_enabled</span><span class="p">,</span>
@@ -1744,6 +1749,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_demand_response_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">associate_chargers_to_electric_vehicles</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_provenance_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
         <span class="c1"># reset reward function (does nothing by default)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.energy_model module &mdash; CityLearn 1.8.3 documentation</title>
+  <title>citylearn.energy_model module &mdash; CityLearn 1.9.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=82e6e318"></script>
+      <script src="../_static/documentation_options.js?v=60b3a732"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -322,6 +322,14 @@ bypassing restrictions such as efficiency losses, power limits, and degradation.
 <dt class="sig sig-object py" id="citylearn.energy_model.Battery.initial_soc">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_soc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#citylearn.energy_model.Battery.initial_soc" title="Link to this definition"></a></dt>
 <dd><p>State of charge when <cite>time_step</cite> = 0 in [kWh].</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.energy_model.Battery.next_time_step">
+<span class="sig-name descname"><span class="pre">next_time_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.next_time_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.next_time_step" title="Link to this definition"></a></dt>
+<dd><p>Advance to next <cite>time_step</cite> value.</p>
+<p class="rubric">Notes</p>
+<p>Override in subclass for custom implementation when advancing to next <cite>time_step</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1009,7 +1017,14 @@ when <code class="docutils literal notranslate"><span class="pre">generation_mod
 <dl class="py property">
 <dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.energy_init">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">energy_init</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#citylearn.energy_model.StorageDevice.energy_init" title="Link to this definition"></a></dt>
-<dd><p>Latest energy level available at the current time step in [kWh].</p>
+<dd><p>Physical stored energy in [kWh], including states below the reserve.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.energy_provenance_events">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">energy_provenance_events</span></span><a class="headerlink" href="#citylearn.energy_model.StorageDevice.energy_provenance_events" title="Link to this definition"></a></dt>
+<dd><p>Actual operations in the current step, with AC/storage boundaries.</p>
+<p>This bounded journal is passive: it never feeds the physical model.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1083,6 +1098,14 @@ when <code class="docutils literal notranslate"><span class="pre">generation_mod
 <dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.soc">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">soc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#citylearn.energy_model.StorageDevice.soc" title="Link to this definition"></a></dt>
 <dd><p>State of charge time series between [0, 1] in [<span class="math notranslate nohighlight">\(\frac{\textrm{capacity}_{\textrm{charged}}}{\textrm{capacity}}\)</span>].</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.stored_energy_transfer">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stored_energy_transfer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#citylearn.energy_model.StorageDevice.stored_energy_transfer" title="Link to this definition"></a></dt>
+<dd><p>Cumulative terminal-flow contribution to stored kWh in this step.</p>
+<p>Includes every charge/discharge call at its own efficiency. Excludes
+standby losses and exogenous SOC assignments such as vehicle arrivals.</p>
 </dd></dl>
 
 <dl class="py property">
