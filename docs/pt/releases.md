@@ -4,6 +4,17 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.1 — correção do pacote publicado
+
+- Incluído `citylearn.utils` nas distribuições. Na 1.9.0, a exportação do manifesto
+  dos KPIs falhava quando o simulador era instalado pelo PyPI; a instalação a
+  partir do código escondia a falta deste módulo.
+- A CI verifica um episódio curto e a exportação dos KPIs, séries do BAU nativo e
+  manifesto com o pacote instalado, fora do repositório, em Python 3.9 e 3.10.
+  A publicação repete o ensaio em Python 3.11 antes do envio para o PyPI.
+- Validação local: o pacote reconstruído passou este ensaio em Python 3.10.
+  Sem alterações à física, políticas, datasets, schemas ou definições dos KPIs.
+
 ## v1.9.0 — 2026-10-27
 
 Responsável: [@calofonseca](https://github.com/calofonseca).

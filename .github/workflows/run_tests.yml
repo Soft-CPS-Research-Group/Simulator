@@ -91,6 +91,15 @@ jobs:
           path: ${{ runner.temp }}/perf/perf_smoke_report.json
           if-no-files-found: ignore
 
+      - name: Verify installed distribution exports outside the source tree
+        run: |
+          python -m pip wheel --no-deps . --wheel-dir "${{ runner.temp }}/wheel"
+          python -m pip install --no-deps --force-reinstall "${{ runner.temp }}"/wheel/*.whl
+          cd "${{ runner.temp }}"
+          python -I "$GITHUB_WORKSPACE/scripts/ci/installed_export_smoke.py" \
+            --schema "$GITHUB_WORKSPACE/tests/data/minute_ev_demo/schema.json" \
+            --output "${{ runner.temp }}/installed-export"
+
   accounting-audit:
     needs: lint
     runs-on: ubuntu-24.04
