@@ -582,6 +582,44 @@ def test_action_feedback_bundle_distinguishes_requested_limited_and_applied(tmp_
         env.close()
 
 
+@pytest.mark.parametrize('headroom', [10.0, 0.5])
+def test_near_full_ev_availability_allows_viable_command_only_inside_headroom(tmp_path, headroom):
+    schema_path = _minute_schema_with_bundles(tmp_path, action_feedback=True)
+    env = CityLearnEnv(str(schema_path), interface='entity', central_agent=True, random_seed=0)
+    try:
+        env.reset(seed=0)
+        charger = env.buildings[0].electric_vehicle_chargers[0]
+        charger.min_charging_power = 1.38
+        ev = charger.connected_electric_vehicle
+        ev.battery.soc[0] = 0.999
+        service = env._entity_service
+        service._headroom_power_limit_for_connection = lambda *args, **kwargs: headroom
+        obs = service.observation_payload()
+        names = env.entity_specs['tables']['charger']['features']
+        row = obs['tables']['charger'][0]
+        available_kw = row[names.index('available_charge_power_kw')]
+        action = row[names.index('available_charge_action_normalized')]
+        assert 0.0 < available_kw < charger.min_charging_power
+        if headroom < charger.min_charging_power:
+            assert action == 0.0
+            assert row[names.index('can_charge')] == 0.0
+        else:
+            assert action * charger.max_charging_power == pytest.approx(charger.min_charging_power)
+            charger.update_connected_electric_vehicle_soc(float(action))
+            assert ev.battery.soc[0] == pytest.approx(1.0, abs=1e-6)
+    finally:
+        env.close()
+
+
+def test_charger_minimum_power_survives_float32_action_roundtrip():
+    from citylearn.electric_vehicle_charger import Charger
+    maximum, minimum = 7.2, 1.38
+    at_minimum = float(np.float32(minimum / maximum))
+    assert Charger._deadband_power_kw(at_minimum, maximum, minimum) == pytest.approx(minimum)
+    assert Charger._deadband_power_kw(at_minimum * 0.99, maximum, minimum) == 0.0
+    assert Charger._deadband_power_kw(0.0, maximum, minimum) == 0.0
+
+
 def test_storage_available_charge_setpoint_keeps_current_limited_charge(tmp_path: Path):
     schema_path = _minute_schema_with_bundles(tmp_path, action_feedback=True)
     schema = json.loads(schema_path.read_text(encoding="utf-8"))

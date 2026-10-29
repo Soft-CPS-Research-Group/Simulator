@@ -1780,6 +1780,20 @@ class CityLearnEntityInterfaceService:
 
         available_charge_power = 0.0 if outage else max(min(charge_candidates), 0.0)
         available_discharge_power = 0.0 if outage else max(min(discharge_candidates), 0.0)
+        # Battery headroom limits energy actually accepted in the last interval,
+        # not the minimum viable charger command. Below the charger deadband a
+        # positive command produces no energy at all. Permit the minimum command
+        # when the electrical envelope allows it; battery physics clips the fill.
+        available_charge_request = available_charge_power
+        minimum_charge_power = max(self._safe_scalar(getattr(charger, 'min_charging_power', 0.0), 0.0), 0.0)
+        command_limit = max(max_charging_power, 0.0)
+        if np.isfinite(import_limit):
+            command_limit = min(command_limit, max(import_limit, 0.0))
+        if available_charge_power > 0.0:
+            if command_limit + 1.0e-9 < minimum_charge_power:
+                available_charge_request = 0.0
+            else:
+                available_charge_request = min(max(available_charge_power, minimum_charge_power), command_limit)
         max_deliverable = min(
             available_charge_power * max(hours_until_departure, 0.0) * charge_efficiency,
             energy_to_full,
@@ -1803,11 +1817,11 @@ class CityLearnEntityInterfaceService:
             "connected_ev_soc_min_ratio": soc_min,
             "connected_ev_energy_available_kwh": energy_available,
             "connected_ev_energy_to_full_kwh": energy_to_full,
-            "can_charge": 1.0 if available_charge_power > 1.0e-9 else 0.0,
+            "can_charge": 1.0 if available_charge_request > 1.0e-9 else 0.0,
             "can_discharge": 1.0 if available_discharge_power > 1.0e-9 else 0.0,
             "available_charge_power_kw": available_charge_power,
             "available_discharge_power_kw": available_discharge_power,
-            "available_charge_action_normalized": available_charge_power / max(max_charging_power, 1.0e-6),
+            "available_charge_action_normalized": available_charge_request / max(max_charging_power, 1.0e-6),
             "available_discharge_action_normalized": available_discharge_power / max(max_discharging_power, 1.0e-6),
             "max_deliverable_energy_until_departure_kwh": max_deliverable,
             "departure_energy_margin_kwh": departure_margin,
