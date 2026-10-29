@@ -405,10 +405,14 @@
             <span class="k">return</span> <span class="mf">0.0</span>
 
         <span class="n">requested_power_kw</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">action_value</span><span class="p">))</span> <span class="o">*</span> <span class="n">max_power_kw</span>
-        <span class="k">if</span> <span class="n">requested_power_kw</span> <span class="o">&lt;</span> <span class="n">min_power_kw</span><span class="p">:</span>
+        <span class="c1"># Entity actions are float32. A command exactly at the minimum can</span>
+        <span class="c1"># round a fraction below it; preserve that valid command without</span>
+        <span class="c1"># admitting materially sub-minimum requests.</span>
+        <span class="n">tolerance_kw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">*</span> <span class="n">max_power_kw</span>
+        <span class="k">if</span> <span class="n">requested_power_kw</span> <span class="o">+</span> <span class="n">tolerance_kw</span> <span class="o">&lt;</span> <span class="n">min_power_kw</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
 
-        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">requested_power_kw</span><span class="p">,</span> <span class="n">max_power_kw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">requested_power_kw</span><span class="p">,</span> <span class="n">min_power_kw</span><span class="p">),</span> <span class="n">max_power_kw</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_signed_power_from_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
         <span class="k">try</span><span class="p">:</span>
