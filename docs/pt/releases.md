@@ -4,7 +4,9 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
-## Ainda não publicado — BAU com carga imediata até 100%
+## v1.9.2 — 2026-10-29 — BAU com carga imediata até 100%
+
+Responsável: [@calofonseca](https://github.com/calofonseca).
 
 - `BusinessAsUsualAgent`, `NormalPolicy` e `NormalNoBatteryPolicy` pedem carga
   máxima do EV desde a ligação até 100%. O alvo de saída, preço e prazo não
@@ -24,6 +26,19 @@ Responsavel default por releases deste fork: [@calofonseca](https://github.com/c
   Os KPIs relativos ao BAU da 1.9.1 e anteriores têm outra referência. Não foram
   alterados datasets ou preços. Os testes cobrem carga total, independência do
   alvo de saída, potência mínima, margem elétrica, aparelhos e RBCs nativos.
+
+Validação: 544 testes locais do Simulator, CI em Python 3.9/3.10 e auditoria
+contabilística passaram para as alterações integradas. O pacote candidato
+instalado fora do repositório completou um episódio e exportou KPIs e
+proveniência. A publicação repete esta verificação em Python 3.11.
+O Algorithms também completou comparações de todo o período (8.759 transições
+horárias, 17 edifícios) com esta referência; esta versão não altera esses agentes.
+
+Migração: não há alterações ao schema dos dados, ações ou observações.
+É necessário recalcular o BAU nativo antes de comparar KPIs relativos entre
+versões. Configurações BAU que usavam deliberadamente um alvo inferior devem
+escolher um controlador orientado ao serviço. O trabalho em curso sobre
+tarifas e datasets não faz parte desta publicação.
 
 ## v1.9.1 — correção do pacote publicado
 
