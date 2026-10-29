@@ -4,6 +4,44 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.3 — 2026-10-29 — integridade dos dados e correções de eventos
+
+Responsável: [@calofonseca](https://github.com/calofonseca).
+
+- A potência disponível durante cortes passa a ser partilhada corretamente
+  entre carregadores e outras cargas flexíveis. Um aparelho não inicia um ciclo
+  cuja primeira etapa excede a potência ainda disponível.
+- As políticas nativas acompanham entradas, saídas e alterações de ativos.
+  Os históricos de ações mantêm a identidade dos membros; episódios repetidos
+  e `Agent.learn()` suportam observações entity e populações variáveis.
+- Uma partida EV desconhecida mantém-se desconhecida nas observações,
+  recompensas, estado terminal e KPIs. O fim do episódio não cria uma partida
+  nem uma penalização por incumprimento fictícias.
+- Corrigidas as 54 sessões domésticas abertas no fim de 2024 e removidos
+  40 intervalos de corte de 15 minutos posteriores à saída dos membros.
+  Atualizados os índices de eventos, checksums, relatório e pacote reproduzível.
+- Incluída a tarifa OMIE comum, dividida por 1.000 e com negativos a zero,
+  previsões causais e mercado comunitário a 80% dessa tarifa nas nove
+  configurações portuguesas. A venda à rede vale zero; a tarifa anterior fica
+  arquivada como proveniência.
+- Preservado o BAU da 1.9.2, com carga imediata até 100% e autoconsumo baseado
+  na potência efetivamente aceite pela bateria do EV.
+
+Validação: 591 testes locais passaram, incluindo regressões dirigidas; lint crítico, auditorias de
+física/datasets, CI em Python 3.9/3.10 e exportação pelo pacote instalado.
+A publicação repete o ensaio do pacote em Python 3.11. Comprovativos em
+[1.9.3-validation.json](../releases/1.9.3-validation.json).
+Não se reivindica uma comparação anual completa de controladores.
+
+Migração: mantêm-se os nomes e dimensões das ações/observações. O valor `-1`
+indica partida desconhecida; a urgência derivada do prazo é neutra e a
+viabilidade de saída fica desconhecida (`-1`). `action_history_ids` identifica
+as linhas dos históricos dinâmicos. O catálogo português acrescenta
+`right_censored` e `observed_end_time_step`, deixando `departure_time_step`
+nulo nas visitas domésticas parciais. Usar o motor 1.9.3 ou posterior com estes
+dados e repetir estudos afetados. Os datasets estão no repositório/ZIP,
+não no pacote PyPI. Mantêm-se os pedidos DR de stress e falhas intencionais.
+
 ## v1.9.2 — 2026-10-29 — BAU com carga imediata até 100%
 
 Responsável: [@calofonseca](https://github.com/calofonseca).

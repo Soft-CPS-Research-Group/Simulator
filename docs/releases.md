@@ -6,6 +6,46 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.3 — 2026-10-29 — dataset integrity and runtime event fixes
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
+
+- Share the remaining islanded electrical supply across EV chargers and other
+  flexible loads. Prevent a new appliance cycle from exceeding the remaining
+  supply in its first interval during an outage.
+- Refresh native baseline action layouts when members or assets change. Keep
+  dynamic action histories attached to stable member IDs and support repeated
+  episodes and `Agent.learn()` with entity observations and changing populations.
+- Preserve unknown EV departure times in observations, rewards, terminal padding
+  and KPIs. A connected vehicle with an unknown deadline is not a departure at
+  the end of the episode and does not receive a fabricated deadline penalty.
+- Correct the Portuguese two-year datasets: distinguish 54 terminal partial home
+  visits from completed departures, remove 40 outage intervals of 15 minutes
+  after members leave, and refresh executable event indexes, checksums, the
+  descriptive report and the reproducible delivery package.
+- Include the common nonnegative OMIE tariff (EUR/MWh divided by 1,000, negatives
+  floored at zero), causal forecasts and community trading at 80% of that tariff
+  with zero grid-export price in the nine Portuguese evaluation configurations.
+  The archived retail tariff remains historical provenance.
+- Preserve the immediate-full-charge BAU introduced in 1.9.2, including accepted
+  EV power in self-consumption battery dispatch.
+
+Validation: 591 local tests passed, including targeted regressions; critical lint, physical
+and dataset audits, CI on Python 3.9/3.10, and installed-wheel export checks.
+The publication workflow repeats its installed-wheel check on Python 3.11.
+Release evidence is recorded in [1.9.3-validation.json](releases/1.9.3-validation.json).
+These checks do not constitute a full annual multi-controller experiment.
+
+Compatibility and migration: action/observation feature names and shapes remain
+unchanged. Unknown departure time is represented by the existing `-1` sentinel;
+deadline-derived urgency is neutral and departure feasibility is unknown (`-1`).
+Dynamic action-history consumers can use `action_history_ids` to identify rows.
+The Portuguese session catalogue adds `right_censored` and
+`observed_end_time_step`; `departure_time_step` is null for partial home visits.
+Use 1.9.3 or later with these repaired inputs and rerun affected studies. The
+datasets and their reconstruction tools live in the repository/delivery ZIP,
+not in the PyPI wheel. Intentional DR stress requests and fault campaigns remain.
+
 ## v1.9.2 — 2026-10-29 — immediate full-charge BAU
 
 Release owner: [@calofonseca](https://github.com/calofonseca).
