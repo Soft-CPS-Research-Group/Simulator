@@ -307,10 +307,14 @@ class Charger(Environment):
             return 0.0
 
         requested_power_kw = abs(float(action_value)) * max_power_kw
-        if requested_power_kw < min_power_kw:
+        # Entity actions are float32. A command exactly at the minimum can
+        # round a fraction below it; preserve that valid command without
+        # admitting materially sub-minimum requests.
+        tolerance_kw = np.finfo(np.float32).eps * max_power_kw
+        if requested_power_kw + tolerance_kw < min_power_kw:
             return 0.0
 
-        return min(requested_power_kw, max_power_kw)
+        return min(max(requested_power_kw, min_power_kw), max_power_kw)
 
     def _signed_power_from_action(self, action_value: float) -> Tuple[float, bool]:
         try:

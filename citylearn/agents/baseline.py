@@ -8,14 +8,8 @@ from citylearn.agents.base import Agent
 from citylearn.citylearn import CityLearnEnv
 
 
-class BusinessAsUsualAgent(Agent):
-    """Deterministic operational baseline for day-to-day equipment use.
-
-    The policy represents a conservative non-optimizing operator:
-    connected EVs charge toward their declared departure service target when
-    available, deferrable appliances start as soon as they can, and electrical
-    storage performs simple PV self-consumption.
-    """
+class _OperationalBaselineAgent(Agent):
+    """Shared equipment dispatch and deadline-based EV service for native RBCs."""
 
     def __init__(
         self,
@@ -537,6 +531,44 @@ class BusinessAsUsualAgent(Agent):
         self._building_action_layout_cache.clear()
 
 
+class BusinessAsUsualAgent(_OperationalBaselineAgent):
+    """Immediate EV charging to 100%, earliest appliance start and PV storage.
+
+    The request is maximum charging power while connected, independent of the
+    departure target, time, price and solar forecast. Charger/battery physics
+    and the existing electrical-service limiter determine delivered power.
+    """
+
+    DEFINITION_VERSION = 'immediate-full-charge-v1'
+
+    def __init__(self, env: CityLearnEnv, **kwargs: Any):
+        # Accept the old default spellings, but reject an explicit service-target
+        # configuration: that is a different policy, available through RBCs.
+        target = kwargs.pop('ev_target_soc', 1.0)
+        follow_required = kwargs.pop('ev_follow_required_soc', False)
+        if (target is not None and float(target) != 1.0) or follow_required:
+            raise ValueError('BusinessAsUsualAgent always charges to 100%; use an RBC for departure targets.')
+        for name, default in (('ev_service_margin_rate', 0.02), ('ev_service_floor_rate', 0.0)):
+            value = kwargs.pop(name, default)
+            if value is not None and float(value) != default:
+                raise ValueError(f'{name} configures deadline charging; use an RBC instead of BAU.')
+        super().__init__(env, ev_target_soc=1.0, ev_follow_required_soc=False, **kwargs)
+
+    def _ev_action_for_charger(self, charger, low: float, high: float, *, building=None) -> float:
+        ev = None if charger is None else getattr(charger, 'connected_electric_vehicle', None)
+        if ev is None:
+            return 0.0
+        soc = self._current_soc(getattr(ev, 'battery', None))
+        if soc is None or soc >= 1.0 - 1.0e-6:
+            return 0.0
+        if self._safe_scalar(getattr(charger, 'max_charging_power', 0.0), 0.0) <= 0.0:
+            return 0.0
+        # Do not reduce this request to the small remaining energy: doing so can
+        # fall into the charger's minimum-power deadband and strand the EV below
+        # full charge. The battery clips the final interval to its capacity.
+        return float(np.clip(1.0, max(0.0, low), max(0.0, high)))
+
+
 class ZeroActionBaselineAgent(Agent):
     """Baseline that requests zero for every action dimension."""
 
@@ -570,7 +602,7 @@ class NormalNoBatteryPolicy(ServiceOnlyBaselineAgent):
     """Day-to-day baseline without stationary battery control."""
 
 
-class RBCBasicPolicy(BusinessAsUsualAgent):
+class RBCBasicPolicy(_OperationalBaselineAgent):
     """Basic rule-based controller with service-aware EV charging and simple price response."""
 
     def __init__(
