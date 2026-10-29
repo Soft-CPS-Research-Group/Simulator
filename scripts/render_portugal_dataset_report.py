@@ -52,7 +52,7 @@ def content():
         p('A two-year collection of synthetic residential and service communities, informed by Portuguese energy, calendar and market sources. Four physical bases support nine scenario configurations at 15-minute resolution.'),
         fig('00_cover','The Premium-100 solar calendar in 2024. Each column is one civil day and each row a local quarter-hour. Colour shows aggregate PV power. Seasonal daylight and day-to-day weather are visible in the inputs.',225),
         table(['4 physical bases','9 configurations','731 days'],[['4, 15, 30 and 100 members','Static and dynamic scenarios','70,176 records per annual-pair series']],[.32,.35,.33]),
-        p('Dataset edition: '+J['version']+'<br/>Report prepared: 29 October 2026<br/>Scope: dataset composition and input distributions','small'),
+        p('Dataset edition: '+J['version']+' / '+str(J.get('integrity_revision', 'original'))+'<br/>Report prepared: 29 October 2026<br/>Scope: dataset composition and input distributions','small'),
         p('This report describes the published data. All quantities are computed from inventories, schedules, schemas and input time series.'))
     page('Reading the collection','PURPOSE AND READING GUIDE',
         p('The collection brings together households with different daily routines, workplaces and other services. Some members contribute generation or controllable equipment; others contribute consumption alone. The same calendar supports weather, electricity prices, carbon intensity and operating schedules.','lead'),
@@ -197,7 +197,7 @@ def content():
         fig('15_ev_times','Premium 2024 arrival and departure hours for complete sessions in the Normal input files. Histograms use one-hour bins in Lisbon civil time. Sessions crossing the start or end of the two-year record are excluded here.',255),
         table(['Base','Sessions starting in 2023','Sessions starting in 2024'],[[name,n(F[name]['sessions_by_year']['2023']),n(F[name]['sessions_by_year']['2024'])] for name in ORDER],[.34,.33,.33]),
         p('Session counts refer to visits reconstructed from each Normal configuration\'s connector records. A visit spanning New Year remains one visit and is attributed to its start year. This preserves the distinction between a new arrival and a continuation of existing parking.'),
-        p('A connection interval gives the period during which charging may be available. It does not indicate that a vehicle charges continuously for the full interval.','small'))
+        p('The 54 home visits still open at the end of 2024 have unknown departure times. Their observed intervals and SOC targets are retained; they are excluded from departure-compliance metrics. A connection interval does not imply continuous charging.','small'))
     page('Requested SOC and connection duration','18 / SERVICE REQUESTS',
         p('Departure targets vary by visit. They combine the user preference and preparation for forthcoming travel, producing a spread of requested SOC values rather than one universal target. All declared targets remain within the accepted 50-100% range.','lead'),
         fig('16_soc_dwell','Premium 2024 target-SOC bands and cumulative connection-duration distributions for complete sessions. The final SOC band is exactly 100%. The duration axis displays the first 36 hours; residential parking has a longer tail.',245),

@@ -58,12 +58,15 @@ def extract():
                 f=pd.read_parquet(root/ch['charger_simulation'])
                 on=f.loc[f.electric_vehicle_charger_state.eq(1)].copy();on['start']=on.index
                 for sid,g in on.groupby('electric_vehicle_session_id',sort=False):
-                    row=g.iloc[0];a=int(row.start);dep=int(a+row.electric_vehicle_departure_time);eid=row.electric_vehicle_id
+                    row=g.iloc[0];a=int(row.start);eid=row.electric_vehicle_id
+                    unknown_departure=not np.isfinite(row.electric_vehicle_departure_time)
+                    # A terminal partial visit has an observed end, no deadline.
+                    dep=int(g.index[-1]+1) if unknown_departure else int(a+row.electric_vehicle_departure_time)
                     capacity=schema['electric_vehicles_def'][eid]['battery']['attributes']['capacity']
                     target=float(row.electric_vehicle_required_soc_departure);soc=float(row.electric_vehicle_current_soc)
                     native_sessions.append(dict(family=name,session_id=sid,member_id=mid,charger_id=cid,ev_id=eid,arrival=a,departure=dep,year=int(YEARS[a]),duration_h=(dep-a)/4,
                         arrival_hour=float(LOCAL[a].hour+LOCAL[a].minute/60),departure_hour=float((CLOCK[0]+pd.Timedelta(minutes=15*dep)).tz_convert('Europe/Lisbon').hour+((dep%4)*.25)),
-                        target_soc=target,arrival_soc=soc,gap_kwh=max(0,(target-soc)*capacity),left_censored=a==0,right_censored=dep>=N))
+                        target_soc=target,arrival_soc=soc,gap_kwh=max(0,(target-soc)*capacity),left_censored=a==0,right_censored=unknown_departure or dep>=N))
             for aid,app in b.get('deferrable_appliances',{}).items():
                 f=pd.read_parquet(root/app['flexibility_schedule_file']).copy();p=pd.read_parquet(root/app['cycle_profiles_file']).copy()
                 f['member_id']=mid;f['asset_id']=aid;f['family']=name;f['year']=YEARS[f.earliest_start_time_step.to_numpy(int)]
@@ -348,6 +351,7 @@ def main():
         table.to_csv(OUT/f'{name}.csv',index=False)
     metrics['variants']=records(tables['variants']);metrics['dr']=records(tables['dr']);metrics['version']=json.loads((ROOT/'results/portugal_rec_native/manifest.json').read_text())['version'];metrics['period']={'years':[2023,2024],'records':N,'interval_minutes':15,'days':731}
     metrics['input_checksums']={str(d['root'].relative_to(ROOT)):hashlib.sha256((d['root']/'file_checksums.sha256').read_bytes()).hexdigest() for d in data.values()}
+    metrics['integrity_revision']=json.loads((ROOT/'results/portugal_rec_native/manifest.json').read_text()).get('integrity_revision')
     metrics['method']='Static description of catalogues, original-engine schemas and selected input series. No CityLearn imports, actions, controller policies or experiment outputs.'
     metrics['counting']='Inventory is the full static base; session and controlled-cycle distributions are read from the Normal schemas. Dynamic active counts are reconstructed from schema topology events. Energy is non-shiftable load and PV separately; no EV/controlled-cycle double-counting or performance KPI.'
     dump(OUT/'statistics.json',metrics)

@@ -184,7 +184,11 @@ examples/*
 # Simulation outputs
 render_logs/
 SimulationData/
-results/
+results/*
+!results/portugal_rec_native/
+results/portugal_rec_native/*
+!results/portugal_rec_native/boundary_integrity.json
+!results/portugal_rec_native/boundary_validation.json
 runtime.csv
 *-runtime.csv
 outputs/

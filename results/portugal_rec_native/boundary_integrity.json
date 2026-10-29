@@ -1,0 +1,92 @@
+{
+  "revision": "portugal-boundaries-1",
+  "families": [
+    {
+      "family": "rec_pt_2023_core_15_v2",
+      "sessions": 3844,
+      "complete_sessions": 3838,
+      "right_censored_sessions": 6,
+      "schedule_files_with_partial_sessions": 12
+    },
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "sessions": 9691,
+      "complete_sessions": 9682,
+      "right_censored_sessions": 9,
+      "schedule_files_with_partial_sessions": 52
+    },
+    {
+      "family": "rec_pt_2023_micro_4_v2",
+      "sessions": 1237,
+      "complete_sessions": 1235,
+      "right_censored_sessions": 2,
+      "schedule_files_with_partial_sessions": 4
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "sessions": 41288,
+      "complete_sessions": 41251,
+      "right_censored_sessions": 37,
+      "schedule_files_with_partial_sessions": 110
+    }
+  ],
+  "removed_inactive_outages": [
+    {
+      "path": "data/datasets/rec_pt_2023_core_30_v2/evaluation/native_inputs/core_30_combined/Member_001.parquet",
+      "variant": "core_30_combined",
+      "member": "Member_001",
+      "time_steps": [
+        30536,
+        30537,
+        30538,
+        30539,
+        30540,
+        30541,
+        30542,
+        30543
+      ]
+    },
+    {
+      "path": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/native_inputs/premium_100_allin/Member_001.parquet",
+      "variant": "premium_100_allin",
+      "member": "Member_001",
+      "time_steps": [
+        21700,
+        21701,
+        21702,
+        21703,
+        21704,
+        21705,
+        21706,
+        21707,
+        21744,
+        21745,
+        21746,
+        21747,
+        21748,
+        21749,
+        21750,
+        21751,
+        30484,
+        30485,
+        30486,
+        30487,
+        30488,
+        30489,
+        30490,
+        30491,
+        30536,
+        30537,
+        30538,
+        30539,
+        30540,
+        30541,
+        30542,
+        30543
+      ]
+    }
+  ],
+  "removed_outage_steps": 40,
+  "preserved": "Prices, forecasts, market, load/PV, EV identities, arrival SOC, targets, DR requests and intentional faults are unchanged.",
+  "runtime_requirement": "Use the accompanying unknown-departure KPI/reward handling; historical simulator commits do not correctly handle terminal unknown deadlines."
+}

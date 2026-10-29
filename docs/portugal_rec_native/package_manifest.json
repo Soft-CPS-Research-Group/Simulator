@@ -1,5 +1,7 @@
 {
   "version": "portugal-native-2023-2024-v3.2",
+  "integrity_revision": "portugal-boundaries-1",
+  "runtime_requirement": "Current simulator with unknown-departure handling; simulator_core below identifies the historical construction reference only.",
   "years": [
     2023,
     2024
@@ -8,14 +10,14 @@
   "configurations": 9,
   "families": 4,
   "package": "docs/portugal_rec_native.zip",
-  "sha256": "c6a2c933e7c0db42aa7bc8366adb5c9af9709dc2ba0579093e90fef14405ae37",
-  "bytes": 551095562,
-  "files": 4024,
+  "sha256": "21309ee46a60cbc8f095b86f22e7c10dd29eb238bab864b26d29ffc1d2729a2c",
+  "bytes": 552561403,
+  "files": 4032,
   "simulator_core": "978be68b0e0740deab15ecf536805f323b86fa57",
   "frozen_2023_commit": "393cd200bb66b671d8904eba00688d56d91f08d3",
   "scope": "Data, public sources, descriptive report, offline reconstruction, pricing and forecast checks and sampled runtime market validation; no annual controller comparison.",
   "english_descriptive_report": {
     "path": "docs/portugal_rec_native/Portugal_REC_Dataset_Report.pdf",
-    "sha256": "c93496b4edd4bc46e34d2cd3a748ae6b768818c55d7fb810693b6ee6d2277870"
+    "sha256": "36d939f875ff98d2e4d695e499f92a5de06cfda1e6079fa81e4a0e66ed6411fc"
   }
 }

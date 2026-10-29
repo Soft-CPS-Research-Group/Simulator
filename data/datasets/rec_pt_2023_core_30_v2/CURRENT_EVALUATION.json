@@ -88,5 +88,6 @@
       "frozen_2023_source_fingerprint": "e93c0b8171be8a312d2f9578d38b31378ef7092d838db1865f751769e3f192c1"
     }
   ],
-  "tariff_policy": "omie_nonnegative"
+  "tariff_policy": "omie_nonnegative",
+  "integrity_revision": "portugal-boundaries-1"
 }

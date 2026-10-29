@@ -32326,15 +32326,6 @@
       "family": "core_30",
       "phase": "development",
       "kind": "grid",
-      "member_id": "Member_001",
-      "start_time_step": 30536,
-      "end_time_step": 30543
-    },
-    {
-      "variant": "core_30_combined",
-      "family": "core_30",
-      "phase": "development",
-      "kind": "grid",
       "member_id": "Member_002",
       "start_time_step": 4180,
       "end_time_step": 4187
@@ -53691,42 +53682,6 @@
       "family": "premium_100",
       "phase": "development",
       "kind": "grid",
-      "member_id": "Member_001",
-      "start_time_step": 21700,
-      "end_time_step": 21707
-    },
-    {
-      "variant": "premium_100_allin",
-      "family": "premium_100",
-      "phase": "development",
-      "kind": "grid",
-      "member_id": "Member_001",
-      "start_time_step": 21744,
-      "end_time_step": 21751
-    },
-    {
-      "variant": "premium_100_allin",
-      "family": "premium_100",
-      "phase": "development",
-      "kind": "grid",
-      "member_id": "Member_001",
-      "start_time_step": 30484,
-      "end_time_step": 30491
-    },
-    {
-      "variant": "premium_100_allin",
-      "family": "premium_100",
-      "phase": "development",
-      "kind": "grid",
-      "member_id": "Member_001",
-      "start_time_step": 30536,
-      "end_time_step": 30543
-    },
-    {
-      "variant": "premium_100_allin",
-      "family": "premium_100",
-      "phase": "development",
-      "kind": "grid",
       "member_id": "Member_002",
       "start_time_step": 4180,
       "end_time_step": 4187
@@ -54434,5 +54389,7 @@
       "stratum": "impossible_stress",
       "activation_source": "explicit_request"
     }
-  ]
+  ],
+  "integrity_revision": "portugal-boundaries-1",
+  "boundary_integrity_report": "results/portugal_rec_native/boundary_integrity.json"
 }

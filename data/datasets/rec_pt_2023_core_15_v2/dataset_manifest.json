@@ -30,5 +30,6 @@
     "enabled": true,
     "local_price_ratio_to_grid_import": 0.8,
     "grid_export_price": 0.0
-  }
+  },
+  "integrity_revision": "portugal-boundaries-1"
 }

@@ -12,6 +12,7 @@ python scripts/portugal_lifecycle_stories.py --repo /tmp/pt-2023-2024
 python scripts/audit/verify_portugal_two_year_inputs.py --repo /tmp/pt-2023-2024 --source /tmp/pt-2023 --engine .
 python scripts/apply_portugal_omie_pricing.py --repo /tmp/pt-2023-2024 --reference-root .
 python scripts/audit/verify_portugal_forecasts_stories.py --repo /tmp/pt-2023-2024
+python scripts/repair_portugal_dataset_boundaries.py --repo /tmp/pt-2023-2024
 ```
 
 A preparação de fontes escreve apenas `data/portugal_reference_2024`. A meteorologia histórica de 2023 é lida das primeiras 35040 linhas do catálogo existente para inicializar previsões causais. A extensão recusa substituir uma pasta de saída já existente; usar uma pasta nova. Os diretórios de entrada e saída devem estar separados.
@@ -25,3 +26,9 @@ A extensão gera automaticamente as narrativas e o plano de ciclo de vida por co
 ## Edição corrente v3.2
 
 A auditoria dos inputs de dois anos acima aplica-se à construção histórica, antes da conversão tarifária. O passo final `apply_portugal_omie_pricing.py` substitui os preços e ativa o mercado comunitário. É idempotente, usa fontes arquivadas e não altera dados físicos. Para atualizar o checkout corrente, executar esse passo sem argumentos. Validar com `python -m pytest -q tests/test_portugal_omie_pricing.py` e `python scripts/audit/audit_portugal_windows.py`. Esta auditoria executa os schemas com a configuração de mercado já gravada, sem a substituir.
+
+### Revisão de integridade `portugal-boundaries-1`
+
+Executar `repair_portugal_dataset_boundaries.py` por último, incluindo após reconstruções. Este passo idempotente elimina cortes fora da presença dos membros e corrige as 54 sessões domésticas que continuam no fim do período observado. O gerador histórico usa o fim do ano como limite do estacionamento, sem gerar a viagem seguinte: esse limite não é uma partida prevista. O catálogo conserva o intervalo em `observed_end_time_step` (exclusivo), assinala `right_censored=true` e deixa `departure_time_step` nulo. As restantes sessões conservam partidas conhecidas. Nos horários executáveis, a contagem até à partida fica nula apenas nessas sessões; chegada, SOC e objetivo mantêm-se. Não se prolonga o calendário nem se presume uma partida em janeiro. As sessões parciais não entram na avaliação de cumprimento à partida, mas a sua energia continua contabilizada.
+
+Usar o simulador corrente com o tratamento de partida desconhecida (`-1`) nos KPIs e recompensas; o commit histórico indicado no início serve para reconstrução e não para executar esta revisão. Validar com `python -m pytest -q tests/test_portugal_dataset_boundaries.py tests/test_kpi_v2.py tests/test_portugal_omie_pricing.py`. Os comprovativos históricos mantêm o âmbito da edição que validaram. Os relatórios atuais estão em `results/portugal_rec_native/boundary_integrity.json` e `boundary_validation.json`. Depois de validar, `python scripts/package_portugal_native.py` atualiza o ZIP e os seus checksums.

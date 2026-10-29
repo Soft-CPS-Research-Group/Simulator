@@ -66,5 +66,6 @@
   "physical_equipment_resized": false,
   "profile_generation": "New 2024 operating draws; frozen appliance profiles and EV specs; true 2024 source weather/prices/calendar. Thermal annual budgets respond to degree-hour ratio.",
   "source_reference": "data/portugal_reference_2024",
-  "source_history": "2023 annual_* catalogue fields and mobility ledgers are frozen/synthetic diagnostics, not runtime trajectories."
+  "source_history": "2023 annual_* catalogue fields and mobility ledgers are frozen/synthetic diagnostics, not runtime trajectories.",
+  "integrity_revision": "portugal-boundaries-1"
 }

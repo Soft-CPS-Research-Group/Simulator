@@ -1628,11 +1628,12 @@
     "days": 731
   },
   "input_checksums": {
-    "data/datasets/rec_pt_2023_core_15_v2": "a7bb7e1af9371854ebf378087b84bf698b012db9b7272faaa2229612f6a4a2b9",
-    "data/datasets/rec_pt_2023_core_30_v2": "e67040f87900a23f60bbf470daa61efb175c4f3fe41cf2a5f72f13f095b9d9ed",
-    "data/datasets/rec_pt_2023_micro_4_v2": "1dc2dc251caeba54cae557bd6a243ca9a252ca579ba730a64c05e4d71eb1f0cf",
-    "data/datasets/rec_pt_2023_premium_100_v2": "9892de94fe8f6c7f0d5950eaf532d062541eeefd9a348a7cce10b899087c8f9b"
+    "data/datasets/rec_pt_2023_micro_4_v2": "6e3156d5156c8f4e5ebd18814f13fca8a10dfb8c83008ad49a5fbec931f264d5",
+    "data/datasets/rec_pt_2023_core_15_v2": "caa67b8345b4d20ddca70bcda2f4e3da97a8a6f89817671823b435c7bdcf0884",
+    "data/datasets/rec_pt_2023_core_30_v2": "16fed8c823b34632f099bb43df63b1ba6163ec8c984f1f16e6bf859ef473ef09",
+    "data/datasets/rec_pt_2023_premium_100_v2": "d36f6bf94713ff77b4add6ef9654baf9b27fd553fa43a8c997e7da20b64ad5c8"
   },
+  "integrity_revision": "portugal-boundaries-1",
   "method": "Static description of catalogues, original-engine schemas and selected input series. No CityLearn imports, actions, controller policies or experiment outputs.",
   "counting": "Inventory is the full static base; session and controlled-cycle distributions are read from the Normal schemas. Dynamic active counts are reconstructed from schema topology events. Energy is non-shiftable load and PV separately; no EV/controlled-cycle double-counting or performance KPI."
 }
