@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3.1",
+  "version": "portugal-native-2023-2024-v3.2",
   "years": [
     2023,
     2024
@@ -8,14 +8,14 @@
   "configurations": 9,
   "families": 4,
   "package": "docs/portugal_rec_native.zip",
-  "sha256": "4535e99862f258ac8150e8c53d24bad637377de19ab4eac706a5308c9bd27062",
-  "bytes": 549407098,
-  "files": 4015,
+  "sha256": "c6a2c933e7c0db42aa7bc8366adb5c9af9709dc2ba0579093e90fef14405ae37",
+  "bytes": 551095562,
+  "files": 4024,
   "simulator_core": "978be68b0e0740deab15ecf536805f323b86fa57",
   "frozen_2023_commit": "393cd200bb66b671d8904eba00688d56d91f08d3",
-  "scope": "Data, public sources, atlas, offline reconstruction and static input checks; no annual/controller evaluation.",
+  "scope": "Data, public sources, descriptive report, offline reconstruction, pricing and forecast checks and sampled runtime market validation; no annual controller comparison.",
   "english_descriptive_report": {
     "path": "docs/portugal_rec_native/Portugal_REC_Dataset_Report.pdf",
-    "sha256": "bfdfa50ac7e4e14824ecc0f58864bedd85dbd5d808380e22c645808938a0d30f"
+    "sha256": "c93496b4edd4bc46e34d2cd3a748ae6b768818c55d7fb810693b6ee6d2277870"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3.1",
+  "version": "portugal-native-2023-2024-v3.2",
   "scope": "Static forecast input errors; no controller or runtime forecast evaluation; errors exclude health overlays.",
   "checks": [
     {
@@ -68,30 +68,6 @@
     },
     {
       "name": "rec_pt_2023_core_15_v2: root stories synchronized",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_15_v2: all actual prices unchanged",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_15_v2: earlier forecasts unchanged 4",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_15_v2: earlier forecasts unchanged 24",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_15_v2: earlier forecasts unchanged 96",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_15_v2: all other data files byte-identical",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_15_v2: executable schema unchanged core_15",
       "passed": true
     },
     {
@@ -231,46 +207,6 @@
       "passed": true
     },
     {
-      "name": "rec_pt_2023_core_30_v2: all actual prices unchanged",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_30_v2: earlier forecasts unchanged 4",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_30_v2: earlier forecasts unchanged 24",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_30_v2: earlier forecasts unchanged 96",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_30_v2: all other data files byte-identical",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_safety",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_combined",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_robustness",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_normal",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_core_30_v2: executable schema unchanged core_30_topology",
-      "passed": true
-    },
-    {
       "name": "rec_pt_2023_micro_4_v2: catalogue derived from all executable variants",
       "passed": true
     },
@@ -292,30 +228,6 @@
     },
     {
       "name": "rec_pt_2023_micro_4_v2: root stories synchronized",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_micro_4_v2: all actual prices unchanged",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_micro_4_v2: earlier forecasts unchanged 4",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_micro_4_v2: earlier forecasts unchanged 24",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_micro_4_v2: earlier forecasts unchanged 96",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_micro_4_v2: all other data files byte-identical",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_micro_4_v2: executable schema unchanged core_4",
       "passed": true
     },
     {
@@ -736,34 +648,6 @@
     },
     {
       "name": "Atlas is the same narrative as catalogue",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_premium_100_v2: all actual prices unchanged",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_premium_100_v2: earlier forecasts unchanged 4",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_premium_100_v2: earlier forecasts unchanged 24",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_premium_100_v2: earlier forecasts unchanged 96",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_premium_100_v2: all other data files byte-identical",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_premium_100_v2: executable schema unchanged premium_100_normal",
-      "passed": true
-    },
-    {
-      "name": "rec_pt_2023_premium_100_v2: executable schema unchanged premium_100_allin",
       "passed": true
     },
     {
@@ -1800,13 +1684,13 @@
       "year": 2023,
       "horizon_hours": 1.0,
       "n": 34944,
-      "mae": 0.03148045763373375,
-      "rmse": 0.112876296043396,
-      "bias": -0.0001590200117789209,
-      "p95_absolute_error": 0.2380499631166458,
-      "predicted_std": 6.3481926918029785,
-      "actual_std": 6.357454299926758,
-      "nmae_mean_pct": 0.513147097080946,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.11859655380249,
+      "actual_std": 4.11859655380249,
+      "nmae_mean_pct": 0.0,
       "omie_published_pct": 100.0,
       "fallback_mae": null
     },
@@ -1817,13 +1701,13 @@
       "year": 2024,
       "horizon_hours": 1.0,
       "n": 35040,
-      "mae": 0.02762087807059288,
-      "rmse": 0.09627685695886612,
-      "bias": -0.02762087807059288,
-      "p95_absolute_error": 0.3355879783630371,
-      "predicted_std": 6.475514888763428,
-      "actual_std": 6.444954872131348,
-      "nmae_mean_pct": 0.19790863152593374,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.58235502243042,
+      "actual_std": 4.58235502243042,
+      "nmae_mean_pct": 0.0,
       "omie_published_pct": 100.0,
       "fallback_mae": null
     },
@@ -1839,8 +1723,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.171161651611328,
-      "actual_std": 4.171161651611328,
+      "predicted_std": 2.789076566696167,
+      "actual_std": 2.789076566696167,
       "nmae_mean_pct": 0.0
     },
     {
@@ -1855,8 +1739,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.0096354484558105,
-      "actual_std": 4.0096354484558105,
+      "predicted_std": 2.8617630004882812,
+      "actual_std": 2.8617630004882812,
       "nmae_mean_pct": 0.0
     },
     {
@@ -1867,13 +1751,13 @@
       "month": 3,
       "horizon_hours": 1.0,
       "n": 2976,
-      "mae": 0.0009021185687743127,
-      "rmse": 0.017399432137608528,
-      "bias": -0.0009021185687743127,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 3.8568499088287354,
-      "actual_std": 3.8557798862457275,
-      "nmae_mean_pct": 0.012209761189296842
+      "predicted_std": 2.883866786956787,
+      "actual_std": 2.883866786956787,
+      "nmae_mean_pct": 0.0
     },
     {
       "signal": "electricity_pricing",
@@ -1883,13 +1767,13 @@
       "month": 4,
       "horizon_hours": 1.0,
       "n": 2880,
-      "mae": 0.33512184023857117,
-      "rmse": 0.3353548049926758,
-      "bias": -0.33512184023857117,
-      "p95_absolute_error": 0.3355884552001953,
-      "predicted_std": 3.0758583545684814,
-      "actual_std": 3.0760674476623535,
-      "nmae_mean_pct": 4.8070017248392105
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 2.271350145339966,
+      "actual_std": 2.271350145339966,
+      "nmae_mean_pct": 0.0
     },
     {
       "signal": "electricity_pricing",
@@ -1903,8 +1787,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 2.9095542430877686,
-      "actual_std": 2.9095542430877686,
+      "predicted_std": 2.6827540397644043,
+      "actual_std": 2.6827540397644043,
       "nmae_mean_pct": 0.0
     },
     {
@@ -1919,8 +1803,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.716120719909668,
-      "actual_std": 4.716120719909668,
+      "predicted_std": 3.9613289833068848,
+      "actual_std": 3.9613289833068848,
       "nmae_mean_pct": 0.0
     },
     {
@@ -1935,8 +1819,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.238297462463379,
-      "actual_std": 4.238297462463379,
+      "predicted_std": 3.700242280960083,
+      "actual_std": 3.700242280960083,
       "nmae_mean_pct": 0.0
     },
     {
@@ -1951,8 +1835,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.449770450592041,
-      "actual_std": 4.449770450592041,
+      "predicted_std": 3.722517490386963,
+      "actual_std": 3.722517490386963,
       "nmae_mean_pct": 0.0
     },
     {
@@ -1967,8 +1851,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 5.217936992645264,
-      "actual_std": 5.217936992645264,
+      "predicted_std": 4.315555095672607,
+      "actual_std": 4.315555095672607,
       "nmae_mean_pct": 0.0
     },
     {
@@ -1983,8 +1867,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 5.402198314666748,
-      "actual_std": 5.402198314666748,
+      "predicted_std": 3.56358003616333,
+      "actual_std": 3.56358003616333,
       "nmae_mean_pct": 0.0
     },
     {
@@ -1999,8 +1883,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 5.644752025604248,
-      "actual_std": 5.644752025604248,
+      "predicted_std": 3.6527631282806396,
+      "actual_std": 3.6527631282806396,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2015,8 +1899,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 6.267969608306885,
-      "actual_std": 6.267969608306885,
+      "predicted_std": 4.239424228668213,
+      "actual_std": 4.239424228668213,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2026,13 +1910,13 @@
       "year": 2023,
       "horizon_hours": 6.0,
       "n": 34944,
-      "mae": 0.03893150016665459,
-      "rmse": 0.13429230451583862,
-      "bias": -7.556143827969208e-05,
-      "p95_absolute_error": 0.3080275058746321,
-      "predicted_std": 6.333718776702881,
-      "actual_std": 6.353030681610107,
-      "nmae_mean_pct": 0.6339294370263815,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.118991851806641,
+      "actual_std": 4.118991851806641,
+      "nmae_mean_pct": 0.0,
       "omie_published_pct": 100.0,
       "fallback_mae": null
     },
@@ -2043,13 +1927,13 @@
       "year": 2024,
       "horizon_hours": 6.0,
       "n": 35040,
-      "mae": 0.027812425047159195,
-      "rmse": 0.09661010652780533,
-      "bias": -0.027812425047159195,
-      "p95_absolute_error": 0.3355879783630371,
-      "predicted_std": 6.4752631187438965,
-      "actual_std": 6.444408893585205,
-      "nmae_mean_pct": 0.19918805919587612,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 4.585239887237549,
+      "actual_std": 4.585239887237549,
+      "nmae_mean_pct": 0.0,
       "omie_published_pct": 100.0,
       "fallback_mae": null
     },
@@ -2065,8 +1949,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.157063961029053,
-      "actual_std": 4.157063961029053,
+      "predicted_std": 2.7811052799224854,
+      "actual_std": 2.7811052799224854,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2081,8 +1965,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.051446914672852,
-      "actual_std": 4.051446914672852,
+      "predicted_std": 2.8753092288970947,
+      "actual_std": 2.8753092288970947,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2093,13 +1977,13 @@
       "month": 3,
       "horizon_hours": 6.0,
       "n": 2976,
-      "mae": 0.0031574140302836895,
-      "rmse": 0.032551348209381104,
-      "bias": -0.0031574140302836895,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 3.857309103012085,
-      "actual_std": 3.853578805923462,
-      "nmae_mean_pct": 0.04272335208952427
+      "predicted_std": 2.8840835094451904,
+      "actual_std": 2.8840835094451904,
+      "nmae_mean_pct": 0.0
     },
     {
       "signal": "electricity_pricing",
@@ -2109,13 +1993,13 @@
       "month": 4,
       "horizon_hours": 6.0,
       "n": 2880,
-      "mae": 0.33512184023857117,
-      "rmse": 0.3353548049926758,
-      "bias": -0.33512184023857117,
-      "p95_absolute_error": 0.3355884552001953,
-      "predicted_std": 3.0618975162506104,
-      "actual_std": 3.062167167663574,
-      "nmae_mean_pct": 4.796923324465752
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "p95_absolute_error": 0.0,
+      "predicted_std": 2.2688374519348145,
+      "actual_std": 2.2688374519348145,
+      "nmae_mean_pct": 0.0
     },
     {
       "signal": "electricity_pricing",
@@ -2129,8 +2013,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 2.9220175743103027,
-      "actual_std": 2.9220175743103027,
+      "predicted_std": 2.6908576488494873,
+      "actual_std": 2.6908576488494873,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2145,8 +2029,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.6459245681762695,
-      "actual_std": 4.6459245681762695,
+      "predicted_std": 3.9372780323028564,
+      "actual_std": 3.9372780323028564,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2161,8 +2045,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.2153849601745605,
-      "actual_std": 4.2153849601745605,
+      "predicted_std": 3.7141551971435547,
+      "actual_std": 3.7141551971435547,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2177,8 +2061,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 4.448461532592773,
-      "actual_std": 4.448461532592773,
+      "predicted_std": 3.726674795150757,
+      "actual_std": 3.726674795150757,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2193,8 +2077,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 5.219201564788818,
-      "actual_std": 5.219201564788818,
+      "predicted_std": 4.299259185791016,
+      "actual_std": 4.299259185791016,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2209,8 +2093,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 5.408054828643799,
-      "actual_std": 5.408054828643799,
+      "predicted_std": 3.5565059185028076,
+      "actual_std": 3.5565059185028076,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2225,8 +2109,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 5.615959644317627,
-      "actual_std": 5.615959644317627,
+      "predicted_std": 3.642896890640259,
+      "actual_std": 3.642896890640259,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2241,8 +2125,8 @@
       "rmse": 0.0,
       "bias": 0.0,
       "p95_absolute_error": 0.0,
-      "predicted_std": 6.2577691078186035,
-      "actual_std": 6.2577691078186035,
+      "predicted_std": 4.243730068206787,
+      "actual_std": 4.243730068206787,
       "nmae_mean_pct": 0.0
     },
     {
@@ -2252,15 +2136,15 @@
       "year": 2023,
       "horizon_hours": 24.0,
       "n": 34944,
-      "mae": 1.3905538320541382,
-      "rmse": 2.613504409790039,
-      "bias": 0.012988202273845673,
-      "p95_absolute_error": 5.973100185394287,
-      "predicted_std": 6.340830326080322,
-      "actual_std": 6.353541851043701,
-      "nmae_mean_pct": 22.636964917182922,
+      "mae": 1.181935429573059,
+      "rmse": 2.2509660720825195,
+      "bias": 0.010328522883355618,
+      "p95_absolute_error": 5.183400464057916,
+      "predicted_std": 4.116971969604492,
+      "actual_std": 4.1209540367126465,
+      "nmae_mean_pct": 13.57000470161438,
       "omie_published_pct": 41.66666666666667,
-      "fallback_mae": 2.3495070934295654
+      "fallback_mae": 2.0261752605438232
     },
     {
       "signal": "electricity_pricing",
@@ -2269,15 +2153,15 @@
       "year": 2024,
       "horizon_hours": 24.0,
       "n": 35040,
-      "mae": 1.2819368839263916,
-      "rmse": 2.5045809745788574,
-      "bias": -0.04741011559963226,
-      "p95_absolute_error": 5.971912670135477,
-      "predicted_std": 6.485434532165527,
-      "actual_std": 6.46064567565918,
-      "nmae_mean_pct": 9.160402417182922,
+      "mae": 1.0875202417373657,
+      "rmse": 2.156970500946045,
+      "bias": -0.01630011945962906,
+      "p95_absolute_error": 5.148199796676618,
+      "predicted_std": 4.587982177734375,
+      "actual_std": 4.594602584838867,
+      "nmae_mean_pct": 17.224884033203125,
       "omie_published_pct": 41.66666666666667,
-      "fallback_mae": 2.1772477626800537
+      "fallback_mae": 1.8643205165863037
     },
     {
       "signal": "electricity_pricing",
@@ -2287,13 +2171,13 @@
       "month": 1,
       "horizon_hours": 24.0,
       "n": 2976,
-      "mae": 1.2340154647827148,
-      "rmse": 2.293086051940918,
-      "bias": -0.07030472159385681,
-      "p95_absolute_error": 5.467079162597656,
-      "predicted_std": 4.16185998916626,
-      "actual_std": 4.105721950531006,
-      "nmae_mean_pct": 8.964835107326508
+      "mae": 1.0638065338134766,
+      "rmse": 1.9767982959747314,
+      "bias": -0.06060755252838135,
+      "p95_absolute_error": 4.713000297546387,
+      "predicted_std": 2.7539618015289307,
+      "actual_std": 2.694756507873535,
+      "nmae_mean_pct": 14.136317372322083
     },
     {
       "signal": "electricity_pricing",
@@ -2303,13 +2187,13 @@
       "month": 2,
       "horizon_hours": 24.0,
       "n": 2784,
-      "mae": 0.7210666537284851,
-      "rmse": 1.4416768550872803,
-      "bias": 0.15035000443458557,
-      "p95_absolute_error": 3.568682003021232,
-      "predicted_std": 3.9483187198638916,
-      "actual_std": 3.9990100860595703,
-      "nmae_mean_pct": 7.67880454659462
+      "mae": 0.6216092109680176,
+      "rmse": 1.2428247928619385,
+      "bias": 0.1296120584011078,
+      "p95_absolute_error": 3.076450037956231,
+      "predicted_std": 2.847496509552002,
+      "actual_std": 2.861966133117676,
+      "nmae_mean_pct": 16.558417677879333
     },
     {
       "signal": "electricity_pricing",
@@ -2319,13 +2203,13 @@
       "month": 3,
       "horizon_hours": 24.0,
       "n": 2976,
-      "mae": 0.7552767395973206,
-      "rmse": 1.7458149194717407,
-      "bias": -0.009506845846772194,
-      "p95_absolute_error": 4.041439533233643,
-      "predicted_std": 3.856407403945923,
-      "actual_std": 3.8517491817474365,
-      "nmae_mean_pct": 10.203561931848526
+      "mae": 0.6434664130210876,
+      "rmse": 1.504101276397705,
+      "bias": 0.001525537925772369,
+      "p95_absolute_error": 3.4839999675750732,
+      "predicted_std": 2.882789373397827,
+      "actual_std": 2.8837785720825195,
+      "nmae_mean_pct": 31.69313371181488
     },
     {
       "signal": "electricity_pricing",
@@ -2335,13 +2219,13 @@
       "month": 4,
       "horizon_hours": 24.0,
       "n": 2880,
-      "mae": 0.8998268842697144,
-      "rmse": 1.6903951168060303,
-      "bias": -0.3575839698314667,
-      "p95_absolute_error": 4.199583029746993,
-      "predicted_std": 3.083744764328003,
-      "actual_std": 3.0624818801879883,
-      "nmae_mean_pct": 12.858803570270538
+      "mae": 0.5770667195320129,
+      "rmse": 1.4234267473220825,
+      "bias": -0.01952221617102623,
+      "p95_absolute_error": 3.5014499425888035,
+      "predicted_std": 2.274451494216919,
+      "actual_std": 2.270184278488159,
+      "nmae_mean_pct": 41.06030762195587
     },
     {
       "signal": "electricity_pricing",
@@ -2351,13 +2235,13 @@
       "month": 5,
       "horizon_hours": 24.0,
       "n": 2976,
-      "mae": 0.9957992434501648,
-      "rmse": 1.8216229677200317,
-      "bias": 0.019235098734498024,
-      "p95_absolute_error": 4.169039726257324,
-      "predicted_std": 2.896562337875366,
-      "actual_std": 2.92699933052063,
-      "nmae_mean_pct": 11.148558557033539
+      "mae": 0.8575646281242371,
+      "rmse": 1.570306658744812,
+      "bias": 0.01656988635659218,
+      "p95_absolute_error": 3.5940003395080566,
+      "predicted_std": 2.686710834503174,
+      "actual_std": 2.69918155670166,
+      "nmae_mean_pct": 28.537961840629578
     },
     {
       "signal": "electricity_pricing",
@@ -2367,13 +2251,13 @@
       "month": 6,
       "horizon_hours": 24.0,
       "n": 2880,
-      "mae": 1.6126866340637207,
-      "rmse": 2.887773275375366,
-      "bias": -0.11863578855991364,
-      "p95_absolute_error": 6.323914527893056,
-      "predicted_std": 4.718388557434082,
-      "actual_std": 4.5817670822143555,
-      "nmae_mean_pct": 11.15945354104042
+      "mae": 1.3859986066818237,
+      "rmse": 2.4886417388916016,
+      "bias": -0.10210137069225311,
+      "p95_absolute_error": 5.451650261878958,
+      "predicted_std": 3.932664394378662,
+      "actual_std": 3.8610239028930664,
+      "nmae_mean_pct": 23.899497091770172
     },
     {
       "signal": "electricity_pricing",
@@ -2383,13 +2267,13 @@
       "month": 7,
       "horizon_hours": 24.0,
       "n": 2976,
-      "mae": 1.2562083005905151,
-      "rmse": 2.421473741531372,
-      "bias": -0.12158481776714325,
-      "p95_absolute_error": 5.71299934387207,
-      "predicted_std": 4.287337303161621,
-      "actual_std": 4.274001121520996,
-      "nmae_mean_pct": 7.688552141189575
+      "mae": 1.081626296043396,
+      "rmse": 2.0867021083831787,
+      "bias": -0.10481450706720352,
+      "p95_absolute_error": 4.925000190734863,
+      "predicted_std": 3.6923110485076904,
+      "actual_std": 3.7128963470458984,
+      "nmae_mean_pct": 14.570775628089905
     },
     {
       "signal": "electricity_pricing",
@@ -2399,13 +2283,13 @@
       "month": 8,
       "horizon_hours": 24.0,
       "n": 2976,
-      "mae": 1.5421169996261597,
-      "rmse": 3.076540231704712,
-      "bias": 0.016807524487376213,
-      "p95_absolute_error": 7.947159767150879,
-      "predicted_std": 4.467957496643066,
-      "actual_std": 4.457259178161621,
-      "nmae_mean_pct": 8.44116061925888
+      "mae": 1.328782320022583,
+      "rmse": 2.6514170169830322,
+      "bias": 0.014489230699837208,
+      "p95_absolute_error": 6.85099983215332,
+      "predicted_std": 3.746565341949463,
+      "actual_std": 3.764984130859375,
+      "nmae_mean_pct": 14.625614881515503
     },
     {
       "signal": "electricity_pricing",
@@ -2415,13 +2299,13 @@
       "month": 9,
       "horizon_hours": 24.0,
       "n": 2880,
-      "mae": 1.276790976524353,
-      "rmse": 2.440309524536133,
-      "bias": 0.025431357324123383,
-      "p95_absolute_error": 5.880735993385305,
-      "predicted_std": 5.243199348449707,
-      "actual_std": 5.248205661773682,
-      "nmae_mean_pct": 7.911796867847443
+      "mae": 1.1002819538116455,
+      "rmse": 2.1035146713256836,
+      "bias": 0.021923616528511047,
+      "p95_absolute_error": 5.069600272178641,
+      "predicted_std": 4.328597068786621,
+      "actual_std": 4.300378322601318,
+      "nmae_mean_pct": 15.179668366909027
     },
     {
       "signal": "electricity_pricing",
@@ -2431,13 +2315,13 @@
       "month": 10,
       "horizon_hours": 24.0,
       "n": 2976,
-      "mae": 1.7717955112457275,
-      "rmse": 3.0310564041137695,
-      "bias": 0.03935422748327255,
-      "p95_absolute_error": 7.268560409545898,
-      "predicted_std": 5.367088794708252,
-      "actual_std": 5.363034725189209,
-      "nmae_mean_pct": 11.345526576042175
+      "mae": 1.5274044275283813,
+      "rmse": 2.612973690032959,
+      "bias": 0.0339260958135128,
+      "p95_absolute_error": 6.266000270843506,
+      "predicted_std": 3.5294604301452637,
+      "actual_std": 3.509913444519043,
+      "nmae_mean_pct": 22.466745972633362
     },
     {
       "signal": "electricity_pricing",
@@ -2447,13 +2331,13 @@
       "month": 11,
       "horizon_hours": 24.0,
       "n": 2880,
-      "mae": 1.658577799797058,
-      "rmse": 3.2267303466796875,
-      "bias": -0.0979362279176712,
-      "p95_absolute_error": 7.806973361968949,
-      "predicted_std": 5.705199718475342,
-      "actual_std": 5.657978534698486,
-      "nmae_mean_pct": 8.282682299613953
+      "mae": 1.4298083782196045,
+      "rmse": 2.7816643714904785,
+      "bias": -0.08442778885364532,
+      "p95_absolute_error": 6.730149602889975,
+      "predicted_std": 3.6816275119781494,
+      "actual_std": 3.647376298904419,
+      "nmae_mean_pct": 13.49070519208908
     },
     {
       "signal": "electricity_pricing",
@@ -2463,13 +2347,13 @@
       "month": 12,
       "horizon_hours": 24.0,
       "n": 2880,
-      "mae": 1.6449331045150757,
-      "rmse": 3.066403865814209,
-      "bias": -0.04323739930987358,
-      "p95_absolute_error": 7.442966103553744,
-      "predicted_std": 6.2581400871276855,
-      "actual_std": 6.252276420593262,
-      "nmae_mean_pct": 7.995046675205231
+      "mae": 1.4180457592010498,
+      "rmse": 2.643451452255249,
+      "bias": -0.03727361932396889,
+      "p95_absolute_error": 6.416350626945472,
+      "predicted_std": 4.232293605804443,
+      "actual_std": 4.2437944412231445,
+      "nmae_mean_pct": 12.807035446166992
     }
   ],
   "exogenous_persistence": [
@@ -2838,7 +2722,7 @@
       ]
     }
   ],
-  "previous_revision_checked": true,
+  "previous_revision_checked": false,
   "native_boundary_limitation": "Original engine clips target before persistence for derived load/PV at episode end; file padding is removed by the loader. No engine changes made.",
   "uncertainty_model": "Deterministic daily persistence, not calibrated probabilistic forecasts or archived numerical weather predictions. Shared weather and price across families; no independent member forecast-skill distribution."
 }

@@ -30,11 +30,11 @@ for path in sorted((ROOT/'data/datasets').glob('rec_pt_*/evaluation/*.json')):
         schema.update(root_directory=str(path.parent.parent), simulation_start_time_step=start,
             simulation_end_time_step=start+steps-1, episode_time_steps=steps, random_episode_split=False,
             rolling_episode_split=False, physics_invariant_checks=True)
-        schema['community_market'] = dict(enabled=True, local_price_ratio_to_grid_import=.8, grid_export_price=0.)
         env = None
         row = dict(schema=str(path), window=label, start=start, transitions=0, status='pass')
         start_clock = time.perf_counter()
         try:
+            assert schema['community_market'] == dict(enabled=True, local_price_ratio_to_grid_import=.8, grid_export_price=0.), 'Dataset market must already be enabled'
             env = CityLearnEnv(schema, render_mode='none', offline=True, random_seed=0,
                                export_kpis_on_episode_end=False)
             obs, _ = env.reset(seed=0)
@@ -64,9 +64,11 @@ for path in sorted((ROOT/'data/datasets').glob('rec_pt_*/evaluation/*.json')):
                 exported = sum(r['local_export_kwh'] for r in settlement)
                 assert abs(imported-exported) < 1e-4, 'Internal energy mismatch'
                 for r in settlement:
+                    assert r['grid_import_price'] >= 0., 'Negative grid purchase price'
                     assert abs(r['local_buy_price']-.8*r['grid_import_price']) < 1e-8
                     assert abs(r['local_sell_price']-.8*r['grid_import_price']) < 1e-8
                     assert r['grid_export_price'] == 0.
+                assert abs(sum(r['local_import_kwh']*r['local_buy_price']-r['local_export_kwh']*r['local_sell_price'] for r in settlement)) < 1e-6, 'Internal cash mismatch'
                 sums['local'] += imported
                 sums['external_import'] += sum(r['grid_import_kwh'] for r in settlement)
                 sums['external_export'] += sum(r['grid_export_kwh'] for r in settlement)

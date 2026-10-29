@@ -1,7 +1,7 @@
 {
   "dataset_id": "CORE-30-ROBUSTNESS",
   "dataset_family": "PT-CORE-30",
-  "dataset_contract_version": "portugal-native-2023-2024-v3.1",
+  "dataset_contract_version": "portugal-native-2023-2024-v3.2",
   "random_seed": 2023,
   "root_directory": "..",
   "central_agent": false,
@@ -248,7 +248,8 @@
     ]
   },
   "community_market": {
-    "enabled": false,
+    "enabled": true,
+    "local_price_ratio_to_grid_import": 0.8,
     "grid_export_price": 0.0
   },
   "electric_vehicles_def": {
@@ -1039,7 +1040,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_001.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [],
       "equity_group": "residential",
@@ -1152,7 +1153,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_002.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1227,7 +1228,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_003.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1300,7 +1301,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_004.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1373,7 +1374,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_005.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1454,7 +1455,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_006.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1563,7 +1564,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_007.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1618,7 +1619,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_008.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1673,7 +1674,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_009.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1748,7 +1749,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_010.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1811,7 +1812,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_011.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1866,7 +1867,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_012.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1941,7 +1942,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_013.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -1996,7 +1997,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_014.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [],
       "equity_group": "residential",
@@ -2111,7 +2112,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_015.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2166,7 +2167,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_016.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2229,7 +2230,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_017.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2284,7 +2285,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_018.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2385,7 +2386,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_019.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2440,7 +2441,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_020.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2513,7 +2514,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_021.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2588,7 +2589,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_022.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2689,7 +2690,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_023.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2752,7 +2753,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_024.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -2807,7 +2808,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_025.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [],
       "equity_group": "small_service",
@@ -2968,7 +2969,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_026.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -3034,7 +3035,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_027.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -3089,7 +3090,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_028.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -3178,7 +3179,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_029.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -3233,7 +3234,7 @@
       "energy_simulation": "evaluation/native_inputs/core_30_robustness/Member_030.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -3336,7 +3337,7 @@
     }
   },
   "experimental_design": {
-    "version": "portugal-native-2023-2024-v3.1",
+    "version": "portugal-native-2023-2024-v3.2",
     "name": "core_30_robustness",
     "label": "Core-30 Robustness",
     "purpose": "robustness",
@@ -3372,7 +3373,7 @@
     ],
     "native_health_unavailable_storage_member": "Member_025",
     "mobility_semantics": "independent arrivals; SOC prescribed per session; no longitudinal trip-energy claim",
-    "tariff_policy": "common",
+    "tariff_policy": "omie_nonnegative",
     "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
     "years": [
       2023,

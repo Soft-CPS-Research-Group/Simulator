@@ -1,7 +1,7 @@
 # Descriptive report - supporting data
 
 The English report `../Portugal_REC_Dataset_Report.pdf` describes dataset edition
-`portugal-native-2023-2024-v3.1`. Its editable Markdown companion contains the same
+`portugal-native-2023-2024-v3.2`. Its editable Markdown companion contains the same
 prose, tables and captions. Figures are available as PNG and editable SVG in
 `../figures/descriptive/`.
 

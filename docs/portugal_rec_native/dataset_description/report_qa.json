@@ -1,12 +1,11 @@
 {
-  "dataset_version": "portugal-native-2023-2024-v3.1",
+  "dataset_version": "portugal-native-2023-2024-v3.2",
   "pages": 33,
   "figures": 28,
-  "pdf_sha256": "bfdfa50ac7e4e14824ecc0f58864bedd85dbd5d808380e22c645808938a0d30f",
+  "pdf_sha256": "c93496b4edd4bc46e34d2cd3a748ae6b768818c55d7fb810693b6ee6d2277870",
   "descriptive_checks_passed": 34,
   "page_titles_match_index": true,
   "replacement_or_black_square_glyphs": 0,
-  "text_outside_horizontal_margins": [],
-  "visual_review": "All 33 pages rendered with system Poppler and visually reviewed; dense chart/table pages inspected separately.",
-  "scope": "Input description only; no dataset, simulator or controller changes."
+  "visual_review": "All 33 rendered pages inspected in contact sheets; changed pricing and source pages inspected individually. No clipping or overflow observed.",
+  "scope": "Current OMIE price and market description; other physical figures preserved from the previous edition."
 }

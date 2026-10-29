@@ -8,9 +8,9 @@ No Core-30 Topology/Combined, Member_001 sai em **14/11/2023 às 22h de Lisboa**
 
 Acrescentaram-se **96 amostras de apoio de 01/01/2025**, exclusivamente para os destinos das previsões de preço. As séries simuladas continuam com **70 176 registos**, terminando em 31/12/2024. Foram corrigidas as últimas 4, 24 e 96 posições das previsões de 1, 6 e 24 horas: 124 células por base. As horas de destino avançam para janeiro, em vez de ficarem presas a 31 de dezembro às 23h45. A meteorologia já tinha horizontes completos por persistência e não foi alterada.
 
-O OMIE só é usado após a hora conservadora de publicação: 14h de Madrid, 13h de Lisboa. Antes disso usa-se o mesmo instante do dia anterior. Os destinos de janeiro usam TAR de 0,0149/0,0830 €/kWh e TSE de 0,0016574 €/kWh, conhecidos em dezembro. Mantêm-se as demais componentes do contrato de referência. Isto não reconstrói uma nova oferta comercial em 2025.
+O OMIE só é usado após a hora conservadora de publicação: 14h de Madrid, 13h de Lisboa. Antes disso usa-se o mesmo instante do dia anterior. Na edição v3.2, preços realizados e previstos são apenas OMIE/1000 com piso zero. Os destinos de janeiro seguem a mesma regra, sem componentes de retalho.
 
-Fontes arquivadas em data/portugal_reference_2024/forecast_support: [ERSE — tarifas 2025, p. 131](https://www.erse.pt/media/xczdo4as/tep-se-2025.pdf), [anúncio de 16/12/2024](https://www.erse.pt/media/jbyluyci/comunicado_tarifas-ee-2025.pdf), [TSE, anúncio de 20/12/2024](https://www.erse.pt/comunicacao/destaques/erse-aprova-diretivas-de-reparticao-do-financiamento-dos-custos-com-a-tarifa-social-de-eletricidade-de-2025/). O ficheiro OMIE de 2 de janeiro só é necessário porque a primeira hora de Madrid corresponde às 23h UTC do dia 1.
+Fontes históricas de retalho, sem efeito nos preços da v3.2, arquivadas em data/portugal_reference_2024/forecast_support: [ERSE — tarifas 2025, p. 131](https://www.erse.pt/media/xczdo4as/tep-se-2025.pdf), [anúncio de 16/12/2024](https://www.erse.pt/media/jbyluyci/comunicado_tarifas-ee-2025.pdf), [TSE, anúncio de 20/12/2024](https://www.erse.pt/comunicacao/destaques/erse-aprova-diretivas-de-reparticao-do-financiamento-dos-custos-com-a-tarifa-social-de-eletricidade-de-2025/). O ficheiro OMIE de 2 de janeiro só é necessário porque a primeira hora de Madrid corresponde às 23h UTC do dia 1.
 
 ![Fronteira temporal](figures/forecast_boundary_2024.png)
 
@@ -38,12 +38,12 @@ MAE é o erro absoluto médio contra a amostra futura efetiva. Emissões após o
 | Irradiância direta — diurna | 2024 | 186.206 | 186.206 | 185.590 | W/m² |
 | Irradiância difusa — diurna | 2023 | 37.551 | 37.551 | 37.595 | W/m² |
 | Irradiância difusa — diurna | 2024 | 38.899 | 38.899 | 38.880 | W/m² |
-| Preço | 2023 | 0.031 | 0.039 | 1.391 | cêntimos/kWh |
-| Preço | 2024 | 0.028 | 0.028 | 1.282 | cêntimos/kWh |
+| Preço | 2023 | 0.000 | 0.000 | 1.182 | cêntimos/kWh |
+| Preço | 2024 | 0.000 | 0.000 | 1.088 | cêntimos/kWh |
 
 ![Variação mensal dos erros](figures/forecast_errors_2024.png)
 
-Os preços a 1 e 6 horas beneficiam de o OMIE já estar publicado. A 24 horas há períodos sem informação publicada, com maior erro. Em 2023 o ajuste MIBEL definitivo é estimado causalmente; em abril de 2024 a previsão não conhece ainda a TSE retroativa. Esses efeitos explicam erros mesmo quando o OMIE é conhecido. O ficheiro JSON inclui erro quadrático, viés, percentil 95, desvio-padrão, fração publicada e erro do período sem publicação.
+Os preços a 1 e 6 horas beneficiam de o OMIE já estar publicado. A 24 horas há períodos sem informação publicada, com maior erro. A edição v3.2 não usa MIBEL nem TSE: quando o OMIE de destino está publicado, a previsão coincide com a série realizada; o erro de persistência ocorre nos destinos ainda não publicados. O ficheiro JSON inclui erro quadrático, viés, percentil 95, desvio-padrão, fração publicada e erro do período sem publicação.
 
 ## Consumo e PV: referência física sem executar controladores
 
@@ -70,4 +70,4 @@ Não foi alterado o simulador, nem desligados canais para esconder o problema. *
 
 Para uma futura investigação centrada na qualidade das previsões, falta um modelo validado com atualização por horizonte, correlações temporais e entre membros, além de qualidade diferenciada por sinal. Para os dados atuais fica documentada e quantificada a referência simples realmente existente.
 
-Verificação desta revisão: 213 verificações, 0 falhas. Evidência: results/portugal_rec_native/forecasts_and_stories.json.
+Verificação desta revisão: 184 verificações, 0 falhas. Evidência: results/portugal_rec_native/forecasts_and_stories.json.

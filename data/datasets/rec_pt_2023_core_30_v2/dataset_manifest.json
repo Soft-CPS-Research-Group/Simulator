@@ -1,10 +1,10 @@
 {
-  "version": "portugal-native-2023-2024-v3.1",
+  "version": "portugal-native-2023-2024-v3.2",
   "engine_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "source_version": "portugal-v2.3",
-  "tariff_policy": "common",
-  "active_pricing_file": "shared/pricing_btn_bi.parquet",
-  "market_configuration_scope": "experiment schema; disabled in dataset schemas",
+  "tariff_policy": "omie_nonnegative",
+  "active_pricing_file": "shared/pricing_omie.parquet",
+  "market_configuration_scope": "enabled in all dataset and evaluation schemas",
   "current_configurations": [
     "core_30_normal",
     "core_30_topology",
@@ -12,7 +12,7 @@
     "core_30_robustness",
     "core_30_combined"
   ],
-  "validation": "construction only; static integrity checks, no controller or usage evaluation for this revision",
+  "validation": "See results/portugal_rec_native/pricing_validation.json for current checks; historical checks retain their original scope.",
   "years": [
     2023,
     2024
@@ -28,5 +28,11 @@
       70175
     ]
   },
-  "frozen_2023_commit": "393cd200bb66b671d8904eba00688d56d91f08d3"
+  "frozen_2023_commit": "393cd200bb66b671d8904eba00688d56d91f08d3",
+  "price_formula": "max(OMIE_PT_EUR_MWh / 1000, 0)",
+  "community_market": {
+    "enabled": true,
+    "local_price_ratio_to_grid_import": 0.8,
+    "grid_export_price": 0.0
+  }
 }

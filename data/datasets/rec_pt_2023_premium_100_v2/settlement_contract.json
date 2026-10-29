@@ -1,12 +1,14 @@
 {
   "runtime_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
-  "tariff_policy": "common",
-  "active_pricing_file": "shared/pricing_btn_bi.parquet",
+  "tariff_policy": "omie_nonnegative",
+  "active_pricing_file": "shared/pricing_omie.parquet",
   "grid_export_price": 0,
-  "dataset_market_enabled": false,
+  "dataset_market_enabled": true,
   "price_series_contains_local_discount": false,
-  "configuration_scope": "enable community_market and set local_price_ratio_to_grid_import=0.8 in the experiment schema",
-  "native_rule": "local price = common grid purchase price times experiment ratio",
+  "configuration_scope": "enabled in dataset and evaluation schemas",
+  "native_rule": "local price = 0.8 * max(OMIE_PT_EUR_MWh / 1000, 0)",
   "cash_conservation": "common price for buyers and sellers; use original simulator settlement",
-  "not_external_rebalanced": true
+  "not_external_rebalanced": true,
+  "version": "portugal-native-2023-2024-v3.2",
+  "local_price_ratio_to_grid_import": 0.8
 }

@@ -1,7 +1,7 @@
 {
   "dataset_id": "CORE-4",
   "dataset_family": "PT-MICRO-4",
-  "dataset_contract_version": "portugal-native-2023-2024-v3.1",
+  "dataset_contract_version": "portugal-native-2023-2024-v3.2",
   "random_seed": 2023,
   "root_directory": ".",
   "central_agent": false,
@@ -248,7 +248,8 @@
     ]
   },
   "community_market": {
-    "enabled": false,
+    "enabled": true,
+    "local_price_ratio_to_grid_import": 0.8,
     "grid_export_price": 0.0
   },
   "electric_vehicles_def": {
@@ -342,7 +343,7 @@
       "energy_simulation": "evaluation/native_inputs/core_4/Member_001.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [],
       "equity_group": "residential",
@@ -451,7 +452,7 @@
       "energy_simulation": "evaluation/native_inputs/core_4/Member_002.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -522,7 +523,7 @@
       "energy_simulation": "evaluation/native_inputs/core_4/Member_003.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -591,7 +592,7 @@
       "energy_simulation": "evaluation/native_inputs/core_4/Member_004.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
-      "pricing": "shared/pricing_btn_bi.parquet",
+      "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
       "inactive_actions": [
         "electrical_storage"
@@ -642,7 +643,7 @@
   "physics_invariant_checks": true,
   "topology_mode": "static",
   "experimental_design": {
-    "version": "portugal-native-2023-2024-v3.1",
+    "version": "portugal-native-2023-2024-v3.2",
     "name": "core_4",
     "label": "Core-4",
     "purpose": "diagnostic",
@@ -657,7 +658,7 @@
     "sensor_noise_stress": false,
     "member_departures": [],
     "mobility_semantics": "independent arrivals; SOC prescribed per session; no longitudinal trip-energy claim",
-    "tariff_policy": "common",
+    "tariff_policy": "omie_nonnegative",
     "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
     "years": [
       2023,

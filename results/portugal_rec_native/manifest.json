@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3.1",
+  "version": "portugal-native-2023-2024-v3.2",
   "physical_version": "portugal-v2.3 with explicit native input adaptations",
   "windows": {
     "development": [
@@ -85,7 +85,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
-      "sha256": "5510eee256ac6592441f8ceebc5c6818ba9e1cfc6552e17032088f76ead217c4",
+      "sha256": "cb78408e8115c3392bbdd533944800614250f9cacbdbb54742e2f05b8ebc3dc5",
       "frozen_2023_source_fingerprint": "c073ab395a0a6340dfb4ababec167aeab2c733e22c2eff70facc09a90dc2596a"
     },
     {
@@ -101,7 +101,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_15_v2/evaluation/core_15.json",
-      "sha256": "fefeee02ab41ad3fde01ef500d1e661978ad05e41ab949af91ad077be84339be",
+      "sha256": "5f3aa1355e801965540965e421c6a3abc21bd6f94be8b0bf342794d7f1a4886f",
       "frozen_2023_source_fingerprint": "eb0f77cf0f59eaa767cd3ed83fa42886ed70201b17bd63bd2852f000d46b5878"
     },
     {
@@ -117,7 +117,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
-      "sha256": "120c038dcfc62dddb65dc7cde0642262cfd7d440e75eb0de50f07d9c0477bbc4",
+      "sha256": "84ec0a05e7982f561a896672a0525739222c260a78428f78afe0c1ac26659797",
       "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
@@ -133,7 +133,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
-      "sha256": "cce0ff10d9ad6a797af843084ecbffcd2511041cc8726416212c9dc9aba8f8f2",
+      "sha256": "0d0d2cc530cf3e02dccc7e2607a70efd0d38cb31fd47df82cbd7c030dee76d41",
       "frozen_2023_source_fingerprint": "e40b0db00c9846a3e689f6a759be05b4769e816f6b3bc20c853707cbbbcf76db"
     },
     {
@@ -149,7 +149,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
-      "sha256": "3eb8cbd7abeec8ccea3824a2a2a139f771e4139c0336addc048c9091272b1282",
+      "sha256": "3e30b4f9d854771bd4053260610051b52ea336dfdddbb7ed0a3babcd923a1ce0",
       "frozen_2023_source_fingerprint": "ae7c92cd7704b8cdb52e74c64a404563d9801fd17af70f4a7eadd9d7ec189a05"
     },
     {
@@ -165,7 +165,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
-      "sha256": "a7bc8710dfb5b0b7b112d364073b37b828bf846b979a8010a5181c6db8cf7dc5",
+      "sha256": "9183b36183d19c35f6473e402714ad451382b6a0075ec05721d17b63cd6633db",
       "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
@@ -181,7 +181,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
-      "sha256": "b6202ccae4c7440dc2ff51c50be80870f48ddfc7010d488bff4efaa3752a3476",
+      "sha256": "4795b482795f6fe57c3854f9bbd2bde803bea96af62f035304eeeedfb9385b46",
       "frozen_2023_source_fingerprint": "e93c0b8171be8a312d2f9578d38b31378ef7092d838db1865f751769e3f192c1"
     },
     {
@@ -197,7 +197,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json",
-      "sha256": "e23df84b0cd50e49a54c8e37bbb7b986bb0aacc9547197a29f41710fa1264f6c",
+      "sha256": "d81d918e75c4ec97fa71258f5c84af57e5953448445baf996f694e38648a1494",
       "frozen_2023_source_fingerprint": "96fde91f842e7183f0b1667f630e3afd4e4a56013aa298873d7f93b49b1a6400"
     },
     {
@@ -213,7 +213,7 @@
         "D": true
       },
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
-      "sha256": "61abdacb8aff59c93a75240d7989aeb5b1c2a9222d1288ef31d8b8aba3741e50",
+      "sha256": "056599b00cf19079d89407b762638c3e303f7719a2bdd12e80f1a76aa6c4d398",
       "frozen_2023_source_fingerprint": "c463b8d036405c1961bc33868a234564e0a30ef662e13572f635bbb453f146ee"
     }
   ],
@@ -227,7 +227,7 @@
     "safety": "Core-30 Safety changes three declared electrical contracts; finite physical and service limits remain active in every scenario.",
     "robustness": "Core-30 Robustness includes health, grid interruptions and separate measurement-noise inputs; Premium All-in also includes measurement noise. The existing simulator applies independent channel noise; derived decision aids remain exact."
   },
-  "pricing": "One common full grid purchase tariff: shared/pricing_btn_bi.parquet, EUR/kWh. Grid export 0. Market disabled in dataset schemas; enable original settlement and configure 0.8 in experiment schemas. No local discount in price series. Explicit DR only in Premium All-in.",
+  "pricing": "Common shared/pricing_omie.parquet: max(OMIE_PT_EUR_MWh / 1000, 0). No retail additions. Native community market enabled at 0.8; grid export zero.",
   "holdout": "Development/confirmation are reserved dates and event inputs within the same named scenarios, not additional dataset variants.",
   "recovery_hours": 168,
   "annual_action_steps": null,
@@ -237,7 +237,7 @@
   },
   "scope": "Current named catalogue only. Prior factorial catalogues and Core DR evidence are archived.",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
-  "tariff_policy": "common",
+  "tariff_policy": "omie_nonnegative",
   "source_history_not_executed": {
     "warmup_days": 56,
     "lookback_days": 56,
@@ -255,7 +255,7 @@
     "baseline_window_seconds": 3600,
     "qualified_commercial_baseline": false
   },
-  "validation_scope": "Dataset construction only. Static integrity checks; no usage/controller evaluation for this common-tariff revision. Previous individual-tariff simulations are historical.",
+  "validation_scope": "Pricing and market revision; current evidence in pricing_validation.json. Previous construction reports remain historical.",
   "status": "dataset_construction_only",
   "input_corrections": {
     "core_30_visitor_sessions": [

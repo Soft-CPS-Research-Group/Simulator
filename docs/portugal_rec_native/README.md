@@ -1,10 +1,10 @@
 # Portugal REC — 2023 e 2024
 
-Versão **portugal-native-2023-2024-v3.1**. As mesmas **quatro bases físicas e nove configurações**, agora com **70 176 registos de 15 minutos**, de 1 de janeiro de 2023 a 31 de dezembro de 2024. Os caminhos mantêm «2023» por estabilidade; os inputs correntes incluem ambos os anos.
+Versão **portugal-native-2023-2024-v3.2**. As mesmas **quatro bases físicas e nove configurações**, agora com **70 176 registos de 15 minutos**, de 1 de janeiro de 2023 a 31 de dezembro de 2024. Os caminhos mantêm «2023» por estabilidade; os inputs correntes incluem ambos os anos.
 
 2024 continua cronologicamente 2023. Quem saiu não regressa; os equipamentos retirados permanecem retirados. Os eventos de entrada/saída de 2023 não são repetidos. Não foram acrescentados membros, equipamentos ou variantes. Nas configurações estáticas mantém-se o catálogo completo; nas dinâmicas mantém-se a composição existente no fim de 2023.
 
-A preparação original destes dados manteve o motor no commit `978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0). Essa é a referência histórica dos relatórios arquivados. Desde a consolidação de 26/10/2026, a pasta de trabalho combina estes mesmos dados com o motor 1.8.3 e as alterações locais descritas em [Releases](../releases.md). Os ficheiros dos datasets foram preservados. Esta integração não constitui uma nova campanha anual de controladores.
+A preparação original destes dados manteve o motor no commit `978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0). Essa é a referência histórica dos relatórios arquivados. Desde a consolidação de 26/10/2026, a pasta de trabalho combina estes mesmos dados com o motor 1.8.3 e as alterações locais descritas em [Releases](../releases.md). A revisão v3.2 de 29/10/2026 altera preços e configuração de mercado, conservando os inputs físicos. Esta integração não constitui uma nova campanha anual de controladores.
 
 | Configuração | Schema relativo à raiz do Simulator |
 |---|---|
@@ -20,7 +20,7 @@ A preparação original destes dados manteve o motor no commit `978be68b0e0740de
 
 DR apenas no Premium All-in; o pedido deliberadamente impossível de 1500 kW durante quatro horas foi mantido, com ocorrência nos dois anos. Health, cortes e ruído conservam as configurações e os níveis anteriores, com campanhas sazonais em 2024. A topologia não é reiniciada no novo ano.
 
-A tarifa de compra à rede é comum a todos: `shared/pricing_btn_bi.parquet`, com OMIE e componentes próprias de cada ano. A exportação à rede vale zero. O mercado interno fica desligado; os 80% configuram-se posteriormente no schema da experiência, usando a liquidação original.
+A tarifa de compra à rede é comum a todos: `shared/pricing_omie.parquet`, com `max(OMIE português em EUR/MWh / 1000, 0)`, em EUR/kWh. Não inclui componentes Coopérnico, perdas, MIBEL, TAR ou impostos. O mercado comunitário está ativo em todos os schemas: o comprador paga e o vendedor recebe 80% desse preço. A exportação à rede vale zero. As previsões seguem a mesma regra com disponibilidade causal do OMIE.
 
 ## Consultar
 
@@ -34,7 +34,7 @@ A tarifa de compra à rede é comum a todos: `shared/pricing_btn_bi.parquet`, co
 - [Fontes e método](Fontes_e_metodo.md).
 - [Fecho imutável de 2023](Fecho_2023.md).
 
-O manifesto corrente está em `results/portugal_rec_native/manifest.json`; a verificação dos inputs em `two_year_integrity.json`, na mesma pasta. O pacote corrente é `docs/portugal_rec_native.zip`.
+O manifesto corrente está em `results/portugal_rec_native/manifest.json`; a verificação desta revisão em `pricing_validation.json`, na mesma pasta. `two_year_integrity.json` documenta a construção histórica dos inputs físicos. O pacote corrente é `docs/portugal_rec_native.zip`.
 
 O fecho de 2023 está no commit `393cd200bb66b671d8904eba00688d56d91f08d3` e no pacote separado `Simulator-recovery-archive/2026-09-27-final-2023/portugal_rec_2023_frozen.zip`. Esse arquivo é proveniência, não mais um dataset ativo.
 

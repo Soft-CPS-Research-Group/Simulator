@@ -1,5 +1,7 @@
 # Extensão de 2024
 
+Nota de versão: este documento descreve a extensão física e a tarifa histórica da edição v3.1. A edição v3.2 preserva os inputs físicos e substitui a tarifa por OMIE/1000 com piso zero, com mercado ativo a 80%; ver [Tarifas e mercado](Tarifas_e_mercado.md).
+
 ## Continuidade e dimensão
 
 As nove configurações passam a cobrir 731 dias consecutivos: 35 040 registos de 2023 e 35 136 de 2024, total de 70 176. O novo ano é continuação do anterior, não uma reposição da comunidade inicial. Os índices absolutos são 0–35039 para 2023 e 35040–70175 para 2024. Uma experiência iniciada apenas em 2024 precisa de respeitar o estado/topologia acumulados; cortar o calendário não equivale automaticamente a repor esse estado.
