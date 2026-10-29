@@ -277,7 +277,9 @@ class BuildingOpsService:
                     required_soc = charger.charger_simulation.electric_vehicle_required_soc_departure[t]
                     departure_steps = charger.charger_simulation.electric_vehicle_departure_time[t]
                     step_hours = building.seconds_per_time_step / 3600.0
-                    hours_until_departure = max(float(departure_steps), 0.0) * step_hours
+                    hours_until_departure = (
+                        float(departure_steps) * step_hours if departure_steps >= 0 else -1.0
+                    )
 
                     battery_capacity = connected_car.battery.capacity
                     min_capacity = (1 - connected_car.battery.depth_of_discharge) * battery_capacity
@@ -865,6 +867,8 @@ class BuildingOpsService:
             profile = self._deferrable_start_profile_kwh(appliance, action)
             if profile.size <= 0:
                 return args
+            if building.power_outage and profile[0] > building.downward_electrical_flexibility + 1.0e-9:
+                return (0.0,)
             return args if self._deferrable_profile_feasible(profile) else (0.0,)
 
         if action_key.startswith('escalator_'):

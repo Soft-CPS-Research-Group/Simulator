@@ -58,12 +58,15 @@ def extract():
                 f=pd.read_parquet(root/ch['charger_simulation'])
                 on=f.loc[f.electric_vehicle_charger_state.eq(1)].copy();on['start']=on.index
                 for sid,g in on.groupby('electric_vehicle_session_id',sort=False):
-                    row=g.iloc[0];a=int(row.start);dep=int(a+row.electric_vehicle_departure_time);eid=row.electric_vehicle_id
+                    row=g.iloc[0];a=int(row.start);eid=row.electric_vehicle_id
+                    unknown_departure=not np.isfinite(row.electric_vehicle_departure_time)
+                    # A terminal partial visit has an observed end, no deadline.
+                    dep=int(g.index[-1]+1) if unknown_departure else int(a+row.electric_vehicle_departure_time)
                     capacity=schema['electric_vehicles_def'][eid]['battery']['attributes']['capacity']
                     target=float(row.electric_vehicle_required_soc_departure);soc=float(row.electric_vehicle_current_soc)
                     native_sessions.append(dict(family=name,session_id=sid,member_id=mid,charger_id=cid,ev_id=eid,arrival=a,departure=dep,year=int(YEARS[a]),duration_h=(dep-a)/4,
                         arrival_hour=float(LOCAL[a].hour+LOCAL[a].minute/60),departure_hour=float((CLOCK[0]+pd.Timedelta(minutes=15*dep)).tz_convert('Europe/Lisbon').hour+((dep%4)*.25)),
-                        target_soc=target,arrival_soc=soc,gap_kwh=max(0,(target-soc)*capacity),left_censored=a==0,right_censored=dep>=N))
+                        target_soc=target,arrival_soc=soc,gap_kwh=max(0,(target-soc)*capacity),left_censored=a==0,right_censored=unknown_departure or dep>=N))
             for aid,app in b.get('deferrable_appliances',{}).items():
                 f=pd.read_parquet(root/app['flexibility_schedule_file']).copy();p=pd.read_parquet(root/app['cycle_profiles_file']).copy()
                 f['member_id']=mid;f['asset_id']=aid;f['family']=name;f['year']=YEARS[f.earliest_start_time_step.to_numpy(int)]
@@ -295,7 +298,7 @@ def charts(data,t):
     for row in regular.itertuples():
         val=row.target_power_kw*(1 if row.direction=='up' else -1);ax.vlines(CLOCK[row.start_time_step],0,val,color=TEAL if val>0 else GOLD,lw=3);ax.scatter(CLOCK[row.start_time_step],val,color=TEAL if val>0 else GOLD,s=38)
     ax.axhline(0,color=GREY,lw=.7);ax.set(ylabel='Requested change in demand (kW)',title='Operational-candidate DR requests: 1 hour each');compact_axis(ax);grid(ax);save('25_dr',fig)
-    shared=premium['root']/'shared';weather=pd.read_parquet(shared/'weather.parquet');price=pd.read_parquet(shared/'pricing_btn_bi.parquet');carbon=pd.read_parquet(shared/'carbon_intensity.parquet')
+    shared=premium['root']/'shared';weather=pd.read_parquet(shared/'weather.parquet');price=pd.read_parquet(shared/'pricing_omie.parquet');carbon=pd.read_parquet(shared/'carbon_intensity.parquet')
     fig,axs=plt.subplots(2,1,figsize=(9.6,4.8),layout='constrained')
     for ax,arr,label,color in [(axs[0],price.electricity_pricing.to_numpy()*100,'Grid purchase price (cents/kWh)',TEAL),(axs[1],carbon.carbon_intensity.to_numpy()*1000,'Grid carbon intensity (gCO2e/kWh)',INK)]:
         s=pd.Series(arr,index=CLOCK);daily=s.resample('D').agg(['mean',lambda x:x.quantile(.1),lambda x:x.quantile(.9)]);ax.fill_between(daily.index,daily.iloc[:,1],daily.iloc[:,2],color=color,alpha=.15,label='Within-day 10th-90th percentile');ax.plot(daily.index,daily['mean'],color=color,lw=.8,label='Daily mean');ax.set(ylabel=label);compact_axis(ax);ax.legend(fontsize=8);grid(ax)
@@ -316,7 +319,7 @@ def statistics(data,t):
     for (v,phase,cat,mod,mode),g in h.groupby(['variant','phase','category','module','mode']):
         intervals=set(i for row in g.itertuples() for i in range(row.start_time_step,row.end_time_step+1))
         health_summary.append(dict(variant=v,phase=phase,category=cat,module=mod,mode=mode,channel_rows=len(g),campaigns=len(g[['start_time_step','end_time_step']].drop_duplicates()),hours=len(intervals)/4,exposure_pct=len(intervals)/N*100,std=sorted(g['std'].dropna().unique().tolist()),values=sorted(g.value.dropna().unique().tolist())))
-    root=data['Premium-100']['root'];p=pd.read_parquet(root/'shared/pricing_btn_bi.parquet').electricity_pricing.to_numpy();c=pd.read_parquet(root/'shared/carbon_intensity.parquet').carbon_intensity.to_numpy();weather=pd.read_parquet(root/'shared/weather.parquet');market=[]
+    root=data['Premium-100']['root'];p=pd.read_parquet(root/'shared/pricing_omie.parquet').electricity_pricing.to_numpy();c=pd.read_parquet(root/'shared/carbon_intensity.parquet').carbon_intensity.to_numpy();weather=pd.read_parquet(root/'shared/weather.parquet');market=[]
     for year in (2023,2024):
         sel=YEARS==year;market.append(dict(year=year,price_min=float(p[sel].min()),price_mean=float(p[sel].mean()),price_max=float(p[sel].max()),price_negative_hours=float((p[sel]<0).sum()/4),carbon_mean_g=float(c[sel].mean()*1000),carbon_min_g=float(c[sel].min()*1000),carbon_max_g=float(c[sel].max()*1000),temperature_mean=float(weather.outdoor_dry_bulb_temperature[sel].mean())))
     return {'families':metrics,'health_summary':health_summary,'market':market}
@@ -348,6 +351,7 @@ def main():
         table.to_csv(OUT/f'{name}.csv',index=False)
     metrics['variants']=records(tables['variants']);metrics['dr']=records(tables['dr']);metrics['version']=json.loads((ROOT/'results/portugal_rec_native/manifest.json').read_text())['version'];metrics['period']={'years':[2023,2024],'records':N,'interval_minutes':15,'days':731}
     metrics['input_checksums']={str(d['root'].relative_to(ROOT)):hashlib.sha256((d['root']/'file_checksums.sha256').read_bytes()).hexdigest() for d in data.values()}
+    metrics['integrity_revision']=json.loads((ROOT/'results/portugal_rec_native/manifest.json').read_text()).get('integrity_revision')
     metrics['method']='Static description of catalogues, original-engine schemas and selected input series. No CityLearn imports, actions, controller policies or experiment outputs.'
     metrics['counting']='Inventory is the full static base; session and controlled-cycle distributions are read from the Normal schemas. Dynamic active counts are reconstructed from schema topology events. Energy is non-shiftable load and PV separately; no EV/controlled-cycle double-counting or performance KPI.'
     dump(OUT/'statistics.json',metrics)

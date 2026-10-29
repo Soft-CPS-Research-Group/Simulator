@@ -58,14 +58,14 @@ def main(repo, reference, previous=None):
                   (repo/'docs/portugal_rec_native/Atlas_Membros_Premium.md').read_text() == render(members, 'Atlas das famílias e instalações · Premium · motor original'))
         if previous:
             oldroot = previous/'data/datasets'/root.name
-            oldprice = pd.read_parquet(oldroot/'shared/pricing_btn_bi.parquet')
-            price = pd.read_parquet(root/'shared/pricing_btn_bi.parquet')
+            oldprice = pd.read_parquet(oldroot/'shared/pricing_omie.parquet')
+            price = pd.read_parquet(root/'shared/pricing_omie.parquet')
             check(root.name+': all actual prices unchanged', price.electricity_pricing.equals(oldprice.electricity_pricing))
             for k, h in enumerate(HORIZONS, 1):
                 col = f'electricity_pricing_predicted_{k}'
                 check(root.name+': earlier forecasts unchanged '+str(h), price[col][:-h].equals(oldprice[col][:-h]))
             # All other time series / event / physical catalogues must be identical.
-            allowed = {'catalogs/members.parquet', 'shared/pricing_btn_bi.parquet'}
+            allowed = {'catalogs/members.parquet', 'shared/pricing_omie.parquet'}
             unchanged = True
             for path in root.rglob('*.parquet'):
                 rel = str(path.relative_to(root))
@@ -81,7 +81,7 @@ def main(repo, reference, previous=None):
     root = next(p for p in roots if 'micro_4' in p.name)
     weather = pd.read_parquet(root/'shared/weather.parquet')
     check('2023 humidity is the documented synthetic proxy', np.allclose(weather.outdoor_relative_humidity[:35040],np.clip(78-1.7*(weather.outdoor_dry_bulb_temperature[:35040]-14),30,95),atol=1e-5))
-    price = pd.read_parquet(root/'shared/pricing_btn_bi.parquet')
+    price = pd.read_parquet(root/'shared/pricing_omie.parquet')
     support = pd.read_parquet(reference/'forecast_support/price_components.parquet').set_index('timestamp_utc')
     check('support is exactly one external day', support.index.equals(pd.date_range('2025-01-01',periods=96,freq='15min',tz='UTC')))
     check('simulation period still two years', len(price)==TOTAL and len(weather)==TOTAL)
@@ -94,7 +94,7 @@ def main(repo, reference, previous=None):
         madrid = target.tz_convert('Europe/Madrid')
         publication = (madrid.tz_localize(None).normalize()-pd.Timedelta(days=1)+pd.Timedelta(hours=14)).tz_localize('Europe/Madrid').tz_convert('UTC')
         source = pd.DatetimeIndex(np.where(issue>=publication, target, target-pd.Timedelta(days=1)))
-        expected = ((c.loc[source,'omie_eur_kwh'].to_numpy()+.014+.0016574)*1.16+c.loc[target,'access_energy_eur_kwh'].to_numpy()+.001).astype('float32')
+        expected = np.maximum(c.loc[source,'omie_eur_kwh'].to_numpy(), 0).astype('float32')
         check('unclipped targets '+str(h), pd.DatetimeIndex(rows.target_utc).equals(target) and target[-1]==UTC[-1]+pd.Timedelta(minutes=15*h))
         check('publication-aware boundary prices '+str(h), np.array_equal(price[f'electricity_pricing_predicted_{k}'].to_numpy()[-h:],expected))
         check('no unpublished OMIE leakage '+str(h), np.all((source<=issue)|(publication<=issue)))
@@ -178,7 +178,7 @@ def document(repo,report,price,reference):
     fig,ax=plt.subplots(figsize=(10,3.4),layout='constrained')
     support=pd.read_parquet(reference/'forecast_support/price_components.parquet').set_index('timestamp_utc')
     truth=pd.Series(price.electricity_pricing.to_numpy(),index=UTC)
-    truth=pd.concat([truth,support.electricity_pricing])
+    truth=pd.concat([truth,support.omie_eur_kwh.clip(lower=0)])
     q=truth.loc['2024-12-31':'2025-01-01']*100
     ax.plot(q.index,q.values,label='Preço realizado / apoio',color='#172f42',lw=1.5)
     for hour,color in [(12,'#c27727'),(13,'#246b8e')]:
@@ -208,9 +208,9 @@ No Core-30 Topology/Combined, Member_001 sai em **14/11/2023 às 22h de Lisboa**
 
 Acrescentaram-se **96 amostras de apoio de 01/01/2025**, exclusivamente para os destinos das previsões de preço. As séries simuladas continuam com **70 176 registos**, terminando em 31/12/2024. Foram corrigidas as últimas 4, 24 e 96 posições das previsões de 1, 6 e 24 horas: 124 células por base. As horas de destino avançam para janeiro, em vez de ficarem presas a 31 de dezembro às 23h45. A meteorologia já tinha horizontes completos por persistência e não foi alterada.
 
-O OMIE só é usado após a hora conservadora de publicação: 14h de Madrid, 13h de Lisboa. Antes disso usa-se o mesmo instante do dia anterior. Os destinos de janeiro usam TAR de 0,0149/0,0830 €/kWh e TSE de 0,0016574 €/kWh, conhecidos em dezembro. Mantêm-se as demais componentes do contrato de referência. Isto não reconstrói uma nova oferta comercial em 2025.
+O OMIE só é usado após a hora conservadora de publicação: 14h de Madrid, 13h de Lisboa. Antes disso usa-se o mesmo instante do dia anterior. Na edição v3.2, preços realizados e previstos são apenas OMIE/1000 com piso zero. Os destinos de janeiro seguem a mesma regra, sem componentes de retalho.
 
-Fontes arquivadas em data/portugal_reference_2024/forecast_support: [ERSE — tarifas 2025, p. 131](https://www.erse.pt/media/xczdo4as/tep-se-2025.pdf), [anúncio de 16/12/2024](https://www.erse.pt/media/jbyluyci/comunicado_tarifas-ee-2025.pdf), [TSE, anúncio de 20/12/2024](https://www.erse.pt/comunicacao/destaques/erse-aprova-diretivas-de-reparticao-do-financiamento-dos-custos-com-a-tarifa-social-de-eletricidade-de-2025/). O ficheiro OMIE de 2 de janeiro só é necessário porque a primeira hora de Madrid corresponde às 23h UTC do dia 1.
+Fontes históricas de retalho, sem efeito nos preços da v3.2, arquivadas em data/portugal_reference_2024/forecast_support: [ERSE — tarifas 2025, p. 131](https://www.erse.pt/media/xczdo4as/tep-se-2025.pdf), [anúncio de 16/12/2024](https://www.erse.pt/media/jbyluyci/comunicado_tarifas-ee-2025.pdf), [TSE, anúncio de 20/12/2024](https://www.erse.pt/comunicacao/destaques/erse-aprova-diretivas-de-reparticao-do-financiamento-dos-custos-com-a-tarifa-social-de-eletricidade-de-2025/). O ficheiro OMIE de 2 de janeiro só é necessário porque a primeira hora de Madrid corresponde às 23h UTC do dia 1.
 
 ![Fronteira temporal](figures/forecast_boundary_2024.png)
 
@@ -232,7 +232,7 @@ MAE é o erro absoluto médio contra a amostra futura efetiva. Emissões após o
 
 ![Variação mensal dos erros](figures/forecast_errors_2024.png)
 
-Os preços a 1 e 6 horas beneficiam de o OMIE já estar publicado. A 24 horas há períodos sem informação publicada, com maior erro. Em 2023 o ajuste MIBEL definitivo é estimado causalmente; em abril de 2024 a previsão não conhece ainda a TSE retroativa. Esses efeitos explicam erros mesmo quando o OMIE é conhecido. O ficheiro JSON inclui erro quadrático, viés, percentil 95, desvio-padrão, fração publicada e erro do período sem publicação.
+Os preços a 1 e 6 horas beneficiam de o OMIE já estar publicado. A 24 horas há períodos sem informação publicada, com maior erro. A edição v3.2 não usa MIBEL nem TSE: quando o OMIE de destino está publicado, a previsão coincide com a série realizada; o erro de persistência ocorre nos destinos ainda não publicados. O ficheiro JSON inclui erro quadrático, viés, percentil 95, desvio-padrão, fração publicada e erro do período sem publicação.
 
 ## Consumo e PV: referência física sem executar controladores
 

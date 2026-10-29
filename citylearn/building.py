@@ -711,7 +711,8 @@ class Building(Environment):
         """Available distributed energy resource capacity to satisfy electric loads while considering power outage at current time step.
         
         It is the sum of solar generation and any discharge from electrical storage, less electricity consumption by cooling, heating, 
-        dhw and non-shfitable load devices as well as charging electrical storage. When there is no power outage, the returned value 
+        dhw and non-shiftable load devices, electrical storage and already served
+        controllable devices. When there is no power outage, the returned value
         is `np.inf`.
         """
 
@@ -725,6 +726,15 @@ class Building(Environment):
             + self.non_shiftable_load_device.electricity_consumption[self.time_step]
             + self.electrical_storage.electricity_consumption[self.time_step]
         )
+
+        # Read live device values: building-level aggregates are only refreshed
+        # after all actions. Each subsequent load must see the remaining supply.
+        for devices in (
+            self.electric_vehicle_chargers,
+            self.deferrable_appliances,
+            self.escalators,
+        ):
+            capacity -= sum(device.electricity_consumption[self.time_step] for device in devices or [])
 
         return max(0.0, capacity)
 

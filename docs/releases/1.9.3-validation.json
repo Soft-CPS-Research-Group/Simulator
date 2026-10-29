@@ -1,0 +1,35 @@
+{
+  "version": "1.9.3",
+  "date": "2026-10-29",
+  "integrated_runtime_commit": "2abc031f",
+  "previous_published_version": "1.9.2",
+  "local": {
+    "python": "3.10.12",
+    "pytest": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "591",
+      "time": "249.115",
+      "timestamp": "2026-10-29T03:01:22.993612+00:00",
+      "hostname": "tiago-Vector-16-HX-A13VHG"
+    },
+    "critical_lint": "passed (E9,F821)",
+    "entity_contract": {
+      "all_contract_checks_passed": true,
+      "drifted_snapshots": 0,
+      "failed_contract": 0,
+      "total_datasets": 2
+    },
+    "installed_wheel_export": "passed outside checkout with Python isolated mode: KPI CSV, native BAU timeseries and provenance manifest",
+    "distribution_metadata": "wheel and source distribution passed twine check"
+  },
+  "dataset_validation": "../../results/portugal_rec_native/boundary_validation.json",
+  "publication_gates": [
+    "Successful GitHub CI including Python 3.9/3.10, accounting audits, performance and installed-wheel exports",
+    "Successful CI for the final master commit before creating v1.9.3",
+    "Publish Python Package workflow builds and tests installed wheel on Python 3.11 before PyPI upload"
+  ],
+  "scope": "Full regression suite and targeted/audit simulations; no new annual multi-controller campaign is claimed."
+}

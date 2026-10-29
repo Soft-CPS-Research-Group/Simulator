@@ -9,3 +9,17 @@ CityLearn provides implementations of rule-based control (RBC) and reinforcement
 .. csv-table::
    :file: ../../../assets/tables/citylearn_agents.csv
    :header-rows: 1
+
+Dynamic operational baselines
+-----------------------------
+
+``NormalPolicy`` and the other ``BusinessAsUsualAgent`` policies refresh their
+action layout when members or equipment change. In decentralized dynamic runs,
+``agent.action_history_ids`` identifies the stable rows of ``agent.actions``:
+departed members retain their history, new members receive new rows, and steps
+without an action contain an empty vector. These historical rows need not match
+the current active-member order. Centralized runs retain one ``central_agent``
+history row. Calling the policy after an environment reset starts a fresh history.
+
+The ``learn`` loop preserves entity observations and reports dynamic reward
+summaries by member identity, using the members that executed each transition.

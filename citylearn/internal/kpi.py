@@ -987,7 +987,8 @@ class CityLearnKPIService:
                 terminal_departure = (
                     t == len(states) - 1
                     and np.isfinite(departure_countdown)
-                    and departure_countdown <= 1.0 + self.EV_DEPARTURE_EPS
+                    # -1 is the schedule's unknown-departure sentinel.
+                    and 0.0 <= departure_countdown <= 1.0 + self.EV_DEPARTURE_EPS
                 )
                 departure_transition = t + 1 < len(states) and (
                     next_state != 1
@@ -1011,7 +1012,7 @@ class CityLearnKPIService:
                         # ``countdown <= 1`` check also counts ordinary
                         # departures one interval early, so require the next
                         # session's countdown to increase explicitly.
-                        and departure_countdown <= 1.0 + self.EV_DEPARTURE_EPS
+                        and 0.0 <= departure_countdown <= 1.0 + self.EV_DEPARTURE_EPS
                         and np.isfinite(next_departure_countdown)
                         and next_departure_countdown
                         > departure_countdown + self.EV_DEPARTURE_EPS

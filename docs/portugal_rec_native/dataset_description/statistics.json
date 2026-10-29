@@ -1072,10 +1072,10 @@
   "market": [
     {
       "year": 2023,
-      "price_min": -0.10328599810600281,
-      "price_mean": 0.06096864491701126,
-      "price_max": 0.2696000039577484,
-      "price_negative_hours": 1571.0,
+      "price_min": 0.0,
+      "price_mean": 0.0871056541800499,
+      "price_max": 0.2199999988079071,
+      "price_negative_hours": 0.0,
       "carbon_mean_g": 112.33721673488617,
       "carbon_min_g": 4.071879666298628,
       "carbon_max_g": 314.0527904033661,
@@ -1083,9 +1083,9 @@
     },
     {
       "year": 2024,
-      "price_min": 0.026440000161528587,
-      "price_mean": 0.13981002569198608,
-      "price_max": 0.3304758667945862,
+      "price_min": 0.0,
+      "price_mean": 0.06306019425392151,
+      "price_max": 0.19300000369548798,
       "price_negative_hours": 0.0,
       "carbon_mean_g": 62.75416165590286,
       "carbon_min_g": 4.483502823859453,
@@ -1617,7 +1617,7 @@
       "variant": "premium_100_allin"
     }
   ],
-  "version": "portugal-native-2023-2024-v3.1",
+  "version": "portugal-native-2023-2024-v3.2",
   "period": {
     "years": [
       2023,
@@ -1628,11 +1628,12 @@
     "days": 731
   },
   "input_checksums": {
-    "data/datasets/rec_pt_2023_micro_4_v2": "417a8214d3230bb83d21141bcf9c94f9d2cef54fb2fc59ec701c41fc1ae63f16",
-    "data/datasets/rec_pt_2023_core_15_v2": "22c14d0fccc4f8f6279a51a65cbd9e0f981510edee399e40200f40eeb4fa7fcd",
-    "data/datasets/rec_pt_2023_core_30_v2": "f9bbfde437629d8ebd6889f4bc9ed417bfe76d403f7874e268565aafa1a34eef",
-    "data/datasets/rec_pt_2023_premium_100_v2": "0fdda3e310c8c2da74de293f6f85580112f0fead65af4a2b9a986716ff8f2d00"
+    "data/datasets/rec_pt_2023_micro_4_v2": "6e3156d5156c8f4e5ebd18814f13fca8a10dfb8c83008ad49a5fbec931f264d5",
+    "data/datasets/rec_pt_2023_core_15_v2": "caa67b8345b4d20ddca70bcda2f4e3da97a8a6f89817671823b435c7bdcf0884",
+    "data/datasets/rec_pt_2023_core_30_v2": "16fed8c823b34632f099bb43df63b1ba6163ec8c984f1f16e6bf859ef473ef09",
+    "data/datasets/rec_pt_2023_premium_100_v2": "d36f6bf94713ff77b4add6ef9654baf9b27fd553fa43a8c997e7da20b64ad5c8"
   },
+  "integrity_revision": "portugal-boundaries-1",
   "method": "Static description of catalogues, original-engine schemas and selected input series. No CityLearn imports, actions, controller policies or experiment outputs.",
   "counting": "Inventory is the full static base; session and controlled-cycle distributions are read from the Normal schemas. Dynamic active counts are reconstructed from schema topology events. Energy is non-shiftable load and PV separately; no EV/controlled-cycle double-counting or performance KPI."
 }

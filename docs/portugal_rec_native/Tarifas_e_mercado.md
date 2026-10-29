@@ -1,25 +1,28 @@
-# Tarifa comum e mercado interno
+# Preço OMIE e mercado comunitário
 
-Decisão de 27 de setembro de 2026: uma série de compra à rede igual para todos
-os membros e para as nove configurações. A referência é `pricing_btn_bi.parquet`,
-BTN bi-horária indexada a OMIE 2023, incluindo os componentes variáveis já
-documentados em [Fontes e método](Fontes_e_metodo.md). As previsões seguem a mesma
-referência. Não se aplicou desconto de 20%, piso a zero ou deslocação temporal.
-Custos fixos e IVA não integram esta série variável; não é uma fatura completa.
+Decisão de 29 de outubro de 2026, edição `portugal-native-2023-2024-v3.2`.
+As quatro bases e nove configurações usam `shared/pricing_omie.parquet`,
+com 70 176 intervalos de 15 minutos, cobrindo 2023 e 2024.
 
-## Dados e configuração experimental
+## Regra de preço
 
-Os schemas de dados contêm apenas:
+`preço_rede[t] = max(OMIE_português[t] / 1000, 0)`
 
-```json
-"community_market": {
-  "enabled": false,
-  "grid_export_price": 0.0
-}
-```
+O OMIE de entrada está em EUR/MWh. A divisão por 1000 converte-o em EUR/kWh;
+um preço positivo mantém-se, um preço negativo passa a zero e zero mantém-se.
+Cada preço horário é repetido nos quatro quartos de hora, após o alinhamento
+do calendário de Madrid com UTC. Não se somam margem, perdas, MIBEL, TAR,
+custos de sistema, taxas ou impostos. Esta é uma convenção experimental baseada
+no mercado grossista, não uma reprodução de uma fatura de consumidor.
 
-Para uma experiência com mercado comunitário, substituir esse bloco na cópia
-do schema da experiência pela configuração nativa:
+As componentes Coopérnico/ERSE anteriores permanecem apenas como proveniência.
+A antiga série está em `sources/legacy_retail_pricing_2023_2024.parquet`;
+nenhum schema corrente a seleciona. A coluna ativa `tariff_id` é
+`omie_nonnegative`; `source_tariff_id` conserva a atribuição histórica.
+
+## Mercado ativo nos datasets
+
+Tanto `schema.json` como os nove schemas em `evaluation/` contêm:
 
 ```json
 "community_market": {
@@ -29,31 +32,30 @@ do schema da experiência pela configuração nativa:
 }
 ```
 
-O campo `local_price_ratio_to_grid_import` é lido pelo simulador original.
-Não é necessário alterar o simulador nem implementar uma liquidação externa.
-Para cada intervalo, o preço local será 0,8 vezes o preço comum de compra à rede;
-o mesmo preço é aplicado a compradores e vendedores. A exportação à rede vale
-zero. O schema resolvido de cada experiência deverá conservar esta escolha.
-A ativação do mercado não cria outro dataset físico.
+O simulador aplica `preço_local[t] = 0.8 × preço_rede[t]` uma única vez,
+na liquidação. O mesmo preço remunera o vendedor e é cobrado ao comprador.
+A série de entrada contém sempre 100% do preço da rede. A exportação para
+a rede pública continua a valer zero, independentemente do OMIE.
 
-Esta decisão substitui a atribuição de tarifas por instalação. A coluna
-`tariff_id` dos catálogos passa a `btn_bi`; `source_tariff_id` é histórica.
-Os parâmetros elétricos, potências contratadas e ligações de fase mantêm-se:
-a uniformização é uma convenção de preços, não uma uniformização das instalações.
+| OMIE (EUR/MWh) | Compra à rede (EUR/kWh) | Troca interna (EUR/kWh) |
+|---:|---:|---:|
+| 100 | 0,100 | 0,080 |
+| 0 | 0 | 0 |
+| -10 | 0 | 0 |
 
-As simulações da versão anterior não avaliam esta revisão. Nenhuma nova avaliação
-de utilização ou controlador foi realizada nesta alteração.
+## Previsões e reprodução
 
+As previsões a 1, 6 e 24 horas usam a mesma conversão e piso a zero.
+Utilizam o preço do destino apenas após a publicação conservadora às 14h
+de Madrid; antes disso recorrem ao mesmo instante do dia anterior. No início
+do arquivo, a persistência é limitada à primeira observação disponível.
+O dia externo de 1 de janeiro de 2025 completa o horizonte final, sem criar
+um terceiro ano simulado. Não há componentes tarifárias futuras nas previsões.
 
-## Ano de 2024
-
-A mesma tarifa comum usa o OMIE de 2024 e `P = (OMIE + 0,004 + 0,010 + TSE) × 1,16 + TAR + 0,001`, em €/kWh, antes de IVA. TSE é zero até março e 0,002893 desde 1 de abril, por aplicação retroativa. O mecanismo MIBEL é zero em 2024.
-
-| Período | TAR vazio | TAR fora de vazio |
-|---|---:|---:|
-| Janeiro–maio | 0,0092 | 0,0502 |
-| Junho–dezembro | 0,0157 | 0,0860 |
-
-Vazio diário: 22h–8h, hora de Lisboa. A referência exclui componentes fixas e não pretende reconstruir uma fatura particular. A perda de 16% é a indicação média publicada para 2024; 2023 conserva 15%. Preços realizados negativos não são cortados. O menor preço final de 2024 nesta referência é 0,02644 €/kWh.
-
-A fonte e a distinção entre realização e informação disponível nas previsões estão documentadas em [Fontes e método](Fontes_e_metodo.md). Exportação a zero, mercado desligado e 80% apenas na experiência mantêm-se nos dois anos.
+`python scripts/apply_portugal_omie_pricing.py` reproduz esta revisão offline,
+a partir dos preços OMIE arquivados, e atualiza schemas, catálogos,
+manifestos e hashes. Ver [Reproduzir](Reproduzir.md).
+Os resultados da verificação corrente estão em
+`results/portugal_rec_native/pricing_validation.json`; os relatórios anteriores
+conservam o seu âmbito histórico. As comparações de controladores devem usar
+a mesma edição de preços, incluindo os respetivos baselines.

@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3.1",
+  "version": "portugal-native-2023-2024-v3.2",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "status": "dataset_construction_only",
   "years": [
@@ -20,8 +20,10 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
-      "sha256": "5510eee256ac6592441f8ceebc5c6818ba9e1cfc6552e17032088f76ead217c4",
+      "sha256": "cb78408e8115c3392bbdd533944800614250f9cacbdbb54742e2f05b8ebc3dc5",
       "frozen_2023_source_fingerprint": "c073ab395a0a6340dfb4ababec167aeab2c733e22c2eff70facc09a90dc2596a"
     }
-  ]
+  ],
+  "tariff_policy": "omie_nonnegative",
+  "integrity_revision": "portugal-boundaries-1"
 }

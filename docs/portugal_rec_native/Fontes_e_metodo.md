@@ -1,4 +1,17 @@
-# Fontes físicas preservadas · Portugal REC
+# Fontes e método · Portugal REC
+
+## Preços correntes — v3.2
+
+Desde 29/10/2026, o preço ativo é `max(OMIE português em EUR/MWh / 1000, 0)`.
+O mercado comunitário está ativo a 80% desse preço; exportação à rede a zero.
+As previsões usam apenas OMIE, com publicação causal e persistência diária.
+Não se aplicam componentes Coopérnico/ERSE, MIBEL, perdas ou impostos.
+Ver [Tarifas e mercado](Tarifas_e_mercado.md).
+
+## Fontes e metodologia da edição histórica de retalho
+
+As descrições tarifárias seguintes documentam os arquivos de origem. As suas
+fórmulas e séries de retalho não são selecionadas pelos schemas correntes.
 
 Reference year: **2023**. Retrieved 25 September 2026. Individual buildings,
 occupancy and equipment are synthetic; the files here are independent inputs.
@@ -47,7 +60,7 @@ access does not establish unrestricted redistribution rights.
 
 ## Native-runtime recovery
 
-The physical inputs and source tariff series above are retained. The current dataset schemas all select the same BTN bi-hourly reference, `shared/pricing_btn_bi.parquet`; other tariff files are provenance only. Dataset prices are full variable grid purchase prices. The 0.8 local-market factor belongs in the experiment schema and uses the original simulator settlement. Dataset schemas leave this market disabled. Source provenance is not evidence of longitudinal EV simulation, calibrated DR or added inverter constraints. No new usage evaluation accompanies this tariff revision.
+The physical inputs and historical retail references above are retained. Current schemas select `shared/pricing_omie.parquet`, enable native community trading at 0.8 of the nonnegative OMIE purchase price and retain zero grid-export remuneration. Source provenance is not evidence of longitudinal EV simulation or calibrated DR.
 
 
 ## Extensão 2024
@@ -68,6 +81,8 @@ Ver [Extensão de 2024](Extensao_2024.md) para diferenças de método, lacunas, 
 
 ## Apoio às previsões no fim de 2024
 
-Os preços de apoio cobrem apenas 01/01/2025 UTC e não entram no período simulado. OMIE e anúncios ERSE de dezembro de 2024, com ficheiros, URLs e hashes, estão em `data/portugal_reference_2024/forecast_support`. TAR BTN bi-horária: 0,0149/0,0830 €/kWh; TSE: 0,0016574 €/kWh. Restantes componentes da referência comum mantidas. Ver Previsoes_e_historias.md para as fontes, causalidade e métricas.
+As referências históricas de apoio cobrem apenas 01/01/2025 UTC e não entram no período simulado. OMIE e anúncios ERSE de dezembro de 2024, com ficheiros, URLs e hashes, estão em `data/portugal_reference_2024/forecast_support`. TAR BTN bi-horária: 0,0149/0,0830 €/kWh; TSE: 0,0016574 €/kWh. Restantes componentes da referência comum mantidas. Ver Previsoes_e_historias.md para as fontes, causalidade e métricas.
 
 A humidade de 2023 é uma aproximação sintética a partir da temperatura; a de 2024 vem de ERA5. Esta diferença de origem foi preservada e está explicitada na análise das previsões; o erro entre anos não mede apenas diferenças de clima.
+
+Na edição v3.2, os ficheiros OMIE brutos desse dia de apoio são usados diretamente, sem TAR, TSE ou outras componentes.

@@ -1,0 +1,1154 @@
+{
+  "version": "portugal-native-2023-2024-v3.2",
+  "formula": "max(OMIE_PT_EUR_MWh / 1000, 0)",
+  "community_market": {
+    "enabled": true,
+    "local_price_ratio_to_grid_import": 0.8,
+    "grid_export_price": 0.0
+  },
+  "source_files": {
+    "data/portugal_reference_2023/omie_2023_hourly.parquet": "f5ab23c3fd30bc89aba1afb783df05eefc3acf2e31120e0da89f768e7e8f73b7",
+    "data/portugal_reference_2024/omie_2024_hourly.parquet": "0b7193d451d6733c0011c36f40a675fa9f479124b6b68d6698adc5422d2dc139",
+    "data/portugal_reference_2024/forecast_support/omie_2025-01-02.txt": "e807ffad7dab9aa1190c958d5ae934b1c55b1da19951a181ce16bec1114f2191",
+    "data/portugal_reference_2024/raw_2024/omie_2025-01-01.txt": "22bd9a729813f5856ab0be265873326eb024d315e1a25444b3c09e48ebecc113"
+  },
+  "forecast_method": "Target OMIE after conservative publication at 14:00 Europe/Madrid; otherwise same target time one day earlier, clipped to first archive observation at initialisation. Full 1/6/24 h horizons, including 2025-01-01 support.",
+  "annual": {
+    "2023": {
+      "intervals": 35040,
+      "negative_omie_clipped": 0,
+      "original_zero_intervals": 432,
+      "final_zero_intervals": 432,
+      "minimum_eur_kwh": 0.0,
+      "mean_eur_kwh": 0.08710565297254617,
+      "maximum_eur_kwh": 0.2199999988079071
+    },
+    "2024": {
+      "intervals": 35136,
+      "negative_omie_clipped": 988,
+      "original_zero_intervals": 2148,
+      "final_zero_intervals": 3136,
+      "minimum_eur_kwh": 0.0,
+      "mean_eur_kwh": 0.06306018898349622,
+      "maximum_eur_kwh": 0.19300000369548798
+    }
+  },
+  "boundary_forecasts": [
+    {
+      "issue_utc": "2024-12-31 23:00:00+00:00",
+      "target_utc": "2025-01-01 00:00:00+00:00",
+      "horizon_steps": 4,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 00:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13159
+    },
+    {
+      "issue_utc": "2024-12-31 23:15:00+00:00",
+      "target_utc": "2025-01-01 00:15:00+00:00",
+      "horizon_steps": 4,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 00:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13159
+    },
+    {
+      "issue_utc": "2024-12-31 23:30:00+00:00",
+      "target_utc": "2025-01-01 00:30:00+00:00",
+      "horizon_steps": 4,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 00:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13159
+    },
+    {
+      "issue_utc": "2024-12-31 23:45:00+00:00",
+      "target_utc": "2025-01-01 00:45:00+00:00",
+      "horizon_steps": 4,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 00:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13159
+    },
+    {
+      "issue_utc": "2024-12-31 18:00:00+00:00",
+      "target_utc": "2025-01-01 00:00:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 00:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13159
+    },
+    {
+      "issue_utc": "2024-12-31 18:15:00+00:00",
+      "target_utc": "2025-01-01 00:15:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 00:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13159
+    },
+    {
+      "issue_utc": "2024-12-31 18:30:00+00:00",
+      "target_utc": "2025-01-01 00:30:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 00:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13159
+    },
+    {
+      "issue_utc": "2024-12-31 18:45:00+00:00",
+      "target_utc": "2025-01-01 00:45:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 00:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13159
+    },
+    {
+      "issue_utc": "2024-12-31 19:00:00+00:00",
+      "target_utc": "2025-01-01 01:00:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 01:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13149
+    },
+    {
+      "issue_utc": "2024-12-31 19:15:00+00:00",
+      "target_utc": "2025-01-01 01:15:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 01:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13149
+    },
+    {
+      "issue_utc": "2024-12-31 19:30:00+00:00",
+      "target_utc": "2025-01-01 01:30:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 01:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13149
+    },
+    {
+      "issue_utc": "2024-12-31 19:45:00+00:00",
+      "target_utc": "2025-01-01 01:45:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 01:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13149
+    },
+    {
+      "issue_utc": "2024-12-31 20:00:00+00:00",
+      "target_utc": "2025-01-01 02:00:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 02:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13141999999999998
+    },
+    {
+      "issue_utc": "2024-12-31 20:15:00+00:00",
+      "target_utc": "2025-01-01 02:15:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 02:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13141999999999998
+    },
+    {
+      "issue_utc": "2024-12-31 20:30:00+00:00",
+      "target_utc": "2025-01-01 02:30:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 02:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13141999999999998
+    },
+    {
+      "issue_utc": "2024-12-31 20:45:00+00:00",
+      "target_utc": "2025-01-01 02:45:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 02:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13141999999999998
+    },
+    {
+      "issue_utc": "2024-12-31 21:00:00+00:00",
+      "target_utc": "2025-01-01 03:00:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 03:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.12049
+    },
+    {
+      "issue_utc": "2024-12-31 21:15:00+00:00",
+      "target_utc": "2025-01-01 03:15:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 03:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.12049
+    },
+    {
+      "issue_utc": "2024-12-31 21:30:00+00:00",
+      "target_utc": "2025-01-01 03:30:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 03:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.12049
+    },
+    {
+      "issue_utc": "2024-12-31 21:45:00+00:00",
+      "target_utc": "2025-01-01 03:45:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 03:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.12049
+    },
+    {
+      "issue_utc": "2024-12-31 22:00:00+00:00",
+      "target_utc": "2025-01-01 04:00:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 04:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.1123
+    },
+    {
+      "issue_utc": "2024-12-31 22:15:00+00:00",
+      "target_utc": "2025-01-01 04:15:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 04:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.1123
+    },
+    {
+      "issue_utc": "2024-12-31 22:30:00+00:00",
+      "target_utc": "2025-01-01 04:30:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 04:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.1123
+    },
+    {
+      "issue_utc": "2024-12-31 22:45:00+00:00",
+      "target_utc": "2025-01-01 04:45:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 04:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.1123
+    },
+    {
+      "issue_utc": "2024-12-31 23:00:00+00:00",
+      "target_utc": "2025-01-01 05:00:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 05:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.1123
+    },
+    {
+      "issue_utc": "2024-12-31 23:15:00+00:00",
+      "target_utc": "2025-01-01 05:15:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 05:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.1123
+    },
+    {
+      "issue_utc": "2024-12-31 23:30:00+00:00",
+      "target_utc": "2025-01-01 05:30:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 05:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.1123
+    },
+    {
+      "issue_utc": "2024-12-31 23:45:00+00:00",
+      "target_utc": "2025-01-01 05:45:00+00:00",
+      "horizon_steps": 24,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 05:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.1123
+    },
+    {
+      "issue_utc": "2024-12-31 00:00:00+00:00",
+      "target_utc": "2025-01-01 00:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 00:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13903000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 00:15:00+00:00",
+      "target_utc": "2025-01-01 00:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 00:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13903000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 00:30:00+00:00",
+      "target_utc": "2025-01-01 00:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 00:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13903000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 00:45:00+00:00",
+      "target_utc": "2025-01-01 00:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 00:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13903000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 01:00:00+00:00",
+      "target_utc": "2025-01-01 01:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 01:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13748
+    },
+    {
+      "issue_utc": "2024-12-31 01:15:00+00:00",
+      "target_utc": "2025-01-01 01:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 01:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13748
+    },
+    {
+      "issue_utc": "2024-12-31 01:30:00+00:00",
+      "target_utc": "2025-01-01 01:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 01:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13748
+    },
+    {
+      "issue_utc": "2024-12-31 01:45:00+00:00",
+      "target_utc": "2025-01-01 01:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 01:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13748
+    },
+    {
+      "issue_utc": "2024-12-31 02:00:00+00:00",
+      "target_utc": "2025-01-01 02:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 02:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13466
+    },
+    {
+      "issue_utc": "2024-12-31 02:15:00+00:00",
+      "target_utc": "2025-01-01 02:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 02:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13466
+    },
+    {
+      "issue_utc": "2024-12-31 02:30:00+00:00",
+      "target_utc": "2025-01-01 02:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 02:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13466
+    },
+    {
+      "issue_utc": "2024-12-31 02:45:00+00:00",
+      "target_utc": "2025-01-01 02:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 02:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13466
+    },
+    {
+      "issue_utc": "2024-12-31 03:00:00+00:00",
+      "target_utc": "2025-01-01 03:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 03:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.12737
+    },
+    {
+      "issue_utc": "2024-12-31 03:15:00+00:00",
+      "target_utc": "2025-01-01 03:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 03:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.12737
+    },
+    {
+      "issue_utc": "2024-12-31 03:30:00+00:00",
+      "target_utc": "2025-01-01 03:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 03:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.12737
+    },
+    {
+      "issue_utc": "2024-12-31 03:45:00+00:00",
+      "target_utc": "2025-01-01 03:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 03:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.12737
+    },
+    {
+      "issue_utc": "2024-12-31 04:00:00+00:00",
+      "target_utc": "2025-01-01 04:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 04:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13115000000000002
+    },
+    {
+      "issue_utc": "2024-12-31 04:15:00+00:00",
+      "target_utc": "2025-01-01 04:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 04:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13115000000000002
+    },
+    {
+      "issue_utc": "2024-12-31 04:30:00+00:00",
+      "target_utc": "2025-01-01 04:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 04:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13115000000000002
+    },
+    {
+      "issue_utc": "2024-12-31 04:45:00+00:00",
+      "target_utc": "2025-01-01 04:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 04:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13115000000000002
+    },
+    {
+      "issue_utc": "2024-12-31 05:00:00+00:00",
+      "target_utc": "2025-01-01 05:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 05:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13718
+    },
+    {
+      "issue_utc": "2024-12-31 05:15:00+00:00",
+      "target_utc": "2025-01-01 05:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 05:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13718
+    },
+    {
+      "issue_utc": "2024-12-31 05:30:00+00:00",
+      "target_utc": "2025-01-01 05:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 05:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13718
+    },
+    {
+      "issue_utc": "2024-12-31 05:45:00+00:00",
+      "target_utc": "2025-01-01 05:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 05:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13718
+    },
+    {
+      "issue_utc": "2024-12-31 06:00:00+00:00",
+      "target_utc": "2025-01-01 06:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 06:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.14298
+    },
+    {
+      "issue_utc": "2024-12-31 06:15:00+00:00",
+      "target_utc": "2025-01-01 06:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 06:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.14298
+    },
+    {
+      "issue_utc": "2024-12-31 06:30:00+00:00",
+      "target_utc": "2025-01-01 06:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 06:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.14298
+    },
+    {
+      "issue_utc": "2024-12-31 06:45:00+00:00",
+      "target_utc": "2025-01-01 06:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 06:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.14298
+    },
+    {
+      "issue_utc": "2024-12-31 07:00:00+00:00",
+      "target_utc": "2025-01-01 07:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 07:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.14977000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 07:15:00+00:00",
+      "target_utc": "2025-01-01 07:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 07:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.14977000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 07:30:00+00:00",
+      "target_utc": "2025-01-01 07:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 07:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.14977000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 07:45:00+00:00",
+      "target_utc": "2025-01-01 07:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 07:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.14977000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 08:00:00+00:00",
+      "target_utc": "2025-01-01 08:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 08:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.145
+    },
+    {
+      "issue_utc": "2024-12-31 08:15:00+00:00",
+      "target_utc": "2025-01-01 08:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 08:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.145
+    },
+    {
+      "issue_utc": "2024-12-31 08:30:00+00:00",
+      "target_utc": "2025-01-01 08:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 08:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.145
+    },
+    {
+      "issue_utc": "2024-12-31 08:45:00+00:00",
+      "target_utc": "2025-01-01 08:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 08:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.145
+    },
+    {
+      "issue_utc": "2024-12-31 09:00:00+00:00",
+      "target_utc": "2025-01-01 09:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 09:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13466
+    },
+    {
+      "issue_utc": "2024-12-31 09:15:00+00:00",
+      "target_utc": "2025-01-01 09:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 09:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13466
+    },
+    {
+      "issue_utc": "2024-12-31 09:30:00+00:00",
+      "target_utc": "2025-01-01 09:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 09:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13466
+    },
+    {
+      "issue_utc": "2024-12-31 09:45:00+00:00",
+      "target_utc": "2025-01-01 09:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 09:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13466
+    },
+    {
+      "issue_utc": "2024-12-31 10:00:00+00:00",
+      "target_utc": "2025-01-01 10:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 10:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11416
+    },
+    {
+      "issue_utc": "2024-12-31 10:15:00+00:00",
+      "target_utc": "2025-01-01 10:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 10:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11416
+    },
+    {
+      "issue_utc": "2024-12-31 10:30:00+00:00",
+      "target_utc": "2025-01-01 10:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 10:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11416
+    },
+    {
+      "issue_utc": "2024-12-31 10:45:00+00:00",
+      "target_utc": "2025-01-01 10:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 10:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11416
+    },
+    {
+      "issue_utc": "2024-12-31 11:00:00+00:00",
+      "target_utc": "2025-01-01 11:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 11:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11201
+    },
+    {
+      "issue_utc": "2024-12-31 11:15:00+00:00",
+      "target_utc": "2025-01-01 11:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 11:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11201
+    },
+    {
+      "issue_utc": "2024-12-31 11:30:00+00:00",
+      "target_utc": "2025-01-01 11:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 11:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11201
+    },
+    {
+      "issue_utc": "2024-12-31 11:45:00+00:00",
+      "target_utc": "2025-01-01 11:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 11:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11201
+    },
+    {
+      "issue_utc": "2024-12-31 12:00:00+00:00",
+      "target_utc": "2025-01-01 12:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 12:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11201
+    },
+    {
+      "issue_utc": "2024-12-31 12:15:00+00:00",
+      "target_utc": "2025-01-01 12:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 12:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11201
+    },
+    {
+      "issue_utc": "2024-12-31 12:30:00+00:00",
+      "target_utc": "2025-01-01 12:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 12:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11201
+    },
+    {
+      "issue_utc": "2024-12-31 12:45:00+00:00",
+      "target_utc": "2025-01-01 12:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 12:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.11201
+    },
+    {
+      "issue_utc": "2024-12-31 13:00:00+00:00",
+      "target_utc": "2025-01-01 13:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 13:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.0215
+    },
+    {
+      "issue_utc": "2024-12-31 13:15:00+00:00",
+      "target_utc": "2025-01-01 13:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 13:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.0215
+    },
+    {
+      "issue_utc": "2024-12-31 13:30:00+00:00",
+      "target_utc": "2025-01-01 13:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 13:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.0215
+    },
+    {
+      "issue_utc": "2024-12-31 13:45:00+00:00",
+      "target_utc": "2025-01-01 13:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 13:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.0215
+    },
+    {
+      "issue_utc": "2024-12-31 14:00:00+00:00",
+      "target_utc": "2025-01-01 14:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 14:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.01068
+    },
+    {
+      "issue_utc": "2024-12-31 14:15:00+00:00",
+      "target_utc": "2025-01-01 14:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 14:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.01068
+    },
+    {
+      "issue_utc": "2024-12-31 14:30:00+00:00",
+      "target_utc": "2025-01-01 14:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 14:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.01068
+    },
+    {
+      "issue_utc": "2024-12-31 14:45:00+00:00",
+      "target_utc": "2025-01-01 14:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 14:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.01068
+    },
+    {
+      "issue_utc": "2024-12-31 15:00:00+00:00",
+      "target_utc": "2025-01-01 15:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 15:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.072
+    },
+    {
+      "issue_utc": "2024-12-31 15:15:00+00:00",
+      "target_utc": "2025-01-01 15:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 15:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.072
+    },
+    {
+      "issue_utc": "2024-12-31 15:30:00+00:00",
+      "target_utc": "2025-01-01 15:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 15:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.072
+    },
+    {
+      "issue_utc": "2024-12-31 15:45:00+00:00",
+      "target_utc": "2025-01-01 15:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 15:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.072
+    },
+    {
+      "issue_utc": "2024-12-31 16:00:00+00:00",
+      "target_utc": "2025-01-01 16:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 16:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.12549
+    },
+    {
+      "issue_utc": "2024-12-31 16:15:00+00:00",
+      "target_utc": "2025-01-01 16:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 16:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.12549
+    },
+    {
+      "issue_utc": "2024-12-31 16:30:00+00:00",
+      "target_utc": "2025-01-01 16:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 16:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.12549
+    },
+    {
+      "issue_utc": "2024-12-31 16:45:00+00:00",
+      "target_utc": "2025-01-01 16:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 16:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.12549
+    },
+    {
+      "issue_utc": "2024-12-31 17:00:00+00:00",
+      "target_utc": "2025-01-01 17:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 17:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.14972
+    },
+    {
+      "issue_utc": "2024-12-31 17:15:00+00:00",
+      "target_utc": "2025-01-01 17:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 17:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.14972
+    },
+    {
+      "issue_utc": "2024-12-31 17:30:00+00:00",
+      "target_utc": "2025-01-01 17:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 17:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.14972
+    },
+    {
+      "issue_utc": "2024-12-31 17:45:00+00:00",
+      "target_utc": "2025-01-01 17:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 17:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.14972
+    },
+    {
+      "issue_utc": "2024-12-31 18:00:00+00:00",
+      "target_utc": "2025-01-01 18:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 18:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15067
+    },
+    {
+      "issue_utc": "2024-12-31 18:15:00+00:00",
+      "target_utc": "2025-01-01 18:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 18:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15067
+    },
+    {
+      "issue_utc": "2024-12-31 18:30:00+00:00",
+      "target_utc": "2025-01-01 18:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 18:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15067
+    },
+    {
+      "issue_utc": "2024-12-31 18:45:00+00:00",
+      "target_utc": "2025-01-01 18:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 18:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15067
+    },
+    {
+      "issue_utc": "2024-12-31 19:00:00+00:00",
+      "target_utc": "2025-01-01 19:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 19:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15299000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 19:15:00+00:00",
+      "target_utc": "2025-01-01 19:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 19:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15299000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 19:30:00+00:00",
+      "target_utc": "2025-01-01 19:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 19:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15299000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 19:45:00+00:00",
+      "target_utc": "2025-01-01 19:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 19:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15299000000000001
+    },
+    {
+      "issue_utc": "2024-12-31 20:00:00+00:00",
+      "target_utc": "2025-01-01 20:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 20:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15169
+    },
+    {
+      "issue_utc": "2024-12-31 20:15:00+00:00",
+      "target_utc": "2025-01-01 20:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 20:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15169
+    },
+    {
+      "issue_utc": "2024-12-31 20:30:00+00:00",
+      "target_utc": "2025-01-01 20:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 20:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15169
+    },
+    {
+      "issue_utc": "2024-12-31 20:45:00+00:00",
+      "target_utc": "2025-01-01 20:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 20:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.15169
+    },
+    {
+      "issue_utc": "2024-12-31 21:00:00+00:00",
+      "target_utc": "2025-01-01 21:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 21:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.14775
+    },
+    {
+      "issue_utc": "2024-12-31 21:15:00+00:00",
+      "target_utc": "2025-01-01 21:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 21:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.14775
+    },
+    {
+      "issue_utc": "2024-12-31 21:30:00+00:00",
+      "target_utc": "2025-01-01 21:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 21:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.14775
+    },
+    {
+      "issue_utc": "2024-12-31 21:45:00+00:00",
+      "target_utc": "2025-01-01 21:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 21:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.14775
+    },
+    {
+      "issue_utc": "2024-12-31 22:00:00+00:00",
+      "target_utc": "2025-01-01 22:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 22:00:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13306
+    },
+    {
+      "issue_utc": "2024-12-31 22:15:00+00:00",
+      "target_utc": "2025-01-01 22:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 22:15:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13306
+    },
+    {
+      "issue_utc": "2024-12-31 22:30:00+00:00",
+      "target_utc": "2025-01-01 22:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 22:30:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13306
+    },
+    {
+      "issue_utc": "2024-12-31 22:45:00+00:00",
+      "target_utc": "2025-01-01 22:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2024-12-31 13:00:00+00:00",
+      "omie_source_utc": "2025-01-01 22:45:00+00:00",
+      "day_ahead_available": true,
+      "forecast_eur_kwh": 0.13306
+    },
+    {
+      "issue_utc": "2024-12-31 23:00:00+00:00",
+      "target_utc": "2025-01-01 23:00:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2025-01-01 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 23:00:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13449
+    },
+    {
+      "issue_utc": "2024-12-31 23:15:00+00:00",
+      "target_utc": "2025-01-01 23:15:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2025-01-01 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 23:15:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13449
+    },
+    {
+      "issue_utc": "2024-12-31 23:30:00+00:00",
+      "target_utc": "2025-01-01 23:30:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2025-01-01 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 23:30:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13449
+    },
+    {
+      "issue_utc": "2024-12-31 23:45:00+00:00",
+      "target_utc": "2025-01-01 23:45:00+00:00",
+      "horizon_steps": 96,
+      "publication_utc": "2025-01-01 13:00:00+00:00",
+      "omie_source_utc": "2024-12-31 23:45:00+00:00",
+      "day_ahead_available": false,
+      "forecast_eur_kwh": 0.13449
+    }
+  ]
+}

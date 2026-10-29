@@ -1,0 +1,11 @@
+{
+  "revision": "portugal-boundaries-1",
+  "right_censored_sessions": [
+    "EV-M001-01-2024-S0315",
+    "EV-M003-01-2024-S0302"
+  ],
+  "schedule_files_with_partial_sessions": 4,
+  "session_contract": "observed_end_time_step is exclusive; departure_time_step is null for right-censored home parking; target and arrival SOC unchanged",
+  "runtime_contract": "null departure countdown loads as unknown (-1); a connected vehicle with unknown departure is not a terminal departure",
+  "source": "portugal_profiles_2024.mobility: home parking is the complement of observed trips, ending at the observation boundary"
+}

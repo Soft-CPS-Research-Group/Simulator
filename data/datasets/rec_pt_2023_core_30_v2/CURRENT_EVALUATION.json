@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3.1",
+  "version": "portugal-native-2023-2024-v3.2",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "status": "dataset_construction_only",
   "years": [
@@ -20,7 +20,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
-      "sha256": "120c038dcfc62dddb65dc7cde0642262cfd7d440e75eb0de50f07d9c0477bbc4",
+      "sha256": "84ec0a05e7982f561a896672a0525739222c260a78428f78afe0c1ac26659797",
       "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
@@ -36,7 +36,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
-      "sha256": "cce0ff10d9ad6a797af843084ecbffcd2511041cc8726416212c9dc9aba8f8f2",
+      "sha256": "0d0d2cc530cf3e02dccc7e2607a70efd0d38cb31fd47df82cbd7c030dee76d41",
       "frozen_2023_source_fingerprint": "e40b0db00c9846a3e689f6a759be05b4769e816f6b3bc20c853707cbbbcf76db"
     },
     {
@@ -52,7 +52,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
-      "sha256": "3eb8cbd7abeec8ccea3824a2a2a139f771e4139c0336addc048c9091272b1282",
+      "sha256": "3e30b4f9d854771bd4053260610051b52ea336dfdddbb7ed0a3babcd923a1ce0",
       "frozen_2023_source_fingerprint": "ae7c92cd7704b8cdb52e74c64a404563d9801fd17af70f4a7eadd9d7ec189a05"
     },
     {
@@ -68,7 +68,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
-      "sha256": "a7bc8710dfb5b0b7b112d364073b37b828bf846b979a8010a5181c6db8cf7dc5",
+      "sha256": "9183b36183d19c35f6473e402714ad451382b6a0075ec05721d17b63cd6633db",
       "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
@@ -84,8 +84,10 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
-      "sha256": "b6202ccae4c7440dc2ff51c50be80870f48ddfc7010d488bff4efaa3752a3476",
+      "sha256": "4795b482795f6fe57c3854f9bbd2bde803bea96af62f035304eeeedfb9385b46",
       "frozen_2023_source_fingerprint": "e93c0b8171be8a312d2f9578d38b31378ef7092d838db1865f751769e3f192c1"
     }
-  ]
+  ],
+  "tariff_policy": "omie_nonnegative",
+  "integrity_revision": "portugal-boundaries-1"
 }

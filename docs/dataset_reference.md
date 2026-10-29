@@ -15,13 +15,13 @@ CSV and Parquet are interchangeable when the schema path is updated and columns,
 
 ## Portugal: consolidated runtime and frozen provenance
 
-The current working tree combines the 1.8.3 runtime with the Portuguese 2023–2024
+The current working tree combines the maintained runtime with the Portuguese 2023–2024
 datasets. Their original preparation was frozen against runtime
 `978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0); that remains the provenance of
 the archived reports, not the runtime of this consolidated checkout.
 Nine configurations: Core-4, Core-15, Core-30 Normal/Topology/Safety/Robustness/Combined and Premium Normal/All-in. DR only in All-in. Use each family's `CURRENT_EVALUATION.json`; executable variants are in `evaluation/`.
 
-The same nine Portugal-oriented configurations now span 2023 and 2024 continuously, preserving permanent departures and equipment identities. Native EVs use prescribed arrival SOC per session, native machines use the building phase split, and DR uses the original pre-event average. All current schemas use the same full grid purchase tariff. The market is disabled in dataset schemas; enable original settlement and its 0.8 ratio in experiment schemas. Grid exports have zero value. No private service continues after member exit. This revision constructs data only, with no new usage evaluations.
+The same nine Portugal-oriented configurations span 2023 and 2024 continuously, preserving permanent departures and equipment identities. Native EVs use prescribed arrival SOC per session, native machines use the building phase split, and DR uses the pre-event average. In dataset edition v3.2, all schemas use `max(OMIE_PT_EUR_MWh / 1000, 0)` in EUR/kWh. The community market is enabled: local purchases and sales use 80% of that price, and grid exports have zero value. No private service continues after member exit. Event-window regression checks do not constitute continuous two-year controller validation.
 
 [Catálogo / catalogue and reproduction](portugal_rec_native/README.md).
 

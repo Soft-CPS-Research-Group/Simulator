@@ -12,8 +12,8 @@ Figure 1. The Premium-100 solar calendar in 2024. Each column is one civil day a
 | --- | --- | --- |
 | 4, 15, 30 and 100 members | Static and dynamic scenarios | 70,176 records per annual-pair series |
 
-Dataset edition: portugal-native-2023-2024-v3.1
-Report prepared: 27 September 2026
+Dataset edition: portugal-native-2023-2024-v3.2 / portugal-boundaries-1
+Report prepared: 29 October 2026
 Scope: dataset composition and input distributions
 
 This report describes the published data. All quantities are computed from inventories, schedules, schemas and input time series.
@@ -100,7 +100,7 @@ The collection combines public external series with a synthetic inventory and op
 | Electricity demand | E-REDES shape priors, occupancy/routine draws and simplified end-use components. | Non-shiftable load and a component ledger. |
 | PV and weather | Lisbon solar resource, temperature and wind; array geometry, shading and inverter ratings. | Quarter-hour weather and per-site absolute PV generation. |
 | Mobility and appliances | Declared vehicles and connectors; visits, SOC preferences and integrated cycle profiles. | Connection records, departure requests and start/deadline windows. |
-| Market and carbon | OMIE, ERSE/contract components, REN, REE and APA reference information. | Common price and operational carbon-intensity series. |
+| Market and carbon | OMIE wholesale prices; REN, REE and APA carbon reference information. | Common price and operational carbon-intensity series. |
 | Scenario overlays | Schema-defined changes and event files with deterministic timing. | Topology, observation/action/asset events, outages and DR requests. |
 
 ## A continuous two-year calendar
@@ -361,7 +361,7 @@ Figure 16. Premium 2024 arrival and departure hours for complete sessions in the
 
 Session counts refer to visits reconstructed from each Normal configuration's connector records. A visit spanning New Year remains one visit and is attributed to its start year. This preserves the distinction between a new arrival and a continuation of existing parking.
 
-A connection interval gives the period during which charging may be available. It does not indicate that a vehicle charges continuously for the full interval.
+The 54 home visits still open at the end of 2024 have unknown departure times. Their observed intervals and SOC targets are retained; they are excluded from departure-compliance metrics. A connection interval does not imply continuous charging.
 
 # Requested SOC and connection duration
 *18 / SERVICE REQUESTS | PDF page 20*
@@ -508,8 +508,8 @@ Figure 25. Premium All-in outage timing and cumulative scheduled site-hours in t
 | Configuration | Distinct affected sites | Site-level episodes | Scheduled site-hours |
 | --- | --- | --- | --- |
 | Core-30 Robustness | 3 | 48 | 96 |
-| Core-30 Combined | 3 | 40 | 80 |
-| Premium All-in | 5 | 72 | 144 |
+| Core-30 Combined | 3 | 39 | 78 |
+| Premium All-in | 5 | 68 | 136 |
 
 The global union of outage times is 32 hours across the two years in each of these configurations. The site-hour totals differ because several members can be affected simultaneously and membership changes can end a site's subsequent participation.
 
@@ -537,17 +537,17 @@ The files contain an activation price of EUR 0.12/kWh, a shortfall penalty of EU
 # Electricity prices and carbon intensity
 *28 / SHARED EXTERNAL SIGNALS | PDF page 30*
 
-All members use the same variable grid-purchase price series. It combines OMIE with the reference contract and regulated access components for the relevant year. Carbon intensity is a separate time-aligned operational estimate based on the national production mix and an imports proxy.
+All members use the same variable grid-purchase price series. It is the Portuguese OMIE price in EUR/MWh divided by 1,000 and floored at zero, without retail additions. Carbon intensity is a separate time-aligned operational estimate based on the national production mix and an imports proxy.
 
 ![Figure 27. Daily mean price and carbon intensity over both years. Shading gives the within-day 10th-90th percentile. Price units are cents/kWh; carbon units are gCO2e/kWh.](figures/descriptive/26_price_carbon.png)
 Figure 27. Daily mean price and carbon intensity over both years. Shading gives the within-day 10th-90th percentile. Price units are cents/kWh; carbon units are gCO2e/kWh.
 
 | Year | Mean price (EUR/kWh) | Price range (EUR/kWh) | Mean carbon (gCO2e/kWh) |
 | --- | --- | --- | --- |
-| 2023 | 0.0610 | -0.1033 to 0.2696 | 112.3 |
-| 2024 | 0.1398 | 0.0264 to 0.3305 | 62.8 |
+| 2023 | 0.0871 | 0.0000 to 0.2200 | 112.3 |
+| 2024 | 0.0631 | 0.0000 to 0.1930 | 62.8 |
 
-Negative values in the reference 2023 variable price are preserved. The series is before VAT and excludes fixed charges. The dataset schemas leave the community market disabled and set grid-export remuneration to zero; the local-market ratio belongs to the later experiment configuration.
+Negative OMIE values become zero. No supplier margin, loss uplift, MIBEL, network tariff or tax is added. Every dataset schema enables community trading: buyers pay and sellers receive 80% of the grid-purchase price. Grid-export remuneration is zero.
 
 Carbon is a derived average operational intensity, not a marginal-emissions or lifecycle accounting series. The component files retain the production/import calculation and its provenance.
 
@@ -564,7 +564,7 @@ Figure 28. Daily mean air temperature in both years and Premium daily PV energy 
 | Air temperature | 1.25 | 1.25 | 1.25 | °C |
 | Relative humidity | 7.32 | 7.32 | 7.31 | percentage points |
 | Direct irradiance, daytime | 186.21 | 186.21 | 185.59 | W/m² |
-| Grid purchase price | 0.03 | 0.03 | 1.28 | cents/kWh |
+| Grid purchase price | 0.00 | 0.00 | 1.09 | cents/kWh |
 
 Weather forecasts use daily persistence with an astronomical night mask for solar channels. Published day-ahead OMIE is used when available, with prior-day persistence otherwise. Daily persistence gives almost the same error for a common destination across horizons; it is a reference forecast method rather than a forecast ensemble.
 
@@ -599,15 +599,15 @@ Supporting outputs: dataset_description/statistics.json, CSV tables and figures/
 
 The source archives and construction scripts accompany the published collection. The links below identify the principal providers and documents; the local source manifests retain the exact downloaded files, request parameters and hashes.
 
-**[S1] Dataset release.** portugal-native-2023-2024-v3.1. Four physical bases and nine schemas. Manifest: results/portugal_rec_native/manifest.json. The original simulator revision is pinned in the manifest; only dataset construction and descriptive tools are used here.
+**[S1] Dataset release.** portugal-native-2023-2024-v3.2. Four physical bases and nine schemas. Manifest: results/portugal_rec_native/manifest.json. The original simulator revision is pinned in the manifest; only dataset construction and descriptive tools are used here.
 
 **[S2] E-REDES load-shape priors.** [Consumption profiles 2023](https://www.e-redes.pt/sites/eredes/files/2023-01/E-REDES_Perfil_Consumo_2023.xlsx) and [consumption profiles 2024](https://www.e-redes.pt/sites/eredes/files/2023-12/E-REDES_Perfil_Consumo_2024.xlsx). Published chronological intervals, aligned to the common UTC axis.
 
 **[S3] Solar resource and weather.** [European Commission PVGIS](https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en), SARAH-3 and the archived PVGIS 5/6 queries for Lisbon, 38.72° N, 9.14° W. [Open-Meteo historical ERA5 interface](https://open-meteo.com/en/docs/historical-weather-api) for 2024 temperature, humidity, wind and documented solar gap fills. Hourly inputs are interpolated to 15 minutes.
 
-**[S4] Wholesale prices.** [OMIE day-ahead market](https://www.omie.es/pt/market-results/daily/daily-market/day-ahead-price), Portuguese price zone. Market periods are interpreted in Europe/Madrid before UTC alignment. Archived adjustment data supply the 2023 MIBEL component.
+**[S4] Wholesale prices.** [OMIE day-ahead market](https://www.omie.es/pt/market-results/daily/daily-market/day-ahead-price), Portuguese price zone. Market periods are interpreted in Europe/Madrid before UTC alignment. The active price uses OMIE only; archived MIBEL adjustments are historical provenance.
 
-**[S5] Tariff components.** [ERSE electricity tariffs](https://www.erse.pt/atividade/regulacao/tarifas-e-precos-eletricidade), 2023 and 2024 schedules and their within-year revisions. The archived Coopérnico reference formula supplies the benchmark commercial components; [the 2024 TSE explanation](https://www.coopernico.org/artigo/366) documents that year's charge. December 2024 ERSE announcements support January forecast destinations.
+**[S5] Historical tariff references.** [ERSE electricity tariffs](https://www.erse.pt/atividade/regulacao/tarifas-e-precos-eletricidade), 2023 and 2024 schedules and their within-year revisions. Coopérnico and ERSE components belong to the archived retail edition and are excluded from current prices; [the 2024 TSE explanation](https://www.coopernico.org/artigo/366) documents that year's charge. Current forecast destinations use only published OMIE or causal daily persistence, with a zero floor.
 
 **[S6] Electricity carbon estimate.** [REN Data Hub](https://datahub.ren.pt/en/api-instructions) production and exchange series; [REE API](https://www.ree.es/en/datos/apidata) for the Spanish imports proxy; [APA electricity-emission reference](https://apambiente.pt/clima/fator-de-emissao-de-gases-de-efeito-de-estufa-para-eletricidade-produzida-em-portugal) for calibration. The fixed 2023 thermal coefficient is retained for the 2024 derived estimate.
 

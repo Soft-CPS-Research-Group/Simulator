@@ -239,6 +239,28 @@ def test_core_bundle_adds_ev_charging_flexibility_features():
         env.close()
 
 
+def test_core_bundle_unknown_departure_does_not_create_false_urgency():
+    env = CityLearnEnv(_schema_with_bundles(core=True), interface='entity',
+                      central_agent=True, episode_time_steps=6, random_seed=0)
+    try:
+        env.reset(seed=0)
+        for building in env.buildings:
+            for charger in building.electric_vehicle_chargers or []:
+                charger.charger_simulation.electric_vehicle_departure_time[:] = -1
+        obs = env.observations
+        features = env.entity_specs['tables']['charger']['features']
+        table = obs['tables']['charger']
+        connected = table[:, features.index('connected_state')] == 1
+        assert connected.any()
+        for name in ('hours_until_departure', 'time_until_departure_ratio', 'departure_feasibility_ratio'):
+            assert (table[connected, features.index(name)] == -1).all()
+        for name in ('required_average_power_kw', 'charging_priority_ratio', 'min_required_action_normalized'):
+            assert (table[connected, features.index(name)] == 0).all()
+        assert np.isfinite(table).all()
+    finally:
+        env.close()
+
+
 def test_base_entity_features_add_static_asset_capabilities_without_core_bundle():
     env = CityLearnEnv(_schema_with_bundles(core=False), interface="entity", central_agent=True, episode_time_steps=6, random_seed=0)
 

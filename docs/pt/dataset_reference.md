@@ -16,12 +16,12 @@ CSV e Parquet sao intercambiaveis se:
 3. As unidades sao as mesmas.
 4. Os tipos conseguem ser convertidos para os construtores do simulador.
 
-## Portugal: simulador original
+## Portugal: motor corrente e proveniência histórica
 
-Motor corrente: `978be68b0e0740deab15ecf536805f323b86fa57`, sem extensões.
+A preparação original foi congelada contra `978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0). Esse commit identifica a proveniência dos relatórios históricos; os datasets correntes são executados pelo motor mantido neste repositório.
 Nove configurações: Core-4, Core-15, Core-30 Normal/Topologia/Safety/Robustness/Combinado e Premium Normal/All-in. DR apenas no All-in. Consultar `CURRENT_EVALUATION.json` em cada família; os schemas executáveis estão em `evaluation/`.
 
-As mesmas nove configurações Portugal abrangem agora 2023 e 2024 em sequência, preservando as saídas definitivas e a identidade dos equipamentos. Os EV nativos usam SOC prescrito por sessão, as máquinas seguem as fases da instalação e a DR usa a média anterior ao pedido. Todos os schemas usam a mesma tarifa completa de compra à rede. O mercado está desligado nos schemas de dados; a liquidação original e o fator 0,8 ativam-se no schema da experiência. A exportação à rede vale zero. Não existe serviço privado depois da saída de um membro. Esta revisão apenas constrói dados, sem novas avaliações de utilização.
+As nove configurações Portugal abrangem 2023 e 2024 em sequência, preservando as saídas definitivas e a identidade dos equipamentos. Os EV nativos usam SOC prescrito por sessão, as máquinas seguem as fases da instalação e a DR usa a média anterior ao pedido. Na edição v3.2, todos os schemas usam `max(OMIE_PT_EUR_MWh / 1000, 0)` em EUR/kWh. O mercado comunitário está ativo: compras e vendas locais usam 80% desse preço; a exportação à rede vale zero. Não existe serviço privado depois da saída de um membro. Os testes de regressão em janelas de eventos não equivalem a uma validação contínua dos dois anos com um controlador.
 
 [Catálogo / catalogue and reproduction](../portugal_rec_native/README.md).
 
@@ -264,5 +264,4 @@ Datasets de robustez definem `schema["robustness"]["enabled"] = true`, apontam `
 8. Preferir Parquet para datasets anuais/sub-minuto.
 9. Correr smoke run e `evaluate_v2()`.
 10. Correr `audit_physics.py` quando o dataset for novo ou critico.
-
 
