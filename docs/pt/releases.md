@@ -4,6 +4,27 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## Ainda não publicado — BAU com carga imediata até 100%
+
+- `BusinessAsUsualAgent`, `NormalPolicy` e `NormalNoBatteryPolicy` pedem carga
+  máxima do EV desde a ligação até 100%. O alvo de saída, preço e prazo não
+  reduzem a carga do BAU. Mantêm-se o arranque imediato dos ciclos pedidos e
+  o autoconsumo da bateria doméstica.
+- O autoconsumo considera a potência que a bateria do EV pode efetivamente
+  aceitar, incluindo capacidade, redução de potência e eficiência. Evita-se
+  descarregar a bateria doméstica para exportação no fim da carga do EV.
+- A lógica por prazo dos RBCs nativos fica numa base separada. Configurações
+  que mudam o BAU para um alvo inferior ou carga por prazo falham explicitamente.
+- Perto de 100%, a interface permite o comando mínimo do carregador quando
+  existe margem elétrica. A potência disponível continua limitada pela energia
+  em falta; o comando pode ser superior, com a energia aceite limitada pela
+  bateria. Sem margem elétrica não se aumenta o comando. A passagem por float32
+  deixa de transformar o comando mínimo válido em carga nula.
+- Os manifestos identificam a referência como `immediate-full-charge-v1`.
+  Os KPIs relativos ao BAU da 1.9.1 e anteriores têm outra referência. Não foram
+  alterados datasets ou preços. Os testes cobrem carga total, independência do
+  alvo de saída, potência mínima, margem elétrica, aparelhos e RBCs nativos.
+
 ## v1.9.1 — correção do pacote publicado
 
 - Incluído `citylearn.utils` nas distribuições. Na 1.9.0, a exportação do manifesto

@@ -6,6 +6,29 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## Unreleased — immediate full-charge BAU
+
+- `BusinessAsUsualAgent`, `NormalPolicy` and `NormalNoBatteryPolicy` request
+  maximum EV charging immediately while connected, until 100% SOC. Departure
+  targets, prices and time remaining do not slow BAU charging. Appliance starts
+  and PV self-consumption storage retain their existing rules.
+- Self-consumption BESS dispatch accounts for the EV power actually accepted
+  under battery capacity/taper/efficiency limits, avoiding an unwanted export
+  when a maximum-power request finishes a nearly full EV battery.
+- Native RBCs keep their deadline-based service in a separate shared base;
+  changing BAU does not make RBCs charge every EV to 100%. BAU configurations
+  requesting a lower target or deadline charging now fail explicitly.
+- Near full charge, entity observations permit a viable minimum charger command
+  if electrical headroom allows it. `available_charge_power_kw` remains limited
+  by energy headroom; `available_charge_action_normalized` may allow a minimum
+  command whose accepted energy is clipped by the battery. An insufficient
+  electrical envelope still prevents charging. Float32 rounding at the charger
+  minimum no longer turns a valid command into zero delivered energy.
+- KPI manifests identify the native reference as `immediate-full-charge-v1`.
+  BAU-relative KPIs from 1.9.1 and earlier use a different reference. Datasets
+  and tariffs are unchanged. Tests cover full charging, departure-target
+  independence, charger deadband, electrical headroom, appliances and native RBCs.
+
 ## v1.9.1 — packaging correction
 
 - Include `citylearn.utils` in the wheel and source distribution. Version 1.9.0
