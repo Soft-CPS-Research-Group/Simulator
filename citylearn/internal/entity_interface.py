@@ -591,13 +591,17 @@ class CityLearnEntityInterfaceService:
                 connected_ev = charger.connected_electric_vehicle
                 current_soc = self._safe_scalar(connected_ev.battery.soc[connected_ev.observation_soc_index(endogenous_t)], -0.1)
                 battery_capacity = self._safe_scalar(connected_ev.battery.capacity, -1.0)
-                hours_until_departure = max(departure_steps, 0.0) * step_hours
+                hours_until_departure = departure_steps * step_hours if departure_steps >= 0.0 else -1.0
                 if core_bundle_enabled:
                     energy_to_required_soc = max((required_soc - current_soc) * max(battery_capacity, 0.0), 0.0)
                     required_average_power = energy_to_required_soc / max(hours_until_departure, 1.0e-6) if energy_to_required_soc > 0.0 else 0.0
                     avg_power_to_departure = required_average_power
                     charging_slack = max_charging_power - required_average_power
-                    if energy_to_required_soc <= 0.0:
+                    if hours_until_departure < 0.0:
+                        # Unknown deadline: no prescribed average rate or urgency.
+                        required_average_power = avg_power_to_departure = 0.0
+                        charging_slack = charging_priority = 0.0
+                    elif energy_to_required_soc <= 0.0:
                         charging_priority = 0.0
                     elif hours_until_departure <= 0.0 or max_charging_power <= 0.0:
                         charging_priority = 1.0
@@ -669,7 +673,7 @@ class CityLearnEntityInterfaceService:
                     row,
                     self._charger_feature_cols,
                     "time_until_departure_ratio",
-                    np.clip(hours_until_departure / 24.0, 0.0, 1.0) if connected else -1.0,
+                    np.clip(hours_until_departure / 24.0, 0.0, 1.0) if connected and hours_until_departure >= 0.0 else -1.0,
                 )
                 self._set_obs_value(row, self._charger_feature_cols, "energy_to_required_soc_kwh", energy_to_required_soc)
                 self._set_obs_value(row, self._charger_feature_cols, "required_average_power_kw", required_average_power)
@@ -1791,6 +1795,9 @@ class CityLearnEntityInterfaceService:
             if required_average_power > 0.0
             else 0.0
         )
+        if hours_until_departure < 0.0:
+            max_deliverable = departure_margin = min_required_action = 0.0
+            departure_feasibility = -1.0
 
         return {
             "connected_ev_soc_min_ratio": soc_min,

@@ -51,6 +51,18 @@ class BusinessAsUsualAgent(Agent):
 
     def predict(self, observations: List[List[float]], deterministic: bool = None) -> List[List[float]]:
         env = self.env.unwrapped
+        if env.time_step == 0 and self.time_step != 0:
+            self.reset()
+        if getattr(env, 'topology_mode', 'static') == 'dynamic':
+            version = env.topology_version
+            if version != self._baseline_topology_version:
+                self.action_space = env.flat_action_space
+                self.action_names = env.action_names
+                self.observation_space = env.flat_observation_space
+                self.observation_names = env.observation_names
+                self.building_metadata = env.get_metadata()['buildings']
+                self._building_action_layout_cache.clear()
+                self._baseline_topology_version = version
         per_building_actions = [
             self._building_action_vector(building)
             for building in env.buildings
@@ -535,6 +547,7 @@ class BusinessAsUsualAgent(Agent):
     def reset(self):
         super().reset()
         self._building_action_layout_cache.clear()
+        self._baseline_topology_version = None
 
 
 class ZeroActionBaselineAgent(Agent):

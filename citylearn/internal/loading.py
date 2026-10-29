@@ -1135,7 +1135,7 @@ class CityLearnLoadingService:
                 pd.Series([terminal['electric_vehicle_departure_time']]),
                 errors='coerce',
             ).iloc[0]
-            if state == 1 and np.isfinite(departure) and float(departure) <= 1.0:
+            if state == 1 and np.isfinite(departure) and 0.0 <= float(departure) <= 1.0:
                 terminal['electric_vehicle_charger_state'] = 3
                 for column in (
                     'electric_vehicle_session_id',
