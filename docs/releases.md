@@ -6,7 +6,9 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
-## Unreleased — immediate full-charge BAU
+## v1.9.2 — 2026-10-29 — immediate full-charge BAU
+
+Release owner: [@calofonseca](https://github.com/calofonseca).
 
 - `BusinessAsUsualAgent`, `NormalPolicy` and `NormalNoBatteryPolicy` request
   maximum EV charging immediately while connected, until 100% SOC. Departure
@@ -28,6 +30,19 @@ Default release owner for this fork: [@calofonseca](https://github.com/calofonse
   BAU-relative KPIs from 1.9.1 and earlier use a different reference. Datasets
   and tariffs are unchanged. Tests cover full charging, departure-target
   independence, charger deadband, electrical headroom, appliances and native RBCs.
+
+Validation: 544 Simulator tests passed locally; Python 3.9/3.10 CI and the
+accounting audit passed for the integrated BAU changes. An installed candidate
+wheel completed the episode/KPI/provenance export check outside the checkout.
+The publishing pipeline repeats the installed-wheel check on Python 3.11.
+Algorithms also completed full-period comparisons (8,759 hourly transitions,
+17 buildings) using this reference; this release does not change those agents.
+
+Migration: no dataset or action/observation schema migration is required.
+Rerun the native BAU reference before comparing relative KPIs across this
+version boundary. BAU configurations that intentionally used a lower target
+must select a service-oriented controller instead. Concurrent tariff/dataset
+work is not included in this release.
 
 ## v1.9.1 — packaging correction
 
