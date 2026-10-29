@@ -568,6 +568,33 @@ class BusinessAsUsualAgent(_OperationalBaselineAgent):
         # full charge. The battery clips the final interval to its capacity.
         return float(np.clip(1.0, max(0.0, low), max(0.0, high)))
 
+    def _charger_requested_kw_for_charger(self, charger, action: float) -> float:
+        """Estimate accepted EV power before dispatching self-consumption BESS.
+
+        A full-power request near 100% is clipped by the EV battery. Reserving
+        nominal charger power instead would discharge the house battery into
+        an export. Mirror the native positive-charge limits without mutating
+        battery SOC, efficiency, capacity history or provenance.
+        """
+        ev = None if charger is None else getattr(charger, 'connected_electric_vehicle', None)
+        if ev is None or action <= 0.0:
+            return 0.0
+        power = max(charger.get_requested_power_kw(action), 0.0)
+        if power <= 0.0:
+            return 0.0
+        hours = max(float(charger.seconds_per_time_step) / 3600.0, 1.0e-12)
+        charger_efficiency = max(charger.get_efficiency(power / charger.max_charging_power, True), 1.0e-9)
+        battery = ev.battery
+        initial = battery.energy_init
+        requested = power * hours * charger_efficiency
+        maximum = max(battery.get_max_input_power(energy_init=initial), 0.0) * hours
+        remaining = max(battery.degraded_capacity - initial, 0.0)
+        accepted = min(requested, maximum)
+        for _ in range(2):
+            efficiency = max(battery.get_current_efficiency(accepted / hours) ** 0.5, 1.0e-9)
+            accepted = min(requested, maximum, remaining / efficiency)
+        return accepted / (hours * charger_efficiency)
+
 
 class ZeroActionBaselineAgent(Agent):
     """Baseline that requests zero for every action dimension."""

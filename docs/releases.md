@@ -12,6 +12,9 @@ Default release owner for this fork: [@calofonseca](https://github.com/calofonse
   maximum EV charging immediately while connected, until 100% SOC. Departure
   targets, prices and time remaining do not slow BAU charging. Appliance starts
   and PV self-consumption storage retain their existing rules.
+- Self-consumption BESS dispatch accounts for the EV power actually accepted
+  under battery capacity/taper/efficiency limits, avoiding an unwanted export
+  when a maximum-power request finishes a nearly full EV battery.
 - Native RBCs keep their deadline-based service in a separate shared base;
   changing BAU does not make RBCs charge every EV to 100%. BAU configurations
   requesting a lower target or deadline charging now fail explicitly.

@@ -10,6 +10,9 @@ Responsavel default por releases deste fork: [@calofonseca](https://github.com/c
   máxima do EV desde a ligação até 100%. O alvo de saída, preço e prazo não
   reduzem a carga do BAU. Mantêm-se o arranque imediato dos ciclos pedidos e
   o autoconsumo da bateria doméstica.
+- O autoconsumo considera a potência que a bateria do EV pode efetivamente
+  aceitar, incluindo capacidade, redução de potência e eficiência. Evita-se
+  descarregar a bateria doméstica para exportação no fim da carga do EV.
 - A lógica por prazo dos RBCs nativos fica numa base separada. Configurações
   que mudam o BAU para um alvo inferior ou carga por prazo falham explicitamente.
 - Perto de 100%, a interface permite o comando mínimo do carregador quando

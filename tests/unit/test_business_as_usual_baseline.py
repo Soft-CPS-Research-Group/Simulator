@@ -141,6 +141,34 @@ def test_bau_finishes_the_last_charge_interval_despite_charger_deadband():
         env.close()
 
 
+@pytest.mark.parametrize('seconds', [15, 900, 3600])
+def test_bau_battery_covers_accepted_ev_energy_instead_of_exporting_nominal_request(seconds):
+    env = CityLearnEnv(str(SOURCE_DATASET / 'schema.json'), central_agent=True,
+                      seconds_per_time_step=seconds, episode_time_steps=4, random_seed=0)
+    try:
+        env.reset(seed=0)
+        building = env.buildings[0]
+        charger = building.electric_vehicle_chargers[0]
+        ev = charger.connected_electric_vehicle
+        ev.battery.soc[0] = 0.999
+        building.energy_simulation.non_shiftable_load[0] = 0.0
+        building._Building__solar_generation[0] = 0.0
+        agent = BusinessAsUsualAgent(env)
+        before = ev.battery.soc.copy()
+        efficiency = ev.battery.efficiency
+        actions = agent.predict([])
+        np.testing.assert_array_equal(ev.battery.soc, before)
+        assert ev.battery.efficiency == efficiency
+        assert actions[0][-1] == 1.0
+        env.step(actions)
+        assert 0.999 < ev.battery.soc[0] <= 1.0
+        if seconds >= 900:
+            assert ev.battery.soc[0] == pytest.approx(1.0, abs=1e-6)
+        assert building.net_electricity_consumption[0] >= -1.0e-5
+    finally:
+        env.close()
+
+
 @pytest.mark.parametrize('kwargs', [
     {'ev_target_soc': 0.8}, {'ev_follow_required_soc': True}, {'ev_service_floor_rate': 0.5},
 ])
