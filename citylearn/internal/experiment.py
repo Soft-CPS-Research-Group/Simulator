@@ -48,6 +48,11 @@ def experiment_manifest(env):
     except (OSError, subprocess.SubprocessError):
         pass
     payload = json.dumps(schema, sort_keys=True, default=str).encode()
+    snapshot = getattr(env, '_input_snapshot', None)
+    from citylearn.internal.temporal import input_changes, runtime_versions
+    changed = input_changes(snapshot) if snapshot is not None else {}
+    if snapshot is not None:
+        files = {name:r['sha256'] for name,r in snapshot.items()}
     metadata = env.get_metadata()
     tracker = env.episode_tracker
     members, district = env._provenance_service.summary()
@@ -58,6 +63,8 @@ def experiment_manifest(env):
                 comparison_context=context(env, files), final_inventory=inventory(env),
                 schema_sha256=hashlib.sha256(payload).hexdigest(), effective_schema=schema,
                 data_files_sha256=files, unresolved_file_references=sorted(set(missing)),
+                runtime_versions=runtime_versions(),
+                input_file_changes=changed, temporal_reproducibility=metadata['temporal_reproducibility'],
                 random_seed=env.random_seed, seconds_per_time_step=env.seconds_per_time_step,
                 episode_start_time_step=tracker.episode_start_time_step,
                 episode_end_time_step=tracker.episode_end_time_step,

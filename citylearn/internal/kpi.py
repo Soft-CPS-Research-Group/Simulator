@@ -169,7 +169,7 @@ class CityLearnKPIService:
 
     @staticmethod
     def _simulated_days(env: "CityLearnEnv") -> float:
-        steps = max(int(getattr(env, 'time_step', 0)), 1)
+        steps = max(int(env.time_step), 0) if hasattr(env, 'time_step') else 1
         step_seconds = max(float(getattr(env, 'seconds_per_time_step', 0) or 0), 1.0)
         return (steps * step_seconds) / (24.0 * 3600.0)
 
@@ -1733,6 +1733,13 @@ class CityLearnKPIService:
                           self._sum_finite(self._energy_values(building,getattr(building,'net_electricity_consumption_cost'+baseline.value)))))
         return dict(buildings=rows,district=thermal_metrics(pool_thermal(counts)),equity=equity_metrics(costs),equity_conditions=conditions)
 
+    def _building_days(self, building, t_start, t_final):
+        if not hasattr(self.env, 'time_step'):
+            return self._window_days(t_start, t_final, self.env.seconds_per_time_step)
+        count = self._energy_values(building, np.ones(max(int(t_final)+1, 0)))
+        active_steps = float(count[max(int(t_start), 0):].sum())
+        return active_steps*self.env.seconds_per_time_step/86400.
+
     def _energy_values(self, building, values):
         """Energy belongs to executed active intervals, not the terminal observation."""
         array = np.asarray(values, dtype='float64')[:int(getattr(self.env, 'time_step', len(values)))].copy()
@@ -1938,6 +1945,7 @@ class CityLearnKPIService:
 
         kpi_buildings = self._get_kpi_buildings()
         building_windows = {building.name: self._building_active_window(building) for building in kpi_buildings}
+        kpi_building_by_name = {building.name: building for building in kpi_buildings}
         building_names = [building.name for building in kpi_buildings]
         equity_group_by_building = {building.name: getattr(building, 'equity_group', None) for building in kpi_buildings}
         equity_relative_benefit_by_building: Dict[str, Optional[float]] = {}
@@ -1947,7 +1955,7 @@ class CityLearnKPIService:
             t_start, t_end = building_windows.get(building.name, (0, -1))
             if t_end < t_start:
                 continue
-            building_days = self._window_days(t_start, t_end, env.seconds_per_time_step)
+            building_days = self._building_days(building, t_start, t_end)
 
             if isinstance(building, dynamics_building_cls):
                 building_control_condition = (
@@ -2459,7 +2467,7 @@ class CityLearnKPIService:
 
         for building_name in building_names:
             t_start, t_end = building_windows.get(building_name, (0, -1))
-            building_days = self._window_days(t_start, t_end, env.seconds_per_time_step)
+            building_days = self._building_days(kpi_building_by_name[building_name], t_start, t_end)
             totals = market_by_building.get(building_name, {})
             local_import = self._to_scalar(totals.get('community_local_import_total_kwh'), 0.0)
             local_export = self._to_scalar(totals.get('community_local_export_total_kwh'), 0.0)
@@ -3258,6 +3266,7 @@ class CityLearnKPIService:
 
         kpi_buildings = self._get_kpi_buildings()
         building_windows = {building.name: self._building_active_window(building) for building in kpi_buildings}
+        kpi_building_by_name = {building.name: building for building in kpi_buildings}
         building_names = [building.name for building in kpi_buildings]
 
         # Optional community KPIs are district-only.
@@ -3449,7 +3458,7 @@ class CityLearnKPIService:
 
         for building_name in building_names:
             t_start, t_end = building_windows.get(building_name, (0, -1))
-            building_days = self._window_days(t_start, t_end, env.seconds_per_time_step)
+            building_days = self._building_days(kpi_building_by_name[building_name], t_start, t_end)
             control_total = self._to_scalar(control_cost_totals.get(building_name), 0.0)
             baseline_total = self._to_scalar(baseline_cost_totals.get(building_name), 0.0)
             delta_total = control_total - baseline_total

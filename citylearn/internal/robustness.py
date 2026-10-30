@@ -159,6 +159,8 @@ class CityLearnRobustnessService:
     def reset(self):
         """Reset episode-local state without reloading event definitions."""
 
+        if (self.env.schema.get('robustness') or {}).get('random_seed') is None:
+            self.random_seed = int(self.env.random_seed)
         self._cursor = 0
         self._active_cache_step = None
         self._active_cache = []

@@ -112,6 +112,13 @@ class CityLearnLoadingService:
 
         schema['root_directory'] = kwargs['root_directory'] if kwargs.get('root_directory') is not None else schema['root_directory']
         schema['random_seed'] = schema.get('random_seed', None) if kwargs.get('random_seed', None) is None else kwargs['random_seed']
+        if schema['random_seed'] is None:
+            schema['random_seed'] = self.env.random_seed
+        from citylearn.internal.temporal import TimeAxis, snapshot_inputs
+        self.env._initialization_seed = schema['random_seed']
+        self.env._input_snapshot = snapshot_inputs(schema)
+        self.env._time_axis = TimeAxis(schema)
+
         schema['central_agent'] = parse_bool(
             kwargs['central_agent'] if kwargs.get('central_agent') is not None else schema['central_agent'],
             default=False,
@@ -406,6 +413,9 @@ class CityLearnLoadingService:
             **self._dataframe_to_constructor_kwargs(energy_simulation),
             seconds_per_time_step=seconds_per_time_step,
             noise_std=noise_std,
+            dataset_seconds_per_time_step=self.env._time_axis.seconds,
+            noise_seed=self._noise_seed(schema, 'energy:'+building_name),
+            noise_start_index=schema['simulation_start_time_step'],
         )
         self._set_time_step_offset(energy_simulation, schema['simulation_start_time_step'])
         ratios = getattr(energy_simulation, 'time_step_ratios', None) or []
@@ -440,7 +450,7 @@ class CityLearnLoadingService:
                 noise_std=noise_std,
             )
         else:
-            carbon_intensity = CarbonIntensity(np.zeros(energy_simulation.hour.shape[0], dtype='float32'), noise_std=noise_std)
+            carbon_intensity = CarbonIntensity(np.zeros(energy_simulation.hour.shape[0], dtype='float32'), noise_std=noise_std, noise_seed=self._noise_seed(schema,'carbon:'+building_name), noise_start_index=schema['simulation_start_time_step'])
             self._set_time_step_offset(carbon_intensity, schema['simulation_start_time_step'])
 
         if building_schema.get('pricing', None) is not None:
@@ -461,6 +471,8 @@ class CityLearnLoadingService:
                 np.zeros(energy_simulation.hour.shape[0], dtype='float32'),
                 np.zeros(energy_simulation.hour.shape[0], dtype='float32'),
                 noise_std=noise_std,
+                noise_seed=self._noise_seed(schema,'pricing:'+building_name),
+                noise_start_index=schema['simulation_start_time_step'],
             )
             self._set_time_step_offset(pricing, schema['simulation_start_time_step'])
 
@@ -565,6 +577,8 @@ class CityLearnLoadingService:
                         else None
                     ),
                     noise_std=noise_std,
+                    noise_seed=self._noise_seed(schema, 'charger:'+building_name+':'+charger_name),
+                    noise_start_index=schema['simulation_start_time_step'],
                 )
                 self._set_time_step_offset(charger_simulation, schema['simulation_start_time_step'])
                 if 'electric_vehicle_current_soc' in charger_simulation_file.columns:
@@ -1226,6 +1240,11 @@ class CityLearnLoadingService:
 
         return pa.Table.from_batches(batches).to_pandas()
 
+    @staticmethod
+    def _noise_seed(schema, label):
+        payload = f"{schema.get('random_seed',0)}:{label}".encode()
+        return int.from_bytes(hashlib.sha256(payload).digest()[:4], 'big')
+
     def _read_dataframe(self, filepath: Union[str, os.PathLike]) -> pd.DataFrame:
         if self._file_format(filepath) == 'parquet':
             return self._read_parquet_timeseries_dataframe(filepath)
@@ -1267,7 +1286,8 @@ class CityLearnLoadingService:
             window=window,
             source_label=source_label,
         )
-        time_series = constructor(**self._dataframe_to_constructor_kwargs(dataframe), noise_std=noise_std)
+        time_series = constructor(**self._dataframe_to_constructor_kwargs(dataframe), noise_std=noise_std,
+            noise_seed=self._noise_seed(schema, source_label), noise_start_index=schema['simulation_start_time_step'])
         self._set_time_step_offset(time_series, schema['simulation_start_time_step'])
 
         if cacheable:

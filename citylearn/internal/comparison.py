@@ -57,8 +57,11 @@ def context(env, data_files):
     code = {str(p.relative_to(source_root)): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in sorted(source_root.rglob('*.py'))}
     tracker = env.episode_tracker
-    return dict(definition_version=DEFINITION_VERSION,
-                engine=dict(version=__version__, source_sha256=digest(code)),
+    from citylearn.internal.temporal import axis_metadata, runtime_versions
+    axis = axis_metadata(env)
+    temporal = {key:axis[key] for key in ('definition_version','initialization_seed','clock_source','dataset_seconds_per_time_step','control_seconds_per_time_step','terminal_padding','data_noise_generator','episode_split_rng')}
+    return dict(temporal=temporal,definition_version=DEFINITION_VERSION,
+                engine=dict(version=__version__, source_sha256=digest(code), runtime_versions=runtime_versions()),
                 physical_configuration_sha256=digest(canonical(physical, root)),
                 data_files_sha256={canonical(k, root): v for k, v in data_files.items()},
                 episode_start_time_step=tracker.episode_start_time_step,
@@ -108,6 +111,9 @@ def compare_manifests(left, right, mode='controller'):
     if not a or not b or a.get('definition_version') != DEFINITION_VERSION or b.get('definition_version') != DEFINITION_VERSION:
         missing.append('versioned_comparison_context')
     else:
+        if a.get('temporal') != b.get('temporal'):
+            if 'temporal' not in a or 'temporal' not in b:missing.append('temporal')
+            else:mismatches.append('temporal')
         required = ('engine', 'physical_configuration_sha256', 'data_files_sha256', 'episode_start_time_step',
                     'episode_end_time_step', 'completed_intervals', 'seconds_per_time_step', 'time_step_ratio',
                     'random_seed', 'ev_drift_seed', 'initial_inventory', 'service_tolerances', 'observation', 'market')
@@ -130,6 +136,8 @@ def compare_manifests(left, right, mode='controller'):
         if not identity.get('implementation') or not identity.get('version') or identity.get('parameters') is None or not identity.get('observation_access'):
             if 'controller_identity' not in missing:
                 missing.append('controller_identity')
+        if manifest.get('input_file_changes') and 'input_changed_after_load' not in missing:
+            missing.append('input_changed_after_load')
         if manifest.get('unresolved_file_references') or not manifest.get('data_files_sha256'):
             if 'data_file_evidence' not in missing:
                 missing.append('data_file_evidence')

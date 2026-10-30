@@ -4,6 +4,31 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.9 — 2026-10-30 — calendário e repetibilidade
+
+- Calendário UTC canónico para resolução dos dados e timestamps com fuso; saltos
+  e repetições de hora local deixam de alterar a resolução inferida na janela.
+- Seed explícita repete o fluxo aleatório independentemente do contador de
+  episódios; índice de episódio selecionável. Ruído de entradas isolado por
+  componente/índice global; BAU conserva condições de inicialização após resets.
+- Janelas aleatórias com seed limitada por seed/índice, incluindo zero e valores
+  elevados. Protocolo identificado; sequências aleatórias históricas podem mudar.
+- Hashes das entradas/modelos/calendário capturados antes de carregar, alterações
+  posteriores identificadas e referência bloqueada se usar outros ficheiros.
+  Versões e condições temporais registadas no manifesto/emparelhamento.
+- Médias diárias por duração ativa executada; utilitários de reamostragem tipada,
+  fronteiras exatas e conversão de perdas. Mudar o passo não reamostra os dados.
+- Datasets preservados. Recalcular análises afetadas. Sem conversão automática de
+  datasets completos, campanha anual ou calibração. [Definições e limites](../temporal_reproducibility.md).
+
+Validação: 754 testes aprovados, incluindo 33 novos. Nove configurações
+portuguesas com 70.176 amostras alinhadas a 900 segundos; seis janelas com três
+replays idênticos e física ativa. Matriz física 16/16 no candidato temporal antes
+das últimas correções de taxas diárias/splits; suite e pacote finais cobrem o código
+final. Os ensaios reais incluem a correção de taxas e não usam splits aleatórios.
+Sem campanha anual ou aprovação de recursos prolongados: ficam na iteração 7.
+[Comprovativos](../releases/1.9.9-validation.json).
+
 ## v1.9.8 — 2026-10-30 — famílias de KPIs e qualidade da avaliação
 
 - Populações, cobertura e denominadores indefinidos de conforto/resiliência e

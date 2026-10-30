@@ -44,6 +44,9 @@ def main():
         assert isinstance(manifest, dict) and manifest
         assert manifest['comparison_context']['definition_version'] == 'paired-experiment-v1'
         assert manifest['kpi_family_audit']['definition_version'] == 'kpi-families-audit-v1'
+        assert manifest['temporal_reproducibility']['definition_version'] == 'temporal-evidence-v1'
+        assert manifest['input_file_changes'] == {}
+        assert manifest['runtime_versions']['numpy']
         assert manifest['reward']['resolved_class'] == 'citylearn.reward_function.RewardFunction'
         assert env.get_kpi_family_audit()['district']['executed_intervals_count'] > 0
         assert manifest['business_as_usual_reference']['definition_version'] == 'immediate-full-charge-v1'

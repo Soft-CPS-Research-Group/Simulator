@@ -30,6 +30,9 @@ class CityLearnBusinessAsUsualBaselineService:
         from citylearn.agents.baseline import BusinessAsUsualAgent
 
         env = self.env
+        from citylearn.internal.temporal import input_changes
+        if input_changes(getattr(env, '_input_snapshot', {})):
+            raise ValueError('Native BAU inputs changed since loading; restore inputs or evaluate without the native reference')
         target_time_step = int(getattr(env, 'time_step', 0))
         episode = int(getattr(env.episode_tracker, 'episode', 0))
         cache_key = (episode, target_time_step)
@@ -43,6 +46,7 @@ class CityLearnBusinessAsUsualBaselineService:
             return cache[cache_key]
 
         baseline_env = self._new_sidecar_env()
+        baseline_env.random_seed = env.random_seed
         agent = BusinessAsUsualAgent(baseline_env)
         baseline_env.reset()
         # Pair the away-EV stochastic stream with the source episode, including
@@ -116,7 +120,7 @@ class CityLearnBusinessAsUsualBaselineService:
             random_episode_split=False,
             seconds_per_time_step=float(getattr(env, 'seconds_per_time_step', 3600.0)),
             central_agent=True,
-            random_seed=getattr(env, 'random_seed', None),
+            random_seed=getattr(env, '_initialization_seed', env.random_seed),
             offline=getattr(env, 'offline', False),
             time_step_ratio=getattr(env, 'time_step_ratio', None),
             interface='entity' if requires_entity_interface else 'flat',

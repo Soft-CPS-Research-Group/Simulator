@@ -731,6 +731,12 @@ class EpisodeExporter:
         if env.time_step == 0 or getattr(env, '_render_start_datetime', None) is None:
             self.reset_time_tracking()
 
+        axis = getattr(env, '_time_axis', None)
+        if axis is not None and axis.utc is not None and not getattr(env, '_render_origin_overridden', False):
+            timestamp = axis.at(env.episode_tracker.episode_start_time_step+env.time_step)
+            env.year, env.current_day = timestamp.year, timestamp.day
+            return timestamp.isoformat()
+
         start_datetime = env._render_start_datetime
         timestamp_dt = start_datetime + datetime.timedelta(seconds=env.time_step * env.seconds_per_time_step)
         env.year = timestamp_dt.year

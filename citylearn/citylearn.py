@@ -273,6 +273,7 @@ class CityLearnEnv(Environment, Env):
         )
         self._observations_cache: List[List[float]] = None
         self._observations_cache_time_step: int = -1
+        self._render_origin_overridden = start_date is not None
         self._render_start_date = self._parse_render_start_date(start_date if start_date is not None else schema_start_date)
         self.previous_month = None
         self.current_day = self._render_start_date.day
@@ -384,6 +385,9 @@ class CityLearnEnv(Environment, Env):
 
         # reset environment and initializes episode time steps
         self.reset()
+        from citylearn.internal.temporal import input_changes
+        if input_changes(self._input_snapshot):
+            raise RuntimeError('Input files changed during environment construction')
 
         # reset episode tracker to start after initializing episode time steps during reset
         self.episode_tracker.reset_episode_index()
@@ -1304,6 +1308,7 @@ class CityLearnEnv(Environment, Env):
     def get_metadata(self) -> Mapping[str, Any]:
         from citylearn.internal.deferrable_service_audit import metadata as deferrable_metadata
         from citylearn.internal.kpi_family_audit import metadata as family_metadata, reward_metadata
+        from citylearn.internal.temporal import axis_metadata
         return {
             'deferrable_service_audit': deferrable_metadata(),
             'kpi_family_audit': family_metadata(),
@@ -1315,6 +1320,7 @@ class CityLearnEnv(Environment, Env):
             'topology_event_log': self.topology_event_log,
             'physics_invariant_checks': bool(getattr(self, 'physics_invariant_checks', False)),
             'energy_accounting': self._provenance_service.get_metadata(),
+            'temporal_reproducibility': axis_metadata(self),
             'ev_departure_within_tolerance': self.ev_departure_within_tolerance,
             'ev_departure_service_tolerance': self.ev_departure_service_tolerance,
             'reward_function': self.reward_function.__class__.__name__,
@@ -1587,8 +1593,7 @@ class CityLearnEnv(Environment, Env):
         seed: int, optional
             Use to updated :code:`citylearn.CityLearnEnv.random_seed` if value is provided.
         options: Mapping[str, Any], optional
-            Use to pass additional data to environment on reset. Not used in this base class
-            but included to conform to gymnasium interface.
+            Optional ``episode_index`` selects a specific episode split for replay.
         
         Returns
         -------
@@ -1613,6 +1618,9 @@ class CityLearnEnv(Environment, Env):
             pass
 
         # update time steps for time series
+        self._episode_index_explicit = bool(options and 'episode_index' in options)
+        if self._episode_index_explicit:
+            self.episode_tracker.set_next_episode_index(options['episode_index'])
         self.episode_tracker.next_episode(
             self.episode_time_steps,
             self.rolling_episode_split,
@@ -1649,7 +1657,8 @@ class CityLearnEnv(Environment, Env):
         self._observations_cache = None
         self._observations_cache_time_step = -1
         episode_index = int(getattr(self.episode_tracker, 'episode', 0))
-        self._ev_drift_seed = int(self.random_seed) + episode_index
+        self._reset_seed_explicit = seed is not None
+        self._ev_drift_seed = int(self.random_seed) if seed is not None else int(self.random_seed) + episode_index
         self._ev_drift_random_state = np.random.RandomState(self._ev_drift_seed)
         self._render_buffer.clear()
         self._refresh_action_cache()

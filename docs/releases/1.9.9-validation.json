@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-30",
+  "iteration": 6,
+  "status": "release_candidate_1_9_9",
+  "base_release": "1.9.8",
+  "base_commit": "58c213e888bd62c454397f8b38667bf318e00932",
+  "committed": false,
+  "pushed": false,
+  "published": false,
+  "new_remote_ci_runs": 0,
+  "definition_version": "temporal-evidence-v1",
+  "tests": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "754",
+    "time": "247.059",
+    "timestamp": "2026-10-30T17:41:47.607126+00:00",
+    "hostname": "tiago-Vector-16-HX-A13VHG"
+  },
+  "new_tests": 33,
+  "critical_lint": "passed E9,F63,F7,F82",
+  "diff_check": "passed",
+  "physics_summary": {
+    "total": 16,
+    "executed": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "hard_failures": 0
+  },
+  "physics_code_scope": "Temporary candidate with clock/RNG changes; before final daily-rate reporting correction and random-split seed correction. Matrix uses fixed splits. Final full suite covers both final corrections.",
+  "native_configurations": 9,
+  "source_samples_per_configuration": 70176,
+  "seconds_per_source_step": 900,
+  "distinct_checked_source_paths": 381,
+  "selected_local_day_intervals": {
+    "2023-03-26": 92,
+    "2023-10-29": 100,
+    "2024-02-29": 96,
+    "2024-03-31": 92,
+    "2024-10-27": 100
+  },
+  "deterministic_replay_windows": [
+    {
+      "name": "year",
+      "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
+      "start": 35039,
+      "end": 35047,
+      "seed": 0,
+      "transitions": 8,
+      "replays": 3,
+      "trace_sha256": "54202a7d622202d9918f77a58fdad2c31de13e39f94171e3d7565a119237edef",
+      "queries_are_passive": true,
+      "active_members": 4
+    },
+    {
+      "name": "leap",
+      "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
+      "start": 40703,
+      "end": 40711,
+      "seed": 0,
+      "transitions": 8,
+      "replays": 3,
+      "trace_sha256": "74c3d494bb02b574fe54747ed0a1bfe11d470e22899269e77424f005cf8e62b8",
+      "queries_are_passive": true,
+      "active_members": 4
+    },
+    {
+      "name": "spring",
+      "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
+      "start": 43683,
+      "end": 43691,
+      "seed": 0,
+      "transitions": 8,
+      "replays": 3,
+      "trace_sha256": "8a22d23be7de0ffe1e71e592ee575c4a5ef48b30e7f24f619f15a3233ee911aa",
+      "queries_are_passive": true,
+      "active_members": 4
+    },
+    {
+      "name": "fall",
+      "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
+      "start": 63843,
+      "end": 63851,
+      "seed": 0,
+      "transitions": 8,
+      "replays": 3,
+      "trace_sha256": "5f05659929ca96e3674f6b97198a381d8ec12e892e270e0eceade22ed15dc6c6",
+      "queries_are_passive": true,
+      "active_members": 4
+    },
+    {
+      "name": "core30",
+      "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
+      "start": 96,
+      "end": 104,
+      "seed": 0,
+      "transitions": 8,
+      "replays": 3,
+      "trace_sha256": "eb5ba8c22057b6eee03ccc6ed7b6d692afb38f1ad4ebbc15bf4849039846e1bc",
+      "queries_are_passive": true,
+      "active_members": 30
+    },
+    {
+      "name": "premium",
+      "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
+      "start": 4176,
+      "end": 4184,
+      "seed": 0,
+      "transitions": 8,
+      "replays": 3,
+      "trace_sha256": "1e5fd6429e37a606762fda4b8132427efefe789c7c049b18dd135eb9345f56dc",
+      "queries_are_passive": true,
+      "active_members": 81
+    }
+  ],
+  "replay_code_scope": "Main checkout after daily-rate correction; before final random-split stream change and metadata protocol field. All six runs use fixed windows. Final suite and wheel include final protocol.",
+  "installed_package_export": "passed outside checkout using isolated Python; wheel source bytes checked against all current citylearn Python files",
+  "candidate_wheel_sha256": "70ed53eaef91d4f73c59d8bdd0a5f1f27f7647d5e6597d33e05a8fd3983f8ce3",
+  "candidate_note": "Iteration 6 prepared as 1.9.9; only version/documentation differ from the validated final iteration 6 sources. The published scope excludes iteration 7.",
+  "datasets_modified": false,
+  "preserved_untracked_sha256": "c64d51b793c9001423244f0c7e685c65604b62da9b77115ff703b2a57c2c6002",
+  "next_iteration": 7,
+  "before_fix_evidence": [
+    "/home/tiago/Documents/ChatGPT/EnergAIze base/output/iteracao6-simulador-2026-10-30/regressions-before.log",
+    "/home/tiago/Documents/ChatGPT/EnergAIze base/output/iteracao6-simulador-2026-10-30/daily-duration-before.log",
+    "/home/tiago/Documents/ChatGPT/EnergAIze base/output/iteracao6-simulador-2026-10-30/split-stream-before.log"
+  ],
+  "source_state": "/home/tiago/Documents/ChatGPT/EnergAIze base/output/iteracao6-simulador-2026-10-30/source-state.json",
+  "fixes": [
+    "UTC source spacing across DST; offset-aware native export labels",
+    "Explicit reset replay, episode selection and bounded random-split seeds including zero",
+    "Owned absolute-index input-noise streams without consuming global NumPy RNG",
+    "Loaded file hashes, changed-input rejection for native references, runtime version/pairing evidence",
+    "Native BAU initialization after reset-seed changes",
+    "Daily member rates over executed active exposure, excluding current/inactive observations"
+  ],
+  "limits": [
+    "Typed resampling primitives and analytical simulator equivalence, not automatic full-dataset conversion or arbitrary dynamic equivalence.",
+    "Direct low-level constructors without explicit noise seed retain legacy global RNG behaviour; custom controllers own their RNG.",
+    "Daily rates are per 86400 seconds of exposure, not an average over unequal civil days.",
+    "Canonical UTC/offset evidence for native or explicitly configured calendars; legacy naive exports remain identified as such.",
+    "Hashes cover schema-declared supported files and clock, not arbitrary custom plugin dependencies or adversarial filesystem transactions.",
+    "Exact replay scoped to tested platform/dependencies and deterministic NormalPolicy, not universal cross-hardware reproducibility.",
+    "No annual campaign, cumulative long-run resource approval or empirical calibration. Iterations 7/8 remain open."
+  ],
+  "release_version": "1.9.9"
+}

@@ -6,6 +6,36 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.9 — 2026-10-30 — source clocks and reproducible evidence
+
+- Use canonical UTC calendars for Portuguese source spacing and offset-aware
+  timestamps; local DST gaps/folds no longer distort the first-two-row inference.
+- Replay explicit reset seeds independently of episode counters; allow an explicit
+  episode index. Isolate indexed input-noise streams and retain initialization
+  conditions in native references after reset-seed changes.
+- Bound random episode seeds per seed/index, including zero and large valid
+  seeds. The identified sampling protocol changes historical random split sequences.
+- Snapshot declared input/model/clock hashes before loading, report later changes
+  and reject native references built from changed files. Record runtime versions
+  and temporal conditions in manifests/pairing evidence.
+- Normalize member daily rates over executed active participation, excluding
+  current observations and re-entry gaps. Add typed resampling and exact event
+  boundary/loss conversion utilities; control-step overrides remain explicitly
+  distinct from real resampling.
+- Preserve datasets. Re-run affected DST-window, noisy/repeated-episode, daily-rate
+  and reference studies after release. No automatic full-dataset conversion,
+  annual campaign or empirical calibration. [Definitions and limits](temporal_reproducibility.md).
+
+Validation: 754 full-suite tests passed, including 33 new cases. Nine native
+Portuguese configurations have aligned 70,176-sample calendars at 900 seconds;
+six bounded windows have three identical seeded/fresh/KPI-query replays with
+physical checks active. The 16-scenario physical matrix passed on the temporal
+candidate before final daily-rate/random-split corrections; final full-suite and
+installed-wheel checks cover the final code. Those real fixed-window replays
+include the daily-rate correction and do not use random split selection.
+No annual campaign or long-run resource approval yet; these remain iteration 7.
+[Validation evidence](releases/1.9.9-validation.json).
+
 ## v1.9.8 — 2026-10-30 — KPI families and evaluation quality
 
 - Add explicit thermal service and equity populations, coverage and undefined

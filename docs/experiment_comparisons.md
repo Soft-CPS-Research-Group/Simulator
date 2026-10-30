@@ -1,5 +1,11 @@
 # Paired comparisons and reference interpretation
 
+Local iteration 6 after public v1.9.8 adds [temporal and input-load evidence](temporal_reproducibility.md):
+loaded-file hashes, initialization conditions, runtime versions and source-clock
+metadata. Changed inputs prevent a safely paired comparison/native reference.
+The paired-v1 temporal extension distinguishes initialization noise seeds; old
+exports without it do not certify the temporal audit contract.
+
 Iteration 3 introduces `paired-experiment-v1` evidence alongside KPI exports.
 It is released in version 1.9.6.
 
