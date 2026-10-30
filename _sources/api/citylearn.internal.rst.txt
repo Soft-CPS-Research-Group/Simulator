@@ -15,6 +15,7 @@ Submodules
    citylearn.internal.baseline
    citylearn.internal.building_ops
    citylearn.internal.capabilities
+   citylearn.internal.comparison
    citylearn.internal.deferrable_service_audit
    citylearn.internal.demand_response
    citylearn.internal.entity_interface
@@ -22,6 +23,7 @@ Submodules
    citylearn.internal.experiment
    citylearn.internal.kpi
    citylearn.internal.loading
+   citylearn.internal.observation_contract
    citylearn.internal.physics_invariants
    citylearn.internal.provenance
    citylearn.internal.robustness

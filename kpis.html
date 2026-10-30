@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KPIs &mdash; CityLearn 1.9.5 documentation</title>
+  <title>KPIs &mdash; CityLearn 1.9.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=9cc2bd95"></script>
+      <script src="_static/documentation_options.js?v=ab3a37ff"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,6 +63,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#old-vs-new-api">Old vs New API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#comparing-simulations">Comparing Simulations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#audited-appliance-service">Audited appliance service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#paired-comparison-evidence">Paired comparison evidence</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">citylearn</a></li>
@@ -184,6 +185,15 @@ are undefined.</p>
 <p><code class="docutils literal notranslate"><span class="pre">env.get_deferrable_service_audit()</span></code> exposes individual requests. Final KPI exports
 include an adjacent <code class="docutils literal notranslate"><span class="pre">.deferrable_service.json</span></code> and versioned manifest metadata.
 Historical appliance service KPIs retain their previous definitions.</p>
+</section>
+<section id="paired-comparison-evidence">
+<h2>Paired comparison evidence<a class="headerlink" href="#paired-comparison-evidence" title="Link to this heading"></a></h2>
+<p>Final KPI manifests include <code class="docutils literal notranslate"><span class="pre">paired-experiment-v1</span></code> conditions, actual native
+reference parameters and explicit controller identity when supplied. The comparison
+API/CLI distinguishes paired, incompatible and unknown conditions. Controller and
+sharing interventions have separate pairing rules. Cost differences must be read
+with audited service, coverage and final storage inventory. Historical exports
+without the required evidence cannot be silently treated as paired.</p>
 </section>
 </section>
 

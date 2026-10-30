@@ -100,3 +100,14 @@ are undefined.
 ``env.get_deferrable_service_audit()`` exposes individual requests. Final KPI exports
 include an adjacent ``.deferrable_service.json`` and versioned manifest metadata.
 Historical appliance service KPIs retain their previous definitions.
+
+
+Paired comparison evidence
+===========================
+
+Final KPI manifests include ``paired-experiment-v1`` conditions, actual native
+reference parameters and explicit controller identity when supplied. The comparison
+API/CLI distinguishes paired, incompatible and unknown conditions. Controller and
+sharing interventions have separate pairing rules. Cost differences must be read
+with audited service, coverage and final storage inventory. Historical exports
+without the required evidence cannot be silently treated as paired.

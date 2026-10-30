@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.exporter &mdash; CityLearn 1.9.5 documentation</title>
+  <title>citylearn.exporter &mdash; CityLearn 1.9.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=9cc2bd95"></script>
+      <script src="../../_static/documentation_options.js?v=ab3a37ff"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -251,6 +251,9 @@
         <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">'env'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">kpis</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">evaluate_v2</span><span class="p">(</span><span class="n">include_business_as_usual</span><span class="o">=</span><span class="n">include_business_as_usual</span><span class="p">)</span>
             <span class="n">export_env</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span>
+            <span class="n">identity</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">'comparison_identity'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">identity</span><span class="p">):</span>
+                <span class="n">export_env</span><span class="o">.</span><span class="n">set_experiment_identity</span><span class="p">(</span><span class="o">**</span><span class="n">identity</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">kpis</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">evaluate_v2</span><span class="p">(</span><span class="n">include_business_as_usual</span><span class="o">=</span><span class="n">include_business_as_usual</span><span class="p">)</span>
             <span class="n">export_env</span> <span class="o">=</span> <span class="n">env</span>

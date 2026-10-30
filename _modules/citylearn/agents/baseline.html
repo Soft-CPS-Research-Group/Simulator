@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.agents.baseline &mdash; CityLearn 1.9.5 documentation</title>
+  <title>citylearn.agents.baseline &mdash; CityLearn 1.9.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=9cc2bd95"></script>
+      <script src="../../../_static/documentation_options.js?v=ab3a37ff"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -157,6 +157,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">next_time_step</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">actions</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">comparison_identity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'ev_target_soc'</span><span class="p">,</span> <span class="s1">'ev_follow_required_soc'</span><span class="p">,</span> <span class="s1">'ev_service_margin_rate'</span><span class="p">,</span> <span class="s1">'ev_service_floor_rate'</span><span class="p">,</span>
+                <span class="s1">'storage_min_soc'</span><span class="p">,</span> <span class="s1">'storage_max_soc'</span><span class="p">,</span> <span class="s1">'storage_deadband_kw'</span><span class="p">,</span> <span class="s1">'deferrable_start_action'</span><span class="p">,</span>
+                <span class="s1">'low_price_quantile'</span><span class="p">,</span> <span class="s1">'high_price_quantile'</span><span class="p">,</span> <span class="s1">'price_charge_rate'</span><span class="p">,</span> <span class="s1">'price_discharge_rate'</span><span class="p">,</span>
+                <span class="s1">'ev_price_charge_rate'</span><span class="p">,</span> <span class="s1">'pv_charge_rate'</span><span class="p">,</span> <span class="s1">'storage_discharge_rate'</span><span class="p">,</span> <span class="s1">'import_peak_threshold_kw'</span><span class="p">,</span>
+                <span class="s1">'ev_urgency_hours'</span><span class="p">,</span> <span class="s1">'community_surplus_charge_soc_ceiling'</span><span class="p">,</span> <span class="s1">'community_import_threshold_kw'</span><span class="p">,</span>
+                <span class="s1">'community_storage_discharge_rate'</span><span class="p">,</span> <span class="s1">'community_surplus_threshold_kw'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">implementation</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__module__</span><span class="o">+</span><span class="s1">'.'</span><span class="o">+</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">__version__</span><span class="p">,</span>
+                    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)},</span>
+                    <span class="n">observation_access</span><span class="o">=</span><span class="s1">'privileged_simulator_state'</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_building_action_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
         <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_building_action_layout</span><span class="p">(</span><span class="n">building</span><span class="p">)</span>

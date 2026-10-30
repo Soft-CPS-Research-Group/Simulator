@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 1.9.5 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 1.9.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=9cc2bd95"></script>
+      <script src="../../_static/documentation_options.js?v=ab3a37ff"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1381,6 +1381,17 @@
         <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buildings</span><span class="p">:</span>
             <span class="n">b</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span>        
 
+<div class="viewcode-block" id="CityLearnEnv.set_experiment_identity">
+<a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.set_experiment_identity">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_experiment_identity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">implementation</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">observation_access</span><span class="o">=</span><span class="s1">'agent_payload'</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Declare the controller used for exported paired comparisons."""</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">implementation</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">version</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'Controller implementation, version and parameter dictionary are required'</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_controller_identity</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">implementation</span><span class="o">=</span><span class="n">implementation</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span> <span class="n">observation_access</span><span class="o">=</span><span class="n">observation_access</span><span class="p">),</span> <span class="n">allow_nan</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="CityLearnEnv.get_deferrable_service_audit">
 <a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.get_deferrable_service_audit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_deferrable_service_audit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1759,6 +1770,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">associate_chargers_to_electric_vehicles</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_provenance_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.comparison</span><span class="w"> </span><span class="kn">import</span> <span class="n">inventory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_comparison_initial_inventory</span> <span class="o">=</span> <span class="n">inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># reset reward function (does nothing by default)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
@@ -1773,7 +1786,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache_time_step</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">episode_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="p">,</span> <span class="s1">'episode'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span><span class="p">)</span> <span class="o">+</span> <span class="n">episode_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span><span class="p">)</span> <span class="o">+</span> <span class="n">episode_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_seed</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_render_buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_action_cache</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_variables</span><span class="p">()</span>
