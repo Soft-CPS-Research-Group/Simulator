@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 1.9.8 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 1.9.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=e7581024"></script>
+      <script src="../../_static/documentation_options.js?v=4320943d"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -365,6 +365,7 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache_time_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_render_origin_overridden</span> <span class="o">=</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_render_start_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_render_start_date</span><span class="p">(</span><span class="n">start_date</span> <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">schema_start_date</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">previous_month</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_day</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_start_date</span><span class="o">.</span><span class="n">day</span>
@@ -476,6 +477,9 @@
 
         <span class="c1"># reset environment and initializes episode time steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.temporal</span><span class="w"> </span><span class="kn">import</span> <span class="n">input_changes</span>
+        <span class="k">if</span> <span class="n">input_changes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_snapshot</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">'Input files changed during environment construction'</span><span class="p">)</span>
 
         <span class="c1"># reset episode tracker to start after initializing episode time steps during reset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">reset_episode_index</span><span class="p">()</span>
@@ -1404,6 +1408,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.deferrable_service_audit</span><span class="w"> </span><span class="kn">import</span> <span class="n">metadata</span> <span class="k">as</span> <span class="n">deferrable_metadata</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.kpi_family_audit</span><span class="w"> </span><span class="kn">import</span> <span class="n">metadata</span> <span class="k">as</span> <span class="n">family_metadata</span><span class="p">,</span> <span class="n">reward_metadata</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.temporal</span><span class="w"> </span><span class="kn">import</span> <span class="n">axis_metadata</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'deferrable_service_audit'</span><span class="p">:</span> <span class="n">deferrable_metadata</span><span class="p">(),</span>
             <span class="s1">'kpi_family_audit'</span><span class="p">:</span> <span class="n">family_metadata</span><span class="p">(),</span>
@@ -1415,6 +1420,7 @@
             <span class="s1">'topology_event_log'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">topology_event_log</span><span class="p">,</span>
             <span class="s1">'physics_invariant_checks'</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'physics_invariant_checks'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
             <span class="s1">'energy_accounting'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_provenance_service</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(),</span>
+            <span class="s1">'temporal_reproducibility'</span><span class="p">:</span> <span class="n">axis_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
             <span class="s1">'ev_departure_within_tolerance'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ev_departure_within_tolerance</span><span class="p">,</span>
             <span class="s1">'ev_departure_service_tolerance'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ev_departure_service_tolerance</span><span class="p">,</span>
             <span class="s1">'reward_function'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
@@ -1735,8 +1741,7 @@
 <span class="sd">        seed: int, optional</span>
 <span class="sd">            Use to updated :code:`citylearn.CityLearnEnv.random_seed` if value is provided.</span>
 <span class="sd">        options: Mapping[str, Any], optional</span>
-<span class="sd">            Use to pass additional data to environment on reset. Not used in this base class</span>
-<span class="sd">            but included to conform to gymnasium interface.</span>
+<span class="sd">            Optional ``episode_index`` selects a specific episode split for replay.</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1761,6 +1766,9 @@
             <span class="k">pass</span>
 
         <span class="c1"># update time steps for time series</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_episode_index_explicit</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">options</span> <span class="ow">and</span> <span class="s1">'episode_index'</span> <span class="ow">in</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_episode_index_explicit</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">set_next_episode_index</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">'episode_index'</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">next_episode</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">episode_time_steps</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rolling_episode_split</span><span class="p">,</span>
@@ -1797,7 +1805,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_cache_time_step</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">episode_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_tracker</span><span class="p">,</span> <span class="s1">'episode'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span><span class="p">)</span> <span class="o">+</span> <span class="n">episode_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_seed_explicit</span> <span class="o">=</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span><span class="p">)</span> <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span><span class="p">)</span> <span class="o">+</span> <span class="n">episode_index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_seed</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_render_buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_action_cache</span><span class="p">()</span>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.experiment &mdash; CityLearn 1.9.8 documentation</title>
+  <title>citylearn.internal.experiment &mdash; CityLearn 1.9.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e7581024"></script>
+      <script src="../../../_static/documentation_options.js?v=4320943d"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -137,6 +137,11 @@
     <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">SubprocessError</span><span class="p">):</span>
         <span class="k">pass</span>
     <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+    <span class="n">snapshot</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">'_input_snapshot'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.temporal</span><span class="w"> </span><span class="kn">import</span> <span class="n">input_changes</span><span class="p">,</span> <span class="n">runtime_versions</span>
+    <span class="n">changed</span> <span class="o">=</span> <span class="n">input_changes</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span> <span class="k">if</span> <span class="n">snapshot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">snapshot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span><span class="n">r</span><span class="p">[</span><span class="s1">'sha256'</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
     <span class="n">metadata</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
     <span class="n">tracker</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">episode_tracker</span>
     <span class="n">members</span><span class="p">,</span> <span class="n">district</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">_provenance_service</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
@@ -147,6 +152,8 @@
                 <span class="n">comparison_context</span><span class="o">=</span><span class="n">context</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">files</span><span class="p">),</span> <span class="n">final_inventory</span><span class="o">=</span><span class="n">inventory</span><span class="p">(</span><span class="n">env</span><span class="p">),</span>
                 <span class="n">schema_sha256</span><span class="o">=</span><span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">effective_schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
                 <span class="n">data_files_sha256</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">unresolved_file_references</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">missing</span><span class="p">)),</span>
+                <span class="n">runtime_versions</span><span class="o">=</span><span class="n">runtime_versions</span><span class="p">(),</span>
+                <span class="n">input_file_changes</span><span class="o">=</span><span class="n">changed</span><span class="p">,</span> <span class="n">temporal_reproducibility</span><span class="o">=</span><span class="n">metadata</span><span class="p">[</span><span class="s1">'temporal_reproducibility'</span><span class="p">],</span>
                 <span class="n">random_seed</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">random_seed</span><span class="p">,</span> <span class="n">seconds_per_time_step</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">seconds_per_time_step</span><span class="p">,</span>
                 <span class="n">episode_start_time_step</span><span class="o">=</span><span class="n">tracker</span><span class="o">.</span><span class="n">episode_start_time_step</span><span class="p">,</span>
                 <span class="n">episode_end_time_step</span><span class="o">=</span><span class="n">tracker</span><span class="o">.</span><span class="n">episode_end_time_step</span><span class="p">,</span>

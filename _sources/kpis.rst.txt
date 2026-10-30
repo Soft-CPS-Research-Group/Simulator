@@ -152,3 +152,18 @@ or no applicable events give undefined audit rates with counts and coverage.
 
 The export manifest records definitions and reward evidence without changing
 the reward. See ``docs/kpi_family_audit.md`` for formulas, migration and limits.
+
+
+Temporal evidence and daily rates
+=================================
+
+Local iteration 6 after v1.9.8 adds ``temporal-evidence-v1``: canonical UTC sample
+clocks, initialization/reset seeds, loaded input hashes and dependency versions.
+Portuguese DST transitions preserve the declared sample spacing. A control-step
+override is explicitly distinguished from real resampling.
+
+Member daily averages use executed active participation, excluding the current
+unexecuted observation and removal/re-entry gaps. Zero elapsed duration gives an
+undefined rate. The manifest separates sample indexes and executed intervals;
+terminal padding is explicit. See ``docs/temporal_reproducibility.md`` for replay,
+resampling conventions and limitations.

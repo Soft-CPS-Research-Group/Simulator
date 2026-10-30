@@ -30,5 +30,6 @@ Submodules
    citylearn.internal.provenance
    citylearn.internal.robustness
    citylearn.internal.runtime
+   citylearn.internal.temporal
    citylearn.internal.topology
    citylearn.internal.units

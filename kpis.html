@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KPIs &mdash; CityLearn 1.9.8 documentation</title>
+  <title>KPIs &mdash; CityLearn 1.9.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e7581024"></script>
+      <script src="_static/documentation_options.js?v=4320943d"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,6 +66,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#paired-comparison-evidence">Paired comparison evidence</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#executed-intervals-and-independent-balances">Executed intervals and independent balances</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#audited-kpi-populations">Audited KPI populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#temporal-evidence-and-daily-rates">Temporal evidence and daily rates</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">citylearn</a></li>
@@ -229,6 +230,18 @@ individual credit/shortfall diagnostics are not district totals. Missing referen
 or no applicable events give undefined audit rates with counts and coverage.</p>
 <p>The export manifest records definitions and reward evidence without changing
 the reward. See <code class="docutils literal notranslate"><span class="pre">docs/kpi_family_audit.md</span></code> for formulas, migration and limits.</p>
+</section>
+<section id="temporal-evidence-and-daily-rates">
+<h2>Temporal evidence and daily rates<a class="headerlink" href="#temporal-evidence-and-daily-rates" title="Link to this heading"></a></h2>
+<p>Local iteration 6 after v1.9.8 adds <code class="docutils literal notranslate"><span class="pre">temporal-evidence-v1</span></code>: canonical UTC sample
+clocks, initialization/reset seeds, loaded input hashes and dependency versions.
+Portuguese DST transitions preserve the declared sample spacing. A control-step
+override is explicitly distinguished from real resampling.</p>
+<p>Member daily averages use executed active participation, excluding the current
+unexecuted observation and removal/re-entry gaps. Zero elapsed duration gives an
+undefined rate. The manifest separates sample indexes and executed intervals;
+terminal padding is explicit. See <code class="docutils literal notranslate"><span class="pre">docs/temporal_reproducibility.md</span></code> for replay,
+resampling conventions and limitations.</p>
 </section>
 </section>
 
