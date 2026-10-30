@@ -111,3 +111,25 @@ API/CLI distinguishes paired, incompatible and unknown conditions. Controller an
 sharing interventions have separate pairing rules. Cost differences must be read
 with audited service, coverage and final storage inventory. Historical exports
 without the required evidence cannot be silently treated as paired.
+
+
+Executed intervals and independent balances
+===========================================
+
+Iteration 4 (included from v1.9.7) reconciles energy, source/destination
+cohorts, acquisition carbon and member/operator cash with a separate flow-network
+reference. Energy/cost/PV totals include only executed active intervals, preserving
+completed flows through member removal and re-entry. Terminal observations do not
+add another dispatched interval.
+
+Provenance definition ``1.1`` adds ``curtailment`` for islanded unused PV. It is
+available generation, excluded from useful load and instantaneous absorption.
+BESS/charger totals retain gross charge/discharge before interval netting.
+Affected experiments require rerunning; historical 1.0 exports cannot reconstruct
+these corrected boundaries. Initial/final inventory remains separate from useful
+service and cash.
+
+See ``docs/independent_balance_audit.md`` for the bounded CLI, reference method,
+explicit tolerances, regression cases and limits. The audit is optional offline
+instrumentation; it does not provide empirical calibration or a universal
+certificate for every dataset/controller.
