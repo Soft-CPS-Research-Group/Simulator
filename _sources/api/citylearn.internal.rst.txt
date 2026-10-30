@@ -17,6 +17,7 @@ Submodules
    citylearn.internal.capabilities
    citylearn.internal.demand_response
    citylearn.internal.entity_interface
+   citylearn.internal.ev_departure_audit
    citylearn.internal.experiment
    citylearn.internal.kpi
    citylearn.internal.loading

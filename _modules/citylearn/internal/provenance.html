@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.provenance &mdash; CityLearn 1.9.3 documentation</title>
+  <title>citylearn.internal.provenance &mdash; CityLearn 1.9.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=f333a941"></script>
+      <script src="../../../_static/documentation_options.js?v=38ba398c"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -455,6 +455,17 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">definition_version</span><span class="o">=</span><span class="n">DEFINITION_VERSION</span><span class="p">,</span> <span class="n">kpi_definition_version</span><span class="o">=</span><span class="n">KPI_DEFINITION_VERSION</span><span class="p">,</span>
                     <span class="n">ev_feasibility</span><span class="o">=</span><span class="s1">'individual_conditioned_on_service_headroom_physical_replay_v2'</span><span class="p">,</span>
+                    <span class="n">ev_departure_audit</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">definition_version</span><span class="o">=</span><span class="s1">'ev-departure-audit-v1'</span><span class="p">,</span>
+                        <span class="n">legacy_feasibility</span><span class="o">=</span><span class="s1">'unchanged_permissive_missing_data'</span><span class="p">,</span>
+                        <span class="n">population</span><span class="o">=</span><span class="s1">'active_charger_departures_in_evaluated_member_window'</span><span class="p">,</span>
+                        <span class="n">scope</span><span class="o">=</span><span class="s1">'individual_replay_from_observed_session_boundary_not_joint_scheduling'</span><span class="p">,</span>
+                        <span class="n">unknown_reasons</span><span class="o">=</span><span class="s1">'exclusive_first_applicable_reason_per_threshold'</span><span class="p">,</span>
+                        <span class="n">coverage_denominator</span><span class="o">=</span><span class="s1">'all_detected_departures'</span><span class="p">,</span>
+                        <span class="n">observed_service_denominator</span><span class="o">=</span><span class="s1">'departures_with_valid_target_and_observed_soc'</span><span class="p">,</span>
+                        <span class="n">feasible_service_denominator</span><span class="o">=</span><span class="s1">'confirmed_feasible_departures_with_observed_service'</span><span class="p">,</span>
+                        <span class="n">empty_denominator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">outage</span><span class="o">=</span><span class="s1">'zero_charge_sufficient_test_otherwise_unknown_local_supply'</span><span class="p">),</span>
                     <span class="n">mixing</span><span class="o">=</span><span class="s1">'proportional_storage_and_interval_member_ac_bus'</span><span class="p">,</span>
                     <span class="n">boundary</span><span class="o">=</span><span class="s1">'active_member_ac_buses_and_connected_ev_storage'</span><span class="p">,</span>
                     <span class="n">sharing</span><span class="o">=</span><span class="s1">'market_allocation'</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s1">'community_market_enabled'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
