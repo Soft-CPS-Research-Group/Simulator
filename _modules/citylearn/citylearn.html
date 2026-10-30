@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.citylearn &mdash; CityLearn 1.9.4 documentation</title>
+  <title>citylearn.citylearn &mdash; CityLearn 1.9.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=38ba398c"></script>
+      <script src="../../_static/documentation_options.js?v=9cc2bd95"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1381,10 +1381,19 @@
         <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buildings</span><span class="p">:</span>
             <span class="n">b</span><span class="o">.</span><span class="n">time_step_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step_ratio</span>        
 
+<div class="viewcode-block" id="CityLearnEnv.get_deferrable_service_audit">
+<a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.get_deferrable_service_audit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_deferrable_service_audit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return executed appliance service, including partial and excluded requests."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpi_service</span><span class="o">.</span><span class="n">deferrable_service_audit</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="CityLearnEnv.get_metadata">
 <a class="viewcode-back" href="../../api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.get_metadata">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.deferrable_service_audit</span><span class="w"> </span><span class="kn">import</span> <span class="n">metadata</span> <span class="k">as</span> <span class="n">deferrable_metadata</span>
         <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">'deferrable_service_audit'</span><span class="p">:</span> <span class="n">deferrable_metadata</span><span class="p">(),</span>
             <span class="o">**</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(),</span>
             <span class="s1">'interface'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="p">,</span>
             <span class="s1">'topology_mode'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">topology_mode</span><span class="p">,</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KPIs &mdash; CityLearn 1.9.4 documentation</title>
+  <title>KPIs &mdash; CityLearn 1.9.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=38ba398c"></script>
+      <script src="_static/documentation_options.js?v=9cc2bd95"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -62,6 +62,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#community-market-toggle">Community market toggle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#old-vs-new-api">Old vs New API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#comparing-simulations">Comparing Simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#audited-appliance-service">Audited appliance service</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">citylearn</a></li>
@@ -169,6 +170,20 @@
 <li><p>Zero differences remain black.</p></li>
 </ul>
 <img alt="KPI comparison view" class="align-center" src="_images/kpis-comparison.png" />
+</section>
+<section id="audited-appliance-service">
+<h2>Audited appliance service<a class="headerlink" href="#audited-appliance-service" title="Link to this heading"></a></h2>
+<p>The additive <code class="docutils literal notranslate"><span class="pre">building_deferrable_appliance_audit_*</span></code> and
+<code class="docutils literal notranslate"><span class="pre">district_deferrable_appliance_audit_*</span></code> families use
+<code class="docutils literal notranslate"><span class="pre">deferrable-service-audit-v1</span></code>. They distinguish pending, running, completed,
+missed and cancelled requests and expose excluded populations. Delivered energy
+counts executed intervals, including partial cycles, rather than future profile
+reservations. Requested energy equals served, final unserved and outstanding
+energy. Completion ratios must be read with resolved coverage; empty denominators
+are undefined.</p>
+<p><code class="docutils literal notranslate"><span class="pre">env.get_deferrable_service_audit()</span></code> exposes individual requests. Final KPI exports
+include an adjacent <code class="docutils literal notranslate"><span class="pre">.deferrable_service.json</span></code> and versioned manifest metadata.
+Historical appliance service KPIs retain their previous definitions.</p>
 </section>
 </section>
 

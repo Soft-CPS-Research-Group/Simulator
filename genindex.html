@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; CityLearn 1.9.4 documentation</title>
+  <title>Index &mdash; CityLearn 1.9.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=38ba398c"></script>
+      <script src="_static/documentation_options.js?v=9cc2bd95"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -421,6 +421,8 @@
       </ul></li>
       <li><a href="api/citylearn.reward_function.html#citylearn.reward_function.Electric_Vehicles_Reward_Function.calculate_ev_penalty">calculate_ev_penalty() (citylearn.reward_function.Electric_Vehicles_Reward_Function method)</a>
 </li>
+      <li><a href="api/citylearn.internal.deferrable_service_audit.html#citylearn.internal.deferrable_service_audit.ServiceLedger.cancel">cancel() (citylearn.internal.deferrable_service_audit.ServiceLedger method)</a>
+</li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.cancel_pending_and_running">cancel_pending_and_running() (citylearn.energy_model.DeferrableAppliance method)</a>
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Battery.capacity">capacity (citylearn.energy_model.Battery property)</a>
@@ -716,6 +718,13 @@
 
       <ul>
         <li><a href="api/citylearn.internal.capabilities.html#module-citylearn.internal.capabilities">module</a>
+</li>
+      </ul></li>
+      <li>
+    citylearn.internal.deferrable_service_audit
+
+      <ul>
+        <li><a href="api/citylearn.internal.deferrable_service_audit.html#module-citylearn.internal.deferrable_service_audit">module</a>
 </li>
       </ul></li>
       <li>
@@ -1046,6 +1055,8 @@
 </li>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.deferrable_appliances_electricity_consumption">deferrable_appliances_electricity_consumption (citylearn.building.Building property)</a>
 </li>
+      <li><a href="api/citylearn.internal.kpi.html#citylearn.internal.kpi.CityLearnKPIService.deferrable_service_audit">deferrable_service_audit() (citylearn.internal.kpi.CityLearnKPIService method)</a>
+</li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance">DeferrableAppliance (class in citylearn.energy_model)</a>
 </li>
       <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.DeferrableApplianceRef">DeferrableApplianceRef (class in citylearn.internal.entity_interface)</a>
@@ -1304,14 +1315,14 @@
         <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.energy_to_electrical_storage">(citylearn.citylearn.CityLearnEnv property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.energy_to_non_shiftable_load">energy_to_non_shiftable_load (citylearn.building.Building property)</a>
 
       <ul>
         <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.energy_to_non_shiftable_load">(citylearn.citylearn.CityLearnEnv property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.end_use_load_profiles.neighborhood.html#citylearn.end_use_load_profiles.neighborhood.Neighborhood.energyplus_output_directory">energyplus_output_directory (citylearn.end_use_load_profiles.neighborhood.Neighborhood property)</a>
 </li>
       <li><a href="api/citylearn.data.html#citylearn.data.EnergySimulation">EnergySimulation (class in citylearn.data)</a>
@@ -1341,6 +1352,8 @@
 </li>
       </ul></li>
       <li><a href="api/citylearn.base.html#citylearn.base.Environment">Environment (class in citylearn.base)</a>
+</li>
+      <li><a href="api/citylearn.internal.deferrable_service_audit.html#citylearn.internal.deferrable_service_audit.environment_audit">environment_audit() (in module citylearn.internal.deferrable_service_audit)</a>
 </li>
       <li><a href="api/citylearn.base.html#citylearn.base.EpisodeTracker.episode">episode (citylearn.base.EpisodeTracker property)</a>
 
@@ -1439,6 +1452,8 @@
       <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService.event_log">event_log (citylearn.internal.topology.CityLearnTopologyService property)</a>
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.events">events (citylearn.internal.robustness.CityLearnRobustnessService property)</a>
+</li>
+      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.exclude_previously_offered_cycles">exclude_previously_offered_cycles() (citylearn.energy_model.DeferrableAppliance method)</a>
 </li>
       <li><a href="api/citylearn.internal.experiment.html#citylearn.internal.experiment.experiment_manifest">experiment_manifest() (in module citylearn.internal.experiment)</a>
 </li>
@@ -1545,6 +1560,8 @@
       <li><a href="api/citylearn.data.html#citylearn.data.DataSet.get_dataset_names">get_dataset_names() (citylearn.data.DataSet method)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.get_default_shared_observations">get_default_shared_observations() (citylearn.citylearn.CityLearnEnv static method)</a>
+</li>
+      <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.get_deferrable_service_audit">get_deferrable_service_audit() (citylearn.citylearn.CityLearnEnv method)</a>
 </li>
       <li><a href="api/citylearn.building.html#citylearn.building.DynamicsBuilding.get_dynamics_input">get_dynamics_input() (citylearn.building.DynamicsBuilding method)</a>
 
@@ -1974,6 +1991,8 @@
 </li>
       <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService.member_pool">member_pool (citylearn.internal.topology.CityLearnTopologyService property)</a>
 </li>
+      <li><a href="api/citylearn.internal.deferrable_service_audit.html#citylearn.internal.deferrable_service_audit.metadata">metadata() (in module citylearn.internal.deferrable_service_audit)</a>
+</li>
       <li><a href="api/citylearn.end_use_load_profiles.neighborhood.html#citylearn.end_use_load_profiles.neighborhood.SampleMethod.METADATA_CLUSTER_FREQUENCY">METADATA_CLUSTER_FREQUENCY (citylearn.end_use_load_profiles.neighborhood.SampleMethod attribute)</a>
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.clustering.html#citylearn.end_use_load_profiles.clustering.MetadataClustering">MetadataClustering (class in citylearn.end_use_load_profiles.clustering)</a>
@@ -2059,6 +2078,8 @@
         <li><a href="api/citylearn.internal.building_ops.html#module-citylearn.internal.building_ops">citylearn.internal.building_ops</a>
 </li>
         <li><a href="api/citylearn.internal.capabilities.html#module-citylearn.internal.capabilities">citylearn.internal.capabilities</a>
+</li>
+        <li><a href="api/citylearn.internal.deferrable_service_audit.html#module-citylearn.internal.deferrable_service_audit">citylearn.internal.deferrable_service_audit</a>
 </li>
         <li><a href="api/citylearn.internal.demand_response.html#module-citylearn.internal.demand_response">citylearn.internal.demand_response</a>
 </li>
@@ -2637,7 +2658,13 @@
         <li><a href="api/citylearn.utils.file_handler.html#citylearn.utils.file_handler.FileHandler.read_yaml">(citylearn.utils.file_handler.FileHandler static method)</a>
 </li>
       </ul></li>
+      <li><a href="api/citylearn.internal.deferrable_service_audit.html#citylearn.internal.deferrable_service_audit.ServiceLedger.record">record() (citylearn.internal.deferrable_service_audit.ServiceLedger method)</a>
+</li>
       <li><a href="api/citylearn.internal.ev_departure_audit.html#citylearn.internal.ev_departure_audit.record_departure">record_departure() (in module citylearn.internal.ev_departure_audit)</a>
+</li>
+      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.record_service_interval">record_service_interval() (citylearn.energy_model.DeferrableAppliance method)</a>
+</li>
+      <li><a href="api/citylearn.internal.deferrable_service_audit.html#citylearn.internal.deferrable_service_audit.ServiceLedger.records">records() (citylearn.internal.deferrable_service_audit.ServiceLedger method)</a>
 </li>
       <li><a href="api/citylearn.agents.marlisa.html#citylearn.agents.marlisa.MARLISA.regression_buffer_capacity">regression_buffer_capacity (citylearn.agents.marlisa.MARLISA property)</a>
 </li>
@@ -2905,12 +2932,16 @@
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.SENTINEL_TIME_STEP">SENTINEL_TIME_STEP (citylearn.energy_model.DeferrableAppliance attribute)</a>
 </li>
+      <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.service_audit">service_audit() (citylearn.energy_model.DeferrableAppliance method)</a>
+</li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.service_summary">service_summary() (citylearn.energy_model.DeferrableAppliance method)</a>
 
       <ul>
         <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.Escalator.service_summary">(citylearn.energy_model.Escalator method)</a>
 </li>
       </ul></li>
+      <li><a href="api/citylearn.internal.deferrable_service_audit.html#citylearn.internal.deferrable_service_audit.ServiceLedger">ServiceLedger (class in citylearn.internal.deferrable_service_audit)</a>
+</li>
       <li><a href="api/citylearn.agents.baseline.html#citylearn.agents.baseline.ServiceOnlyBaselineAgent">ServiceOnlyBaselineAgent (class in citylearn.agents.baseline)</a>
 </li>
       <li><a href="api/citylearn.wrappers.html#citylearn.wrappers.TabularQLearningActionWrapper.set_combinations">set_combinations() (citylearn.wrappers.TabularQLearningActionWrapper method)</a>
@@ -3051,6 +3082,8 @@
 </li>
       <li><a href="api/citylearn.agents.rlc.html#citylearn.agents.rlc.RLC.standardize_start_time_step">standardize_start_time_step (citylearn.agents.rlc.RLC property)</a>
 </li>
+      <li><a href="api/citylearn.internal.deferrable_service_audit.html#citylearn.internal.deferrable_service_audit.ServiceLedger.start">start() (citylearn.internal.deferrable_service_audit.ServiceLedger method)</a>
+</li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.start_cycle">start_cycle() (citylearn.energy_model.DeferrableAppliance method)</a>
 
       <ul>
@@ -3125,6 +3158,8 @@
 
       <ul>
         <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.summarize">(citylearn.internal.robustness.CityLearnRobustnessService method)</a>
+</li>
+        <li><a href="api/citylearn.internal.deferrable_service_audit.html#citylearn.internal.deferrable_service_audit.summarize">(in module citylearn.internal.deferrable_service_audit)</a>
 </li>
       </ul></li>
       <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.summary">summary() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>

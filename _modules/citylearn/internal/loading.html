@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.loading &mdash; CityLearn 1.9.4 documentation</title>
+  <title>citylearn.internal.loading &mdash; CityLearn 1.9.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=38ba398c"></script>
+      <script src="../../../_static/documentation_options.js?v=9cc2bd95"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -140,7 +140,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_charger_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_deferrable_appliance_windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="nd">@staticmethod</span>
@@ -287,17 +286,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">episode_tracker</span><span class="o">.</span><span class="n">simulation_time_steps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_charger_windows</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_deferrable_appliance_windows</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shared_timeseries_cache</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">dynamic_mode</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dynamic_member_windows</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_charger_windows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dynamic_charger_windows</span><span class="p">(</span>
-                <span class="n">schema</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_deferrable_appliance_windows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dynamic_deferrable_appliance_windows</span><span class="p">(</span>
                 <span class="n">schema</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_member_windows</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_expected_rows</span><span class="p">,</span>
@@ -1086,13 +1079,9 @@
 
         <span class="n">profiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dataframe</span><span class="p">(</span><span class="n">profiles_file</span><span class="p">)</span>
         <span class="n">schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dataframe</span><span class="p">(</span><span class="n">schedule_file</span><span class="p">)</span>
-        <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_deferrable_appliance_windows</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">building_name</span><span class="p">,</span> <span class="n">appliance_name</span><span class="p">))</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_mode</span> <span class="ow">and</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">schedule</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">window</span>
-            <span class="n">schedule</span> <span class="o">=</span> <span class="n">schedule</span><span class="p">[</span>
-                <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">schedule</span><span class="p">[</span><span class="s1">'deadline_time_step'</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'coerce'</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">))</span>
-                <span class="o">&amp;</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">schedule</span><span class="p">[</span><span class="s1">'earliest_start_time_step'</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'coerce'</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">end</span><span class="p">))</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Sparse requests use global calendar indexes. Keep the catalogue intact:</span>
+        <span class="c1"># a local loading window can discard current requests in partial episodes</span>
+        <span class="c1"># and future requests after member re-entry. Activation/audit owns eligibility.</span>
 
         <span class="n">source_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'buildings.</span><span class="si">{</span><span class="n">building_name</span><span class="si">}</span><span class="s1">.deferrable_appliances.</span><span class="si">{</span><span class="n">appliance_name</span><span class="si">}</span><span class="s1">'</span>
         <span class="n">simulation</span> <span class="o">=</span> <span class="n">DeferrableApplianceSimulation</span><span class="o">.</span><span class="n">from_dataframes</span><span class="p">(</span>
@@ -1567,32 +1556,6 @@
                 <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">expected_rows</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="n">end</span> <span class="o">&gt;</span> <span class="n">start</span><span class="p">:</span>
                     <span class="n">windows</span><span class="p">[(</span><span class="nb">str</span><span class="p">(</span><span class="n">member_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">charger_id</span><span class="p">))]</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">windows</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_build_dynamic_deferrable_appliance_windows</span><span class="p">(</span>
-        <span class="n">schema</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-        <span class="n">member_windows</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
-        <span class="n">expected_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-        <span class="n">windows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">buildings</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'buildings'</span><span class="p">,</span> <span class="p">{})</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
-
-        <span class="k">for</span> <span class="n">member_id</span><span class="p">,</span> <span class="n">member_schema</span> <span class="ow">in</span> <span class="n">buildings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">member_window</span> <span class="o">=</span> <span class="n">member_windows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">member_id</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">member_window</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">member_window</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">expected_rows</span><span class="p">)))</span>
-            <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">end</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">expected_rows</span><span class="p">)))</span>
-            <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="n">appliances</span> <span class="o">=</span> <span class="p">(</span><span class="n">member_schema</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'deferrable_appliances'</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">appliance_id</span> <span class="ow">in</span> <span class="n">appliances</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">windows</span><span class="p">[(</span><span class="nb">str</span><span class="p">(</span><span class="n">member_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">appliance_id</span><span class="p">))]</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">windows</span>
 

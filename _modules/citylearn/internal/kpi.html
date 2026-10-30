@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.kpi &mdash; CityLearn 1.9.4 documentation</title>
+  <title>citylearn.internal.kpi &mdash; CityLearn 1.9.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=38ba398c"></script>
+      <script src="../../../_static/documentation_options.js?v=9cc2bd95"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -92,7 +92,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">array</span><span class="w"> </span><span class="kn">import</span> <span class="n">array</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.energy_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Battery</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">ev_departure_audit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">ev_departure_audit</span><span class="p">,</span> <span class="n">deferrable_service_audit</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
 
@@ -1304,6 +1304,12 @@
                 <span class="k">return</span> <span class="n">chargers</span>
 
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">building</span><span class="o">.</span><span class="n">electric_vehicle_chargers</span> <span class="ow">or</span> <span class="p">[])</span>
+
+<div class="viewcode-block" id="CityLearnKPIService.deferrable_service_audit">
+<a class="viewcode-back" href="../../../api/citylearn.internal.kpi.html#citylearn.internal.kpi.CityLearnKPIService.deferrable_service_audit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deferrable_service_audit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">deferrable_service_audit</span><span class="o">.</span><span class="n">environment_audit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_deferrable_appliances_for_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">:</span>
         <span class="n">topology_service</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s1">'_topology_service'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -2561,6 +2567,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="s1">'equity_bpr_asset_poor_over_rich'</span><span class="p">,</span> <span class="n">equity_bpr</span><span class="p">,</span> <span class="s1">'District'</span><span class="p">,</span> <span class="s1">'district'</span><span class="p">),</span>
         <span class="p">])</span>
 
+        <span class="n">service_audit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferrable_service_audit</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">service_audit</span><span class="p">[</span><span class="s1">'buildings'</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">extended_building_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="sa">f</span><span class="s1">'deferrable_appliance_audit_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s1">'building'</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">extended_district_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">(</span><span class="sa">f</span><span class="s1">'deferrable_appliance_audit_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'District'</span><span class="p">,</span> <span class="s1">'district'</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">service_audit</span><span class="p">[</span><span class="s1">'district'</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
         <span class="n">district_deferrable</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">'completed_cycles'</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
             <span class="s1">'missed_cycles'</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -3247,6 +3260,9 @@
             <span class="p">(</span><span class="s1">'escalator_electricity_consumption_total_kwh'</span><span class="p">,</span> <span class="s1">'escalator'</span><span class="p">,</span> <span class="s1">'energy'</span><span class="p">,</span> <span class="s1">'electricity_consumption_total'</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">'kwh'</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">'escalator_state_changes_count'</span><span class="p">,</span> <span class="s1">'escalator'</span><span class="p">,</span> <span class="s1">'operation'</span><span class="p">,</span> <span class="s1">'state_changes'</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">'count'</span><span class="p">),</span>
         <span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">deferrable_service_audit</span><span class="o">.</span><span class="n">summarize</span><span class="p">([]):</span>
+            <span class="n">metric</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">'_'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">extended_map</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="sa">f</span><span class="s1">'deferrable_appliance_audit_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="s1">'deferrable_appliance'</span><span class="p">,</span> <span class="s1">'audit'</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ev_departure_audit</span><span class="o">.</span><span class="n">metrics</span><span class="p">(</span><span class="n">ev_departure_audit</span><span class="o">.</span><span class="n">empty_counts</span><span class="p">()):</span>
             <span class="n">metric</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">'_'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">extended_map</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="sa">f</span><span class="s1">'ev_departure_audit_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="s1">'ev'</span><span class="p">,</span> <span class="s1">'departure_audit'</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">))</span>

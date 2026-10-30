@@ -83,3 +83,20 @@ When multiple simulations are loaded, a **Compare** button lets you choose a ref
 .. image:: _static/ui/kpis-comparison.png
    :align: center
    :alt: KPI comparison view
+
+
+Audited appliance service
+=========================
+
+The additive ``building_deferrable_appliance_audit_*`` and
+``district_deferrable_appliance_audit_*`` families use
+``deferrable-service-audit-v1``. They distinguish pending, running, completed,
+missed and cancelled requests and expose excluded populations. Delivered energy
+counts executed intervals, including partial cycles, rather than future profile
+reservations. Requested energy equals served, final unserved and outstanding
+energy. Completion ratios must be read with resolved coverage; empty denominators
+are undefined.
+
+``env.get_deferrable_service_audit()`` exposes individual requests. Final KPI exports
+include an adjacent ``.deferrable_service.json`` and versioned manifest metadata.
+Historical appliance service KPIs retain their previous definitions.

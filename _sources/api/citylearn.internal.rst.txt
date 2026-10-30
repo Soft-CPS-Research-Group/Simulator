@@ -15,6 +15,7 @@ Submodules
    citylearn.internal.baseline
    citylearn.internal.building_ops
    citylearn.internal.capabilities
+   citylearn.internal.deferrable_service_audit
    citylearn.internal.demand_response
    citylearn.internal.entity_interface
    citylearn.internal.ev_departure_audit
