@@ -1,5 +1,7 @@
 # KPI v2 Naming Tree
 
+The additive `*_ev_departure_audit_*` family is the recommended service/feasibility view. It exposes unknown cases instead of assuming feasibility; see [definitions and denominators](ev_departure_audit.md). The historical names below retain their compatibility semantics.
+
 ## Naming Contract
 
 All KPI names in `evaluate_v2()` follow:

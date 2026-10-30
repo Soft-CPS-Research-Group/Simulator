@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-30",
+  "iteration": 1,
+  "definition_version": "ev-departure-audit-v1",
+  "tests": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "617",
+    "time": "207.334",
+    "timestamp": "2026-10-30T09:43:19.647562+00:00",
+    "hostname": "tiago-Vector-16-HX-A13VHG"
+  },
+  "new_tests": 26,
+  "critical_lint": "passed E9,F821",
+  "diff_check": "passed",
+  "physics": {
+    "total": 16,
+    "executed": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "hard_failures": 0
+  },
+  "physics_scope_note": "Matrix run during implementation; final asset-availability filter additionally covered by final 617-test suite and both repeated Portugal windows.",
+  "portugal_windows": [
+    {
+      "start": 4176,
+      "end": 4190,
+      "transitions": 14,
+      "physics_invariant_checks": true,
+      "departures": 18,
+      "target_service_met": 17,
+      "status": "pass"
+    },
+    {
+      "start": 4132,
+      "end": 4190,
+      "transitions": 58,
+      "physics_invariant_checks": true,
+      "departures": 52,
+      "target_service_met": 43,
+      "status": "pass"
+    }
+  ],
+  "datasets_modified": false,
+  "limits": [
+    "Individual conditioned replay, not joint EV scheduling.",
+    "Outage local PV/storage allocation not replayed: conservative failure is unknown, not infeasible.",
+    "Historical EV KPI names retain permissive compatibility; external fixed KPI lists need explicit migration.",
+    "No new annual campaign or empirical calibration."
+  ],
+  "version": "1.9.4",
+  "base_commit": "759b1252a83ec9c8d2b79b6ea5566be3dc11a554",
+  "publication_gates": [
+    "master CI Python 3.9/3.10 and accounting audit",
+    "installed-wheel export in publish job Python 3.11"
+  ],
+  "pipeline_policy": "One master CI; tag push ignored by CI; one release-triggered PyPI workflow.",
+  "installed_1_9_4_candidate": "Passed isolated Python 3.10 outside checkout: KPI, BAU and audit manifest export"
+}

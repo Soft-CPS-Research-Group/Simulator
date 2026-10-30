@@ -1,5 +1,7 @@
 # KPIs Reference
 
+A [auditoria de partidas EV](../ev_departure_audit.md) distingue viável, inviável e informação insuficiente, com cobertura, motivos e cumprimento observado. Os indicadores antigos mantêm as definições; o scorecard passa a recomendar as taxas auditadas acompanhadas da cobertura.
+
 A versão 1.9.0 acrescenta [origem/destino da energia e emissões na fronteira externa](../energy_provenance.md). Os indicadores antigos mantêm o significado de absorção solar instantânea e emissões anteriores à partilha.
 
 O simulador tem duas APIs de KPIs:

@@ -9,6 +9,7 @@ from pathlib import Path
 
 import citylearn
 from citylearn.citylearn import CityLearnEnv
+from citylearn.internal.ev_departure_audit import DEFINITION_VERSION
 
 
 def main():
@@ -38,6 +39,8 @@ def main():
         assert (output / "installed_kpis.csv").is_file()
         manifest = json.loads((output / "installed_kpis.manifest.json").read_text())
         assert isinstance(manifest, dict) and manifest
+        assert DEFINITION_VERSION in json.dumps(manifest)
+        assert 'district_ev_departure_audit_target_coverage_ratio' in (output / 'installed_kpis.csv').read_text()
         assert list(output.glob("exported_data_business_as_usual_ep*.csv"))
         print(f"Installed {citylearn.__version__}: KPI, BAU and manifest export passed")
     finally:

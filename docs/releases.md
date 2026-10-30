@@ -6,6 +6,25 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.4 — 2026-10-30 — EV departure information quality
+
+- Added `ev-departure-audit-v1`: three-way feasibility, exclusive unknown reasons,
+  coverage and observed service with explicit denominators at building/district level.
+- Preserved historical EV KPI definitions; the default scorecard recommends audited
+  ratios with coverage. CSV exports and manifests identify the new definition.
+- Audit replay cannot borrow time before a dynamic connection or from an earlier
+  session. Unknown local supply during an outage is not declared impossible;
+  delayed charging is judged by actual service at departure.
+- Added regressions for missing data, windows, dynamic activation/reset, outage
+  recovery/shortfall and installed-package exports. Datasets, dispatch and market
+  pricing are unchanged. See [scope and migration](ev_departure_audit.md).
+- No annual validation, joint EV scheduling or complete local-supply replay during
+  outages is claimed. Iteration 2 (appliance service) is not included.
+- Tag pushes no longer start a duplicate CI. Publication keeps the installed-wheel
+  gate in Python 3.11; the master commit is checked once in Python 3.9/3.10.
+
+Validation: 617 local tests, 16 physics audit scenarios and both reported Portugal windows passed; the installed candidate exports KPIs, BAU and the versioned audit manifest. Release gates: successful master CI and Python 3.11 installed-package export before PyPI upload. [Local evidence](releases/1.9.4-validation.json).
+
 ## v1.9.3 — 2026-10-29 — dataset integrity and runtime event fixes
 
 Release owner: [@calofonseca](https://github.com/calofonseca).

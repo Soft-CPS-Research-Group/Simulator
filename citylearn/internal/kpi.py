@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from array import array
 
 from citylearn.energy_model import Battery
+from citylearn.internal import ev_departure_audit
 
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Sequence, Tuple
 
@@ -42,12 +43,18 @@ class CityLearnKPIService:
         'building_cost_total_delta_to_business_as_usual_eur',
 
         # EV service and grid-safety values are judged directly, not vs BAU.
-        'district_ev_performance_departure_min_acceptable_feasible_ratio',
-        'district_ev_performance_departure_within_tolerance_feasible_ratio',
+        'district_ev_departure_audit_min_acceptable_service_feasible_ratio',
+        'district_ev_departure_audit_within_tolerance_service_feasible_ratio',
+        'district_ev_departure_audit_target_coverage_ratio',
+        'district_ev_departure_audit_service_coverage_ratio',
+        'district_ev_departure_audit_target_unknown_count',
         'district_electrical_service_phase_violations_energy_total_kwh',
         'district_electrical_service_phase_requested_pressure_energy_total_kwh',
-        'building_ev_performance_departure_min_acceptable_feasible_ratio',
-        'building_ev_performance_departure_within_tolerance_feasible_ratio',
+        'building_ev_departure_audit_min_acceptable_service_feasible_ratio',
+        'building_ev_departure_audit_within_tolerance_service_feasible_ratio',
+        'building_ev_departure_audit_target_coverage_ratio',
+        'building_ev_departure_audit_service_coverage_ratio',
+        'building_ev_departure_audit_target_unknown_count',
         'building_electrical_service_phase_violations_energy_total_kwh',
         'building_electrical_service_phase_requested_pressure_energy_total_kwh',
 
@@ -569,16 +576,22 @@ class CityLearnKPIService:
         states: np.ndarray,
         departure_index: int,
         threshold_soc: float,
-    ) -> bool:
+        *,
+        audit_arrival_soc: Optional[float] = None,
+        audit_interval_start: Optional[int] = None,
+        audit: bool = False,
+    ) -> Optional[bool]:
         """Return whether a departure threshold was reachable with max charging.
 
         Missing charger/battery/arrival data is treated as feasible to preserve
         existing KPI semantics for legacy datasets that cannot support this audit.
+        The additive departure audit validates its inputs first, supplies an
+        observed connection boundary, and treats non-finite replay as unknown.
         """
 
         threshold_soc = self._normalize_soc_target(threshold_soc)
 
-        if threshold_soc is None or threshold_soc <= 0.0:
+        if not audit and (threshold_soc is None or threshold_soc <= 0.0):
             return True
 
         battery = getattr(ev, 'battery', None)
@@ -597,8 +610,10 @@ class CityLearnKPIService:
         ):
             return True
 
-        interval_start = self._ev_connected_interval_start(sim, states, departure_index)
-        arrival_soc = self._ev_arrival_soc_for_interval(sim, ev, states, interval_start)
+        interval_start = (audit_interval_start if audit else
+                          self._ev_connected_interval_start(sim, states, departure_index))
+        arrival_soc = (audit_arrival_soc if audit else
+                       self._ev_arrival_soc_for_interval(sim, ev, states, interval_start))
 
         if arrival_soc is None:
             return True
@@ -613,7 +628,7 @@ class CityLearnKPIService:
         )
         step_hours = max(seconds_per_time_step / 3600.0, 0.0)
 
-        if step_hours <= 0.0:
+        if not np.isfinite(step_hours) or step_hours <= 0.0:
             return True
 
         soc = float(arrival_soc)
@@ -639,6 +654,8 @@ class CityLearnKPIService:
             power_kw = self._ev_constraint_limited_charge_power_kw(
                 building, charger, step, charger_power_kw,
             )
+            if audit and self._ev_power_outage_at_step(building, step):
+                power_kw = 0.0
             charger_efficiency = self._ev_charger_charge_efficiency(charger, power_kw, charger_power_kw)
             if replay is not None:
                 if offset:
@@ -658,6 +675,8 @@ class CityLearnKPIService:
                 soc = float(np.clip(soc + battery_power * step_hours * eta / capacity_kwh,
                                     0.0, getattr(battery, 'max_soc', 1.0)))
 
+        if audit and not np.isfinite(soc):
+            return None
         return bool(soc + self.EV_DEPARTURE_EPS >= threshold_soc)
 
     def _ev_departure_within_tolerance(self) -> float:
@@ -877,8 +896,10 @@ class CityLearnKPIService:
         t_final = upper if t_final is None else int(min(max(t_final, 0), upper))
         within_tolerance = self._ev_departure_within_tolerance()
         service_tolerance = self._ev_departure_service_tolerance()
+        audit_counts = ev_departure_audit.empty_counts()
         if t_final < t_start:
             return {
+                '_departure_audit': audit_counts,
                 'departures_total': 0.0,
                 'departures_met': 0.0,
                 'departures_min_acceptable': 0.0,
@@ -946,8 +967,6 @@ class CityLearnKPIService:
             history_limit = min(
                 t_final,
                 len(states) - 1,
-                len(required_soc) - 1,
-                len(charger.past_connected_evs) - 1,
             )
 
             if history_limit < t_start:
@@ -1022,15 +1041,18 @@ class CityLearnKPIService:
                 if current_state != 1 or not (departure_transition or terminal_departure):
                     continue
 
-                ev = charger.past_connected_evs[t]
-                if ev is None:
+                ev = self._safe_sequence_value(charger.past_connected_evs, t)
+                target_soc = self._normalize_soc_target(self._safe_sequence_value(required_soc, t))
+                ev_departure_audit.record_departure(
+                    self, audit_counts, building, charger, sim, ev, states, t, target_soc)
+                if ev is None or getattr(ev, 'battery', None) is None:
                     continue
 
-                target_soc = self._normalize_soc_target(required_soc[t])
                 if target_soc is None:
                     continue
 
-                if t >= len(ev.battery.soc):
+                battery_soc = getattr(ev.battery, 'soc', [])
+                if t >= len(battery_soc):
                     continue
 
                 actual_soc = self._to_scalar(ev.battery.soc[t], np.nan)
@@ -1143,6 +1165,7 @@ class CityLearnKPIService:
         absolute_error_mean = None if departures_total == 0 else departure_absolute_error_sum / departures_total
 
         return {
+            '_departure_audit': audit_counts,
             'departures_total': float(departures_total),
             'departures_met': float(departures_met),
             'departures_min_acceptable': float(departures_min_acceptable),
@@ -1802,6 +1825,7 @@ class CityLearnKPIService:
         legacy_building_frames: List[pd.DataFrame] = []
         extended_building_rows: List[Dict[str, object]] = []
 
+        ev_audit_counts = ev_departure_audit.empty_counts()
         ev_departures_total = 0.0
         ev_departures_met = 0.0
         ev_departures_min_acceptable = 0.0
@@ -2061,6 +2085,11 @@ class CityLearnKPIService:
             ])
 
             ev_metrics = self._compute_ev_metrics(building, t_start=t_start, t_final=t_end)
+            ev_audit_counts.update(ev_metrics['_departure_audit'])
+            extended_building_rows.extend(
+                self._metric(f'ev_departure_audit_{key}', value, building.name, 'building')
+                for key, value in ev_departure_audit.metrics(ev_metrics['_departure_audit']).items()
+            )
             extended_building_rows.extend([
                 self._metric('ev_departure_events_count', ev_metrics['departures_total'], building.name, 'building'),
                 self._metric('ev_departure_met_events_count', ev_metrics['departures_met'], building.name, 'building'),
@@ -2248,6 +2277,10 @@ class CityLearnKPIService:
             self._metric('cost_delta_daily_average_eur', self._daily_average(cost_c_env_raw - cost_b_env_raw, simulated_days), 'District', 'district'),
         ]
 
+        extended_district_rows.extend(
+            self._metric(f'ev_departure_audit_{key}', value, 'District', 'district')
+            for key, value in ev_departure_audit.metrics(ev_audit_counts).items()
+        )
         ev_success_rate = None if ev_departures_total <= 0.0 else ev_departures_met / ev_departures_total
         ev_min_acceptable_rate = None if ev_departures_total <= 0.0 else ev_departures_min_acceptable / ev_departures_total
         ev_within_tolerance_rate = None if ev_departures_total <= 0.0 else ev_departures_within_tolerance / ev_departures_total
@@ -3117,6 +3150,9 @@ class CityLearnKPIService:
             ('escalator_electricity_consumption_total_kwh', 'escalator', 'energy', 'electricity_consumption_total', None, 'kwh'),
             ('escalator_state_changes_count', 'escalator', 'operation', 'state_changes', None, 'count'),
         ]
+        for key in ev_departure_audit.metrics(ev_departure_audit.empty_counts()):
+            metric, unit = key.rsplit('_', 1)
+            extended_map.append((f'ev_departure_audit_{key}', 'ev', 'departure_audit', metric, None, unit))
         for old_name, family, subfamily, metric, variant, unit in extended_map:
             map_from(extended_df, old_name, family, subfamily, metric, variant, unit)
 

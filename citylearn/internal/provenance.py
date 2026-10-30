@@ -325,6 +325,17 @@ class CityLearnProvenanceService:
     def get_metadata(self):
         return dict(definition_version=DEFINITION_VERSION, kpi_definition_version=KPI_DEFINITION_VERSION,
                     ev_feasibility='individual_conditioned_on_service_headroom_physical_replay_v2',
+                    ev_departure_audit=dict(
+                        definition_version='ev-departure-audit-v1',
+                        legacy_feasibility='unchanged_permissive_missing_data',
+                        population='active_charger_departures_in_evaluated_member_window',
+                        scope='individual_replay_from_observed_session_boundary_not_joint_scheduling',
+                        unknown_reasons='exclusive_first_applicable_reason_per_threshold',
+                        coverage_denominator='all_detected_departures',
+                        observed_service_denominator='departures_with_valid_target_and_observed_soc',
+                        feasible_service_denominator='confirmed_feasible_departures_with_observed_service',
+                        empty_denominator=None,
+                        outage='zero_charge_sufficient_test_otherwise_unknown_local_supply'),
                     mixing='proportional_storage_and_interval_member_ac_bus',
                     boundary='active_member_ac_buses_and_connected_ev_storage',
                     sharing='market_allocation' if getattr(self.env, 'community_market_enabled', False)

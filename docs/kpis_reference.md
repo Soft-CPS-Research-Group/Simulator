@@ -1,5 +1,7 @@
 # KPIs Reference
 
+EV information quality is reported separately by the [departure audit](ev_departure_audit.md): confirmed feasible, infeasible and unknown, coverage, exclusive reasons, and observed service with explicit denominators. Historical EV KPI definitions remain available.
+
 Version 1.9.0 adds [energy provenance and external-boundary carbon accounting](energy_provenance.md). Legacy instantaneous PV absorption and pre-sharing emissions keep their existing meanings.
 
 The simulator exposes two KPI APIs.

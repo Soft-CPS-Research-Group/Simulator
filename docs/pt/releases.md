@@ -4,6 +4,26 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.4 — 2026-10-30 — qualidade da informação nas partidas EV
+
+- Acrescentada a definição `ev-departure-audit-v1`: viável, inviável e informação
+  insuficiente, motivos exclusivos, cobertura e cumprimento observado por membro
+  e comunidade, com denominadores explícitos.
+- Preservadas as definições históricas dos KPIs EV. O scorecard recomenda os
+  novos indicadores com cobertura; exportações CSV e manifestos identificam-nos.
+- A avaliação não usa tempo anterior à ligação dinâmica nem de outra sessão.
+  A falta de reprodução da energia local num corte resulta em desconhecido,
+  sem transformar carga adiada em incumprimento à partida.
+- Regressões de dados em falta, fronteiras, entradas/reset, recuperação após corte,
+  incumprimento e exportação do pacote. Datasets, física e mercado preservados.
+- Sem campanha anual nova, escalonamento conjunto ou reprodução completa do
+  fornecimento local durante cortes. A iteração 2 (máquinas) não está incluída.
+- As tags deixam de iniciar uma CI duplicada. Mantém-se o ensaio do pacote
+  instalado em Python 3.11 na publicação e a CI da principal em Python 3.9/3.10.
+  [Definições, limites e migração](../ev_departure_audit.md).
+
+Validação: 617 testes locais, 16 cenários da auditoria física e ambas as janelas portuguesas aprovados; o pacote candidato instalado exporta KPIs, BAU e o manifesto da auditoria. A publicação exige a CI da principal aprovada e exportação em Python 3.11 antes do envio ao PyPI. [Evidência local](../releases/1.9.4-validation.json).
+
 ## v1.9.3 — 2026-10-29 — integridade dos dados e correções de eventos
 
 Responsável: [@calofonseca](https://github.com/calofonseca).
