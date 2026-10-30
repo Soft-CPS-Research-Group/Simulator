@@ -1,5 +1,11 @@
 # KPIs Reference
 
+Iteration 5 (from v1.9.8) adds [audited DR, thermal service and equity populations](kpi_family_audit.md),
+explicit coverage and reference/reward evidence. It corrects comfort bands,
+conditional severity, active/executed samples and service-energy units. New audit
+ratios distinguish zero, unknown and not applicable; historical aggregates remain
+available. This work is absent from public v1.9.7.
+
 EV information quality is reported separately by the [departure audit](ev_departure_audit.md): confirmed feasible, infeasible and unknown, coverage, exclusive reasons, and observed service with explicit denominators. Historical EV KPI definitions remain available.
 
 Version 1.9.0 adds [energy provenance and external-boundary carbon accounting](energy_provenance.md). Legacy instantaneous PV absorption and pre-sharing emissions keep their existing meanings.

@@ -27,6 +27,13 @@ class CityLearnKPIService:
     EV_DEPARTURE_EPS = 1.0e-6
     ELECTRICAL_RESIDUAL_EPS_KW = 1.0e-5
     SCORECARD_DEFAULT_KPIS: Tuple[str, ...] = (
+        'district_thermal_service_audit_discomfort_ratio',
+        'district_thermal_service_audit_thermal_coverage_ratio',
+        'district_thermal_service_audit_outage_discomfort_ratio',
+        'district_thermal_service_audit_unserved_service_ratio',
+        'district_thermal_service_audit_outage_unserved_service_ratio',
+        'district_thermal_service_audit_energy_coverage_ratio',
+        'district_equity_audit_coverage_ratio',
         # Final destinations and external carbon use the versioned ledger.
         'district_energy_provenance_pv_useful_building_ratio',
         'district_energy_provenance_pv_useful_with_mobility_ratio',
@@ -1683,6 +1690,49 @@ class CityLearnKPIService:
 
         return start, end
 
+    def _thermal_values(self, building, values, t_start=0, t_final=None):
+        """Select completed active samples without inserting fictitious zero temperatures."""
+        array = np.asarray(values, dtype=float)
+        upper = min(len(array), int(getattr(self.env, 'time_step', len(array))))
+        end = upper if t_final is None else min(upper, int(t_final)+1)
+        indices = np.arange(max(0, int(t_start)), end)
+        if getattr(self.env, 'topology_mode', 'static') == 'dynamic':
+            history = self.env._topology_service
+            indices = np.array([i for i in indices if building.name in history.active_member_ids_at(int(i))], dtype=int)
+        return array[indices]
+
+    def _service_energy(self, building, t_start=0, t_final=None):
+        """Demand/device histories use dataset energy; tank balances already use control kWh."""
+        take = lambda name: self._thermal_values(building, getattr(building, name), t_start, t_final)
+        scale = float(getattr(building, 'time_step_ratio', 1.) or 1.)
+        expected = np.array([take(name)*scale for name in ('cooling_demand','heating_demand','dhw_demand','non_shiftable_load')]).T
+        served = np.array([take('energy_from_cooling_device')*scale+take('energy_from_cooling_storage'),
+                           take('energy_from_heating_device')*scale+take('energy_from_heating_storage'),
+                           take('energy_from_dhw_device')*scale+take('energy_from_dhw_storage'),
+                           take('energy_to_non_shiftable_load')*scale]).T
+        return expected, served
+
+    def family_audit(self, comfort_band=None, control_condition=None, baseline_condition=None):
+        from citylearn.internal.kpi_family_audit import thermal_counts, thermal_metrics, pool_thermal, equity_metrics
+        from citylearn.citylearn import EvaluationCondition
+        from citylearn.building import DynamicsBuilding
+        rows, counts, costs, conditions = {}, [], [], {}
+        for building in self._get_kpi_buildings():
+            take = lambda name: self._thermal_values(building, getattr(building, name))
+            expected, served = self._service_energy(building)
+            bands = take('comfort_band') if comfort_band is None else comfort_band
+            count = thermal_counts(take('indoor_dry_bulb_temperature'),take('indoor_dry_bulb_temperature_cooling_set_point'),
+                take('indoor_dry_bulb_temperature_heating_set_point'),bands,take('occupant_count'),expected,served,
+                take('power_outage_signal'),self.env.seconds_per_time_step/3600.)
+            counts.append(count); rows[building.name] = thermal_metrics(count)
+            dynamic = isinstance(building, DynamicsBuilding)
+            control = control_condition if control_condition is not None else (EvaluationCondition.WITH_STORAGE_AND_PARTIAL_LOAD_AND_PV if dynamic else EvaluationCondition.WITH_STORAGE_AND_PV)
+            baseline = baseline_condition if baseline_condition is not None else (EvaluationCondition.WITHOUT_STORAGE_AND_PARTIAL_LOAD_BUT_WITH_PV if dynamic else EvaluationCondition.WITHOUT_STORAGE_BUT_WITH_PV)
+            conditions[building.name] = dict(control=getattr(control,'name',control.value), reference=getattr(baseline,'name',baseline.value))
+            costs.append((self._sum_finite(self._energy_values(building,getattr(building,'net_electricity_consumption_cost'+control.value))),
+                          self._sum_finite(self._energy_values(building,getattr(building,'net_electricity_consumption_cost'+baseline.value)))))
+        return dict(buildings=rows,district=thermal_metrics(pool_thermal(counts)),equity=equity_metrics(costs),equity_conditions=conditions)
+
     def _energy_values(self, building, values):
         """Energy belongs to executed active intervals, not the terminal observation."""
         array = np.asarray(values, dtype='float64')[:int(getattr(self.env, 'time_step', len(values)))].copy()
@@ -1843,7 +1893,6 @@ class CityLearnKPIService:
         get_net_electricity_consumption_cost = lambda x, c: self._energy_values(x, getattr(x, f'net_electricity_consumption_cost{c.value}'))
         get_net_electricity_consumption_emission = lambda x, c: self._energy_values(x, getattr(x, f'net_electricity_consumption_emission{c.value}'))
 
-        comfort_band = EnergySimulation.DEFUALT_COMFORT_BAND if comfort_band is None else comfort_band
         daily_steps = self._window_steps(24.0 * 3600.0, env.seconds_per_time_step)
         monthly_steps = self._window_steps(730.0 * 3600.0, env.seconds_per_time_step)
         simulated_days = self._simulated_days(env)
@@ -1919,36 +1968,25 @@ class CityLearnKPIService:
                     if baseline_condition is None else baseline_condition
                 )
 
-            indoor = self._slice_window(building.indoor_dry_bulb_temperature, t_start, t_end)
-            cooling_setpoint = self._slice_window(building.indoor_dry_bulb_temperature_cooling_set_point, t_start, t_end)
-            heating_setpoint = self._slice_window(building.indoor_dry_bulb_temperature_heating_set_point, t_start, t_end)
-            occupants = self._slice_window(building.occupant_count, t_start, t_end)
+            indoor = self._thermal_values(building, building.indoor_dry_bulb_temperature, t_start, t_end)
+            cooling_setpoint = self._thermal_values(building, building.indoor_dry_bulb_temperature_cooling_set_point, t_start, t_end)
+            heating_setpoint = self._thermal_values(building, building.indoor_dry_bulb_temperature_heating_set_point, t_start, t_end)
+            occupants = self._thermal_values(building, building.occupant_count, t_start, t_end)
             discomfort_kwargs = {
                 'indoor_dry_bulb_temperature': indoor,
                 'dry_bulb_temperature_cooling_set_point': cooling_setpoint,
                 'dry_bulb_temperature_heating_set_point': heating_setpoint,
-                'band': building.comfort_band if comfort_band is None else comfort_band,
+                'band': self._thermal_values(building, building.comfort_band, t_start, t_end) if comfort_band is None else comfort_band,
                 'occupant_count': occupants,
             }
             unmet, cold, hot, \
                 cold_minimum_delta, cold_maximum_delta, cold_average_delta, \
-                hot_minimum_delta, hot_maximum_delta, hot_average_delta = CostFunction.discomfort(**discomfort_kwargs)
+                hot_minimum_delta, hot_maximum_delta, hot_average_delta = [v if v else [np.nan] for v in CostFunction.discomfort(**discomfort_kwargs)]
 
-            expected_energy = (
-                self._slice_window(building.cooling_demand, t_start, t_end)
-                + self._slice_window(building.heating_demand, t_start, t_end)
-                + self._slice_window(building.dhw_demand, t_start, t_end)
-                + self._slice_window(building.non_shiftable_load, t_start, t_end)
-            )
-            served_energy = (
-                self._slice_window(building.energy_from_cooling_device, t_start, t_end)
-                + self._slice_window(building.energy_from_cooling_storage, t_start, t_end)
-                + self._slice_window(building.energy_from_heating_device, t_start, t_end)
-                + self._slice_window(building.energy_from_heating_storage, t_start, t_end)
-                + self._slice_window(building.energy_from_dhw_device, t_start, t_end)
-                + self._slice_window(building.energy_from_dhw_storage, t_start, t_end)
-                + self._slice_window(building.energy_to_non_shiftable_load, t_start, t_end)
-            )
+            expected_components, served_components = self._service_energy(building, t_start, t_end)
+            expected_energy = expected_components.sum(axis=1)
+            # Serving another demand cannot compensate a shortfall in this one.
+            served_energy = np.minimum(expected_components, served_components).sum(axis=1)
 
             net_c_series = self._slice_window(
                 self._energy_values(building, getattr(building, f'net_electricity_consumption{building_control_condition.value}')),
@@ -2046,7 +2084,7 @@ class CityLearnKPIService:
                 'value': self._cost_last(
                     np.asarray(
                         CostFunction.one_minus_thermal_resilience(
-                            power_outage=self._slice_window(building.power_outage_signal, t_start, t_end),
+                            power_outage=self._thermal_values(building, building.power_outage_signal, t_start, t_end),
                             **discomfort_kwargs,
                         ),
                         dtype='float64',
@@ -2060,7 +2098,7 @@ class CityLearnKPIService:
                         CostFunction.normalized_unserved_energy(
                             expected_energy,
                             served_energy,
-                            power_outage=self._slice_window(building.power_outage_signal, t_start, t_end),
+                            power_outage=self._thermal_values(building, building.power_outage_signal, t_start, t_end),
                         ),
                         dtype='float64',
                     ),
@@ -3263,9 +3301,21 @@ class CityLearnKPIService:
                         share,
                     )
 
+        family_audit = self.family_audit(comfort_band=comfort_band, control_condition=control_condition, baseline_condition=baseline_condition)
+        for name, totals in list(family_audit['buildings'].items())+[('District',family_audit['district'])]:
+            level = 'district' if name == 'District' else 'building'
+            for suffix, value in totals.items():
+                put(level, name, f'{level}_thermal_service_audit_{suffix}', value)
+        for suffix, value in family_audit['equity'].items():
+            put('district', 'District', f'district_equity_audit_{suffix}', value)
+
         demand_response_service = getattr(env, '_demand_response_service', None)
         if getattr(demand_response_service, 'enabled', False):
             dr_by_building, dr_district = demand_response_service.summarize(building_names)
+            for purpose, totals in demand_response_service.audit_summary().items():
+                for suffix, value in totals.items():
+                    put('district', 'District', f'district_demand_response_audit_{purpose}_{suffix}', value)
+
 
             def dr_name(level: str, suffix: str) -> str:
                 return f'{level}_demand_response_{suffix}'
@@ -3467,6 +3517,9 @@ class CityLearnKPIService:
         output = pd.DataFrame(list(records.values()))
         if provenance is not None:
             output.attrs['energy_accounting'] = provenance.get_metadata()
+        from citylearn.internal.kpi_family_audit import metadata as family_metadata
+        output.attrs['kpi_family_audit'] = family_metadata()
+        output.attrs['kpi_family_audit']['equity_conditions'] = family_audit['equity_conditions']
         if output.empty:
             return pd.DataFrame(columns=['cost_function', 'value', 'name', 'level'])
 

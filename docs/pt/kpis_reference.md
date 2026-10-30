@@ -1,5 +1,11 @@
 # KPIs Reference
 
+A iteração 5 (desde a v1.9.8) acrescenta [populações auditadas de DR, serviço térmico e equidade](../kpi_family_audit.md),
+cobertura e comprovativos da referência/recompensa. Corrige bandas de conforto,
+desvios condicionais, intervalos ativos/executados e unidades de energia servida.
+As novas taxas distinguem zero, desconhecido e não aplicável; os agregados antigos
+continuam disponíveis. Este trabalho não integra a v1.9.7 pública.
+
 A [auditoria de partidas EV](../ev_departure_audit.md) distingue viável, inviável e informação insuficiente, com cobertura, motivos e cumprimento observado. Os indicadores antigos mantêm as definições; o scorecard passa a recomendar as taxas auditadas acompanhadas da cobertura.
 
 A versão 1.9.0 acrescenta [origem/destino da energia e emissões na fronteira externa](../energy_provenance.md). Os indicadores antigos mantêm o significado de absorção solar instantânea e emissões anteriores à partilha.

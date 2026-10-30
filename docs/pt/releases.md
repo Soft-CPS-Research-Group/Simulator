@@ -4,6 +4,30 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.8 — 2026-10-30 — famílias de KPIs e qualidade da avaliação
+
+- Populações, cobertura e denominadores indefinidos de conforto/resiliência e
+  equidade; agregação auditada por exposição/energia, com agregados antigos disponíveis.
+- Respeitadas bandas de conforto nativas; desvios condicionados ao desconforto;
+  denominadores acumulados observados e exclusão de intervalos inativos/não executados.
+  Energia de serviço em kWh do controlo, sem converter duas vezes os tanques;
+  excesso num serviço não compensa outro serviço não satisfeito.
+- DR exige preparação completa e topologia estrutural estável, invalida referências
+  em cache após mudanças, rejeita IDs repetidos e identifica motivos de exclusão.
+- Finalidade serviço/stress/não especificada explícita; recompensa identificada.
+  Preservados recompensa, despacho, tarifas, datasets e regras de alocação.
+- Auditor independente de energia/pagamentos DR. O quarto pedido Premium de 2023
+  coincide com retirada de PV: 16 intervalos sem referência comparável, não sucessos.
+- Recalcular análises afetadas. Sem campanha anual, prova de otimização conjunta
+  ou calibração térmica. Corrige as limitações de avaliação da v1.9.7.
+  [Definições e limites](../kpi_family_audit.md).
+
+Validação: 721 testes (34 novos), 16 cenários físicos, oito pedidos DR reais e
+pacote instalado aprovados. Dos 56 intervalos DR, 40 têm referência válida e 16
+ficam excluídos pela retirada de PV. Datasets intactos. Publicação sujeita a CI
+da principal e teste do pacote instalado antes do PyPI.
+[Evidência](../releases/1.9.8-validation.json).
+
 ## v1.9.7 — 2026-10-30 — balanços independentes e fronteiras dos resultados
 
 - Auditor independente por rede de fluxos: origens/destinos, operações de baterias,

@@ -43,6 +43,9 @@ def main():
         manifest = json.loads((output / "installed_kpis.manifest.json").read_text())
         assert isinstance(manifest, dict) and manifest
         assert manifest['comparison_context']['definition_version'] == 'paired-experiment-v1'
+        assert manifest['kpi_family_audit']['definition_version'] == 'kpi-families-audit-v1'
+        assert manifest['reward']['resolved_class'] == 'citylearn.reward_function.RewardFunction'
+        assert env.get_kpi_family_audit()['district']['executed_intervals_count'] > 0
         assert manifest['business_as_usual_reference']['definition_version'] == 'immediate-full-charge-v1'
         assert manifest['business_as_usual_reference']['evaluated']
         assert manifest['final_inventory'] is not None

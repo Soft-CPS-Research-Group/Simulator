@@ -1,5 +1,11 @@
 # KPI v2 Naming Tree
 
+Iteration 5 (from v1.9.8) adds `*_thermal_service_audit_*`, `district_equity_audit_*`
+and `district_demand_response_audit_{all|service|stress|unspecified}_*` populations,
+coverage and undefined rates. See [formulas, populations and migration](kpi_family_audit.md).
+These additions are absent from public v1.9.7; the older tree below remains a
+reference for the historical families.
+
 The additive `*_ev_departure_audit_*` family is the recommended service/feasibility view. It exposes unknown cases instead of assuming feasibility; see [definitions and denominators](ev_departure_audit.md). The historical names below retain their compatibility semantics.
 
 ## Naming Contract

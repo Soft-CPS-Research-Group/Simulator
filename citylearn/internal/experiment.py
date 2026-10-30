@@ -64,5 +64,8 @@ def experiment_manifest(env):
                 completed_intervals=env._provenance_service.steps,
                 community_market=metadata['community_market'], energy_accounting=metadata['energy_accounting'],
                 deferrable_service_audit=metadata['deferrable_service_audit'],
+                kpi_family_audit=metadata['kpi_family_audit'],
+                demand_response=metadata['demand_response'],
+                reward=metadata['reward_evidence'],
                 provenance_summary=dict(buildings=members, district=district),
                 source_destinations=env._provenance_service.source_destinations())

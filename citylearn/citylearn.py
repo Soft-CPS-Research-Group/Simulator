@@ -1303,8 +1303,11 @@ class CityLearnEnv(Environment, Env):
 
     def get_metadata(self) -> Mapping[str, Any]:
         from citylearn.internal.deferrable_service_audit import metadata as deferrable_metadata
+        from citylearn.internal.kpi_family_audit import metadata as family_metadata, reward_metadata
         return {
             'deferrable_service_audit': deferrable_metadata(),
+            'kpi_family_audit': family_metadata(),
+            'reward_evidence': reward_metadata(self),
             **super().get_metadata(),
             'interface': self.interface,
             'topology_mode': self.topology_mode,
@@ -1448,6 +1451,11 @@ class CityLearnEnv(Environment, Env):
             evaluation_condition_cls=EvaluationCondition,
             dynamics_building_cls=DynamicsBuilding,
         )
+
+    def get_kpi_family_audit(self, *, comfort_band=None, control_condition=None, baseline_condition=None):
+        """Return observed populations, thermal service and equity audit evidence."""
+        return self._kpi_service.family_audit(comfort_band=comfort_band,
+            control_condition=control_condition, baseline_condition=baseline_condition)
 
     def run_business_as_usual_baseline(self, force: bool = False):
         """Run or return the cached native business-as-usual baseline."""

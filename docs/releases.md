@@ -6,6 +6,32 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.8 — 2026-10-30 — KPI families and evaluation quality
+
+- Add explicit thermal service and equity populations, coverage and undefined
+  denominators; pool district exposure/energy and retain historical aggregates.
+- Honour native comfort bands, condition deviation statistics on violations,
+  use observed rolling occupancy and exclude unexecuted/inactive samples.
+  Normalize demand/device energy to control-step kWh while retaining tank units;
+  oversupply of one service cannot cancel another service's shortfall.
+- Require full DR preparation and stable structural topology, invalidate cached
+  references after changes, reject duplicate IDs and expose exclusion reasons.
+- Separate declared service/stress/unspecified purposes. Record actual reward
+  identity/parameters without changing reward, dispatch, tariffs or datasets.
+  Preserve the existing rejection of overlapping requests and allocation rules.
+- Add an independent bounded DR energy/cash audit. The fourth Premium 2023
+  request overlaps a PV retirement: its 16 intervals lack a comparable reference.
+  Other requests have full preparation. Missing references are not successes.
+- Re-run affected comfort/resilience/DR studies. No joint scheduling optimality,
+  annual campaign or empirical thermal calibration. Fixes the evaluation
+  limitations documented for v1.9.7. [Definitions and limits](kpi_family_audit.md).
+
+Validation: 721 tests passed (34 new), all 16 physical scenarios, eight real DR
+request windows and installed-wheel export. Of 56 DR intervals, 40 have a valid
+reference and 16 are explicitly excluded after PV retirement. No dataset edits.
+Release gates require successful master CI and installed-wheel export before PyPI.
+[Validation evidence](releases/1.9.8-validation.json).
+
 ## v1.9.7 — 2026-10-30 — independent balances and reporting boundaries
 
 - Add an offline independent physical-flow network audit: energy by source and
