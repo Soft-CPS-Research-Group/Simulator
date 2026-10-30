@@ -616,6 +616,9 @@ class CityLearnTopologyService:
             return False
 
         building = self._member_pool[target_member_id]
+        # Keep appliance instances held by history intact when a member rejoins.
+        if self.historical_deferrable_appliances(target_member_id):
+            building.deferrable_appliances = [deepcopy(a) for a in building.deferrable_appliances or []]
         self._bind_building_runtime_context(building)
         building.reset()
         self._set_building_time_step(building, time_step)
@@ -625,6 +628,8 @@ class CityLearnTopologyService:
             self._global_time_step(time_step),
         )
 
+        for appliance in building.deferrable_appliances or []:
+            self._exclude_previous_deferrable_requests(target_member_id, appliance)
         self._active_member_ids.append(target_member_id)
         lifecycle = self._member_lifecycle.setdefault(target_member_id, {'born_at': None, 'removed_at': None, 'active': False})
         lifecycle['active'] = True
@@ -697,6 +702,8 @@ class CityLearnTopologyService:
         if target_member_id not in self._active_member_ids:
             return False
 
+        for appliance in self._member_pool[target_member_id].deferrable_appliances or []:
+            appliance.cancel_pending_and_running(self._global_time_step(time_step), reason='member_removed')
         self._active_member_ids = [member_id for member_id in self._active_member_ids if member_id != target_member_id]
         lifecycle = self._member_lifecycle.setdefault(target_member_id, {'born_at': None, 'removed_at': None, 'active': False})
         lifecycle['active'] = False
@@ -777,7 +784,7 @@ class CityLearnTopologyService:
 
             for appliance in removed:
                 if hasattr(appliance, 'cancel_pending_and_running'):
-                    appliance.cancel_pending_and_running(int(time_step))
+                    appliance.cancel_pending_and_running(self._global_time_step(time_step), reason='asset_removed')
 
             building.deferrable_appliances = remaining
             self._sync_deferrable_appliance_metadata(building)
@@ -838,6 +845,13 @@ class CityLearnTopologyService:
         self._topology_version += 1
         return True
 
+    def _exclude_previous_deferrable_requests(self, member_id, appliance):
+        offered = set()
+        for previous in self.historical_deferrable_appliances(member_id):
+            if previous is not appliance and previous.name == appliance.name:
+                offered.update(row['cycle_id'] for row in previous.service_audit()['records'] if row['included'])
+        appliance.exclude_previously_offered_cycles(offered)
+
     def _add_deferrable_appliance_asset(self, building: Building, event: TopologyEvent, time_step: int) -> bool:
         target_asset_id = event.target_asset_id
         if target_asset_id is None:
@@ -858,6 +872,7 @@ class CityLearnTopologyService:
         cloned.reset()
         cloned.time_step = time_step
         cloned.skip_cycles_before(self._global_time_step(time_step))
+        self._exclude_previous_deferrable_requests(building.name, cloned)
 
         appliances = list(building.deferrable_appliances or [])
         appliances.append(cloned)

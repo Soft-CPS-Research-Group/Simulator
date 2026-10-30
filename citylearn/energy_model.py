@@ -1544,6 +1544,11 @@ class DeferrableAppliance(ElectricDevice):
         self.__cycle_completion_time_steps = {}
         self.__cycle_missed_time_steps = {}
         self.__cycle_cancelled_time_steps = {}
+        from citylearn.internal.deferrable_service_audit import ServiceLedger
+        episode_start = int(self.episode_tracker.episode_start_time_step or 0)
+        self._service_ledger = ServiceLedger(
+            episode_start, episode_start + int(self.episode_tracker.episode_time_steps) - 1,
+        )
         self.action_feedback_last_start_requested = np.zeros(self.episode_tracker.episode_time_steps, dtype=bool)
         self.action_feedback_last_start_applied = np.zeros(self.episode_tracker.episode_time_steps, dtype=bool)
         self.action_feedback_start_blocked = np.zeros(self.episode_tracker.episode_time_steps, dtype=bool)
@@ -1582,6 +1587,7 @@ class DeferrableAppliance(ElectricDevice):
         """
 
         activation = int(global_time_step)
+        self._service_ledger.activation = activation
         for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
             cycle_id = cycle['cycle_id']
             if (
@@ -1627,6 +1633,7 @@ class DeferrableAppliance(ElectricDevice):
         cycle_id = cycle['cycle_id']
         self.__cycle_state[cycle_id] = 'running'
         self.__cycle_start_time_steps[cycle_id] = current_global
+        self._service_ledger.start(cycle, current_global)
 
         for offset, energy_kwh in enumerate(cycle['load_profile']):
             step = self.time_step + offset
@@ -1658,13 +1665,15 @@ class DeferrableAppliance(ElectricDevice):
 
         return np.array(cycle['load_profile'], dtype='float32')
 
-    def cancel_pending_and_running(self, global_time_step: Optional[int] = None):
+    def cancel_pending_and_running(self, global_time_step: Optional[int] = None, reason: str = 'asset_removed'):
         """Cancel future service after a dynamic topology removal."""
 
         current_global = self._current_global_time_step() if global_time_step is None else int(global_time_step)
+        self._service_ledger.cancel(current_global, reason)
         for cycle in self.deferrable_appliance_simulation.flexibility_schedule:
             cycle_id = cycle['cycle_id']
-            if self.__cycle_state.get(cycle_id) in {'pending', 'running'}:
+            if (self.__cycle_state.get(cycle_id) in {'pending', 'running'}
+                    or (cycle_id in self._service_ledger.starts and cycle_id not in self._service_ledger.finished)):
                 self.__cycle_state[cycle_id] = 'cancelled'
                 self.__cycle_cancelled_time_steps[cycle_id] = current_global
 
@@ -1763,6 +1772,26 @@ class DeferrableAppliance(ElectricDevice):
             'remaining_average_power_kw': remaining_average_power,
             'current_step_power_kw': current_energy / step_hours,
         }
+
+    def record_service_interval(self):
+        """Record the executed interval, never the prebooked future profile."""
+        energy = (float(self._ElectricDevice__electricity_consumption[self.time_step])
+                  * self._electricity_consumption_ratio())
+        self._service_ledger.record(self._current_global_time_step(), energy)
+
+    def exclude_previously_offered_cycles(self, cycle_ids):
+        """A reinstall must not offer the same logical request twice."""
+        self._service_ledger.excluded.update(cycle_ids)
+        for cycle_id in cycle_ids:
+            if self.__cycle_state.get(cycle_id) == 'pending':
+                self.__cycle_state[cycle_id] = 'already_accounted_previous_instance'
+
+    def service_audit(self):
+        """Pure snapshot of actual service with exclusive states and reasons."""
+        from citylearn.internal.deferrable_service_audit import DEFINITION_VERSION
+        return dict(definition_version=DEFINITION_VERSION,
+                    records=self._service_ledger.records(self.deferrable_appliance_simulation.flexibility_schedule),
+                    physical_energy_kwh=self._service_ledger.physical_energy)
 
     def service_summary(self) -> Mapping[str, float]:
         self._finalize_running_cycles_at_current_step()

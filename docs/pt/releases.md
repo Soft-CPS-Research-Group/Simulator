@@ -4,6 +4,28 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.5 — 2026-10-30 — serviço completo das máquinas
+
+- Acrescentada `deferrable-service-audit-v1`: energia realmente executada, estados
+  e motivos exclusivos, universo de pedidos e denominadores explícitos.
+- Preservado o serviço parcial quando sai uma máquina ou membro; cancelamento
+  com índice global e histórico preservado no regresso. A reinstalação não volta
+  a oferecer o mesmo pedido lógico.
+- Novos KPIs V2, manifesto e ficheiro `.deferrable_service.json` com os pedidos
+  individuais. Mantidos os indicadores históricos.
+- Preservado o calendário completo: o filtro local eliminava pedidos em janelas
+  a meio do calendário e depois do regresso de membros.
+- Datasets e regras físicas preservados. A recuperação de pedidos e as correções
+  de ciclo de vida podem alterar o consumo nessas experiências. Sem campanha anual ou calibração empírica.
+  [Definições e migração](../deferrable_service_audit.md).
+- Corrige a limitação dos calendários identificada na v1.9.4. Reexecutar as
+  experiências afetadas em janelas parciais ou com regresso de membros.
+
+Validação: 637 testes locais (20 novos), 16 cenários físicos, as duas janelas
+portuguesas e exportação pelo pacote instalado aprovados. A publicação exige CI
+da principal e exportação do pacote instalado antes do PyPI.
+[Evidência](../releases/1.9.5-validation.json).
+
 ## v1.9.4 — 2026-10-30 — qualidade da informação nas partidas EV
 
 - Acrescentada a definição `ev-departure-audit-v1`: viável, inviável e informação

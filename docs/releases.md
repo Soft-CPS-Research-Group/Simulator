@@ -6,6 +6,28 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.5 — 2026-10-30 — complete appliance service accounting
+
+- Add `deferrable-service-audit-v1`, actual executed energy, exclusive request
+  states/reasons, explicit populations and completion/coverage denominators.
+- Preserve partial service through asset/member removal; use global cancellation
+  indexes and retain appliance history when members rejoin. Reinstallation does
+  not offer the same logical request twice.
+- Export per-request `.deferrable_service.json` evidence and versioned manifest
+  metadata alongside additive V2 KPIs. Historical KPIs remain available.
+- Keep complete sparse request calendars: local-window filtering previously
+  discarded requests in mid-calendar episodes and after member re-entry.
+- Datasets and physical rules remain unchanged; restored requests and lifecycle
+  corrections can change partial-window/re-entry consumption. No annual ranking or empirical calibration.
+  See [definitions and migration](deferrable_service_audit.md).
+- This iteration supersedes the appliance-calendar limitation documented for
+  v1.9.4. Re-run affected partial-window/re-entry experiments after upgrading.
+
+Validation: 637 local tests (20 new), all 16 physical scenarios, both reported
+Portugal windows and isolated installed-package export passed. Publication gates
+require successful master CI and installed-wheel export before PyPI upload.
+[Validation evidence](releases/1.9.5-validation.json).
+
 ## v1.9.4 — 2026-10-30 — EV departure information quality
 
 - Added `ev-departure-audit-v1`: three-way feasibility, exclusive unknown reasons,

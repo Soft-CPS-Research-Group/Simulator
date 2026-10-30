@@ -252,6 +252,7 @@ class CityLearnRuntimeService:
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         self.update_variables()
+        self._record_deferrable_service_interval()
         env._provenance_service.settle()
         if debug_timing:
             timings['update_variables_time'] = time.perf_counter() - timer_start
@@ -753,6 +754,7 @@ class CityLearnRuntimeService:
             building.apply_actions(**building_actions)
 
         self.update_variables()
+        self._record_deferrable_service_interval()
         env._provenance_service.settle()
         if getattr(getattr(env, '_demand_response_service', None), 'enabled', False):
             env._demand_response_service.settle_current_time_step()
@@ -1173,6 +1175,11 @@ class CityLearnRuntimeService:
                 variability = np.clip(random_state.normal(1.0, drift_std), 0.6, 1.4)
                 # Exogenous away-from-home movement: driving can reduce SOC, offsite charging can raise it.
                 ev.battery.force_set_soc(float(np.clip(last_soc * variability, 0.0, 1.0)))
+
+    def _record_deferrable_service_interval(self):
+        for building in self.env.buildings:
+            for appliance in building.deferrable_appliances or []:
+                appliance.record_service_interval()
 
     def update_variables(self):
         """Update district aggregate series from current building states."""

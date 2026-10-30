@@ -59,5 +59,6 @@ def experiment_manifest(env):
                 episode_end_time_step=tracker.episode_end_time_step,
                 completed_intervals=env._provenance_service.steps,
                 community_market=metadata['community_market'], energy_accounting=metadata['energy_accounting'],
+                deferrable_service_audit=metadata['deferrable_service_audit'],
                 provenance_summary=dict(buildings=members, district=district),
                 source_destinations=env._provenance_service.source_destinations())

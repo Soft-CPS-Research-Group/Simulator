@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from array import array
 
 from citylearn.energy_model import Battery
-from citylearn.internal import ev_departure_audit
+from citylearn.internal import ev_departure_audit, deferrable_service_audit
 
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Sequence, Tuple
 
@@ -1215,6 +1215,9 @@ class CityLearnKPIService:
                 return chargers
 
         return list(building.electric_vehicle_chargers or [])
+
+    def deferrable_service_audit(self):
+        return deferrable_service_audit.environment_audit(self)
 
     def _deferrable_appliances_for_metrics(self, building) -> Sequence:
         topology_service = getattr(self.env, '_topology_service', None)
@@ -2470,6 +2473,13 @@ class CityLearnKPIService:
             self._metric('equity_bpr_asset_poor_over_rich', equity_bpr, 'District', 'district'),
         ])
 
+        service_audit = self.deferrable_service_audit()
+        for name, summary in service_audit['buildings'].items():
+            extended_building_rows.extend(self._metric(f'deferrable_appliance_audit_{key}', value, name, 'building')
+                        for key, value in summary.items())
+        extended_district_rows.extend(self._metric(f'deferrable_appliance_audit_{key}', value, 'District', 'district')
+                    for key, value in service_audit['district'].items())
+
         district_deferrable = {
             'completed_cycles': 0.0,
             'missed_cycles': 0.0,
@@ -3150,6 +3160,9 @@ class CityLearnKPIService:
             ('escalator_electricity_consumption_total_kwh', 'escalator', 'energy', 'electricity_consumption_total', None, 'kwh'),
             ('escalator_state_changes_count', 'escalator', 'operation', 'state_changes', None, 'count'),
         ]
+        for key in deferrable_service_audit.summarize([]):
+            metric, unit = key.rsplit('_', 1)
+            extended_map.append((f'deferrable_appliance_audit_{key}', 'deferrable_appliance', 'audit', metric, None, unit))
         for key in ev_departure_audit.metrics(ev_departure_audit.empty_counts()):
             metric, unit = key.rsplit('_', 1)
             extended_map.append((f'ev_departure_audit_{key}', 'ev', 'departure_audit', metric, None, unit))

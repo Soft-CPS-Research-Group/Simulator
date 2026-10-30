@@ -1289,8 +1289,14 @@ class CityLearnEnv(Environment, Env):
         for b in self.buildings:
             b.time_step_ratio = self.time_step_ratio        
 
+    def get_deferrable_service_audit(self):
+        """Return executed appliance service, including partial and excluded requests."""
+        return self._kpi_service.deferrable_service_audit()
+
     def get_metadata(self) -> Mapping[str, Any]:
+        from citylearn.internal.deferrable_service_audit import metadata as deferrable_metadata
         return {
+            'deferrable_service_audit': deferrable_metadata(),
             **super().get_metadata(),
             'interface': self.interface,
             'topology_mode': self.topology_mode,

@@ -41,6 +41,10 @@ def main():
         assert isinstance(manifest, dict) and manifest
         assert DEFINITION_VERSION in json.dumps(manifest)
         assert 'district_ev_departure_audit_target_coverage_ratio' in (output / 'installed_kpis.csv').read_text()
+        service = json.loads((output / 'installed_kpis.deferrable_service.json').read_text())
+        assert service['definition_version'] == 'deferrable-service-audit-v1'
+        assert manifest['deferrable_service_audit']['definition_version'] == service['definition_version']
+        assert 'district_deferrable_appliance_audit_offered_count' in (output / 'installed_kpis.csv').read_text()
         assert list(output.glob("exported_data_business_as_usual_ep*.csv"))
         print(f"Installed {citylearn.__version__}: KPI, BAU and manifest export passed")
     finally:

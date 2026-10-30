@@ -48,7 +48,6 @@ class CityLearnLoadingService:
         self._dynamic_expected_rows: int = 0
         self._dynamic_member_windows: Dict[str, Tuple[int, int]] = {}
         self._dynamic_charger_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
-        self._dynamic_deferrable_appliance_windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
         self._shared_timeseries_cache: Dict[Tuple[Any, ...], Any] = {}
 
     @staticmethod
@@ -193,17 +192,11 @@ class CityLearnLoadingService:
         self._dynamic_expected_rows = int(episode_tracker.simulation_time_steps)
         self._dynamic_member_windows = {}
         self._dynamic_charger_windows = {}
-        self._dynamic_deferrable_appliance_windows = {}
         self._shared_timeseries_cache = {}
 
         if dynamic_mode:
             self._dynamic_member_windows = self._build_dynamic_member_windows(schema, self._dynamic_expected_rows)
             self._dynamic_charger_windows = self._build_dynamic_charger_windows(
-                schema,
-                self._dynamic_member_windows,
-                self._dynamic_expected_rows,
-            )
-            self._dynamic_deferrable_appliance_windows = self._build_dynamic_deferrable_appliance_windows(
                 schema,
                 self._dynamic_member_windows,
                 self._dynamic_expected_rows,
@@ -980,13 +973,9 @@ class CityLearnLoadingService:
 
         profiles = self._read_dataframe(profiles_file)
         schedule = self._read_dataframe(schedule_file)
-        window = self._dynamic_deferrable_appliance_windows.get((building_name, appliance_name))
-        if self._dynamic_mode and window is not None and not schedule.empty:
-            start, end = window
-            schedule = schedule[
-                (pd.to_numeric(schedule['deadline_time_step'], errors='coerce') >= int(start))
-                & (pd.to_numeric(schedule['earliest_start_time_step'], errors='coerce') < int(end))
-            ].reset_index(drop=True)
+        # Sparse requests use global calendar indexes. Keep the catalogue intact:
+        # a local loading window can discard current requests in partial episodes
+        # and future requests after member re-entry. Activation/audit owns eligibility.
 
         source_label = f'buildings.{building_name}.deferrable_appliances.{appliance_name}'
         simulation = DeferrableApplianceSimulation.from_dataframes(
@@ -1454,32 +1443,6 @@ class CityLearnLoadingService:
                 end = max(start, min(end, int(expected_rows)))
                 if end > start:
                     windows[(str(member_id), str(charger_id))] = (start, end)
-
-        return windows
-
-    @staticmethod
-    def _build_dynamic_deferrable_appliance_windows(
-        schema: Mapping[str, Any],
-        member_windows: Mapping[str, Tuple[int, int]],
-        expected_rows: int,
-    ) -> Dict[Tuple[str, str], Tuple[int, int]]:
-        windows: Dict[Tuple[str, str], Tuple[int, int]] = {}
-        buildings = schema.get('buildings', {}) if isinstance(schema, Mapping) else {}
-
-        for member_id, member_schema in buildings.items():
-            member_window = member_windows.get(str(member_id))
-            if member_window is None:
-                continue
-
-            start, end = member_window
-            start = max(0, min(int(start), int(expected_rows)))
-            end = max(start, min(int(end), int(expected_rows)))
-            if end <= start:
-                continue
-
-            appliances = (member_schema or {}).get('deferrable_appliances', {}) or {}
-            for appliance_id in appliances.keys():
-                windows[(str(member_id), str(appliance_id))] = (start, end)
 
         return windows
 
