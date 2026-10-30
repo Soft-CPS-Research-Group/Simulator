@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KPIs &mdash; CityLearn 1.9.7 documentation</title>
+  <title>KPIs &mdash; CityLearn 1.9.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=0f42b3e6"></script>
+      <script src="_static/documentation_options.js?v=e7581024"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -65,6 +65,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#audited-appliance-service">Audited appliance service</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#paired-comparison-evidence">Paired comparison evidence</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#executed-intervals-and-independent-balances">Executed intervals and independent balances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#audited-kpi-populations">Audited KPI populations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">citylearn</a></li>
@@ -213,6 +214,21 @@ service and cash.</p>
 explicit tolerances, regression cases and limits. The audit is optional offline
 instrumentation; it does not provide empirical calibration or a universal
 certificate for every dataset/controller.</p>
+</section>
+<section id="audited-kpi-populations">
+<h2>Audited KPI populations<a class="headerlink" href="#audited-kpi-populations" title="Link to this heading"></a></h2>
+<p>Iteration 5, included from v1.9.8, adds <code class="docutils literal notranslate"><span class="pre">kpi-families-audit-v1</span></code> thermal service
+and equity coverage, plus <code class="docutils literal notranslate"><span class="pre">demand-response-audit-v1</span></code> reference quality.
+<code class="docutils literal notranslate"><span class="pre">env.get_kpi_family_audit()</span></code> reports executed active samples, occupied/known
+populations and energy shortfalls by service. District audit ratios pool exposure
+and energy. Native comfort bands and conditional severity statistics are corrected.</p>
+<p>DR preparation rounds up to the requested duration and excludes structurally
+changed references, even after caching. Explicit service/stress/unspecified groups
+retain separate denominators. Member signed delivery and cash are additive;
+individual credit/shortfall diagnostics are not district totals. Missing reference
+or no applicable events give undefined audit rates with counts and coverage.</p>
+<p>The export manifest records definitions and reward evidence without changing
+the reward. See <code class="docutils literal notranslate"><span class="pre">docs/kpi_family_audit.md</span></code> for formulas, migration and limits.</p>
 </section>
 </section>
 

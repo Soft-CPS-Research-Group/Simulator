@@ -23,6 +23,7 @@ Submodules
    citylearn.internal.ev_departure_audit
    citylearn.internal.experiment
    citylearn.internal.kpi
+   citylearn.internal.kpi_family_audit
    citylearn.internal.loading
    citylearn.internal.observation_contract
    citylearn.internal.physics_invariants

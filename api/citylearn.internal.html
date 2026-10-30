@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal package &mdash; CityLearn 1.9.7 documentation</title>
+  <title>citylearn.internal package &mdash; CityLearn 1.9.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0f42b3e6"></script>
+      <script src="../_static/documentation_options.js?v=e7581024"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -198,6 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.DEFAULT_BASELINE_WINDOW_SECONDS"><code class="docutils literal notranslate"><span class="pre">CityLearnDemandResponseService.DEFAULT_BASELINE_WINDOW_SECONDS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.DIRECTION_CODES"><code class="docutils literal notranslate"><span class="pre">CityLearnDemandResponseService.DIRECTION_CODES</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.ISSUER_CODES"><code class="docutils literal notranslate"><span class="pre">CityLearnDemandResponseService.ISSUER_CODES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.audit_summary"><code class="docutils literal notranslate"><span class="pre">CityLearnDemandResponseService.audit_summary()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.get_metadata"><code class="docutils literal notranslate"><span class="pre">CityLearnDemandResponseService.get_metadata()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.initialize"><code class="docutils literal notranslate"><span class="pre">CityLearnDemandResponseService.initialize()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.observation_meta"><code class="docutils literal notranslate"><span class="pre">CityLearnDemandResponseService.observation_meta()</span></code></a></li>
@@ -215,6 +216,7 @@
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest.end_time_step"><code class="docutils literal notranslate"><span class="pre">DemandResponseRequest.end_time_step</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest.issuer"><code class="docutils literal notranslate"><span class="pre">DemandResponseRequest.issuer</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest.order"><code class="docutils literal notranslate"><span class="pre">DemandResponseRequest.order</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest.purpose"><code class="docutils literal notranslate"><span class="pre">DemandResponseRequest.purpose</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest.request_id"><code class="docutils literal notranslate"><span class="pre">DemandResponseRequest.request_id</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest.shortfall_penalty_eur_per_kwh"><code class="docutils literal notranslate"><span class="pre">DemandResponseRequest.shortfall_penalty_eur_per_kwh</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest.start_time_step"><code class="docutils literal notranslate"><span class="pre">DemandResponseRequest.start_time_step</span></code></a></li>
@@ -325,8 +327,19 @@
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.kpi.html#citylearn.internal.kpi.CityLearnKPIService.evaluate"><code class="docutils literal notranslate"><span class="pre">CityLearnKPIService.evaluate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.kpi.html#citylearn.internal.kpi.CityLearnKPIService.evaluate_legacy"><code class="docutils literal notranslate"><span class="pre">CityLearnKPIService.evaluate_legacy()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="citylearn.internal.kpi.html#citylearn.internal.kpi.CityLearnKPIService.evaluate_v2"><code class="docutils literal notranslate"><span class="pre">CityLearnKPIService.evaluate_v2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="citylearn.internal.kpi.html#citylearn.internal.kpi.CityLearnKPIService.family_audit"><code class="docutils literal notranslate"><span class="pre">CityLearnKPIService.family_audit()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citylearn.internal.kpi_family_audit.html">citylearn.internal.kpi_family_audit module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="citylearn.internal.kpi_family_audit.html#citylearn.internal.kpi_family_audit.equity_metrics"><code class="docutils literal notranslate"><span class="pre">equity_metrics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="citylearn.internal.kpi_family_audit.html#citylearn.internal.kpi_family_audit.metadata"><code class="docutils literal notranslate"><span class="pre">metadata()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="citylearn.internal.kpi_family_audit.html#citylearn.internal.kpi_family_audit.pool_thermal"><code class="docutils literal notranslate"><span class="pre">pool_thermal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="citylearn.internal.kpi_family_audit.html#citylearn.internal.kpi_family_audit.ratio"><code class="docutils literal notranslate"><span class="pre">ratio()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="citylearn.internal.kpi_family_audit.html#citylearn.internal.kpi_family_audit.reward_metadata"><code class="docutils literal notranslate"><span class="pre">reward_metadata()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="citylearn.internal.kpi_family_audit.html#citylearn.internal.kpi_family_audit.thermal_counts"><code class="docutils literal notranslate"><span class="pre">thermal_counts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="citylearn.internal.kpi_family_audit.html#citylearn.internal.kpi_family_audit.thermal_metrics"><code class="docutils literal notranslate"><span class="pre">thermal_metrics()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="citylearn.internal.loading.html">citylearn.internal.loading module</a><ul>

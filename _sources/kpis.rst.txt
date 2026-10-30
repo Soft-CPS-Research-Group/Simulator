@@ -133,3 +133,22 @@ See ``docs/independent_balance_audit.md`` for the bounded CLI, reference method,
 explicit tolerances, regression cases and limits. The audit is optional offline
 instrumentation; it does not provide empirical calibration or a universal
 certificate for every dataset/controller.
+
+
+Audited KPI populations
+=======================
+
+Iteration 5, included from v1.9.8, adds ``kpi-families-audit-v1`` thermal service
+and equity coverage, plus ``demand-response-audit-v1`` reference quality.
+``env.get_kpi_family_audit()`` reports executed active samples, occupied/known
+populations and energy shortfalls by service. District audit ratios pool exposure
+and energy. Native comfort bands and conditional severity statistics are corrected.
+
+DR preparation rounds up to the requested duration and excludes structurally
+changed references, even after caching. Explicit service/stress/unspecified groups
+retain separate denominators. Member signed delivery and cash are additive;
+individual credit/shortfall diagnostics are not district totals. Missing reference
+or no applicable events give undefined audit rates with counts and coverage.
+
+The export manifest records definitions and reward evidence without changing
+the reward. See ``docs/kpi_family_audit.md`` for formulas, migration and limits.
