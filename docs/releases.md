@@ -6,6 +6,36 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.10 — 2026-10-30 — continuous campaign and measured resources
+
+- Add an offline continuous-run auditor with per-interval device/meter/cash
+  checks, final KPI/service reconciliation and block-by-block Linux RSS/timing.
+- Observe terminals before topology advances; retain failed/partial case evidence
+  and explicitly identify the scope of production provenance residuals.
+- Selected annual Micro-4/Core-30 and intermediate Premium runs are recorded in
+  the local campaign evidence. No controller ranking, full two-year certification
+  of every configuration or empirical calibration is implied.
+- Preserve runtime dispatch, market, datasets and KPI definitions. [Method](long_run_validation.md).
+
+Validation: 767 local tests (10 new); continuous Micro-4/Core-30 years and 60 Premium days passed. Datasets/runtime unchanged.
+
+Selected campaign: 35,040 intervals each in Micro-4 and Core-30 (2023), plus
+5,760 intervals in Premium (2024): 75,840 intervals and 12,793,490 streaming checks.
+Actual active members were 4, 26–27 and 88, respectively. Observed peaks were
+692.3, 2,029.9 and 1,708.3 MiB. The final Micro-4 trace was byte-identical after
+moving the observer before topology transitions.
+
+Service outcomes are not implied by an accounting pass: NormalPolicy missed the
+target SOC in 318/4,661 Core-30 and 139/3,318 Premium departures; service coverage
+was 100%. All 334/3,478/1,921 offered appliance tasks completed in the three cases.
+Feasible individual replay does not certify joint scheduling feasibility.
+
+The CLI is a source-checkout script; the PyPI wheel carries the validated runtime
+and version milestone. Physical dispatch, market/reward and datasets are unchanged
+from v1.9.9. No new annual campaign was run solely for the version bump.
+Premium annual execution and empirical calibration remain outside this evidence.
+[Validation evidence](releases/1.9.10-validation.json).
+
 ## v1.9.9 — 2026-10-30 — source clocks and reproducible evidence
 
 - Use canonical UTC calendars for Portuguese source spacing and offset-aware

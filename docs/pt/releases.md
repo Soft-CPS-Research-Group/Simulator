@@ -4,6 +4,35 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.10 — 2026-10-30 — campanha contínua e recursos medidos
+
+- Auditor local contínuo com verificações de dispositivos/contadores/dinheiro,
+  reconciliação final de KPIs/serviço e memória/duração por blocos em Linux.
+- Recolha antes de avançar a topologia; falhas/parciais preservados e âmbito dos
+  resíduos de proveniência do motor identificado explicitamente.
+- Campanha selecionada anual Micro-4/Core-30 e intermédia Premium documentada
+  nos comprovativos locais. Sem ranking de controladores, certificação de dois
+  anos em todas as configurações ou calibração empírica.
+- Preservados despacho, mercado, datasets e definições de KPIs. [Método](../long_run_validation.md).
+
+Validação: 767 testes locais (10 novos), anos Micro-4/Core-30 e 60 dias Premium aprovados. Datasets e motor intactos.
+
+Campanha selecionada: 35.040 intervalos no Micro-4 e outros 35.040 no Core-30
+(2023), mais 5.760 no Premium (2024): 75.840 intervalos e 12.793.490 verificações.
+Membros ativos reais: 4, 26–27 e 88; picos observados de 692,3/2.029,9/1.708,3 MiB.
+O registo anual Micro-4 ficou idêntico após mover o observador antes da topologia.
+
+O serviço é reportado com os balanços: NormalPolicy ficou abaixo do alvo SOC em
+318/4.661 partidas Core-30 e 139/3.318 Premium, com cobertura de avaliação de 100%.
+Todas as 334/3.478/1.921 tarefas de máquinas oferecidas foram concluídas.
+Viabilidade individual não certifica escalonamento conjunto.
+
+O auditor corre a partir do checkout; o wheel do PyPI contém o runtime e a nova
+versão, sem scripts de auditoria/datasets do repositório. Despacho físico, mercado,
+recompensa e datasets iguais à 1.9.9. Sem repetir a campanha apenas pelo bump.
+Premium anual e calibração empírica continuam fora desta evidência.
+[Comprovativos](../releases/1.9.10-validation.json).
+
 ## v1.9.9 — 2026-10-30 — calendário e repetibilidade
 
 - Calendário UTC canónico para resolução dos dados e timestamps com fuso; saltos
