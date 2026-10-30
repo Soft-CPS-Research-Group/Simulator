@@ -10,6 +10,8 @@ Default release owner for this fork: [@calofonseca](https://github.com/calofonse
 
 - Use canonical UTC calendars for Portuguese source spacing and offset-aware
   timestamps; local DST gaps/folds no longer distort the first-two-row inference.
+- Normalize Parquet timestamp units (seconds/milliseconds/microseconds/nanoseconds)
+  before deriving physical spacing; storage precision cannot scale simulation time.
 - Replay explicit reset seeds independently of episode counters; allow an explicit
   episode index. Isolate indexed input-noise streams and retain initialization
   conditions in native references after reset-seed changes.
@@ -26,7 +28,7 @@ Default release owner for this fork: [@calofonseca](https://github.com/calofonse
   and reference studies after release. No automatic full-dataset conversion,
   annual campaign or empirical calibration. [Definitions and limits](temporal_reproducibility.md).
 
-Validation: 754 full-suite tests passed, including 33 new cases. Nine native
+Validation: 757 full-suite tests passed, including 36 new cases. Nine native
 Portuguese configurations have aligned 70,176-sample calendars at 900 seconds;
 six bounded windows have three identical seeded/fresh/KPI-query replays with
 physical checks active. The 16-scenario physical matrix passed on the temporal

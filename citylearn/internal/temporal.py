@@ -133,7 +133,7 @@ class TimeAxis:
                 raise ValueError("Calendar indexes must be contiguous from zero")
             self.utc = pd.DatetimeIndex(
                 pd.to_datetime(frame.timestamp_utc, utc=True, errors="raise")
-            )
+            ).astype("datetime64[ns, UTC]")
             if self.utc.hasnans:
                 raise ValueError("Calendar contains missing timestamps")
             differences = np.diff(self.utc.asi8) / 1e9
@@ -148,7 +148,8 @@ class TimeAxis:
                 )
             self.seconds = float(differences[0])
             if "timestamp_local" in frame and not np.array_equal(
-                pd.to_datetime(frame.timestamp_local, utc=True).astype("int64"),
+                pd.to_datetime(frame.timestamp_local, utc=True)
+                .astype("datetime64[ns, UTC]").astype("int64"),
                 self.utc.asi8,
             ):
                 raise ValueError("Local and UTC calendar instants disagree")

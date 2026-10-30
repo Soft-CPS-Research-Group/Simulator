@@ -434,3 +434,17 @@ def test_random_split_stream_handles_zero_and_large_valid_seeds(seed):
         tracker.next_episode(5, False, True, seed)
         assert tracker.episode_start_time_step == start
         assert 0 <= start <= tracker.episode_end_time_step <= 99
+
+
+@pytest.mark.parametrize('unit', ['s', 'ms', 'us'])
+def test_parquet_calendar_precision_does_not_change_physical_spacing(tmp_path, unit):
+    from citylearn.internal.temporal import TimeAxis
+    clock = pd.date_range('2024-01-01', periods=3, freq='15min', tz='UTC')
+    # Parquet timestamps can preserve a coarser integer unit on reading.
+    coarse = clock.as_unit(unit)
+    pd.DataFrame({'time_step': range(3), 'timestamp_utc': coarse,
+                  'timestamp_local': clock.tz_convert('Europe/Lisbon').astype(str)}).to_parquet(tmp_path/'clock.parquet')
+    axis = TimeAxis({'root_directory': str(tmp_path),
+                     'time_axis': {'calendar_file': 'clock.parquet'}})
+    assert axis.seconds == 900
+    assert axis.at(1) == pd.Timestamp('2024-01-01T00:15:00Z')

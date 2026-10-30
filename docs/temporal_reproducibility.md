@@ -13,6 +13,10 @@ instants. Portuguese datasets automatically use their existing
 `shared/calendar.parquet`. The IANA `timezone`, when supplied, determines display
 time. No timezone or DST information is inferred from repeated local clock hours.
 
+Calendar timestamp integer units are normalized to nanoseconds before calculating
+spacing or comparing UTC/local instants. Parquet precision does not change the
+physical interval.
+
 The canonical UTC spacing overrides inference from the first two local hour/minute
 labels. Otherwise a spring jump can look like a 75-minute sample and an autumn
 fold like a 23-hour-15-minute sample. Native datasets remain on 900-second UTC

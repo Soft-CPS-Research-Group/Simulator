@@ -8,6 +8,8 @@ Responsavel default por releases deste fork: [@calofonseca](https://github.com/c
 
 - Calendário UTC canónico para resolução dos dados e timestamps com fuso; saltos
   e repetições de hora local deixam de alterar a resolução inferida na janela.
+- Normalizadas unidades de timestamps Parquet (segundos/milissegundos/microssegundos/
+  nanossegundos); a precisão de armazenamento não altera o tempo físico.
 - Seed explícita repete o fluxo aleatório independentemente do contador de
   episódios; índice de episódio selecionável. Ruído de entradas isolado por
   componente/índice global; BAU conserva condições de inicialização após resets.
@@ -21,7 +23,7 @@ Responsavel default por releases deste fork: [@calofonseca](https://github.com/c
 - Datasets preservados. Recalcular análises afetadas. Sem conversão automática de
   datasets completos, campanha anual ou calibração. [Definições e limites](../temporal_reproducibility.md).
 
-Validação: 754 testes aprovados, incluindo 33 novos. Nove configurações
+Validação: 757 testes aprovados, incluindo 36 novos. Nove configurações
 portuguesas com 70.176 amostras alinhadas a 900 segundos; seis janelas com três
 replays idênticos e física ativa. Matriz física 16/16 no candidato temporal antes
 das últimas correções de taxas diárias/splits; suite e pacote finais cobrem o código
