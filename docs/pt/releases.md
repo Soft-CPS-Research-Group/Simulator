@@ -4,6 +4,25 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.7 — 2026-10-30 — balanços independentes e fronteiras dos resultados
+
+- Auditor independente por rede de fluxos: origens/destinos, operações de baterias,
+  carbono adquirido, pagamentos por membro/operador, serviço e KPIs.
+- Preservados os históricos de membros e instâncias de BESS/carregadores no regresso.
+  Excluídos intervalos inativos e a observação terminal dos totais de energia/custo.
+- PV não utilizado durante cortes é curtailment, nunca consumo útil. A definição
+  de proveniência 1.1 inclui esse destino; a absorção também o exclui.
+- Conservadas carga e descarga brutas antes de anular movimentos opostos no intervalo.
+- Sem alterações de datasets/despacho, campanha anual ou calibração. Recalcular
+  análises afetadas. Corrige as limitações documentadas na v1.9.6; os resultados
+  antigos com proveniência 1.0 exigem nova execução.
+
+Validação: 687 testes na suite global (30 novas regressões). Aprovados os
+16 cenários físicos, ambas as janelas Premium (5.405.941 comparações) e o pacote
+instalado. [Método e limites](../independent_balance_audit.md).
+Publicação sujeita a CI da principal e teste do pacote instalado antes do PyPI.
+[Evidência](../releases/1.9.7-validation.json).
+
 ## v1.9.6 — 2026-10-30 — comparações e observações do agente
 
 - Contrato de emparelhamento, identidades do BAU/controlador, condições efetivas,

@@ -958,8 +958,10 @@ class CityLearnKPIService:
 
         for charger in self._chargers_for_metrics(building):
             consumption = np.array(charger.electricity_consumption[t_start:t_final + 1], dtype='float64')
-            charge_total_kwh += self._sum_finite(np.clip(consumption, 0.0, None))
-            v2g_export_total_kwh += self._sum_finite(np.clip(-consumption, 0.0, None))
+            charge = getattr(charger, 'gross_energy_charge', None)
+            discharge = getattr(charger, 'gross_energy_discharge', None)
+            charge_total_kwh += self._sum_finite(charge[t_start:t_final + 1] if charge is not None else np.clip(consumption, 0.0, None))
+            v2g_export_total_kwh += self._sum_finite(discharge[t_start:t_final + 1] if discharge is not None else np.clip(-consumption, 0.0, None))
 
             sim = charger.charger_simulation
             states = np.array(sim.electric_vehicle_charger_state, dtype='float64')
@@ -1266,7 +1268,7 @@ class CityLearnKPIService:
             storage for storage in self._storages_for_metrics(building)
             if self._to_scalar(getattr(storage, 'capacity', 0.0), 0.0) > 0.0
         ]
-        storage_series = []
+        charge_series, discharge_series = [], []
         for storage in storages:
             values = getattr(storage, 'electricity_consumption', None)
             if values is None and len(storages) == 1:
@@ -1277,17 +1279,12 @@ class CityLearnKPIService:
                     'electrical_storage_electricity_consumption',
                     [],
                 )
-            storage_series.append(
-                np.array(values[t_start:t_final + 1], dtype='float64')
-            )
-        charge_total = sum(
-            self._sum_finite(np.clip(values, 0.0, None))
-            for values in storage_series
-        )
-        discharge_total = sum(
-            self._sum_finite(np.clip(-values, 0.0, None))
-            for values in storage_series
-        )
+            charge = getattr(storage, 'gross_energy_charge', None)
+            discharge = getattr(storage, 'gross_energy_discharge', None)
+            charge_series.append(self._slice_window(charge if charge is not None else np.clip(values, 0., None), t_start, t_final))
+            discharge_series.append(self._slice_window(discharge if discharge is not None else np.clip(-np.asarray(values), 0., None), t_start, t_final))
+        charge_total = sum(self._sum_finite(values) for values in charge_series)
+        discharge_total = sum(self._sum_finite(values) for values in discharge_series)
         throughput_total = charge_total + discharge_total
 
         capacity = sum(
@@ -1323,21 +1320,24 @@ class CityLearnKPIService:
         t_final = upper if t_final is None else int(min(max(t_final, 0), upper))
         if t_final < t_start:
             return {
+                'pv_curtailment_total_kwh': 0.0,
                 'pv_generation_total_kwh': 0.0,
                 'pv_export_total_kwh': 0.0,
                 'pv_self_consumption_ratio': None,
             }
 
-        solar = np.array(building.solar_generation[t_start:t_final + 1], dtype='float64')
-        net = np.array(building.net_electricity_consumption[t_start:t_final + 1], dtype='float64')
+        solar = np.array(self._energy_values(building, building.solar_generation)[t_start:t_final + 1], dtype='float64')
+        net = np.array(self._energy_values(building, building.net_electricity_consumption)[t_start:t_final + 1], dtype='float64')
 
+        curtailment = self._energy_values(building, getattr(building, 'pv_curtailment', np.zeros_like(building.solar_generation)))[t_start:t_final + 1]
         generation = np.clip(-solar, 0.0, None)
         export = np.clip(-net, 0.0, None)
         pv_generation_total = self._sum_finite(generation)
         pv_export_total = self._sum_finite(np.minimum(generation, export))
-        self_consumption_ratio = None if pv_generation_total <= 0.0 else (pv_generation_total - pv_export_total) / pv_generation_total
+        self_consumption_ratio = None if pv_generation_total <= 0.0 else (pv_generation_total - pv_export_total - self._sum_finite(curtailment)) / pv_generation_total
 
         return {
+            'pv_curtailment_total_kwh': self._sum_finite(curtailment),
             'pv_generation_total_kwh': pv_generation_total,
             'pv_export_total_kwh': pv_export_total,
             'pv_self_consumption_ratio': self_consumption_ratio,
@@ -1361,33 +1361,39 @@ class CityLearnKPIService:
                     building.name,
                     int(t_start),
                     int(t_end),
-                    np.array(building.solar_generation, dtype='float64'),
-                    np.array(building.net_electricity_consumption, dtype='float64'),
+                    self._energy_values(building, building.solar_generation),
+                    self._energy_values(building, building.net_electricity_consumption),
+                    self._energy_values(building, getattr(building, 'pv_curtailment', np.zeros_like(building.solar_generation))),
                 )
             )
 
         pv_generation_total = 0.0
         pv_export_total = 0.0
 
+        pv_curtailment_total = 0.0
         for t in range(int(max(final_t, 0)) + 1):
             generation_t = 0.0
             district_net_t = 0.0
 
-            for _, t_start, t_end, solar, net in series_by_building:
+            curtailment_t = 0.0
+            for _, t_start, t_end, solar, net, curtailed in series_by_building:
                 if not (t_start <= t <= t_end):
                     continue
 
                 solar_value = self._to_scalar(solar[t] if t < len(solar) else np.nan, 0.0)
                 net_value = self._to_scalar(net[t] if t < len(net) else np.nan, 0.0)
+                curtailment_t += float(curtailed[t]) if t < len(curtailed) else 0.0
                 generation_t += max(-solar_value, 0.0)
                 district_net_t += net_value
 
             pv_generation_total += generation_t
-            pv_export_total += min(generation_t, max(-district_net_t, 0.0))
+            pv_curtailment_total += curtailment_t
+            pv_export_total += min(max(generation_t-curtailment_t,0.0), max(-district_net_t, 0.0))
 
-        self_consumption_ratio = None if pv_generation_total <= 0.0 else (pv_generation_total - pv_export_total) / pv_generation_total
+        self_consumption_ratio = None if pv_generation_total <= 0.0 else (pv_generation_total - pv_export_total - pv_curtailment_total) / pv_generation_total
 
         return {
+            'pv_curtailment_total_kwh': float(pv_curtailment_total),
             'pv_generation_total_kwh': float(pv_generation_total),
             'pv_export_total_kwh': float(pv_export_total),
             'pv_self_consumption_ratio': self_consumption_ratio,
@@ -1677,6 +1683,21 @@ class CityLearnKPIService:
 
         return start, end
 
+    def _energy_values(self, building, values):
+        """Energy belongs to executed active intervals, not the terminal observation."""
+        array = np.asarray(values, dtype='float64')[:int(getattr(self.env, 'time_step', len(values)))].copy()
+        if building is self.env or getattr(self.env, 'topology_mode', 'static') != 'dynamic':
+            return array
+        history = self.env._topology_service._active_member_history
+        steps = sorted(history)
+        mask = np.zeros(len(array), dtype=bool)
+        for i, start in enumerate(steps):
+            end = steps[i + 1] if i + 1 < len(steps) else len(array)
+            if building.name in history[start]:
+                mask[start:min(end, len(array))] = True
+        array[~mask] = 0.0
+        return array
+
     @staticmethod
     def _slice_window(values, t_start: int, t_final: int) -> np.ndarray:
         array = np.array(values, dtype='float64')
@@ -1732,7 +1753,7 @@ class CityLearnKPIService:
                 continue
 
             net_series_by_name[building.name] = np.asarray(
-                getattr(building, f'net_electricity_consumption{condition.value}'),
+                self._energy_values(building, getattr(building, f'net_electricity_consumption{condition.value}')),
                 dtype='float64',
             )
             price_series_by_name[building.name] = np.asarray(
@@ -1740,13 +1761,15 @@ class CityLearnKPIService:
                 dtype='float64',
             )
 
-        for t in range(final_t + 1):
+        for t in range(min(final_t + 1, int(env.time_step))):
             net_values = []
             active_buildings_t = []
             active_weights_t = []
             for building in buildings:
                 t_start, t_end = windows.get(building.name, (0, -1))
                 if not (t_start <= t <= t_end):
+                    continue
+                if getattr(env, 'topology_mode', 'static') == 'dynamic' and building.name not in env._topology_service.active_member_ids_at(t):
                     continue
 
                 net_series = net_series_by_name.get(building.name)
@@ -1816,9 +1839,9 @@ class CityLearnKPIService:
 
         env = self.env
 
-        get_net_electricity_consumption = lambda x, c: getattr(x, f'net_electricity_consumption{c.value}')
-        get_net_electricity_consumption_cost = lambda x, c: getattr(x, f'net_electricity_consumption_cost{c.value}')
-        get_net_electricity_consumption_emission = lambda x, c: getattr(x, f'net_electricity_consumption_emission{c.value}')
+        get_net_electricity_consumption = lambda x, c: self._energy_values(x, getattr(x, f'net_electricity_consumption{c.value}'))
+        get_net_electricity_consumption_cost = lambda x, c: self._energy_values(x, getattr(x, f'net_electricity_consumption_cost{c.value}'))
+        get_net_electricity_consumption_emission = lambda x, c: self._energy_values(x, getattr(x, f'net_electricity_consumption_emission{c.value}'))
 
         comfort_band = EnergySimulation.DEFUALT_COMFORT_BAND if comfort_band is None else comfort_band
         daily_steps = self._window_steps(24.0 * 3600.0, env.seconds_per_time_step)
@@ -1928,12 +1951,12 @@ class CityLearnKPIService:
             )
 
             net_c_series = self._slice_window(
-                getattr(building, f'net_electricity_consumption{building_control_condition.value}'),
+                self._energy_values(building, getattr(building, f'net_electricity_consumption{building_control_condition.value}')),
                 t_start,
                 t_end,
             )
             net_b_series = self._slice_window(
-                getattr(building, f'net_electricity_consumption{building_baseline_condition.value}'),
+                self._energy_values(building, getattr(building, f'net_electricity_consumption{building_baseline_condition.value}')),
                 t_start,
                 t_end,
             )
@@ -1944,12 +1967,12 @@ class CityLearnKPIService:
             zne_c = self._net_total(net_c_series)
             zne_b = self._net_total(net_b_series)
             ce_c_series = self._slice_window(
-                getattr(building, f'net_electricity_consumption_emission{building_control_condition.value}'),
+                self._energy_values(building, getattr(building, f'net_electricity_consumption_emission{building_control_condition.value}')),
                 t_start,
                 t_end,
             )
             ce_b_series = self._slice_window(
-                getattr(building, f'net_electricity_consumption_emission{building_baseline_condition.value}'),
+                self._energy_values(building, getattr(building, f'net_electricity_consumption_emission{building_baseline_condition.value}')),
                 t_start,
                 t_end,
             )
@@ -1960,12 +1983,12 @@ class CityLearnKPIService:
                 else 0.0
             )
             control_cost_series = self._slice_window(
-                getattr(building, f'net_electricity_consumption_cost{building_control_condition.value}'),
+                self._energy_values(building, getattr(building, f'net_electricity_consumption_cost{building_control_condition.value}')),
                 t_start,
                 t_end,
             )
             baseline_cost_series = self._slice_window(
-                getattr(building, f'net_electricity_consumption_cost{building_baseline_condition.value}'),
+                self._energy_values(building, getattr(building, f'net_electricity_consumption_cost{building_baseline_condition.value}')),
                 t_start,
                 t_end,
             )
@@ -2158,6 +2181,7 @@ class CityLearnKPIService:
 
             pv_metrics = self._compute_pv_metrics(building, t_start=t_start, t_final=t_end)
             extended_building_rows.extend([
+                self._metric('pv_curtailment_total_kwh', pv_metrics['pv_curtailment_total_kwh'], building.name, 'building'),
                 self._metric('pv_generation_total_kwh', pv_metrics['pv_generation_total_kwh'], building.name, 'building'),
                 self._metric('pv_export_total_kwh', pv_metrics['pv_export_total_kwh'], building.name, 'building'),
                 self._metric('pv_generation_daily_average_kwh', self._daily_average(pv_metrics['pv_generation_total_kwh'], building_days), building.name, 'building'),
@@ -2347,6 +2371,7 @@ class CityLearnKPIService:
         pv_export_total = district_pv_metrics['pv_export_total_kwh']
         district_pv_ratio = district_pv_metrics['pv_self_consumption_ratio']
         extended_district_rows.extend([
+            self._metric('pv_curtailment_total_kwh', district_pv_metrics['pv_curtailment_total_kwh'], 'District', 'district'),
             self._metric('pv_generation_total_kwh', pv_generation_total, 'District', 'district'),
             self._metric('pv_export_total_kwh', pv_export_total, 'District', 'district'),
             self._metric('pv_generation_daily_average_kwh', self._daily_average(pv_generation_total, simulated_days), 'District', 'district'),
@@ -3086,6 +3111,7 @@ class CityLearnKPIService:
             ('carbon_emissions_control_daily_average_kgco2', 'emissions', 'daily_average', 'control', None, 'kgco2'),
             ('carbon_emissions_baseline_daily_average_kgco2', 'emissions', 'daily_average', 'baseline', None, 'kgco2'),
             ('carbon_emissions_delta_daily_average_kgco2', 'emissions', 'daily_average', 'delta', None, 'kgco2'),
+            ('pv_curtailment_total_kwh', 'solar_self_consumption', 'total', 'curtailment', None, 'kwh'),
             ('pv_generation_total_kwh', 'solar_self_consumption', 'total', 'generation', None, 'kwh'),
             ('pv_export_total_kwh', 'solar_self_consumption', 'total', 'export', None, 'kwh'),
             ('pv_generation_daily_average_kwh', 'solar_self_consumption', 'daily_average', 'generation', None, 'kwh'),

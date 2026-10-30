@@ -32,8 +32,11 @@ def main():
     )
     try:
         env.reset()
-        while not (env.terminated or env.truncated):
-            env.step([[0.0] * len(names) for names in env.action_names])
+        from citylearn.internal.balance_audit import IndependentBalanceAudit
+        with IndependentBalanceAudit(env) as audit:
+            while not (env.terminated or env.truncated):
+                env.step([[0.0] * len(names) for names in env.action_names])
+            assert audit.finish()['status'] == 'pass'
         env.export_final_kpis(filepath="installed_kpis.csv")
         output = Path(env.new_folder_path)
         assert (output / "installed_kpis.csv").is_file()

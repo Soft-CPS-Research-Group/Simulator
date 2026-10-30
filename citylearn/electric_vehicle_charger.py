@@ -153,6 +153,15 @@ class Charger(Environment):
         return self.__past_charging_action_values_kwh
 
     @property
+    def gross_energy_charge(self):
+        """Actual AC import before netting opposing calls in an interval."""
+        return self.__gross_energy_charge
+
+    @property
+    def gross_energy_discharge(self):
+        return self.__gross_energy_discharge
+
+    @property
     def electricity_consumption(self) -> List[float]:
         r"""Electricity consumption time series."""
 
@@ -403,6 +412,8 @@ class Charger(Environment):
                 if battery_energy_balance >= 0 else battery_energy_balance * efficiency
             )
             self.__electricity_consumption[self.time_step] += ac_energy
+            self.__gross_energy_charge[self.time_step] += max(float(ac_energy), 0.0)
+            self.__gross_energy_discharge[self.time_step] += max(-float(ac_energy), 0.0)
             # Preserve charger losses at the AC boundary for passive provenance.
             events = electric_vehicle.battery.energy_provenance_events
             if events:
@@ -424,6 +435,8 @@ class Charger(Environment):
         self.connected_electric_vehicle = None
         self.incoming_electric_vehicle = None
         self.__electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.__gross_energy_charge = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.__gross_energy_discharge = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.__past_charging_action_values_kwh = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
         self.__past_connected_evs = [None] * self.episode_tracker.episode_time_steps
         self.action_feedback_requested_action_normalized = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')

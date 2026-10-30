@@ -1,0 +1,128 @@
+{
+  "date": "2026-10-30",
+  "iteration": 4,
+  "status": "release_candidate_1_9_7",
+  "base_release": "1.9.6",
+  "base_commit": "609507c9b3a53be382c164f119ddbfaf9348f52e",
+  "committed": false,
+  "pushed": false,
+  "published": false,
+  "new_remote_ci_runs": 0,
+  "definition_version": "independent-flow-audit-v1",
+  "provenance_definition_version": "1.1",
+  "full_suite": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "687",
+    "time": "275.200",
+    "timestamp": "2026-10-30T15:49:55.939605+00:00",
+    "hostname": "tiago-Vector-16-HX-A13VHG"
+  },
+  "focused_regressions": {
+    "passed": 30,
+    "new_tests": 30,
+    "note": "The 686-test full suite includes the first 29 new cases. One additional EV opposing-call parameter was then added and the complete 30-case regression file passed. No runtime code changed after the full suite."
+  },
+  "distinct_tests_passed": 687,
+  "critical_lint": "passed E9,F63,F7,F82",
+  "diff_check": "passed",
+  "physics_summary": {
+    "total": 16,
+    "executed": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "hard_failures": 0
+  },
+  "portugal_windows": [
+    {
+      "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
+      "schema_sha256": "056599b00cf19079d89407b762638c3e303f7719a2bdd12e80f1a76aa6c4d398",
+      "start": 4176,
+      "end": 4190,
+      "seed": 0,
+      "policy": "normal",
+      "physics_invariant_checks": true,
+      "status": "pass",
+      "completed_intervals": 14,
+      "checks": 987696,
+      "max_absolute_error": 1.7262064488932083e-06,
+      "max_tolerance_fraction": 0.10246231349417469,
+      "members_initial": 81,
+      "members_final": 81,
+      "initial_inventory_kwh": 1648.3355461597441,
+      "final_inventory_kwh": 1698.5672734212885,
+      "district_closure": {
+        "pv_balance_residual_kwh": 4.782605742548185e-07,
+        "grid_balance_residual_kwh": 1.024623202283692e-06,
+        "unknown_balance_residual_kwh": 1.348635123576969e-07,
+        "carbon_balance_residual_kgco2": 1.4446974461179707e-07
+      },
+      "evidence_file": "/home/tiago/Documents/ChatGPT/EnergAIze base/output/iteracao4-simulador-2026-10-30/portugal-4176-4190.json"
+    },
+    {
+      "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
+      "schema_sha256": "056599b00cf19079d89407b762638c3e303f7719a2bdd12e80f1a76aa6c4d398",
+      "start": 4132,
+      "end": 4190,
+      "seed": 0,
+      "policy": "normal",
+      "physics_invariant_checks": true,
+      "status": "pass",
+      "completed_intervals": 58,
+      "checks": 4418245,
+      "max_absolute_error": 3.342982836329611e-06,
+      "max_tolerance_fraction": 0.3165113312071804,
+      "members_initial": 80,
+      "members_final": 81,
+      "initial_inventory_kwh": 1761.410635080337,
+      "final_inventory_kwh": 1694.0580138587964,
+      "district_closure": {
+        "pv_balance_residual_kwh": 4.5415163185680285e-07,
+        "grid_balance_residual_kwh": 3.1651134122512303e-06,
+        "unknown_balance_residual_kwh": 1.1187648851773702e-07,
+        "carbon_balance_residual_kgco2": 4.2345126871623506e-07
+      },
+      "evidence_file": "/home/tiago/Documents/ChatGPT/EnergAIze base/output/iteracao4-simulador-2026-10-30/portugal-4132-4190.json"
+    }
+  ],
+  "total_independent_window_checks": 5405941,
+  "tolerances": {
+    "absolute": 1e-05,
+    "relative": 1e-07,
+    "rule": "absolute + relative * max(abs(actual), abs(expected)); per compared quantity in kWh, kgCO2 or EUR"
+  },
+  "installed_package_export": "passed with independent audit outside source checkout using isolated Python",
+  "candidate_wheel_sha256": "2f77fb19d90148ebc2ce18ccb0973729ecc3b5f0004c7bdde02b29868c1c40c2",
+  "candidate_note": "Iteration 4 prepared for 1.9.7. Prior physical matrix and real windows use identical runtime logic; candidate changes version and documentation only.",
+  "datasets_modified": false,
+  "preserved_untracked_script_sha256": "c64d51b793c9001423244f0c7e685c65604b62da9b77115ff703b2a57c2c6002",
+  "next_iteration": 5,
+  "fixes": [
+    "Preserve completed member flow/cost and retired BESS/charger history on re-entry.",
+    "Exclude unexecuted terminal observations and inactive member gaps from energy/PV/cost/carbon totals.",
+    "Classify unused islanded PV as curtailment, excluded from useful load and absorption.",
+    "Retain gross BESS and charger terminal charge/discharge before interval netting; explicit reading replacement remains supported."
+  ],
+  "limits": [
+    "Independent accounting reference, not an independent electrochemical, thermal, charger controller or EV feasibility model.",
+    "Trusts raw model served loads/journals/configuration while checking journals against terminals and stored energy.",
+    "Interval-net community boundary and ordered storage operations; no subinterval power-flow proof.",
+    "Existing EV/appliance service audits and explicit initial/final inventory must accompany economic comparisons; no terminal price credit or optimality claim.",
+    "Legacy facades without gross traces and manually overwritten terminal readings cannot reconstruct unrecorded gross operations.",
+    "DR, resilience, equity and comfort definitions remain iteration 5; temporal alignment/reproducibility iteration 6.",
+    "No annual campaign, long-run memory/performance certification, empirical calibration or external UI modification."
+  ],
+  "release_candidate_full_suite": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "687",
+    "time": "275.200",
+    "timestamp": "2026-10-30T15:49:55.939605+00:00",
+    "hostname": "tiago-Vector-16-HX-A13VHG"
+  }
+}

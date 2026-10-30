@@ -195,6 +195,14 @@ class ElectricDevice(Device):
         step = self.time_step if time_step is None else int(time_step)
         ratio = self.time_step_ratio if self.time_step_ratio not in (None, 0) else 1.0
         self.__electricity_consumption[step] = float(electricity_consumption) / ratio
+        # An explicit replacement of the terminal reading also replaces its
+        # gross trace. Ordered physical operations use the transfer journal;
+        # a manually supplied net reading cannot reconstruct those operations.
+        charge = getattr(self, 'gross_energy_charge', None)
+        discharge = getattr(self, 'gross_energy_discharge', None)
+        if charge is not None and discharge is not None:
+            charge[step] = max(float(electricity_consumption), 0.0)
+            discharge[step] = max(-float(electricity_consumption), 0.0)
 
     def reset(self):
         r"""Reset `ElectricDevice` to initial state and set `electricity_consumption` at `time_step` 0 to = 0.0."""
@@ -797,6 +805,15 @@ class StorageDevice(Device):
         return self.__stored_energy_transfer
 
     @property
+    def gross_energy_charge(self):
+        """Actual positive terminal movements, in control-step kWh."""
+        return getattr(self, '_StorageDevice__gross_energy_charge', None)
+
+    @property
+    def gross_energy_discharge(self):
+        return getattr(self, '_StorageDevice__gross_energy_discharge', None)
+
+    @property
     def energy_provenance_events(self):
         """Actual operations in the current step, with AC/storage boundaries.
 
@@ -812,6 +829,9 @@ class StorageDevice(Device):
             self._energy_event_step = self.time_step
         self._energy_events.append(dict(kind=kind, before=float(before), after=float(after),
                                        terminal=float(terminal), bus=float(terminal)))
+        if kind == 'transfer' and self.__gross_energy_charge is not None:
+            self.__gross_energy_charge[self.time_step] += max(float(terminal), 0.0)
+            self.__gross_energy_discharge[self.time_step] += max(-float(terminal), 0.0)
 
     @property
     def energy_balance(self) -> np.ndarray:
@@ -990,6 +1010,8 @@ class StorageDevice(Device):
         self.__soc_initialized = np.zeros(self.episode_tracker.episode_time_steps, dtype=bool)
         self.__soc_initialized[0] = True
         self.__energy_balance = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+        self.__gross_energy_charge = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32') if isinstance(self, ElectricDevice) and self.capacity > 0 else None
+        self.__gross_energy_discharge = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32') if self.__gross_energy_charge is not None else None
         self.__stored_energy_transfer = 0.0
         self.__transfer_time_step = self.time_step
         self._energy_events = []

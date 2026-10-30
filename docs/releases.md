@@ -6,6 +6,27 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.7 — 2026-10-30 — independent balances and reporting boundaries
+
+- Add an offline independent physical-flow network audit: energy by source and
+  destination, ordered storage operations, acquisition carbon, member/operator
+  cash, service energy and reported KPIs. It observes normal/no-feedback paths.
+- Preserve completed member flows and retired BESS/charger instances on re-entry.
+  Price only executed active intervals; exclude terminal-only PV and membership gaps.
+- Report islanded unused PV as curtailment, never useful load. Provenance definition
+  1.1 adds that destination; absorption also excludes rejected PV.
+- Retain gross BESS/charger charge and discharge before netting opposing calls.
+- Datasets and dispatch are unchanged. Re-run affected energy/cost/solar/throughput
+  analyses after release. No annual campaign or empirical calibration.
+  Fixes the reporting limitations documented for v1.9.6. Historical provenance
+  1.0 exports cannot reconstruct these corrected results; rerun affected studies.
+
+Validation: 687 full-suite tests passed (30 new regression cases). All 16 physical
+scenarios, both Premium windows (5,405,941 comparisons) and installed-wheel export
+passed. [Method, tolerances and limits](independent_balance_audit.md).
+Release gates require successful master CI and installed-wheel export before PyPI.
+[Validation evidence](releases/1.9.7-validation.json).
+
 ## v1.9.6 — 2026-10-30 — paired comparisons and agent observations
 
 - Add versioned pairing evidence, explicit native BAU/controller identities,

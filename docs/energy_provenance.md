@@ -1,7 +1,7 @@
-# Energy provenance and carbon accounting (1.9.0)
+# Energy provenance and carbon accounting
 
 The new `evaluate_v2()` family is `building_energy_provenance_*` and
-`district_energy_provenance_*`. The definition version is **1.0**; the complete
+`district_energy_provenance_*`. The definition version is **1.1**; the complete
 KPI contract version is **1.9.0**. Both are present in environment metadata,
 DataFrame attributes and the JSON manifest accompanying exported KPIs.
 
@@ -18,6 +18,17 @@ linear balance resolves energy charged and discharged within the same interval,
 including transfers between several storages. This is an accounting convention,
 not a claim to identify electrons or the chronology inside a sampled interval.
 No counter changes actions, physical SOC, degradation, rewards or prices.
+
+Only executed intervals while a member is active contribute energy, PV, cost and
+carbon totals. The terminal observation is not another dispatched interval.
+Completed flows survive member removal and re-entry; recommissioning still starts
+the physical equipment from its configured initial state. The ledger classifies
+retired inventory as an exit and the new initial inventory as unknown input.
+
+During an outage, PV availability that cannot serve load or charge storage is
+assigned to `curtailment`. It remains part of available generation and is excluded
+from useful load and instantaneous absorption. This is rejected local generation,
+not an external grid export. `Building.pv_curtailment` exposes the interval series.
 
 PV generated after reset is the current generation cohort. Grid energy carries
 its acquisition carbon mass. Initial SOC and imposed arrival SOC have unknown
@@ -46,6 +57,7 @@ following suffixes. Energy is in kWh, carbon mass in kgCO2 and ratios are unitle
 | `pv_mobility_kwh` | Known PV inventory leaving in a departing connected vehicle. This is delivery to mobility, not measured trip consumption. |
 | `pv_grid_export_kwh` | PV reaching the external grid, including delayed battery or V2G export. |
 | `pv_loss_kwh` | PV lost in battery/charger conversion and standby. |
+| `pv_curtailment_kwh` | Available PV rejected during islanded operation. |
 | `pv_stored_kwh` | PV remaining inside connected/active storage. Not final consumption. |
 | `pv_asset_exit_kwh` | Inventory leaving with a removed stationary asset/member. |
 | `pv_external_reset_kwh` | Old inventory retired when an external SOC assignment replaces its provenance. |
@@ -59,13 +71,13 @@ following suffixes. Energy is in kWh, carbon mass in kgCO2 and ratios are unitle
 | `local_import_kwh`, `local_export_kwh` | Internal transfers, also split by `pv_` and `grid_` prefixes. These are not additional final destinations. |
 
 Destination substitutions are `load`, `mobility`, `grid_export`, `loss`, `stored`,
-`asset_exit` and `external_reset`. Recipient-level PV use can exceed that member's
+`asset_exit`, `external_reset` and `curtailment`. Recipient-level PV use can exceed that member's
 own generation because energy can be received from neighbours. Ratios and cohort
 closure are therefore published at district level:
 
 - `pv_useful_building_ratio = pv_load_kwh / pv_generated_kwh`.
 - `pv_useful_with_mobility_ratio = (pv_load_kwh + pv_mobility_kwh) / pv_generated_kwh`.
-- `pv_balance_residual_kwh`: generation minus all seven final destinations above.
+- `pv_balance_residual_kwh`: generation minus all eight final destinations above.
 - `grid_balance_residual_kwh` and `unknown_balance_residual_kwh`: acquisition or
   unknown input minus the corresponding destinations.
 - `carbon_balance_residual_kgco2`: external acquisition emissions minus known
@@ -74,7 +86,7 @@ closure are therefore published at district level:
   discrepancy observed during accounting.
 
 A zero PV denominator produces an undefined ratio (`None`/NaN), not an artificial
-zero or 100%. Stored energy, losses and asset exits are excluded from useful-use
+zero or 100%. Stored energy, losses, curtailment and asset exits are excluded from useful-use
 ratios. Carbon acquisition and carbon use answer different questions; **do not
 add them together**. Unknown-carbon energy is explicitly reported separately.
 
@@ -87,7 +99,10 @@ configuration, timestep and definition version as the controlled simulation.
 Existing PV self-consumption remains **instantaneous absorption**, which includes
 energy entering storage. It does not prove final useful consumption. Existing
 emissions remain the sum of positive member imports before sharing. These old
-names and values were not silently replaced. Recompute using the new family to
+names are retained. Definition 1.1 corrects rejected PV being counted as load or
+absorption during outages and excludes unexecuted/inactive intervals from totals.
+Recompute affected experiments; historical 1.0 totals are not interchangeable with
+1.1 results. Recompute using the provenance family to
 answer provenance or external-boundary questions. Historical aggregated exports
 alone cannot reconstruct storage origins; rerun those experiments.
 
@@ -95,6 +110,17 @@ For example, 1 kWh PV charged and later exported gives 1 kWh of
 `pv_grid_export_kwh`, zero useful PV consumption and zero PV stock at the end.
 An external purchase of 1 kWh at 0.2 kgCO2/kWh gives 0.2 kgCO2 even if gross member
 imports before sharing total 3.5 kWh.
+
+BESS charge/discharge and charger charge/V2G totals use gross terminal movements
+before netting opposing calls in one interval. Their sum is throughput; net
+exchange and physical dispatch retain their definitions. Legacy custom facades
+without gross traces retain a net-series approximation. An explicit replacement
+of a device terminal reading also replaces its gross trace with that signed net
+reading; it cannot recover unrecorded operations.
+
+See [independent balance audit](independent_balance_audit.md) for the separate
+reference calculation, tolerances, command and limits. Definition 1.1 and that
+audit are included from v1.9.7 and are absent from v1.9.6.
 
 ## EV feasibility
 

@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-DEFINITION_VERSION = '1.0'
+DEFINITION_VERSION = '1.1'
 KPI_DEFINITION_VERSION = '1.9.0'
 EPS = 1e-10
 
@@ -158,6 +158,11 @@ class CityLearnProvenanceService:
             pv = max(-float(b.solar_generation[t]), 0.0)
             source = {('pv', b.name): (pv, 0.0)} if pv > EPS else {}
             self.source(b.name, source)
+            curtailed = float(b.pv_curtailment[t]) if hasattr(b, 'pv_curtailment') else 0.0
+            if curtailed > EPS:
+                self.sink(b.name, 'curtailment', {('pv', b.name): (curtailed, 0.0)})
+            pv = max(pv - curtailed, 0.0)
+            source = {('pv', b.name): (pv, 0.0)} if pv > EPS else {}
             buses[b.name] = dict(known=dict(source), pv=pv, discharge=0.0, charge=0.0,
                                  recycle=0.0, net=net, building=b)
         for stock in self.stocks.values():
@@ -281,7 +286,7 @@ class CityLearnProvenanceService:
                 row[f'{direction}_kwh'] = quantity(bag)
                 row[f'pv_{direction}_kwh'] = quantity(bag, 'pv')
                 row[f'grid_{direction}_kwh'] = quantity(bag, 'grid')+quantity(bag, 'grid_unknown_carbon')
-            for destination in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'stored'):
+            for destination in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'curtailment', 'stored'):
                 bag = stocks if destination == 'stored' else self.sinks[(name, destination)]
                 row[f'pv_{destination}_kwh'] = quantity(bag, 'pv')
                 row[f'grid_{destination}_kwh'] = quantity(bag, 'grid')+quantity(bag, 'grid_unknown_carbon')
@@ -293,13 +298,13 @@ class CityLearnProvenanceService:
         district = {key: sum(row[key] for row in result.values()) for key in next(iter(result.values()), {})}
         if district:
             district['unknown_balance_residual_kwh'] = district['unknown_input_kwh']-sum(
-                district[f'unknown_{d}_kwh'] for d in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'stored'))
+                district[f'unknown_{d}_kwh'] for d in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'curtailment', 'stored'))
             district['grid_balance_residual_kwh'] = district['external_import_kwh']-sum(
-                district[f'grid_{d}_kwh'] for d in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'stored'))
+                district[f'grid_{d}_kwh'] for d in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'curtailment', 'stored'))
             district['pv_balance_residual_kwh'] = district['pv_generated_kwh']-sum(
-                district[f'pv_{d}_kwh'] for d in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'stored'))
+                district[f'pv_{d}_kwh'] for d in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'curtailment', 'stored'))
             district['carbon_balance_residual_kgco2'] = district['external_purchase_emissions_kgco2']-sum(
-                district[f'carbon_{d}_kgco2'] for d in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'stored'))
+                district[f'carbon_{d}_kgco2'] for d in ('load', 'mobility', 'grid_export', 'loss', 'asset_exit', 'external_reset', 'curtailment', 'stored'))
             generation = district['pv_generated_kwh']
             district['pv_useful_building_ratio'] = district['pv_load_kwh']/generation if generation > EPS else None
             district['pv_useful_with_mobility_ratio'] = (district['pv_load_kwh']+district['pv_mobility_kwh'])/generation if generation > EPS else None
@@ -341,4 +346,7 @@ class CityLearnProvenanceService:
                     sharing='market_allocation' if getattr(self.env, 'community_market_enabled', False)
                     else 'same_interval_netting_weighted_imports_proportional_exports',
                     initial_inventory='unknown_external', export_carbon_credit=False,
+                    pv_generation='available_including_reported_curtailment',
+                    reported_energy_intervals='executed_active_intervals_v1',
+                    equipment_throughput='gross_terminal_movements_before_interval_netting',
                     completed_intervals=self.steps)
