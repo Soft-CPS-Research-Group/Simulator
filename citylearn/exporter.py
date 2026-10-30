@@ -157,6 +157,9 @@ class EpisodeExporter:
         if model is not None and getattr(model, 'env', None) is not None:
             kpis = model.env.evaluate_v2(include_business_as_usual=include_business_as_usual)
             export_env = model.env.unwrapped
+            identity = getattr(model, 'comparison_identity', None)
+            if callable(identity):
+                export_env.set_experiment_identity(**identity())
         else:
             kpis = env.evaluate_v2(include_business_as_usual=include_business_as_usual)
             export_env = env

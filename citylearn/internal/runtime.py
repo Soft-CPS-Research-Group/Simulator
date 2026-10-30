@@ -409,7 +409,9 @@ class CityLearnRuntimeService:
 
         timer_start = time.perf_counter() if debug_timing else 0.0
         info = dict(env.get_info()) if collect_info else {}
-        if collect_info and action_execution is not None:
+        from citylearn.internal.observation_contract import configuration
+        hidden_faults = configuration(env)['mode'] == 'hidden_faults'
+        if collect_info and action_execution is not None and not hidden_faults:
             info['entity_action_execution'] = action_execution
             info['topology_events_applied'] = topology_events_applied
         if debug_timing:

@@ -15,6 +15,7 @@ def _sha256(path):
 
 def experiment_manifest(env):
     from citylearn import __version__
+    from citylearn.internal.comparison import context, inventory, native_reference
     from citylearn.agents.baseline import BusinessAsUsualAgent
     schema = env.schema
     root = Path(schema.get('root_directory') or '.').resolve()
@@ -52,6 +53,9 @@ def experiment_manifest(env):
     members, district = env._provenance_service.summary()
     return dict(simulator_version=__version__, git_commit=revision, tracked_worktree_dirty=dirty,
                 business_as_usual_definition=BusinessAsUsualAgent.DEFINITION_VERSION,
+                business_as_usual_reference=native_reference(env),
+                controller_identity=getattr(env, '_controller_identity', None),
+                comparison_context=context(env, files), final_inventory=inventory(env),
                 schema_sha256=hashlib.sha256(payload).hexdigest(), effective_schema=schema,
                 data_files_sha256=files, unresolved_file_references=sorted(set(missing)),
                 random_seed=env.random_seed, seconds_per_time_step=env.seconds_per_time_step,

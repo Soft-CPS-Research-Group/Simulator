@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-30",
+  "iteration": 3,
+  "status": "release_candidate_1_9_6",
+  "base_release": "1.9.5",
+  "base_commit": "116506774f93038e831055d764c3593ec8312f2e",
+  "committed": false,
+  "pushed": false,
+  "published": false,
+  "new_remote_ci_runs": 0,
+  "definition_version": "paired-experiment-v1",
+  "observation_contract": "agent-observation-contract-v1",
+  "tests": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "657",
+    "time": "242.771",
+    "timestamp": "2026-10-30T11:38:47.913411+00:00",
+    "hostname": "tiago-Vector-16-HX-A13VHG"
+  },
+  "new_tests": 20,
+  "critical_lint": "passed E9,F821",
+  "diff_check": "passed",
+  "portugal_windows": [
+    {
+      "schema": "rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
+      "start": 96,
+      "end": 104,
+      "transitions": 8,
+      "members": 30,
+      "status": "pass",
+      "physics_invariant_checks": true,
+      "identical_physical_outcomes": true,
+      "hidden_inputs": "only declared building load and PV power; labels and other numeric channels masked",
+      "schema_sha256": "9183b36183d19c35f6473e402714ad451382b6a0075ec05721d17b63cd6633db"
+    },
+    {
+      "schema": "rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
+      "start": 4176,
+      "end": 4184,
+      "transitions": 8,
+      "members": 81,
+      "status": "pass",
+      "physics_invariant_checks": true,
+      "identical_physical_outcomes": true,
+      "hidden_inputs": "only declared building load and PV power; labels and other numeric channels masked",
+      "schema_sha256": "056599b00cf19079d89407b762638c3e303f7719a2bdd12e80f1a76aa6c4d398"
+    }
+  ],
+  "installed_package_export": "passed outside source checkout with isolated Python",
+  "candidate_wheel_sha256": "ca9b32c24ffca9d09897ec63adf5904203ba42c96d8d285d1fa0fbffaa35a13b",
+  "candidate_note": "Iteration 3 prepared for 1.9.6; remote gates verified after push.",
+  "before_fix_evidence": "/home/tiago/Documents/ChatGPT/EnergAIze base/output/iteracao3-simulador-2026-10-30/native-reference-before.json",
+  "datasets_modified": false,
+  "next_iteration": 4,
+  "limits": [
+    "Hidden inputs require an explicit allowlist; structural IDs/edges/connection masks remain visible.",
+    "Hiding labels does not prove statistical blindness or prevent physical inference; direct env access remains privileged.",
+    "Known alias catalogue is conservative; other derived signals require scientific review.",
+    "External UIs/consumers must adopt the pairing report; no external UI was modified.",
+    "No numerical equivalence proof with Algorithms, annual controller ranking, empirical calibration or general re-entry energy/cost reconciliation."
+  ],
+  "release_candidate_physics": {
+    "total": 16,
+    "executed": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "hard_failures": 0
+  },
+  "release_candidate_physics_note": "Same iteration 3 implementation; release bump changes version and notes only."
+}

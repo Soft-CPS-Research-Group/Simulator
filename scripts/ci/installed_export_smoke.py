@@ -39,6 +39,10 @@ def main():
         assert (output / "installed_kpis.csv").is_file()
         manifest = json.loads((output / "installed_kpis.manifest.json").read_text())
         assert isinstance(manifest, dict) and manifest
+        assert manifest['comparison_context']['definition_version'] == 'paired-experiment-v1'
+        assert manifest['business_as_usual_reference']['definition_version'] == 'immediate-full-charge-v1'
+        assert manifest['business_as_usual_reference']['evaluated']
+        assert manifest['final_inventory'] is not None
         assert DEFINITION_VERSION in json.dumps(manifest)
         assert 'district_ev_departure_audit_target_coverage_ratio' in (output / 'installed_kpis.csv').read_text()
         service = json.loads((output / 'installed_kpis.deferrable_service.json').read_text())

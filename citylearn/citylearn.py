@@ -1289,6 +1289,14 @@ class CityLearnEnv(Environment, Env):
         for b in self.buildings:
             b.time_step_ratio = self.time_step_ratio        
 
+    def set_experiment_identity(self, implementation, version, parameters, observation_access='agent_payload'):
+        """Declare the controller used for exported paired comparisons."""
+        import json
+        if not implementation or not version or not isinstance(parameters, dict):
+            raise ValueError('Controller implementation, version and parameter dictionary are required')
+        self._controller_identity = json.loads(json.dumps(dict(implementation=implementation,
+            version=version, parameters=parameters, observation_access=observation_access), allow_nan=False))
+
     def get_deferrable_service_audit(self):
         """Return executed appliance service, including partial and excluded requests."""
         return self._kpi_service.deferrable_service_audit()
@@ -1617,6 +1625,8 @@ class CityLearnEnv(Environment, Env):
         self._robustness_service.reset()
         self.associate_chargers_to_electric_vehicles()
         self._provenance_service.reset()
+        from citylearn.internal.comparison import inventory
+        self._comparison_initial_inventory = inventory(self)
 
         # reset reward function (does nothing by default)
         self.reward_function.reset()
@@ -1631,7 +1641,8 @@ class CityLearnEnv(Environment, Env):
         self._observations_cache = None
         self._observations_cache_time_step = -1
         episode_index = int(getattr(self.episode_tracker, 'episode', 0))
-        self._ev_drift_random_state = np.random.RandomState(int(self.random_seed) + episode_index)
+        self._ev_drift_seed = int(self.random_seed) + episode_index
+        self._ev_drift_random_state = np.random.RandomState(self._ev_drift_seed)
         self._render_buffer.clear()
         self._refresh_action_cache()
         self.update_variables()

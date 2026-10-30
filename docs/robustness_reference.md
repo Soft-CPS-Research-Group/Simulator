@@ -65,3 +65,11 @@ This adds district features for active state, previous-step corruption counts an
 When robustness is enabled, `evaluate_v2()` adds district/building counters for event count, active timesteps, observation/forecast/action corruptions, asset unavailable applications, missing observations and action dropouts.
 
 In `MultiCommunityEnv`, robustness stays independent per child community. Portfolio rows aggregate robustness `_count` KPIs in the same way as other count KPIs.
+
+
+## Agent observation contract
+
+The default mode is `known_faults`. Entity studies without event labels must
+explicitly select `hidden_faults` and a feature allowlist. Unlisted numeric
+channels are masked; direct clean aliases of noisy measurements are rejected.
+See [comparison and observation contracts](experiment_comparisons.md) for configuration, boundaries and migration.

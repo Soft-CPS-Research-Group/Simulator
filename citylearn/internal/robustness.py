@@ -169,7 +169,9 @@ class CityLearnRobustnessService:
         self._validated_layout_signature = None
 
     def get_metadata(self) -> Mapping[str, Any]:
+        from citylearn.internal.observation_contract import configuration
         return {
+            'agent_observation_contract': configuration(self.env),
             "enabled": bool(self.enabled),
             "events_file": self.events_file,
             "random_seed": int(self.random_seed),
@@ -270,6 +272,10 @@ class CityLearnRobustnessService:
         return payload
 
     def apply_observations(self, observations: Any) -> Any:
+        from citylearn.internal.observation_contract import apply
+        return apply(self, self._apply_observation_events(observations))
+
+    def _apply_observation_events(self, observations: Any) -> Any:
         """Apply observation/forecast/telemetry events to the agent-facing payload."""
 
         if not self.enabled:
@@ -357,6 +363,10 @@ class CityLearnRobustnessService:
     def adjust_observation_space(self, observation_space: Any) -> Any:
         """Conservatively expand observation spaces for sentinel/clip values."""
 
+        from citylearn.internal.observation_contract import configuration
+        contract = configuration(self.env)
+        if contract['mode'] == 'hidden_faults':
+            observation_space = self._adjust_space_bounds(observation_space, -np.inf, np.inf)
         if not self.enabled:
             return observation_space
 
@@ -408,6 +418,8 @@ class CityLearnRobustnessService:
 
     def validate_targets(self):
         """Validate enabled events against the current flat/entity layout."""
+        from citylearn.internal.observation_contract import validate
+        validate(self)
 
         if not self.enabled:
             return

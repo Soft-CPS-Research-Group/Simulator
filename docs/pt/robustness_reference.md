@@ -65,3 +65,13 @@ Isto adiciona features na tabela `district` para estado ativo, contagens do step
 Quando robustez esta ativa, `evaluate_v2()` adiciona contadores district/building para eventos, timesteps ativos, corrupcoes de observation/forecast/action, assets indisponiveis, observations missing e action dropouts.
 
 Em `MultiCommunityEnv`, a robustez continua independente por comunidade filha. Linhas de portfolio agregam KPIs de robustez com sufixo `_count` como os restantes KPIs de contagem.
+
+
+## Contrato de observação do agente
+
+O modo por omissão é `known_faults`. Estudos entity sem rótulos de eventos devem
+selecionar explicitamente `hidden_faults` e uma lista de medições permitidas.
+Os canais numéricos restantes são mascarados; alternativas equivalentes limpas
+às medições perturbadas são rejeitadas. Consultar os
+[contratos de comparação e observação](../experiment_comparisons.md) para configuração,
+limites e migração.

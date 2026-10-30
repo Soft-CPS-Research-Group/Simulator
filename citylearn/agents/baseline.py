@@ -71,6 +71,18 @@ class _OperationalBaselineAgent(Agent):
         self.next_time_step()
         return actions
 
+    def comparison_identity(self):
+        from citylearn import __version__
+        keys = ('ev_target_soc', 'ev_follow_required_soc', 'ev_service_margin_rate', 'ev_service_floor_rate',
+                'storage_min_soc', 'storage_max_soc', 'storage_deadband_kw', 'deferrable_start_action',
+                'low_price_quantile', 'high_price_quantile', 'price_charge_rate', 'price_discharge_rate',
+                'ev_price_charge_rate', 'pv_charge_rate', 'storage_discharge_rate', 'import_peak_threshold_kw',
+                'ev_urgency_hours', 'community_surplus_charge_soc_ceiling', 'community_import_threshold_kw',
+                'community_storage_discharge_rate', 'community_surplus_threshold_kw')
+        return dict(implementation=type(self).__module__+'.'+type(self).__qualname__, version=__version__,
+                    parameters={key: getattr(self, key) for key in keys if hasattr(self, key)},
+                    observation_access='privileged_simulator_state')
+
     def _building_action_vector(self, building) -> List[float]:
         layout = self._building_action_layout(building)
         active_actions = layout['active_actions']

@@ -6,6 +6,29 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.6 — 2026-10-30 — paired comparisons and agent observations
+
+- Add versioned pairing evidence, explicit native BAU/controller identities,
+  resolved service/market conditions, input/code hashes and initial/final inventory.
+- Pair native BAU service tolerances and the away-EV random stream after repeated
+  resets. Expose privileged state access explicitly.
+- Add a guarded comparison API/CLI for controller and sharing experiments, with
+  cost, service, coverage and inventory together. Upgrade the equity CLI for V2
+  exports and the pairing gate; avoid universal improvement labels.
+- Add an explicit entity hidden-fault input allowlist; mask unlisted channels,
+  remove fault labels/automatic action diagnostics and reject clean equivalents
+  of targeted measurements. Compatibility defaults remain known-fault observations.
+- No dataset edits, annual ranking, empirical calibration or update to an external
+  UI. Historical exports without pairing evidence remain unknown.
+  [Definitions, migration and limits](experiment_comparisons.md).
+- Fixes the native-reference pairing limitations documented for v1.9.5.
+  Re-evaluate affected overridden-tolerance/repeated-episode reference comparisons.
+
+Validation: 657 local tests (20 new), both real Portuguese observation-contract
+windows with physical checks, and isolated installed-package export passed.
+Release gates require successful master CI and installed-wheel export before PyPI.
+[Validation evidence](releases/1.9.6-validation.json).
+
 ## v1.9.5 — 2026-10-30 — complete appliance service accounting
 
 - Add `deferrable-service-audit-v1`, actual executed energy, exclusive request

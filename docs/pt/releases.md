@@ -4,6 +4,28 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.6 — 2026-10-30 — comparações e observações do agente
+
+- Contrato de emparelhamento, identidades do BAU/controlador, condições efetivas,
+  hashes dos dados/código e energia inicialmente/finalmente armazenada.
+- Corrigidos os limiares de serviço e a sequência aleatória dos EV fora de casa
+  na referência BAU após resets repetidos. Acesso privilegiado identificado.
+- Comparador com verificação das condições e apresentação conjunta de custo,
+  serviço, cobertura e energia final; CLI de equidade adaptado aos KPIs V2.
+- Modo entity explícito sem rótulos de falhas: lista de medições permitidas,
+  restantes canais mascarados e rejeição de alternativas equivalentes limpas.
+  O modo compatível por omissão conserva os diagnósticos conhecidos.
+- Sem alterações de datasets, campanha anual, calibração ou atualização de UI
+  externa. Exportações antigas sem comprovativos de emparelhamento ficam desconhecidas.
+  [Definições e limites](../experiment_comparisons.md).
+- Corrige as limitações de emparelhamento BAU documentadas na v1.9.5. Recalcular
+  as comparações afetadas por overrides de tolerância ou episódios repetidos.
+
+Validação: 657 testes locais (20 novos), duas janelas portuguesas com verificações
+físicas e exportação pelo pacote instalado aprovados. Publicação sujeita a CI
+da principal e teste do pacote instalado antes do PyPI.
+[Evidência](../releases/1.9.6-validation.json).
+
 ## v1.9.5 — 2026-10-30 — serviço completo das máquinas
 
 - Acrescentada `deferrable-service-audit-v1`: energia realmente executada, estados

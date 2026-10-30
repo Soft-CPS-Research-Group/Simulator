@@ -45,6 +45,22 @@ class CityLearnBusinessAsUsualBaselineService:
         baseline_env = self._new_sidecar_env()
         agent = BusinessAsUsualAgent(baseline_env)
         baseline_env.reset()
+        # Pair the away-EV stochastic stream with the source episode, including
+        # repeated resets; a freshly constructed sidecar has a different episode index.
+        import numpy as np
+        baseline_env._ev_drift_seed = env._ev_drift_seed
+        baseline_env._ev_drift_random_state = np.random.RandomState(env._ev_drift_seed)
+        from citylearn import __version__
+        from citylearn.internal.comparison import inventory
+        if inventory(baseline_env) != env._comparison_initial_inventory:
+            raise ValueError('Native BAU initial inventory differs from the evaluated episode')
+        baseline_env._native_reference_metadata = dict(
+            implementation='citylearn.agents.baseline.BusinessAsUsualAgent', simulator_version=__version__,
+            definition_version=agent.DEFINITION_VERSION, observation_access='privileged_simulator_state',
+            resolved_parameters={key: getattr(agent, key) for key in (
+                'ev_target_soc', 'ev_follow_required_soc', 'ev_service_margin_rate', 'ev_service_floor_rate',
+                'storage_min_soc', 'storage_max_soc', 'storage_deadband_kw', 'deferrable_start_action')},
+        )
 
         while int(baseline_env.time_step) < target_time_step and not (baseline_env.terminated or baseline_env.truncated):
             actions = agent.predict([], deterministic=True)
@@ -107,6 +123,8 @@ class CityLearnBusinessAsUsualBaselineService:
             topology_mode=getattr(env, 'topology_mode', None),
             render_mode='none',
             export_kpis_on_episode_end=False,
+            ev_departure_within_tolerance=env.ev_departure_within_tolerance,
+            ev_departure_service_tolerance=env.ev_departure_service_tolerance,
             check_observation_limits=False,
             physics_invariant_checks=bool(getattr(env, 'physics_invariant_checks', False)),
         )
