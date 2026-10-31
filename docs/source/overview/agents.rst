@@ -13,6 +13,19 @@ CityLearn provides implementations of rule-based control (RBC) and reinforcement
 Dynamic operational baselines
 -----------------------------
 
+``BusinessAsUsualAgent`` and ``NormalPolicy`` use the same immediate EV charging
+rule: request maximum charging power while connected, until 100% SOC. Departure
+targets, deadlines, prices and solar forecasts do not postpone or prioritise EV
+charging. Stationary storage retains its separate PV self-consumption rules.
+
+When an electrical-service limit binds, controllable requests in that scope are
+scaled proportionally to their requested power. Equal requests therefore receive
+equal shares; different charger ratings can yield different shares. Total and
+phase checks use the powers after preceding reductions, so overlapping limits do
+not repeatedly curtail the same excess. Charger minimum power and battery limits
+still apply. This is a physical allocation rule, not a departure-target scheduler;
+an EV can miss its requested departure SOC while another continues toward 100%.
+
 ``NormalPolicy`` and the other ``BusinessAsUsualAgent`` policies refresh their
 action layout when members or equipment change. In decentralized dynamic runs,
 ``agent.action_history_ids`` identifies the stable rows of ``agent.actions``:

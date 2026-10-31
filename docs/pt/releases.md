@@ -4,6 +4,40 @@ Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bu
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.11 — 2026-10-31 — correção da sobreposição dos limites elétricos
+
+- Recalculada a potência total e por fase após as reduções anteriores, tanto no
+  pré-limitador das policies como no limitador do motor. Os limites partilhados
+  deixam de cortar repetidamente o mesmo excesso e de desligar carregadores
+  desnecessariamente por lhes atribuir potência abaixo do mínimo.
+- Preservado `immediate-full-charge-v1`: BAU/NormalPolicy pedem carregamento
+  máximo imediato até 100% SOC. A partilha mantém a proporção das potências
+  pedidas no âmbito de cada limite; pedidos iguais recebem partes iguais.
+  Alvos de partida, prazos, preços e previsões solares não decidem a ordem ou
+  o adiamento dos EVs. Mantêm-se os limites físicos dos equipamentos.
+- Acrescentadas 20 regressões de importação/exportação, limites total/fase,
+  fases assimétricas, carregadores iguais/diferentes, fluxos EV/BESS opostos e
+  despacho real de dois carros com preço baixo/alto e ações diretas ao motor.
+
+Validação: 787 testes locais passaram; as 20 regressões novas falhavam antes.
+Passaram os 16 cenários físicos, o teste de desempenho e as janelas completas
+de corte de rede Premium 4176–4190 e 4132–4190, com verificações físicas ativas.
+
+Reexecutados os seis membros responsáveis pelos incumprimentos originais,
+durante todo o ano original Core-30 (35.040 intervalos; 1.764 partidas) e os
+60 dias Premium (5.760 intervalos; 899 partidas). Incumprimentos SOC estritos:
+Core 318 -> 1; Premium 139 -> 0. Nenhuma partida ficou abaixo do serviço mínimo
+aceitável. O caso restante chega a 90,6133% para alvo de 90,8241%, enquanto outro
+EV continua para 100%, conforme o BAU preservado. Trajetórias idênticas às
+contraprovas isoladas; sem nova campanha económica anual da comunidade completa.
+
+Compatibilidade: datasets/schema, definições/tolerâncias dos KPIs, tarifas e
+definição BAU preservados; 391 referências a ficheiros mantêm os hashes.
+O despacho corrigido altera energia e serviço nos casos afetados. Reexecutar
+referências BAU e experiências com código, entradas e seeds emparelhados antes
+de comparar resultados entre versões. Modelos dos equipamentos preservados.
+[Comprovativos](../releases/1.9.11-validation.json).
+
 ## v1.9.10 — 2026-10-30 — campanha contínua e recursos medidos
 
 - Auditor local contínuo com verificações de dispositivos/contadores/dinheiro,

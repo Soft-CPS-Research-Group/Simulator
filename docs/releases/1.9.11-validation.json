@@ -1,0 +1,271 @@
+{
+  "status": "validated_release_candidate",
+  "release_version": "1.9.11",
+  "date": "2026-10-31",
+  "base_commit": "e12ac70c913b1e8ca41de4b5e75b66d72e9b9fb5",
+  "fix": "Fresh total and per-phase powers before each subsequent import/export clipping scope in both policy pre-limiter and runtime limiter.",
+  "BAU_definition": "immediate-full-charge-v1",
+  "BAU_preservation_checks": {
+    "BusinessAsUsualAgent": "unchanged",
+    "NormalPolicy": "unchanged",
+    "ServiceOnlyBaselineAgent": "unchanged",
+    "NormalNoBatteryPolicy": "unchanged",
+    "_OperationalBaselineAgent._ev_action_for_charger": "unchanged",
+    "_OperationalBaselineAgent._storage_action": "unchanged",
+    "_OperationalBaselineAgent._deferrable_action_for_appliance": "unchanged"
+  },
+  "sharing_rule": "Unchanged proportional scaling of requested controllable power within each binding scope; equal requests have equal shares. Equipment minimums, battery acceptance and physical phase connections remain in force. No departure-target scheduling, price optimisation or solar-forecast delay added.",
+  "regressions": {
+    "new_tests": 20,
+    "before": "20 failed on original code",
+    "after": "20 passed; 64 targeted tests passed"
+  },
+  "tests": {
+    "tests": 787,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 287.61
+  },
+  "physics": {
+    "status": "passed",
+    "summary": {
+      "total": 16,
+      "executed": 16,
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0,
+      "hard_failures": 0
+    },
+    "scenario_matrix": {
+      "seconds_per_time_step": [
+        60,
+        300,
+        900,
+        3600
+      ],
+      "covers_interface": [
+        "flat",
+        "entity"
+      ],
+      "covers_topology_mode": [
+        "static",
+        "dynamic (entity only)"
+      ],
+      "covers_physical_checks": [
+        "finite_observations",
+        "action_space_compatibility",
+        "runtime_invariants",
+        "soc_bounds",
+        "kw_kwh_step_consistency",
+        "net_balance",
+        "component_power_limits",
+        "kpi_evaluation"
+      ]
+    }
+  },
+  "performance": {
+    "status": "passed",
+    "cases": {
+      "none": {
+        "render_mode": "none",
+        "interface": "flat",
+        "configured_steps": 600,
+        "executed_steps": 599,
+        "seconds_per_time_step": 60,
+        "init_s": 0.5039,
+        "reset_s": 0.0469,
+        "rollout_s": 4.4568,
+        "avg_step_ms": 7.4374,
+        "p95_step_ms": 9.5826,
+        "raw_avg_step_ms": 7.4374,
+        "raw_p95_step_ms": 9.5826,
+        "end_export_s": 0.0,
+        "final_kpi_export_s": 0.0,
+        "terminal_export_s": 0.0
+      },
+      "end": {
+        "render_mode": "end",
+        "interface": "flat",
+        "configured_steps": 600,
+        "executed_steps": 599,
+        "seconds_per_time_step": 60,
+        "init_s": 0.4439,
+        "reset_s": 0.0405,
+        "rollout_s": 12.9903,
+        "avg_step_ms": 7.1824,
+        "p95_step_ms": 10.0528,
+        "raw_avg_step_ms": 21.6843,
+        "raw_p95_step_ms": 10.4773,
+        "end_export_s": 0.3505,
+        "final_kpi_export_s": 8.3362,
+        "terminal_export_s": 8.6867
+      },
+      "entity_none": {
+        "render_mode": "none",
+        "interface": "entity",
+        "configured_steps": 600,
+        "executed_steps": 599,
+        "seconds_per_time_step": 60,
+        "init_s": 0.5026,
+        "reset_s": 0.0483,
+        "rollout_s": 9.2801,
+        "avg_step_ms": 15.4899,
+        "p95_step_ms": 20.4019,
+        "raw_avg_step_ms": 15.4899,
+        "raw_p95_step_ms": 20.4019,
+        "end_export_s": 0.0,
+        "final_kpi_export_s": 0.0,
+        "terminal_export_s": 0.0
+      }
+    },
+    "thresholds": {
+      "none_max_ms": 30.0,
+      "end_max_ms": 45.0,
+      "entity_max_ms": 50.0,
+      "ratio_max": 2.0,
+      "entity_overhead_ratio_max": 3.75,
+      "baseline_regression_ratio": 4.5,
+      "baseline_slack_ms": 15.0
+    },
+    "measurement_note": "Local concurrent validations; not an isolated hardware benchmark"
+  },
+  "native_replays": {
+    "core30-year2023": {
+      "start": 0,
+      "transitions": 35040,
+      "members": [
+        "Member_025",
+        "Member_028"
+      ],
+      "departures": 1764,
+      "strict_misses": 1,
+      "below_minimum_acceptable": 0,
+      "matches_diagnostic_prediction_byte_for_byte": true,
+      "physics_invariant_checks": true
+    },
+    "premium60days2024": {
+      "start": 39360,
+      "transitions": 5760,
+      "members": [
+        "Member_081",
+        "Member_086",
+        "Member_087",
+        "Member_091"
+      ],
+      "departures": 899,
+      "strict_misses": 0,
+      "below_minimum_acceptable": 0,
+      "matches_diagnostic_prediction_byte_for_byte": true,
+      "physics_invariant_checks": true
+    }
+  },
+  "outage_windows": {
+    "4176-4190": {
+      "status": "pass",
+      "completed_intervals": 15,
+      "checks": 10088,
+      "max_tolerance_fraction": 0.009194696097532543
+    },
+    "4132-4190": {
+      "status": "pass",
+      "completed_intervals": 59,
+      "checks": 38336,
+      "max_tolerance_fraction": 0.008836835083858125
+    }
+  },
+  "input_integrity": {
+    "core30-year2023": {
+      "schema_unchanged": true,
+      "input_files_checked": 89,
+      "mismatches": 0
+    },
+    "premium60days2024": {
+      "schema_unchanged": true,
+      "input_files_checked": 302,
+      "mismatches": 0
+    }
+  },
+  "remaining_strict_shortfall": {
+    "case": "core30-year2023",
+    "member": "Member_028",
+    "ev_session": "EV-V028-01-1-S0109",
+    "departure": 22903,
+    "target_soc": 0.9082406759262085,
+    "actual_soc": 0.9061327576637268,
+    "reason": "Preserved BAU full-charge proportional sharing; another EV already above its departure target continues toward 100%. Within existing service tolerance; no KPI relaxation or target scheduling introduced."
+  },
+  "limitations": [
+    "Native long replays cover the six original miss-producing members over their full original windows, not a new full-community annual campaign. Physical totals/counts were independently matched to the original native campaign in the prior diagnosis.",
+    "The native long replay trajectories match the isolated diagnostic counterfactuals byte for byte; same datasets, physical limits and seeds.",
+    "Performance smoke checks ran alongside other local validations; timings are not isolated hardware benchmarks.",
+    "Existing simplified equipment physics remains uncalibrated against real measurements."
+  ],
+  "release_gates": "One master push for CI/docs; publish release after successful gates; installed-wheel export check before PyPI upload",
+  "final_source_sha256": {
+    "citylearn/__init__.py": "c87e76616aab437ee0a46019917588248d56c9adf09a8a6b101dbcbbaf2dff51",
+    "citylearn/__main__.py": "6761a2df4ce972977eac637939568c0ed8389ded3459ac9eadaa99dbeccfcb7f",
+    "citylearn/agents/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "citylearn/agents/base.py": "422d965f9db4e43e82546af8414fbcaa3b06d3df42ed58921c8a052aee328716",
+    "citylearn/agents/baseline.py": "e9d3fd1d37641c4d590a24b26a649e7332f75e4b805308b3efe076084f566941",
+    "citylearn/agents/marlisa.py": "a65cbdcf5b71d93013c9abccad12e055954f3435fc78a0b69991760d8e26a9f3",
+    "citylearn/agents/q_learning.py": "3626ba99f66cd94b6560ef96727d6df2828c94b030d2945a3d25bf1fa015be9c",
+    "citylearn/agents/rbc.py": "c28b485533a45993d130ff21db7045c16a2145efbdd8438e7726ffb92912d86d",
+    "citylearn/agents/rlc.py": "dd1be03991b1edee4b93a0c528cf3cd30295a15ea07631c19aa224bfe07d05b6",
+    "citylearn/agents/sac.py": "4fcc95796fa49582d4e6f28cac1a5f1c18ae5005e48fc55a4b95b2cfa428e112",
+    "citylearn/base.py": "212ca57fd1de14de87286b97d2d7ba77a4005ec71a7a5eb483f49ad41ef2944f",
+    "citylearn/building.py": "715c1f41d9ce9123be32b28164335a0bb25d832f2c9bbc078cd128e6b38a3b19",
+    "citylearn/citylearn.py": "adac09ed63c9a1265d247d56919c513a2cba9a20ebc9da2a31c422cbeea2437c",
+    "citylearn/community_dataset.py": "e53839f418df924c44b40759f7fd9a65cc3e2116aec5133d603763df77bc2846",
+    "citylearn/cost_function.py": "b6a6098b1883f63a85d5c9f54556690989c79b224dc76de70b495f21b160c168",
+    "citylearn/data.py": "2ccad600cbf67c96b676d841e54ccec8029eaa277ba6cb9c9fdfd4176a8d0815",
+    "citylearn/dynamics.py": "412d759502d468fd71d1cdf9d09af7a36cc16b39b34565b336b088001a84775c",
+    "citylearn/electric_vehicle.py": "38a3f836282209b133a648ca505cbd7655a4647c096eed88cdc5196278492b5f",
+    "citylearn/electric_vehicle_charger.py": "d8ad62b76a45cc42c9bf3d2918e7b192b2bf4144dde6dd2f307836cefc9889a3",
+    "citylearn/end_use_load_profiles/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "citylearn/end_use_load_profiles/clustering.py": "9ba2082c70599b37e332f90afe5935730968d1b1f44cfff1e584e51adb9e76a0",
+    "citylearn/end_use_load_profiles/lstm_model/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "citylearn/end_use_load_profiles/lstm_model/model.py": "2046269db9ed71b3dcba2dcbb01ad397451996a47488446c4f3e50aba2e13b26",
+    "citylearn/end_use_load_profiles/lstm_model/model_generation.py": "aabb2e356b395a2a7d4ec55b2fcdd76c7856c77886823f4211f199b0fdf8f906",
+    "citylearn/end_use_load_profiles/lstm_model/model_generation_wrapper.py": "b8814ff8f24693a471cd7d402e953d9f3c07874361c6af841ef4c16f9d93cab3",
+    "citylearn/end_use_load_profiles/lstm_model/preprocessing.py": "de6488bbe5d689494064e8ad929746e1479dfdc3e6ed4ef039b4e7992ca1a3f0",
+    "citylearn/end_use_load_profiles/neighborhood.py": "2a3154f3966f33a2639130256fe1dc39a3f14b5cb67ab40ff959156463ce978d",
+    "citylearn/end_use_load_profiles/simulate.py": "c7a745f5003722ebccbb83ce3b6416ef1b229fdc8be4a3e5ee1ca08722f8a29d",
+    "citylearn/energy_model.py": "1ad213f5875a4c31e941cccbe513488afe2d8d9d718a027679d7b279872c2fb2",
+    "citylearn/exporter.py": "8d9ac5106d236135012939ec1ffbe35048237144cc145eb1cf255cffa1458781",
+    "citylearn/internal/__init__.py": "4be65562c88e4667911fcfc40383274148acecab47de959175df03238c0d7732",
+    "citylearn/internal/balance_audit.py": "f1aacb8da98a473f64be70b42f56564019b183d8abf9d1c91f8587e3c0562541",
+    "citylearn/internal/baseline.py": "f099ea370882dc3fc5272dfa745b3b048233599994c9b4d6ec4b9f905a55564c",
+    "citylearn/internal/building_ops.py": "4f2a60adf2db0bfec86961c92dbfdddf582aea88c05491a49b2928ada7dd1a79",
+    "citylearn/internal/capabilities.py": "041ae390efaa2e15c602af6e58e3565ead293b29c629e997b9cea4c2dc6efbc2",
+    "citylearn/internal/comparison.py": "a21aca32e3d2d0b7043854588c5aa0a0aa0edd3d11c4656c13d41a8a2ecfff2d",
+    "citylearn/internal/deferrable_service_audit.py": "c89d72e20f019a01361b2acedb842e7d2e1c27485ab70e12e1375c0fccc461b1",
+    "citylearn/internal/demand_response.py": "fd3fff446c9e2ddc2aa04c8ebe07f988446ff59473e2b7ae79e2c453807789dc",
+    "citylearn/internal/entity_interface.py": "78b0a95034e7c00e556d0f393a1cd84b757c906f4c5641cb0445192c17e2b37c",
+    "citylearn/internal/ev_departure_audit.py": "1652c633e4f88b4848f570f4402d1f696a64660647901649068906a0c35b4b0b",
+    "citylearn/internal/experiment.py": "53c05aec671bcbbaa2df36c4eb4025651c853ef5a5f5041f65b047389e2a753b",
+    "citylearn/internal/kpi.py": "d26e4f1583d6271cbd42288c133eac4898397514254bfd7ba371f5470740a961",
+    "citylearn/internal/kpi_family_audit.py": "c1da8c6f2bab4a67e14bfb134e92aac515b67db9df6dc50311834c5553d1e8e1",
+    "citylearn/internal/loading.py": "27a2fd347ba0b05f9aa6e9e6b855b5dd0df62db467ee05afd823c603ea8f4bb1",
+    "citylearn/internal/observation_contract.py": "e16ffa11594be5d2c16192a2b195b67ea7def8849a8ce1e2df520de48aadf277",
+    "citylearn/internal/physics_invariants.py": "f216772e1f1f3fea36718c6ba02feb82a8babdf3f88538b45320ea4626a6dcbb",
+    "citylearn/internal/provenance.py": "c029c1821d80378f8e8fa36b1ac609af8742712b78cffbe608cac58886c42b4b",
+    "citylearn/internal/robustness.py": "0b9f384a8428f96bbe87cf87390e082b86cd3509f97dafef26f495257ad06858",
+    "citylearn/internal/runtime.py": "5d8580da0e29afc233aac6c167a778c0a6a978764c5fb4177165a315d86ace34",
+    "citylearn/internal/temporal.py": "2fe57d1928ebf05e2311ab69bbd51a41844373065bbdbb7f789e42ac7c00dac6",
+    "citylearn/internal/topology.py": "f5432db693b3af830641588b07d477aff2412dc050198bfb4a49f6df337decee",
+    "citylearn/internal/units.py": "70eb90b0013e7b0886a797fcfa4e21d5f9535334addba8b7659bf43dd958b876",
+    "citylearn/multi_community.py": "34a0dfba1e4f7512463c3b3239dc2d14519c6b4d66df1808c9f46384dcdff67a",
+    "citylearn/occupant.py": "4f23d42a45eab66a4b1b6046aa12810ca78038c883847ee41b6e07f28a353e6f",
+    "citylearn/power_outage.py": "0181b021f40e3bf0eb944c8f38cd5fd8110228ffc9dae583fe6ad3b439c99acc",
+    "citylearn/preprocessing.py": "d753576d111065b8486cece168be4c9cd299bdadfc9ab763cf343e5a5904ec43",
+    "citylearn/reward_function.py": "edd72b26585a6fee0e65beb41f82801d9952aec92238f1084a69cbceedd3a172",
+    "citylearn/rl.py": "c0da4efb5deddc83bdadd7873a2bbf290ff400b8be81feb8eefc0a23aff94020",
+    "citylearn/utilities.py": "36f0636f0aea19674af52642f8f8ddf4faad8656515e6eeb4e2cab9a6b3b87bd",
+    "citylearn/utils/__init__.py": "a531dd1047d1a4b7e495e044cc039133077feb8bbf8f21c8c903dd8a72a115d2",
+    "citylearn/utils/file_handler.py": "3610ca57f5a65ad4d7174ebf503ff001b5603a418f1ce2e40d5b2e38d0e126cf",
+    "citylearn/utils/noise.py": "9f13293b7ac4c2bd6b242ffbe2b8d8da21bfa682ba4b3b607da4c4e2ad9baa64",
+    "citylearn/utils/paths.py": "7be341e173bc29409e348e0d2b051cdd681ea3656b0b700d0bedc0946ff9887d",
+    "citylearn/wrappers.py": "cb0077d26b36b0999a77f936f825fb2304f7e9faa208ebf1f7cb53462bb599d8"
+  }
+}

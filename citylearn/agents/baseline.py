@@ -369,6 +369,8 @@ class _OperationalBaselineAgent(Agent):
                     scales,
                     component_getter=lambda c: c['request_total_kw'],
                 )
+                # Each scope must see reductions already applied elsewhere.
+                total_kw, phase_kw = ops._compute_totals(base_total_kw, base_phase_kw, controls, scales)
                 changed |= ops._scale_for_export_scope(
                     total_kw,
                     total_limits.get('export_kw'),
@@ -379,6 +381,7 @@ class _OperationalBaselineAgent(Agent):
 
                 for phase_name in phase_names:
                     phase_limit = per_phase_limits.get(phase_name, {}) or {}
+                    total_kw, phase_kw = ops._compute_totals(base_total_kw, base_phase_kw, controls, scales)
                     changed |= ops._scale_for_import_scope(
                         phase_kw.get(phase_name, 0.0),
                         phase_limit.get('import_kw'),
@@ -386,6 +389,7 @@ class _OperationalBaselineAgent(Agent):
                         scales,
                         component_getter=lambda c, p=phase_name: c['request_phase_kw'].get(p, 0.0),
                     )
+                    total_kw, phase_kw = ops._compute_totals(base_total_kw, base_phase_kw, controls, scales)
                     changed |= ops._scale_for_export_scope(
                         phase_kw.get(phase_name, 0.0),
                         phase_limit.get('export_kw'),

@@ -6,6 +6,41 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.11 — 2026-10-31 — correct overlapping electrical-service clipping
+
+- Recompute total and per-phase power after preceding reductions in both the
+  operational-policy pre-limiter and runtime electrical-service limiter. Shared
+  limits no longer repeatedly curtail the same excess or unnecessarily push
+  multiple chargers below their minimum operating power.
+- Preserve `immediate-full-charge-v1`: BAU/NormalPolicy request maximum EV
+  charging immediately until 100% SOC, with proportional sharing of requested
+  controllable power within each binding scope. Equal requests receive equal
+  shares. Departure targets, deadlines, prices and solar forecasts do not
+  schedule or prioritise EV charging; existing equipment limits still apply.
+- Add 20 regressions covering import/export, overlapping and asymmetric phase
+  limits, equal/different charger ratings, opposing EV/BESS flows and real
+  two-charger dispatch at low/high prices, including direct runtime actions.
+
+Validation: 787 local tests passed; all 20 new cases failed before the fix.
+The 16-scenario physical matrix, performance smoke and complete Premium outage
+windows 4176–4190 and 4132–4190 passed with physical checks active.
+
+Replays cover the six original miss-producing members over the full original
+Core-30 year (35,040 intervals; 1,764 departures) and Premium 60-day window
+(5,760 intervals; 899 departures). Strict SOC misses fell from 318 to 1 in Core
+and 139 to 0 in Premium; none remained below minimum acceptable service.
+The remaining Core departure reaches 90.6133% against a 90.8241% target while
+another EV continues toward 100%, consistent with the preserved BAU strategy.
+Replays match the isolated diagnostic predictions byte for byte; they are not
+a new full-community annual economic campaign.
+
+Compatibility: dataset/schema, KPI definitions/tolerances, tariffs and BAU
+definition are unchanged; 391 input-file references retained their hashes.
+Corrected dispatch changes affected energy and service outcomes. Re-run native
+BAU references and affected experiments with matching code/input/seed conditions
+before comparing results across this fix. Equipment models remain unchanged.
+[Validation evidence](releases/1.9.11-validation.json).
+
 ## v1.9.10 — 2026-10-30 — continuous campaign and measured resources
 
 - Add an offline continuous-run auditor with per-interval device/meter/cash
