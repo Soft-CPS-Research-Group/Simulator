@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agents &mdash; CityLearn 1.9.10 documentation</title>
+  <title>Agents &mdash; CityLearn 1.9.11 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=b389aa7a"></script>
+      <script src="../_static/documentation_options.js?v=17f12e63"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -138,6 +138,17 @@
 </table>
 <section id="dynamic-operational-baselines">
 <h2>Dynamic operational baselines<a class="headerlink" href="#dynamic-operational-baselines" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">BusinessAsUsualAgent</span></code> and <code class="docutils literal notranslate"><span class="pre">NormalPolicy</span></code> use the same immediate EV charging
+rule: request maximum charging power while connected, until 100% SOC. Departure
+targets, deadlines, prices and solar forecasts do not postpone or prioritise EV
+charging. Stationary storage retains its separate PV self-consumption rules.</p>
+<p>When an electrical-service limit binds, controllable requests in that scope are
+scaled proportionally to their requested power. Equal requests therefore receive
+equal shares; different charger ratings can yield different shares. Total and
+phase checks use the powers after preceding reductions, so overlapping limits do
+not repeatedly curtail the same excess. Charger minimum power and battery limits
+still apply. This is a physical allocation rule, not a departure-target scheduler;
+an EV can miss its requested departure SOC while another continues toward 100%.</p>
 <p><code class="docutils literal notranslate"><span class="pre">NormalPolicy</span></code> and the other <code class="docutils literal notranslate"><span class="pre">BusinessAsUsualAgent</span></code> policies refresh their
 action layout when members or equipment change. In decentralized dynamic runs,
 <code class="docutils literal notranslate"><span class="pre">agent.action_history_ids</span></code> identifies the stable rows of <code class="docutils literal notranslate"><span class="pre">agent.actions</span></code>:
