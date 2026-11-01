@@ -17,5 +17,8 @@
       "events": [],
       "excluded_template_registration": []
     }
-  }
+  },
+  "edition": "portugal-native-2023-2024-v3.3",
+  "campaign_revision": "portugal-heldout-2024-1",
+  "historical_member_narratives": "The base member parquet stories are preserved source metadata from v3.2; current executable lifecycle is recorded here."
 }

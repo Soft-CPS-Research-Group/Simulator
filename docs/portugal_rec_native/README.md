@@ -1,5 +1,28 @@
 # Portugal REC — 2023 e 2024
 
+## Edição corrente v3.3 — campanha reservada e referências emparelhadas
+
+A edição corrente é **portugal-native-2023-2024-v3.3**, revisão de campanha
+**portugal-heldout-2024-1**, mantendo a revisão de fronteiras **portugal-boundaries-1**.
+O [relatório de passagem de trabalho](Heldout_2024.md) é a descrição atual dos
+eventos de 2024, populações, recursos, seis referências emparelhadas e verificações.
+As quatro bases estáticas e nove configurações principais mantêm-se. As três
+configurações dinâmicas recebem seis eventos cada; há uma identidade suplementar
+por base dinâmica, disponível apenas após a admissão. As referências estão em
+`evaluation/references/`, sem duplicar as séries que permanecem iguais.
+Para treino/seleção, usar as vistas limitadas a 2023 em
+`evaluation/preparation_2023/`; os schemas completos de avaliação contêm o
+catálogo e os eventos reservados de 2024 nos seus metadados.
+
+O manifesto corrente está em `results/portugal_rec_native/manifest.json` e a
+evidência desta edição em `results/portugal_rec_native/heldout_2024/`.
+O PDF descritivo, as figuras, as tabelas em `dataset_description/` e as narrativas
+anteriores conservam explicitamente o âmbito **v3.2**; não descrevem a nova campanha.
+Os inputs físicos originais permanecem disponíveis e identificados por checksum.
+Os resultados anteriores não são resultados de v3.3. Ver [reprodução](Reproduzir.md).
+
+## Descrição histórica da edição v3.2
+
 Versão **portugal-native-2023-2024-v3.2**. As mesmas **quatro bases físicas e nove configurações**, agora com **70 176 registos de 15 minutos**, de 1 de janeiro de 2023 a 31 de dezembro de 2024. Os caminhos mantêm «2023» por estabilidade; os inputs correntes incluem ambos os anos.
 
 2024 continua cronologicamente 2023. Quem saiu não regressa; os equipamentos retirados permanecem retirados. Os eventos de entrada/saída de 2023 não são repetidos. Não foram acrescentados membros, equipamentos ou variantes. Nas configurações estáticas mantém-se o catálogo completo; nas dinâmicas mantém-se a composição existente no fim de 2023.

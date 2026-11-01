@@ -1,7 +1,7 @@
 {
   "dataset_id": "PREMIUM-100-ALLIN",
   "dataset_family": "PT-PREMIUM-100",
-  "dataset_contract_version": "portugal-native-2023-2024-v3.2",
+  "dataset_contract_version": "portugal-native-2023-2024-v3.3",
   "random_seed": 2023,
   "root_directory": "..",
   "central_agent": false,
@@ -4888,7 +4888,7 @@
     "Member_014": {
       "include": true,
       "type": "citylearn.building.Building",
-      "energy_simulation": "evaluation/native_inputs/premium_100_allin/Member_014.parquet",
+      "energy_simulation": "evaluation/campaign_2024/inputs/premium_100_allin/Member_014.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
       "pricing": "shared/pricing_omie.parquet",
@@ -5438,7 +5438,7 @@
     "Member_020": {
       "include": true,
       "type": "citylearn.building.Building",
-      "energy_simulation": "evaluation/native_inputs/premium_100_allin/Member_020.parquet",
+      "energy_simulation": "evaluation/campaign_2024/inputs/premium_100_allin/Member_020.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
       "pricing": "shared/pricing_omie.parquet",
@@ -5450,7 +5450,7 @@
       "chargers": {
         "CHG-M020-01": {
           "type": "citylearn.electric_vehicle_charger.Charger",
-          "charger_simulation": "evaluation/native_inputs/premium_100_allin/CHG-M020-01.parquet",
+          "charger_simulation": "evaluation/campaign_2024/inputs/premium_100_allin/CHG-M020-01.parquet",
           "autosize": false,
           "noise_std": 0.0,
           "attributes": {
@@ -6191,14 +6191,12 @@
     "Member_029": {
       "include": true,
       "type": "citylearn.building.Building",
-      "energy_simulation": "evaluation/native_inputs/premium_100_allin/Member_029.parquet",
+      "energy_simulation": "evaluation/campaign_2024/inputs/premium_100_allin/Member_029.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
       "pricing": "shared/pricing_omie.parquet",
       "inactive_observations": [],
-      "inactive_actions": [
-        "electrical_storage"
-      ],
+      "inactive_actions": [],
       "equity_group": "residential",
       "pv": {
         "type": "citylearn.energy_model.PV",
@@ -11725,7 +11723,7 @@
     "Member_099": {
       "include": true,
       "type": "citylearn.building.Building",
-      "energy_simulation": "evaluation/native_inputs/premium_100_allin/Member_099.parquet",
+      "energy_simulation": "evaluation/campaign_2024/inputs/premium_100_allin/Member_099.parquet",
       "weather": "shared/weather.parquet",
       "carbon_intensity": "shared/carbon_intensity.parquet",
       "pricing": "shared/pricing_omie.parquet",
@@ -11927,6 +11925,61 @@
           "attributes": {
             "trigger_threshold": 0.5
           }
+        }
+      },
+      "power_outage": {
+        "simulate_power_outage": true,
+        "stochastic_power_outage": false
+      }
+    },
+    "Member_101": {
+      "include": false,
+      "type": "citylearn.building.Building",
+      "energy_simulation": "evaluation/campaign_2024/inputs/premium_100_allin/Member_101.parquet",
+      "weather": "shared/weather.parquet",
+      "carbon_intensity": "shared/carbon_intensity.parquet",
+      "pricing": "shared/pricing_omie.parquet",
+      "inactive_observations": [],
+      "inactive_actions": [
+        "electrical_storage"
+      ],
+      "equity_group": "small_service",
+      "electrical_service": {
+        "mode": "three_phase",
+        "default_split": "balanced",
+        "connection_type": "three_phase",
+        "contracted_power_kva": 20.7,
+        "original_sampled_contracted_power_kva": 20.7,
+        "native_peak_import_kw": 4.28182088809648,
+        "native_peak_export_kw": 0.0,
+        "native_feasibility_margin": 0.3,
+        "contract_level_upgraded_for_native_feasibility": false,
+        "active_power_factor_assumption": 1.0,
+        "limits": {
+          "total": {
+            "import_kw": 20.7,
+            "export_kw": 0.0
+          },
+          "per_phase": {
+            "L1": {
+              "import_kw": 6.8999999999999995,
+              "export_kw": 0.0
+            },
+            "L2": {
+              "import_kw": 6.8999999999999995,
+              "export_kw": 0.0
+            },
+            "L3": {
+              "import_kw": 6.8999999999999995,
+              "export_kw": 0.0
+            }
+          }
+        },
+        "observations": {
+          "headroom": true,
+          "headroom_export": true,
+          "violation": true,
+          "phase_encoding": true
         }
       },
       "power_outage": {
@@ -12382,6 +12435,134 @@
       "target_member_id": "Member_095",
       "purpose": "permanent_departure",
       "timestamp_local": "2023-11-17 18:00:00+00:00"
+    },
+    {
+      "id": "heldout2024_admission_Member_101",
+      "time_step": 39120,
+      "operation": "add_member",
+      "target_member_id": "Member_101",
+      "purpose": "admission",
+      "campaign": "portugal-heldout-2024-1",
+      "timestamp_utc": "2024-02-12T12:00:00+00:00",
+      "timestamp_local": "2024-02-12T12:00:00+00:00"
+    },
+    {
+      "id": "heldout2024_commissioning_Member_029",
+      "time_step": 47852,
+      "operation": "add_asset",
+      "target_member_id": "Member_029",
+      "purpose": "commissioning",
+      "campaign": "portugal-heldout-2024-1",
+      "timestamp_utc": "2024-05-13T11:00:00+00:00",
+      "timestamp_local": "2024-05-13T12:00:00+01:00",
+      "target_asset_type": "electrical_storage",
+      "target_asset_id": "BESS-M029-01",
+      "source_member_id": "Member_004",
+      "overrides": {
+        "capacity": 5.12,
+        "nominal_power": 2.56,
+        "efficiency": 0.94,
+        "initial_soc": 0.1,
+        "depth_of_discharge": 0.9,
+        "loss_coefficient": 2.805892205981486e-05,
+        "capacity_loss_coefficient": 0.0,
+        "power_efficiency_curve": [
+          [
+            0,
+            0.94
+          ],
+          [
+            1,
+            0.94
+          ]
+        ],
+        "capacity_power_curve": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "heldout2024_replacement_out_Member_014",
+      "time_step": 48524,
+      "operation": "remove_asset",
+      "target_member_id": "Member_014",
+      "purpose": "replacement_out",
+      "campaign": "portugal-heldout-2024-1",
+      "timestamp_utc": "2024-05-20T11:00:00+00:00",
+      "timestamp_local": "2024-05-20T12:00:00+01:00",
+      "target_asset_type": "electrical_storage",
+      "target_asset_id": "BESS-M014-01"
+    },
+    {
+      "id": "heldout2024_replacement_in_Member_014",
+      "time_step": 48716,
+      "operation": "add_asset",
+      "target_member_id": "Member_014",
+      "purpose": "replacement_in",
+      "campaign": "portugal-heldout-2024-1",
+      "timestamp_utc": "2024-05-22T11:00:00+00:00",
+      "timestamp_local": "2024-05-22T12:00:00+01:00",
+      "target_asset_type": "electrical_storage",
+      "target_asset_id": "BESS-M014-02",
+      "source_member_id": "Member_004",
+      "overrides": {
+        "capacity": 5.12,
+        "nominal_power": 2.56,
+        "efficiency": 0.94,
+        "initial_soc": 0.1,
+        "depth_of_discharge": 0.9,
+        "loss_coefficient": 2.805892205981486e-05,
+        "capacity_loss_coefficient": 0.0,
+        "power_efficiency_curve": [
+          [
+            0,
+            0.94
+          ],
+          [
+            1,
+            0.94
+          ]
+        ],
+        "capacity_power_curve": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "heldout2024_permanent_departure_Member_020",
+      "time_step": 56588,
+      "operation": "remove_member",
+      "target_member_id": "Member_020",
+      "purpose": "permanent_departure",
+      "campaign": "portugal-heldout-2024-1",
+      "timestamp_utc": "2024-08-12T11:00:00+00:00",
+      "timestamp_local": "2024-08-12T12:00:00+01:00"
+    },
+    {
+      "id": "heldout2024_permanent_retirement_Member_099",
+      "time_step": 65328,
+      "operation": "remove_asset",
+      "target_member_id": "Member_099",
+      "purpose": "permanent_retirement",
+      "campaign": "portugal-heldout-2024-1",
+      "timestamp_utc": "2024-11-11T12:00:00+00:00",
+      "timestamp_local": "2024-11-11T12:00:00+00:00",
+      "target_asset_type": "pv",
+      "target_asset_id": "PV-M099-01"
     }
   ],
   "membership_policy": "first entry only; departures permanent; member and all owned assets cease activity after exit; no subsequent private service",
@@ -12413,7 +12594,7 @@
     "allow_overlapping_requests": false
   },
   "experimental_design": {
-    "version": "portugal-native-2023-2024-v3.2",
+    "version": "portugal-native-2023-2024-v3.3",
     "name": "premium_100_allin",
     "label": "Premium All-in",
     "purpose": "integrated operation with demand response",
@@ -12512,6 +12693,16 @@
         "owned_ev_ids": [],
         "post_exit_demand": "none",
         "pending_cycles": "cancelled"
+      },
+      {
+        "member_id": "Member_020",
+        "exit_step": 56588,
+        "owned_ev_ids": [
+          "EV-M020-01"
+        ],
+        "post_exit_demand": "none",
+        "pending_cycles": "none; no controllable appliances",
+        "boundary_policy": "service-free gap; all previously admitted EV visits complete before exit"
       }
     ],
     "measurement_noise": {
@@ -12638,8 +12829,13 @@
         70175
       ]
     },
-    "continuation": "Topology is not replayed. Permanent exits and retired assets remain absent; same equipment and members.",
-    "frozen_2023_source_fingerprint": "c463b8d036405c1961bc33868a234564e0a30ef662e13572f635bbb453f146ee"
+    "continuation": "Preserve all 2023 lifecycle events; add the explicitly reserved 2024 campaign, with no readmission or resurrection.",
+    "frozen_2023_source_fingerprint": "c463b8d036405c1961bc33868a234564e0a30ef662e13572f635bbb453f146ee",
+    "heldout_campaign": {
+      "revision": "portugal-heldout-2024-1",
+      "supplemental_member_catalogue": "evaluation/campaign_2024/catalogue.json",
+      "information_boundary": "2023 only for training, validation and preprocessing; 2024 event schedule is evaluator-only, not a policy input"
+    }
   },
   "native_compatibility": {
     "engine_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
