@@ -110,8 +110,8 @@ def resource_state(schema, t):
 def campaign_events(family, exit_step):
     core = family == 'core_30'
     newcomer, install, retired = ('031', '010', '023') if core else ('101', '029', '099')
-    # M025 has a schema-loaded battery in both bases, including after its exit
-    # from neither campaign. Explicit attributes avoid copying its operating SoC.
+    # Retained owners Core M025 and Premium M004 supply battery templates.
+    # Explicit attributes and initial SoC define the new physical products.
     source = 'Member_025' if core else 'Member_004'
     storage = dict(capacity=5.12, nominal_power=2.56, efficiency=.94, initial_soc=.1,
                    depth_of_discharge=.9, loss_coefficient=2.805892205981486e-05,
