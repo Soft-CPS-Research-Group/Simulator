@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3.2",
+  "version": "portugal-native-2023-2024-v3.3",
   "integrity_revision": "portugal-boundaries-1",
   "runtime_requirement": "Current simulator with unknown-departure handling; simulator_core below identifies the historical construction reference only.",
   "years": [
@@ -10,12 +10,17 @@
   "configurations": 9,
   "families": 4,
   "package": "docs/portugal_rec_native.zip",
-  "sha256": "21309ee46a60cbc8f095b86f22e7c10dd29eb238bab864b26d29ffc1d2729a2c",
-  "bytes": 552561403,
-  "files": 4032,
+  "sha256": "76963a223e03af163e2489178dc13196bc24fde0a2af64ff406fd7ca6dbd7f8e",
+  "bytes": 565772983,
+  "files": 4111,
   "simulator_core": "978be68b0e0740deab15ecf536805f323b86fa57",
   "frozen_2023_commit": "393cd200bb66b671d8904eba00688d56d91f08d3",
   "scope": "Data, public sources, descriptive report, offline reconstruction, pricing and forecast checks and sampled runtime market validation; no annual controller comparison.",
+  "matched_references": 6,
+  "preparation_views": 9,
+  "campaign_revision": "portugal-heldout-2024-1",
+  "current_campaign_report": "docs/portugal_rec_native/Heldout_2024.md",
+  "historical_descriptive_report_edition": "portugal-native-2023-2024-v3.2; not current campaign evidence",
   "english_descriptive_report": {
     "path": "docs/portugal_rec_native/Portugal_REC_Dataset_Report.pdf",
     "sha256": "36d939f875ff98d2e4d695e499f92a5de06cfda1e6079fa81e4a0e66ed6411fc"

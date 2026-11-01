@@ -381,4 +381,8 @@ def main():
     print(json.dumps({'pdf':str(out),'planned_pages':len(PAGES),'figures':len(FIGURES)},indent=2))
 
 
-if __name__=='__main__':main()
+if __name__=='__main__':
+    edition=json.loads((ROOT/'results/portugal_rec_native/manifest.json').read_text())['version']
+    if edition!='portugal-native-2023-2024-v3.2':
+        raise SystemExit('This descriptive report is frozen at v3.2. Rebuild in the recorded source checkout; use Heldout_2024.md for the current campaign. Do not relabel old figures as v3.3 evidence.')
+    main()

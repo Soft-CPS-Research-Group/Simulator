@@ -1,5 +1,38 @@
 # Reconstruir 2023 e 2024
 
+## Último passo para a edição corrente v3.3
+
+Depois de construir v3.2 e aplicar `repair_portugal_dataset_boundaries.py` na ordem
+abaixo, executar:
+
+```bash
+python scripts/prepare_portugal_heldout_2024.py --repo /tmp/pt-2023-2024
+python scripts/audit/audit_portugal_heldout_2024.py --repo /tmp/pt-2023-2024 --runtime
+```
+
+No checkout corrente, omitir `--repo`. A preparação é offline e idempotente;
+verifica os checksums dos inputs anteriores, arquiva os schemas v3.2 e cria séries
+derivadas apenas onde a campanha o exige. Nunca sobrescreve as séries físicas
+anteriores. Não executar novamente os construtores históricos sobre v3.3 sem
+voltar a aplicar este último passo. A auditoria usa o motor do checkout em que o
+script é executado; `--repo` seleciona os dados. Usar o motor corrente, nunca o
+commit histórico de construção como substituto do motor atual.
+As vistas de preparação ficam em `evaluation/preparation_2023/`, sem os novos
+membros nem os programas de 2024. Manter os blocos de treino/validação dentro de
+2023; não alimentar a preparação com os schemas completos de avaliação.
+
+`python -m pytest -q tests/test_portugal_heldout_2024.py` mantém a verificação dos
+pares e de todos os novos eventos no CI. A auditoria de entrega percorre 72 janelas
+reais de eventos/fronteiras, sem deslocar datas para um episódio artificial.
+`python scripts/package_portugal_native.py` exige essa evidência e os checksums
+atuais antes de reconstruir o pacote.
+
+A edição anterior pode ser recuperada integralmente no commit
+`8157f605e26fb75651037451fb453b1a48056787`. O PDF e as tabelas descritivas existentes
+são históricos de v3.2; a descrição de v3.3 está em [Heldout_2024.md](Heldout_2024.md).
+
+## Construção histórica de v3.2
+
 Usar o motor original `978be68b0e0740deab15ecf536805f323b86fa57` e Python com numpy, pandas, pyarrow e pvlib 0.15.2. Nenhum construtor importa CityLearn. As fontes públicas de ambos os anos estão arquivadas no repositório; a reconstrução abaixo funciona sem rede.
 
 ```bash

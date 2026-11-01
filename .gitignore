@@ -189,6 +189,7 @@ results/*
 results/portugal_rec_native/*
 !results/portugal_rec_native/boundary_integrity.json
 !results/portugal_rec_native/boundary_validation.json
+!results/portugal_rec_native/heldout_2024/
 runtime.csv
 *-runtime.csv
 outputs/

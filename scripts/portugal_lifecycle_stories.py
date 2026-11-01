@@ -17,7 +17,8 @@ INTRO = ('Histórias do inventário sintético de 2023–2024. As transições s
          'diretamente dos schemas em evaluation/, por configuração; datas e horas '
          'em Europe/Lisbon. A disponibilidade dos equipamentos segue os eventos. '
          'As saídas são definitivas, com todos os ativos do membro; não há atividade '
-         'privada posterior nem repetição de entradas em 2024. Os limites que o motor '
+         'privada posterior nem readmissão de membros que saíram. As novas entradas '
+         'de 2024 têm identidades próprias no catálogo suplementar. Os limites que o motor '
          'original consegue impor estão descritos no README da documentação.\n')
 
 
@@ -71,6 +72,8 @@ def sentence(event):
 def narrative(catalogue, mid):
     groups = {}
     for variant, data in catalogue['variants'].items():
+        if mid not in data['initial_membership']:
+            continue
         events = [e for e in data['events'] if e['target_member_id'] == mid]
         initial = data['initial_membership'][mid]
         key = json.dumps([initial, events], sort_keys=True)
@@ -79,7 +82,9 @@ def narrative(catalogue, mid):
     for group in groups.values():
         states = ['presente no início de 2023' if group['initial'] else 'ainda não integra a REC no início de 2023']
         states.extend(sentence(e) for e in group['events'])
-        if group['events']:
+        if any(e['time_step'] >= 35040 for e in group['events']):
+            states.append('as transições de 2024 pertencem à campanha reservada, preservando a história de 2023')
+        elif group['events']:
             states.append('em 2024 mantém o estado resultante, sem novas transições de topologia')
         else:
             states.append('sem transições de membros ou ativos em 2023–2024')

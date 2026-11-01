@@ -358,4 +358,8 @@ def main():
     print(json.dumps({'inventory':records(tables['inventory']),'market':metrics['market'],'variants':metrics['variants']},indent=2))
 
 
-if __name__=='__main__':main()
+if __name__=='__main__':
+    edition=json.loads((ROOT/'results/portugal_rec_native/manifest.json').read_text())['version']
+    if edition!='portugal-native-2023-2024-v3.2':
+        raise SystemExit('This descriptive report is frozen at v3.2. Use its recorded source commit to rebuild it; current campaign evidence is in docs/portugal_rec_native/Heldout_2024.md.')
+    main()

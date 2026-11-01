@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3.2",
+  "version": "portugal-native-2023-2024-v3.3",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "status": "dataset_construction_only",
   "years": [
@@ -20,10 +20,25 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
-      "sha256": "cb78408e8115c3392bbdd533944800614250f9cacbdbb54742e2f05b8ebc3dc5",
+      "sha256": "6ac61417f794e372db92ceee19ea1934b9aca1d6998800d8ec6a5c448b952e94",
       "frozen_2023_source_fingerprint": "c073ab395a0a6340dfb4ababec167aeab2c733e22c2eff70facc09a90dc2596a"
     }
   ],
   "tariff_policy": "omie_nonnegative",
-  "integrity_revision": "portugal-boundaries-1"
+  "integrity_revision": "portugal-boundaries-1",
+  "campaign_revision": "portugal-heldout-2024-1",
+  "references": [],
+  "member_catalogue_scope": "Original static physical inventory; prose fields retain v3.2 source histories. Current per-variant lifecycle is in catalogs/lifecycle_plan.json; supplemental identities are in evaluation/campaign_2024/catalogue.json where applicable.",
+  "preparation_schemas": [
+    {
+      "variant": "core_4",
+      "schema": "data/datasets/rec_pt_2023_micro_4_v2/evaluation/preparation_2023/core_4.json",
+      "sha256": "43dc371552065aa3e277fa92335400d15567322db30603d639a2a55011964bb1",
+      "interval": [
+        0,
+        35039
+      ],
+      "role": "Preparation entry point, not an additional experimental scenario"
+    }
+  ]
 }

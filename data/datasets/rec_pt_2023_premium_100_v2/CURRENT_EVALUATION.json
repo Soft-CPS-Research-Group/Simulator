@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3.2",
+  "version": "portugal-native-2023-2024-v3.3",
   "simulator_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "status": "dataset_construction_only",
   "years": [
@@ -20,7 +20,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json",
-      "sha256": "d81d918e75c4ec97fa71258f5c84af57e5953448445baf996f694e38648a1494",
+      "sha256": "873c1fe4fdb66798524820d5f47cae3394b89320da1c2b30c840e08fd98dde28",
       "frozen_2023_source_fingerprint": "96fde91f842e7183f0b1667f630e3afd4e4a56013aa298873d7f93b49b1a6400"
     },
     {
@@ -36,10 +36,75 @@
         "D": true
       },
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
-      "sha256": "056599b00cf19079d89407b762638c3e303f7719a2bdd12e80f1a76aa6c4d398",
+      "sha256": "09c50c796414714b3f76bb9533724fb489a64b5af07f93f34a398197d3b22238",
       "frozen_2023_source_fingerprint": "c463b8d036405c1961bc33868a234564e0a30ef662e13572f635bbb453f146ee"
     }
   ],
   "tariff_policy": "omie_nonnegative",
-  "integrity_revision": "portugal-boundaries-1"
+  "integrity_revision": "portugal-boundaries-1",
+  "campaign_revision": "portugal-heldout-2024-1",
+  "references": [
+    {
+      "family": "premium_100",
+      "variant": "premium_100_allin_no_disturbances",
+      "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/references/premium_100_allin_no_disturbances.json",
+      "sha256": "0a60b2689a00d09afb2e77498a7ced2871c3dcabad602e2671f1f5464fa9c036",
+      "factors": {
+        "T": true,
+        "E": false,
+        "H": false,
+        "G": false,
+        "D": true
+      }
+    },
+    {
+      "family": "premium_100",
+      "variant": "premium_100_allin_no_dr",
+      "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/references/premium_100_allin_no_dr.json",
+      "sha256": "f67004d7f2a7d5d14c8e73c673b3cea9dd47b78cf302b3ab294f9674c6a0c754",
+      "factors": {
+        "T": true,
+        "E": false,
+        "H": true,
+        "G": true,
+        "D": false
+      }
+    },
+    {
+      "family": "premium_100",
+      "variant": "premium_100_allin_frozen_2024",
+      "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/references/premium_100_allin_frozen_2024.json",
+      "sha256": "d432123de5d1b16fa070b346de5c811c4e8826efaf759b784af7cb18bdea8b1e",
+      "factors": {
+        "T": true,
+        "E": false,
+        "H": true,
+        "G": true,
+        "D": true
+      }
+    }
+  ],
+  "member_catalogue_scope": "Original static physical inventory; prose fields retain v3.2 source histories. Current per-variant lifecycle is in catalogs/lifecycle_plan.json; supplemental identities are in evaluation/campaign_2024/catalogue.json where applicable.",
+  "preparation_schemas": [
+    {
+      "variant": "premium_100_normal",
+      "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/preparation_2023/premium_100_normal.json",
+      "sha256": "5c4285ab0094f3a3fe3ef84f366dc31acd3df0617c5505980428e042e258031a",
+      "interval": [
+        0,
+        35039
+      ],
+      "role": "Preparation entry point, not an additional experimental scenario"
+    },
+    {
+      "variant": "premium_100_allin",
+      "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/preparation_2023/premium_100_allin.json",
+      "sha256": "c958acc94060ec11bbe57b55e2f3417cb2ba24c261fc50cd79dacddc73590abc",
+      "interval": [
+        0,
+        35039
+      ],
+      "role": "Preparation entry point, not an additional experimental scenario"
+    }
+  ]
 }

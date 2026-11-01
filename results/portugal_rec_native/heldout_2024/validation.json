@@ -1,0 +1,4697 @@
+{
+  "version": "portugal-native-2023-2024-v3.3",
+  "revision": "portugal-heldout-2024-1",
+  "static": {
+    "status": "pass",
+    "pairs": [
+      {
+        "reference": "core_30_combined_no_disturbances",
+        "factor": "disturbances",
+        "status": "pass",
+        "changed_energy_files": [
+          "evaluation/campaign_2024/inputs/core_30_combined_no_disturbances/Member_001.parquet",
+          "evaluation/campaign_2024/inputs/core_30_combined_no_disturbances/Member_002.parquet",
+          "evaluation/campaign_2024/inputs/core_30_combined_no_disturbances/Member_014.parquet"
+        ],
+        "changed_limit_members": []
+      },
+      {
+        "reference": "core_30_combined_nominal_limits",
+        "factor": "electrical_limits",
+        "status": "pass",
+        "changed_energy_files": [],
+        "changed_limit_members": [
+          "Member_001",
+          "Member_006",
+          "Member_025"
+        ]
+      },
+      {
+        "reference": "premium_100_allin_no_disturbances",
+        "factor": "disturbances",
+        "status": "pass",
+        "changed_energy_files": [
+          "evaluation/campaign_2024/inputs/premium_100_allin_no_disturbances/Member_001.parquet",
+          "evaluation/campaign_2024/inputs/premium_100_allin_no_disturbances/Member_002.parquet",
+          "evaluation/campaign_2024/inputs/premium_100_allin_no_disturbances/Member_004.parquet",
+          "evaluation/campaign_2024/inputs/premium_100_allin_no_disturbances/Member_081.parquet",
+          "evaluation/campaign_2024/inputs/premium_100_allin_no_disturbances/Member_098.parquet"
+        ],
+        "changed_limit_members": []
+      },
+      {
+        "reference": "premium_100_allin_no_dr",
+        "factor": "dr_activation",
+        "status": "pass",
+        "changed_energy_files": [],
+        "changed_limit_members": []
+      },
+      {
+        "reference": "core_30_topology_frozen_2024",
+        "factor": "topology_2024",
+        "status": "pass",
+        "identical_through_step": 39119
+      },
+      {
+        "reference": "premium_100_allin_frozen_2024",
+        "factor": "topology_2024",
+        "status": "pass",
+        "identical_through_step": 39119
+      }
+    ],
+    "scenarios": [
+      {
+        "variant": "core_30_topology",
+        "status": "pass",
+        "events_2024": 6,
+        "inherited_members": 27,
+        "peak_members": 28,
+        "final_members": 27
+      },
+      {
+        "variant": "core_30_combined",
+        "status": "pass",
+        "events_2024": 6,
+        "inherited_members": 27,
+        "peak_members": 28,
+        "final_members": 27
+      },
+      {
+        "variant": "premium_100_allin",
+        "status": "pass",
+        "events_2024": 6,
+        "inherited_members": 88,
+        "peak_members": 89,
+        "final_members": 88
+      }
+    ],
+    "cohorts": [
+      {
+        "variant": "core_30_topology",
+        "source_sessions": 9691,
+        "previous_offered": 8587,
+        "current_offered": 8481,
+        "excluded_by_2024_departure": 106,
+        "excluded_requested_energy_reference_kwh": 485.2432619217719,
+        "affected_inflight_sessions": 0,
+        "shared_service_requests_unchanged": true,
+        "appliances": "All existing appliance schedules and profiles unchanged; exiting member owns no controllable appliance"
+      },
+      {
+        "variant": "core_30_combined",
+        "source_sessions": 9691,
+        "previous_offered": 8587,
+        "current_offered": 8481,
+        "excluded_by_2024_departure": 106,
+        "excluded_requested_energy_reference_kwh": 485.2432619217719,
+        "affected_inflight_sessions": 0,
+        "shared_service_requests_unchanged": true,
+        "appliances": "All existing appliance schedules and profiles unchanged; exiting member owns no controllable appliance"
+      },
+      {
+        "variant": "premium_100_allin",
+        "source_sessions": 41288,
+        "previous_offered": 40072,
+        "current_offered": 39982,
+        "excluded_by_2024_departure": 90,
+        "excluded_requested_energy_reference_kwh": 694.1178983848698,
+        "affected_inflight_sessions": 0,
+        "shared_service_requests_unchanged": true,
+        "appliances": "All existing appliance schedules and profiles unchanged; exiting member owns no controllable appliance"
+      }
+    ],
+    "preparation": [
+      {
+        "variant": "core_4",
+        "status": "pass",
+        "final_step": 35039,
+        "future_member_pool": false,
+        "future_event_programmes": false
+      },
+      {
+        "variant": "core_15",
+        "status": "pass",
+        "final_step": 35039,
+        "future_member_pool": false,
+        "future_event_programmes": false
+      },
+      {
+        "variant": "core_30_normal",
+        "status": "pass",
+        "final_step": 35039,
+        "future_member_pool": false,
+        "future_event_programmes": false
+      },
+      {
+        "variant": "core_30_topology",
+        "status": "pass",
+        "final_step": 35039,
+        "future_member_pool": false,
+        "future_event_programmes": false
+      },
+      {
+        "variant": "core_30_safety",
+        "status": "pass",
+        "final_step": 35039,
+        "future_member_pool": false,
+        "future_event_programmes": false
+      },
+      {
+        "variant": "core_30_robustness",
+        "status": "pass",
+        "final_step": 35039,
+        "future_member_pool": false,
+        "future_event_programmes": false
+      },
+      {
+        "variant": "core_30_combined",
+        "status": "pass",
+        "final_step": 35039,
+        "future_member_pool": false,
+        "future_event_programmes": false
+      },
+      {
+        "variant": "premium_100_normal",
+        "status": "pass",
+        "final_step": 35039,
+        "future_member_pool": false,
+        "future_event_programmes": false
+      },
+      {
+        "variant": "premium_100_allin",
+        "status": "pass",
+        "final_step": 35039,
+        "future_member_pool": false,
+        "future_event_programmes": false
+      }
+    ],
+    "preparation_year_preserved": true,
+    "declared_2024_events": 18
+  },
+  "runtime": [
+    {
+      "schema": "core_4.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 4,
+            "charger": 2,
+            "deferrable_appliance": 2,
+            "pv": 1,
+            "storage": 1
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 4,
+            "charger": 2,
+            "deferrable_appliance": 2,
+            "pv": 1,
+            "storage": 1
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 1557,
+      "seconds": 0.196
+    },
+    {
+      "schema": "core_4.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 4,
+            "charger": 2,
+            "deferrable_appliance": 2,
+            "pv": 1,
+            "storage": 1
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 4,
+            "charger": 2,
+            "deferrable_appliance": 2,
+            "pv": 1,
+            "storage": 1
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 1557,
+      "seconds": 0.188
+    },
+    {
+      "schema": "core_15.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 15,
+            "charger": 6,
+            "deferrable_appliance": 10,
+            "pv": 4,
+            "storage": 1
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 15,
+            "charger": 6,
+            "deferrable_appliance": 10,
+            "pv": 4,
+            "storage": 1
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 4923,
+      "seconds": 0.617
+    },
+    {
+      "schema": "core_15.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 15,
+            "charger": 6,
+            "deferrable_appliance": 10,
+            "pv": 4,
+            "storage": 1
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 15,
+            "charger": 6,
+            "deferrable_appliance": 10,
+            "pv": 4,
+            "storage": 1
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 4923,
+      "seconds": 0.595
+    },
+    {
+      "schema": "core_30_normal.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9513,
+      "seconds": 1.207
+    },
+    {
+      "schema": "core_30_normal.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9513,
+      "seconds": 1.187
+    },
+    {
+      "schema": "core_30_topology.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8905,
+      "seconds": 2.679
+    },
+    {
+      "schema": "core_30_topology.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9007,
+      "seconds": 2.86
+    },
+    {
+      "schema": "core_30_topology.json",
+      "label": "heldout2024_admission_Member_031",
+      "status": "pass",
+      "start": 39072,
+      "end": 39168,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 39072,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 39119,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 39120,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 39121,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 39168,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_admission_Member_031",
+          "time_step": 39120,
+          "operation": "add_member",
+          "target_member_id": "Member_031",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 14,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 6.143
+    },
+    {
+      "schema": "core_30_topology.json",
+      "label": "heldout2024_commissioning_Member_010",
+      "status": "pass",
+      "start": 47804,
+      "end": 47900,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 47804,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 47851,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 47852,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 47853,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 47900,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_commissioning_Member_010",
+          "time_step": 47852,
+          "operation": "add_asset",
+          "target_member_id": "Member_010",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M010-01",
+          "source_member_id": "Member_025",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 15,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 6.12
+    },
+    {
+      "schema": "core_30_topology.json",
+      "label": "heldout2024_replacement_out_Member_014",
+      "status": "pass",
+      "start": 48476,
+      "end": 48572,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48476,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 48523,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 48524,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48525,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48572,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_out_Member_014",
+          "time_step": 48524,
+          "operation": "remove_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 16,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 6.232
+    },
+    {
+      "schema": "core_30_topology.json",
+      "label": "heldout2024_replacement_in_Member_014",
+      "status": "pass",
+      "start": 48668,
+      "end": 48764,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48668,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48715,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48716,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 48717,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 48764,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_in_Member_014",
+          "time_step": 48716,
+          "operation": "add_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-02",
+          "source_member_id": "Member_025",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 17,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 6.388
+    },
+    {
+      "schema": "core_30_topology.json",
+      "label": "heldout2024_permanent_departure_Member_020",
+      "status": "pass",
+      "start": 56540,
+      "end": 56636,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 56540,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 56587,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 56588,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 56589,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 56636,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_departure_Member_020",
+          "time_step": 56588,
+          "operation": "remove_member",
+          "target_member_id": "Member_020",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 18,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 6.286
+    },
+    {
+      "schema": "core_30_topology.json",
+      "label": "heldout2024_permanent_retirement_Member_023",
+      "status": "pass",
+      "start": 65280,
+      "end": 65376,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 65280,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 65327,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 65328,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 65329,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 65376,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_retirement_Member_023",
+          "time_step": 65328,
+          "operation": "remove_asset",
+          "target_member_id": "Member_023",
+          "target_asset_type": "pv",
+          "target_asset_id": "PV-M023-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 19,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9007,
+      "seconds": 6.201
+    },
+    {
+      "schema": "core_30_safety.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9513,
+      "seconds": 1.237
+    },
+    {
+      "schema": "core_30_safety.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9513,
+      "seconds": 1.213
+    },
+    {
+      "schema": "core_30_robustness.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9761,
+      "seconds": 1.378
+    },
+    {
+      "schema": "core_30_robustness.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 30,
+            "charger": 15,
+            "deferrable_appliance": 19,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9761,
+      "seconds": 1.353
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9153,
+      "seconds": 2.749
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9263,
+      "seconds": 2.931
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "heldout2024_admission_Member_031",
+      "status": "pass",
+      "start": 39072,
+      "end": 39168,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 39072,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 39119,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 39120,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 39121,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 39168,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_admission_Member_031",
+          "time_step": 39120,
+          "operation": "add_member",
+          "target_member_id": "Member_031",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 14,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 6.52
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "heldout2024_commissioning_Member_010",
+      "status": "pass",
+      "start": 47804,
+      "end": 47900,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 47804,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 47851,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 47852,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 47853,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 47900,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_commissioning_Member_010",
+          "time_step": 47852,
+          "operation": "add_asset",
+          "target_member_id": "Member_010",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M010-01",
+          "source_member_id": "Member_025",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 15,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 6.536
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "heldout2024_replacement_out_Member_014",
+      "status": "pass",
+      "start": 48476,
+      "end": 48572,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48476,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 48523,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 48524,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48525,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48572,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_out_Member_014",
+          "time_step": 48524,
+          "operation": "remove_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 16,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 6.426
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "heldout2024_replacement_in_Member_014",
+      "status": "pass",
+      "start": 48668,
+      "end": 48764,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48668,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48715,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48716,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 48717,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 48764,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_in_Member_014",
+          "time_step": 48716,
+          "operation": "add_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-02",
+          "source_member_id": "Member_025",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 17,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 6.762
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "heldout2024_permanent_departure_Member_020",
+      "status": "pass",
+      "start": 56540,
+      "end": 56636,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 56540,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 56587,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 56588,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 56589,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 56636,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_departure_Member_020",
+          "time_step": 56588,
+          "operation": "remove_member",
+          "target_member_id": "Member_020",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 18,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 6.631
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "heldout2024_permanent_retirement_Member_023",
+      "status": "pass",
+      "start": 65280,
+      "end": 65376,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 65280,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 65327,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 65328,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 65329,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 65376,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_retirement_Member_023",
+          "time_step": 65328,
+          "operation": "remove_asset",
+          "target_member_id": "Member_023",
+          "target_asset_type": "pv",
+          "target_asset_id": "PV-M023-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 19,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9263,
+      "seconds": 6.297
+    },
+    {
+      "schema": "premium_100_normal.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 100,
+            "charger": 65,
+            "deferrable_appliance": 64,
+            "pv": 36,
+            "storage": 20
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 100,
+            "charger": 65,
+            "deferrable_appliance": 64,
+            "pv": 36,
+            "storage": 20
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30933,
+      "seconds": 4.194
+    },
+    {
+      "schema": "premium_100_normal.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 100,
+            "charger": 65,
+            "deferrable_appliance": 64,
+            "pv": 36,
+            "storage": 20
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 100,
+            "charger": 65,
+            "deferrable_appliance": 64,
+            "pv": 36,
+            "storage": 20
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30933,
+      "seconds": 4.1
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30388,
+      "seconds": 9.596
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30508,
+      "seconds": 9.757
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "heldout2024_admission_Member_101",
+      "status": "pass",
+      "start": 39072,
+      "end": 39168,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 39072,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 39119,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 39120,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 39121,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 39168,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_admission_Member_101",
+          "time_step": 39120,
+          "operation": "add_member",
+          "target_member_id": "Member_101",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 48,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 30711,
+      "seconds": 26.684
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "heldout2024_commissioning_Member_029",
+      "status": "pass",
+      "start": 47804,
+      "end": 47900,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 47804,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 47851,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 47852,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 47853,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 47900,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_commissioning_Member_029",
+          "time_step": 47852,
+          "operation": "add_asset",
+          "target_member_id": "Member_029",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M029-01",
+          "source_member_id": "Member_004",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 49,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 30711,
+      "seconds": 27.526
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "heldout2024_replacement_out_Member_014",
+      "status": "pass",
+      "start": 48476,
+      "end": 48572,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48476,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 48523,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 48524,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48525,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48572,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_out_Member_014",
+          "time_step": 48524,
+          "operation": "remove_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 50,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 30711,
+      "seconds": 27.44
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "heldout2024_replacement_in_Member_014",
+      "status": "pass",
+      "start": 48668,
+      "end": 48764,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48668,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48715,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48716,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 48717,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 48764,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_in_Member_014",
+          "time_step": 48716,
+          "operation": "add_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-02",
+          "source_member_id": "Member_004",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 51,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 30711,
+      "seconds": 27.63
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "heldout2024_permanent_departure_Member_020",
+      "status": "pass",
+      "start": 56540,
+      "end": 56636,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 56540,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 56587,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 56588,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 56589,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 56636,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_departure_Member_020",
+          "time_step": 56588,
+          "operation": "remove_member",
+          "target_member_id": "Member_020",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 52,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 30711,
+      "seconds": 27.289
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "heldout2024_permanent_retirement_Member_099",
+      "status": "pass",
+      "start": 65280,
+      "end": 65376,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 65280,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 65327,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 65328,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        },
+        {
+          "time_step": 65329,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        },
+        {
+          "time_step": 65376,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_retirement_Member_099",
+          "time_step": 65328,
+          "operation": "remove_asset",
+          "target_member_id": "Member_099",
+          "target_asset_type": "pv",
+          "target_asset_id": "PV-M099-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 53,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 30508,
+      "seconds": 30.954
+    },
+    {
+      "schema": "core_30_combined_no_disturbances.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8905,
+      "seconds": 3.129
+    },
+    {
+      "schema": "core_30_combined_no_disturbances.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9007,
+      "seconds": 3.345
+    },
+    {
+      "schema": "core_30_combined_no_disturbances.json",
+      "label": "heldout2024_admission_Member_031",
+      "status": "pass",
+      "start": 39072,
+      "end": 39168,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 39072,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 39119,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 39120,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 39121,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 39168,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_admission_Member_031",
+          "time_step": 39120,
+          "operation": "add_member",
+          "target_member_id": "Member_031",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 14,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 7.26
+    },
+    {
+      "schema": "core_30_combined_no_disturbances.json",
+      "label": "heldout2024_commissioning_Member_010",
+      "status": "pass",
+      "start": 47804,
+      "end": 47900,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 47804,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 47851,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 47852,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 47853,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 47900,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_commissioning_Member_010",
+          "time_step": 47852,
+          "operation": "add_asset",
+          "target_member_id": "Member_010",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M010-01",
+          "source_member_id": "Member_025",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 15,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 8.095
+    },
+    {
+      "schema": "core_30_combined_no_disturbances.json",
+      "label": "heldout2024_replacement_out_Member_014",
+      "status": "pass",
+      "start": 48476,
+      "end": 48572,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48476,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 48523,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 48524,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48525,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48572,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_out_Member_014",
+          "time_step": 48524,
+          "operation": "remove_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 16,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 8.454
+    },
+    {
+      "schema": "core_30_combined_no_disturbances.json",
+      "label": "heldout2024_replacement_in_Member_014",
+      "status": "pass",
+      "start": 48668,
+      "end": 48764,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48668,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48715,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48716,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 48717,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 48764,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_in_Member_014",
+          "time_step": 48716,
+          "operation": "add_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-02",
+          "source_member_id": "Member_025",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 17,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 7.734
+    },
+    {
+      "schema": "core_30_combined_no_disturbances.json",
+      "label": "heldout2024_permanent_departure_Member_020",
+      "status": "pass",
+      "start": 56540,
+      "end": 56636,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 56540,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 56587,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 56588,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 56589,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 56636,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_departure_Member_020",
+          "time_step": 56588,
+          "operation": "remove_member",
+          "target_member_id": "Member_020",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 18,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9210,
+      "seconds": 7.473
+    },
+    {
+      "schema": "core_30_combined_no_disturbances.json",
+      "label": "heldout2024_permanent_retirement_Member_023",
+      "status": "pass",
+      "start": 65280,
+      "end": 65376,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 65280,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 65327,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 65328,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 65329,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 65376,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_retirement_Member_023",
+          "time_step": 65328,
+          "operation": "remove_asset",
+          "target_member_id": "Member_023",
+          "target_asset_type": "pv",
+          "target_asset_id": "PV-M023-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 19,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9007,
+      "seconds": 7.533
+    },
+    {
+      "schema": "core_30_combined_nominal_limits.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9153,
+      "seconds": 3.055
+    },
+    {
+      "schema": "core_30_combined_nominal_limits.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9263,
+      "seconds": 3.388
+    },
+    {
+      "schema": "core_30_combined_nominal_limits.json",
+      "label": "heldout2024_admission_Member_031",
+      "status": "pass",
+      "start": 39072,
+      "end": 39168,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 39072,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 39119,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 39120,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 39121,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 39168,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_admission_Member_031",
+          "time_step": 39120,
+          "operation": "add_member",
+          "target_member_id": "Member_031",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 14,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 7.43
+    },
+    {
+      "schema": "core_30_combined_nominal_limits.json",
+      "label": "heldout2024_commissioning_Member_010",
+      "status": "pass",
+      "start": 47804,
+      "end": 47900,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 47804,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 47851,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 14
+        },
+        {
+          "time_step": 47852,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 47853,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 47900,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_commissioning_Member_010",
+          "time_step": 47852,
+          "operation": "add_asset",
+          "target_member_id": "Member_010",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M010-01",
+          "source_member_id": "Member_025",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 15,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 8.28
+    },
+    {
+      "schema": "core_30_combined_nominal_limits.json",
+      "label": "heldout2024_replacement_out_Member_014",
+      "status": "pass",
+      "start": 48476,
+      "end": 48572,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48476,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 48523,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 48524,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48525,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48572,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_out_Member_014",
+          "time_step": 48524,
+          "operation": "remove_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 16,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 7.584
+    },
+    {
+      "schema": "core_30_combined_nominal_limits.json",
+      "label": "heldout2024_replacement_in_Member_014",
+      "status": "pass",
+      "start": 48668,
+      "end": 48764,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48668,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48715,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 16
+        },
+        {
+          "time_step": 48716,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 48717,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 48764,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_in_Member_014",
+          "time_step": 48716,
+          "operation": "add_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-02",
+          "source_member_id": "Member_025",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 17,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 7.753
+    },
+    {
+      "schema": "core_30_combined_nominal_limits.json",
+      "label": "heldout2024_permanent_departure_Member_020",
+      "status": "pass",
+      "start": 56540,
+      "end": 56636,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 56540,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 56587,
+          "counts": {
+            "building": 28,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 17
+        },
+        {
+          "time_step": 56588,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 56589,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 56636,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_departure_Member_020",
+          "time_step": 56588,
+          "operation": "remove_member",
+          "target_member_id": "Member_020",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 18,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9466,
+      "seconds": 7.51
+    },
+    {
+      "schema": "core_30_combined_nominal_limits.json",
+      "label": "heldout2024_permanent_retirement_Member_023",
+      "status": "pass",
+      "start": 65280,
+      "end": 65376,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 65280,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 65327,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 18
+        },
+        {
+          "time_step": 65328,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 65329,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        },
+        {
+          "time_step": 65376,
+          "counts": {
+            "building": 27,
+            "charger": 12,
+            "deferrable_appliance": 18,
+            "pv": 8,
+            "storage": 3
+          },
+          "topology_version": 19
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_retirement_Member_023",
+          "time_step": 65328,
+          "operation": "remove_asset",
+          "target_member_id": "Member_023",
+          "target_asset_type": "pv",
+          "target_asset_id": "PV-M023-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 19,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 9263,
+      "seconds": 7.622
+    },
+    {
+      "schema": "premium_100_allin_no_disturbances.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 29580,
+      "seconds": 10.691
+    },
+    {
+      "schema": "premium_100_allin_no_disturbances.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 29692,
+      "seconds": 11.46
+    },
+    {
+      "schema": "premium_100_allin_no_disturbances.json",
+      "label": "heldout2024_admission_Member_101",
+      "status": "pass",
+      "start": 39072,
+      "end": 39168,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 39072,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 39119,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 39120,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 39121,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 39168,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_admission_Member_101",
+          "time_step": 39120,
+          "operation": "add_member",
+          "target_member_id": "Member_101",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 48,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29895,
+      "seconds": 27.896
+    },
+    {
+      "schema": "premium_100_allin_no_disturbances.json",
+      "label": "heldout2024_commissioning_Member_029",
+      "status": "pass",
+      "start": 47804,
+      "end": 47900,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 47804,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 47851,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 47852,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 47853,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 47900,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_commissioning_Member_029",
+          "time_step": 47852,
+          "operation": "add_asset",
+          "target_member_id": "Member_029",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M029-01",
+          "source_member_id": "Member_004",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 49,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29895,
+      "seconds": 27.813
+    },
+    {
+      "schema": "premium_100_allin_no_disturbances.json",
+      "label": "heldout2024_replacement_out_Member_014",
+      "status": "pass",
+      "start": 48476,
+      "end": 48572,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48476,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 48523,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 48524,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48525,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48572,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_out_Member_014",
+          "time_step": 48524,
+          "operation": "remove_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 50,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29895,
+      "seconds": 28.251
+    },
+    {
+      "schema": "premium_100_allin_no_disturbances.json",
+      "label": "heldout2024_replacement_in_Member_014",
+      "status": "pass",
+      "start": 48668,
+      "end": 48764,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48668,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48715,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48716,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 48717,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 48764,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_in_Member_014",
+          "time_step": 48716,
+          "operation": "add_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-02",
+          "source_member_id": "Member_004",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 51,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29895,
+      "seconds": 27.79
+    },
+    {
+      "schema": "premium_100_allin_no_disturbances.json",
+      "label": "heldout2024_permanent_departure_Member_020",
+      "status": "pass",
+      "start": 56540,
+      "end": 56636,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 56540,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 56587,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 56588,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 56589,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 56636,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_departure_Member_020",
+          "time_step": 56588,
+          "operation": "remove_member",
+          "target_member_id": "Member_020",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 52,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29895,
+      "seconds": 27.187
+    },
+    {
+      "schema": "premium_100_allin_no_disturbances.json",
+      "label": "heldout2024_permanent_retirement_Member_099",
+      "status": "pass",
+      "start": 65280,
+      "end": 65376,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 65280,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 65327,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 65328,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        },
+        {
+          "time_step": 65329,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        },
+        {
+          "time_step": 65376,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_retirement_Member_099",
+          "time_step": 65328,
+          "operation": "remove_asset",
+          "target_member_id": "Member_099",
+          "target_asset_type": "pv",
+          "target_asset_id": "PV-M099-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 53,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29692,
+      "seconds": 28.021
+    },
+    {
+      "schema": "premium_100_allin_no_dr.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 29306,
+      "seconds": 10.756
+    },
+    {
+      "schema": "premium_100_allin_no_dr.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 29416,
+      "seconds": 10.743
+    },
+    {
+      "schema": "premium_100_allin_no_dr.json",
+      "label": "heldout2024_admission_Member_101",
+      "status": "pass",
+      "start": 39072,
+      "end": 39168,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 39072,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 39119,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 39120,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 39121,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 39168,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_admission_Member_101",
+          "time_step": 39120,
+          "operation": "add_member",
+          "target_member_id": "Member_101",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 48,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29619,
+      "seconds": 30.539
+    },
+    {
+      "schema": "premium_100_allin_no_dr.json",
+      "label": "heldout2024_commissioning_Member_029",
+      "status": "pass",
+      "start": 47804,
+      "end": 47900,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 47804,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 47851,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 48
+        },
+        {
+          "time_step": 47852,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 47853,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 47900,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_commissioning_Member_029",
+          "time_step": 47852,
+          "operation": "add_asset",
+          "target_member_id": "Member_029",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M029-01",
+          "source_member_id": "Member_004",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 49,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29619,
+      "seconds": 29.87
+    },
+    {
+      "schema": "premium_100_allin_no_dr.json",
+      "label": "heldout2024_replacement_out_Member_014",
+      "status": "pass",
+      "start": 48476,
+      "end": 48572,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48476,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 48523,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 49
+        },
+        {
+          "time_step": 48524,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48525,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48572,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_out_Member_014",
+          "time_step": 48524,
+          "operation": "remove_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 50,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29619,
+      "seconds": 31.266
+    },
+    {
+      "schema": "premium_100_allin_no_dr.json",
+      "label": "heldout2024_replacement_in_Member_014",
+      "status": "pass",
+      "start": 48668,
+      "end": 48764,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 48668,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48715,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 50
+        },
+        {
+          "time_step": 48716,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 48717,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 48764,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_replacement_in_Member_014",
+          "time_step": 48716,
+          "operation": "add_asset",
+          "target_member_id": "Member_014",
+          "target_asset_type": "electrical_storage",
+          "target_asset_id": "BESS-M014-02",
+          "source_member_id": "Member_004",
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 51,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29619,
+      "seconds": 30.08
+    },
+    {
+      "schema": "premium_100_allin_no_dr.json",
+      "label": "heldout2024_permanent_departure_Member_020",
+      "status": "pass",
+      "start": 56540,
+      "end": 56636,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 56540,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 56587,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 51
+        },
+        {
+          "time_step": 56588,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 56589,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 56636,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_departure_Member_020",
+          "time_step": 56588,
+          "operation": "remove_member",
+          "target_member_id": "Member_020",
+          "target_asset_type": null,
+          "target_asset_id": null,
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 52,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29619,
+      "seconds": 29.532
+    },
+    {
+      "schema": "premium_100_allin_no_dr.json",
+      "label": "heldout2024_permanent_retirement_Member_099",
+      "status": "pass",
+      "start": 65280,
+      "end": 65376,
+      "transitions": 96,
+      "snapshots": [
+        {
+          "time_step": 65280,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 65327,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 20
+          },
+          "topology_version": 52
+        },
+        {
+          "time_step": 65328,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        },
+        {
+          "time_step": 65329,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        },
+        {
+          "time_step": 65376,
+          "counts": {
+            "building": 88,
+            "charger": 62,
+            "deferrable_appliance": 57,
+            "pv": 32,
+            "storage": 20
+          },
+          "topology_version": 53
+        }
+      ],
+      "executed_events": [
+        {
+          "id": "heldout2024_permanent_retirement_Member_099",
+          "time_step": 65328,
+          "operation": "remove_asset",
+          "target_member_id": "Member_099",
+          "target_asset_type": "pv",
+          "target_asset_id": "PV-M099-01",
+          "source_member_id": null,
+          "source_asset_id": null,
+          "applied": true,
+          "topology_version": 53,
+          "episode_time_step": 48
+        }
+      ],
+      "kpi_rows": 29416,
+      "seconds": 30.39
+    },
+    {
+      "schema": "core_30_topology_frozen_2024.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8904,
+      "seconds": 3.076
+    },
+    {
+      "schema": "core_30_topology_frozen_2024.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 27,
+            "charger": 13,
+            "deferrable_appliance": 18,
+            "pv": 9,
+            "storage": 2
+          },
+          "topology_version": 13
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8904,
+      "seconds": 3.002
+    },
+    {
+      "schema": "premium_100_allin_frozen_2024.json",
+      "label": "year_boundary",
+      "status": "pass",
+      "start": 35032,
+      "end": 35048,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 35032,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 35048,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30387,
+      "seconds": 10.604
+    },
+    {
+      "schema": "premium_100_allin_frozen_2024.json",
+      "label": "terminal_boundary",
+      "status": "pass",
+      "start": 70159,
+      "end": 70175,
+      "transitions": 16,
+      "snapshots": [
+        {
+          "time_step": 70159,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 70175,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30387,
+      "seconds": 10.451
+    }
+  ],
+  "runtime_input_fingerprint": "c06810042e5469a50680ac3cbd94e71072b9d2896798d46f6816dd02a564e826",
+  "runtime_evidence_reused_with_identical_executable_inputs": true,
+  "status": "pass",
+  "dataset_checksums": {
+    "data/datasets/rec_pt_2023_core_15_v2/file_checksums.sha256": "2d57abf7881d7011be3f466fb650f0ac07754129ea34d032ae9f9f225299e7f8",
+    "data/datasets/rec_pt_2023_core_30_v2/file_checksums.sha256": "c133000ab49a2f139703612e2415d3c0226f70e1ef89876bddecec28b8b31e5c",
+    "data/datasets/rec_pt_2023_micro_4_v2/file_checksums.sha256": "0977916f71bbbdcb4558c53ed225250ce64aa5eec2a83f6b8732208d136efbda",
+    "data/datasets/rec_pt_2023_premium_100_v2/file_checksums.sha256": "abe89d6d1633d570621bfe564f5cbd9728312c78e4a5cfed3060c245c95f6df4"
+  },
+  "runtime_scope": "Actual event and annual-boundary windows; no annual controller benchmark or training. Window resets preserve topology, not unsimulated physical state."
+}

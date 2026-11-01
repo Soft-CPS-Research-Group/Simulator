@@ -1,5 +1,5 @@
 {
-  "version": "portugal-native-2023-2024-v3.2",
+  "version": "portugal-native-2023-2024-v3.3",
   "engine_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
   "source_version": "portugal-v2.3",
   "tariff_policy": "omie_nonnegative",
@@ -35,5 +35,100 @@
     "local_price_ratio_to_grid_import": 0.8,
     "grid_export_price": 0.0
   },
-  "integrity_revision": "portugal-boundaries-1"
+  "integrity_revision": "portugal-boundaries-1",
+  "campaign_revision": "portugal-heldout-2024-1",
+  "references": [
+    {
+      "family": "core_30",
+      "variant": "core_30_combined_no_disturbances",
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/references/core_30_combined_no_disturbances.json",
+      "sha256": "5e2b1786faf289df12839fe4cd03c3264c8a7d2e16f9497e328fc728f68f960f",
+      "factors": {
+        "T": true,
+        "E": true,
+        "H": false,
+        "G": false,
+        "D": false
+      }
+    },
+    {
+      "family": "core_30",
+      "variant": "core_30_combined_nominal_limits",
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/references/core_30_combined_nominal_limits.json",
+      "sha256": "f3cf634031b09f8e6ae2bba5351a67f1777e6c668ccbb524bfc103a35438364b",
+      "factors": {
+        "T": true,
+        "E": false,
+        "H": true,
+        "G": true,
+        "D": false
+      }
+    },
+    {
+      "family": "core_30",
+      "variant": "core_30_topology_frozen_2024",
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/references/core_30_topology_frozen_2024.json",
+      "sha256": "1294eae551f6cb8ed4bf9a2735a3ad3c5bac9df4e13a500b544255a53ecb443d",
+      "factors": {
+        "T": true,
+        "E": false,
+        "H": false,
+        "G": false,
+        "D": false
+      }
+    }
+  ],
+  "member_catalogue_scope": "Original static physical inventory; prose fields retain v3.2 source histories. Current per-variant lifecycle is in catalogs/lifecycle_plan.json; supplemental identities are in evaluation/campaign_2024/catalogue.json where applicable.",
+  "preparation_schemas": [
+    {
+      "variant": "core_30_normal",
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_normal.json",
+      "sha256": "5ae17cd053671ea267e4af0efbaa25c1cc13b75fdbb7badf9dfc343efaabd868",
+      "interval": [
+        0,
+        35039
+      ],
+      "role": "Preparation entry point, not an additional experimental scenario"
+    },
+    {
+      "variant": "core_30_topology",
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_topology.json",
+      "sha256": "bf2c6f054caa6661886f745142d344c569ebbb9393a69f9d267f1e71dd964c17",
+      "interval": [
+        0,
+        35039
+      ],
+      "role": "Preparation entry point, not an additional experimental scenario"
+    },
+    {
+      "variant": "core_30_safety",
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_safety.json",
+      "sha256": "eb9626773cd3d60f50630f27eef34833d6acff6f8770a235a7209683e7d41ca7",
+      "interval": [
+        0,
+        35039
+      ],
+      "role": "Preparation entry point, not an additional experimental scenario"
+    },
+    {
+      "variant": "core_30_robustness",
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_robustness.json",
+      "sha256": "b7af15299f5d93ec7ac4fa8da2f8a1f75f1b6a69f59780945b338c7f7feb3122",
+      "interval": [
+        0,
+        35039
+      ],
+      "role": "Preparation entry point, not an additional experimental scenario"
+    },
+    {
+      "variant": "core_30_combined",
+      "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_combined.json",
+      "sha256": "a8c2a48ab97a0af8b0321bed0c2ee7c9660b2de110a1d205eb803e9c9aae7f1e",
+      "interval": [
+        0,
+        35039
+      ],
+      "role": "Preparation entry point, not an additional experimental scenario"
+    }
+  ]
 }
