@@ -29,8 +29,6 @@ controller is executed by the report builders. Dataset files are read only.
 - `dr.csv`: explicit requested service, not delivered response or settlement.
 - `statistics.json`: source checksum identities, aggregation conventions,
   descriptive statistics and 34 construction/aggregation consistency checks.
-- `report_structure.json`: section and figure index.
-- `report_qa.json`: final PDF identity, consistency-check count and layout review.
 
 Inventories are alternatives across bases, not additive independent samples.
 UTC years define annual totals; daily schedules and clock-hour summaries use
@@ -44,10 +42,15 @@ From the Simulator repository, use a Python environment with the packages in
 
 ```bash
 python scripts/build_portugal_dataset_description.py
-python scripts/render_portugal_dataset_report.py
+python scripts/render_portugal_dataset_report.py --structure-output /tmp/portugal-report/structure.json
 ```
 
 The first script reads the four current bases and produces the CSV tables,
 statistics and figures. The second composes the PDF and Markdown. The saved
 checksums identify the inputs described. The figures are descriptive data plots;
 they do not reproduce any previous controller experiment or audit outcome.
+
+The optional `--structure-output` writes a section/figure index to an explicitly
+chosen diagnostic location. Rendering QA, contact sheets and review notes belong
+outside the checkout; they are not inputs to the report or part of the dataset.
+Omit the flag when only the product PDF/Markdown are needed.

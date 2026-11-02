@@ -6,6 +6,7 @@ import numpy as np
 
 from citylearn.agents.base import Agent
 from citylearn.citylearn import CityLearnEnv
+from citylearn.internal.electrical_limits import allocate_electrical_service
 
 
 class _OperationalBaselineAgent(Agent):
@@ -354,52 +355,14 @@ class _OperationalBaselineAgent(Agent):
             if not controls:
                 return actions
 
-            scales = {control_id: 1.0 for control_id in controls}
             limits = getattr(building, '_electrical_service_limits', {}) or {}
-            total_limits = limits.get('total', {}) or {}
-            per_phase_limits = limits.get('per_phase', {}) or {}
-
-            for _ in range(8):
-                changed = False
-                total_kw, phase_kw = ops._compute_totals(base_total_kw, base_phase_kw, controls, scales)
-                changed |= ops._scale_for_import_scope(
-                    total_kw,
-                    total_limits.get('import_kw'),
-                    controls,
-                    scales,
-                    component_getter=lambda c: c['request_total_kw'],
-                )
-                # Each scope must see reductions already applied elsewhere.
-                total_kw, phase_kw = ops._compute_totals(base_total_kw, base_phase_kw, controls, scales)
-                changed |= ops._scale_for_export_scope(
-                    total_kw,
-                    total_limits.get('export_kw'),
-                    controls,
-                    scales,
-                    component_getter=lambda c: c['request_total_kw'],
-                )
-
-                for phase_name in phase_names:
-                    phase_limit = per_phase_limits.get(phase_name, {}) or {}
-                    total_kw, phase_kw = ops._compute_totals(base_total_kw, base_phase_kw, controls, scales)
-                    changed |= ops._scale_for_import_scope(
-                        phase_kw.get(phase_name, 0.0),
-                        phase_limit.get('import_kw'),
-                        controls,
-                        scales,
-                        component_getter=lambda c, p=phase_name: c['request_phase_kw'].get(p, 0.0),
-                    )
-                    total_kw, phase_kw = ops._compute_totals(base_total_kw, base_phase_kw, controls, scales)
-                    changed |= ops._scale_for_export_scope(
-                        phase_kw.get(phase_name, 0.0),
-                        phase_limit.get('export_kw'),
-                        controls,
-                        scales,
-                        component_getter=lambda c, p=phase_name: c['request_phase_kw'].get(p, 0.0),
-                    )
-
-                if not changed:
-                    break
+            # Prediction uses prospective loads; runtime repeats this calculation
+            # with its own state and remains responsible for final device limits.
+            allocation = allocate_electrical_service(
+                base_total_kw, base_phase_kw, controls,
+                limits.get('total', {}) or {}, limits.get('per_phase', {}) or {}, phase_names,
+            )
+            scales = allocation.scales
 
             for charger_id, index in ev_action_indices.items():
                 charger = getattr(building, '_charger_lookup', {}).get(charger_id)

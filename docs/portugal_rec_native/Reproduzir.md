@@ -52,7 +52,7 @@ A preparação de fontes escreve apenas `data/portugal_reference_2024`. A meteor
 
 O primeiro construtor recria a edição de 2023. O segundo acrescenta 2024 sobre os mesmos quatro diretórios e nove schemas. Os caminhos históricos conservam «2023» mas contêm os dois anos. A alteração manual de constantes de ano não é suficiente: não respeitaria feriados, hora legal, fontes, saídas nem janelas entre anos.
 
-A verificação é estática; as sessões EV usam um limite físico calculado com os parâmetros declarados, sem executar uma política. Os comprovativos antigos das duas visitas do Café 028 estão em `results/portugal_rec_native/frozen_2023_evidence/` e aplicam-se à edição congelada. O pacote de 2023 e o commit `393cd200` preservam essa edição integral.
+A verificação é estática; as sessões EV usam um limite físico calculado com os parâmetros declarados, sem executar uma política. Os [comprovativos antigos das duas visitas do Café 028](https://github.com/Soft-CPS-Research-Group/Simulator/tree/8157f605e26fb75651037451fb453b1a48056787/results/portugal_rec_native/frozen_2023_evidence) estão preservados no histórico Git e aplicam-se à edição congelada. O pacote de 2023 e o commit `393cd200` preservam essa edição integral.
 
 A extensão gera automaticamente as narrativas e o plano de ciclo de vida por configuração. A ferramenta de histórias publica o atlas a partir do catálogo. A auditoria de previsões produz o relatório e as figuras (requer matplotlib); com `--previous /caminho/para/a/edicao-v3` verifica também a preservação de todos os perfis físicos e dos preços anteriores à fronteira. O dia de apoio e as fontes de janeiro estão arquivados em `data/portugal_reference_2024/forecast_support`; a reconstrução não depende de downloads.
 

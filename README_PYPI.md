@@ -14,12 +14,9 @@ It is a fork-based project used for research and experimentation on:
   feasible action capacity and requested/limited/applied action feedback.
 - dynamic member and asset topology with repeatable multi-episode reset semantics.
 
-Current source release: `1.9.0`. This release adds passive energy provenance
-through stationary batteries, EVs and community sharing, useful solar-energy
-indicators and carbon accounting at the external grid boundary. EV departure
-feasibility uses the concrete battery physics. KPI exports include reproducibility
-manifests. Existing instantaneous PV and gross-import emissions remain available
-with their historical meanings. See the release notes for validation and limits.
+Current source release: `1.9.12`. It consolidates robustness contracts, physical
+regressions and internal organization while preserving BAU and export compatibility.
+See the [release history](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/releases.md) for validation and model limits.
 
 ## Project Positioning
 

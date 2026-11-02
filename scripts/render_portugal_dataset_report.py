@@ -355,7 +355,7 @@ def markdown():
     (DOCS/'Portugal_REC_Dataset_Report.md').write_text('\n'.join(out))
 
 
-def main():
+def main(structure_output=None):
     content();story=[]
     for index,page in enumerate(PAGES):
         if index:story.append(PageBreak())
@@ -377,12 +377,19 @@ def main():
     out=DOCS/'Portugal_REC_Dataset_Report.pdf'
     doc=Report(str(out),pagesize=(595.28,841.89),leftMargin=48,rightMargin=48,topMargin=57,bottomMargin=53,title='Portugal REC Datasets 2023-2024: A Descriptive Data Report',author='Portugal REC dataset documentation',subject=J['version'],pageCompression=1)
     doc.build(story,onFirstPage=footer,onLaterPages=footer)
-    markdown();(D/'report_structure.json').write_text(json.dumps({'pages':[{'page':i+1,'title':p['title']} for i,p in enumerate(PAGES)],'figures':[{'number':i,'file':f,'caption':c} for i,f,c in FIGURES]},indent=2)+'\n')
+    markdown()
+    if structure_output is not None:
+        structure_output=Path(structure_output).expanduser().resolve()
+        structure_output.parent.mkdir(parents=True,exist_ok=True)
+        structure_output.write_text(json.dumps({'pages':[{'page':i+1,'title':p['title']} for i,p in enumerate(PAGES)],'figures':[{'number':i,'file':f,'caption':c} for i,f,c in FIGURES]},indent=2)+'\n')
     print(json.dumps({'pdf':str(out),'planned_pages':len(PAGES),'figures':len(FIGURES)},indent=2))
 
 
 if __name__=='__main__':
     edition=json.loads((ROOT/'results/portugal_rec_native/manifest.json').read_text())['version']
     if edition!='portugal-native-2023-2024-v3.2':
-        raise SystemExit('This descriptive report is frozen at v3.2. Rebuild in the recorded source checkout; use Heldout_2024.md for the current campaign. Do not relabel old figures as v3.3 evidence.')
-    main()
+        raise SystemExit('This descriptive report is frozen at v3.2; use Heldout_2024.md for the current campaign. Do not relabel historical figures as v3.3 evidence.')
+    import argparse
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--structure-output',type=Path,help='Optional diagnostic section/figure index; choose a path outside the source checkout.')
+    main(parser.parse_args().structure_output)

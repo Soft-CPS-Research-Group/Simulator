@@ -180,6 +180,9 @@ class EpisodeExporter:
         FileHandler.write_json(str(Path(file_path).with_suffix('.manifest.json')), experiment_manifest(export_env))
         FileHandler.write_json(str(Path(file_path).with_suffix('.deferrable_service.json')),
                                export_env.get_deferrable_service_audit())
+        if export_env._robustness_service.enabled:
+            FileHandler.write_json(str(Path(file_path).with_suffix('.robustness.json')),
+                                   export_env.get_robustness_audit())
         env._final_kpis_exported = True
 
     def export_business_as_usual_timeseries(self, source_env: "CityLearnEnv" = None):

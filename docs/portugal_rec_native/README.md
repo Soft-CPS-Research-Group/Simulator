@@ -27,7 +27,13 @@ Versão **portugal-native-2023-2024-v3.2**. As mesmas **quatro bases físicas e 
 
 2024 continua cronologicamente 2023. Quem saiu não regressa; os equipamentos retirados permanecem retirados. Os eventos de entrada/saída de 2023 não são repetidos. Não foram acrescentados membros, equipamentos ou variantes. Nas configurações estáticas mantém-se o catálogo completo; nas dinâmicas mantém-se a composição existente no fim de 2023.
 
-A preparação original destes dados manteve o motor no commit `978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0). Essa é a referência histórica dos relatórios arquivados. Desde a consolidação de 26/10/2026, a pasta de trabalho combina estes mesmos dados com o motor 1.8.3 e as alterações locais descritas em [Releases](../releases.md). A revisão v3.2 de 29/10/2026 altera preços e configuração de mercado, conservando os inputs físicos. Esta integração não constitui uma nova campanha anual de controladores.
+A preparação original fixou o motor no commit
+`978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0). Essa é uma referência
+histórica de construção; a versão corrente do código é 1.9.11, descrita no
+[changelog](../releases.md). A edição dos dados v3.2 e a revisão
+`portugal-boundaries-1` conservam a sua identidade própria. A revisão tarifária
+de 29/10/2026 alterou preços e mercado, preservando os inputs físicos. Integrar
+dados e motor não constitui uma nova campanha anual de controladores.
 
 | Configuração | Schema relativo à raiz do Simulator |
 |---|---|
@@ -55,11 +61,16 @@ A tarifa de compra à rede é comum a todos: `shared/pricing_omie.parquet`, com 
 - [Atlas de membros Premium](Atlas_Membros_Premium.md).
 - [Tarifas e mercado](Tarifas_e_mercado.md).
 - [Fontes e método](Fontes_e_metodo.md).
-- [Fecho imutável de 2023](Fecho_2023.md).
+- [Registo histórico do fecho de 2023](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/portugal_rec_native/Fecho_2023.md).
 
 O manifesto corrente está em `results/portugal_rec_native/manifest.json`; a verificação desta revisão em `pricing_validation.json`, na mesma pasta. `two_year_integrity.json` documenta a construção histórica dos inputs físicos. O pacote corrente é `docs/portugal_rec_native.zip`.
 
-O fecho de 2023 está no commit `393cd200bb66b671d8904eba00688d56d91f08d3` e no pacote separado `Simulator-recovery-archive/2026-09-27-final-2023/portugal_rec_2023_frozen.zip`. Esse arquivo é proveniência, não mais um dataset ativo.
+O fecho de 2023 está no commit `393cd200bb66b671d8904eba00688d56d91f08d3`.
+Os [comprovativos dessa edição](https://github.com/Soft-CPS-Research-Group/Simulator/tree/8157f605e26fb75651037451fb453b1a48056787/results/portugal_rec_native/frozen_2023_evidence)
+e os [registos das tarifas/sessões EV](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/portugal_rec_native/Fecho_Tarifas_SOC.md)
+conservam o âmbito histórico. Não são mais um dataset ativo nem prova de
+desempenho do motor corrente. O [histórico de construção](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/portugal_rec_native/Historico.md)
+identifica as edições anteriores e as adaptações entre anos.
 
 ## Limites da afirmação de fecho
 
@@ -68,3 +79,23 @@ Os consumos, rotinas e famílias são sintéticos, apoiados nas fontes documenta
 Mantêm-se as capacidades do simulador original: SOC prescrito à chegada de cada sessão EV, fases das máquinas por instalação, backup agregado, possível exposição dos eventos de health e DR com média da hora anterior. Os itinerários não constituem um balanço longitudinal de viagens executado pelo motor. Não existe atividade privada após saída de um membro.
 
 Nesta revisão, as histórias são geradas dos eventos por configuração. O apoio de um dia de janeiro de 2025 completa as previsões de preço no fim de 2024, sem alargar a simulação. As previsões derivadas de consumo/PV continuam sujeitas ao corte de horizonte do motor original no fim de cada episódio; ver o relatório de previsões.
+
+## Proveniência conservada no produto
+
+O diretório `results/portugal_rec_native/` contém oito ficheiros de proveniência
+necessários à distribuição/reconstrução corrente:
+
+| Ficheiro | Uso |
+|---|---|
+| `manifest.json` | Identidade da edição, variantes, configuração e referência histórica do motor. |
+| `pricing_policy.json` | Fórmula tarifária, fontes e condições das previsões. |
+| `pricing_validation.json` | Verificações tarifárias exigidas pelo empacotador. |
+| `boundary_integrity.json` | Correções dos limites da presença e censura de sessões. |
+| `boundary_validation.json` | Checksums dos inputs e verificação exigida pelo empacotador. |
+| `forecasts_and_stories.json` | Métricas/fontes consumidas pelo relatório descritivo. |
+| `two_year_integrity.json` | Proveniência da continuidade e construção dos dois anos. |
+| `publication.json` | Identidade e verificações da entrega dos dados. |
+
+Relatórios de execução do motor e notas de trabalho são guardados fora do
+checkout ou como artefactos de CI. Os registos desta tabela não representam
+resultados atuais de uma política nem substituem as verificações do simulador.

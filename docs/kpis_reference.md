@@ -192,6 +192,14 @@ Available when `robustness.enabled=true`.
 
 Names are prefixed with `district_` or `building_`, for example `district_robustness_missing_observation_count`.
 
+These historical counters include queried terminal telemetry and remain unchanged.
+They are not restricted to completed energy intervals. For separate populations,
+event-step denominators and application coverage, use `get_robustness_audit()`
+(`robustness-audit-v1`), also attached to the V2 DataFrame and exported as a
+`.robustness.json` sidecar when enabled. A scheduled event whose target is absent
+has no application; an empty coverage denominator is `null`. See the
+[robustness reference](robustness_reference.md#kpis) for units and boundaries.
+
 ## Electrical Service and Phase KPIs
 
 | Concept | Unit | Meaning |

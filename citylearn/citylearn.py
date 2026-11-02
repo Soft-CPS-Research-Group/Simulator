@@ -1305,6 +1305,10 @@ class CityLearnEnv(Environment, Env):
         """Return executed appliance service, including partial and excluded requests."""
         return self._kpi_service.deferrable_service_audit()
 
+    def get_robustness_audit(self):
+        """Return versioned fault coverage, telemetry and completed-interval counters."""
+        return self._robustness_service.audit_summary()
+
     def get_metadata(self) -> Mapping[str, Any]:
         from citylearn.internal.deferrable_service_audit import metadata as deferrable_metadata
         from citylearn.internal.kpi_family_audit import metadata as family_metadata, reward_metadata

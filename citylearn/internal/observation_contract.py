@@ -47,7 +47,10 @@ def validate(service):
         return
     tables = service.env.entity_specs['tables']
     for table, names in contract['features'].items():
-        if table not in tables or set(names)-set(tables[table]['features']):
+        declared = tables
+        if (table not in tables or set(names)-set(tables[table]['features'])) and service.env.topology_mode == 'dynamic':
+            declared = service._target_validator().env.entity_specs['tables']
+        if table not in declared or set(names)-set(declared[table]['features']):
             raise ValueError(f'Unknown agent observation feature in table {table}')
     # An uncorrupted alternate channel cannot replace a targeted measurement.
     selected = [(t, f) for t, names in contract['features'].items() for f in names]

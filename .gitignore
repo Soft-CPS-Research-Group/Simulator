@@ -210,3 +210,10 @@ data/datasets/citylearn_three_phase_electrical_service_demo_15s_parquet/
 
 # Rebuildable Portugal delivery package
 docs/portugal_rec_native.zip
+
+# Work material and execution evidence: keep outside the source checkout.
+docs/empirical_calibration_readiness.md
+docs/releases/*-validation.json
+docs/portugal_rec_native/dataset_description/report_qa.json
+docs/portugal_rec_native/dataset_description/report_structure.json
+sample_observations.txt

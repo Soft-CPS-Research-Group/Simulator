@@ -1,8 +1,40 @@
 # Releases
 
-Este ficheiro e o changelog operacional do fork. A partir de agora, cada mini bump deve explicar o que mudou, o impacto para utilizadores, impacto para datasets, testes corridos e risco de compatibilidade.
+A política, o modelo de notas e o procedimento estão no [guia de publicação](publishing.md).
+Os comprovativos históricos usam ligações imutáveis no Git e conservam o âmbito
+da execução original; não são uma nova validação deste checkout.
+
+Este é o histórico de versões do fork, com impacto para os utilizadores,
+compatibilidade, alterações de contratos e âmbito da validação.
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
+
+## v1.9.12 — 2026-11-02 — contratos de robustez e organização interna
+
+- Consolida C1–C7: composição determinística de eventos de robustez, contratos de
+  observações/ações/alvos e auditoria versionada disponível na avaliação e exports.
+- Partilha a distribuição dos limites elétricos entre NormalPolicy e runtime,
+  preservando o orçamento sequencial durante cortes e o carregamento imediato BAU.
+- Separa responsabilidades dos KPIs, observações de entidades, carregamento de
+  dados e robustez, mantendo as fachadas públicas e os contratos de exportação.
+- Acrescenta referências de auditoria verificáveis, fixtures portáteis e regressões
+  físicas; remove notas temporárias e comprovativos de trabalho do código-fonte.
+- Preserva os datasets Portugal v3.3 e referências de 2024 já integrados na
+  principal; atualiza o pacote documental após a limpeza, sem gerar inputs físicos.
+
+Validação histórica C7: 1.020 testes, 16 cenários físicos, 63 interfaces de datasets,
+  duas janelas portuguesas de cortes, seis referências instaladas e quatro formatos
+  instalados. A integração desta versão é novamente testada sobre a principal;
+  comprovativos da execução corrente nos anexos da GitHub Release.
+  As otimizações P1–P8 ficam separadas na 1.9.13.
+
+Integração da versão: 1063 testes passaram; quatro auditores em modo strict,
+lint crítico, desempenho e exportação do wheel instalado aprovados, sem atualizar
+as referências esperadas.
+
+Compatibilidade: estratégia BAU, modelos físicos, definições e tolerâncias dos KPIs
+mantidos. Cumprir o mínimo de serviço é distinto de atingir o alvo exato de SOC.
+Não se afirma calibração com equipamentos reais.
 
 ## v1.9.11 — 2026-10-31 — correção da sobreposição dos limites elétricos
 
@@ -36,7 +68,7 @@ definição BAU preservados; 391 referências a ficheiros mantêm os hashes.
 O despacho corrigido altera energia e serviço nos casos afetados. Reexecutar
 referências BAU e experiências com código, entradas e seeds emparelhados antes
 de comparar resultados entre versões. Modelos dos equipamentos preservados.
-[Comprovativos](../releases/1.9.11-validation.json).
+[Comprovativos](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.11-validation.json).
 
 ## v1.9.10 — 2026-10-30 — campanha contínua e recursos medidos
 
@@ -65,7 +97,7 @@ O auditor corre a partir do checkout; o wheel do PyPI contém o runtime e a nova
 versão, sem scripts de auditoria/datasets do repositório. Despacho físico, mercado,
 recompensa e datasets iguais à 1.9.9. Sem repetir a campanha apenas pelo bump.
 Premium anual e calibração empírica continuam fora desta evidência.
-[Comprovativos](../releases/1.9.10-validation.json).
+[Comprovativos](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.10-validation.json).
 
 ## v1.9.9 — 2026-10-30 — calendário e repetibilidade
 
@@ -92,7 +124,7 @@ replays idênticos e física ativa. Matriz física 16/16 no candidato temporal a
 das últimas correções de taxas diárias/splits; suite e pacote finais cobrem o código
 final. Os ensaios reais incluem a correção de taxas e não usam splits aleatórios.
 Sem campanha anual ou aprovação de recursos prolongados: ficam na iteração 7.
-[Comprovativos](../releases/1.9.9-validation.json).
+[Comprovativos](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.9-validation.json).
 
 ## v1.9.8 — 2026-10-30 — famílias de KPIs e qualidade da avaliação
 
@@ -116,7 +148,7 @@ Validação: 721 testes (34 novos), 16 cenários físicos, oito pedidos DR reais
 pacote instalado aprovados. Dos 56 intervalos DR, 40 têm referência válida e 16
 ficam excluídos pela retirada de PV. Datasets intactos. Publicação sujeita a CI
 da principal e teste do pacote instalado antes do PyPI.
-[Evidência](../releases/1.9.8-validation.json).
+[Evidência](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.8-validation.json).
 
 ## v1.9.7 — 2026-10-30 — balanços independentes e fronteiras dos resultados
 
@@ -135,7 +167,7 @@ Validação: 687 testes na suite global (30 novas regressões). Aprovados os
 16 cenários físicos, ambas as janelas Premium (5.405.941 comparações) e o pacote
 instalado. [Método e limites](../independent_balance_audit.md).
 Publicação sujeita a CI da principal e teste do pacote instalado antes do PyPI.
-[Evidência](../releases/1.9.7-validation.json).
+[Evidência](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.7-validation.json).
 
 ## v1.9.6 — 2026-10-30 — comparações e observações do agente
 
@@ -157,7 +189,7 @@ Publicação sujeita a CI da principal e teste do pacote instalado antes do PyPI
 Validação: 657 testes locais (20 novos), duas janelas portuguesas com verificações
 físicas e exportação pelo pacote instalado aprovados. Publicação sujeita a CI
 da principal e teste do pacote instalado antes do PyPI.
-[Evidência](../releases/1.9.6-validation.json).
+[Evidência](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.6-validation.json).
 
 ## v1.9.5 — 2026-10-30 — serviço completo das máquinas
 
@@ -179,7 +211,7 @@ da principal e teste do pacote instalado antes do PyPI.
 Validação: 637 testes locais (20 novos), 16 cenários físicos, as duas janelas
 portuguesas e exportação pelo pacote instalado aprovados. A publicação exige CI
 da principal e exportação do pacote instalado antes do PyPI.
-[Evidência](../releases/1.9.5-validation.json).
+[Evidência](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.5-validation.json).
 
 ## v1.9.4 — 2026-10-30 — qualidade da informação nas partidas EV
 
@@ -199,7 +231,7 @@ da principal e exportação do pacote instalado antes do PyPI.
   instalado em Python 3.11 na publicação e a CI da principal em Python 3.9/3.10.
   [Definições, limites e migração](../ev_departure_audit.md).
 
-Validação: 617 testes locais, 16 cenários da auditoria física e ambas as janelas portuguesas aprovados; o pacote candidato instalado exporta KPIs, BAU e o manifesto da auditoria. A publicação exige a CI da principal aprovada e exportação em Python 3.11 antes do envio ao PyPI. [Evidência local](../releases/1.9.4-validation.json).
+Validação: 617 testes locais, 16 cenários da auditoria física e ambas as janelas portuguesas aprovados; o pacote candidato instalado exporta KPIs, BAU e o manifesto da auditoria. A publicação exige a CI da principal aprovada e exportação em Python 3.11 antes do envio ao PyPI. [Evidência local](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.4-validation.json).
 
 ## v1.9.3 — 2026-10-29 — integridade dos dados e correções de eventos
 
@@ -227,7 +259,7 @@ Responsável: [@calofonseca](https://github.com/calofonseca).
 Validação: 591 testes locais passaram, incluindo regressões dirigidas; lint crítico, auditorias de
 física/datasets, CI em Python 3.9/3.10 e exportação pelo pacote instalado.
 A publicação repete o ensaio do pacote em Python 3.11. Comprovativos em
-[1.9.3-validation.json](../releases/1.9.3-validation.json).
+[1.9.3-validation.json](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.3-validation.json).
 Não se reivindica uma comparação anual completa de controladores.
 
 Migração: mantêm-se os nomes e dimensões das ações/observações. O valor `-1`
@@ -321,7 +353,7 @@ Responsável: [@calofonseca](https://github.com/calofonseca).
 ### Validação
 
 Os resultados e a medição de tempo/memória para 4, 30 e 100 membros constam da
-[evidência da versão](../releases/1.9.0-validation.json). As regressões incluem os
+[evidência da versão](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.0-validation.json). As regressões incluem os
 quatro erros EV, solar guardado e depois exportado, mistura solar/rede, partilha,
 perdas, V2G, chegadas/partidas, atribuições externas de SOC, remoções, reset,
 avaliação repetida e passos sem feedback. Para as mesmas ações, o registo passivo
@@ -343,59 +375,26 @@ preserva trajetórias físicas e custos. [Definições](../energy_provenance.md)
 - Mantêm-se a venda à rede a zero e o preço interno a 80% quando assim
   configurados. Os layouts de ações e observações mantêm-se compatíveis.
 
-## Politica de Versao
+## v1.8.3 - 2026-10-23
 
-| Tipo | Quando usar | Exemplo |
-|---|---|---|
-| Patch | Fixes e features aditivas compativeis. | `0.4.1 -> 0.4.2`. |
-| Minor | Mudanca de contrato ou nova capacidade grande. | `0.3.x -> 0.4.0`. |
-| Major | Breaking changes amplos ou desalinhamento com API anterior. | `0.x -> 1.0`. |
+O SOC observado à chegada fica imediatamente disponível nas observações flat e
+entity. Durante a ligação, continua a usar-se o estado resultante do controlo
+anterior. O novo marcador `RuntimeEVBuilding` permite rejeitar runtimes antigos
+para datasets temporais de EVs. Sem alteração da dinâmica elétrica ou do formato
+das tabelas. Validação: 455 testes passaram, 5 opcionais omitidos; o caso Mongo
+no backend cobre previsões revistas/apagadas e chegadas/reconexões. A falha
+preexistente da auditoria física de topologia dinâmica continua separada.
 
-## Checklist por Release
+## v1.8.2 - 2026-10-23
 
-1. Atualizar `citylearn/__init__.py`.
-2. Atualizar este ficheiro.
-3. Atualizar README se houver novas features relevantes.
-4. Atualizar docs especificas quando muda schema/action/observation/KPI.
-5. Correr suite relevante:
-   - `.venv/bin/pytest -q`
-   - `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`
-   - `.venv/bin/python scripts/audit/audit_physics.py`
-6. Validar pelo menos um smoke run com dataset representativo.
-7. Criar commit/tag.
-8. Publicar pacote quando aplicavel.
-
-## Template
-
-```markdown
-## vX.Y.Z - YYYY-MM-DD
-
-Release owner: [@calofonseca](https://github.com/calofonseca).
-
-### Summary
-- ...
-
-### Added
-- ...
-
-### Changed
-- ...
-
-### Fixed
-- ...
-
-### Dataset/Schema Impact
-- ...
-
-### Compatibility
-- ...
-
-### Validation
-- `...`: pass
-
-### Migration Notes
-- ...
-```
+O carregamento das baterias EV respeita a subclasse declarada. InventoryBattery
+preserva potências e eficiências direcionais, incluindo descarga zero para EVs
+sem V2G. InventoryEVBuilding identifica exports que exigem este carregamento e
+rejeita runtimes antigos explicitamente. Schemas sem tipo explícito conservam
+Battery e os valores por defeito; não surgem novas ações ou observações.
+Os exports novos exigem o motor 1.8.2. Validação histórica: 455 testes aprovados,
+cinco omitidos; os cenários gerados e o backend cobrem perdas, limites, partidas,
+V2G e episódios completos. Detalhe no changelog inglês.
 
 ## v1.8.0 - 2026-08-22
 
@@ -411,6 +410,16 @@ Responsável pela release: [@calofonseca](https://github.com/calofonseca).
   da potência aplicada.
 
 ### Adicionado
+
+Este inventário descreve a **edição anual da versão 1.8.0**; não constitui
+medição nem atualização do inventário de edições posteriores dos datasets.
+
+| Family | Members | PV | BESS | Chargers | Deferrables | Variants |
+|---|---:|---:|---:|---:|---:|---|
+| `MICRO-4-Q` | 4 | 2 | 1 | 2 | 1 | Micro |
+| `CORE-15-STRIPPED` | 15 | 7 | 3 | 7 | 4 | Stripped |
+| `CORE-30` | 30 | 15 | 6 | 15 | 8 | Nominal, Safety, Health, Dynamic, Combined |
+| `PREMIUM-100` | 100 | 55 | 22 | 80 | 30 | Clean, AllIn |
 
 - Quatro famílias determinísticas de datasets REC de 2023 a 15 minutos:
   `MICRO-4-Q`, `CORE-15-STRIPPED`, `CORE-30` e `PREMIUM-100`, num total de nove
@@ -492,6 +501,27 @@ Responsável pela release: [@calofonseca](https://github.com/calofonseca).
   funcionalidades.
 - Ambientes de algoritmos que usem os novos contratos de fronteira terminal,
   histórico dinâmico ou KPIs devem fixar `softcpsrecsimulator==1.8.0`.
+
+## v1.7.0 — evidência de runtime entity
+
+A tag deste fork é `softcpsrecsimulator-v1.7.0`. A tag herdada `v1.7.0` de 2023
+pertence ao upstream e é conservada sem alteração.
+
+- `runtime_status_v1`: `meta.runtime_status` expõe causas/duração de eventos,
+  ligações EV, disponibilidade, canais de sensores/atuadores/comunicação,
+  qualidade e atualidade dos valores. Não deriva um `HealthState`: uma causa
+  `stuck` não implica automaticamente `STALE`. Desconexão EV normal não é avaria.
+  O campo opcional `event_domain` mantém compatibilidade com ficheiros antigos.
+- `entity_action_execution_v1`: o resultado de `step()` identifica proprietário,
+  pedido, ação após falhas, limite, ação/potência aplicada e motivos observáveis.
+  Valores físicos indisponíveis são `None`. `info.topology_events_applied`
+  identifica eventos anteriores à observação devolvida.
+- Os significados das tabelas, relações, features e ações de `entity_v1` e a
+  interface flat mantêm-se. Metadados e specs são aditivos.
+- A validação histórica cobre eventos antigos, causas/domínios independentes,
+  ligações, ações pedidas/aplicadas, topologia e contratos/bundles entity.
+
+O [changelog inglês](../releases.md) conserva o texto integral consolidado.
 
 ## v1.6.1 - 2026-08-06
 
@@ -1978,13 +2008,3 @@ Antes da consolidacao dos deferrables normalizados, o fork introduziu EVs/charge
 | Chargers | Acoes de charging/discharging e schedules por charger. |
 | Washing machines | Primeira versao de appliances flexiveis. |
 | Algorithms integration | Preparacao para RBC/MADDPG e repos externos. |
-
-## v1.8.3 - 2026-10-23
-
-O SOC observado à chegada fica imediatamente disponível nas observações flat e
-entity. Durante a ligação, continua a usar-se o estado resultante do controlo
-anterior. O novo marcador `RuntimeEVBuilding` permite rejeitar runtimes antigos
-para datasets temporais de EVs. Sem alteração da dinâmica elétrica ou do formato
-das tabelas. Validação: 455 testes passaram, 5 opcionais omitidos; o caso Mongo
-no backend cobre previsões revistas/apagadas e chegadas/reconexões. A falha
-preexistente da auditoria física de topologia dinâmica continua separada.

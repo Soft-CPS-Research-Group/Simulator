@@ -1,10 +1,45 @@
 # Releases
 
-This is the operational changelog for the fork. From now on, every version bump should explain what changed, user impact, dataset/schema impact, validation and compatibility risk.
+This is the changelog for the fork. Version policy, the release template and
+publication procedure are maintained in the [publishing guide](publishing.md).
+Historical validation links point to immutable evidence in Git history; they
+describe the scope of that release rather than a new execution on this checkout.
 
 Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
+
+## v1.9.12 — 2026-11-02 — robustness contracts and maintainable internals
+
+- Consolidate C1–C7: deterministic composition of robustness events, explicit
+  observation/action-space and target contracts, and versioned robustness audit
+  metadata available in evaluation and export sidecars.
+- Share electrical-service allocation between NormalPolicy and runtime limiting;
+  preserve sequential outage budgets and immediate maximum charging BAU rules.
+- Split KPI, entity-observation, loading and robustness responsibilities into
+  focused internal modules while keeping the public facades and export contracts.
+- Make audit references verifiable without silently rewriting expected results;
+  add portable fixtures, physical regressions and installed-distribution checks.
+- Remove temporary release-run notes and frozen working evidence from the source
+  tree. Keep maintained product documentation and immutable historical links.
+- Preserve the Portugal v3.3 datasets and matched 2024 references already merged
+  on master; their edition is separate from the simulator version. Reconcile the
+  documentation bundle after cleanup without regenerating physical inputs.
+
+Validation: the preserved C7 runtime previously passed 1,020 tests, 16 physical
+scenarios, 63 dataset-interface audits, two Portuguese outage windows, six installed
+reference cases and four installed export formats. The release integration is
+retested against current master; current-run evidence is attached to the GitHub
+Release. Optimizations P1–P8 are intentionally reserved for v1.9.13, not included here.
+
+Release integration: 1,063 tests passed on current master; all four strict
+auditors, critical lint, performance smoke, wheel/sdist checks and installed-wheel
+KPI/BAU/manifest export passed. No reference snapshots were rewritten.
+
+Compatibility: no change to BAU scheduling, physical models, KPI definitions or
+numerical tolerances. Internal modules are implementation details. Exact target
+SOC is not guaranteed by immediate-charging BAU; minimum service and target service
+remain separate metrics. No empirical equipment calibration is claimed.
 
 ## v1.9.11 — 2026-10-31 — correct overlapping electrical-service clipping
 
@@ -39,7 +74,7 @@ definition are unchanged; 391 input-file references retained their hashes.
 Corrected dispatch changes affected energy and service outcomes. Re-run native
 BAU references and affected experiments with matching code/input/seed conditions
 before comparing results across this fix. Equipment models remain unchanged.
-[Validation evidence](releases/1.9.11-validation.json).
+[Validation evidence](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.11-validation.json).
 
 ## v1.9.10 — 2026-10-30 — continuous campaign and measured resources
 
@@ -69,7 +104,7 @@ The CLI is a source-checkout script; the PyPI wheel carries the validated runtim
 and version milestone. Physical dispatch, market/reward and datasets are unchanged
 from v1.9.9. No new annual campaign was run solely for the version bump.
 Premium annual execution and empirical calibration remain outside this evidence.
-[Validation evidence](releases/1.9.10-validation.json).
+[Validation evidence](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.10-validation.json).
 
 ## v1.9.9 — 2026-10-30 — source clocks and reproducible evidence
 
@@ -101,7 +136,7 @@ candidate before final daily-rate/random-split corrections; final full-suite and
 installed-wheel checks cover the final code. Those real fixed-window replays
 include the daily-rate correction and do not use random split selection.
 No annual campaign or long-run resource approval yet; these remain iteration 7.
-[Validation evidence](releases/1.9.9-validation.json).
+[Validation evidence](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.9-validation.json).
 
 ## v1.9.8 — 2026-10-30 — KPI families and evaluation quality
 
@@ -127,7 +162,7 @@ Validation: 721 tests passed (34 new), all 16 physical scenarios, eight real DR
 request windows and installed-wheel export. Of 56 DR intervals, 40 have a valid
 reference and 16 are explicitly excluded after PV retirement. No dataset edits.
 Release gates require successful master CI and installed-wheel export before PyPI.
-[Validation evidence](releases/1.9.8-validation.json).
+[Validation evidence](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.8-validation.json).
 
 ## v1.9.7 — 2026-10-30 — independent balances and reporting boundaries
 
@@ -148,7 +183,7 @@ Validation: 687 full-suite tests passed (30 new regression cases). All 16 physic
 scenarios, both Premium windows (5,405,941 comparisons) and installed-wheel export
 passed. [Method, tolerances and limits](independent_balance_audit.md).
 Release gates require successful master CI and installed-wheel export before PyPI.
-[Validation evidence](releases/1.9.7-validation.json).
+[Validation evidence](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.7-validation.json).
 
 ## v1.9.6 — 2026-10-30 — paired comparisons and agent observations
 
@@ -171,7 +206,7 @@ Release gates require successful master CI and installed-wheel export before PyP
 Validation: 657 local tests (20 new), both real Portuguese observation-contract
 windows with physical checks, and isolated installed-package export passed.
 Release gates require successful master CI and installed-wheel export before PyPI.
-[Validation evidence](releases/1.9.6-validation.json).
+[Validation evidence](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.6-validation.json).
 
 ## v1.9.5 — 2026-10-30 — complete appliance service accounting
 
@@ -193,7 +228,7 @@ Release gates require successful master CI and installed-wheel export before PyP
 Validation: 637 local tests (20 new), all 16 physical scenarios, both reported
 Portugal windows and isolated installed-package export passed. Publication gates
 require successful master CI and installed-wheel export before PyPI upload.
-[Validation evidence](releases/1.9.5-validation.json).
+[Validation evidence](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.5-validation.json).
 
 ## v1.9.4 — 2026-10-30 — EV departure information quality
 
@@ -212,7 +247,7 @@ require successful master CI and installed-wheel export before PyPI upload.
 - Tag pushes no longer start a duplicate CI. Publication keeps the installed-wheel
   gate in Python 3.11; the master commit is checked once in Python 3.9/3.10.
 
-Validation: 617 local tests, 16 physics audit scenarios and both reported Portugal windows passed; the installed candidate exports KPIs, BAU and the versioned audit manifest. Release gates: successful master CI and Python 3.11 installed-package export before PyPI upload. [Local evidence](releases/1.9.4-validation.json).
+Validation: 617 local tests, 16 physics audit scenarios and both reported Portugal windows passed; the installed candidate exports KPIs, BAU and the versioned audit manifest. Release gates: successful master CI and Python 3.11 installed-package export before PyPI upload. [Local evidence](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.4-validation.json).
 
 ## v1.9.3 — 2026-10-29 — dataset integrity and runtime event fixes
 
@@ -241,7 +276,7 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 Validation: 591 local tests passed, including targeted regressions; critical lint, physical
 and dataset audits, CI on Python 3.9/3.10, and installed-wheel export checks.
 The publication workflow repeats its installed-wheel check on Python 3.11.
-Release evidence is recorded in [1.9.3-validation.json](releases/1.9.3-validation.json).
+Release evidence is recorded in [1.9.3-validation.json](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.3-validation.json).
 These checks do not constitute a full annual multi-controller experiment.
 
 Compatibility and migration: action/observation feature names and shapes remain
@@ -340,7 +375,7 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
 ### Validation
 
 Machine-readable results and the measured 4/30/100-member accounting footprint
-are recorded in [release evidence](releases/1.9.0-validation.json). Analytical
+are recorded in [release evidence](https://github.com/Soft-CPS-Research-Group/Simulator/blob/8157f605e26fb75651037451fb453b1a48056787/docs/releases/1.9.0-validation.json). Analytical
 regressions cover solar stored then exported, mixed origins, carbon retained
 through storage, multiple transfers, charger losses, departures, external SOC
 assignments, removals, reset, repeated evaluation and the feedback-free path.
@@ -363,60 +398,6 @@ same seeded actions. See [definitions and examples](energy_provenance.md).
 - DR and dynamic topology require entity; escalator control in entity remains
   unsupported and is explicitly reported. No future-data policy redesign,
   SAC/MARLISA work or full annual multi-controller research campaign is claimed.
-
-## Version Policy
-
-| Type | Use when | Example |
-|---|---|---|
-| Patch | Compatible fixes and additive features. | `0.4.1 -> 0.4.2`. |
-| Minor | New major capability or schema/API change. | `0.3.x -> 0.4.0`. |
-| Major | Broad breaking changes. | `0.x -> 1.0`. |
-
-## Release Checklist
-
-1. Update `citylearn/__init__.py`.
-2. Update this file.
-3. Update README when relevant features change.
-4. Update affected reference pages when schema/action/observation/KPI contracts change.
-5. Run validation:
-   - `.venv/bin/pytest -q`
-   - `.venv/bin/python scripts/audit/audit_entity_contract.py --strict`
-   - `.venv/bin/python scripts/audit/audit_physics.py`
-6. Run at least one representative smoke simulation.
-7. Commit and tag.
-8. Publish package when applicable.
-
-## Template
-
-```markdown
-## vX.Y.Z - YYYY-MM-DD
-
-Release owner: [@calofonseca](https://github.com/calofonseca).
-
-### Summary
-- ...
-
-### Added
-- ...
-
-### Changed
-- ...
-
-### Fixed
-- ...
-
-### Dataset/Schema Impact
-- ...
-
-### Compatibility
-- ...
-
-### Validation
-- `...`: pass
-
-### Migration Notes
-- ...
-```
 
 ## v1.8.3 - 2026-10-23
 
@@ -465,6 +446,16 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
   safety failure.
 
 ### Added
+
+The inventory below describes the **1.8.0 annual-suite edition**, not a new
+measurement or an inventory update for later dataset revisions.
+
+| Family | Members | PV | BESS | Chargers | Deferrables | Variants |
+|---|---:|---:|---:|---:|---:|---|
+| `MICRO-4-Q` | 4 | 2 | 1 | 2 | 1 | Micro |
+| `CORE-15-STRIPPED` | 15 | 7 | 3 | 7 | 4 | Stripped |
+| `CORE-30` | 30 | 15 | 6 | 15 | 8 | Nominal, Safety, Health, Dynamic, Combined |
+| `PREMIUM-100` | 100 | 55 | 22 | 80 | 30 | Clean, AllIn |
 
 - Four deterministic 2023 quarter-hour REC dataset families: `MICRO-4-Q`,
   `CORE-15-STRIPPED`, `CORE-30` and `PREMIUM-100`, comprising nine clean,
@@ -549,6 +540,75 @@ Release owner: [@calofonseca](https://github.com/calofonseca).
   features.
 - Pin `softcpsrecsimulator==1.8.0` in algorithm environments that use the new
   terminal-boundary, dynamic-history or KPI contracts.
+
+## v1.7.0 — entity runtime evidence
+
+This fork publishes the release from the namespaced tag
+`softcpsrecsimulator-v1.7.0`. The inherited upstream repository already owns
+the unrelated historical tag `v1.7.0` from 2023; it is deliberately left
+untouched.
+
+### Entity runtime evidence
+
+This release adds two backward-compatible subcontracts to the existing
+`entity_v1` interface.
+
+#### `runtime_status_v1`
+
+Entity observations now include `meta.runtime_status`. It exposes raw runtime
+facts for typed and health-aware controllers:
+
+- active fault/event causes and durations;
+- actual charger-to-EV connection state;
+- asset availability;
+- sensor-channel status;
+- actuator-channel status;
+- community/cloud communication-link status; and
+- value-quality evidence and freshness.
+
+The Simulator does **not** derive a controller `HealthState`. `fault_mode`
+remains the original cause: for example, `stuck` does not automatically mean
+`STALE`. Policies and interface compilers must combine cause, duration,
+freshness, semantic type and criticality according to their own versioned
+rules.
+
+Asset disconnection, asset unavailability, sensor loss, actuator loss and
+communication loss remain separate facts. Normal EV disconnection is not an
+equipment failure.
+
+Existing robustness event files remain valid. They may optionally provide an
+`event_domain` column. Omitting it uses a backward-compatible evidence-domain
+default; it never emits health.
+
+#### `entity_action_execution_v1`
+
+Entity-mode `step()` information now includes an action audit with stable
+ownership and, where observable:
+
+- requested action;
+- action after channel faults;
+- equipment-limited action;
+- applied action/power; and
+- limitation reasons.
+
+Unavailable physical values are reported as `None`, not estimated.
+`info.topology_events_applied` identifies topology events applied before the
+returned observation.
+
+### Compatibility
+
+- `entity_v1` table, edge, feature and action meanings are unchanged.
+- New observation metadata are additive and can be ignored by existing agents.
+- Flat-interface inputs and outputs are unchanged.
+- `entity_specs` now documents the runtime-status and action-execution
+  subcontracts.
+
+### Validation
+
+The release includes regression and contract tests covering old event files,
+fault-cause preservation, independent status domains, connection evidence,
+requested-versus-applied actions, dynamic topology, entity observation bundles
+and the legacy entity contract.
 
 ## v1.6.1 - 2026-08-06
 
