@@ -40,8 +40,8 @@ the approved commit:
 
 ```console
 git push origin master
-git tag -a vX.Y.Z -m "Release vX.Y.Z"
-git push origin vX.Y.Z
+git tag -a softcpsrecsimulator-vX.Y.Z -m "Release vX.Y.Z"
+git push origin softcpsrecsimulator-vX.Y.Z
 ```
 
 These are release steps, not local-maintenance commands. Tag pushes do not repeat
@@ -94,3 +94,7 @@ Release owner: maintainer.
 - Validation, coverage and limitations.
 - Migration actions, when required.
 ```
+
+From fork 2.0.0 onward, release tags use `softcpsrecsimulator-vX.Y.Z`.
+`DataSet` defaults to that namespaced ref, preserving inherited upstream tags.
+Historical fork `v1.9.*` tags and explicit dataset-tag overrides remain available.

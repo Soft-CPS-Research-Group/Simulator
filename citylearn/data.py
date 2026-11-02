@@ -54,7 +54,7 @@ class DataSet:
 
     GITHUB_ACCOUNT = os.getenv('CITYLEARN_DATASET_GITHUB_ACCOUNT', 'Soft-CPS-Research-Group')
     REPOSITORY_NAME = os.getenv('CITYLEARN_DATASET_REPOSITORY', 'Simulator')
-    REPOSITORY_TAG = os.getenv('CITYLEARN_DATASET_TAG', f'v{__version__}')
+    REPOSITORY_TAG = os.getenv('CITYLEARN_DATASET_TAG', f'softcpsrecsimulator-v{__version__}')
     OFFLINE = _parse_env_bool('CITYLEARN_OFFLINE', False)
     REPOSITORY_DATA_PATH = FileHandler.join_url('data')
     REPOSITORY_DATA_DATASETS_PATH = FileHandler.join_url(REPOSITORY_DATA_PATH, 'datasets')

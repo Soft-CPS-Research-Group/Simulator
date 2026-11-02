@@ -41,8 +41,8 @@ tag ainda não utilizada para o commit aprovado:
 
 ```console
 git push origin master
-git tag -a vX.Y.Z -m "Release vX.Y.Z"
-git push origin vX.Y.Z
+git tag -a softcpsrecsimulator-vX.Y.Z -m "Release vX.Y.Z"
+git push origin softcpsrecsimulator-vX.Y.Z
 ```
 
 São passos de publicação, não de manutenção local. O push da tag não repete a CI
@@ -94,3 +94,7 @@ Responsável: mantenedor.
 - Validação, cobertura e limitações.
 - Migração, quando necessária.
 ```
+
+A partir da 2.0.0, os tags do fork usam `softcpsrecsimulator-vX.Y.Z`.
+O `DataSet` usa essa referência por omissão, preservando os tags do upstream.
+Os tags históricos `v1.9.*` e as opções explícitas dos datasets mantêm-se.

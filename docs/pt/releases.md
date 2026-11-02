@@ -20,9 +20,11 @@ Responsavel default por releases deste fork: [@calofonseca](https://github.com/c
   é `softcpsrecsimulator-v2.0.0`; o tag histórico `v2.0.0` do upstream é preservado.
 
 Validação: os 81 ficheiros Python correspondem byte a byte à 1.9.13, admitindo
-apenas a mudança do número em `__init__.py`. Só cinco ficheiros de versão e
-documentação foram alterados. Build/check de wheel e sdist e exportações
-KPI/BAU/manifesto do wheel instalado passaram. Workflows e datasets mantidos. Mantém a
+apenas a mudança do número em `__init__.py` e do prefixo do tag de dados
+em `DataSet.REPOSITORY_TAG`. O carregamento online aponta para o tag do fork,
+com os mesmos dados, preservando as opções explícitas por ambiente/construtor
+e com teste de regressão. Build/check e exportações instaladas aprovados.
+Workflows, datasets, física, BAU, KPIs e otimizações mantidos. Mantém a
 validação da 1.9.13: 1.186 testes locais, quatro auditores strict e nove cenários
 longos (631.575 transições, 197.347.896 verificações e 77.603 comparações exatas de
 KPIs nas sete referências completas). O CI e a publicação desta versão ficam

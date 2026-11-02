@@ -21,9 +21,12 @@ Default release owner for this fork: [@calofonseca](https://github.com/calofonse
   tag remains unchanged.
 
 Validation: all 81 runtime Python files match v1.9.13 byte for byte, allowing
-only the version literal in `citylearn/__init__.py`. The complete diff changes
-only five version/documentation files. Wheel/sdist checks and isolated installed
-KPI/BAU/manifest exports passed; no datasets, workflows or functional code changed.
+only the version literal in `citylearn/__init__.py` and the release-tag prefix
+in `DataSet.REPOSITORY_TAG`. Online data use the namespaced fork tag so they
+resolve the same dataset content rather than the inherited upstream tag. Explicit
+environment/constructor overrides are preserved and regression-tested. Wheel/sdist
+checks and isolated installed KPI/BAU/manifest exports passed. Datasets, workflows
+and all physical, BAU, KPI and optimization implementations are unchanged.
 The unchanged runtime retains the v1.9.13 validation: 1,186 local integration tests,
 four strict auditors and the nine-case campaign (631,575 transitions; 197,347,896
 physical/accounting checks; 77,603 exact KPI comparisons across seven complete
