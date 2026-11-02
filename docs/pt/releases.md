@@ -9,6 +9,30 @@ compatibilidade, alterações de contratos e âmbito da validação.
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.0.0 — 2026-11-02 — marco de consolidação do simulador auditado
+
+- Fecha a fase de auditoria, robustez, organização e desempenho, publicando o
+  runtime da 1.9.13 com o número 2.0.0. Este marco não introduz alterações
+  funcionais nem exige migração.
+- Mantém modelos físicos, BAU/NormalPolicy, fórmulas/tolerâncias dos KPIs,
+  recompensas, históricos completos, schemas de exportação, dependências e datasets.
+- O pacote continua `softcpsrecsimulator`, com imports `citylearn`. O tag do fork
+  é `softcpsrecsimulator-v2.0.0`; o tag histórico `v2.0.0` do upstream é preservado.
+
+Validação: os 81 ficheiros Python correspondem byte a byte à 1.9.13, admitindo
+apenas a mudança do número em `__init__.py`. Só cinco ficheiros de versão e
+documentação foram alterados. Build/check de wheel e sdist e exportações
+KPI/BAU/manifesto do wheel instalado passaram. Workflows e datasets mantidos. Mantém a
+validação da 1.9.13: 1.186 testes locais, quatro auditores strict e nove cenários
+longos (631.575 transições, 197.347.896 verificações e 77.603 comparações exatas de
+KPIs nas sete referências completas). O CI e a publicação desta versão ficam
+registados nos anexos da release. A campanha longa é reutilizada, sem repetir
+execuções apenas para mudar a numeração. Medições e método na entrada 1.9.13.
+
+Limites mantidos: alvos exatos SOC isolados por diagnosticar, com todos os mínimos
+aceitáveis observados cumpridos; campanha longa anterior à v3.3, dados correntes
+v3.3 com testes de integração limitados; calibração empírica fora deste âmbito.
+
 ## v1.9.13 — 2026-11-02 — menos memória e avaliação mais rápida
 
 - P1: progresso da avaliação por etapa, membro e família de KPIs, sem acrescentar

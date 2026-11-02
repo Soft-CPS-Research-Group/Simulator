@@ -9,6 +9,33 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.0.0 — 2026-11-02 — audited-runtime consolidation milestone
+
+- Close the audit, robustness, internal-organization and performance phase by
+  releasing the v1.9.13 runtime as v2.0.0. This major-number milestone introduces
+  no functional change or migration requirement.
+- Preserve physical models, BAU/NormalPolicy, KPI formulas/tolerances, rewards,
+  complete histories, export schemas, dependencies and the current datasets.
+- Keep the distribution name `softcpsrecsimulator` and import namespace `citylearn`.
+  The fork tag is `softcpsrecsimulator-v2.0.0`; the inherited upstream `v2.0.0`
+  tag remains unchanged.
+
+Validation: all 81 runtime Python files match v1.9.13 byte for byte, allowing
+only the version literal in `citylearn/__init__.py`. The complete diff changes
+only five version/documentation files. Wheel/sdist checks and isolated installed
+KPI/BAU/manifest exports passed; no datasets, workflows or functional code changed.
+The unchanged runtime retains the v1.9.13 validation: 1,186 local integration tests,
+four strict auditors and the nine-case campaign (631,575 transitions; 197,347,896
+physical/accounting checks; 77,603 exact KPI comparisons across seven complete
+historical references). The current release CI and publication checks are recorded
+in the release artifacts. The long campaign is reused, not repeated for renumbering.
+Performance measurements and their method remain in the v1.9.13 entry below.
+
+Scope limits remain unchanged: isolated exact SOC-target misses need diagnosis;
+all observed minimum acceptable service was met. The long campaign used the
+pre-v3.3 inputs, while current v3.3 data passed bounded integration checks.
+Empirical equipment calibration remains outside this validation.
+
 ## v1.9.13 — 2026-11-02 — lower-memory histories and faster evaluation
 
 - P1: expose evaluation progress by stage/member/KPI family, with optional callback

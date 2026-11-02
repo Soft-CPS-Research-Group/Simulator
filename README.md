@@ -16,9 +16,9 @@ from citylearn.citylearn import CityLearnEnv
 
 Default documentation is in English. Portuguese documentation is available under [docs/pt](docs/pt/).
 
-Current source release: `1.9.13`. It adds lossless compact histories, faster KPI
-evaluation and observation preparation on top of the 1.9.12 robustness consolidation.
-See the [release history](docs/releases.md) for measured RAM/time gains, validation scope and compatibility.
+Current source release: `2.0.0`. This phase-closing milestone retains the audited
+1.9.13 runtime, datasets and behavior, with no functional changes or migration.
+See the [release history](docs/releases.md) for validation, measured gains and scope limits.
 
 The Portuguese two-year scenarios, sources and reconstruction instructions are in
 the [dataset catalogue](docs/portugal_rec_native/README.md). Dataset editions and
