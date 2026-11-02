@@ -9,6 +9,58 @@ compatibilidade, alterações de contratos e âmbito da validação.
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.13 — 2026-11-02 — menos memória e avaliação mais rápida
+
+- P1: progresso da avaliação por etapa, membro e família de KPIs, sem acrescentar
+  tempos aos valores dos indicadores.
+- P2–P3: históricos completos do mercado e da robustez em representações compactas
+  sem perdas, com consultas por janela e leitura sequencial compatíveis.
+- P4–P5: reutilização de populações durante a avaliação e de replays de viabilidade
+  EV por partida/contexto, sem partilhar estado físico entre simulações.
+- P7–P8: indexação dos ciclos de máquinas diferíveis e reutilização local da
+  preparação de observações/previsões. Recompensas personalizadas mantêm o
+  contrato completo; o caminho rápido da recompensa predefinida é restrito.
+- P6: integração e campanha longa final de regressão e desempenho.
+
+Campanha: nove cenários, 70.175 transições cada, semente 0 e NormalPolicy/BAU,
+com verificações físicas ativas. Os valores são observações de execuções separadas
+na mesma máquina, não um benchmark repetido e controlado.
+
+| Cenário | Pico de RAM antes → depois (MiB) | Tempo total antes → depois |
+|---|---:|---:|
+| Micro4 | 920,5 → 691,6 | 7m04s → 4m31s |
+| Premium All-in | 13.709,7 → 5.333,4 | 4h23m01s → 2h08m40s |
+| Core30 Topology | 3.521,1 → 1.844,1 | 57m57s → 26m51s |
+| Core30 Combined | 3.536,2 → 1.849,2 | 52m43s → 27m25s |
+| Core30 Safety | 3.821,7 → 1.899,7 | 50m04s → 29m26s |
+| Core30 Normal | 3.822,7 → 1.902,2 | 50m49s → 29m30s |
+| Core15 | 2.036,3 → 1.158,3 | 24m39s → 14m46s |
+
+Premium All-in: menos 61,1% de pico de RAM, 51,1% de tempo total e 89,7% no fecho
+KPIs/exportação (4.667,2 → 479,9 s). A média por transição com auditoria desceu de
+157,97 para 102,79 ms. Core30 Robustness terminou em 43m51s, pico 2.045,8 MiB;
+Premium Normal em 1h53m07s, pico 5.523,6 MiB. Estes dois não têm referência
+anterior completa: não se afirma uma melhoria final histórica para eles.
+
+Validação: 631.575 transições, 197.347.896 verificações físicas/contabilísticas e
+77.603 linhas de KPIs exatamente iguais nas sete referências completas, incluindo
+valores indefinidos. Reconciliação independente aprovada nos nove cenários;
+3.499 inputs preservados. A campanha usou a edição anterior à v3.3; não certifica
+uma execução anual dos novos eventos reservados de 2024 agora na principal.
+Testes e auditorias da integração corrente ficam identificados separadamente nos
+anexos da release. O runtime medido coincide com esta versão exceto o número da
+versão; o auditor congelado tinha instrumentação de medição validada em separado.
+
+Integração corrente: 1186 testes locais aprovados (22 avisos conhecidos
+Gymnasium float32), quatro auditores strict, lint, desempenho, distribuições e
+exportação do wheel fora do código-fonte. Comprovativos nos anexos da release.
+
+Sem amostragem/descarte de informação, alteração dos modelos físicos, BAU,
+recompensas, preços, definições/tolerâncias dos KPIs ou schemas de exportação.
+Todos os mínimos SOC observados foram cumpridos; mantêm-se alvos exatos de SOC
+isolados por diagnosticar. A aprovação contabilística não garante cumprimento de
+todos os alvos nem calibração com equipamentos reais.
+
 ## v1.9.12 — 2026-11-02 — contratos de robustez e organização interna
 
 - Consolida C1–C7: composição determinística de eventos de robustez, contratos de

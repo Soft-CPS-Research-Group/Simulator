@@ -9,6 +9,69 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v1.9.13 — 2026-11-02 — lower-memory histories and faster evaluation
+
+- P1: expose evaluation progress by stage/member/KPI family, with optional callback
+  and auditor progress files; instrumentation does not add values to KPI results.
+- P2–P3: retain complete market and robustness histories in compact lossless
+  representations with bounded window/stream readers and compatible public views.
+- P4–P5: reuse active-population masks within an evaluation and maximum-charge EV
+  feasibility replay within each departure/context, without caching physical state.
+- P7–P8: index deferrable-appliance cycles and reuse observation/forecast preparation
+  within a request, including a narrowly guarded default-reward fast path. Custom
+  rewards retain the full observation contract; state/RNG/physics are unchanged.
+- P6: integrate installed-export checks, regression tests and final long-run evidence.
+
+### Observed two-year campaign performance
+
+Each case executes 70,175 transitions, seed 0, NormalPolicy/BAU and active physical
+checks. RSS is the process high-water mark in MiB; wall time includes load, dispatch,
+independent auditing, final KPI evaluation and export. Baseline and optimized runs
+are separate observations on the same host, not a repeated controlled benchmark.
+
+| Scenario | Peak RSS before → after (MiB) | Total wall before → after | KPI/export before → after (s) |
+|---|---:|---:|---:|
+| Micro4 | 920.5 → 691.6 | 7m04s → 4m31s | 51.7 → 21.1 |
+| Premium All-in | 13,709.7 → 5,333.4 | 4h23m01s → 2h08m40s | 4,667.2 → 479.9 |
+| Core30 Topology | 3,521.1 → 1,844.1 | 57m57s → 26m51s | 646.3 → 110.1 |
+| Core30 Combined | 3,536.2 → 1,849.2 | 52m43s → 27m25s | 647.5 → 112.9 |
+| Core30 Safety | 3,821.7 → 1,899.7 | 50m04s → 29m26s | 290.8 → 115.9 |
+| Core30 Normal | 3,822.7 → 1,902.2 | 50m49s → 29m30s | 293.2 → 116.9 |
+| Core15 | 2,036.3 → 1,158.3 | 24m39s → 14m46s | 162.8 → 65.5 |
+
+Premium All-in peak RSS fell 61.1%, total wall time 51.1%, and KPI/export time
+89.7%. Audit-inclusive mean dispatch time fell from 157.97 to 102.79 ms/transition.
+Core30 Robustness completed in 43m51s at 2,045.8 MiB and Premium Normal in 1h53m07s
+at 5,523.6 MiB. Their old runs were incomplete: no final historical speedup or
+full historical KPI-equivalence claim is made for these two cases.
+
+Validation: all nine cases passed, totaling 631,575 transitions and 197,347,896
+physical/accounting checks. The seven complete historical comparisons matched
+77,603 KPI rows exactly, including identities and undefined values. Independent
+reconciliation passed in all nine cases. All 3,499 campaign input hashes were
+preserved. The campaign used the pre-v3.3 dataset edition on the frozen P8 source;
+it does NOT certify a full annual run of the newer heldout-2024 scenarios now on
+master. The measured input edition is retained at commit
+`8157f605e26fb75651037451fb453b1a48056787`; combine those data with the
+v1.9.13 runtime for reproduction, resolving the archived local paths for your machine.
+Current-master tests and bounded audits are recorded separately in release
+artifacts. Measured runtime modules match the release except for the version string.
+The frozen auditor adds measurement-only dispatch timing; parity of its results
+was checked before running the campaign.
+
+Current-master integration: 1,186 local tests passed (22 known Gymnasium
+float32-bound warnings); four strict auditors, critical lint, performance smoke,
+wheel/sdist checks and isolated wheel export passed.
+
+[Campaign evidence](https://github.com/Soft-CPS-Research-Group/Simulator/releases/download/v1.9.13/campaign-P8-evidence.zip) ·
+[Release integration evidence](https://github.com/Soft-CPS-Research-Group/Simulator/releases/download/v1.9.13/validation-1.9.13.zip).
+
+Compatibility: no information sampling/discard, relaxed tolerances, changes to
+physical equipment, BAU strategy, reward values, tariffs, KPI formulas or export
+schemas. Minimum SOC service was met for every observed departure; isolated exact
+target misses remain, with diagnosis pending. Accounting PASS is not a guarantee
+of target attainment, universal scheduling feasibility or real-equipment calibration.
+
 ## v1.9.12 — 2026-11-02 — robustness contracts and maintainable internals
 
 - Consolidate C1–C7: deterministic composition of robustness events, explicit

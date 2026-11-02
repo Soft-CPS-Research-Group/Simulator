@@ -14,9 +14,9 @@ It is a fork-based project used for research and experimentation on:
   feasible action capacity and requested/limited/applied action feedback.
 - dynamic member and asset topology with repeatable multi-episode reset semantics.
 
-Current source release: `1.9.12`. It consolidates robustness contracts, physical
-regressions and internal organization while preserving BAU and export compatibility.
-See the [release history](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/releases.md) for validation and model limits.
+Current source release: `1.9.13`. It adds lossless compact histories, faster KPI
+evaluation and observation preparation on top of the 1.9.12 robustness consolidation.
+See the [release history](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/releases.md) for measured RAM/time gains, validation scope and compatibility.
 
 ## Project Positioning
 

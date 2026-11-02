@@ -1,4 +1,4 @@
-__version__ = '1.9.12'
+__version__ = '1.9.13'
 
 __all__ = ["MultiCommunityEnv", "__version__"]
 
