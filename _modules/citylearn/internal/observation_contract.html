@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.observation_contract &mdash; CityLearn 1.9.11 documentation</title>
+  <title>citylearn.internal.observation_contract &mdash; CityLearn 1.9.12 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=17f12e63"></script>
+      <script src="../../../_static/documentation_options.js?v=2009a409"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -139,7 +139,10 @@
         <span class="k">return</span>
     <span class="n">tables</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">entity_specs</span><span class="p">[</span><span class="s1">'tables'</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">table</span><span class="p">,</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">contract</span><span class="p">[</span><span class="s1">'features'</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="o">-</span><span class="nb">set</span><span class="p">(</span><span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="s1">'features'</span><span class="p">]):</span>
+        <span class="n">declared</span> <span class="o">=</span> <span class="n">tables</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="o">-</span><span class="nb">set</span><span class="p">(</span><span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="s1">'features'</span><span class="p">]))</span> <span class="ow">and</span> <span class="n">service</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">topology_mode</span> <span class="o">==</span> <span class="s1">'dynamic'</span><span class="p">:</span>
+            <span class="n">declared</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">_target_validator</span><span class="p">()</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">entity_specs</span><span class="p">[</span><span class="s1">'tables'</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">declared</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="o">-</span><span class="nb">set</span><span class="p">(</span><span class="n">declared</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="s1">'features'</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Unknown agent observation feature in table </span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="c1"># An uncorrupted alternate channel cannot replace a targeted measurement.</span>
     <span class="n">selected</span> <span class="o">=</span> <span class="p">[(</span><span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">contract</span><span class="p">[</span><span class="s1">'features'</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
