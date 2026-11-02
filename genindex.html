@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; CityLearn 1.9.12 documentation</title>
+  <title>Index &mdash; CityLearn 1.9.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2009a409"></script>
+      <script src="_static/documentation_options.js?v=84712010"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -207,6 +207,8 @@
 </li>
       <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService.active_storage_at">active_storage_at() (citylearn.internal.topology.CityLearnTopologyService method)</a>
 </li>
+      <li><a href="api/citylearn.internal.kpi_population.html#citylearn.internal.kpi_population.ActivePopulation">ActivePopulation (class in citylearn.internal.kpi_population)</a>
+</li>
       <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.add">add() (in module citylearn.internal.provenance)</a>
 </li>
       <li><a href="api/citylearn.internal.loading_components.html#citylearn.internal.loading_components.add_model_options">add_model_options() (in module citylearn.internal.loading_components)</a>
@@ -217,17 +219,21 @@
 </li>
       <li><a href="api/citylearn.internal.robustness_spaces.html#citylearn.internal.robustness_spaces.adjusted_space">adjusted_space() (in module citylearn.internal.robustness_spaces)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.agents.base.html#citylearn.agents.base.Agent">Agent (class in citylearn.agents.base)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.internal.electrical_limits.html#citylearn.internal.electrical_limits.allocate_electrical_service">allocate_electrical_service() (in module citylearn.internal.electrical_limits)</a>
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.simulate.html#citylearn.end_use_load_profiles.simulate.EndUseLoadProfilesEnergyPlusPartialLoadSimulator.allow_multi_load_time_step">allow_multi_load_time_step (citylearn.end_use_load_profiles.simulate.EndUseLoadProfilesEnergyPlusPartialLoadSimulator property)</a>
 </li>
       <li><a href="api/citylearn.agents.rlc.html#citylearn.agents.rlc.RLC.alpha">alpha (citylearn.agents.rlc.RLC property)</a>
 </li>
+      <li><a href="api/citylearn.internal.market_history.html#citylearn.internal.market_history.MarketSettlementHistory.append">append() (citylearn.internal.market_history.MarketSettlementHistory method)</a>
+</li>
       <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.DeferrableApplianceRef.appliance_id">appliance_id (citylearn.internal.entity_interface.DeferrableApplianceRef attribute)</a>
+</li>
+      <li><a href="api/citylearn.internal.robustness_history.html#citylearn.internal.robustness_history.RobustnessHistory.application_scopes">application_scopes() (citylearn.internal.robustness_history.RobustnessHistory method)</a>
 </li>
       <li><a href="api/citylearn.internal.observation_contract.html#citylearn.internal.observation_contract.apply">apply() (in module citylearn.internal.observation_contract)</a>
 </li>
@@ -499,6 +505,8 @@
         <li><a href="api/citylearn.reward_function.html#citylearn.reward_function.RewardFunction.central_agent">(citylearn.reward_function.RewardFunction property)</a>
 </li>
       </ul></li>
+      <li><a href="api/citylearn.internal.deferrable_cycles.html#citylearn.internal.deferrable_cycles.CycleIndex.changed">changed() (citylearn.internal.deferrable_cycles.CycleIndex method)</a>
+</li>
       <li><a href="api/citylearn.community_dataset.html#citylearn.community_dataset.InventoryBattery.charge">charge() (citylearn.community_dataset.InventoryBattery method)</a>
 
       <ul>
@@ -781,6 +789,13 @@
 </li>
       </ul></li>
       <li>
+    citylearn.internal.deferrable_cycles
+
+      <ul>
+        <li><a href="api/citylearn.internal.deferrable_cycles.html#module-citylearn.internal.deferrable_cycles">module</a>
+</li>
+      </ul></li>
+      <li>
     citylearn.internal.deferrable_service_audit
 
       <ul>
@@ -830,14 +845,19 @@
 </li>
       </ul></li>
       <li>
+    citylearn.internal.evaluation_progress
+
+      <ul>
+        <li><a href="api/citylearn.internal.evaluation_progress.html#module-citylearn.internal.evaluation_progress">module</a>
+</li>
+      </ul></li>
+      <li>
     citylearn.internal.experiment
 
       <ul>
         <li><a href="api/citylearn.internal.experiment.html#module-citylearn.internal.experiment">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     citylearn.internal.kpi
 
@@ -845,6 +865,8 @@
         <li><a href="api/citylearn.internal.kpi.html#module-citylearn.internal.kpi">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     citylearn.internal.kpi_community
 
@@ -874,6 +896,13 @@
 </li>
       </ul></li>
       <li>
+    citylearn.internal.kpi_population
+
+      <ul>
+        <li><a href="api/citylearn.internal.kpi_population.html#module-citylearn.internal.kpi_population">module</a>
+</li>
+      </ul></li>
+      <li>
     citylearn.internal.kpi_service_metrics
 
       <ul>
@@ -899,6 +928,13 @@
 
       <ul>
         <li><a href="api/citylearn.internal.loading_inputs.html#module-citylearn.internal.loading_inputs">module</a>
+</li>
+      </ul></li>
+      <li>
+    citylearn.internal.market_history
+
+      <ul>
+        <li><a href="api/citylearn.internal.market_history.html#module-citylearn.internal.market_history">module</a>
 </li>
       </ul></li>
       <li>
@@ -934,6 +970,13 @@
 
       <ul>
         <li><a href="api/citylearn.internal.robustness_audit.html#module-citylearn.internal.robustness_audit">module</a>
+</li>
+      </ul></li>
+      <li>
+    citylearn.internal.robustness_history
+
+      <ul>
+        <li><a href="api/citylearn.internal.robustness_history.html#module-citylearn.internal.robustness_history">module</a>
 </li>
       </ul></li>
       <li>
@@ -1091,7 +1134,11 @@
       <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.CityLearnTopologyService">CityLearnTopologyService (class in citylearn.internal.topology)</a>
 </li>
       <li><a href="api/citylearn.internal.baseline.html#citylearn.internal.baseline.CityLearnBusinessAsUsualBaselineService.clear">clear() (citylearn.internal.baseline.CityLearnBusinessAsUsualBaselineService method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.internal.market_history.html#citylearn.internal.market_history.MarketSettlementHistory.clear">(citylearn.internal.market_history.MarketSettlementHistory method)</a>
 </li>
+      </ul></li>
       <li><a href="api/citylearn.data.html#citylearn.data.DataSet.clear_cache">clear_cache() (citylearn.data.DataSet method)</a>
 </li>
       <li><a href="api/citylearn.building.html#citylearn.building.Building.clear_step_electric_loads_for_action">clear_step_electric_loads_for_action() (citylearn.building.Building method)</a>
@@ -1196,9 +1243,15 @@
 </li>
       <li><a href="api/citylearn.cost_function.html#citylearn.cost_function.CostFunction">CostFunction (class in citylearn.cost_function)</a>
 </li>
+      <li><a href="api/citylearn.internal.robustness_history.html#citylearn.internal.robustness_history.RobustnessHistory.counts">counts() (citylearn.internal.robustness_history.RobustnessHistory method)</a>
+</li>
+      <li><a href="api/citylearn.internal.kpi_population.html#citylearn.internal.kpi_population.current_population">current_population() (in module citylearn.internal.kpi_population)</a>
+</li>
       <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.Stock.cursor">cursor (citylearn.internal.provenance.Stock attribute)</a>
 </li>
       <li><a href="api/citylearn.energy_model.html#citylearn.energy_model.DeferrableAppliance.cycle_state">cycle_state (citylearn.energy_model.DeferrableAppliance property)</a>
+</li>
+      <li><a href="api/citylearn.internal.deferrable_cycles.html#citylearn.internal.deferrable_cycles.CycleIndex">CycleIndex (class in citylearn.internal.deferrable_cycles)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1429,6 +1482,8 @@
       <li><a href="api/citylearn.cost_function.html#citylearn.cost_function.CostFunction.electricity_consumption">electricity_consumption() (citylearn.cost_function.CostFunction static method)</a>
 </li>
       <li><a href="api/citylearn.electric_vehicle.html#citylearn.electric_vehicle.ElectricVehicle">ElectricVehicle (class in citylearn.electric_vehicle)</a>
+</li>
+      <li><a href="api/citylearn.internal.evaluation_progress.html#citylearn.internal.evaluation_progress.EvaluationProgress.emit">emit() (citylearn.internal.evaluation_progress.EvaluationProgress method)</a>
 </li>
       <li><a href="api/citylearn.internal.ev_departure_audit.html#citylearn.internal.ev_departure_audit.empty_counts">empty_counts() (in module citylearn.internal.ev_departure_audit)</a>
 </li>
@@ -1670,6 +1725,8 @@
       </ul></li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.EvaluationCondition">EvaluationCondition (class in citylearn.citylearn)</a>
 </li>
+      <li><a href="api/citylearn.internal.evaluation_progress.html#citylearn.internal.evaluation_progress.EvaluationProgress">EvaluationProgress (class in citylearn.internal.evaluation_progress)</a>
+</li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.RobustnessEvent.event_domain">event_domain (citylearn.internal.robustness.RobustnessEvent attribute)</a>
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.RobustnessEvent.event_id">event_id (citylearn.internal.robustness.RobustnessEvent attribute)</a>
@@ -1745,6 +1802,8 @@
       <li><a href="api/citylearn.internal.entity_observations.html#citylearn.internal.entity_observations.fill_storage_rows">fill_storage_rows() (in module citylearn.internal.entity_observations)</a>
 </li>
       <li><a href="api/citylearn.internal.balance_audit.html#citylearn.internal.balance_audit.IndependentBalanceAudit.finish">finish() (citylearn.internal.balance_audit.IndependentBalanceAudit method)</a>
+</li>
+      <li><a href="api/citylearn.internal.deferrable_cycles.html#citylearn.internal.deferrable_cycles.CycleIndex.first">first() (citylearn.internal.deferrable_cycles.CycleIndex method)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.flat_action_space">flat_action_space (citylearn.citylearn.CityLearnEnv property)</a>
 </li>
@@ -2068,6 +2127,8 @@
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.history">history (citylearn.internal.robustness.CityLearnRobustnessService property)</a>
 </li>
+      <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.history_window">history_window() (citylearn.internal.robustness.CityLearnRobustnessService method)</a>
+</li>
       <li><a href="api/citylearn.data.html#citylearn.data.WashingMachineSimulation.hour">hour (citylearn.data.WashingMachineSimulation attribute)</a>
 </li>
       <li><a href="api/citylearn.agents.rbc.html#citylearn.agents.rbc.HourRBC">HourRBC (class in citylearn.agents.rbc)</a>
@@ -2126,6 +2187,8 @@
 </li>
       <li><a href="api/citylearn.dynamics.html#citylearn.dynamics.LSTMDynamics.input_size">input_size (citylearn.dynamics.LSTMDynamics property)</a>
 </li>
+      <li><a href="api/citylearn.internal.market_history.html#citylearn.internal.market_history.MarketSettlementHistory.insert">insert() (citylearn.internal.market_history.MarketSettlementHistory method)</a>
+</li>
       <li><a href="api/citylearn.end_use_load_profiles.simulate.html#citylearn.end_use_load_profiles.simulate.EndUseLoadProfilesEnergyPlusPartialLoadSimulator.insert_zone_metadata">insert_zone_metadata() (citylearn.end_use_load_profiles.simulate.EndUseLoadProfilesEnergyPlusPartialLoadSimulator method)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.interface">interface (citylearn.citylearn.CityLearnEnv property)</a>
@@ -2149,6 +2212,8 @@
       <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.DemandResponseRequest.issuer">issuer (citylearn.internal.demand_response.DemandResponseRequest attribute)</a>
 </li>
       <li><a href="api/citylearn.internal.demand_response.html#citylearn.internal.demand_response.CityLearnDemandResponseService.ISSUER_CODES">ISSUER_CODES (citylearn.internal.demand_response.CityLearnDemandResponseService attribute)</a>
+</li>
+      <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.iter_history">iter_history() (citylearn.internal.robustness.CityLearnRobustnessService method)</a>
 </li>
       <li><a href="api/citylearn.agents.marlisa.html#citylearn.agents.marlisa.MARLISA.iterations">iterations (citylearn.agents.marlisa.MARLISA property)</a>
 </li>
@@ -2258,11 +2323,19 @@
 </li>
       <li><a href="api/citylearn.internal.kpi_community.html#citylearn.internal.kpi_community.market_records">market_records() (in module citylearn.internal.kpi_community)</a>
 </li>
+      <li><a href="api/citylearn.internal.market_history.html#citylearn.internal.market_history.MarketSettlementHistory.market_totals">market_totals() (citylearn.internal.market_history.MarketSettlementHistory method)</a>
+</li>
+      <li><a href="api/citylearn.internal.market_history.html#citylearn.internal.market_history.MarketSettlementHistory">MarketSettlementHistory (class in citylearn.internal.market_history)</a>
+</li>
       <li><a href="api/citylearn.reward_function.html#citylearn.reward_function.MARL">MARL (class in citylearn.reward_function)</a>
 </li>
       <li><a href="api/citylearn.agents.marlisa.html#citylearn.agents.marlisa.MARLISA">MARLISA (class in citylearn.agents.marlisa)</a>
 </li>
       <li><a href="api/citylearn.agents.marlisa.html#citylearn.agents.marlisa.MARLISARBC">MARLISARBC (class in citylearn.agents.marlisa)</a>
+</li>
+      <li><a href="api/citylearn.internal.kpi_population.html#citylearn.internal.kpi_population.ActivePopulation.mask">mask() (citylearn.internal.kpi_population.ActivePopulation method)</a>
+</li>
+      <li><a href="api/citylearn.internal.kpi_population.html#citylearn.internal.kpi_population.ActivePopulation.mask_bytes">mask_bytes (citylearn.internal.kpi_population.ActivePopulation property)</a>
 </li>
       <li><a href="api/citylearn.electric_vehicle_charger.html#citylearn.electric_vehicle_charger.Charger.max_charging_power">max_charging_power (citylearn.electric_vehicle_charger.Charger property)</a>
 </li>
@@ -2382,6 +2455,8 @@
 </li>
         <li><a href="api/citylearn.internal.comparison.html#module-citylearn.internal.comparison">citylearn.internal.comparison</a>
 </li>
+        <li><a href="api/citylearn.internal.deferrable_cycles.html#module-citylearn.internal.deferrable_cycles">citylearn.internal.deferrable_cycles</a>
+</li>
         <li><a href="api/citylearn.internal.deferrable_service_audit.html#module-citylearn.internal.deferrable_service_audit">citylearn.internal.deferrable_service_audit</a>
 </li>
         <li><a href="api/citylearn.internal.demand_response.html#module-citylearn.internal.demand_response">citylearn.internal.demand_response</a>
@@ -2396,6 +2471,8 @@
 </li>
         <li><a href="api/citylearn.internal.ev_departure_audit.html#module-citylearn.internal.ev_departure_audit">citylearn.internal.ev_departure_audit</a>
 </li>
+        <li><a href="api/citylearn.internal.evaluation_progress.html#module-citylearn.internal.evaluation_progress">citylearn.internal.evaluation_progress</a>
+</li>
         <li><a href="api/citylearn.internal.experiment.html#module-citylearn.internal.experiment">citylearn.internal.experiment</a>
 </li>
         <li><a href="api/citylearn.internal.kpi.html#module-citylearn.internal.kpi">citylearn.internal.kpi</a>
@@ -2408,6 +2485,8 @@
 </li>
         <li><a href="api/citylearn.internal.kpi_family_audit.html#module-citylearn.internal.kpi_family_audit">citylearn.internal.kpi_family_audit</a>
 </li>
+        <li><a href="api/citylearn.internal.kpi_population.html#module-citylearn.internal.kpi_population">citylearn.internal.kpi_population</a>
+</li>
         <li><a href="api/citylearn.internal.kpi_service_metrics.html#module-citylearn.internal.kpi_service_metrics">citylearn.internal.kpi_service_metrics</a>
 </li>
         <li><a href="api/citylearn.internal.loading.html#module-citylearn.internal.loading">citylearn.internal.loading</a>
@@ -2415,6 +2494,8 @@
         <li><a href="api/citylearn.internal.loading_components.html#module-citylearn.internal.loading_components">citylearn.internal.loading_components</a>
 </li>
         <li><a href="api/citylearn.internal.loading_inputs.html#module-citylearn.internal.loading_inputs">citylearn.internal.loading_inputs</a>
+</li>
+        <li><a href="api/citylearn.internal.market_history.html#module-citylearn.internal.market_history">citylearn.internal.market_history</a>
 </li>
         <li><a href="api/citylearn.internal.observation_contract.html#module-citylearn.internal.observation_contract">citylearn.internal.observation_contract</a>
 </li>
@@ -2425,6 +2506,8 @@
         <li><a href="api/citylearn.internal.robustness.html#module-citylearn.internal.robustness">citylearn.internal.robustness</a>
 </li>
         <li><a href="api/citylearn.internal.robustness_audit.html#module-citylearn.internal.robustness_audit">citylearn.internal.robustness_audit</a>
+</li>
+        <li><a href="api/citylearn.internal.robustness_history.html#module-citylearn.internal.robustness_history">citylearn.internal.robustness_history</a>
 </li>
         <li><a href="api/citylearn.internal.robustness_spaces.html#module-citylearn.internal.robustness_spaces">citylearn.internal.robustness_spaces</a>
 </li>
@@ -2853,6 +2936,8 @@
 </li>
       <li><a href="api/citylearn.internal.kpi_family_audit.html#citylearn.internal.kpi_family_audit.pool_thermal">pool_thermal() (in module citylearn.internal.kpi_family_audit)</a>
 </li>
+      <li><a href="api/citylearn.internal.kpi_population.html#citylearn.internal.kpi_population.population_scope">population_scope() (in module citylearn.internal.kpi_population)</a>
+</li>
       <li><a href="api/citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.PORTFOLIO_COMMUNITY_ID">PORTFOLIO_COMMUNITY_ID (citylearn.multi_community.MultiCommunityEnv attribute)</a>
 </li>
       <li><a href="api/citylearn.multi_community.html#citylearn.multi_community.MultiCommunityEnv.PORTFOLIO_NAME">PORTFOLIO_NAME (citylearn.multi_community.MultiCommunityEnv attribute)</a>
@@ -3235,6 +3320,8 @@
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.RobustnessEvent">RobustnessEvent (class in citylearn.internal.robustness)</a>
 </li>
+      <li><a href="api/citylearn.internal.robustness_history.html#citylearn.internal.robustness_history.RobustnessHistory">RobustnessHistory (class in citylearn.internal.robustness_history)</a>
+</li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.rolling_episode_split">rolling_episode_split (citylearn.citylearn.CityLearnEnv property)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.root_directory">root_directory (citylearn.citylearn.CityLearnEnv property)</a>
@@ -3256,10 +3343,14 @@
       <ul>
         <li><a href="api/citylearn.end_use_load_profiles.lstm_model.model_generation.html#citylearn.end_use_load_profiles.lstm_model.model_generation.run">(in module citylearn.end_use_load_profiles.lstm_model.model_generation)</a>
 </li>
+        <li><a href="api/citylearn.internal.evaluation_progress.html#citylearn.internal.evaluation_progress.run">(in module citylearn.internal.evaluation_progress)</a>
+</li>
       </ul></li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.CityLearnEnv.run_business_as_usual_baseline">run_business_as_usual_baseline() (citylearn.citylearn.CityLearnEnv method)</a>
 </li>
       <li><a href="api/citylearn.end_use_load_profiles.lstm_model.model_generation_wrapper.html#citylearn.end_use_load_profiles.lstm_model.model_generation_wrapper.run_one_model">run_one_model() (in module citylearn.end_use_load_profiles.lstm_model.model_generation_wrapper)</a>
+</li>
+      <li><a href="api/citylearn.internal.deferrable_cycles.html#citylearn.internal.deferrable_cycles.CycleIndex.running">running() (citylearn.internal.deferrable_cycles.CycleIndex method)</a>
 </li>
       <li><a href="api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.runtime_status">runtime_status() (citylearn.internal.robustness.CityLearnRobustnessService method)</a>
 </li>
@@ -3429,10 +3520,10 @@
         <li><a href="api/citylearn.internal.runtime.html#citylearn.internal.runtime.CityLearnRuntimeService.simulate_unconnected_ev_soc">(citylearn.internal.runtime.CityLearnRuntimeService method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.base.html#citylearn.base.EpisodeTracker.simulation_end_time_step">simulation_end_time_step (citylearn.base.EpisodeTracker property)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/citylearn.base.html#citylearn.base.EpisodeTracker.simulation_start_time_step">simulation_start_time_step (citylearn.base.EpisodeTracker property)</a>
 </li>
       <li><a href="api/citylearn.base.html#citylearn.base.EpisodeTracker.simulation_time_steps">simulation_time_steps (citylearn.base.EpisodeTracker property)</a>
@@ -3479,6 +3570,12 @@
 </li>
       <li><a href="api/citylearn.internal.topology.html#citylearn.internal.topology.TopologyEvent.source_member_id">source_member_id (citylearn.internal.topology.TopologyEvent attribute)</a>
 </li>
+      <li><a href="api/citylearn.internal.evaluation_progress.html#citylearn.internal.evaluation_progress.EvaluationProgress.span">span() (citylearn.internal.evaluation_progress.EvaluationProgress method)</a>
+
+      <ul>
+        <li><a href="api/citylearn.internal.evaluation_progress.html#citylearn.internal.evaluation_progress.span">(in module citylearn.internal.evaluation_progress)</a>
+</li>
+      </ul></li>
       <li><a href="api/citylearn.internal.entity_interface.html#citylearn.internal.entity_interface.CityLearnEntityInterfaceService.specs">specs (citylearn.internal.entity_interface.CityLearnEntityInterfaceService property)</a>
 </li>
       <li><a href="api/citylearn.wrappers.html#citylearn.wrappers.StableBaselines3ActionWrapper">StableBaselines3ActionWrapper (class in citylearn.wrappers)</a>
@@ -3576,6 +3673,8 @@
       <li><a href="api/citylearn.internal.provenance.html#citylearn.internal.provenance.CityLearnProvenanceService.summary">summary() (citylearn.internal.provenance.CityLearnProvenanceService method)</a>
 
       <ul>
+        <li><a href="api/citylearn.internal.robustness_history.html#citylearn.internal.robustness_history.RobustnessHistory.summary">(citylearn.internal.robustness_history.RobustnessHistory method)</a>
+</li>
         <li><a href="api/citylearn.internal.robustness_audit.html#citylearn.internal.robustness_audit.summary">(in module citylearn.internal.robustness_audit)</a>
 </li>
       </ul></li>
@@ -3894,6 +3993,8 @@
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.EvaluationCondition.WITHOUT_STORAGE_BUT_WITH_PARTIAL_LOAD_AND_PV">WITHOUT_STORAGE_BUT_WITH_PARTIAL_LOAD_AND_PV (citylearn.citylearn.EvaluationCondition attribute)</a>
 </li>
       <li><a href="api/citylearn.citylearn.html#citylearn.citylearn.EvaluationCondition.WITHOUT_STORAGE_BUT_WITH_PV">WITHOUT_STORAGE_BUT_WITH_PV (citylearn.citylearn.EvaluationCondition attribute)</a>
+</li>
+      <li><a href="api/citylearn.internal.robustness_history.html#citylearn.internal.robustness_history.RobustnessHistory.writable_record">writable_record() (citylearn.internal.robustness_history.RobustnessHistory method)</a>
 </li>
       <li><a href="api/citylearn.utilities.html#citylearn.utilities.FileHandler.write_json">write_json() (citylearn.utilities.FileHandler static method)</a>
 

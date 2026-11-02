@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.internal.robustness &mdash; CityLearn 1.9.12 documentation</title>
+  <title>citylearn.internal.robustness &mdash; CityLearn 1.9.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2009a409"></script>
+      <script src="../../../_static/documentation_options.js?v=84712010"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -99,6 +99,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_bool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.robustness_history</span><span class="w"> </span><span class="kn">import</span> <span class="n">RobustnessHistory</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.citylearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">CityLearnEnv</span>
@@ -205,7 +206,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_cache_step</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_cache</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RobustnessEvent</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="n">RobustnessHistory</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stuck_values</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_action_history</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flat_layout_cache</span> <span class="o">=</span> <span class="kc">None</span>
@@ -222,6 +223,22 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_public_record</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">items</span><span class="p">())}</span>
+
+<div class="viewcode-block" id="CityLearnRobustnessService.iter_history">
+<a class="viewcode-back" href="../../../api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.iter_history">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iter_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Yield detached public records in [start, stop), without a full copy."""</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">step</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">stop</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="n">stop</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">step</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_public_record</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">[</span><span class="n">step</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="CityLearnRobustnessService.history_window">
+<a class="viewcode-back" href="../../../api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.history_window">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">history_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return a detached public snapshot of the requested step window."""</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iter_history</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">))</span></div>
+
 
 <div class="viewcode-block" id="CityLearnRobustnessService.initialize">
 <a class="viewcode-back" href="../../../api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.initialize">[docs]</a>
@@ -266,7 +283,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_cache_step</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_cache</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="n">RobustnessHistory</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stuck_values</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_action_history</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flat_layout_cache</span> <span class="o">=</span> <span class="kc">None</span>
@@ -526,38 +543,10 @@
 <div class="viewcode-block" id="CityLearnRobustnessService.summarize">
 <a class="viewcode-back" href="../../../api/citylearn.internal.robustness.html#citylearn.internal.robustness.CityLearnRobustnessService.summarize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">building_names</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">executed_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-        <span class="n">building_names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">building_names</span><span class="p">]</span>
-        <span class="n">by_building</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_summary</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">building_names</span><span class="p">}</span>
-        <span class="n">district</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_summary</span><span class="p">()</span>
-        <span class="n">district_events</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="n">district_steps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="n">building_events</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">set</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">building_names</span><span class="p">}</span>
-        <span class="n">building_steps</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">set</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">building_names</span><span class="p">}</span>
-
-        <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">record</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">executed_only</span> <span class="ow">and</span> <span class="n">step</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_global_time_step</span><span class="p">():</span>
-                <span class="k">continue</span>
-            <span class="n">district_events</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event_ids"</span><span class="p">,</span> <span class="nb">set</span><span class="p">()))</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record_has_any_application</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-                <span class="n">district_steps</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_accumulate_summary_sets</span><span class="p">(</span><span class="n">district</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">application</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"applications"</span><span class="p">,</span> <span class="p">[]):</span>
-                <span class="n">building_name</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"building"</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">building_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">by_building</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="n">building_events</span><span class="p">[</span><span class="n">building_name</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event_id"</span><span class="p">))</span>
-                <span class="n">building_steps</span><span class="p">[</span><span class="n">building_name</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_accumulate_building_application</span><span class="p">(</span><span class="n">by_building</span><span class="p">[</span><span class="n">building_name</span><span class="p">],</span> <span class="n">application</span><span class="p">)</span>
-
-        <span class="n">district</span><span class="p">[</span><span class="s2">"robustness_events_count"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">district_events</span><span class="p">))</span>
-        <span class="n">district</span><span class="p">[</span><span class="s2">"robustness_active_time_step_count"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">district_steps</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">by_building</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">summary</span><span class="p">[</span><span class="s2">"robustness_events_count"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">building_events</span><span class="p">[</span><span class="n">name</span><span class="p">]))</span>
-            <span class="n">summary</span><span class="p">[</span><span class="s2">"robustness_active_time_step_count"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">building_steps</span><span class="p">[</span><span class="n">name</span><span class="p">]))</span>
-
-        <span class="k">return</span> <span class="n">by_building</span><span class="p">,</span> <span class="n">district</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span>
+            <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">building_names</span><span class="p">],</span>
+            <span class="n">executed_before</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_global_time_step</span><span class="p">()</span> <span class="k">if</span> <span class="n">executed_only</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CityLearnRobustnessService.validate_targets">
@@ -1338,20 +1327,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_record_application</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">RobustnessEvent</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_global_time_step</span><span class="p">()</span>
-        <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-            <span class="n">step</span><span class="p">,</span>
-            <span class="p">{</span>
-                <span class="s2">"event_ids"</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span>
-                <span class="s2">"modules"</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span>
-                <span class="s2">"observation"</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span>
-                <span class="s2">"forecast"</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span>
-                <span class="s2">"action"</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span>
-                <span class="s2">"asset"</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span>
-                <span class="s2">"missing"</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span>
-                <span class="s2">"dropout"</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span>
-                <span class="s2">"applications"</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="p">},</span>
-        <span class="p">)</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">writable_record</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
         <span class="n">target_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"target_key"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"asset"</span><span class="p">:</span>
             <span class="c1"># An availability event is applied to every observation field and</span>
@@ -1390,15 +1366,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_counts_for_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-        <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="p">),</span> <span class="p">{})</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">"observation"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"observation"</span><span class="p">,</span> <span class="nb">set</span><span class="p">())),</span>
-            <span class="s2">"forecast"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"forecast"</span><span class="p">,</span> <span class="nb">set</span><span class="p">())),</span>
-            <span class="s2">"action"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"action"</span><span class="p">,</span> <span class="nb">set</span><span class="p">())),</span>
-            <span class="s2">"asset"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"asset"</span><span class="p">,</span> <span class="nb">set</span><span class="p">())),</span>
-            <span class="s2">"missing"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"missing"</span><span class="p">,</span> <span class="nb">set</span><span class="p">())),</span>
-            <span class="s2">"dropout"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"dropout"</span><span class="p">,</span> <span class="nb">set</span><span class="p">())),</span>
-        <span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">counts</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_accumulate_summary_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">record</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
         <span class="n">target</span><span class="p">[</span><span class="s2">"robustness_observation_corruption_count"</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"observation"</span><span class="p">,</span> <span class="nb">set</span><span class="p">())))</span>
@@ -1438,11 +1406,14 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_public_record</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="n">key</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">set</span><span class="p">)</span> <span class="k">else</span> <span class="n">value</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">"applications"</span>
-        <span class="p">}</span> <span class="o">|</span> <span class="p">{</span><span class="s2">"applications"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"applications"</span><span class="p">,</span> <span class="p">[]))}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">record</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"applications"</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">set</span><span class="p">)</span> <span class="k">else</span> <span class="n">value</span>
+        <span class="n">result</span><span class="p">[</span><span class="s2">"applications"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"applications"</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_zero_observation_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">{</span>

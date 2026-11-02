@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>citylearn.reward_function module &mdash; CityLearn 1.9.12 documentation</title>
+  <title>citylearn.reward_function module &mdash; CityLearn 1.9.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -17,7 +17,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2009a409"></script>
+      <script src="../_static/documentation_options.js?v=84712010"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -167,7 +167,7 @@ boundary or heating mode but temperature is above setpoint upper boundary.</p></
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.reward_function.ComfortReward.get_required_observation_names">
 <span class="sig-name descname"><span class="pre">get_required_observation_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/citylearn/reward_function.html#ComfortReward.get_required_observation_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.reward_function.ComfortReward.get_required_observation_names" title="Link to this definition"></a></dt>
-<dd><p>Return minimal observation names for this reward, or None if unknown.</p>
+<dd><p>Declare inputs of the built-in calculation; custom rewards remain unrestricted.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -214,7 +214,7 @@ Only affects EV-related behavior; other building logic comes from the superclass
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.reward_function.Electric_Vehicles_Reward_Function.get_required_observation_names">
 <span class="sig-name descname"><span class="pre">get_required_observation_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/citylearn/reward_function.html#Electric_Vehicles_Reward_Function.get_required_observation_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.reward_function.Electric_Vehicles_Reward_Function.get_required_observation_names" title="Link to this definition"></a></dt>
-<dd><p>Return minimal observation names for this reward, or None if unknown.</p>
+<dd><p>Declare inputs of the built-in calculation; custom rewards remain unrestricted.</p>
 </dd></dl>
 
 </dd></dl>
@@ -251,7 +251,7 @@ Only affects EV-related behavior; other building logic comes from the superclass
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.reward_function.IndependentSACReward.get_required_observation_names">
 <span class="sig-name descname"><span class="pre">get_required_observation_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/citylearn/reward_function.html#IndependentSACReward.get_required_observation_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.reward_function.IndependentSACReward.get_required_observation_names" title="Link to this definition"></a></dt>
-<dd><p>Return minimal observation names for this reward, or None if unknown.</p>
+<dd><p>Declare inputs of the built-in calculation; custom rewards remain unrestricted.</p>
 </dd></dl>
 
 </dd></dl>
@@ -287,7 +287,7 @@ Only affects EV-related behavior; other building logic comes from the superclass
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.reward_function.MARL.get_required_observation_names">
 <span class="sig-name descname"><span class="pre">get_required_observation_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/citylearn/reward_function.html#MARL.get_required_observation_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.reward_function.MARL.get_required_observation_names" title="Link to this definition"></a></dt>
-<dd><p>Return minimal observation names for this reward, or None if unknown.</p>
+<dd><p>Declare inputs of the built-in calculation; custom rewards remain unrestricted.</p>
 </dd></dl>
 
 </dd></dl>
@@ -322,7 +322,7 @@ Only affects EV-related behavior; other building logic comes from the superclass
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.reward_function.MultiBuildingRewardFunction.get_required_observation_names">
 <span class="sig-name descname"><span class="pre">get_required_observation_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/citylearn/reward_function.html#MultiBuildingRewardFunction.get_required_observation_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.reward_function.MultiBuildingRewardFunction.get_required_observation_names" title="Link to this definition"></a></dt>
-<dd><p>Return minimal observation names for this reward, or None if unknown.</p>
+<dd><p>Declare inputs of the built-in calculation; custom rewards remain unrestricted.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -389,7 +389,7 @@ Only affects EV-related behavior; other building logic comes from the superclass
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.reward_function.RewardFunction.get_required_observation_names">
 <span class="sig-name descname"><span class="pre">get_required_observation_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/citylearn/reward_function.html#RewardFunction.get_required_observation_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.reward_function.RewardFunction.get_required_observation_names" title="Link to this definition"></a></dt>
-<dd><p>Return minimal observation names for this reward, or None if unknown.</p>
+<dd><p>Declare inputs of the built-in calculation; custom rewards remain unrestricted.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -450,7 +450,7 @@ boundary or heating mode but temperature is above setpoint upper boundary.</p></
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.reward_function.SolarPenaltyAndComfortReward.get_required_observation_names">
 <span class="sig-name descname"><span class="pre">get_required_observation_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/citylearn/reward_function.html#SolarPenaltyAndComfortReward.get_required_observation_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.reward_function.SolarPenaltyAndComfortReward.get_required_observation_names" title="Link to this definition"></a></dt>
-<dd><p>Return minimal observation names for this reward, or None if unknown.</p>
+<dd><p>Declare inputs of the built-in calculation; custom rewards remain unrestricted.</p>
 </dd></dl>
 
 </dd></dl>
@@ -492,7 +492,7 @@ grid the penalty is maximized.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.reward_function.SolarPenaltyReward.get_required_observation_names">
 <span class="sig-name descname"><span class="pre">get_required_observation_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/citylearn/reward_function.html#SolarPenaltyReward.get_required_observation_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.reward_function.SolarPenaltyReward.get_required_observation_names" title="Link to this definition"></a></dt>
-<dd><p>Return minimal observation names for this reward, or None if unknown.</p>
+<dd><p>Declare inputs of the built-in calculation; custom rewards remain unrestricted.</p>
 </dd></dl>
 
 </dd></dl>
