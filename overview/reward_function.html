@@ -51,9 +51,15 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Start and run</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">QuickStart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides.html">User guides and validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Concepts and development</span></p>
+<ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Overview</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="environment.html">Environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="observations.html">Observations</a></li>
@@ -72,9 +78,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kpis.html">KPIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">citylearn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citylearn_challenge/index.html">The CityLearn Challenge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
@@ -156,14 +161,14 @@
 <section id="how-to-point-to-the-reward-function">
 <h2>How to Point to the Reward Function<a class="headerlink" href="#how-to-point-to-the-reward-function" title="Link to this heading"></a></h2>
 <p>The reward function to use in a simulation is defined in the <code class="code docutils literal notranslate"><span class="pre">reward_function</span></code> key-value of the schema:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">   </span><span class="err">...</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">"reward_function"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"citylearn.reward_function.RewardFunction"</span><span class="p">,</span>
-<span class="w">      </span><span class="err">...</span>
-<span class="w">   </span><span class="p">},</span>
-<span class="w">   </span><span class="err">...</span>
-<span class="p">}</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{
+   ...,
+   "reward_function": {
+      "type": "citylearn.reward_function.RewardFunction",
+      ...
+   },
+   ...
+}
 </pre></div>
 </div>
 </section>
@@ -214,14 +219,14 @@
 </pre></div>
 </div>
 <p>The schema must then be updated to reference the custom reward function:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">   </span><span class="err">...</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">"reward_function"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"custom_module.CustomReward"</span><span class="p">,</span>
-<span class="w">      </span><span class="err">...</span>
-<span class="w">   </span><span class="p">},</span>
-<span class="w">   </span><span class="err">...</span>
-<span class="p">}</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{
+   ...,
+   "reward_function": {
+      "type": "custom_module.CustomReward",
+      ...
+   },
+   ...
+}
 </pre></div>
 </div>
 </section>

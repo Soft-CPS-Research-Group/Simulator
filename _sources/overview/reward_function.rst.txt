@@ -17,7 +17,7 @@ How to Point to the Reward Function
 
 The reward function to use in a simulation is defined in the :code:`reward_function` key-value of the schema:
 
-.. code:: json
+.. code:: text
 
    {
       ...,
@@ -39,7 +39,7 @@ CityLearn also allows for custom reward functions by inheriting the base :py:cla
 
 The schema must then be updated to reference the custom reward function:
 
-.. code:: json
+.. code:: text
 
    {
       ...,
