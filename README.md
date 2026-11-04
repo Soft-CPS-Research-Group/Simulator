@@ -41,6 +41,7 @@ not certify a current controller campaign.
 | [Robustness reference](docs/robustness_reference.md) | [PT](docs/pt/robustness_reference.md) | Dataset-driven observation, forecast, action and asset availability perturbations. |
 | [Data unit contract](docs/data_unit_contract.md) | [PT](docs/pt/data_unit_contract.md) | Formal contract for `kWh/step`, `kW`, prices, emissions and timesteps. |
 | [Simulator features](docs/features.md) | [PT](docs/pt/features.md) | Capability inventory, including less obvious features. |
+| [Validation and performance](docs/validation.md) | — | Choose audits, interpret validation scope and find measured results. |
 | [Developer guide](docs/developer_guide.md) | [PT](docs/pt/developer_guide.md) | Tests, audits, performance checks and internal architecture. |
 | [Publishing guide](docs/publishing.md) | [PT](docs/pt/publishing.md) | PyPI release workflow and local build checks. |
 

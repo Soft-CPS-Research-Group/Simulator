@@ -1,6 +1,6 @@
 # Deferrable appliance service audit
 
-Iteration 2 adds `deferrable-service-audit-v1`. It accounts for executed appliance
+`deferrable-service-audit-v1` accounts for executed appliance
 service independently of the full profiles reserved by `start_cycle`. Existing
 `deferrable_appliance_service_*` KPIs retain their historical definitions; use the
 new `building_deferrable_appliance_audit_*` and

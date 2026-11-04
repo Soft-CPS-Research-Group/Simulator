@@ -1,6 +1,6 @@
 # Continuous campaign and resource evidence
 
-Release v1.9.10 records iteration 7 and adds the offline `long-run-audit-v1` CLI. It keeps runtime physical
+The offline `long-run-audit-v1` CLI keeps runtime physical
 checks active throughout a continuous episode and records the exact schema,
 loaded-input hashes, software versions, NormalPolicy parameters and audit-script
 hash. It does not change datasets, dispatch, market pricing or rewards.

@@ -1,6 +1,6 @@
 # Energy provenance and carbon accounting
 
-The new `evaluate_v2()` family is `building_energy_provenance_*` and
+The `evaluate_v2()` provenance families are `building_energy_provenance_*` and
 `district_energy_provenance_*`. The definition version is **1.1**; the complete
 KPI contract version is **1.9.0**. Both are present in environment metadata,
 DataFrame attributes and the JSON manifest accompanying exported KPIs.

@@ -69,7 +69,7 @@ de vida de membros com falhas combinadas. Reutiliza a fábrica de fixtures curta
 do checkout e requer `test_requirements.txt` além das dependências de execução.
 Não executa agentes, treino ou BAU auxiliar. A fixture versionada
 `scripts/audit/snapshots/refactor_parity.json` fixa o comportamento após as
-correções C1/C2 na base 1.9.11, antes da reorganização interna seguinte.
+correções de robustez na base 1.9.11, antes da reorganização interna seguinte.
 
 Cada caso verifica independentemente energia, dinheiro e proveniência, e compara
 inputs, ações pedidas/executadas, SOC, fluxos, recompensa, serviço das máquinas,

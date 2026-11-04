@@ -1,8 +1,9 @@
 # Temporal coherence and reproducibility
 
-Release v1.9.9 introduces `temporal-evidence-v1` in iteration 6. Existing datasets are not rewritten. The work verifies declared
-model timing and selected deterministic replays; it is not field calibration or
-an annual certification of every controller.
+`temporal-evidence-v1`, available from v1.9.9, records source clocks, loaded
+inputs and initialization conditions. It supports timing checks and deterministic
+replays without rewriting datasets. It does not establish field calibration or
+annual validation of every controller.
 
 ## One source-row clock
 

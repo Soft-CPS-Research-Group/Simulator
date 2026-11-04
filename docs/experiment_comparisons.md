@@ -1,13 +1,10 @@
 # Paired comparisons and reference interpretation
 
-Local iteration 6 after public v1.9.8 adds [temporal and input-load evidence](temporal_reproducibility.md):
-loaded-file hashes, initialization conditions, runtime versions and source-clock
-metadata. Changed inputs prevent a safely paired comparison/native reference.
-The paired-v1 temporal extension distinguishes initialization noise seeds; old
-exports without it do not certify the temporal audit contract.
-
-Iteration 3 introduces `paired-experiment-v1` evidence alongside KPI exports.
-It is released in version 1.9.6.
+`paired-experiment-v1` records the conditions needed to compare KPI exports.
+It is available from v1.9.6; v1.9.9 adds [temporal and input-load evidence](temporal_reproducibility.md),
+including file hashes, initialization seeds, runtime versions and source clocks.
+Changed or undocumented inputs prevent a matched comparison. Older exports
+without temporal evidence do not establish that part of the contract.
 
 ## Identity and pairing
 
@@ -112,5 +109,5 @@ model. In-process agents with direct environment access, including native BAU,
 remain privileged; the API payload contract is not a process-isolation boundary.
 External analysis UIs must consume the pairing report before claiming a matched
 comparison. This repository adds the packaged API and CLI, not an update to a
-separately maintained UI. General re-entry energy-history reconciliation, annual
-controller campaigns and empirical calibration remain later iterations.
+separately maintained UI. General re-entry energy-history reconciliation, annual controller
+campaigns and empirical calibration are outside this comparison contract.

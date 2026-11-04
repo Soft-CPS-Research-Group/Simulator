@@ -1,7 +1,7 @@
 # Independent balance audit
 
-Iteration 4 introduces `independent-flow-audit-v1` as an optional offline audit.
-It is included from v1.9.7 and is absent from v1.9.6.
+`independent-flow-audit-v1` checks energy flows and settlement independently
+of the production calculations. This optional offline audit is available from v1.9.7.
 
 The reference calculation is implemented in `citylearn/internal/balance_audit.py`.
 It does not call the production settlement, provenance or KPI formulas to compute

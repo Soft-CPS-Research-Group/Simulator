@@ -1,9 +1,9 @@
 # Auditing demand response, thermal service and equity
 
-Iteration 5, included from v1.9.8, introduces `kpi-families-audit-v1` and
-`demand-response-audit-v1`. These definitions are absent from v1.9.7. These are
-model-consistency checks and definitions, not calibration against real equipment.
-Datasets, dispatch, market rules and reward functions are unchanged.
+`kpi-families-audit-v1` and `demand-response-audit-v1` check thermal service,
+equity and demand-response accounting. Available from v1.9.8, they check model
+consistency without changing dispatch, settlement or rewards. They do not
+calibrate the model against real equipment.
 
 ## Interfaces and evidence
 

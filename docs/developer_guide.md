@@ -1,6 +1,8 @@
 # Developer Guide
 
-This page collects local development commands, validation checks, performance smoke tests and the current internal architecture map.
+Set up a development environment, run regression checks and profile the runtime.
+For simulation-level checks and published measurements, start with
+[Validation and performance](validation.md).
 
 Portuguese version: [pt/developer_guide.md](pt/developer_guide.md).
 
@@ -66,8 +68,8 @@ flat/entity interfaces, 60/300/900/3600-second steps, phase limits, outages and
 member lifecycle/fault composition. It reuses the checkout's bounded test fixture
 factory and requires `test_requirements.txt` as well as runtime dependencies.
 It runs no agent, training or BAU sidecar. The versioned fixture
-`scripts/audit/snapshots/refactor_parity.json` freezes the behaviour after the C1/C2
-corrections on the 1.9.11 base, before further internal refactoring.
+`scripts/audit/snapshots/refactor_parity.json` freezes the corrected behaviour on the 1.9.11
+base before subsequent internal refactoring.
 
 Each case independently checks energy, cash and provenance, then compares input
 fingerprints, requested/executed actions, SOC, flows, rewards, machine service,
@@ -200,6 +202,21 @@ still expose aggregate BESS series instead of per-storage consumption histories.
 | Add tests for new physics or observations. | Sub-hourly and entity behavior are easy to regress silently. |
 | Prefer additive observations in patch releases. | Avoid breaking trained algorithms and wrappers. |
 | Run audits before tagging. | They catch contract drift outside normal unit tests. |
+
+## Build the documentation
+
+Install `docs/requirements.txt` and Pandoc for the retained notebook tutorials.
+Generate the API reference, then build the site with notebook execution disabled:
+
+```console
+sphinx-apidoc citylearn -o docs/source/api -e -M -f
+sphinx-build -b html -D nb_execution_mode=off -D nbsphinx_execute=never docs/source docs/build/html
+```
+
+The Sphinx [guide directory](source/guides.rst) links to the maintained Markdown
+references. Edit `docs/*.md` for those references and `docs/source/*.rst` for the
+site introductions. Build outputs and generated API files are not maintained
+sources and must not be committed.
 
 ## Repository content
 
