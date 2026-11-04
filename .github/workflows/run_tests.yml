@@ -54,13 +54,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-py${{ matrix.python-version }}-pip-${{ hashFiles('requirements.txt', 'test_requirements.txt', 'setup.py') }}
+          key: ${{ runner.os }}-py${{ matrix.python-version }}-cpu-pip-${{ hashFiles('requirements.txt', 'test_requirements.txt', 'setup.py') }}
           restore-keys: |
-            ${{ runner.os }}-py${{ matrix.python-version }}-pip-
+            ${{ runner.os }}-py${{ matrix.python-version }}-cpu-pip-
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          # Hosted runners have no GPU; avoid downloading unused CUDA runtimes.
+          python -m pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements.txt
           pip install -r test_requirements.txt
           pip install -e .
@@ -111,7 +113,9 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install audit dependencies
-        run: pip install -r requirements.txt -r test_requirements.txt pyarrow -e .
+        run: |
+          python -m pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt -r test_requirements.txt pyarrow -e .
       - name: Audit physical time steps and topology boundaries
         run: python scripts/audit/audit_physics.py --output outputs/audit/physics.json
       - name: Audit Portuguese winter and summer windows
