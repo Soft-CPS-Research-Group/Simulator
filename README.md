@@ -16,8 +16,9 @@ from citylearn.citylearn import CityLearnEnv
 
 Default documentation is in English. Portuguese documentation is available under [docs/pt](docs/pt/).
 
-Current source release: `2.0.0`. This phase-closing milestone retains the audited
-1.9.13 runtime, datasets and behavior, with no functional changes or migration.
+Current source release: `2.0.1`. This patch corrects episode-selection overrides,
+subhourly storage losses and physical autosizing while preserving datasets and
+public interfaces. Corrected subhourly results and autosized equipment may differ.
 See the [release history](docs/releases.md) for validation, measured gains and scope limits.
 
 The Portuguese two-year scenarios, sources and reconstruction instructions are in

@@ -9,6 +9,39 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.0.1 — 2026-11-04 — episode selection and subhourly corrections
+
+Release owner: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+- Honor explicit `random_episode_split=True` and `False` constructor overrides;
+  `None` continues to inherit the schema setting.
+- Compound the configured hourly standby-loss fraction over the physical step,
+  independently of dataset cadence. A 1% hourly loss leaves 99% after one hour
+  at both hourly and 15-minute resolution, within float precision.
+- Convert dataset energy to average step power when autosizing heat pumps,
+  electric heaters and batteries; calculate daily battery peaks over physical
+  24-hour periods. Thermal capacity remains energy for one control step.
+- Retain public energy-command interfaces, explicitly configured equipment, BAU
+  control logic, KPI definitions, dataset files and CSV/Parquet exports.
+  Subhourly SOC, derived KPIs and automatically selected equipment can change;
+  compare matching versions and resolved equipment. No file migration is needed.
+- Keep release documentation concise and use CPU-only PyTorch wheels in hosted
+  CI to avoid runner disk exhaustion; runtime dependency requirements are unchanged.
+
+The corrected runtime passed 1,300 CI tests, the physical-step/topology audit,
+Portuguese winter/summer windows and supported-dataset checks. The common
+standby/autosizing/BAU/reference subset passed 223 local tests. The reviewed
+fixed-command reference reproduces the old baseline exactly when only the old
+loss formula is restored; hourly reference results are unchanged.
+Release CI and installed-distribution checks accompany the GitHub release.
+The two-year campaign and performance measurements below describe the earlier
+runtime: they have not been repeated for this patch, and no new speedup, full
+annual equivalence or empirical equipment calibration is claimed.
+
+Package/import names remain `softcpsrecsimulator` / `citylearn`. The release tag
+and default online dataset ref are `softcpsrecsimulator-v2.0.1`; dataset files
+are unchanged from 2.0.0. Explicit dataset-ref overrides remain supported.
+
 ## v2.0.0 — 2026-11-02 — audited-runtime consolidation milestone
 
 - Close the audit, robustness, internal-organization and performance phase by

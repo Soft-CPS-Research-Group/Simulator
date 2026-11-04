@@ -9,6 +9,34 @@ compatibilidade, alterações de contratos e âmbito da validação.
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.0.1 — 2026-11-04 — seleção de episódios e correções sub-horárias
+
+Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+- Respeita `True`/`False` explícitos em `random_episode_split`; `None` herda o schema.
+- Compõe as perdas em repouso a partir da fração horária e da duração física
+  do passo, independentemente da cadência dos dados.
+- Dimensiona bombas de calor, aquecedores e baterias a partir da potência média
+  e calcula picos diários em períodos de 24 horas. Os depósitos térmicos mantêm
+  capacidade em energia para um passo de controlo.
+- Mantém interfaces de energia, equipamento explícito, lógica BAU, definições
+  dos KPIs, datasets e exports. SOC, KPIs derivados e equipamentos dimensionados
+  automaticamente podem diferir; comparar versões e configurações equivalentes.
+- Simplifica a documentação e usa wheels PyTorch apenas para CPU no CI alojado,
+  evitando falta de espaço no runner sem mudar as dependências de execução.
+
+O runtime corrigido passou 1.300 testes de CI, a auditoria física/topológica,
+janelas portuguesas de inverno/verão e verificações dos datasets suportados.
+O subconjunto local de perdas, dimensionamento, BAU e referências passou 223 testes.
+As referências foram revistas contra a fórmula antiga; o caso horário mantém os
+resultados. O CI da release e a validação do pacote instalado acompanham a release.
+Não foi repetida a campanha de dois anos nem se reivindicam novos ganhos de
+desempenho, equivalência anual completa ou calibração empírica nesta atualização.
+
+Pacote/import mantidos: `softcpsrecsimulator` / `citylearn`. O tag e a referência
+de dados por omissão são `softcpsrecsimulator-v2.0.1`; os dados mantêm-se iguais
+aos da 2.0.0, sem migração. Mantêm-se as opções explícitas de referência de dados.
+
 ## v2.0.0 — 2026-11-02 — marco de consolidação do simulador auditado
 
 - Fecha a fase de auditoria, robustez, organização e desempenho, publicando o
