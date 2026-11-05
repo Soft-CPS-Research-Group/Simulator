@@ -24,6 +24,8 @@ Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca))
 - Corrige o descarregamento de subpastas e só disponibiliza a cache depois de
   completar todos os ficheiros. Downloads interrompidos podem ser repetidos.
   Acrescenta regressões do carregamento e obtém o commit de origem fixa no CI.
+- Permite iniciar a interface de linha de comandos sem Stable Baselines3;
+  carregar um agente SB3 indica explicitamente a dependência em falta.
 - Mantém a dinâmica da simulação, interfaces e convenção de preços OMIE.
   Resultados anteriores precisam da revisão original dos dados para comparação.
 

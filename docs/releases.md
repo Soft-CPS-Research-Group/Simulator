@@ -24,6 +24,8 @@ Release owner: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)
 - Download nested dataset directories and expose the cache only after a complete,
   successful download. Failed downloads can be retried without accepting a partial
   dataset. Add online-loader regressions and fetch the immutable source commit in CI.
+- Allow the command-line interface to start without optional Stable Baselines3;
+  loading an SB3 agent explicitly reports the missing dependency.
 - Keep simulation dynamics, public interfaces and the OMIE pricing convention
   unchanged. Old experiment results must retain their original dataset reference;
   upgrading the default dataset changes the benchmark inputs.
