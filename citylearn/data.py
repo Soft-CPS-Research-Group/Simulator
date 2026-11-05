@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from platformdirs import user_cache_dir
 import shutil
+import tempfile
 from typing import Any, Dict, Iterable, Mapping, List, Optional, Union
 import numpy as np
 import pandas as pd
@@ -260,21 +261,33 @@ class DataSet:
                     f'Next time DataSet.get_dataset(\'{dataset_name}\') is called, it will read '
                     'from cache unless DataSet.clear_cache is run first.'
                 )
-                contents = self.get_github_contents(path)
+                os.makedirs(datasets_directory, exist_ok=True)
+                # Publish the cache only after every nested file has arrived.
+                # A root schema alone must not make an interrupted download valid.
+                with tempfile.TemporaryDirectory(prefix=f'.{dataset_name}-', dir=datasets_directory) as staging:
+                    with self.get_requests_session() as session:
+                        pending = [path]
+                        while pending:
+                            for c in self.get_github_contents(pending.pop()):
+                                relative_path = Path(c['path']).relative_to(path)
+                                if '..' in relative_path.parts or relative_path.is_absolute():
+                                    raise ValueError(f"Invalid dataset path: {c['path']}")
+                                if c['type'] == 'dir':
+                                    pending.append(c['path'])
+                                elif c['type'] == 'file':
+                                    response = session.get(c['download_url'])
+                                    response.raise_for_status()
+                                    destination = Path(staging) / relative_path
+                                    destination.parent.mkdir(parents=True, exist_ok=True)
+                                    destination.write_bytes(response.content)
+                                else:
+                                    raise ValueError(f"Unsupported dataset entry: {c['path']}")
 
-                if os.path.isdir(root_directory):
-                    shutil.rmtree(root_directory)
-
-                for c in contents:
-                    if c['type'] == 'file':
-                        relative_directory_content = c['path'].split(f'{dataset_name}/')[-1].split('/')[:-1]
-                        content_directory = os.path.join(root_directory, *relative_directory_content)
-                        filepath = os.path.join(content_directory, c['name'])
-                        os.makedirs(content_directory, exist_ok=True)
-                        response = self.get_requests_session().get(c['download_url'])
-
-                        with open(filepath, 'wb') as f:
-                            f.write(response.content)
+                    if not (Path(staging) / 'schema.json').is_file():
+                        raise FileNotFoundError(f'Dataset {dataset_name} has no schema.json')
+                    if os.path.isdir(root_directory):
+                        shutil.rmtree(root_directory)
+                    os.replace(staging, root_directory)
 
         if directory is not None:
             os.makedirs(directory, exist_ok=True)
