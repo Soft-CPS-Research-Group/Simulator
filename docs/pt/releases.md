@@ -9,6 +9,35 @@ compatibilidade, alterações de contratos e âmbito da validação.
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.0.2 — 2026-11-05 — datasets Portugal reproduzíveis e downloads completos
+
+Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+- Publica `portugal-realism-4` e `portugal-ev-mobility-1` nas quatro comunidades,
+  em 2023/2024: diversidade nos carregamentos, atividade residencial, ocupação e
+  equipamentos comerciais, orçamentos anuais, falhas locais e pedidos de DR.
+  Preserva os casos de stress identificados, equipamentos, nove cenários principais
+  e seis referências comparáveis.
+- Inclui gerador determinístico, referências empíricas compactas, hipóteses e
+  evidência de sementes, sensibilidade e reprodução. São benchmarks sintéticos;
+  não constituem medições representativas da população portuguesa.
+- Corrige o descarregamento de subpastas e só disponibiliza a cache depois de
+  completar todos os ficheiros. Downloads interrompidos podem ser repetidos.
+  Acrescenta regressões do carregamento e obtém o commit de origem fixa no CI.
+- Mantém a dinâmica da simulação, interfaces e convenção de preços OMIE.
+  Resultados anteriores precisam da revisão original dos dados para comparação.
+
+A validação dos dados anterior à release passou 161 testes específicos,
+72 janelas de fronteiras, 27 sondas de falhas e 18 janelas contabilísticas;
+duas regenerações produziram Parquet idênticos. A release no GitHub acompanha
+os testes gerais, auditorias e verificação da instalação. Não inclui campanha
+anual de controladores nem treino MARL. As limitações empíricas estão na
+[validação dos datasets](../portugal_rec_native/Heldout_2024.md).
+
+Distribuição/import mantêm-se `softcpsrecsimulator` / `citylearn`. A tag e referência
+online por omissão são `softcpsrecsimulator-v2.0.2`. Instalar o extra `parquet`
+para Portugal. Não exige migração de schemas; mantém referências explícitas.
+
 ## v2.0.1 — 2026-11-04 — seleção de episódios e correções sub-horárias
 
 Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).

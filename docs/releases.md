@@ -9,6 +9,37 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.0.2 — 2026-11-05 — reproducible Portugal datasets and nested downloads
+
+Release owner: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+- Deliver `portugal-realism-4` and `portugal-ev-mobility-1` for all four Portugal
+  communities across 2023/2024: diverse charging sessions, household activity,
+  commercial occupancy and equipment, annual consumption budgets, and irregular
+  local faults and demand-response requests. Preserve labelled stress cases,
+  equipment inventories, nine main scenarios and six matched references.
+- Include the deterministic generator, compact empirical references, assumptions,
+  seed/sensitivity checks and reproducibility evidence. These are synthetic
+  benchmarks, not measurements representative of the Portuguese population.
+- Download nested dataset directories and expose the cache only after a complete,
+  successful download. Failed downloads can be retried without accepting a partial
+  dataset. Add online-loader regressions and fetch the immutable source commit in CI.
+- Keep simulation dynamics, public interfaces and the OMIE pricing convention
+  unchanged. Old experiment results must retain their original dataset reference;
+  upgrading the default dataset changes the benchmark inputs.
+
+Pre-release data validation passed 161 focused tests, 72 boundary windows,
+27 fault probes and 18 accounting windows; two regenerations produced identical
+Parquet files. Release-wide tests, audits and installed-package verification are
+reported with the GitHub release. No annual controller campaign or MARL training
+is included. Reference-data reuse and empirical limitations are documented in
+[the dataset validation](portugal_rec_native/Heldout_2024.md).
+
+Package/import names remain `softcpsrecsimulator` / `citylearn`. The release tag
+and default online dataset ref are `softcpsrecsimulator-v2.0.2`. Install the
+`parquet` extra for the Portugal datasets. Explicit dataset-ref overrides remain
+supported; no schema migration is required.
+
 ## v2.0.1 — 2026-11-04 — episode selection and subhourly corrections
 
 Release owner: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
