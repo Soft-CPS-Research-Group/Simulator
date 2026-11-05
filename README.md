@@ -17,8 +17,8 @@ from citylearn.citylearn import CityLearnEnv
 Default documentation is in English. Portuguese documentation is available under [docs/pt](docs/pt/).
 
 Current source release: `2.0.2`. This patch delivers the revised Portugal
-two-year datasets and complete online downloads of nested dataset files.
-Simulation APIs are unchanged; dataset-dependent results require matching revisions.
+two-year datasets, complete online downloads of nested files, and command-line
+compatibility fixes. Dataset-dependent results require matching revisions.
 See the [release history](docs/releases.md) for validation, measured gains and scope limits.
 
 The Portuguese two-year scenarios, sources and reconstruction instructions are in

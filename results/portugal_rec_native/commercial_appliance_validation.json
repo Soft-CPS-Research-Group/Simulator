@@ -36647,7 +36647,7 @@
       }
     ]
   },
-  "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+  "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
   "generator_sha256": {
     "scripts/portugal_activity.py": "dd6fd46fac932f000521400d08db3dc9c9b736936c7f481bae3f1478e46c1b05",
     "scripts/portugal_commercial_activity.py": "0713b02f7c29aa6656ee455ea2f33863aacf7dad8340106942ad5a77dee0aed9",
@@ -71822,7 +71822,7 @@
     ],
     "inference_limit": "Published Portuguese summaries inform scenario assumptions, not independent population validation. No measured commercial occupancy or professional workload series were fitted. Clinics, workshops, sports centres and care homes still lack comparable Portuguese annual anchors. Grocery reference sites are much smaller; generic health/beauty is not a clinic and a print shop is not an industrial factory."
   },
-  "software_validation": {
+  "development_software_validation": {
     "date": "2026-11-05",
     "scope": "Local validation of this generated revision; no remote CI, annual controller benchmark, publication or commits.",
     "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
@@ -71863,5 +71863,50 @@
     "commercial_sensitivity_rejected_saturated_cases": 1,
     "commercial_sensitivity_infeasible_annual_budgets": 0,
     "interpretation": "Defaults and regression checks pass. One extreme full-transfer refrigerated-retail sensitivity setting is rejected for service-ceiling-induced repeated shapes; not silently accepted. Portuguese summaries inform calibration/engineering priors, not independent population validation."
+  },
+  "software_validation": {
+    "date": "2026-11-05",
+    "simulator_version": "2.0.2",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
+    "scope": "Local release validation. Full final CI and published-PyPI verification are linked from the GitHub release; no annual controller campaign or MARL training.",
+    "pytest_distinct_cases_verified": 1368,
+    "pytest_runs": [
+      {
+        "scope": "Full suite before the CLI optional-dependency correction",
+        "passed": 1364,
+        "failed": 1,
+        "seconds": 1000.85,
+        "resolved_failure": "tests/unit/test_business_as_usual_baseline.py::test_cli_default_agent_is_business_as_usual"
+      },
+      {
+        "scope": "CLI, BAU, online/offline loader and release-tag regressions after all fixes",
+        "passed": 44,
+        "failed": 0,
+        "seconds": 4.59
+      }
+    ],
+    "unresolved_test_failures": 0,
+    "transition_windows": 72,
+    "fault_probes": 27,
+    "accounting_windows": 18,
+    "matched_pairs": 6,
+    "preparation_schemas": 9,
+    "boundary_execution": "Existing runtime_window function in four independent worker processes; unchanged 72 cases and 48-step half-windows. Equivalent serial command: python scripts/audit/audit_portugal_heldout_2024.py --runtime",
+    "maximum_accounting_energy_residual_kwh": 2.3682741812081076e-07,
+    "maximum_kpi_error": 9.094947017729282e-13,
+    "unchanged_data_and_generator_commit": "f2823c34b782f1f08a6d9079748320bda55605ea",
+    "generation_reproducibility": "The 1969-Parquet byte-identical regeneration evidence remains valid: datasets and generator are unchanged from the development commit.",
+    "installed_wheel": {
+      "version": "2.0.2",
+      "outside_checkout": true,
+      "main_scenarios": 9,
+      "transitions_per_scenario": 7,
+      "cli_checks": [
+        "four-step BAU train",
+        "four-step BAU evaluate"
+      ],
+      "kpi_bau_manifest_exports": "pass"
+    },
+    "release_url": "https://github.com/Soft-CPS-Research-Group/Simulator/releases/tag/softcpsrecsimulator-v2.0.2"
   }
 }

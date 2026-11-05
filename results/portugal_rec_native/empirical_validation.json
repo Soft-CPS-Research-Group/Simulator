@@ -12636,7 +12636,7 @@
     "boundary": "Meter demand versus synthetic nonshiftable demand plus controlled appliance cycles started at their earliest allowed time. EV charging excluded because measured fleet/equipment inventory is unknown; no controller behaviour is claimed.",
     "uncertainty": "Households, not quarter-hour rows, are the independent bootstrap units. Small nonrandom cohort; confidence intervals do not establish nationwide representativeness. Calendar periods, equipment, electric heating and occupancy differ."
   },
-  "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+  "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
   "status": "completed_comparison_with_reported_discrepancies",
   "source_manifest_sha256": "496a3a86d0c4ea05d75d95e6f805bde6175b91896dbd06898803c40486178645",
   "audit_sha256": "229850c1f49023dd83bdc46dc60f863fd306c41f7e06195778a1c516505f58b8",

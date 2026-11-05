@@ -5,7 +5,7 @@
     "start": 2880,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 15,
     "chargers": 6,
     "appliances": 10,
@@ -72,9 +72,9 @@
       "storage_max_residual_kwh": 1.4210854715202004e-14,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.11875353089271812,
+    "ledger_seconds": 0.12290682396269403,
     "ledger_aggregate_bytes": 108588,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 625.42578125,
     "max_kpi_error": 2.842170943040401e-14,
     "totals": {
       "local": 77.79464714694768,
@@ -84,7 +84,7 @@
     },
     "kpi_rows": 4923,
     "topology_events": 0,
-    "seconds": 5.945
+    "seconds": 5.731
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_15_v2/evaluation/core_15.json",
@@ -92,7 +92,7 @@
     "start": 52320,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 15,
     "chargers": 6,
     "appliances": 10,
@@ -159,9 +159,9 @@
       "storage_max_residual_kwh": 6.632205895584775e-11,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.07552720505918842,
+    "ledger_seconds": 0.08639931794459699,
     "ledger_aggregate_bytes": 115908,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 665.84375,
     "max_kpi_error": 5.684341886080802e-14,
     "totals": {
       "local": 48.88497187104076,
@@ -171,7 +171,7 @@
     },
     "kpi_rows": 4923,
     "topology_events": 0,
-    "seconds": 5.764
+    "seconds": 6.17
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
@@ -179,7 +179,7 @@
     "start": 2880,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 26,
     "chargers": 14,
     "appliances": 17,
@@ -246,9 +246,9 @@
       "storage_max_residual_kwh": 1.1932854704355123e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.14553410592634464,
+    "ledger_seconds": 0.16503102520073298,
     "ledger_aggregate_bytes": 289029,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 679.61328125,
     "max_kpi_error": 5.684341886080802e-14,
     "totals": {
       "local": 312.3757380871102,
@@ -258,7 +258,7 @@
     },
     "kpi_rows": 8510,
     "topology_events": 0,
-    "seconds": 12.941
+    "seconds": 14.281
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
@@ -266,7 +266,7 @@
     "start": 52320,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 28,
     "chargers": 13,
     "appliances": 18,
@@ -333,9 +333,9 @@
       "storage_max_residual_kwh": 1.70139458077756e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.1806858059935621,
+    "ledger_seconds": 0.18318328294117237,
     "ledger_aggregate_bytes": 365195,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 700.140625,
     "max_kpi_error": 1.1368683772161603e-13,
     "totals": {
       "local": 210.7947664805688,
@@ -345,7 +345,7 @@
     },
     "kpi_rows": 9466,
     "topology_events": 17,
-    "seconds": 16.062
+    "seconds": 16.999
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
@@ -353,7 +353,7 @@
     "start": 2880,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 30,
     "chargers": 15,
     "appliances": 19,
@@ -420,9 +420,9 @@
       "storage_max_residual_kwh": 1.085211920326401e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.19973471293633338,
+    "ledger_seconds": 0.2054633220031974,
     "ledger_aggregate_bytes": 436145,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 716.75390625,
     "max_kpi_error": 0.0,
     "totals": {
       "local": 356.9817644096911,
@@ -432,7 +432,7 @@
     },
     "kpi_rows": 9513,
     "topology_events": 0,
-    "seconds": 12.056
+    "seconds": 12.773
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
@@ -440,7 +440,7 @@
     "start": 52320,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 30,
     "chargers": 15,
     "appliances": 19,
@@ -507,9 +507,9 @@
       "storage_max_residual_kwh": 2.560653911132249e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.19092080801783595,
+    "ledger_seconds": 0.20222236502013402,
     "ledger_aggregate_bytes": 453977,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 744.7109375,
     "max_kpi_error": 1.1368683772161603e-13,
     "totals": {
       "local": 203.43982170755044,
@@ -519,7 +519,7 @@
     },
     "kpi_rows": 9513,
     "topology_events": 0,
-    "seconds": 11.928
+    "seconds": 12.745
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
@@ -527,7 +527,7 @@
     "start": 2880,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 30,
     "chargers": 15,
     "appliances": 19,
@@ -594,9 +594,9 @@
       "storage_max_residual_kwh": 1.085211920326401e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.19813977197918575,
+    "ledger_seconds": 0.2070043111234554,
     "ledger_aggregate_bytes": 436145,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 747.57421875,
     "max_kpi_error": 0.0,
     "totals": {
       "local": 356.9817644096911,
@@ -606,7 +606,7 @@
     },
     "kpi_rows": 9761,
     "topology_events": 0,
-    "seconds": 14.194
+    "seconds": 15.291
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
@@ -614,7 +614,7 @@
     "start": 52320,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 30,
     "chargers": 15,
     "appliances": 19,
@@ -681,9 +681,9 @@
       "storage_max_residual_kwh": 2.560653911132249e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.19294137909309939,
+    "ledger_seconds": 0.2059786240934045,
     "ledger_aggregate_bytes": 453977,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 760.96484375,
     "max_kpi_error": 1.1368683772161603e-13,
     "totals": {
       "local": 203.43982170755044,
@@ -693,7 +693,7 @@
     },
     "kpi_rows": 9761,
     "topology_events": 0,
-    "seconds": 14.056
+    "seconds": 15.443
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
@@ -701,7 +701,7 @@
     "start": 2880,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 30,
     "chargers": 15,
     "appliances": 19,
@@ -768,9 +768,9 @@
       "storage_max_residual_kwh": 1.085211920326401e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.2024841250749887,
+    "ledger_seconds": 0.2192309559250134,
     "ledger_aggregate_bytes": 436145,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 771.89453125,
     "max_kpi_error": 4.440892098500626e-16,
     "totals": {
       "local": 355.91641953215003,
@@ -780,7 +780,7 @@
     },
     "kpi_rows": 9513,
     "topology_events": 0,
-    "seconds": 12.522
+    "seconds": 13.667
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
@@ -788,7 +788,7 @@
     "start": 52320,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 30,
     "chargers": 15,
     "appliances": 19,
@@ -855,9 +855,9 @@
       "storage_max_residual_kwh": 2.560653911132249e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.191475853920565,
+    "ledger_seconds": 0.21929121796711115,
     "ledger_aggregate_bytes": 453977,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 776.04296875,
     "max_kpi_error": 1.1368683772161603e-13,
     "totals": {
       "local": 203.36690305406228,
@@ -867,7 +867,7 @@
     },
     "kpi_rows": 9513,
     "topology_events": 0,
-    "seconds": 12.04
+    "seconds": 13.935
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
@@ -875,7 +875,7 @@
     "start": 2880,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 26,
     "chargers": 14,
     "appliances": 17,
@@ -942,9 +942,9 @@
       "storage_max_residual_kwh": 1.1932854704355123e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.15427123104745988,
+    "ledger_seconds": 0.17578325898648473,
     "ledger_aggregate_bytes": 289029,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 802.640625,
     "max_kpi_error": 5.684341886080802e-14,
     "totals": {
       "local": 314.4589995769784,
@@ -954,7 +954,7 @@
     },
     "kpi_rows": 8294,
     "topology_events": 0,
-    "seconds": 12.96
+    "seconds": 15.085
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
@@ -962,7 +962,7 @@
     "start": 52320,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 28,
     "chargers": 13,
     "appliances": 18,
@@ -1029,9 +1029,9 @@
       "storage_max_residual_kwh": 1.70139458077756e-10,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.17582984190812567,
+    "ledger_seconds": 0.19525055786652956,
     "ledger_aggregate_bytes": 365195,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 813.40234375,
     "max_kpi_error": 1.1368683772161603e-13,
     "totals": {
       "local": 210.7947664805688,
@@ -1041,7 +1041,7 @@
     },
     "kpi_rows": 9210,
     "topology_events": 17,
-    "seconds": 15.006
+    "seconds": 17.73
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
@@ -1049,7 +1049,7 @@
     "start": 2880,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 4,
     "chargers": 2,
     "appliances": 2,
@@ -1116,9 +1116,9 @@
       "storage_max_residual_kwh": 7.105427357601002e-15,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.026216298923827708,
+    "ledger_seconds": 0.031236116941727232,
     "ledger_aggregate_bytes": 20867,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 817.4296875,
     "max_kpi_error": 5.329070518200751e-15,
     "totals": {
       "local": 9.911276364699006,
@@ -1128,7 +1128,7 @@
     },
     "kpi_rows": 1557,
     "topology_events": 0,
-    "seconds": 1.719
+    "seconds": 2.062
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
@@ -1136,7 +1136,7 @@
     "start": 52320,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 4,
     "chargers": 2,
     "appliances": 2,
@@ -1203,9 +1203,9 @@
       "storage_max_residual_kwh": 7.105427357601002e-15,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.02502903492131736,
+    "ledger_seconds": 0.03180398493714165,
     "ledger_aggregate_bytes": 20251,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 818.91796875,
     "max_kpi_error": 8.881784197001252e-16,
     "totals": {
       "local": 0.02996894344687462,
@@ -1215,7 +1215,7 @@
     },
     "kpi_rows": 1557,
     "topology_events": 0,
-    "seconds": 1.695
+    "seconds": 2.124
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
@@ -1223,7 +1223,7 @@
     "start": 2880,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 80,
     "chargers": 63,
     "appliances": 58,
@@ -1290,9 +1290,9 @@
       "storage_max_residual_kwh": 4.698151201409928e-09,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 0.8629725080099888,
+    "ledger_seconds": 0.9589746379497228,
     "ledger_aggregate_bytes": 2668343,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 851.30078125,
     "max_kpi_error": 9.094947017729282e-13,
     "totals": {
       "local": 708.8243218837306,
@@ -1302,7 +1302,7 @@
     },
     "kpi_rows": 26364,
     "topology_events": 1,
-    "seconds": 49.285
+    "seconds": 58.194
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json",
@@ -1310,7 +1310,7 @@
     "start": 52320,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 89,
     "chargers": 63,
     "appliances": 57,
@@ -1377,9 +1377,9 @@
       "storage_max_residual_kwh": 1.2575682717397285e-09,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 1.147152401121275,
+    "ledger_seconds": 1.4066294970252784,
     "ledger_aggregate_bytes": 3486034,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 869.47265625,
     "max_kpi_error": 4.547473508864641e-13,
     "totals": {
       "local": 469.2352712260763,
@@ -1389,7 +1389,7 @@
     },
     "kpi_rows": 30711,
     "topology_events": 51,
-    "seconds": 56.559
+    "seconds": 71.365
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json",
@@ -1397,7 +1397,7 @@
     "start": 2880,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 100,
     "chargers": 65,
     "appliances": 64,
@@ -1464,9 +1464,9 @@
       "storage_max_residual_kwh": 1.542634464613002e-08,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 1.4000565240494325,
+    "ledger_seconds": 1.6958365040482022,
     "ledger_aggregate_bytes": 4043179,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 925.17578125,
     "max_kpi_error": 2.2737367544323206e-13,
     "totals": {
       "local": 823.3923500124365,
@@ -1476,7 +1476,7 @@
     },
     "kpi_rows": 30933,
     "topology_events": 0,
-    "seconds": 43.859
+    "seconds": 56.598
   },
   {
     "schema": "/home/tiago/dev/Simulator/data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json",
@@ -1484,7 +1484,7 @@
     "start": 52320,
     "transitions": 191,
     "status": "pass",
-    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
     "members": 100,
     "chargers": 65,
     "appliances": 64,
@@ -1551,9 +1551,9 @@
       "storage_max_residual_kwh": 1.1518181963765528e-09,
       "bus_max_residual_kwh": 0.0
     },
-    "ledger_seconds": 1.5023914951525512,
+    "ledger_seconds": 1.7563917340085027,
     "ledger_aggregate_bytes": 4179819,
-    "process_peak_rss_mib": 1882.71484375,
+    "process_peak_rss_mib": 963.4609375,
     "max_kpi_error": 4.547473508864641e-13,
     "totals": {
       "local": 534.3561467420514,
@@ -1563,6 +1563,6 @@
     },
     "kpi_rows": 30933,
     "topology_events": 0,
-    "seconds": 43.801
+    "seconds": 55.717
   }
 ]

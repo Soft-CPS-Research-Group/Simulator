@@ -30,7 +30,7 @@ Release owner: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)
   exports to executed intervals, excluding the terminal observation. Remove five
   obsolete partial-load default columns that no longer exist on Building; explicit
   invalid variable names now fail instead of repeating the preceding column.
-- Keep simulation dynamics, public interfaces and the OMIE pricing convention
+- Keep simulation dynamics, dataset schemas and the OMIE pricing convention
   unchanged. Old experiment results must retain their original dataset reference;
   upgrading the default dataset changes the benchmark inputs.
 

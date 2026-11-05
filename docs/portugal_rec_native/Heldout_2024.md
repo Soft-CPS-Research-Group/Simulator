@@ -65,7 +65,7 @@ benchmark anual de controladores. As figuras e avaliações anteriores mantêm o
 seu âmbito histórico; a figura desta revisão é `figures/realism_validation.png`.
 
 Duas gerações completas da revisão 4 reproduziram **1 969 Parquet byte a byte**.
-Validação local concluída: **161 testes distintos**, **72 janelas de execução
+Validação local de desenvolvimento: **161 testes distintos**, **72 janelas de execução
 nas transições/fronteiras**, **27 sondas de falhas** e **18 janelas de balanço
 energético**, todos aprovados. Os seis pares de comparação, os nove schemas
 de preparação e os 2 090 hashes dos ficheiros das famílias foram verificados.
@@ -74,13 +74,22 @@ a maior diferença de KPI face ao cálculo independente foi **9,10 × 10⁻¹³*
 As 80 realizações de componentes, 14 regenerações físicas/aparelhos/EV,
 72 sensibilidades dessa cadeia e 80 regenerações de eventos também passaram.
 
-Comandos, versões e hashes ficam em `realism_validation.json` e
-`commercial_appliance_validation.json`, campo `software_validation`.
-Todas as evidências de execução correspondem ao fingerprint
-`e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445`.
-São verificações locais e amostradas; não houve CI remoto, benchmark anual,
-commits ou publicação. O caso comercial extremo rejeitado na sensibilidade
-é descrito separadamente abaixo, sem o contar como uma geração realista aprovada.
+A evidência original de desenvolvimento fica no campo
+`development_software_validation` de `realism_validation.json` e
+`commercial_appliance_validation.json`. O campo `software_validation` descreve
+a preparação da release **2.0.2**, com **1 368 testes distintos** verificados
+entre a execução geral e a reexecução dirigida das correções da linha de comandos.
+As 72 janelas, 27 sondas e 18 verificações contabilísticas foram executadas de
+novo com o código final; os relatórios atuais correspondem ao fingerprint
+`d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6`.
+Os dados e o gerador não mudaram desde o commit
+`f2823c34b782f1f08a6d9079748320bda55605ea`, conservando a evidência de reprodução.
+A instalação local do wheel num ambiente separado passou os nove cenários
+principais, as exportações de KPI/BAU/manifesto e os dois comandos curtos da CLI.
+O CI final e a verificação da instalação publicada acompanham a
+[release 2.0.2](https://github.com/Soft-CPS-Research-Group/Simulator/releases/tag/softcpsrecsimulator-v2.0.2).
+Não foi executado benchmark anual nem treino MARL. O caso comercial extremo
+rejeitado na sensibilidade é descrito abaixo, sem o contar como geração realista aprovada.
 
 ### Consumos e ocupação: resultados da revisão 4
 

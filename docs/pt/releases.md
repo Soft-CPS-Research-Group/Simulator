@@ -30,7 +30,7 @@ Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca))
   intervalos executados, excluindo a observação terminal. Remove cinco colunas
   obsoletas de carga parcial; nomes inválidos explícitos passam a falhar, em vez
   de repetir silenciosamente a coluna anterior.
-- Mantém a dinâmica da simulação, interfaces e convenção de preços OMIE.
+- Mantém a dinâmica da simulação, schemas dos datasets e convenção de preços OMIE.
   Resultados anteriores precisam da revisão original dos dados para comparação.
 
 A validação dos dados anterior à release passou 161 testes específicos,

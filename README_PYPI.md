@@ -15,8 +15,8 @@ It is a fork-based project used for research and experimentation on:
 - dynamic member and asset topology with repeatable multi-episode reset semantics.
 
 Current source release: `2.0.2`. This patch delivers the revised Portugal
-two-year datasets and complete online downloads of nested dataset files.
-Simulation APIs are unchanged; dataset-dependent results require matching revisions.
+two-year datasets, complete online downloads of nested files, and command-line
+compatibility fixes. Dataset-dependent results require matching revisions.
 See the [release history](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/releases.md) for validation, measured gains and scope limits.
 
 ## Project Positioning
