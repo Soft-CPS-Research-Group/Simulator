@@ -39,7 +39,7 @@
       "family": "premium_100",
       "variant": "premium_100_allin_no_disturbances",
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/references/premium_100_allin_no_disturbances.json",
-      "sha256": "0a60b2689a00d09afb2e77498a7ced2871c3dcabad602e2671f1f5464fa9c036",
+      "sha256": "efce6a6790dcd13927bd5ea3c486a09fe18aa33bee47e1ec4d65d07bc6462305",
       "factors": {
         "T": true,
         "E": false,
@@ -52,7 +52,7 @@
       "family": "premium_100",
       "variant": "premium_100_allin_no_dr",
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/references/premium_100_allin_no_dr.json",
-      "sha256": "f67004d7f2a7d5d14c8e73c673b3cea9dd47b78cf302b3ab294f9674c6a0c754",
+      "sha256": "461517c70af27f6b2c4a3d37ee06b8bc6782cfd8847af64fc3f915c1da60f550",
       "factors": {
         "T": true,
         "E": false,
@@ -65,7 +65,7 @@
       "family": "premium_100",
       "variant": "premium_100_allin_frozen_2024",
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/references/premium_100_allin_frozen_2024.json",
-      "sha256": "d432123de5d1b16fa070b346de5c811c4e8826efaf759b784af7cb18bdea8b1e",
+      "sha256": "119441044c7ac328109ce0e86fc1d827c112ebff8bdda837d4e1e944e0720ddd",
       "factors": {
         "T": true,
         "E": false,
@@ -80,7 +80,7 @@
     {
       "variant": "premium_100_normal",
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/preparation_2023/premium_100_normal.json",
-      "sha256": "5c4285ab0094f3a3fe3ef84f366dc31acd3df0617c5505980428e042e258031a",
+      "sha256": "12fd7a606e75df18664cd4553d49992a773e24e66c2caec603051f993f85eed1",
       "interval": [
         0,
         35039
@@ -90,12 +90,17 @@
     {
       "variant": "premium_100_allin",
       "schema": "data/datasets/rec_pt_2023_premium_100_v2/evaluation/preparation_2023/premium_100_allin.json",
-      "sha256": "c958acc94060ec11bbe57b55e2f3417cb2ba24c261fc50cd79dacddc73590abc",
+      "sha256": "d2763dbcb12a1259817ea745de71a10d1a64aa9803f1e479bd51fe49811febf9",
       "interval": [
         0,
         35039
       ],
       "role": "Preparation entry point, not an additional experimental scenario"
     }
-  ]
+  ],
+  "mobility_revision": "portugal-ev-mobility-1",
+  "mobility_evidence": "ev_mobility_revision.json",
+  "mobility_catalogue_scope": "charging_profile, charging_sessions, mobility_episodes and ev_annual_energy describe current mobility. soc_preference, reserve_soc, member prose and planning energy fields retain historical sizing provenance; reserve_soc is not a minimum allowed SOC in this revision. Prior controller evaluations do not evaluate this mobility revision.",
+  "realism_revision": "portugal-realism-4",
+  "realism_evidence": "realism_revision.json"
 }

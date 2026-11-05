@@ -4,6 +4,336 @@ Data: 1 de novembro de 2026. Âmbito: questões 53-F1 e 53-F3 do plano do capít
 Nenhum ficheiro da tese foi alterado. Esta entrega modifica condições experimentais;
 não apresenta resultados anuais de controladores nem resultados de aprendizagem.
 
+## Revisão corrente de realismo e mobilidade — 5 de novembro de 2026
+
+`portugal-realism-4` e `portugal-ev-mobility-1` substituem os calendários de
+atividade, mobilidade, aparelhos, consumos e perturbações de **2023 e 2024**.
+As afirmações históricas mais abaixo sobre preservação dos inputs de 2023
+referem-se à intervenção original v3.3. Na revisão corrente, ambos os braços
+de cada comparação recebem os mesmos inputs revistos. Mantêm-se equipamentos,
+limites, histórias de topologia, energia anual de condução e convenção OMIE.
+
+Reprodução: `python scripts/revise_portugal_realism.py --apply`, com origem
+imutável `c54b13b62823fb1256397ea98cb37a830a24124d` disponível no Git, sem extrair
+cópias. Ver [Fontes e método](Fontes_e_metodo.md) para os mecanismos, parâmetros,
+referências científicas e limites de validação. A variabilidade da procura
+agregada foi ajustada em sete casas portuguesas SHEERM e avaliada em seis casas
+separadas. A revisão 3 acrescenta BDG2, REFIT e FIKElectricity, com separação
+prévia dos edifícios/aparelhos usados no ajuste e na avaliação. Mobilidade, SOC,
+transferências comerciais e usos individuais continuam a incluir priors;
+não se afirma realismo populacional validado nem preparação concluída para
+publicar um paper.
+
+As distribuições dos residentes em 2024 abaixo são por sessão; a frequência é
+por veículo. As bases têm 2, 6, 9 e 37 EV residentes. Os perfis frequente,
+periódico, bateria baixa e empresa são escolhas de desenho, não percentagens
+medidas da população. Visitantes permanecem uma população distinta.
+
+| Base | SOC médio à chegada | Objetivo médio | Pedido médio (p.p.) | Cargas/EV/semana | Pedidos a 100% | Chegada ≤5% e pedido a 100% |
+|---|---:|---:|---:|---:|---:|---:|
+| 4 membros | 56,00% | 84,84% | 28,84 | 2,11 | 10,41% | 1,36% |
+| 15 membros | 46,62% | 86,92% | 40,30 | 1,27 | 13,32% | 2,01% |
+| 30 membros | 45,52% | 87,89% | 42,36 | 1,15 | 13,63% | 1,47% |
+| 100 membros | 45,10% | 87,20% | 42,09 | 1,29 | 12,68% | 2,09% |
+
+| Pedido por sessão (p.p.) | 4 membros | 15 membros | 30 membros | 100 membros |
+|---|---:|---:|---:|---:|
+| <10 | 19,46% | 19,85% | 14,73% | 13,76% |
+| 10–<30 | 44,34% | 23,12% | 17,13% | 23,76% |
+| 30–<50 | 17,19% | 14,07% | 24,49% | 17,66% |
+| 50–<70 | 14,48% | 25,38% | 32,41% | 30,62% |
+| ≥70 | 4,52% | 17,59% | 11,23% | 14,21% |
+
+Os pedidos a 100% são sujeitos a tempo de ligação, perdas, taper e margem de
+potência partilhada com os aparelhos. O SOC tem balanço contínuo no gerador,
+incluindo carga externa finita. O simulador continua a receber SOC prescrito à
+chegada. Esta trajetória offline prova a viabilidade dos pedidos no cenário
+normal; não é uma previsão perfeita validada dos condutores nem um resultado MARL.
+
+As evidências correntes estão em `ev_mobility_revision.json`, `realism_revision.json`,
+`catalogs/household_activity.parquet`, `catalogs/mobility_episodes.parquet`,
+`catalogs/grid_event_programme.parquet` e `catalogs/ev_annual_energy.parquet` de
+cada base. Os hashes permitem distinguir esta revisão dos resultados anteriores.
+Os campos antigos `soc_preference`, `reserve_soc`, narrativas e valores de
+planeamento conservam a proveniência do dimensionamento; `charging_profile`
+e os catálogos de sessões/atividade são a descrição operacional corrente.
+
+A auditoria corrente de coerência/diversidade fica em
+`results/portugal_rec_native/realism_validation.json`; a de comparabilidade e
+fronteiras em `heldout_2024/validation.json`. Não houve novo treino MARL nem
+benchmark anual de controladores. As figuras e avaliações anteriores mantêm o
+seu âmbito histórico; a figura desta revisão é `figures/realism_validation.png`.
+
+Duas gerações completas da revisão 4 reproduziram **1 969 Parquet byte a byte**.
+Validação local concluída: **161 testes distintos**, **72 janelas de execução
+nas transições/fronteiras**, **27 sondas de falhas** e **18 janelas de balanço
+energético**, todos aprovados. Os seis pares de comparação, os nove schemas
+de preparação e os 2 090 hashes dos ficheiros das famílias foram verificados.
+A maior discrepância energética nas janelas contabilísticas foi **2,37 × 10⁻⁷ kWh**;
+a maior diferença de KPI face ao cálculo independente foi **9,10 × 10⁻¹³**.
+As 80 realizações de componentes, 14 regenerações físicas/aparelhos/EV,
+72 sensibilidades dessa cadeia e 80 regenerações de eventos também passaram.
+
+Comandos, versões e hashes ficam em `realism_validation.json` e
+`commercial_appliance_validation.json`, campo `software_validation`.
+Todas as evidências de execução correspondem ao fingerprint
+`e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445`.
+São verificações locais e amostradas; não houve CI remoto, benchmark anual,
+commits ou publicação. O caso comercial extremo rejeitado na sensibilidade
+é descrito separadamente abaixo, sem o contar como uma geração realista aprovada.
+
+### Consumos e ocupação: resultados da revisão 4
+
+Esta revisão acrescenta referências portuguesas para escritórios e pequeno
+comércio, heterogeneidade anual persistente entre estabelecimentos, presença
+discreta de trabalhadores/clientes/residentes e programas de lavandaria
+informados por uma ficha de fabricante. Os dados de calibração, o protocolo
+anterior e os limites de transferência estão em [Fontes e método](Fontes_e_metodo.md#referências-portuguesas-e-correções-da-revisão-4).
+As comparações com BDG2/REFIT/FIKElectricity são agora diagnósticos repetidos,
+não uma nova avaliação independente após os resultados da revisão 3.
+
+A tabela compara a mediana entre estabelecimentos em 2024, normalizada a
+365 dias, em kWh/m²/ano. Inclui os aparelhos uma única vez e exclui EV.
+Os valores não são resultados de um controlador nem estimativas populacionais.
+
+| Atividade | Revisão 3 | Revisão 4 | Intervalo entre locais | Referência PT usada |
+|---|---:|---:|---:|---:|
+| Escritórios | 78.1 | 129.0 | 79.2–132.8 | 94.4 |
+| Lojas | 52.2 | 39.6 | 36.3–59.5 | 39.0 |
+| Clínicas | 72.1 | 61.9 | 56.5–88.5 | — |
+| Cafés/restauração | 143.8 | 138.2 | 125.4–186.9 | 271.0 |
+| Oficinas | 120.2 | 131.7 | 116.2–167.2 | — |
+| Centros desportivos | 62.7 | 65.4 | 64.5–66.4 | — |
+| Lar | 108.0 | 110.7 | 110.7–110.7 | — |
+| Mercearia refrigerada | 117.9 | 212.1 | 212.1–212.1 | 531.0 |
+
+Os cinco escritórios desta realização não são forçados a reproduzir exatamente
+a média portuguesa de referência. O centro do gerador e a mediana de cinco
+locais são quantidades diferentes; reportam-se todas as sementes e não se
+escolhe uma realização por proximidade à referência. A dispersão dos restantes
+setores sem dados portugueses comparáveis continua um pressuposto explícito.
+
+As 26 instalações têm contagens inteiras e composição explícita de ocupação;
+não há clientes fora da abertura. Os trabalhadores de escritórios/oficinas têm
+jornadas de 7,5–9 h, incluindo pausas, distintas do intervalo de serviço.
+O lar preserva residentes durante a noite; visitas têm uma janela própria
+das 10 às 20 h, assumida no cenário. O número de pessoas não varia por
+alterar o ruído elétrico. Densidades, assiduidade e permanência não estão
+calibradas com medições comerciais portuguesas.
+
+Nas três lavandarias, as medianas de energia ficam em 1,40–1,46 kWh/programa,
+com duração mediana de 1 h e 428, 443 e 484 programas em 2024. A roupa modelada
+é 4,48–4,85 t/ano por máquina; não se afirma que cubra toda a roupa produzida
+pelo edifício. A máquina de loiça profissional tem 2001 lotes agregados em 2024,
+mediana de 0,465 kWh e 15 minutos, além do apoio térmico não deslocável.
+A frequência e os prazos destes equipamentos continuam hipóteses de cenário.
+
+O balanço anual foi corrigido: o orçamento comercial inclui todos os pedidos
+de aparelhos uma única vez, em vez de os adicionar novamente ao consumo de
+referência. A maior diferença nos 52 balanços edifício/ano é inferior a
+0,000024 kWh. O aquecimento inicial da máquina de loiça ocupa o primeiro
+intervalo; todos os inícios admissíveis respeitam a potência conjunta.
+
+As **20 sementes comerciais** passaram nos oito setores (160 realizações),
+com 100 bibliotecas de aparelhos. A sensibilidade avaliou 72 configurações
+emparelhadas e os oito setores: **575 casos aceites e um rejeitado**. A transferência
+integral da referência refrigerada, na semente 20263123, leva a 63,5% dos
+intervalos no limite do contrato e seis formas diárias repetidas. Não houve
+orçamento anual superior à capacidade energética nos casos avaliados. Essa
+configuração extrema não é entregue como um perfil realista; os datasets usam
+a transferência parcial e não exibem cópias diárias exatas.
+
+Nos componentes comerciais de 20 sementes, os P10/P50/P90 da intensidade
+anualizada são 74,2/95,4/139,5 nos escritórios, 35,7/45,7/58,6 nas lojas,
+128,1/153,2/172,3 na restauração e 223,0/239,8/255,8 nos refrigerados.
+São intervalos Monte Carlo do componente de usos finais, com um local por
+setor, não intervalos de confiança populacionais nem a distribuição dos cinco
+escritórios da realização entregue. A cadeia completa com aparelhos/EV é
+verificada separadamente em `ensemble_validation.json`.
+
+![Consumos comerciais, presenças e lavandaria](figures/commercial_appliance_validation.png)
+
+### Comerciais e aparelhos: resultados históricos da revisão 3
+
+A auditoria abrange os **26 estabelecimentos comerciais**, oito tipos de uso,
+e todos os aparelhos das quatro bases. Não há fábricas industriais: oficinas
+não são apresentadas como fábricas. Os cinco escritórios somam 22 postos,
+com mediana de quatro e máximo de 12; os restantes estabelecimentos somam 12.
+Todos respeitam o número de lugares de estacionamento e todas as visitas
+ficam dentro da abertura. Potências nominais somadas dos postos podem exceder
+o contrato sob gestão de potência; isso não equivale a violação simultânea.
+
+A reprodução integral gerou **1 969 Parquet idênticos byte a byte**. Os oito
+setores passaram em 20 sementes (160 realizações), mais 30 configurações de
+sensibilidade (240 realizações) e 100 bibliotecas de aparelhos sorteadas.
+Os consumos revistos não têm formas diárias exatamente repetidas, incluindo
+encerramentos. Mantêm-se os horários públicos regulares, feriados, férias e
+atividade de preparação/limpeza, com variação correlacionada de procura.
+A auditoria corrigiu a conversão das férias em ano bissexto e atualizou os
+membros suplementares que reutilizam explicitamente um perfil dador.
+
+Comparação horária com os edifícios BDG2 reservados: mediana por edifício,
+2024 sintético versus medições 2016–2017. O indicador abaixo é o P95 da
+variação absoluta entre horas dividido pela potência média. Valores mais
+próximos da referência não são uma percentagem de realismo.
+
+| Setor | Antes | Revisto | Referência reservada |
+|---|---:|---:|---:|
+| Escritórios | 1,85 | 0,42 | 0,33 |
+| Lojas | 1,70 | 0,74 | 0,34 |
+| Clínicas | 1,85 | 0,52 | 0,18 |
+| Cafés | 1,38 | 0,55 | 0,43 |
+| Oficinas | 2,12 | 0,35 | 0,35 |
+| Desporto | 1,26 | 0,57 | 0,23 |
+| Lar | 0,19 | 0,20 | 0,28 |
+| Supermercado | 1,10 | 0,47 | 0,34 |
+
+A comparação também mostra limites importantes. As intensidades anuais ainda
+não coincidem com a amostra externa; países, dimensão e serviços energéticos
+são diferentes e há setores com apenas um ou dois edifícios reservados.
+O supermercado não teve edifício de desenvolvimento. Não houve reajuste depois
+de consultar os reservados. A transferência conservadora não garante uma
+melhoria em todos os indicadores: a intensidade das oficinas, por exemplo,
+afastou-se da mediana reservada, embora a estrutura horária se tenha aproximado.
+
+| Setor | Revisto (kWh/m²/ano) | Referência reservada (kWh/m²/ano) |
+|---|---:|---:|
+| Escritórios | 78,05 | 180,21 |
+| Lojas | 52,19 | 252,81 |
+| Clínicas | 72,11 | 166,19 |
+| Cafés | 143,79 | 241,42 |
+| Oficinas | 120,18 | 65,76 |
+| Desporto | 62,72 | 124,94 |
+| Lar | 108,05 | 195,28 |
+| Supermercado | 117,94 | 28,66 |
+
+Nos aparelhos domésticos, a energia e a duração passam a ser amostradas
+conjuntamente a partir das casas REFIT de desenvolvimento. A tabela mostra
+medianas das medianas por aparelho; as duas casas reservadas têm comportamentos
+muito distintos e não constituem uma estimativa nacional.
+
+| Aparelho / métrica | Antes | Revisto | Referência reservada |
+|---|---:|---:|---:|
+| Roupa — kWh/programa | 0,62 | 0,48 | 0,51 |
+| Roupa — h/programa | 3,38 | 1,25 | 1,35 |
+| Loiça — kWh/programa | 0,90 | 1,23 | 1,28 |
+| Loiça — h/programa | 3,75 | 1,75 | 1,76 |
+
+A frequência mantém-se como pressuposto do inventário. Nas duas casas
+reservadas, a loiça varia entre **0,86 e 6,56 candidatos/semana**; logo, a média
+isolada esconderia diferenças grandes. A extração também importa: na casa 5,
+a mediana de duração da loiça varia entre 1,91 e 2,51 h conforme limiar e
+intervalo entre etapas. Esta incerteza é reportada, não eliminada escolhendo
+o detetor que mais se aproxima do gerador.
+
+No café com máquina profissional, 2024 contém **991,93 kWh em lotes deslocáveis**
+e **1 143,12 kWh de aquecimento/manutenção não deslocáveis**. O segundo valor
+foi reclassificado da base, sem contagem dupla. A máquina medida FIKElectricity
+tem mediana observada de 9,06 kWh/dia, mas não é o mesmo equipamento/contexto.
+Os parâmetros profissionais e a lavandaria continuam a ser hipóteses; não
+foram validados como população de máquinas portuguesas.
+
+![Comparação comercial e de aparelhos](figures/commercial_appliance_validation.png)
+
+Fontes, licenças, cobertura, separação prévia e limitações em
+[Fontes e método](Fontes_e_metodo.md). Resultados completos em
+`results/portugal_rec_native/commercial_appliance_validation.json`.
+
+### Comparação externa residencial corrente
+
+Foram usados os ficheiros `raw` de [13 casas SHEERM portuguesas](https://doi.org/10.5281/zenodo.13972210),
+com sete casas para desenvolvimento e seis reservadas. A tabela mostra medianas
+por casa: 80 casas residenciais Premium em 2024 e as seis casas medidas. As
+restantes bases têm comparações próprias em `empirical_validation.json`.
+
+| Métrica | Antes | Revisto | Medido, seis casas |
+|---|---:|---:|---:|
+| Energia diária média (kWh) | 7,84 | 7,78 | 5,99 |
+| Variabilidade diária dentro do mês (CV) | 0,270 | 0,408 | 0,360 |
+| P95 da variação de potência / média | 0,809 | 1,552 | 1,245 |
+| Desvio da forma diária | 0,253 | 0,539 | 0,522 |
+| P99 da potência / média | 4,460 | 5,633 | 6,722 |
+| Autocorrelação a um dia | 0,475 | 0,232 | 0,298 |
+| Autocorrelação a uma semana | 0,442 | 0,195 | 0,296 |
+| Concentração do horário do pico diário | 14,42% | 5,77% | 6,54% |
+
+A distância diagnóstica média das cinco métricas usadas no desenvolvimento
+diminuiu de 0,464 para 0,161 na avaliação Premium. **Isto não significa uma
+percentagem equivalente de realismo.** A energia média continua cerca de 30%
+mais alta e o pico relativo P99 cerca de 16% mais baixo. A pequena amostra,
+as estações observadas e os equipamentos diferentes limitam a interpretação.
+O consumo sintético inclui os aparelhos no primeiro início admissível e exclui
+EV; não é uma curva medida nem um resultado de controlo.
+
+A exclusão de três dias com leituras anómalas na referência real, numa
+sensibilidade de qualidade separada, não altera materialmente estas medianas.
+Não se reajustou o gerador depois dessa inspeção; ver o método e os resultados
+completos no campo `measured_quality_sensitivity` da evidência empírica.
+
+O confronto EV usa [35 377 sessões medidas na Noruega](https://doi.org/10.5281/zenodo.13896176),
+sem SOC/capacidades inferidos. Após filtros comuns, a referência reservada tem
+18 259 sessões de 140 utilizadores. Em sessões domésticas Premium, a mediana
+de energia AC pedida é **25,84 kWh**, versus **9,04 kWh** medidos; a mediana de
+frequência doméstica por utilizador e intervalo observado é **0,89/semana**,
+versus **2,44/semana**. Estes valores usam fronteiras/filtros diferentes da
+tabela de todos os carregamentos dos residentes acima. A discrepância é
+mantida explícita: a composição da frota real é desconhecida e os pedidos
+grandes são preferências deliberadas deste cenário, não um ajuste populacional.
+A mediana do tempo ligado é 16,75 h, contra 11,11 h; a correlação de Spearman
+entre energia e duração é 0,05, contra 0,31. Portanto, a distribuição conjunta
+também não está validada, mesmo existindo diversidade e viabilidade física.
+
+As férias já não repetem exatamente os mesmos dias nos dois anos nas 123
+posições residenciais das quatro bases (Micro/Core partilham identidades).
+Não foram encontradas séries de consumo de membros
+duplicadas nem coincidências de início entre causas locais independentes
+na realização corrente. A sincronização das causas comuns e dos casos de
+stress continua explícita. A forte correlação PV é esperada porque todos os
+locais partilham meteorologia de Lisboa; não representa nuvens locais medidas.
+
+Ver `figures/empirical_validation.png`, `ensemble_validation.json` e
+[Fontes e método](Fontes_e_metodo.md) para a análise das sementes, sensibilidade,
+fontes, limites e tarefas científicas ainda necessárias.
+
+### Sementes e sensibilidade
+
+As 20 sementes passaram nas quatro bases: 80 realizações de componentes e
+80 regenerações dos programas de sensores/DR. As experiências de componentes
+usam uma casa por rotina (quatro na Micro e seis nas restantes bases), mantendo
+os outros usos e pedidos de aparelhos fixos. A tabela mostra a mediana entre
+essas casas da variabilidade diária dentro do mês, não a dispersão de toda a
+população nem um intervalo de confiança populacional.
+
+| Base | Mediana das 20 sementes | Mínimo–máximo |
+|---|---:|---:|
+| 4 membros | 0,371 | 0,356–0,405 |
+| 15 membros | 0,375 | 0,361–0,411 |
+| 30 membros | 0,375 | 0,361–0,411 |
+| 100 membros | 0,377 | 0,353–0,400 |
+
+Core-15 e Core-30 dão aqui os mesmos valores porque as seis identidades e
+fluxos escolhidos coincidem; isso é o controlo de comparabilidade, não uma
+segunda amostra independente. As 14 regenerações de toda a cadeia física/
+aparelhos/EV também passaram. Os pedidos médios dos residentes em 2024 ficaram
+em 28,01–29,75 p.p. na Micro (cinco sementes), 37,58–41,51 na Core-15 (cinco),
+43,23–43,76 na Core-30 (duas) e 42,36–42,47 na Premium (duas). Duas realizações
+grandes não estabelecem cobertura das caudas; a realização principal tem outra
+semente e as distribuições detalhadas acima.
+
+A análise local de 12 parâmetros usa ±25% e três sementes emparelhadas
+(72 realizações). Na mediana dos pares, reduzir/aumentar o desvio diário muda
+a variabilidade entre dias em −14,5%/+16,4%. Alterar o peso dos episódios muda
+as variações entre quartos de hora em −16,1%/+16,7%. Alterar a persistência dos
+episódios muda essa métrica em +47,6%/−37,4%: é uma hipótese influente, que deve
+entrar nas ablações e na incerteza de resultados futuros. Os efeitos completos,
+incluindo energia/janelas dos aparelhos, ficam no relatório JSON.
+Na Micro, a perturbação da dispersão da energia dos ciclos altera a energia
+pedida em menos de 0,4% na mediana dos pares; a dispersão dentro de cada aparelho
+muda −3,5%/+2,8%. A variação da dispersão das janelas muda o P90 da folga em
+−3,6%/+8,6%. Estes efeitos são condicionados aos programas e inventário fixos.
+Nenhuma destas experiências estima a sensibilidade de uma política MARL ou
+substitui uma análise global com interações entre parâmetros.
+
 ## Edição e proveniência
 
 Edição: **portugal-native-2023-2024-v3.3**. Revisão da campanha:
@@ -266,8 +596,11 @@ intervalo reservado, usar um checkpoint comum e declarar esse recorte adicional.
 
 ## Limitações e tarefas que permanecem fora do pedido
 
-Não houve treino nem uma nova campanha anual de desempenho. As verificações
-individuais dos pedidos EV não provam viabilidade conjunta sob limites partilhados.
+Não houve treino nem uma nova campanha anual de desempenho. A revisão corrente
+EV fornece uma trajetória offline de referência com margens de potência
+partilhadas e um envelope conservador para aparelhos. Isto não garante o
+cumprimento sob perturbações ou sob qualquer política de controlo; os testes
+individuais dos pedidos, por si só, também não provam viabilidade conjunta.
 Os novos membros reutilizam arquétipos explicitamente, sem acrescentar evidência
 estatística independente. Não foi construída uma referência de informação
 perfeita nem um novo controlador convencional.

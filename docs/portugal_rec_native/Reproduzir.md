@@ -1,5 +1,55 @@
 # Reconstruir 2023 e 2024
 
+## Revisão corrente de realismo
+
+Depois da construção histórica descrita abaixo, executar no checkout corrente:
+
+```bash
+python scripts/revise_portugal_realism.py --apply
+python -m pytest -q tests/test_portugal_realism.py tests/test_portugal_ev_mobility.py tests/test_portugal_empirical.py tests/test_portugal_commercial_appliances.py tests/test_portugal_dataset_boundaries.py tests/test_portugal_heldout_2024.py tests/test_portugal_omie_pricing.py tests/test_ev_arrivals.py tests/test_ev_soc_behavior.py tests/test_ev_feasibility_replay.py
+python scripts/audit/portugal_empirical_validation.py
+python scripts/audit/portugal_commercial_appliance_validation.py --evaluate --seeds --figure
+python scripts/audit/audit_portugal_ensembles.py
+python scripts/audit/audit_portugal_realism.py --runtime
+python scripts/audit/audit_portugal_heldout_2024.py --runtime
+python scripts/audit/audit_portugal_windows.py --output results/portugal_rec_native/accounting_validation.json
+```
+
+Este passo inclui a revisão EV e substitui a repetição de eventos entre anos.
+Lê a origem diretamente do commit `c54b13b62823fb1256397ea98cb37a830a24124d`;
+o histórico desse commit tem de estar disponível (a geração não funciona num
+clone superficial que o omita). Os testes que comparam a revisão com os horários
+e inventários originais também precisam desse commit; num clone superficial,
+obtê-lo com `git fetch --no-tags --depth=1 origin c54b13b62823fb1256397ea98cb37a830a24124d`.
+A fonte adicional de humidade de 2023 está incluída no repo.
+Não executar novamente os construtores históricos por cima destes resultados
+sem repetir a revisão. `--seed` e `--config` permitem ensembles explícitos,
+mantendo a mesma realização nos braços de cada comparação.
+Se a auditoria contabilística for interrompida, `--resume` reaproveita apenas
+janelas completas com a mesma duração e a mesma impressão SHA-256 dos dados,
+schemas e motor. Uma alteração desses inputs obriga a nova execução.
+As sementes podem retomar com `--resume`; as janelas de fronteiras com
+`--resume-runtime` e as sondas de falhas com `--reuse-runtime`, sempre após
+verificação dos inputs. As fontes empíricas compactas já estão incluídas;
+`portugal_empirical_validation.py --acquire` permite readquiri-las com validação
+dos hashes publicados. `--calibrate-load` é uma etapa de desenvolvimento:
+não se deve repetir o ajuste depois de consultar as casas reservadas e continuar
+a apresentar essas casas como uma avaliação independente.
+
+As referências BDG2, REFIT e FIKElectricity são readquiridas, se necessário, com
+`portugal_commercial_appliance_validation.py --acquire-commercial --acquire-appliances --acquire-kitchens`.
+Os ficheiros grandes permanecem apenas em memória; retêm-se resumos compactos.
+`--regenerate-and-reproduce` executa duas gerações completas e exige igualdade
+byte a byte de todos os Parquet, sem criar cópias ou arquivos.
+`--baseline` e `--freeze-protocol` são passos únicos de desenvolvimento já
+concluídos; não os repetir para redefinir os grupos reservados. Não reajustar
+parâmetros após consultar esses grupos e alegar uma nova avaliação independente.
+
+Ver [Fontes e método](Fontes_e_metodo.md) para hipóteses, evidência científica e
+o que ainda falta validar empiricamente. Não é necessário gerar ZIPs nem cópias
+locais para esta revisão. Os passos de empacotamento mais abaixo são opcionais
+e históricos; não foram executados nesta entrega.
+
 ## Último passo para a edição corrente v3.3
 
 Depois de construir v3.2 e aplicar `repair_portugal_dataset_boundaries.py` na ordem

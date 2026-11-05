@@ -18,7 +18,32 @@ def main():
         assert integrity['integrity_revision']==manifest['integrity_revision']
         assert integrity['test_failures']==integrity['static_failures']==0
     assert all(digest(ROOT/path)==expected for path,expected in integrity['dataset_checksums'].items())
-    roots=[docs,results,ROOT/'data/portugal_reference_2023',ROOT/'data/portugal_reference_2024',*sorted((ROOT/'data/datasets').glob('rec_pt_2023_*_v2'))]
+    if manifest.get('realism_revision'):
+        realism=json.loads((results/'realism_validation.json').read_text())
+        assert realism['status']=='pass' and realism['runtime']
+        assert realism['runtime_input_fingerprint']==integrity['runtime_input_fingerprint']
+    if manifest.get('realism_revision') in {'portugal-realism-2','portugal-realism-3','portugal-realism-4'}:
+        empirical=json.loads((results/'empirical_validation.json').read_text())
+        ensemble=json.loads((results/'ensemble_validation.json').read_text())
+        assert empirical['status']=='completed_comparison_with_reported_discrepancies'
+        assert ensemble['status']=='pass'
+        assert empirical['runtime_input_fingerprint']==ensemble['runtime_input_fingerprint']==integrity['runtime_input_fingerprint']
+        assert all(digest(ROOT/path)==expected for evidence in (empirical,ensemble) for path,expected in evidence['generator_sha256'].items())
+        assert len(ensemble['component_ensembles'])>=80 and len(ensemble['coherent_ensembles'])>=14
+        assert len(ensemble['sensitivity'])>=72 and len(ensemble['event_ensembles'])>=80
+    if manifest.get('realism_revision') in {'portugal-realism-3','portugal-realism-4'}:
+        commercial=json.loads((results/'commercial_appliance_validation.json').read_text())
+        assert commercial['status']=='completed_comparison_with_reported_discrepancies'
+        assert commercial['runtime_input_fingerprint']==integrity['runtime_input_fingerprint']
+        assert all(digest(ROOT/path)==expected for path,expected in commercial['generator_sha256'].items())
+        assert commercial['seed_sensitivity']['status']=='pass'
+        assert len(commercial['seed_sensitivity']['seeds'])>=20
+        if manifest.get('realism_revision')=='portugal-realism-4':
+            assert commercial['portuguese_revision']['status']=='pass'
+            assert len(commercial['portuguese_revision']['building_budgets'])==52
+            assert len(commercial['seed_sensitivity']['sensitivity'])>=72
+        assert len(commercial['seed_sensitivity']['sensitivity'])>=30
+    roots=[docs,results,ROOT/'data/portugal_reference_2023',ROOT/'data/portugal_reference_2024',ROOT/'data/portugal_validation_reference',*sorted((ROOT/'data/datasets').glob('rec_pt_2023_*_v2'))]
     files=[p for root in roots for p in root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.name not in ('package_checksums.sha256','package_manifest.json')]
     files += [ROOT/name for name in ['data/portugal_native_source_v23.tar.gz','scripts/build_portugal_native_suite.py','scripts/portugal_rec_common.py','scripts/portugal_site_calendar.py','scripts/prepare_portugal_reference.py','scripts/prepare_portugal_reference_2024.py','scripts/portugal_profiles_2024.py','scripts/extend_portugal_2024.py','scripts/package_portugal_native.py','scripts/requirements-portugal-generator.txt','scripts/audit/verify_portugal_two_year_inputs.py','scripts/audit/verify_portugal_core30_sessions.py']]
     files += [ROOT/'scripts/portugal_lifecycle_stories.py', ROOT/'scripts/audit/verify_portugal_forecasts_stories.py']
@@ -26,6 +51,11 @@ def main():
     files += [ROOT/'scripts/repair_portugal_dataset_boundaries.py', ROOT/'tests/test_portugal_dataset_boundaries.py']
     if manifest.get('campaign_revision'):
         files += [ROOT/name for name in ['scripts/prepare_portugal_heldout_2024.py', 'scripts/audit/audit_portugal_heldout_2024.py', 'tests/test_portugal_heldout_2024.py']]
+    if manifest.get('realism_revision'):
+        files += [ROOT/name for name in ['scripts/portugal_activity.py', 'scripts/portugal_stochastic_demand.py', 'scripts/portugal_commercial_activity.py', 'scripts/portugal_realism_config.json',
+            'scripts/revise_portugal_realism.py', 'scripts/revise_portugal_ev_mobility.py',
+            'scripts/audit/audit_portugal_realism.py', 'scripts/audit/portugal_empirical_validation.py', 'scripts/audit/audit_portugal_ensembles.py',
+            'tests/test_portugal_realism.py', 'tests/test_portugal_ev_mobility.py', 'tests/test_portugal_empirical.py', 'tests/test_portugal_commercial_appliances.py', 'scripts/audit/portugal_commercial_appliance_validation.py']]
     files += [ROOT/'scripts/build_portugal_dataset_description.py', ROOT/'scripts/render_portugal_dataset_report.py', ROOT/'scripts/requirements-portugal-report.txt']
     files=sorted(set(files));checks=docs/'package_checksums.sha256';checks.write_text(''.join(f'{digest(p)}  {p.relative_to(ROOT)}\n' for p in files))
     archive=ROOT/'docs/portugal_rec_native.zip'
@@ -36,6 +66,7 @@ def main():
         assert not any(x.startswith('citylearn/') or '/annual/' in x for x in z.namelist())
     info={'version':manifest['version'],'integrity_revision':manifest.get('integrity_revision'),'runtime_requirement':'Current simulator with unknown-departure handling; simulator_core below identifies the historical construction reference only.','years':[2023,2024],'records':70176,'configurations':9,'families':4,'package':str(archive.relative_to(ROOT)),'sha256':digest(archive),'bytes':archive.stat().st_size,'files':len(files)+1,'simulator_core':manifest['simulator_commit'],'frozen_2023_commit':manifest['frozen_2023_commit'],'scope':'Data, public sources, descriptive report, offline reconstruction, pricing and forecast checks and sampled runtime market validation; no annual controller comparison.'}
     info.update(configurations=len(manifest['variants']), matched_references=len(manifest.get('references', [])), preparation_views=len(manifest.get('preparation_schemas', [])), campaign_revision=manifest.get('campaign_revision'))
+    info['realism_revision']=manifest.get('realism_revision')
     if manifest.get('campaign_revision'):
         info['current_campaign_report']='docs/portugal_rec_native/Heldout_2024.md'
         info['historical_descriptive_report_edition']='portugal-native-2023-2024-v3.2; not current campaign evidence'

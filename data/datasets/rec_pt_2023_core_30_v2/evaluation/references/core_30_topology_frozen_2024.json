@@ -3369,7 +3369,7 @@
       "G": false,
       "D": false
     },
-    "agent_fault_labels": "native metadata may expose events",
+    "agent_fault_labels": "known_faults explicitly enabled; not a fault-diagnosis benchmark",
     "sensor_noise_stress": false,
     "member_departures": [
       {
@@ -3429,7 +3429,14 @@
       "contrast_scope": "2024 lifecycle campaign",
       "initial_state": "Same run start and state/history convention; pair controller seeds and checkpoints explicitly",
       "cohort_policy": "Full offered services plus common-member exposure; report excluded post-exit requests separately, never as fulfilled"
-    }
+    },
+    "realism_revision": "portugal-realism-4",
+    "activity_calendar": "catalogs/household_activity.parquet",
+    "realism_parameter_status": "Residential aggregate parameters developed on seven raw SHEERM houses; commercial hourly anchors from predeclared BDG2 development buildings; domestic program shapes from REFIT houses 3/5. Independent identities held out. Transfer weights, service activities, occupancy, charging, flexibility and other behaviour remain scenario priors, not a Portuguese population fit.",
+    "fixed_thermal_placeholders": "Indoor temperature 21 C and humidity 50% are inactive nonthermal placeholders, not comfort ground truth",
+    "disturbance_regimes": "generation_regime distinguishes synthetic local/common faults and retained controlled stress; continuous noise remains an explicit sensor stress control",
+    "commercial_activity": "catalogs/commercial_activity.parquet",
+    "occupancy_semantics": "occupant_count is sampled integer presence at commercial sites, separately tracking staff, clients and care residents; operations.expected_people is its compatibility alias; catalogue occupants counts household residents. Public opening hours are posted service constraints; preparation/cleanup may occur outside them."
   },
   "native_compatibility": {
     "engine_commit": "978be68b0e0740deab15ecf536805f323b86fa57",
@@ -3459,6 +3466,11 @@
       "DEF-M026-02": "L2",
       "DEF-M030-01": "L1",
       "DEF-M030-02": "L2"
+    }
+  },
+  "robustness": {
+    "agent_observation_contract": {
+      "mode": "known_faults"
     }
   }
 }

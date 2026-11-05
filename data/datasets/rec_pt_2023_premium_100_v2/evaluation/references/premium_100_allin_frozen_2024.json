@@ -12403,6 +12403,9 @@
       "assets": {
         "enabled": true
       }
+    },
+    "agent_observation_contract": {
+      "mode": "known_faults"
     }
   },
   "demand_response": {
@@ -12424,7 +12427,7 @@
       "G": true,
       "D": true
     },
-    "agent_fault_labels": "native metadata may expose events",
+    "agent_fault_labels": "known_faults explicitly enabled; not a fault-diagnosis benchmark",
     "sensor_noise_stress": true,
     "member_departures": [
       {
@@ -12520,74 +12523,266 @@
       "distribution": "independent Gaussian channel errors; domain clipping; fixed seed",
       "power_std_w": 20,
       "soc_std_percentage_points": 0.5,
-      "temporal_exposure": "Seasonal campaigns in both years; raw telemetry only; no commercial DR baseline qualification.",
+      "temporal_exposure": "Seeded channel-specific stress exposures; see actual event files. Noise/clip pairs share one window; not observed sensor reliability.",
       "schedules": {
         "development": [
           {
-            "start_time_step": 3912,
-            "end_time_step": 5255
+            "start_time_step": 439,
+            "end_time_step": 1378
           },
           {
-            "start_time_step": 12740,
-            "end_time_step": 14083
+            "start_time_step": 3026,
+            "end_time_step": 3670
           },
           {
-            "start_time_step": 21476,
-            "end_time_step": 22819
+            "start_time_step": 4614,
+            "end_time_step": 5875
           },
           {
-            "start_time_step": 30320,
-            "end_time_step": 31663
+            "start_time_step": 10122,
+            "end_time_step": 11422
           },
           {
-            "start_time_step": 38856,
-            "end_time_step": 40199
+            "start_time_step": 11022,
+            "end_time_step": 12400
           },
           {
-            "start_time_step": 47684,
-            "end_time_step": 49027
+            "start_time_step": 11818,
+            "end_time_step": 12834
           },
           {
-            "start_time_step": 56420,
-            "end_time_step": 57763
+            "start_time_step": 15381,
+            "end_time_step": 16572
           },
           {
-            "start_time_step": 65264,
-            "end_time_step": 66607
+            "start_time_step": 17055,
+            "end_time_step": 18995
+          },
+          {
+            "start_time_step": 17139,
+            "end_time_step": 18508
+          },
+          {
+            "start_time_step": 21175,
+            "end_time_step": 22640
+          },
+          {
+            "start_time_step": 22604,
+            "end_time_step": 23309
+          },
+          {
+            "start_time_step": 23115,
+            "end_time_step": 24820
+          },
+          {
+            "start_time_step": 26942,
+            "end_time_step": 29488
+          },
+          {
+            "start_time_step": 29169,
+            "end_time_step": 31256
+          },
+          {
+            "start_time_step": 31924,
+            "end_time_step": 33527
+          },
+          {
+            "start_time_step": 33664,
+            "end_time_step": 34804
+          },
+          {
+            "start_time_step": 37990,
+            "end_time_step": 38983
+          },
+          {
+            "start_time_step": 38212,
+            "end_time_step": 39805
+          },
+          {
+            "start_time_step": 38290,
+            "end_time_step": 40188
+          },
+          {
+            "start_time_step": 39917,
+            "end_time_step": 41243
+          },
+          {
+            "start_time_step": 43001,
+            "end_time_step": 45335
+          },
+          {
+            "start_time_step": 44153,
+            "end_time_step": 45679
+          },
+          {
+            "start_time_step": 46732,
+            "end_time_step": 47596
+          },
+          {
+            "start_time_step": 49839,
+            "end_time_step": 51150
+          },
+          {
+            "start_time_step": 54512,
+            "end_time_step": 57199
+          },
+          {
+            "start_time_step": 58680,
+            "end_time_step": 60006
+          },
+          {
+            "start_time_step": 60230,
+            "end_time_step": 62917
+          },
+          {
+            "start_time_step": 62312,
+            "end_time_step": 63852
+          },
+          {
+            "start_time_step": 63291,
+            "end_time_step": 64734
+          },
+          {
+            "start_time_step": 63415,
+            "end_time_step": 64781
+          },
+          {
+            "start_time_step": 64172,
+            "end_time_step": 65614
+          },
+          {
+            "start_time_step": 65685,
+            "end_time_step": 66618
           }
         ],
         "confirmation": [
           {
-            "start_time_step": 6600,
-            "end_time_step": 7943
+            "start_time_step": 4094,
+            "end_time_step": 5112
           },
           {
-            "start_time_step": 15428,
-            "end_time_step": 16771
+            "start_time_step": 4621,
+            "end_time_step": 6013
           },
           {
-            "start_time_step": 24164,
-            "end_time_step": 25507
+            "start_time_step": 7100,
+            "end_time_step": 7864
           },
           {
-            "start_time_step": 32956,
-            "end_time_step": 34299
+            "start_time_step": 9349,
+            "end_time_step": 11061
           },
           {
-            "start_time_step": 41544,
-            "end_time_step": 42887
+            "start_time_step": 9406,
+            "end_time_step": 11634
           },
           {
-            "start_time_step": 50372,
-            "end_time_step": 51715
+            "start_time_step": 12685,
+            "end_time_step": 13847
           },
           {
-            "start_time_step": 59108,
-            "end_time_step": 60451
+            "start_time_step": 13800,
+            "end_time_step": 16229
           },
           {
-            "start_time_step": 67900,
-            "end_time_step": 69243
+            "start_time_step": 14626,
+            "end_time_step": 15839
+          },
+          {
+            "start_time_step": 17352,
+            "end_time_step": 19344
+          },
+          {
+            "start_time_step": 20143,
+            "end_time_step": 22134
+          },
+          {
+            "start_time_step": 20177,
+            "end_time_step": 21349
+          },
+          {
+            "start_time_step": 22458,
+            "end_time_step": 23481
+          },
+          {
+            "start_time_step": 24264,
+            "end_time_step": 25234
+          },
+          {
+            "start_time_step": 29194,
+            "end_time_step": 30751
+          },
+          {
+            "start_time_step": 32574,
+            "end_time_step": 33986
+          },
+          {
+            "start_time_step": 33182,
+            "end_time_step": 34758
+          },
+          {
+            "start_time_step": 36291,
+            "end_time_step": 37482
+          },
+          {
+            "start_time_step": 37852,
+            "end_time_step": 40539
+          },
+          {
+            "start_time_step": 40989,
+            "end_time_step": 43676
+          },
+          {
+            "start_time_step": 41259,
+            "end_time_step": 42027
+          },
+          {
+            "start_time_step": 44986,
+            "end_time_step": 46782
+          },
+          {
+            "start_time_step": 46129,
+            "end_time_step": 48153
+          },
+          {
+            "start_time_step": 47797,
+            "end_time_step": 49304
+          },
+          {
+            "start_time_step": 49600,
+            "end_time_step": 51653
+          },
+          {
+            "start_time_step": 51069,
+            "end_time_step": 53695
+          },
+          {
+            "start_time_step": 52658,
+            "end_time_step": 54256
+          },
+          {
+            "start_time_step": 53180,
+            "end_time_step": 54614
+          },
+          {
+            "start_time_step": 57098,
+            "end_time_step": 58694
+          },
+          {
+            "start_time_step": 57789,
+            "end_time_step": 59044
+          },
+          {
+            "start_time_step": 62349,
+            "end_time_step": 62952
+          },
+          {
+            "start_time_step": 66349,
+            "end_time_step": 67377
+          },
+          {
+            "start_time_step": 67725,
+            "end_time_step": 69885
           }
         ]
       },
@@ -12654,7 +12849,14 @@
       "contrast_scope": "2024 lifecycle campaign",
       "initial_state": "Same run start and state/history convention; pair controller seeds and checkpoints explicitly",
       "cohort_policy": "Full offered services plus common-member exposure; report excluded post-exit requests separately, never as fulfilled"
-    }
+    },
+    "realism_revision": "portugal-realism-4",
+    "activity_calendar": "catalogs/household_activity.parquet",
+    "realism_parameter_status": "Residential aggregate parameters developed on seven raw SHEERM houses; commercial hourly anchors from predeclared BDG2 development buildings; domestic program shapes from REFIT houses 3/5. Independent identities held out. Transfer weights, service activities, occupancy, charging, flexibility and other behaviour remain scenario priors, not a Portuguese population fit.",
+    "fixed_thermal_placeholders": "Indoor temperature 21 C and humidity 50% are inactive nonthermal placeholders, not comfort ground truth",
+    "disturbance_regimes": "generation_regime distinguishes synthetic local/common faults and retained controlled stress; continuous noise remains an explicit sensor stress control",
+    "commercial_activity": "catalogs/commercial_activity.parquet",
+    "occupancy_semantics": "occupant_count is sampled integer presence at commercial sites, separately tracking staff, clients and care residents; operations.expected_people is its compatibility alias; catalogue occupants counts household residents. Public opening hours are posted service constraints; preparation/cleanup may occur outside them."
   },
   "native_compatibility": {
     "engine_commit": "978be68b0e0740deab15ecf536805f323b86fa57",

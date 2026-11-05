@@ -3495,6 +3495,9 @@
       "assets": {
         "enabled": true
       }
+    },
+    "agent_observation_contract": {
+      "mode": "known_faults"
     }
   },
   "experimental_design": {
@@ -3509,7 +3512,7 @@
       "G": true,
       "D": false
     },
-    "agent_fault_labels": "native metadata may expose events",
+    "agent_fault_labels": "known_faults explicitly enabled; not a fault-diagnosis benchmark",
     "sensor_noise_stress": false,
     "member_departures": [
       {
@@ -3561,6 +3564,13 @@
     },
     "continuation": "Preparation view ends in 2023; no held-out lifecycle calendar or supplemental member pool.",
     "frozen_2023_source_fingerprint": "e93c0b8171be8a312d2f9578d38b31378ef7092d838db1865f751769e3f192c1",
+    "realism_revision": "portugal-realism-4",
+    "activity_calendar": "catalogs/household_activity.parquet",
+    "realism_parameter_status": "Residential aggregate parameters developed on seven raw SHEERM houses; commercial hourly anchors from predeclared BDG2 development buildings; domestic program shapes from REFIT houses 3/5. Independent identities held out. Transfer weights, service activities, occupancy, charging, flexibility and other behaviour remain scenario priors, not a Portuguese population fit.",
+    "fixed_thermal_placeholders": "Indoor temperature 21 C and humidity 50% are inactive nonthermal placeholders, not comfort ground truth",
+    "disturbance_regimes": "generation_regime distinguishes synthetic local/common faults and retained controlled stress; continuous noise remains an explicit sensor stress control",
+    "commercial_activity": "catalogs/commercial_activity.parquet",
+    "occupancy_semantics": "occupant_count is sampled integer presence at commercial sites, separately tracking staff, clients and care residents; operations.expected_people is its compatibility alias; catalogue occupants counts household residents. Public opening hours are posted service constraints; preparation/cleanup may occur outside them.",
     "preparation_only": true
   },
   "native_compatibility": {

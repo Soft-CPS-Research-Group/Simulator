@@ -1,0 +1,1547 @@
+{
+  "revision": "portugal-realism-4",
+  "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+  "validation_scope": "Internal coherence, physical feasibility, diversity and matched comparisons; no empirical fit claim",
+  "families": [
+    {
+      "family": "rec_pt_2023_core_15_v2",
+      "members": 15,
+      "ev_distributions": [
+        {
+          "year": 2023,
+          "pool": "resident",
+          "vehicles": 6,
+          "sessions": 391,
+          "sessions_per_vehicle_week": 1.2497716894977169,
+          "arrival_mean_pct": 46.98279263776902,
+          "target_mean_pct": 87.21358828643433,
+          "request_mean_pp": 40.23079564866531,
+          "full_target_pct": 13.299232736572892,
+          "near_empty_to_full_pct": 2.3017902813299234,
+          "gap_bins_pct": [
+            17.902813299232736,
+            25.063938618925828,
+            14.066496163682865,
+            26.08695652173913,
+            16.879795396419436
+          ],
+          "arrival_bins_pct": [
+            2.3017902813299234,
+            4.092071611253197,
+            11.76470588235294,
+            28.388746803069054,
+            10.485933503836318,
+            42.96675191815857
+          ],
+          "median_slack_hours": 7.75
+        },
+        {
+          "year": 2024,
+          "pool": "resident",
+          "vehicles": 6,
+          "sessions": 398,
+          "sessions_per_vehicle_week": 1.2686703096539163,
+          "arrival_mean_pct": 46.619102724753674,
+          "target_mean_pct": 86.91913219813625,
+          "request_mean_pp": 40.300029473382594,
+          "full_target_pct": 13.316582914572864,
+          "near_empty_to_full_pct": 2.0100502512562812,
+          "gap_bins_pct": [
+            19.849246231155778,
+            23.115577889447238,
+            14.07035175879397,
+            25.376884422110553,
+            17.587939698492463
+          ],
+          "arrival_bins_pct": [
+            2.0100502512562812,
+            4.522613065326634,
+            12.814070351758794,
+            27.1356783919598,
+            11.557788944723619,
+            41.959798994974875
+          ],
+          "median_slack_hours": 6.625
+        }
+      ],
+      "multiday_trips": 55,
+      "multiday_with_destination_travel": 40,
+      "multiday_count_distribution": {
+        "2": 1,
+        "3": 2,
+        "4": 3,
+        "5": 4,
+        "7": 1,
+        "8": 1
+      },
+      "cycle_profiles": 1344,
+      "annual_physical_nonshiftable_kwh": [
+        {
+          "year": 2023,
+          "original": 43822.47412109375,
+          "revised": 43264.579345703125,
+          "scope": "physical inventory, not topology-filtered executed annual controller demand"
+        },
+        {
+          "year": 2024,
+          "original": 42576.66954734072,
+          "revised": 42076.26708984375,
+          "scope": "physical inventory, not topology-filtered executed annual controller demand"
+        }
+      ],
+      "max_end_use_balance_error_kwh": 1.1920928955078125e-07,
+      "absence_to_home_dhw_mean_ratio": 0.13515374633900334,
+      "native_import_over_limit": [],
+      "median_member_load_correlation_2024": 0.13084308030333056,
+      "exact_duplicate_member_loads_2024": 0,
+      "events": []
+    },
+    {
+      "family": "rec_pt_2023_core_30_v2",
+      "members": 30,
+      "ev_distributions": [
+        {
+          "year": 2023,
+          "pool": "resident",
+          "vehicles": 9,
+          "sessions": 499,
+          "sessions_per_vehicle_week": 1.063318112633181,
+          "arrival_mean_pct": 44.535052251856946,
+          "target_mean_pct": 88.10230209700055,
+          "request_mean_pp": 43.56724984514359,
+          "full_target_pct": 13.627254509018035,
+          "near_empty_to_full_pct": 2.004008016032064,
+          "gap_bins_pct": [
+            9.819639278557114,
+            20.240480961923847,
+            24.04809619238477,
+            35.07014028056113,
+            10.821643286573146
+          ],
+          "arrival_bins_pct": [
+            2.004008016032064,
+            2.004008016032064,
+            6.613226452905812,
+            38.677354709418836,
+            20.841683366733466,
+            29.859719438877757
+          ],
+          "median_slack_hours": 10.0
+        },
+        {
+          "year": 2023,
+          "pool": "external_visitors",
+          "vehicles": 10,
+          "sessions": 524,
+          "sessions_per_vehicle_week": 1.004931506849315,
+          "arrival_mean_pct": 49.237226583635945,
+          "target_mean_pct": 81.83603693104318,
+          "request_mean_pp": 32.59881034740723,
+          "full_target_pct": 5.534351145038168,
+          "near_empty_to_full_pct": 0.0,
+          "gap_bins_pct": [
+            0.5725190839694656,
+            41.79389312977099,
+            49.61832061068702,
+            8.015267175572518,
+            0.0
+          ],
+          "arrival_bins_pct": [
+            0.0,
+            0.0,
+            0.0,
+            13.549618320610687,
+            77.29007633587787,
+            9.16030534351145
+          ],
+          "median_slack_hours": 1.5
+        },
+        {
+          "year": 2024,
+          "pool": "resident",
+          "vehicles": 9,
+          "sessions": 543,
+          "sessions_per_vehicle_week": 1.1539162112932606,
+          "arrival_mean_pct": 45.524159148886255,
+          "target_mean_pct": 87.88888376898754,
+          "request_mean_pp": 42.3647246201013,
+          "full_target_pct": 13.627992633517497,
+          "near_empty_to_full_pct": 1.4732965009208103,
+          "gap_bins_pct": [
+            14.732965009208105,
+            17.12707182320442,
+            24.49355432780847,
+            32.41252302025783,
+            11.233885819521179
+          ],
+          "arrival_bins_pct": [
+            1.4732965009208103,
+            2.0257826887661143,
+            7.550644567219153,
+            34.99079189686925,
+            21.54696132596685,
+            32.41252302025783
+          ],
+          "median_slack_hours": 9.75
+        },
+        {
+          "year": 2024,
+          "pool": "external_visitors",
+          "vehicles": 10,
+          "sessions": 538,
+          "sessions_per_vehicle_week": 1.0289617486338798,
+          "arrival_mean_pct": 49.95799852877542,
+          "target_mean_pct": 82.19899251587263,
+          "request_mean_pp": 32.24099398709719,
+          "full_target_pct": 6.319702602230483,
+          "near_empty_to_full_pct": 0.0,
+          "gap_bins_pct": [
+            0.5576208178438662,
+            46.09665427509294,
+            45.539033457249076,
+            7.806691449814126,
+            0.0
+          ],
+          "arrival_bins_pct": [
+            0.0,
+            0.0,
+            0.0,
+            11.895910780669144,
+            76.39405204460967,
+            11.71003717472119
+          ],
+          "median_slack_hours": 1.5
+        }
+      ],
+      "multiday_trips": 76,
+      "multiday_with_destination_travel": 56,
+      "multiday_count_distribution": {
+        "1": 2,
+        "2": 1,
+        "3": 2,
+        "4": 5,
+        "5": 5,
+        "6": 1,
+        "7": 1,
+        "8": 1
+      },
+      "cycle_profiles": 2208,
+      "annual_physical_nonshiftable_kwh": [
+        {
+          "year": 2023,
+          "original": 164944.0050048828,
+          "revised": 213111.68127441406,
+          "scope": "physical inventory, not topology-filtered executed annual controller demand"
+        },
+        {
+          "year": 2024,
+          "original": 158392.76359080433,
+          "revised": 208871.9158935547,
+          "scope": "physical inventory, not topology-filtered executed annual controller demand"
+        }
+      ],
+      "max_end_use_balance_error_kwh": 4.76837158203125e-07,
+      "absence_to_home_dhw_mean_ratio": 0.13265201408888208,
+      "native_import_over_limit": [],
+      "median_member_load_correlation_2024": 0.12479873409066085,
+      "exact_duplicate_member_loads_2024": 0,
+      "events": [
+        {
+          "variant": "core_30_combined",
+          "channel_rows": 238,
+          "latent_causes": 30,
+          "latent_causes_by_regime": {
+            "local_fault": 20,
+            "controlled_stress": 10
+          },
+          "exact_52_week_replayed_starts": 0,
+          "distinct_2024_starts": 12,
+          "largest_simultaneous_channel_group": 11
+        },
+        {
+          "variant": "core_30_robustness",
+          "channel_rows": 246,
+          "latent_causes": 34,
+          "latent_causes_by_regime": {
+            "local_fault": 20,
+            "controlled_stress": 10,
+            "controlled_noise_stress": 4
+          },
+          "exact_52_week_replayed_starts": 0,
+          "distinct_2024_starts": 12,
+          "largest_simultaneous_channel_group": 11
+        }
+      ]
+    },
+    {
+      "family": "rec_pt_2023_micro_4_v2",
+      "members": 4,
+      "ev_distributions": [
+        {
+          "year": 2023,
+          "pool": "resident",
+          "vehicles": 2,
+          "sessions": 213,
+          "sessions_per_vehicle_week": 2.0424657534246573,
+          "arrival_mean_pct": 57.3152170789348,
+          "target_mean_pct": 85.54797886356663,
+          "request_mean_pp": 28.23276178463183,
+          "full_target_pct": 16.901408450704224,
+          "near_empty_to_full_pct": 0.4694835680751174,
+          "gap_bins_pct": [
+            19.248826291079812,
+            43.66197183098591,
+            18.779342723004692,
+            12.676056338028168,
+            5.633802816901409
+          ],
+          "arrival_bins_pct": [
+            0.4694835680751174,
+            1.4084507042253522,
+            3.755868544600939,
+            14.553990610328638,
+            18.779342723004692,
+            61.03286384976526
+          ],
+          "median_slack_hours": 11.75
+        },
+        {
+          "year": 2024,
+          "pool": "resident",
+          "vehicles": 2,
+          "sessions": 221,
+          "sessions_per_vehicle_week": 2.1133879781420766,
+          "arrival_mean_pct": 55.998383802713704,
+          "target_mean_pct": 84.84119724929712,
+          "request_mean_pp": 28.842813446583403,
+          "full_target_pct": 10.407239819004525,
+          "near_empty_to_full_pct": 1.3574660633484164,
+          "gap_bins_pct": [
+            19.457013574660635,
+            44.34389140271493,
+            17.194570135746606,
+            14.479638009049776,
+            4.524886877828054
+          ],
+          "arrival_bins_pct": [
+            1.3574660633484164,
+            0.0,
+            2.7149321266968327,
+            18.552036199095024,
+            21.71945701357466,
+            55.65610859728507
+          ],
+          "median_slack_hours": 11.5
+        }
+      ],
+      "multiday_trips": 15,
+      "multiday_with_destination_travel": 13,
+      "multiday_count_distribution": {
+        "3": 2,
+        "4": 1,
+        "5": 1
+      },
+      "cycle_profiles": 336,
+      "annual_physical_nonshiftable_kwh": [
+        {
+          "year": 2023,
+          "original": 12100.843505859375,
+          "revised": 11967.4921875,
+          "scope": "physical inventory, not topology-filtered executed annual controller demand"
+        },
+        {
+          "year": 2024,
+          "original": 11789.879122086855,
+          "revised": 11252.310791015625,
+          "scope": "physical inventory, not topology-filtered executed annual controller demand"
+        }
+      ],
+      "max_end_use_balance_error_kwh": 1.1920928955078125e-07,
+      "absence_to_home_dhw_mean_ratio": 0.12716584344309725,
+      "native_import_over_limit": [],
+      "median_member_load_correlation_2024": 0.1319820060836439,
+      "exact_duplicate_member_loads_2024": 0,
+      "events": []
+    },
+    {
+      "family": "rec_pt_2023_premium_100_v2",
+      "members": 100,
+      "ev_distributions": [
+        {
+          "year": 2023,
+          "pool": "resident",
+          "vehicles": 37,
+          "sessions": 2520,
+          "sessions_per_vehicle_week": 1.3061828952239911,
+          "arrival_mean_pct": 45.47230514026773,
+          "target_mean_pct": 87.24968369700798,
+          "request_mean_pp": 41.77737855674026,
+          "full_target_pct": 12.738095238095237,
+          "near_empty_to_full_pct": 1.9444444444444444,
+          "gap_bins_pct": [
+            14.206349206349206,
+            25.238095238095237,
+            15.476190476190476,
+            29.8015873015873,
+            15.277777777777779
+          ],
+          "arrival_bins_pct": [
+            1.984126984126984,
+            2.301587301587302,
+            10.873015873015873,
+            33.13492063492063,
+            13.531746031746032,
+            38.17460317460317
+          ],
+          "median_slack_hours": 11.5
+        },
+        {
+          "year": 2023,
+          "pool": "external_visitors",
+          "vehicles": 48,
+          "sessions": 2784,
+          "sessions_per_vehicle_week": 1.1123287671232875,
+          "arrival_mean_pct": 48.85554319673435,
+          "target_mean_pct": 75.90560233297134,
+          "request_mean_pp": 27.05005913623698,
+          "full_target_pct": 2.586206896551724,
+          "near_empty_to_full_pct": 0.0,
+          "gap_bins_pct": [
+            0.28735632183908044,
+            61.02729885057471,
+            36.06321839080459,
+            2.6221264367816093,
+            0.0
+          ],
+          "arrival_bins_pct": [
+            0.0,
+            0.0,
+            0.10775862068965517,
+            14.367816091954023,
+            76.29310344827587,
+            9.23132183908046
+          ],
+          "median_slack_hours": 1.25
+        },
+        {
+          "year": 2024,
+          "pool": "resident",
+          "vehicles": 37,
+          "sessions": 2491,
+          "sessions_per_vehicle_week": 1.2876236892630335,
+          "arrival_mean_pct": 45.08569656229602,
+          "target_mean_pct": 87.19624930862668,
+          "request_mean_pp": 42.110552746330676,
+          "full_target_pct": 12.725812926535529,
+          "near_empty_to_full_pct": 2.0875150541951024,
+          "gap_bins_pct": [
+            13.76957045363308,
+            23.76555600160578,
+            17.58329987956644,
+            30.63026896828583,
+            14.251304696908873
+          ],
+          "arrival_bins_pct": [
+            2.127659574468085,
+            2.6896828582898435,
+            9.51425130469691,
+            34.122842232035325,
+            16.01766358892011,
+            35.52790044158972
+          ],
+          "median_slack_hours": 11.625
+        },
+        {
+          "year": 2024,
+          "pool": "external_visitors",
+          "vehicles": 48,
+          "sessions": 2937,
+          "sessions_per_vehicle_week": 1.1702527322404372,
+          "arrival_mean_pct": 47.7066115061668,
+          "target_mean_pct": 74.40364057701416,
+          "request_mean_pp": 26.697029070847346,
+          "full_target_pct": 2.417432754511406,
+          "near_empty_to_full_pct": 0.0,
+          "gap_bins_pct": [
+            0.37453183520599254,
+            61.3210759278175,
+            35.308137555328564,
+            2.9962546816479403,
+            0.0
+          ],
+          "arrival_bins_pct": [
+            0.0,
+            0.0,
+            0.17024174327545114,
+            17.87538304392237,
+            74.39564181137214,
+            7.558733401430031
+          ],
+          "median_slack_hours": 1.25
+        }
+      ],
+      "multiday_trips": 267,
+      "multiday_with_destination_travel": 210,
+      "multiday_count_distribution": {
+        "1": 11,
+        "2": 17,
+        "3": 13,
+        "4": 12,
+        "5": 11,
+        "6": 1,
+        "7": 6,
+        "9": 1,
+        "11": 1,
+        "12": 1
+      },
+      "cycle_profiles": 7104,
+      "annual_physical_nonshiftable_kwh": [
+        {
+          "year": 2023,
+          "original": 583809.931640625,
+          "revised": 850678.2868652344,
+          "scope": "physical inventory, not topology-filtered executed annual controller demand"
+        },
+        {
+          "year": 2024,
+          "original": 560192.2418476503,
+          "revised": 825793.2276611328,
+          "scope": "physical inventory, not topology-filtered executed annual controller demand"
+        }
+      ],
+      "max_end_use_balance_error_kwh": 9.5367431640625e-07,
+      "absence_to_home_dhw_mean_ratio": 0.1325169989730178,
+      "native_import_over_limit": [],
+      "median_member_load_correlation_2024": 0.1238142550971917,
+      "exact_duplicate_member_loads_2024": 0,
+      "events": [
+        {
+          "variant": "premium_100_allin",
+          "channel_rows": 676,
+          "latent_causes": 103,
+          "latent_causes_by_regime": {
+            "local_fault": 57,
+            "controlled_noise_stress": 32,
+            "controlled_stress": 14
+          },
+          "exact_52_week_replayed_starts": 0,
+          "distinct_2024_starts": 49,
+          "largest_simultaneous_channel_group": 11
+        }
+      ]
+    }
+  ],
+  "runtime": [
+    {
+      "schema": "core_30_combined.json",
+      "label": "development_storage_unavailable_2023",
+      "status": "pass",
+      "start": 1935,
+      "end": 1938,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 1935,
+          "counts": {
+            "building": 26,
+            "charger": 14,
+            "deferrable_appliance": 17,
+            "pv": 8,
+            "storage": 2
+          },
+          "topology_version": 0
+        },
+        {
+          "time_step": 1938,
+          "counts": {
+            "building": 26,
+            "charger": 14,
+            "deferrable_appliance": 17,
+            "pv": 8,
+            "storage": 2
+          },
+          "topology_version": 0
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8510,
+      "seconds": 1.606
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "development_pv_missing_local_Member_014_0_2023",
+      "status": "pass",
+      "start": 4867,
+      "end": 4870,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 4867,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 4
+        },
+        {
+          "time_step": 4870,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 4
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8933,
+      "seconds": 1.917
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "development_price_bias_2023",
+      "status": "pass",
+      "start": 4919,
+      "end": 4922,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 4919,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 4
+        },
+        {
+          "time_step": 4922,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 4
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8933,
+      "seconds": 2.062
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "development_charger_unavailable_2023",
+      "status": "pass",
+      "start": 19027,
+      "end": 19030,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 19027,
+          "counts": {
+            "building": 26,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 7
+        },
+        {
+          "time_step": 19030,
+          "counts": {
+            "building": 26,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 7
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8730,
+      "seconds": 1.878
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "development_storage_delay_2023",
+      "status": "pass",
+      "start": 25621,
+      "end": 25624,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 25621,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 18,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 10
+        },
+        {
+          "time_step": 25624,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 18,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 10
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9043,
+      "seconds": 2.287
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "development_native_missing_2023",
+      "status": "pass",
+      "start": 27334,
+      "end": 27337,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 27334,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 18,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 10
+        },
+        {
+          "time_step": 27337,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 18,
+            "pv": 10,
+            "storage": 3
+          },
+          "topology_version": 10
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 9043,
+      "seconds": 2.323
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "grid_Member_001_2023_1",
+      "status": "pass",
+      "start": 18645,
+      "end": 18648,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 18645,
+          "counts": {
+            "building": 26,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 7
+        },
+        {
+          "time_step": 18648,
+          "counts": {
+            "building": 26,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 7
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8730,
+      "seconds": 2.01
+    },
+    {
+      "schema": "core_30_combined.json",
+      "label": "grid_stress_2023",
+      "status": "pass",
+      "start": 9968,
+      "end": 9971,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 9968,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 4
+        },
+        {
+          "time_step": 9971,
+          "counts": {
+            "building": 27,
+            "charger": 15,
+            "deferrable_appliance": 17,
+            "pv": 9,
+            "storage": 3
+          },
+          "topology_version": 4
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 8933,
+      "seconds": 2.064
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "measurement_noise_pv_generation_power_kw_campaign_2_2023",
+      "status": "pass",
+      "start": 438,
+      "end": 441,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 438,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        },
+        {
+          "time_step": 441,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 26364,
+      "seconds": 6.317
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "measurement_noise_pv_generation_power_kw_domain_campaign_2_2023",
+      "status": "pass",
+      "start": 438,
+      "end": 441,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 438,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        },
+        {
+          "time_step": 441,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 26364,
+      "seconds": 6.215
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "development_pv_missing_local_Member_018_0_2023",
+      "status": "pass",
+      "start": 538,
+      "end": 541,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 538,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        },
+        {
+          "time_step": 541,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 26364,
+      "seconds": 6.19
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "development_storage_delay_2023",
+      "status": "pass",
+      "start": 2783,
+      "end": 2786,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 2783,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        },
+        {
+          "time_step": 2786,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 26364,
+      "seconds": 6.201
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "measurement_noise_ev_soc_campaign_1_2023",
+      "status": "pass",
+      "start": 3025,
+      "end": 3028,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 3025,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        },
+        {
+          "time_step": 3028,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 26364,
+      "seconds": 6.017
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "measurement_noise_ev_soc_domain_campaign_1_2023",
+      "status": "pass",
+      "start": 3025,
+      "end": 3028,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 3025,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        },
+        {
+          "time_step": 3028,
+          "counts": {
+            "building": 80,
+            "charger": 63,
+            "deferrable_appliance": 58,
+            "pv": 26,
+            "storage": 17
+          },
+          "topology_version": 1
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 26364,
+      "seconds": 5.938
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "measurement_noise_storage_soc_campaign_4_2023",
+      "status": "pass",
+      "start": 4613,
+      "end": 4616,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 4613,
+          "counts": {
+            "building": 83,
+            "charger": 65,
+            "deferrable_appliance": 56,
+            "pv": 30,
+            "storage": 19
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 4616,
+          "counts": {
+            "building": 83,
+            "charger": 65,
+            "deferrable_appliance": 56,
+            "pv": 30,
+            "storage": 19
+          },
+          "topology_version": 15
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 27693,
+      "seconds": 6.554
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "measurement_noise_storage_soc_domain_campaign_4_2023",
+      "status": "pass",
+      "start": 4613,
+      "end": 4616,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 4613,
+          "counts": {
+            "building": 83,
+            "charger": 65,
+            "deferrable_appliance": 56,
+            "pv": 30,
+            "storage": 19
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 4616,
+          "counts": {
+            "building": 83,
+            "charger": 65,
+            "deferrable_appliance": 56,
+            "pv": 30,
+            "storage": 19
+          },
+          "topology_version": 15
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 27693,
+      "seconds": 6.363
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "development_charging_dropout_2023",
+      "status": "pass",
+      "start": 5071,
+      "end": 5074,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 5071,
+          "counts": {
+            "building": 83,
+            "charger": 65,
+            "deferrable_appliance": 56,
+            "pv": 30,
+            "storage": 19
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 5074,
+          "counts": {
+            "building": 83,
+            "charger": 65,
+            "deferrable_appliance": 56,
+            "pv": 30,
+            "storage": 19
+          },
+          "topology_version": 15
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 27693,
+      "seconds": 6.449
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "measurement_noise_building_non_shiftable_load_campaign_1_2023",
+      "status": "pass",
+      "start": 17054,
+      "end": 17057,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 17054,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        },
+        {
+          "time_step": 17057,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 28579,
+      "seconds": 7.219
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "measurement_noise_building_non_shiftable_load_domain_campaign_1_2023",
+      "status": "pass",
+      "start": 17054,
+      "end": 17057,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 17054,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        },
+        {
+          "time_step": 17057,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 28579,
+      "seconds": 7.199
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "development_storage_unavailable_2023",
+      "status": "pass",
+      "start": 18193,
+      "end": 18196,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 18193,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        },
+        {
+          "time_step": 18196,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 28579,
+      "seconds": 7.164
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "development_native_missing_2023",
+      "status": "pass",
+      "start": 18692,
+      "end": 18695,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 18692,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        },
+        {
+          "time_step": 18695,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 28579,
+      "seconds": 7.166
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "development_charger_unavailable_2023",
+      "status": "pass",
+      "start": 22850,
+      "end": 22853,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 22850,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 34,
+            "storage": 19
+          },
+          "topology_version": 37
+        },
+        {
+          "time_step": 22853,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 34,
+            "storage": 19
+          },
+          "topology_version": 37
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30111,
+      "seconds": 8.008
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "development_price_bias_2023",
+      "status": "pass",
+      "start": 23900,
+      "end": 23903,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 23900,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 34,
+            "storage": 19
+          },
+          "topology_version": 37
+        },
+        {
+          "time_step": 23903,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 34,
+            "storage": 19
+          },
+          "topology_version": 37
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30111,
+      "seconds": 7.822
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "development_dr_3",
+      "status": "pass",
+      "start": 11423,
+      "end": 11426,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 11423,
+          "counts": {
+            "building": 83,
+            "charger": 65,
+            "deferrable_appliance": 56,
+            "pv": 30,
+            "storage": 19
+          },
+          "topology_version": 15
+        },
+        {
+          "time_step": 11426,
+          "counts": {
+            "building": 83,
+            "charger": 65,
+            "deferrable_appliance": 56,
+            "pv": 30,
+            "storage": 19
+          },
+          "topology_version": 15
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 27693,
+      "seconds": 6.376
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "development_dr_4",
+      "status": "pass",
+      "start": 27013,
+      "end": 27016,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 27013,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 34,
+            "storage": 19
+          },
+          "topology_version": 37
+        },
+        {
+          "time_step": 27016,
+          "counts": {
+            "building": 89,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 34,
+            "storage": 19
+          },
+          "topology_version": 37
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30111,
+      "seconds": 7.465
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "grid_Member_002_2023_0",
+      "status": "pass",
+      "start": 16819,
+      "end": 16822,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 16819,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        },
+        {
+          "time_step": 16822,
+          "counts": {
+            "building": 85,
+            "charger": 65,
+            "deferrable_appliance": 58,
+            "pv": 35,
+            "storage": 20
+          },
+          "topology_version": 27
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 28579,
+      "seconds": 7.322
+    },
+    {
+      "schema": "premium_100_allin.json",
+      "label": "grid_stress_2023",
+      "status": "pass",
+      "start": 33551,
+      "end": 33554,
+      "transitions": 3,
+      "snapshots": [
+        {
+          "time_step": 33551,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        },
+        {
+          "time_step": 33554,
+          "counts": {
+            "building": 88,
+            "charger": 63,
+            "deferrable_appliance": 57,
+            "pv": 33,
+            "storage": 19
+          },
+          "topology_version": 47
+        }
+      ],
+      "executed_events": [],
+      "kpi_rows": 30388,
+      "seconds": 7.677
+    }
+  ],
+  "reproducibility": {
+    "status": "pass",
+    "parquet_files": 1969,
+    "identical_bytes": true,
+    "scope": "Two complete four-family generations from pinned Git source, including matched propagation and EV planning. Original raw downloads, archives and second dataset trees are not created.",
+    "generator_sha256": {
+      "scripts/portugal_activity.py": "dd6fd46fac932f000521400d08db3dc9c9b736936c7f481bae3f1478e46c1b05",
+      "scripts/portugal_commercial_activity.py": "0713b02f7c29aa6656ee455ea2f33863aacf7dad8340106942ad5a77dee0aed9",
+      "scripts/portugal_stochastic_demand.py": "df8e790c1fa9e24e9db5f494ad3ea38b43873cb58b127de23b915f2c098346b6",
+      "scripts/portugal_realism_config.json": "b699b6d3ac0a228f8544f65f82ba0b79f2f7314140ec1ccaa120f0d067bcdffe",
+      "scripts/revise_portugal_realism.py": "94fbdf761f4668fb84d9abefa3113be15bb76557c5382a399f2e4d90d06c83c6",
+      "scripts/revise_portugal_ev_mobility.py": "e5115b63e452e95e8152ea50270b2a3cdbb58c7ff47b491822fe4918cf2906f4"
+    },
+    "runtime_input_fingerprint_unchanged": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445"
+  },
+  "status": "pass",
+  "generator_sha256": {
+    "scripts/portugal_activity.py": "dd6fd46fac932f000521400d08db3dc9c9b736936c7f481bae3f1478e46c1b05",
+    "scripts/portugal_stochastic_demand.py": "df8e790c1fa9e24e9db5f494ad3ea38b43873cb58b127de23b915f2c098346b6",
+    "scripts/portugal_commercial_activity.py": "0713b02f7c29aa6656ee455ea2f33863aacf7dad8340106942ad5a77dee0aed9",
+    "scripts/portugal_realism_config.json": "b699b6d3ac0a228f8544f65f82ba0b79f2f7314140ec1ccaa120f0d067bcdffe",
+    "scripts/revise_portugal_realism.py": "94fbdf761f4668fb84d9abefa3113be15bb76557c5382a399f2e4d90d06c83c6",
+    "scripts/revise_portugal_ev_mobility.py": "e5115b63e452e95e8152ea50270b2a3cdbb58c7ff47b491822fe4918cf2906f4"
+  },
+  "software_validation": {
+    "date": "2026-11-05",
+    "scope": "Local validation of this generated revision; no remote CI, annual controller benchmark, publication or commits.",
+    "runtime_input_fingerprint": "e9643a8e581f93989a7a5dca3f1009c4beadce4bdf115d37a24b139ae2846445",
+    "pytest_command": "python -m pytest -q tests/test_portugal_realism.py tests/test_portugal_ev_mobility.py tests/test_portugal_empirical.py tests/test_portugal_commercial_appliances.py tests/test_portugal_dataset_boundaries.py tests/test_portugal_heldout_2024.py tests/test_portugal_omie_pricing.py tests/test_ev_arrivals.py tests/test_ev_soc_behavior.py tests/test_ev_feasibility_replay.py",
+    "pytest_passed": 161,
+    "pytest_duration_seconds": 778.17,
+    "test_files_sha256": {
+      "tests/test_portugal_realism.py": "d334ad22681b7910c3bdde07bd2613135818b21ac1e87d53dbba7e38c02b3e5d",
+      "tests/test_portugal_ev_mobility.py": "6c9ac71af67759263fb54001f399e639ebde3fe485dee46a080b5d654b8365cb",
+      "tests/test_portugal_empirical.py": "259d169ef39cca0f5fa0aed0660c9446e07a30b16e104c45da837b184de18a72",
+      "tests/test_portugal_commercial_appliances.py": "a5668104ea28fe1440dc2d0c1a4d0958890ab0c5029dd33b4d6b0dcd343a536d",
+      "tests/test_portugal_dataset_boundaries.py": "409693c6901618e352f0548855b0a7b52fa2b57c5a1c3e39bf06340c999ee24d",
+      "tests/test_portugal_heldout_2024.py": "68798a4727b613e77b2a98cf82989b228f64a0b002e15cd423de54ccde340491",
+      "tests/test_portugal_omie_pricing.py": "94ca4f2e0b1e3a7ed6fb9b4e08ed81e386504deacc2a92a79d9acc01cb2f8b51",
+      "tests/test_ev_arrivals.py": "8f7b5b42f700e59d8d36908b664a492dcca40000a878e34b6e57e6f5eca19ab6",
+      "tests/test_ev_soc_behavior.py": "90de9a3f7fc87a2f181f5dd723dbfd902d8ac2f77ee6efb6e23556768e97539c",
+      "tests/test_ev_feasibility_replay.py": "1cf8550f7e705bc8f5cdc035b5930c2f11a1fa9e654077d50288933b0d240fe1"
+    },
+    "environment": {
+      "python": "3.10.22",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "pyarrow": "18.1.0",
+      "scipy": "1.15.1",
+      "pytest": "8.3.2",
+      "requests": "2.32.3"
+    },
+    "transition_windows": 72,
+    "fault_probes": 27,
+    "accounting_windows": 18,
+    "matched_pairs": 6,
+    "preparation_schemas": 9,
+    "family_file_hashes_verified": 2090,
+    "maximum_accounting_energy_residual_kwh": 2.3682741812081076e-07,
+    "maximum_kpi_error": 9.094947017729282e-13,
+    "commercial_seed_draws": 160,
+    "commercial_sensitivity_sector_cases": 576,
+    "commercial_sensitivity_rejected_saturated_cases": 1,
+    "commercial_sensitivity_infeasible_annual_budgets": 0,
+    "interpretation": "Defaults and regression checks pass. One extreme full-transfer refrigerated-retail sensitivity setting is rejected for service-ceiling-induced repeated shapes; not silently accepted. Portuguese summaries inform calibration/engineering priors, not independent population validation."
+  }
+}

@@ -3,31 +3,31 @@
   "families": [
     {
       "family": "rec_pt_2023_core_15_v2",
-      "sessions": 3844,
-      "complete_sessions": 3838,
-      "right_censored_sessions": 6,
-      "schedule_files_with_partial_sessions": 12
+      "sessions": 789,
+      "complete_sessions": 789,
+      "right_censored_sessions": 0,
+      "schedule_files_with_partial_sessions": 0
     },
     {
       "family": "rec_pt_2023_core_30_v2",
-      "sessions": 9691,
-      "complete_sessions": 9682,
-      "right_censored_sessions": 9,
-      "schedule_files_with_partial_sessions": 52
+      "sessions": 2104,
+      "complete_sessions": 2102,
+      "right_censored_sessions": 2,
+      "schedule_files_with_partial_sessions": 12
     },
     {
       "family": "rec_pt_2023_micro_4_v2",
-      "sessions": 1237,
-      "complete_sessions": 1235,
-      "right_censored_sessions": 2,
-      "schedule_files_with_partial_sessions": 4
+      "sessions": 434,
+      "complete_sessions": 433,
+      "right_censored_sessions": 1,
+      "schedule_files_with_partial_sessions": 2
     },
     {
       "family": "rec_pt_2023_premium_100_v2",
-      "sessions": 41288,
-      "complete_sessions": 41251,
-      "right_censored_sessions": 37,
-      "schedule_files_with_partial_sessions": 110
+      "sessions": 10732,
+      "complete_sessions": 10729,
+      "right_censored_sessions": 3,
+      "schedule_files_with_partial_sessions": 9
     }
   ],
   "removed_inactive_outages": [
@@ -87,6 +87,7 @@
     }
   ],
   "removed_outage_steps": 40,
-  "preserved": "Prices, forecasts, market, load/PV, EV identities, arrival SOC, targets, DR requests and intentional faults are unchanged.",
-  "runtime_requirement": "Use the accompanying unknown-departure KPI/reward handling; historical simulator commits do not correctly handle terminal unknown deadlines."
+  "preserved": "Boundary censoring and inactive-outage corrections remain valid. Current EV arrivals, targets and sessions use portugal-ev-mobility-1; realism_revision.json additionally describes the shared activity calendar and physical/event revisions where present.",
+  "runtime_requirement": "Use the accompanying unknown-departure KPI/reward handling; historical simulator commits do not correctly handle terminal unknown deadlines.",
+  "mobility_revision": "portugal-ev-mobility-1"
 }
