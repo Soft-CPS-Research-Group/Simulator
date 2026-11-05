@@ -88,36 +88,36 @@
     "cohorts": [
       {
         "variant": "core_30_topology",
-        "source_sessions": 9691,
-        "previous_offered": 8587,
-        "current_offered": 8481,
-        "excluded_by_2024_departure": 106,
-        "excluded_requested_energy_reference_kwh": 485.2432619217719,
+        "source_sessions": 2104,
+        "previous_offered": 1939,
+        "current_offered": 1898,
+        "excluded_by_2024_departure": 41,
+        "excluded_requested_energy_reference_kwh": 529.899266775522,
         "affected_inflight_sessions": 0,
         "shared_service_requests_unchanged": true,
-        "appliances": "All existing appliance schedules and profiles unchanged; exiting member owns no controllable appliance"
+        "appliances": "Current appliance realization is shared across matched arms; exiting member owns no controllable appliance"
       },
       {
         "variant": "core_30_combined",
-        "source_sessions": 9691,
-        "previous_offered": 8587,
-        "current_offered": 8481,
-        "excluded_by_2024_departure": 106,
-        "excluded_requested_energy_reference_kwh": 485.2432619217719,
+        "source_sessions": 2104,
+        "previous_offered": 1939,
+        "current_offered": 1898,
+        "excluded_by_2024_departure": 41,
+        "excluded_requested_energy_reference_kwh": 529.899266775522,
         "affected_inflight_sessions": 0,
         "shared_service_requests_unchanged": true,
-        "appliances": "All existing appliance schedules and profiles unchanged; exiting member owns no controllable appliance"
+        "appliances": "Current appliance realization is shared across matched arms; exiting member owns no controllable appliance"
       },
       {
         "variant": "premium_100_allin",
-        "source_sessions": 41288,
-        "previous_offered": 40072,
-        "current_offered": 39982,
-        "excluded_by_2024_departure": 90,
-        "excluded_requested_energy_reference_kwh": 694.1178983848698,
+        "source_sessions": 10732,
+        "previous_offered": 10595,
+        "current_offered": 10572,
+        "excluded_by_2024_departure": 23,
+        "excluded_requested_energy_reference_kwh": 731.9394388985469,
         "affected_inflight_sessions": 0,
         "shared_service_requests_unchanged": true,
-        "appliances": "All existing appliance schedules and profiles unchanged; exiting member owns no controllable appliance"
+        "appliances": "Current appliance realization is shared across matched arms; exiting member owns no controllable appliance"
       }
     ],
     "preparation": [
@@ -186,6 +186,8 @@
       }
     ],
     "preparation_year_preserved": true,
+    "preparation_preservation_scope": "Matched 2023 inputs across current campaign and references; declared mobility/realism revisions apply to both.",
+    "mobility_revision": "portugal-ev-mobility-1",
     "declared_2024_events": 18
   },
   "runtime": [
@@ -222,7 +224,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 1557,
-      "seconds": 0.196
+      "seconds": 0.268
     },
     {
       "schema": "core_4.json",
@@ -257,7 +259,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 1557,
-      "seconds": 0.188
+      "seconds": 0.266
     },
     {
       "schema": "core_15.json",
@@ -292,7 +294,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 4923,
-      "seconds": 0.617
+      "seconds": 0.795
     },
     {
       "schema": "core_15.json",
@@ -327,7 +329,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 4923,
-      "seconds": 0.595
+      "seconds": 0.78
     },
     {
       "schema": "core_30_normal.json",
@@ -362,7 +364,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9513,
-      "seconds": 1.207
+      "seconds": 1.527
     },
     {
       "schema": "core_30_normal.json",
@@ -397,7 +399,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9513,
-      "seconds": 1.187
+      "seconds": 1.501
     },
     {
       "schema": "core_30_topology.json",
@@ -432,7 +434,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 8905,
-      "seconds": 2.679
+      "seconds": 3.406
     },
     {
       "schema": "core_30_topology.json",
@@ -467,7 +469,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9007,
-      "seconds": 2.86
+      "seconds": 3.633
     },
     {
       "schema": "core_30_topology.json",
@@ -549,7 +551,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 6.143
+      "seconds": 6.106
     },
     {
       "schema": "core_30_topology.json",
@@ -631,7 +633,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 6.12
+      "seconds": 6.226
     },
     {
       "schema": "core_30_topology.json",
@@ -713,7 +715,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 6.232
+      "seconds": 6.231
     },
     {
       "schema": "core_30_topology.json",
@@ -795,7 +797,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 6.388
+      "seconds": 6.249
     },
     {
       "schema": "core_30_topology.json",
@@ -877,7 +879,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 6.286
+      "seconds": 6.251
     },
     {
       "schema": "core_30_topology.json",
@@ -959,7 +961,7 @@
         }
       ],
       "kpi_rows": 9007,
-      "seconds": 6.201
+      "seconds": 6.204
     },
     {
       "schema": "core_30_safety.json",
@@ -994,7 +996,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9513,
-      "seconds": 1.237
+      "seconds": 1.551
     },
     {
       "schema": "core_30_safety.json",
@@ -1029,7 +1031,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9513,
-      "seconds": 1.213
+      "seconds": 1.499
     },
     {
       "schema": "core_30_robustness.json",
@@ -1064,7 +1066,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9761,
-      "seconds": 1.378
+      "seconds": 1.811
     },
     {
       "schema": "core_30_robustness.json",
@@ -1099,7 +1101,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9761,
-      "seconds": 1.353
+      "seconds": 1.793
     },
     {
       "schema": "core_30_combined.json",
@@ -1134,7 +1136,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9153,
-      "seconds": 2.749
+      "seconds": 3.34
     },
     {
       "schema": "core_30_combined.json",
@@ -1169,7 +1171,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9263,
-      "seconds": 2.931
+      "seconds": 4.054
     },
     {
       "schema": "core_30_combined.json",
@@ -1251,7 +1253,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 6.52
+      "seconds": 6.511
     },
     {
       "schema": "core_30_combined.json",
@@ -1333,7 +1335,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 6.536
+      "seconds": 6.827
     },
     {
       "schema": "core_30_combined.json",
@@ -1415,7 +1417,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 6.426
+      "seconds": 6.786
     },
     {
       "schema": "core_30_combined.json",
@@ -1497,7 +1499,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 6.762
+      "seconds": 6.801
     },
     {
       "schema": "core_30_combined.json",
@@ -1579,7 +1581,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 6.631
+      "seconds": 6.777
     },
     {
       "schema": "core_30_combined.json",
@@ -1661,7 +1663,7 @@
         }
       ],
       "kpi_rows": 9263,
-      "seconds": 6.297
+      "seconds": 6.727
     },
     {
       "schema": "premium_100_normal.json",
@@ -1696,7 +1698,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 30933,
-      "seconds": 4.194
+      "seconds": 5.534
     },
     {
       "schema": "premium_100_normal.json",
@@ -1731,7 +1733,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 30933,
-      "seconds": 4.1
+      "seconds": 5.453
     },
     {
       "schema": "premium_100_allin.json",
@@ -1766,7 +1768,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 30388,
-      "seconds": 9.596
+      "seconds": 12.797
     },
     {
       "schema": "premium_100_allin.json",
@@ -1801,7 +1803,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 30508,
-      "seconds": 9.757
+      "seconds": 17.664
     },
     {
       "schema": "premium_100_allin.json",
@@ -1883,7 +1885,7 @@
         }
       ],
       "kpi_rows": 30711,
-      "seconds": 26.684
+      "seconds": 29.653
     },
     {
       "schema": "premium_100_allin.json",
@@ -1965,7 +1967,7 @@
         }
       ],
       "kpi_rows": 30711,
-      "seconds": 27.526
+      "seconds": 27.504
     },
     {
       "schema": "premium_100_allin.json",
@@ -2047,7 +2049,7 @@
         }
       ],
       "kpi_rows": 30711,
-      "seconds": 27.44
+      "seconds": 28.551
     },
     {
       "schema": "premium_100_allin.json",
@@ -2129,7 +2131,7 @@
         }
       ],
       "kpi_rows": 30711,
-      "seconds": 27.63
+      "seconds": 29.05
     },
     {
       "schema": "premium_100_allin.json",
@@ -2211,7 +2213,7 @@
         }
       ],
       "kpi_rows": 30711,
-      "seconds": 27.289
+      "seconds": 30.636
     },
     {
       "schema": "premium_100_allin.json",
@@ -2293,7 +2295,7 @@
         }
       ],
       "kpi_rows": 30508,
-      "seconds": 30.954
+      "seconds": 30.262
     },
     {
       "schema": "core_30_combined_no_disturbances.json",
@@ -2328,7 +2330,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 8905,
-      "seconds": 3.129
+      "seconds": 4.066
     },
     {
       "schema": "core_30_combined_no_disturbances.json",
@@ -2363,7 +2365,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9007,
-      "seconds": 3.345
+      "seconds": 3.926
     },
     {
       "schema": "core_30_combined_no_disturbances.json",
@@ -2445,7 +2447,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 7.26
+      "seconds": 7.48
     },
     {
       "schema": "core_30_combined_no_disturbances.json",
@@ -2527,7 +2529,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 8.095
+      "seconds": 7.391
     },
     {
       "schema": "core_30_combined_no_disturbances.json",
@@ -2609,7 +2611,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 8.454
+      "seconds": 7.024
     },
     {
       "schema": "core_30_combined_no_disturbances.json",
@@ -2691,7 +2693,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 7.734
+      "seconds": 7.429
     },
     {
       "schema": "core_30_combined_no_disturbances.json",
@@ -2773,7 +2775,7 @@
         }
       ],
       "kpi_rows": 9210,
-      "seconds": 7.473
+      "seconds": 7.552
     },
     {
       "schema": "core_30_combined_no_disturbances.json",
@@ -2855,7 +2857,7 @@
         }
       ],
       "kpi_rows": 9007,
-      "seconds": 7.533
+      "seconds": 7.505
     },
     {
       "schema": "core_30_combined_nominal_limits.json",
@@ -2890,7 +2892,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9153,
-      "seconds": 3.055
+      "seconds": 4.065
     },
     {
       "schema": "core_30_combined_nominal_limits.json",
@@ -2925,7 +2927,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 9263,
-      "seconds": 3.388
+      "seconds": 4.902
     },
     {
       "schema": "core_30_combined_nominal_limits.json",
@@ -3007,7 +3009,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 7.43
+      "seconds": 7.587
     },
     {
       "schema": "core_30_combined_nominal_limits.json",
@@ -3089,7 +3091,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 8.28
+      "seconds": 7.29
     },
     {
       "schema": "core_30_combined_nominal_limits.json",
@@ -3171,7 +3173,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 7.584
+      "seconds": 7.856
     },
     {
       "schema": "core_30_combined_nominal_limits.json",
@@ -3253,7 +3255,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 7.753
+      "seconds": 8.339
     },
     {
       "schema": "core_30_combined_nominal_limits.json",
@@ -3335,7 +3337,7 @@
         }
       ],
       "kpi_rows": 9466,
-      "seconds": 7.51
+      "seconds": 8.374
     },
     {
       "schema": "core_30_combined_nominal_limits.json",
@@ -3417,7 +3419,7 @@
         }
       ],
       "kpi_rows": 9263,
-      "seconds": 7.622
+      "seconds": 8.154
     },
     {
       "schema": "premium_100_allin_no_disturbances.json",
@@ -3452,7 +3454,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 29580,
-      "seconds": 10.691
+      "seconds": 14.517
     },
     {
       "schema": "premium_100_allin_no_disturbances.json",
@@ -3487,7 +3489,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 29692,
-      "seconds": 11.46
+      "seconds": 15.097
     },
     {
       "schema": "premium_100_allin_no_disturbances.json",
@@ -3569,7 +3571,7 @@
         }
       ],
       "kpi_rows": 29895,
-      "seconds": 27.896
+      "seconds": 26.016
     },
     {
       "schema": "premium_100_allin_no_disturbances.json",
@@ -3651,7 +3653,7 @@
         }
       ],
       "kpi_rows": 29895,
-      "seconds": 27.813
+      "seconds": 25.932
     },
     {
       "schema": "premium_100_allin_no_disturbances.json",
@@ -3733,7 +3735,7 @@
         }
       ],
       "kpi_rows": 29895,
-      "seconds": 28.251
+      "seconds": 26.097
     },
     {
       "schema": "premium_100_allin_no_disturbances.json",
@@ -3815,7 +3817,7 @@
         }
       ],
       "kpi_rows": 29895,
-      "seconds": 27.79
+      "seconds": 26.131
     },
     {
       "schema": "premium_100_allin_no_disturbances.json",
@@ -3897,7 +3899,7 @@
         }
       ],
       "kpi_rows": 29895,
-      "seconds": 27.187
+      "seconds": 26.099
     },
     {
       "schema": "premium_100_allin_no_disturbances.json",
@@ -3979,7 +3981,7 @@
         }
       ],
       "kpi_rows": 29692,
-      "seconds": 28.021
+      "seconds": 26.031
     },
     {
       "schema": "premium_100_allin_no_dr.json",
@@ -4014,7 +4016,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 29306,
-      "seconds": 10.756
+      "seconds": 14.001
     },
     {
       "schema": "premium_100_allin_no_dr.json",
@@ -4049,7 +4051,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 29416,
-      "seconds": 10.743
+      "seconds": 18.52
     },
     {
       "schema": "premium_100_allin_no_dr.json",
@@ -4131,7 +4133,7 @@
         }
       ],
       "kpi_rows": 29619,
-      "seconds": 30.539
+      "seconds": 31.066
     },
     {
       "schema": "premium_100_allin_no_dr.json",
@@ -4213,7 +4215,7 @@
         }
       ],
       "kpi_rows": 29619,
-      "seconds": 29.87
+      "seconds": 28.535
     },
     {
       "schema": "premium_100_allin_no_dr.json",
@@ -4295,7 +4297,7 @@
         }
       ],
       "kpi_rows": 29619,
-      "seconds": 31.266
+      "seconds": 28.763
     },
     {
       "schema": "premium_100_allin_no_dr.json",
@@ -4377,7 +4379,7 @@
         }
       ],
       "kpi_rows": 29619,
-      "seconds": 30.08
+      "seconds": 28.824
     },
     {
       "schema": "premium_100_allin_no_dr.json",
@@ -4459,7 +4461,7 @@
         }
       ],
       "kpi_rows": 29619,
-      "seconds": 29.532
+      "seconds": 29.306
     },
     {
       "schema": "premium_100_allin_no_dr.json",
@@ -4541,7 +4543,7 @@
         }
       ],
       "kpi_rows": 29416,
-      "seconds": 30.39
+      "seconds": 28.993
     },
     {
       "schema": "core_30_topology_frozen_2024.json",
@@ -4576,7 +4578,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 8904,
-      "seconds": 3.076
+      "seconds": 3.706
     },
     {
       "schema": "core_30_topology_frozen_2024.json",
@@ -4611,7 +4613,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 8904,
-      "seconds": 3.002
+      "seconds": 3.735
     },
     {
       "schema": "premium_100_allin_frozen_2024.json",
@@ -4646,7 +4648,7 @@
       ],
       "executed_events": [],
       "kpi_rows": 30387,
-      "seconds": 10.604
+      "seconds": 14.939
     },
     {
       "schema": "premium_100_allin_frozen_2024.json",
@@ -4681,17 +4683,17 @@
       ],
       "executed_events": [],
       "kpi_rows": 30387,
-      "seconds": 10.451
+      "seconds": 14.429
     }
   ],
-  "runtime_input_fingerprint": "c06810042e5469a50680ac3cbd94e71072b9d2896798d46f6816dd02a564e826",
-  "runtime_evidence_reused_with_identical_executable_inputs": true,
+  "runtime_input_fingerprint": "d4dd523d721b893a6fe22b11abbbdeaa1543eb1f4f7a1dc8bc8d645aec7844c6",
+  "execution_method": "Existing runtime_window function; four isolated processes; same 72 cases and 48-step half-windows",
   "status": "pass",
   "dataset_checksums": {
-    "data/datasets/rec_pt_2023_core_15_v2/file_checksums.sha256": "2d57abf7881d7011be3f466fb650f0ac07754129ea34d032ae9f9f225299e7f8",
-    "data/datasets/rec_pt_2023_core_30_v2/file_checksums.sha256": "c133000ab49a2f139703612e2415d3c0226f70e1ef89876bddecec28b8b31e5c",
-    "data/datasets/rec_pt_2023_micro_4_v2/file_checksums.sha256": "0977916f71bbbdcb4558c53ed225250ce64aa5eec2a83f6b8732208d136efbda",
-    "data/datasets/rec_pt_2023_premium_100_v2/file_checksums.sha256": "abe89d6d1633d570621bfe564f5cbd9728312c78e4a5cfed3060c245c95f6df4"
+    "data/datasets/rec_pt_2023_core_15_v2/file_checksums.sha256": "d858aeb2fcb7a05e4396445aa9463df89af9bf332e5e9548e953d2dce9be8555",
+    "data/datasets/rec_pt_2023_core_30_v2/file_checksums.sha256": "9d84702498acacaacefb6fd4533cf13167bf682948af164500001677ba1980d7",
+    "data/datasets/rec_pt_2023_micro_4_v2/file_checksums.sha256": "a2ea97c7f154f91e08e26bdd1f4fff1a09d7cdd7b4530127a0cebe1ed5f39ad7",
+    "data/datasets/rec_pt_2023_premium_100_v2/file_checksums.sha256": "2877502591f2d7b100bb1e2e0bffbf6df5112aaf45124f16cc0f1859bf69aace"
   },
   "runtime_scope": "Actual event and annual-boundary windows; no annual controller benchmark or training. Window resets preserve topology, not unsimulated physical state."
 }

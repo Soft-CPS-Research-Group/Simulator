@@ -13,25 +13,35 @@ import resource
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output', type=Path, default=Path('outputs/audit/portugal_windows.json'))
 parser.add_argument('--long-days', type=int, default=0)
+parser.add_argument('--resume', action='store_true', help='Resume completed windows only with identical executable inputs')
 args = parser.parse_args()
 args.output.parent.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(ROOT))
 from citylearn.citylearn import CityLearnEnv
 from citylearn.agents.baseline import NormalPolicy
+from audit_portugal_heldout_2024 import runtime_fingerprint
 
-rows = []
+fingerprint = runtime_fingerprint(ROOT)
+rows = json.loads(args.output.read_text()) if args.resume else []
+windows = [('long2023', 0)] if args.long_days else [('winter2023', 96*30), ('summer2024', 35040+96*180)]
+steps = args.long_days*96+1 if args.long_days else 192
+if args.resume:
+    assert all(r.get('runtime_input_fingerprint') == fingerprint for r in rows), 'Cannot resume stale or unbound evidence'
+    assert all((r['window'], r['start']) in windows and
+               (r['status'] != 'pass' or r['transitions'] == steps-1) for r in rows), 'Cannot resume with different window settings'
+completed = {(r['schema'], r['window'], r['start']) for r in rows if r['status'] == 'pass'}
 for path in sorted((ROOT/'data/datasets').glob('rec_pt_*/evaluation/*.json')):
     if args.long_days and path.stem not in {'core_4', 'core_30_combined', 'premium_100_allin'}:
         continue
-    windows = [('long2023', 0)] if args.long_days else [('winter2023', 96*30), ('summer2024', 35040+96*180)]
-    steps = args.long_days*96+1 if args.long_days else 192
     for label, start in windows:
+        if (str(path), label, start) in completed:
+            continue
         schema = json.loads(path.read_text())
         schema.update(root_directory=str(path.parent.parent), simulation_start_time_step=start,
             simulation_end_time_step=start+steps-1, episode_time_steps=steps, random_episode_split=False,
             rolling_episode_split=False, physics_invariant_checks=True)
         env = None
-        row = dict(schema=str(path), window=label, start=start, transitions=0, status='pass')
+        row = dict(schema=str(path), window=label, start=start, transitions=0, status='pass', runtime_input_fingerprint=fingerprint)
         start_clock = time.perf_counter()
         try:
             assert schema['community_market'] == dict(enabled=True, local_price_ratio_to_grid_import=.8, grid_export_price=0.), 'Dataset market must already be enabled'
@@ -118,4 +128,5 @@ for path in sorted((ROOT/'data/datasets').glob('rec_pt_*/evaluation/*.json')):
         del env
         gc.collect()
 
+assert runtime_fingerprint(ROOT) == fingerprint, 'Inputs changed during execution'
 sys.exit(0 if all(row['status'] == 'pass' for row in rows) else 1)

@@ -45,6 +45,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Fetch immutable Portugal generation reference
+        run: git fetch --no-tags --depth=1 origin c54b13b62823fb1256397ea98cb37a830a24124d
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

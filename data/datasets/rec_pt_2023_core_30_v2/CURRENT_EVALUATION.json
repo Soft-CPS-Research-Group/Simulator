@@ -20,7 +20,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_normal.json",
-      "sha256": "990ece4b767f3b1d59ecabd82845f355ba6051f2fc79d4025b62e08f052c9eab",
+      "sha256": "e4a7642eab79b09e40002a74bfb67c53480af6d2841f1d4cb5981f006adf3bca",
       "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
@@ -36,7 +36,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json",
-      "sha256": "02c00a34016b28742e7029f946840a64193b82c7111f37746050f6b0de665f31",
+      "sha256": "bbf3745a23447e5febfb06c8525e6d81b9ef7844889bd46eaecedd9de9160ca7",
       "frozen_2023_source_fingerprint": "e40b0db00c9846a3e689f6a759be05b4769e816f6b3bc20c853707cbbbcf76db"
     },
     {
@@ -52,7 +52,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_safety.json",
-      "sha256": "0e7c3b4a7fc5ff353b1ef142b9a704a07c4d0899a88133fe780fa180b40a4db7",
+      "sha256": "67e15a903cff40bd4da57d9caf759488eed5e2f93c0752146943ec66c017929d",
       "frozen_2023_source_fingerprint": "ae7c92cd7704b8cdb52e74c64a404563d9801fd17af70f4a7eadd9d7ec189a05"
     },
     {
@@ -68,7 +68,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json",
-      "sha256": "526cf1295e85ec9efd763614edd731c2062bcc69b82b4dba2df337e18f4385a1",
+      "sha256": "90ba15ff31a2807fd1161ed40c5c98a196fb6ea88061b080c2edb2dfa83eff14",
       "frozen_2023_source_fingerprint": "8c49ea959fe56a76d1dd5846ef2a9de381d06255ad1803e24b49e1414d9fee7d"
     },
     {
@@ -84,7 +84,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_combined.json",
-      "sha256": "c241515d6fb7ba758354e52e05abb0d5696e96ab07da06f702cad5eff7615cd3",
+      "sha256": "72871af912eaebd6496d79b1be3ca2794fd478e5b64274782ea2b147d1d9a30d",
       "frozen_2023_source_fingerprint": "e93c0b8171be8a312d2f9578d38b31378ef7092d838db1865f751769e3f192c1"
     }
   ],
@@ -96,7 +96,7 @@
       "family": "core_30",
       "variant": "core_30_combined_no_disturbances",
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/references/core_30_combined_no_disturbances.json",
-      "sha256": "5e2b1786faf289df12839fe4cd03c3264c8a7d2e16f9497e328fc728f68f960f",
+      "sha256": "54b6b606b648ef389d034c1d2f535db2fcea7a7715714de382399ecbc3eeeb5a",
       "factors": {
         "T": true,
         "E": true,
@@ -109,7 +109,7 @@
       "family": "core_30",
       "variant": "core_30_combined_nominal_limits",
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/references/core_30_combined_nominal_limits.json",
-      "sha256": "f3cf634031b09f8e6ae2bba5351a67f1777e6c668ccbb524bfc103a35438364b",
+      "sha256": "017a5e11d28a3d2b5869f56599835dc3b9acc55f7690b836551e5950234c9792",
       "factors": {
         "T": true,
         "E": false,
@@ -122,7 +122,7 @@
       "family": "core_30",
       "variant": "core_30_topology_frozen_2024",
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/references/core_30_topology_frozen_2024.json",
-      "sha256": "1294eae551f6cb8ed4bf9a2735a3ad3c5bac9df4e13a500b544255a53ecb443d",
+      "sha256": "3f30fb7f17eeddae2dc0c747329ad9dc79cba57d561f9f5613c300401eea0b25",
       "factors": {
         "T": true,
         "E": false,
@@ -137,7 +137,7 @@
     {
       "variant": "core_30_normal",
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_normal.json",
-      "sha256": "5ae17cd053671ea267e4af0efbaa25c1cc13b75fdbb7badf9dfc343efaabd868",
+      "sha256": "e648d24c42ce025ec89230f6c558f01fc59ee591538efbec5a0632a932774816",
       "interval": [
         0,
         35039
@@ -147,7 +147,7 @@
     {
       "variant": "core_30_topology",
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_topology.json",
-      "sha256": "bf2c6f054caa6661886f745142d344c569ebbb9393a69f9d267f1e71dd964c17",
+      "sha256": "79d01e3dd4c7e43737e28cb2a0da23c036c6de9407e755835d3b66e7c28bf489",
       "interval": [
         0,
         35039
@@ -157,7 +157,7 @@
     {
       "variant": "core_30_safety",
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_safety.json",
-      "sha256": "eb9626773cd3d60f50630f27eef34833d6acff6f8770a235a7209683e7d41ca7",
+      "sha256": "e717debe1d9bbaf05d8f46264b9df678f544996819e29cda9836299e8549a9a0",
       "interval": [
         0,
         35039
@@ -167,7 +167,7 @@
     {
       "variant": "core_30_robustness",
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_robustness.json",
-      "sha256": "b7af15299f5d93ec7ac4fa8da2f8a1f75f1b6a69f59780945b338c7f7feb3122",
+      "sha256": "b0e4e65dbd7180cb8233696896c1eac145a01470456b2ddb3e43e6078daa410e",
       "interval": [
         0,
         35039
@@ -177,12 +177,17 @@
     {
       "variant": "core_30_combined",
       "schema": "data/datasets/rec_pt_2023_core_30_v2/evaluation/preparation_2023/core_30_combined.json",
-      "sha256": "a8c2a48ab97a0af8b0321bed0c2ee7c9660b2de110a1d205eb803e9c9aae7f1e",
+      "sha256": "6592acb7e7389b41904c1da8b23e3a62f7097c59a29c0d3f825793ceefd371f7",
       "interval": [
         0,
         35039
       ],
       "role": "Preparation entry point, not an additional experimental scenario"
     }
-  ]
+  ],
+  "mobility_revision": "portugal-ev-mobility-1",
+  "mobility_evidence": "ev_mobility_revision.json",
+  "mobility_catalogue_scope": "charging_profile, charging_sessions, mobility_episodes and ev_annual_energy describe current mobility. soc_preference, reserve_soc, member prose and planning energy fields retain historical sizing provenance; reserve_soc is not a minimum allowed SOC in this revision. Prior controller evaluations do not evaluate this mobility revision.",
+  "realism_revision": "portugal-realism-4",
+  "realism_evidence": "realism_revision.json"
 }

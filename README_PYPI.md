@@ -14,9 +14,9 @@ It is a fork-based project used for research and experimentation on:
   feasible action capacity and requested/limited/applied action feedback.
 - dynamic member and asset topology with repeatable multi-episode reset semantics.
 
-Current source release: `2.0.1`. This patch corrects episode-selection overrides,
-subhourly storage losses and physical autosizing while preserving datasets and
-public interfaces. Corrected subhourly results and autosized equipment may differ.
+Current source release: `2.0.2`. This patch delivers the revised Portugal
+two-year datasets, complete online downloads of nested files, and command-line
+compatibility fixes. Dataset-dependent results require matching revisions.
 See the [release history](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/releases.md) for validation, measured gains and scope limits.
 
 ## Project Positioning

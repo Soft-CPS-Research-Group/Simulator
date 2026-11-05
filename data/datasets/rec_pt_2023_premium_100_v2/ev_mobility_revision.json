@@ -1,0 +1,1779 @@
+{
+  "revision": "portugal-ev-mobility-1",
+  "source_commit": "c54b13b62823fb1256397ea98cb37a830a24124d",
+  "family": "rec_pt_2023_premium_100_v2",
+  "profiles": {
+    "visitor": 48,
+    "periodic": 17,
+    "low_soc": 9,
+    "frequent": 7,
+    "work": 4
+  },
+  "distributions": [
+    {
+      "year": 2023,
+      "pool": "resident",
+      "vehicles": 37,
+      "sessions": 2520,
+      "sessions_per_vehicle_week": 1.3061828952239911,
+      "arrival_mean_pct": 45.47230514026773,
+      "target_mean_pct": 87.24968369700798,
+      "request_mean_pp": 41.77737855674026,
+      "full_target_pct": 12.738095238095237,
+      "near_empty_to_full_pct": 1.9444444444444444,
+      "gap_bins_pct": [
+        14.206349206349206,
+        25.238095238095237,
+        15.476190476190476,
+        29.8015873015873,
+        15.277777777777779
+      ],
+      "arrival_bins_pct": [
+        1.984126984126984,
+        2.301587301587302,
+        10.873015873015873,
+        33.13492063492063,
+        13.531746031746032,
+        38.17460317460317
+      ],
+      "median_slack_hours": 11.5
+    },
+    {
+      "year": 2023,
+      "pool": "external_visitors",
+      "vehicles": 48,
+      "sessions": 2784,
+      "sessions_per_vehicle_week": 1.1123287671232875,
+      "arrival_mean_pct": 48.85554319673435,
+      "target_mean_pct": 75.90560233297134,
+      "request_mean_pp": 27.05005913623698,
+      "full_target_pct": 2.586206896551724,
+      "near_empty_to_full_pct": 0.0,
+      "gap_bins_pct": [
+        0.28735632183908044,
+        61.02729885057471,
+        36.06321839080459,
+        2.6221264367816093,
+        0.0
+      ],
+      "arrival_bins_pct": [
+        0.0,
+        0.0,
+        0.10775862068965517,
+        14.367816091954023,
+        76.29310344827587,
+        9.23132183908046
+      ],
+      "median_slack_hours": 1.25
+    },
+    {
+      "year": 2024,
+      "pool": "resident",
+      "vehicles": 37,
+      "sessions": 2491,
+      "sessions_per_vehicle_week": 1.2876236892630335,
+      "arrival_mean_pct": 45.08569656229602,
+      "target_mean_pct": 87.19624930862668,
+      "request_mean_pp": 42.110552746330676,
+      "full_target_pct": 12.725812926535529,
+      "near_empty_to_full_pct": 2.0875150541951024,
+      "gap_bins_pct": [
+        13.76957045363308,
+        23.76555600160578,
+        17.58329987956644,
+        30.63026896828583,
+        14.251304696908873
+      ],
+      "arrival_bins_pct": [
+        2.127659574468085,
+        2.6896828582898435,
+        9.51425130469691,
+        34.122842232035325,
+        16.01766358892011,
+        35.52790044158972
+      ],
+      "median_slack_hours": 11.625
+    },
+    {
+      "year": 2024,
+      "pool": "external_visitors",
+      "vehicles": 48,
+      "sessions": 2937,
+      "sessions_per_vehicle_week": 1.1702527322404372,
+      "arrival_mean_pct": 47.7066115061668,
+      "target_mean_pct": 74.40364057701416,
+      "request_mean_pp": 26.697029070847346,
+      "full_target_pct": 2.417432754511406,
+      "near_empty_to_full_pct": 0.0,
+      "gap_bins_pct": [
+        0.37453183520599254,
+        61.3210759278175,
+        35.308137555328564,
+        2.9962546816479403,
+        0.0
+      ],
+      "arrival_bins_pct": [
+        0.0,
+        0.0,
+        0.17024174327545114,
+        17.87538304392237,
+        74.39564181137214,
+        7.558733401430031
+      ],
+      "median_slack_hours": 1.25
+    }
+  ],
+  "mobility_episodes": 24869,
+  "annual_energy": [
+    {
+      "ev_id": "EV-M001-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 2184.9575862321635,
+      "trip_energy_kwh": 2184.957586232164,
+      "external_charge_used_kwh": 273.0709466064409,
+      "reference_charge_kwh": 1916.3689180821423
+    },
+    {
+      "ev_id": "EV-M001-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 2229.558293925544,
+      "trip_energy_kwh": 2229.5582939255432,
+      "external_charge_used_kwh": 193.1486450091997,
+      "reference_charge_kwh": 2032.8045702542659
+    },
+    {
+      "ev_id": "EV-M002-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1980.205489399951,
+      "trip_energy_kwh": 1980.2054893999507,
+      "external_charge_used_kwh": 205.06470341240487,
+      "reference_charge_kwh": 1788.7451021752997
+    },
+    {
+      "ev_id": "EV-M002-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1950.543368968858,
+      "trip_energy_kwh": 1950.5433689688582,
+      "external_charge_used_kwh": 44.67067909413064,
+      "reference_charge_kwh": 1889.7033177896953
+    },
+    {
+      "ev_id": "EV-M003-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1877.7160130554043,
+      "trip_energy_kwh": 1877.7160130554046,
+      "external_charge_used_kwh": 133.70860589243205,
+      "reference_charge_kwh": 1729.08032390303
+    },
+    {
+      "ev_id": "EV-M003-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1828.6899229848932,
+      "trip_energy_kwh": 1828.6899229848937,
+      "external_charge_used_kwh": 232.15648086607965,
+      "reference_charge_kwh": 1580.8406399446374
+    },
+    {
+      "ev_id": "EV-M005-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 793.4689969884568,
+      "trip_energy_kwh": 793.4689969884568,
+      "external_charge_used_kwh": 83.24039014817977,
+      "reference_charge_kwh": 719.2723408841476
+    },
+    {
+      "ev_id": "EV-M005-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 842.3001188073192,
+      "trip_energy_kwh": 842.3001188073192,
+      "external_charge_used_kwh": 76.78455741017055,
+      "reference_charge_kwh": 758.614344675748
+    },
+    {
+      "ev_id": "EV-M006-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1992.6060505492012,
+      "trip_energy_kwh": 1992.6060505492017,
+      "external_charge_used_kwh": 178.9302770689107,
+      "reference_charge_kwh": 1813.9264728974053
+    },
+    {
+      "ev_id": "EV-M006-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 2122.680553914101,
+      "trip_energy_kwh": 2122.680553914101,
+      "external_charge_used_kwh": 235.67036142316107,
+      "reference_charge_kwh": 1895.1692309440593
+    },
+    {
+      "ev_id": "EV-M006-02",
+      "year": 2023,
+      "original_trip_energy_kwh": 2200.9002814495384,
+      "trip_energy_kwh": 2200.9002814495384,
+      "external_charge_used_kwh": 86.84652017851326,
+      "reference_charge_kwh": 2115.3351053591196
+    },
+    {
+      "ev_id": "EV-M006-02",
+      "year": 2024,
+      "original_trip_energy_kwh": 2278.536852694994,
+      "trip_energy_kwh": 2278.536852694994,
+      "external_charge_used_kwh": 291.44994154636964,
+      "reference_charge_kwh": 1972.6683271648226
+    },
+    {
+      "ev_id": "EV-M010-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1794.656137571288,
+      "trip_energy_kwh": 1794.6561375712877,
+      "external_charge_used_kwh": 99.26619055658631,
+      "reference_charge_kwh": 1698.9565419080175
+    },
+    {
+      "ev_id": "EV-M010-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1647.216149445041,
+      "trip_energy_kwh": 1647.2161494450415,
+      "external_charge_used_kwh": 36.942664589966206,
+      "reference_charge_kwh": 1606.7108302273173
+    },
+    {
+      "ev_id": "EV-M018-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 2122.722383472264,
+      "trip_energy_kwh": 2122.7223834722636,
+      "external_charge_used_kwh": 170.04868263000236,
+      "reference_charge_kwh": 1928.5409649367543
+    },
+    {
+      "ev_id": "EV-M018-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 2188.6112668565147,
+      "trip_energy_kwh": 2188.6112668565142,
+      "external_charge_used_kwh": 129.30593778850542,
+      "reference_charge_kwh": 2089.2061520568827
+    },
+    {
+      "ev_id": "EV-M022-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1429.6564720890115,
+      "trip_energy_kwh": 1429.6564720890115,
+      "external_charge_used_kwh": 111.52766606188253,
+      "reference_charge_kwh": 1311.1758208010338
+    },
+    {
+      "ev_id": "EV-M022-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1445.0364970917171,
+      "trip_energy_kwh": 1445.0364970917174,
+      "external_charge_used_kwh": 98.8824205877194,
+      "reference_charge_kwh": 1354.7913407055462
+    },
+    {
+      "ev_id": "EV-M026-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1664.8016965235781,
+      "trip_energy_kwh": 1664.801696523578,
+      "external_charge_used_kwh": 4.349306175429625,
+      "reference_charge_kwh": 1670.0509307105485
+    },
+    {
+      "ev_id": "EV-M026-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1591.5805773166608,
+      "trip_energy_kwh": 1591.5805773166608,
+      "external_charge_used_kwh": 165.1132493804037,
+      "reference_charge_kwh": 1424.49343752994
+    },
+    {
+      "ev_id": "EV-M030-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 2743.649337488161,
+      "trip_energy_kwh": 2743.6493374881607,
+      "external_charge_used_kwh": 161.55905334401822,
+      "reference_charge_kwh": 2581.4634941404306
+    },
+    {
+      "ev_id": "EV-M030-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 2744.881914957742,
+      "trip_energy_kwh": 2744.8819149577425,
+      "external_charge_used_kwh": 219.71935762633726,
+      "reference_charge_kwh": 2500.4153387685487
+    },
+    {
+      "ev_id": "EV-M034-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1495.4578239042842,
+      "trip_energy_kwh": 1495.457823904284,
+      "external_charge_used_kwh": 61.02322344609331,
+      "reference_charge_kwh": 1419.7485308494222
+    },
+    {
+      "ev_id": "EV-M034-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1685.134987767698,
+      "trip_energy_kwh": 1685.1349877676982,
+      "external_charge_used_kwh": 77.33457649032863,
+      "reference_charge_kwh": 1588.4205851744914
+    },
+    {
+      "ev_id": "EV-M038-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 2463.8933740684706,
+      "trip_energy_kwh": 2463.89337406847,
+      "external_charge_used_kwh": 302.27232655459295,
+      "reference_charge_kwh": 2169.5044477863203
+    },
+    {
+      "ev_id": "EV-M038-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 2343.8700742166166,
+      "trip_energy_kwh": 2343.870074216617,
+      "external_charge_used_kwh": 243.74748219108966,
+      "reference_charge_kwh": 2092.2070892522906
+    },
+    {
+      "ev_id": "EV-M042-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 2396.363102024471,
+      "trip_energy_kwh": 2396.3631020244707,
+      "external_charge_used_kwh": 411.614989365808,
+      "reference_charge_kwh": 1975.1631146389582
+    },
+    {
+      "ev_id": "EV-M042-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 2397.326726530564,
+      "trip_energy_kwh": 2397.3267265305635,
+      "external_charge_used_kwh": 414.14103375041395,
+      "reference_charge_kwh": 1960.3119889813695
+    },
+    {
+      "ev_id": "EV-M046-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1597.622019506789,
+      "trip_energy_kwh": 1597.6220195067888,
+      "external_charge_used_kwh": 243.96890391176515,
+      "reference_charge_kwh": 1364.9225620335687
+    },
+    {
+      "ev_id": "EV-M046-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1450.5644402913997,
+      "trip_energy_kwh": 1450.5644402913995,
+      "external_charge_used_kwh": 224.11883280429453,
+      "reference_charge_kwh": 1189.5904421790076
+    },
+    {
+      "ev_id": "EV-M050-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1707.1962501977055,
+      "trip_energy_kwh": 1707.1962501977052,
+      "external_charge_used_kwh": 215.03709443245452,
+      "reference_charge_kwh": 1497.2330835832608
+    },
+    {
+      "ev_id": "EV-M050-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1763.2918640693622,
+      "trip_energy_kwh": 1763.2918640693624,
+      "external_charge_used_kwh": 75.95901773614568,
+      "reference_charge_kwh": 1671.5405929305136
+    },
+    {
+      "ev_id": "EV-M054-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 2024.411796493829,
+      "trip_energy_kwh": 2024.4117964938291,
+      "external_charge_used_kwh": 48.78707623271291,
+      "reference_charge_kwh": 1989.72307444505
+    },
+    {
+      "ev_id": "EV-M054-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 2160.2303180850267,
+      "trip_energy_kwh": 2160.2303180850267,
+      "external_charge_used_kwh": 47.07210998301326,
+      "reference_charge_kwh": 2105.7003700793252
+    },
+    {
+      "ev_id": "EV-M062-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1814.6591328627997,
+      "trip_energy_kwh": 1814.6591328627997,
+      "external_charge_used_kwh": 286.4664439849614,
+      "reference_charge_kwh": 1541.9605619473416
+    },
+    {
+      "ev_id": "EV-M062-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1790.3714462883809,
+      "trip_energy_kwh": 1790.3714462883809,
+      "external_charge_used_kwh": 55.542178236073205,
+      "reference_charge_kwh": 1725.8062872715911
+    },
+    {
+      "ev_id": "EV-M070-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1402.8570625490895,
+      "trip_energy_kwh": 1402.8570625490895,
+      "external_charge_used_kwh": 33.734734444313005,
+      "reference_charge_kwh": 1359.5924963578175
+    },
+    {
+      "ev_id": "EV-M070-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1560.1903711375444,
+      "trip_energy_kwh": 1560.1903711375444,
+      "external_charge_used_kwh": 94.25739779989507,
+      "reference_charge_kwh": 1465.9280247763281
+    },
+    {
+      "ev_id": "EV-M008-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1786.8756114462285,
+      "trip_energy_kwh": 1786.8756114462283,
+      "external_charge_used_kwh": 208.01893228941682,
+      "reference_charge_kwh": 1566.9745640225601
+    },
+    {
+      "ev_id": "EV-M008-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1768.9608640916506,
+      "trip_energy_kwh": 1768.9608640916506,
+      "external_charge_used_kwh": 278.45927094926014,
+      "reference_charge_kwh": 1483.5483483357648
+    },
+    {
+      "ev_id": "EV-M016-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1412.6690825732828,
+      "trip_energy_kwh": 1412.6690825732828,
+      "external_charge_used_kwh": 166.09807297187652,
+      "reference_charge_kwh": 1251.535688977437
+    },
+    {
+      "ev_id": "EV-M016-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1430.462587676012,
+      "trip_energy_kwh": 1430.462587676012,
+      "external_charge_used_kwh": 211.77212522716573,
+      "reference_charge_kwh": 1209.872970908797
+    },
+    {
+      "ev_id": "EV-M016-02",
+      "year": 2023,
+      "original_trip_energy_kwh": 2414.0874905289566,
+      "trip_energy_kwh": 2414.087490528957,
+      "external_charge_used_kwh": 199.43480316441196,
+      "reference_charge_kwh": 2186.5763142676037
+    },
+    {
+      "ev_id": "EV-M016-02",
+      "year": 2024,
+      "original_trip_energy_kwh": 2327.1888828740907,
+      "trip_energy_kwh": 2327.18888287409,
+      "external_charge_used_kwh": 300.78784886079325,
+      "reference_charge_kwh": 2019.9686109211843
+    },
+    {
+      "ev_id": "EV-M020-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1973.8237962933601,
+      "trip_energy_kwh": 1973.8237962933601,
+      "external_charge_used_kwh": 176.0308444954254,
+      "reference_charge_kwh": 1792.320767987668
+    },
+    {
+      "ev_id": "EV-M020-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1785.6002053896987,
+      "trip_energy_kwh": 1785.600205389699,
+      "external_charge_used_kwh": 90.61191879314046,
+      "reference_charge_kwh": 1697.4209250397212
+    },
+    {
+      "ev_id": "EV-M024-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 2854.385559674093,
+      "trip_energy_kwh": 2854.3855596740927,
+      "external_charge_used_kwh": 111.25544448661888,
+      "reference_charge_kwh": 2712.59166526463
+    },
+    {
+      "ev_id": "EV-M024-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 2927.0354359888684,
+      "trip_energy_kwh": 2927.0354359888684,
+      "external_charge_used_kwh": 194.33758303417534,
+      "reference_charge_kwh": 2735.6842491733914
+    },
+    {
+      "ev_id": "EV-M028-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1835.9991941457706,
+      "trip_energy_kwh": 1835.9991941457704,
+      "external_charge_used_kwh": 136.36157101738863,
+      "reference_charge_kwh": 1689.9914339852107
+    },
+    {
+      "ev_id": "EV-M028-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1743.2015435987278,
+      "trip_energy_kwh": 1743.2015435987282,
+      "external_charge_used_kwh": 257.33947437206456,
+      "reference_charge_kwh": 1478.2843484532948
+    },
+    {
+      "ev_id": "EV-M040-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1702.1335102713192,
+      "trip_energy_kwh": 1702.133510271319,
+      "external_charge_used_kwh": 237.45274603420415,
+      "reference_charge_kwh": 1441.152753036548
+    },
+    {
+      "ev_id": "EV-M040-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1582.3122862247073,
+      "trip_energy_kwh": 1582.3122862247073,
+      "external_charge_used_kwh": 72.47698893985788,
+      "reference_charge_kwh": 1536.019629179718
+    },
+    {
+      "ev_id": "EV-M040-02",
+      "year": 2023,
+      "original_trip_energy_kwh": 2269.734397435597,
+      "trip_energy_kwh": 2269.734397435597,
+      "external_charge_used_kwh": 272.5378455928286,
+      "reference_charge_kwh": 2002.9656092344085
+    },
+    {
+      "ev_id": "EV-M040-02",
+      "year": 2024,
+      "original_trip_energy_kwh": 2272.276193199536,
+      "trip_energy_kwh": 2272.2761931995356,
+      "external_charge_used_kwh": 180.14108303795393,
+      "reference_charge_kwh": 2096.9556098596063
+    },
+    {
+      "ev_id": "EV-M044-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1760.7449986679812,
+      "trip_energy_kwh": 1760.744998667981,
+      "external_charge_used_kwh": 66.12165369304262,
+      "reference_charge_kwh": 1673.448192044045
+    },
+    {
+      "ev_id": "EV-M044-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1724.5661982577465,
+      "trip_energy_kwh": 1724.5661982577465,
+      "external_charge_used_kwh": 123.37208540339554,
+      "reference_charge_kwh": 1626.5320316725204
+    },
+    {
+      "ev_id": "EV-M048-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 2055.6284246834703,
+      "trip_energy_kwh": 2055.6284246834703,
+      "external_charge_used_kwh": 102.07644249405138,
+      "reference_charge_kwh": 1937.8927836742193
+    },
+    {
+      "ev_id": "EV-M048-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 2043.0265018178704,
+      "trip_energy_kwh": 2043.0265018178707,
+      "external_charge_used_kwh": 55.6020811337055,
+      "reference_charge_kwh": 2000.2811033019436
+    },
+    {
+      "ev_id": "EV-M052-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1531.7963775298201,
+      "trip_energy_kwh": 1531.79637752982,
+      "external_charge_used_kwh": 27.042828204887286,
+      "reference_charge_kwh": 1513.882840838178
+    },
+    {
+      "ev_id": "EV-M052-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1673.843541774842,
+      "trip_energy_kwh": 1673.843541774842,
+      "external_charge_used_kwh": 96.43570371231418,
+      "reference_charge_kwh": 1562.1503638378988
+    },
+    {
+      "ev_id": "EV-M056-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1737.8736266147705,
+      "trip_energy_kwh": 1737.8736266147703,
+      "external_charge_used_kwh": 206.45880859293118,
+      "reference_charge_kwh": 1534.7880857000196
+    },
+    {
+      "ev_id": "EV-M056-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1700.4498428578033,
+      "trip_energy_kwh": 1700.4498428578033,
+      "external_charge_used_kwh": 239.06162446472115,
+      "reference_charge_kwh": 1462.0054503271456
+    },
+    {
+      "ev_id": "EV-M056-02",
+      "year": 2023,
+      "original_trip_energy_kwh": 2231.437413597528,
+      "trip_energy_kwh": 2231.4374135975286,
+      "external_charge_used_kwh": 331.1890027323182,
+      "reference_charge_kwh": 1902.3531154478273
+    },
+    {
+      "ev_id": "EV-M056-02",
+      "year": 2024,
+      "original_trip_energy_kwh": 2242.0247229508504,
+      "trip_energy_kwh": 2242.0247229508504,
+      "external_charge_used_kwh": 343.99671596734504,
+      "reference_charge_kwh": 1899.1681174868625
+    },
+    {
+      "ev_id": "EV-M060-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1893.7062212020073,
+      "trip_energy_kwh": 1893.7062212020069,
+      "external_charge_used_kwh": 72.70304736170206,
+      "reference_charge_kwh": 1817.7104247400412
+    },
+    {
+      "ev_id": "EV-M060-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1858.6301463033421,
+      "trip_energy_kwh": 1858.6301463033424,
+      "external_charge_used_kwh": 76.68162305678953,
+      "reference_charge_kwh": 1784.75342184815
+    },
+    {
+      "ev_id": "EV-M068-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1986.4748376985385,
+      "trip_energy_kwh": 1986.4748376985387,
+      "external_charge_used_kwh": 273.3034090722797,
+      "reference_charge_kwh": 1712.4453544824676
+    },
+    {
+      "ev_id": "EV-M068-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1880.6706382312132,
+      "trip_energy_kwh": 1880.6706382312132,
+      "external_charge_used_kwh": 307.06138379516545,
+      "reference_charge_kwh": 1565.3936391360307
+    },
+    {
+      "ev_id": "EV-M072-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1973.5362782391403,
+      "trip_energy_kwh": 1973.5362782391403,
+      "external_charge_used_kwh": 125.36784812956265,
+      "reference_charge_kwh": 1839.2790710973663
+    },
+    {
+      "ev_id": "EV-M072-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1925.2223636815563,
+      "trip_energy_kwh": 1925.2223636815563,
+      "external_charge_used_kwh": 146.12741029125698,
+      "reference_charge_kwh": 1791.591508834143
+    },
+    {
+      "ev_id": "EV-M076-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1383.020615707591,
+      "trip_energy_kwh": 1383.020615707591,
+      "external_charge_used_kwh": 258.54833349745877,
+      "reference_charge_kwh": 1121.8429407334959
+    },
+    {
+      "ev_id": "EV-M076-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1334.3050853768395,
+      "trip_energy_kwh": 1334.3050853768393,
+      "external_charge_used_kwh": 101.69769173027551,
+      "reference_charge_kwh": 1240.8538329009311
+    },
+    {
+      "ev_id": "EV-M080-01",
+      "year": 2023,
+      "original_trip_energy_kwh": 1608.6903281919037,
+      "trip_energy_kwh": 1608.6903281919033,
+      "external_charge_used_kwh": 166.2674003685691,
+      "reference_charge_kwh": 1447.6934850937557
+    },
+    {
+      "ev_id": "EV-M080-01",
+      "year": 2024,
+      "original_trip_energy_kwh": 1498.2704599033896,
+      "trip_energy_kwh": 1498.2704599033896,
+      "external_charge_used_kwh": 56.16153340085627,
+      "reference_charge_kwh": 1441.4320002305712
+    },
+    {
+      "ev_id": "EV-V081-05-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1364.267192344647,
+      "trip_energy_kwh": 1364.267192344647,
+      "external_charge_used_kwh": 275.724,
+      "reference_charge_kwh": 1067.0506531327258
+    },
+    {
+      "ev_id": "EV-V081-05-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1242.4716587608145,
+      "trip_energy_kwh": 1242.4716587608145,
+      "external_charge_used_kwh": 227.7,
+      "reference_charge_kwh": 1019.3334362648872
+    },
+    {
+      "ev_id": "EV-V081-05-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1208.97830053289,
+      "trip_energy_kwh": 1208.97830053289,
+      "external_charge_used_kwh": 235.98000000000002,
+      "reference_charge_kwh": 956.1633776006431
+    },
+    {
+      "ev_id": "EV-V081-05-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1480.5074853680019,
+      "trip_energy_kwh": 1480.5074853680019,
+      "external_charge_used_kwh": 269.1,
+      "reference_charge_kwh": 1217.825682367698
+    },
+    {
+      "ev_id": "EV-V081-06-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1306.1728187074023,
+      "trip_energy_kwh": 1306.1728187074023,
+      "external_charge_used_kwh": 240.948,
+      "reference_charge_kwh": 1054.5377713687444
+    },
+    {
+      "ev_id": "EV-V081-06-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1341.5552018045764,
+      "trip_energy_kwh": 1341.5552018045764,
+      "external_charge_used_kwh": 263.30400000000003,
+      "reference_charge_kwh": 1086.9026814048818
+    },
+    {
+      "ev_id": "EV-V081-06-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1153.962310010117,
+      "trip_energy_kwh": 1153.962310010117,
+      "external_charge_used_kwh": 214.45200000000003,
+      "reference_charge_kwh": 916.3142161856562
+    },
+    {
+      "ev_id": "EV-V081-06-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1331.6213352767527,
+      "trip_energy_kwh": 1331.6213352767527,
+      "external_charge_used_kwh": 242.604,
+      "reference_charge_kwh": 1104.8532729643769
+    },
+    {
+      "ev_id": "EV-V081-07-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1399.0545457026092,
+      "trip_energy_kwh": 1399.0545457026092,
+      "external_charge_used_kwh": 260.82000000000005,
+      "reference_charge_kwh": 1125.3204042547902
+    },
+    {
+      "ev_id": "EV-V081-07-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1402.5452312568577,
+      "trip_energy_kwh": 1402.5452312568577,
+      "external_charge_used_kwh": 266.616,
+      "reference_charge_kwh": 1138.9246294369796
+    },
+    {
+      "ev_id": "EV-V081-07-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1165.1020569806285,
+      "trip_energy_kwh": 1165.1020569806285,
+      "external_charge_used_kwh": 211.14000000000004,
+      "reference_charge_kwh": 937.1066396541136
+    },
+    {
+      "ev_id": "EV-V081-07-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1269.751985297437,
+      "trip_energy_kwh": 1269.751985297437,
+      "external_charge_used_kwh": 249.228,
+      "reference_charge_kwh": 1031.7219360775155
+    },
+    {
+      "ev_id": "EV-V081-08-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1237.2631664323758,
+      "trip_energy_kwh": 1237.2631664323758,
+      "external_charge_used_kwh": 218.592,
+      "reference_charge_kwh": 1003.3053089688723
+    },
+    {
+      "ev_id": "EV-V081-08-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1408.3035368348205,
+      "trip_energy_kwh": 1408.3035368348205,
+      "external_charge_used_kwh": 249.228,
+      "reference_charge_kwh": 1158.0391346510085
+    },
+    {
+      "ev_id": "EV-V081-08-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1319.0147840016286,
+      "trip_energy_kwh": 1319.0147840016286,
+      "external_charge_used_kwh": 244.26000000000002,
+      "reference_charge_kwh": 1046.9371354029854
+    },
+    {
+      "ev_id": "EV-V081-08-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1202.9409426874913,
+      "trip_energy_kwh": 1202.9409426874913,
+      "external_charge_used_kwh": 219.42000000000002,
+      "reference_charge_kwh": 987.3374572020753
+    },
+    {
+      "ev_id": "EV-V081-09-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1272.7297496500669,
+      "trip_energy_kwh": 1272.7297496500669,
+      "external_charge_used_kwh": 240.12000000000003,
+      "reference_charge_kwh": 1016.0126861084068
+    },
+    {
+      "ev_id": "EV-V081-09-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1359.473585914881,
+      "trip_energy_kwh": 1359.473585914881,
+      "external_charge_used_kwh": 265.788,
+      "reference_charge_kwh": 1095.1209392434764
+    },
+    {
+      "ev_id": "EV-V081-09-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1307.292497437033,
+      "trip_energy_kwh": 1307.292497437033,
+      "external_charge_used_kwh": 239.29200000000003,
+      "reference_charge_kwh": 1047.5161358898115
+    },
+    {
+      "ev_id": "EV-V081-09-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1177.8207488956455,
+      "trip_energy_kwh": 1177.8207488956455,
+      "external_charge_used_kwh": 221.904,
+      "reference_charge_kwh": 963.4112692141398
+    },
+    {
+      "ev_id": "EV-V081-10-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1340.038644958735,
+      "trip_energy_kwh": 1340.038644958735,
+      "external_charge_used_kwh": 250.056,
+      "reference_charge_kwh": 1072.7686234356743
+    },
+    {
+      "ev_id": "EV-V081-10-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1340.071318710051,
+      "trip_energy_kwh": 1340.071318710051,
+      "external_charge_used_kwh": 244.26000000000005,
+      "reference_charge_kwh": 1096.8978863653485
+    },
+    {
+      "ev_id": "EV-V081-10-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1374.964103009836,
+      "trip_energy_kwh": 1374.964103009836,
+      "external_charge_used_kwh": 244.26000000000002,
+      "reference_charge_kwh": 1127.357528973316
+    },
+    {
+      "ev_id": "EV-V081-10-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1210.7952847250826,
+      "trip_energy_kwh": 1210.7952847250826,
+      "external_charge_used_kwh": 216.108,
+      "reference_charge_kwh": 985.1534382876163
+    },
+    {
+      "ev_id": "EV-V081-11-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1329.3261078317178,
+      "trip_energy_kwh": 1329.3261078317178,
+      "external_charge_used_kwh": 240.12,
+      "reference_charge_kwh": 1085.7535773607385
+    },
+    {
+      "ev_id": "EV-V081-11-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1284.3001651286065,
+      "trip_energy_kwh": 1284.3001651286065,
+      "external_charge_used_kwh": 239.29200000000003,
+      "reference_charge_kwh": 1022.8105132145052
+    },
+    {
+      "ev_id": "EV-V081-11-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1289.4391772822034,
+      "trip_energy_kwh": 1289.4391772822034,
+      "external_charge_used_kwh": 231.012,
+      "reference_charge_kwh": 1050.371228233285
+    },
+    {
+      "ev_id": "EV-V081-11-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1406.793179192614,
+      "trip_energy_kwh": 1406.793179192614,
+      "external_charge_used_kwh": 236.80800000000002,
+      "reference_charge_kwh": 1151.0277734656556
+    },
+    {
+      "ev_id": "EV-V081-12-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1245.340580180498,
+      "trip_energy_kwh": 1245.340580180498,
+      "external_charge_used_kwh": 241.77600000000004,
+      "reference_charge_kwh": 988.8628089792861
+    },
+    {
+      "ev_id": "EV-V081-12-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1307.4108850713767,
+      "trip_energy_kwh": 1307.4108850713767,
+      "external_charge_used_kwh": 253.36800000000002,
+      "reference_charge_kwh": 1052.1378483671429
+    },
+    {
+      "ev_id": "EV-V081-12-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1252.285210277519,
+      "trip_energy_kwh": 1252.285210277519,
+      "external_charge_used_kwh": 226.04400000000004,
+      "reference_charge_kwh": 1008.9445163644347
+    },
+    {
+      "ev_id": "EV-V081-12-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1296.640061094305,
+      "trip_energy_kwh": 1296.640061094305,
+      "external_charge_used_kwh": 249.22800000000004,
+      "reference_charge_kwh": 1051.276953417146
+    },
+    {
+      "ev_id": "EV-V085-01-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1320.7246227074475,
+      "trip_energy_kwh": 1320.7246227074475,
+      "external_charge_used_kwh": 245.08800000000002,
+      "reference_charge_kwh": 1084.1320076088164
+    },
+    {
+      "ev_id": "EV-V085-01-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1279.0173479198932,
+      "trip_energy_kwh": 1279.0173479198932,
+      "external_charge_used_kwh": 219.42000000000007,
+      "reference_charge_kwh": 1055.4796179663488
+    },
+    {
+      "ev_id": "EV-V085-01-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 996.9247728744075,
+      "trip_energy_kwh": 996.9247728744075,
+      "external_charge_used_kwh": 196.23600000000002,
+      "reference_charge_kwh": 804.1259339850263
+    },
+    {
+      "ev_id": "EV-V085-01-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1116.2931240819273,
+      "trip_energy_kwh": 1116.2931240819273,
+      "external_charge_used_kwh": 211.96800000000005,
+      "reference_charge_kwh": 871.8183486587078
+    },
+    {
+      "ev_id": "EV-V086-01-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1346.088247905316,
+      "trip_energy_kwh": 1346.088247905316,
+      "external_charge_used_kwh": 263.30400000000003,
+      "reference_charge_kwh": 1071.6907530797268
+    },
+    {
+      "ev_id": "EV-V086-01-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1294.390088348973,
+      "trip_energy_kwh": 1294.390088348973,
+      "external_charge_used_kwh": 237.63600000000002,
+      "reference_charge_kwh": 1046.8358373276383
+    },
+    {
+      "ev_id": "EV-V086-01-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1332.4444062605348,
+      "trip_energy_kwh": 1332.4444062605348,
+      "external_charge_used_kwh": 264.13200000000006,
+      "reference_charge_kwh": 1064.8681366529547
+    },
+    {
+      "ev_id": "EV-V086-01-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1415.7670375779544,
+      "trip_energy_kwh": 1415.7670375779544,
+      "external_charge_used_kwh": 260.82000000000005,
+      "reference_charge_kwh": 1157.1718171542095
+    },
+    {
+      "ev_id": "EV-V086-02-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1281.256018277076,
+      "trip_energy_kwh": 1281.256018277076,
+      "external_charge_used_kwh": 244.26000000000002,
+      "reference_charge_kwh": 1029.1060404622003
+    },
+    {
+      "ev_id": "EV-V086-02-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1267.7757970690677,
+      "trip_energy_kwh": 1267.7757970690677,
+      "external_charge_used_kwh": 235.98000000000002,
+      "reference_charge_kwh": 1030.373557420221
+    },
+    {
+      "ev_id": "EV-V086-02-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1299.0336996713488,
+      "trip_energy_kwh": 1299.0336996713488,
+      "external_charge_used_kwh": 240.12000000000003,
+      "reference_charge_kwh": 1042.9202197454906
+    },
+    {
+      "ev_id": "EV-V086-02-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1365.967663899064,
+      "trip_energy_kwh": 1365.967663899064,
+      "external_charge_used_kwh": 235.98,
+      "reference_charge_kwh": 1138.7553920192909
+    },
+    {
+      "ev_id": "EV-V086-03-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1202.512639881788,
+      "trip_energy_kwh": 1202.512639881788,
+      "external_charge_used_kwh": 222.73200000000003,
+      "reference_charge_kwh": 965.0322011296962
+    },
+    {
+      "ev_id": "EV-V086-03-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1213.33997623993,
+      "trip_energy_kwh": 1213.33997623993,
+      "external_charge_used_kwh": 219.42000000000002,
+      "reference_charge_kwh": 992.3654442054144
+    },
+    {
+      "ev_id": "EV-V086-03-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1239.9105652415592,
+      "trip_energy_kwh": 1239.9105652415592,
+      "external_charge_used_kwh": 227.7,
+      "reference_charge_kwh": 992.2550917699118
+    },
+    {
+      "ev_id": "EV-V086-03-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1376.080653860333,
+      "trip_energy_kwh": 1376.080653860333,
+      "external_charge_used_kwh": 234.324,
+      "reference_charge_kwh": 1154.5132726935858
+    },
+    {
+      "ev_id": "EV-V086-04-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1001.6559846364466,
+      "trip_energy_kwh": 1001.6559846364466,
+      "external_charge_used_kwh": 193.752,
+      "reference_charge_kwh": 808.8078628705082
+    },
+    {
+      "ev_id": "EV-V086-04-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1294.6150713481193,
+      "trip_energy_kwh": 1294.6150713481193,
+      "external_charge_used_kwh": 246.74400000000003,
+      "reference_charge_kwh": 1031.6282950367547
+    },
+    {
+      "ev_id": "EV-V086-04-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 925.8719630818159,
+      "trip_energy_kwh": 925.8719630818159,
+      "external_charge_used_kwh": 176.36400000000003,
+      "reference_charge_kwh": 742.6250594931964
+    },
+    {
+      "ev_id": "EV-V086-04-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1384.8134563116726,
+      "trip_energy_kwh": 1384.8134563116726,
+      "external_charge_used_kwh": 263.30400000000003,
+      "reference_charge_kwh": 1117.509849703937
+    },
+    {
+      "ev_id": "EV-V087-01-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1345.1200015277323,
+      "trip_energy_kwh": 1345.1200015277323,
+      "external_charge_used_kwh": 240.12000000000003,
+      "reference_charge_kwh": 1078.475536718182
+    },
+    {
+      "ev_id": "EV-V087-01-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1180.6247912624676,
+      "trip_energy_kwh": 1180.6247912624676,
+      "external_charge_used_kwh": 216.108,
+      "reference_charge_kwh": 977.7789969967808
+    },
+    {
+      "ev_id": "EV-V087-01-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1312.7760079307989,
+      "trip_energy_kwh": 1312.7760079307989,
+      "external_charge_used_kwh": 238.46400000000003,
+      "reference_charge_kwh": 1057.3851372431848
+    },
+    {
+      "ev_id": "EV-V087-01-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1286.6253597526027,
+      "trip_energy_kwh": 1286.6253597526027,
+      "external_charge_used_kwh": 243.43200000000002,
+      "reference_charge_kwh": 1048.9342459682787
+    },
+    {
+      "ev_id": "EV-V087-02-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1215.4746031988457,
+      "trip_energy_kwh": 1215.4746031988457,
+      "external_charge_used_kwh": 226.044,
+      "reference_charge_kwh": 971.5576038178947
+    },
+    {
+      "ev_id": "EV-V087-02-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1379.5462264085288,
+      "trip_energy_kwh": 1379.5462264085288,
+      "external_charge_used_kwh": 255.02400000000003,
+      "reference_charge_kwh": 1135.417709230992
+    },
+    {
+      "ev_id": "EV-V087-02-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1306.7701210451876,
+      "trip_energy_kwh": 1306.7701210451876,
+      "external_charge_used_kwh": 252.54,
+      "reference_charge_kwh": 1036.2855021487835
+    },
+    {
+      "ev_id": "EV-V087-02-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1318.9364269491816,
+      "trip_energy_kwh": 1318.9364269491816,
+      "external_charge_used_kwh": 241.77600000000004,
+      "reference_charge_kwh": 1082.6895002424653
+    },
+    {
+      "ev_id": "EV-V089-01-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1556.1695149281363,
+      "trip_energy_kwh": 1556.1695149281363,
+      "external_charge_used_kwh": 295.59600000000006,
+      "reference_charge_kwh": 1242.068962940322
+    },
+    {
+      "ev_id": "EV-V089-01-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1726.5099361744221,
+      "trip_energy_kwh": 1726.5099361744221,
+      "external_charge_used_kwh": 317.124,
+      "reference_charge_kwh": 1407.7924968602047
+    },
+    {
+      "ev_id": "EV-V089-01-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1580.9579677917634,
+      "trip_energy_kwh": 1580.9579677917634,
+      "external_charge_used_kwh": 276.5520000000001,
+      "reference_charge_kwh": 1289.6898188901816
+    },
+    {
+      "ev_id": "EV-V089-01-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1583.337260469092,
+      "trip_energy_kwh": 1583.337260469092,
+      "external_charge_used_kwh": 288.972,
+      "reference_charge_kwh": 1303.220767663345
+    },
+    {
+      "ev_id": "EV-V091-01-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1236.8598656186423,
+      "trip_energy_kwh": 1236.8598656186423,
+      "external_charge_used_kwh": 216.108,
+      "reference_charge_kwh": 993.6615721523134
+    },
+    {
+      "ev_id": "EV-V091-01-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1269.6681585804452,
+      "trip_energy_kwh": 1269.6681585804452,
+      "external_charge_used_kwh": 238.46400000000003,
+      "reference_charge_kwh": 1041.2421929906432
+    },
+    {
+      "ev_id": "EV-V091-01-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1326.504832611319,
+      "trip_energy_kwh": 1326.504832611319,
+      "external_charge_used_kwh": 241.776,
+      "reference_charge_kwh": 1063.3880032041386
+    },
+    {
+      "ev_id": "EV-V091-01-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1294.9068921264131,
+      "trip_energy_kwh": 1294.9068921264131,
+      "external_charge_used_kwh": 219.42000000000004,
+      "reference_charge_kwh": 1087.9668105434841
+    },
+    {
+      "ev_id": "EV-V091-02-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1309.8131198734127,
+      "trip_energy_kwh": 1309.8131198734127,
+      "external_charge_used_kwh": 236.80800000000002,
+      "reference_charge_kwh": 1075.976924457072
+    },
+    {
+      "ev_id": "EV-V091-02-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1187.7404964199209,
+      "trip_energy_kwh": 1187.7404964199209,
+      "external_charge_used_kwh": 209.48400000000004,
+      "reference_charge_kwh": 975.9993947830661
+    },
+    {
+      "ev_id": "EV-V091-02-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1210.2295170779234,
+      "trip_energy_kwh": 1210.2295170779234,
+      "external_charge_used_kwh": 229.35600000000002,
+      "reference_charge_kwh": 963.2837697310658
+    },
+    {
+      "ev_id": "EV-V091-02-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1470.8518114307878,
+      "trip_energy_kwh": 1470.8518114307878,
+      "external_charge_used_kwh": 255.024,
+      "reference_charge_kwh": 1220.1939280793442
+    },
+    {
+      "ev_id": "EV-V098-01-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1623.4215892720545,
+      "trip_energy_kwh": 1623.4215892720545,
+      "external_charge_used_kwh": 302.22,
+      "reference_charge_kwh": 1318.1714550147742
+    },
+    {
+      "ev_id": "EV-V098-01-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1725.948075335979,
+      "trip_energy_kwh": 1725.948075335979,
+      "external_charge_used_kwh": 327.06,
+      "reference_charge_kwh": 1401.6641906454508
+    },
+    {
+      "ev_id": "EV-V098-01-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1745.9664365705198,
+      "trip_energy_kwh": 1745.9664365705198,
+      "external_charge_used_kwh": 319.60800000000006,
+      "reference_charge_kwh": 1414.6906291191435
+    },
+    {
+      "ev_id": "EV-V098-01-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1439.411311716238,
+      "trip_energy_kwh": 1439.411311716238,
+      "external_charge_used_kwh": 251.71200000000002,
+      "reference_charge_kwh": 1191.4797410299927
+    },
+    {
+      "ev_id": "EV-V098-02-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1559.653593854977,
+      "trip_energy_kwh": 1559.653593854977,
+      "external_charge_used_kwh": 277.38000000000005,
+      "reference_charge_kwh": 1264.0328518049184
+    },
+    {
+      "ev_id": "EV-V098-02-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1624.5831535262064,
+      "trip_energy_kwh": 1624.5831535262064,
+      "external_charge_used_kwh": 307.18800000000005,
+      "reference_charge_kwh": 1322.789946923675
+    },
+    {
+      "ev_id": "EV-V098-02-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1625.3901271639184,
+      "trip_energy_kwh": 1625.3901271639184,
+      "external_charge_used_kwh": 277.38000000000005,
+      "reference_charge_kwh": 1334.1115584186223
+    },
+    {
+      "ev_id": "EV-V098-02-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1685.9796823561237,
+      "trip_energy_kwh": 1685.9796823561237,
+      "external_charge_used_kwh": 315.4680000000001,
+      "reference_charge_kwh": 1389.620911581021
+    },
+    {
+      "ev_id": "EV-V098-03-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1554.9639050987425,
+      "trip_energy_kwh": 1554.9639050987425,
+      "external_charge_used_kwh": 293.94000000000005,
+      "reference_charge_kwh": 1249.8064991158608
+    },
+    {
+      "ev_id": "EV-V098-03-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1507.268552661739,
+      "trip_energy_kwh": 1507.268552661739,
+      "external_charge_used_kwh": 257.50800000000004,
+      "reference_charge_kwh": 1248.8584004098157
+    },
+    {
+      "ev_id": "EV-V098-03-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1492.4397680923353,
+      "trip_energy_kwh": 1492.4397680923353,
+      "external_charge_used_kwh": 264.96000000000004,
+      "reference_charge_kwh": 1222.8938243628736
+    },
+    {
+      "ev_id": "EV-V098-03-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1589.6639276634742,
+      "trip_energy_kwh": 1589.6639276634742,
+      "external_charge_used_kwh": 276.552,
+      "reference_charge_kwh": 1308.198352909293
+    },
+    {
+      "ev_id": "EV-V098-04-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1603.7661298610467,
+      "trip_energy_kwh": 1603.7661298610467,
+      "external_charge_used_kwh": 281.52000000000004,
+      "reference_charge_kwh": 1323.3527607128672
+    },
+    {
+      "ev_id": "EV-V098-04-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1628.2722570722312,
+      "trip_energy_kwh": 1628.2722570722312,
+      "external_charge_used_kwh": 294.76800000000003,
+      "reference_charge_kwh": 1312.5712822494913
+    },
+    {
+      "ev_id": "EV-V098-04-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1513.7463742061514,
+      "trip_energy_kwh": 1513.7463742061514,
+      "external_charge_used_kwh": 290.62800000000004,
+      "reference_charge_kwh": 1204.0163384812422
+    },
+    {
+      "ev_id": "EV-V098-04-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1570.5682647038689,
+      "trip_energy_kwh": 1570.5682647038689,
+      "external_charge_used_kwh": 302.21999999999997,
+      "reference_charge_kwh": 1264.4349874405577
+    },
+    {
+      "ev_id": "EV-V099-01-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1577.4452757418899,
+      "trip_energy_kwh": 1577.4452757418899,
+      "external_charge_used_kwh": 293.94000000000005,
+      "reference_charge_kwh": 1280.3652880168054
+    },
+    {
+      "ev_id": "EV-V099-01-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1550.4498356439692,
+      "trip_energy_kwh": 1550.4498356439692,
+      "external_charge_used_kwh": 269.928,
+      "reference_charge_kwh": 1271.9472775161487
+    },
+    {
+      "ev_id": "EV-V099-01-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1408.320052244934,
+      "trip_energy_kwh": 1408.320052244934,
+      "external_charge_used_kwh": 250.88400000000001,
+      "reference_charge_kwh": 1131.8455269128501
+    },
+    {
+      "ev_id": "EV-V099-01-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1456.8199882600436,
+      "trip_energy_kwh": 1456.8199882600436,
+      "external_charge_used_kwh": 268.27200000000005,
+      "reference_charge_kwh": 1197.6774306465086
+    },
+    {
+      "ev_id": "EV-V099-02-0",
+      "year": 2023,
+      "original_trip_energy_kwh": 1547.2452517503252,
+      "trip_energy_kwh": 1547.2452517503252,
+      "external_charge_used_kwh": 288.14400000000006,
+      "reference_charge_kwh": 1261.0169654495812
+    },
+    {
+      "ev_id": "EV-V099-02-0",
+      "year": 2024,
+      "original_trip_energy_kwh": 1528.4511146767118,
+      "trip_energy_kwh": 1528.4511146767118,
+      "external_charge_used_kwh": 287.31600000000003,
+      "reference_charge_kwh": 1226.2705726470876
+    },
+    {
+      "ev_id": "EV-V099-02-1",
+      "year": 2023,
+      "original_trip_energy_kwh": 1564.182795853266,
+      "trip_energy_kwh": 1564.182795853266,
+      "external_charge_used_kwh": 269.92800000000005,
+      "reference_charge_kwh": 1297.4496222653065
+    },
+    {
+      "ev_id": "EV-V099-02-1",
+      "year": 2024,
+      "original_trip_energy_kwh": 1511.9474635612137,
+      "trip_energy_kwh": 1511.9474635612137,
+      "external_charge_used_kwh": 270.7560000000001,
+      "reference_charge_kwh": 1228.7903391305708
+    }
+  ],
+  "connection_jitter_rejected_ev_ids": [],
+  "reference_scope": "Continuous offline ledger, conservative normal-site headroom, no stationary battery support; runtime arrivals remain prescribed. Disturbance scenarios may intentionally miss requests.",
+  "output_checksums": {
+    "catalogs/chargers.parquet": "604bea959d654824d6a04e8dd3b8db89b6e3bc6dfd5ab217e6404ba02924bbd7",
+    "catalogs/charging_sessions.parquet": "8696f07e0e838d34b6679b404778f0a0157c98b4cb7197c71b2cae1a9841ed9c",
+    "catalogs/electric_vehicles.parquet": "ee652f5855eaaf02b8bd9b7ad849a494d8ae8d6df31d57410ebf21a1e038dcbc",
+    "catalogs/ev_annual_energy.parquet": "d6679fff6e885925523ffa594e8f447b60c3f16fe4fda045669abac17ac04430",
+    "catalogs/mobility_episodes.parquet": "0a44dcda0e1a218c23acc20f112b6b8640c0f94b2a41526f6c51a787d0f7ab26",
+    "chargers/CHG-M001-01.parquet": "7039620b380cc9f052abe356929b8a5785b56dc193cb6aac8282a88548e6b73d",
+    "chargers/CHG-M002-01.parquet": "37d14a439e7125f2bd2ad16dd45631c851fd2fcb995c85f7e8bf3d1a2115656f",
+    "chargers/CHG-M003-01.parquet": "5530e7daa56fcf144a400303754c526a2f2ba36f10871c3e6a9594383e5672a8",
+    "chargers/CHG-M005-01.parquet": "97e0afffba609fe08ac0526a13487b2c5db75991028366171d7f334aaf7572c9",
+    "chargers/CHG-M006-01.parquet": "42e2b2c7e8d1dd534e376080c522a3cb744f5564c05b200618c9e078a3999f77",
+    "chargers/CHG-M006-02.parquet": "960a72a4ea21dbd40df1aac4f347644db2c960ab544dcb8d16e010396c9841b9",
+    "chargers/CHG-M008-01.parquet": "1fde2f0d5067309c3664aaa638bfdbeb8d56e7988bca4d9c55abc491e01ece0c",
+    "chargers/CHG-M010-01.parquet": "ee501ec0a998f6e0cf9d104834b88286258705ee85ffeaf30c533e29acb9a473",
+    "chargers/CHG-M016-01.parquet": "5a51d9ca1db68379c9175e7266685d990135f51b92237140f45307184269324a",
+    "chargers/CHG-M016-02.parquet": "fadd7d85aced943ed7691005b8f2254e7ad7b6168e0ea19ba9e57cb4c22543d1",
+    "chargers/CHG-M018-01.parquet": "9dfa8a03bc25f73a6371961c66cb5c04b4381c2a6d47e1b6fbad296f0457c517",
+    "chargers/CHG-M020-01.parquet": "60b43dd347ca22bf0a6d37f6d750515185610ba706ee63f5925d0c743aa54ec8",
+    "chargers/CHG-M022-01.parquet": "31bbe6bd13eb6c8f3f946c807780a0cb3bb127c6c778bf005283e7790851ab3c",
+    "chargers/CHG-M024-01.parquet": "2da6facf15e38ea3f7b82856d29bd49150c7a3ec110e264c7daf575feca4f049",
+    "chargers/CHG-M026-01.parquet": "6ad51e3f90896c17b206bab5fdf0139a5a5e7a903958c7f33e8fefb8a497670a",
+    "chargers/CHG-M028-01.parquet": "4d4a7cdbceb85969a389cd2152bab844b3b3b00d44b39ecb7c92fec440da6ed6",
+    "chargers/CHG-M030-01.parquet": "e081acd31c7b746427bfddd014b06d8496979f6e03db7249e5d4e4559c66379e",
+    "chargers/CHG-M034-01.parquet": "dc35444176fd70badaeb892416f4525f0de53d9d159366f24a689d0a300a160c",
+    "chargers/CHG-M038-01.parquet": "34c8187321a4301fc39d6f21839cbbd2007bbefc1aa6d766fee38dc6337c5041",
+    "chargers/CHG-M040-01.parquet": "b72c8e407fe434f060c3361c262e4af9d1b9573a346f815dd8c81569d252ee1b",
+    "chargers/CHG-M040-02.parquet": "e2bbec55949209187bd40e448501ae06d4f18de522ab9651527ed8240e642a14",
+    "chargers/CHG-M042-01.parquet": "8dbfaa218c5e92db691ef7ad4cafc7073492395cf88936e30a592bce56cb37cd",
+    "chargers/CHG-M044-01.parquet": "aff61a16db6f234d2a6893969ff8d635d85adf04ece2306cf091bd9ba9bc153c",
+    "chargers/CHG-M046-01.parquet": "08305b3525d0a3384b719d9cdc46c2d23cbd7cce5a8dd9fd55c698d13cc43563",
+    "chargers/CHG-M048-01.parquet": "646ba63911d527e17423ae6fa33f1d78731b03bcfbbf3bc54e998c7ba7071d38",
+    "chargers/CHG-M050-01.parquet": "7841bbeb96b2de028bd9312c06656f7a7ae724144b7993bec8ab41ed528dcdb6",
+    "chargers/CHG-M052-01.parquet": "ce765ff1c45bae338ec94080c36439cd79f08ca85896d9ccde1c97a2fc7c2b7d",
+    "chargers/CHG-M054-01.parquet": "c90ebc340316bb3051e6602898d5c20a7b07553420c20dd4db5f16cfe8eac488",
+    "chargers/CHG-M056-01.parquet": "78f00b4ae2f53f621c18592596e1274933363066a5eea61ac37b2a8e48c52ed1",
+    "chargers/CHG-M056-02.parquet": "12e5d2ebc2a2e50cd112ec50bd9de243ae3dceba941560b2045d6d0e1618546d",
+    "chargers/CHG-M060-01.parquet": "7b47346f5d22f6468bbc0ad2282e2976c675e5d44b6c89361a14e168ad453a3f",
+    "chargers/CHG-M062-01.parquet": "fb34d17c7c8614003a94f535a3db603d810cffb47e6960142f6d388f5a639fb6",
+    "chargers/CHG-M068-01.parquet": "1c5983512e5cf60917102b601b953f367008c87a1815da96aebb5f941bc096cf",
+    "chargers/CHG-M070-01.parquet": "53f5a3b4f75693b5848bbb50d52fab022d643b5cfddba2db8529f16536461b49",
+    "chargers/CHG-M072-01.parquet": "d828920cb3a5875aa0d23f0f31646fad7778cf091dcd1650be3755eb89d6e3b0",
+    "chargers/CHG-M076-01.parquet": "823ef9388bf6466409cdae62b97fa6c0424342edb05854e52fa125b10d852bf6",
+    "chargers/CHG-M080-01.parquet": "07f60453a9f004bdb4ac0e38eca963a4ca4333be570287e0efeba4440590f03a",
+    "chargers/CHG-M081-01.parquet": "da1e4f11a9cfae8b024eefb737f876dbc21c989b402da109661719c74d7046e0",
+    "chargers/CHG-M081-02.parquet": "a93a299916e4606f04615b2e0c418011f56644930ebd8eed75ed1d062c289183",
+    "chargers/CHG-M081-03.parquet": "3f89cb6773e56c9b09a0fa785f464679251934504fadae4041e3924f991c5384",
+    "chargers/CHG-M081-04.parquet": "43e1c50924ec35f3ef9281331ee9a48b8260a5e61beefc796f1eb08a7296a9a7",
+    "chargers/CHG-M081-05.parquet": "cf9bce43e877b05dd0599ba8a803d6327362493aed5ce70c723699545cf36415",
+    "chargers/CHG-M081-06.parquet": "a04ce175a6d90c852113e8ed2488a7386f58eec50511171bfaccb53b2a6e70de",
+    "chargers/CHG-M081-07.parquet": "a0d5d0d110a7395aa2dfc1bba354df6c9d73e8ddf85a9f0d6a3121ee4805f76c",
+    "chargers/CHG-M081-08.parquet": "3cd774c2b1f114548a66403954b31d9c43fe966b5c26c15d38ae7b6379df1f46",
+    "chargers/CHG-M081-09.parquet": "6f8260287a9d92b55d56bc00e77b4140130a23fc2e037508bbbeb8c7e28e0a44",
+    "chargers/CHG-M081-10.parquet": "2f0e337b36fb6d63f54d701c2a156b8dd7c1961ed54bad762f7b1d0c0394c1fc",
+    "chargers/CHG-M081-11.parquet": "b7b7998b172a25190c465186e1cbecfbb051c2b2c90efc01381f09c3bd85eb2c",
+    "chargers/CHG-M081-12.parquet": "924b71299c784b0a5b26106c7bb0c88596ad7b7235d94d19b795624455ab0524",
+    "chargers/CHG-M085-01.parquet": "71cd2fab6f437e2cb23e11dcf3d8d045930f6188eca97c141cb4da0aa188401a",
+    "chargers/CHG-M086-01.parquet": "3c591ffbae3075245a9af8dd4a7dc84ecba2dda0cea023d4c97990b4d579fd53",
+    "chargers/CHG-M086-02.parquet": "ea87eb76e3548bf99dcb0d769b8f20a9e23eb4c0b99b61b8112ec4b9cbdd34f7",
+    "chargers/CHG-M086-03.parquet": "8e42134ebb28841e73f80d0f0971f075d9cd619df051d6a3b50ea65980febd19",
+    "chargers/CHG-M086-04.parquet": "4bd565fd60e73ee915395d6a452fcdf6895c3ba2ec699e8fdc68d21e53b8c75a",
+    "chargers/CHG-M087-01.parquet": "d9ab139a2e583cc2f510ac3f5c0c6767ddfd96421bddb468c198f960c3152bc9",
+    "chargers/CHG-M087-02.parquet": "f3cc8e3bcc24af144476b4d5623e8615588078618a3d3a3fd17e6cddd17baed3",
+    "chargers/CHG-M089-01.parquet": "6c6735ca8d0cde57d43d18b3296388a12a60bbf2584616a477e9e901977c4da2",
+    "chargers/CHG-M091-01.parquet": "cc76c5c5a1a804e392c81e8072bc4b5c68fb3b8c84daf54618e93ea3d1782d80",
+    "chargers/CHG-M091-02.parquet": "615daab763a020c62eee32c79add11ee5bcd272bf9e71fdc06f9c6601cd5f9bc",
+    "chargers/CHG-M098-01.parquet": "ee82b8180b2bef7292c1df6276d245ca72bbe7b8fa792c1589dc3913a6162c8c",
+    "chargers/CHG-M098-02.parquet": "567a4a70272b2aba0f652d3d39de9b1a8a1984473c04eec61fd3546ea2fbb28e",
+    "chargers/CHG-M098-03.parquet": "7bb745f43f3544ff36269874d028004c682f32776a53536fad8457cd554b9d90",
+    "chargers/CHG-M098-04.parquet": "ea5d5dde9c82c95627bf7ba1a5e6fb45dcd4113b18a84e35bdf061cdc305eb82",
+    "chargers/CHG-M099-01.parquet": "10ddccbf17d1e56a89830d61b3c9a87fc7f8b8060c3e0805e487d15563eb4ebf",
+    "chargers/CHG-M099-02.parquet": "d805335aceef3c2282f47722af13870b15b01567541345e4b21a7a735caa2c1e",
+    "evaluation/campaign_2024/inputs/premium_100_allin/CHG-M020-01.parquet": "2275d3d0fd03894c70c95191a19c0cd175f3d4440be66e41b596527b313f40fa",
+    "evaluation/native_inputs/premium_100_allin/CHG-M001-01.parquet": "8f638f1c48052e08e93303737ef2d3093eeea927787e6218278591ce5780dcef",
+    "evaluation/native_inputs/premium_100_allin/CHG-M002-01.parquet": "37d14a439e7125f2bd2ad16dd45631c851fd2fcb995c85f7e8bf3d1a2115656f",
+    "evaluation/native_inputs/premium_100_allin/CHG-M003-01.parquet": "5530e7daa56fcf144a400303754c526a2f2ba36f10871c3e6a9594383e5672a8",
+    "evaluation/native_inputs/premium_100_allin/CHG-M005-01.parquet": "97e0afffba609fe08ac0526a13487b2c5db75991028366171d7f334aaf7572c9",
+    "evaluation/native_inputs/premium_100_allin/CHG-M006-01.parquet": "42e2b2c7e8d1dd534e376080c522a3cb744f5564c05b200618c9e078a3999f77",
+    "evaluation/native_inputs/premium_100_allin/CHG-M006-02.parquet": "960a72a4ea21dbd40df1aac4f347644db2c960ab544dcb8d16e010396c9841b9",
+    "evaluation/native_inputs/premium_100_allin/CHG-M008-01.parquet": "1fde2f0d5067309c3664aaa638bfdbeb8d56e7988bca4d9c55abc491e01ece0c",
+    "evaluation/native_inputs/premium_100_allin/CHG-M010-01.parquet": "ee501ec0a998f6e0cf9d104834b88286258705ee85ffeaf30c533e29acb9a473",
+    "evaluation/native_inputs/premium_100_allin/CHG-M016-01.parquet": "5a51d9ca1db68379c9175e7266685d990135f51b92237140f45307184269324a",
+    "evaluation/native_inputs/premium_100_allin/CHG-M016-02.parquet": "fadd7d85aced943ed7691005b8f2254e7ad7b6168e0ea19ba9e57cb4c22543d1",
+    "evaluation/native_inputs/premium_100_allin/CHG-M018-01.parquet": "9dfa8a03bc25f73a6371961c66cb5c04b4381c2a6d47e1b6fbad296f0457c517",
+    "evaluation/native_inputs/premium_100_allin/CHG-M020-01.parquet": "60b43dd347ca22bf0a6d37f6d750515185610ba706ee63f5925d0c743aa54ec8",
+    "evaluation/native_inputs/premium_100_allin/CHG-M022-01.parquet": "31bbe6bd13eb6c8f3f946c807780a0cb3bb127c6c778bf005283e7790851ab3c",
+    "evaluation/native_inputs/premium_100_allin/CHG-M024-01.parquet": "2da6facf15e38ea3f7b82856d29bd49150c7a3ec110e264c7daf575feca4f049",
+    "evaluation/native_inputs/premium_100_allin/CHG-M026-01.parquet": "6ad51e3f90896c17b206bab5fdf0139a5a5e7a903958c7f33e8fefb8a497670a",
+    "evaluation/native_inputs/premium_100_allin/CHG-M028-01.parquet": "4d4a7cdbceb85969a389cd2152bab844b3b3b00d44b39ecb7c92fec440da6ed6",
+    "evaluation/native_inputs/premium_100_allin/CHG-M030-01.parquet": "e081acd31c7b746427bfddd014b06d8496979f6e03db7249e5d4e4559c66379e",
+    "evaluation/native_inputs/premium_100_allin/CHG-M034-01.parquet": "dc35444176fd70badaeb892416f4525f0de53d9d159366f24a689d0a300a160c",
+    "evaluation/native_inputs/premium_100_allin/CHG-M038-01.parquet": "34c8187321a4301fc39d6f21839cbbd2007bbefc1aa6d766fee38dc6337c5041",
+    "evaluation/native_inputs/premium_100_allin/CHG-M040-01.parquet": "b72c8e407fe434f060c3361c262e4af9d1b9573a346f815dd8c81569d252ee1b",
+    "evaluation/native_inputs/premium_100_allin/CHG-M040-02.parquet": "e2bbec55949209187bd40e448501ae06d4f18de522ab9651527ed8240e642a14",
+    "evaluation/native_inputs/premium_100_allin/CHG-M042-01.parquet": "8dbfaa218c5e92db691ef7ad4cafc7073492395cf88936e30a592bce56cb37cd",
+    "evaluation/native_inputs/premium_100_allin/CHG-M044-01.parquet": "aff61a16db6f234d2a6893969ff8d635d85adf04ece2306cf091bd9ba9bc153c",
+    "evaluation/native_inputs/premium_100_allin/CHG-M046-01.parquet": "08305b3525d0a3384b719d9cdc46c2d23cbd7cce5a8dd9fd55c698d13cc43563",
+    "evaluation/native_inputs/premium_100_allin/CHG-M048-01.parquet": "646ba63911d527e17423ae6fa33f1d78731b03bcfbbf3bc54e998c7ba7071d38",
+    "evaluation/native_inputs/premium_100_allin/CHG-M050-01.parquet": "7841bbeb96b2de028bd9312c06656f7a7ae724144b7993bec8ab41ed528dcdb6",
+    "evaluation/native_inputs/premium_100_allin/CHG-M052-01.parquet": "ce765ff1c45bae338ec94080c36439cd79f08ca85896d9ccde1c97a2fc7c2b7d",
+    "evaluation/native_inputs/premium_100_allin/CHG-M054-01.parquet": "c90ebc340316bb3051e6602898d5c20a7b07553420c20dd4db5f16cfe8eac488",
+    "evaluation/native_inputs/premium_100_allin/CHG-M056-01.parquet": "78f00b4ae2f53f621c18592596e1274933363066a5eea61ac37b2a8e48c52ed1",
+    "evaluation/native_inputs/premium_100_allin/CHG-M056-02.parquet": "12e5d2ebc2a2e50cd112ec50bd9de243ae3dceba941560b2045d6d0e1618546d",
+    "evaluation/native_inputs/premium_100_allin/CHG-M060-01.parquet": "7b47346f5d22f6468bbc0ad2282e2976c675e5d44b6c89361a14e168ad453a3f",
+    "evaluation/native_inputs/premium_100_allin/CHG-M062-01.parquet": "fb34d17c7c8614003a94f535a3db603d810cffb47e6960142f6d388f5a639fb6",
+    "evaluation/native_inputs/premium_100_allin/CHG-M068-01.parquet": "1c5983512e5cf60917102b601b953f367008c87a1815da96aebb5f941bc096cf",
+    "evaluation/native_inputs/premium_100_allin/CHG-M070-01.parquet": "53f5a3b4f75693b5848bbb50d52fab022d643b5cfddba2db8529f16536461b49",
+    "evaluation/native_inputs/premium_100_allin/CHG-M072-01.parquet": "d828920cb3a5875aa0d23f0f31646fad7778cf091dcd1650be3755eb89d6e3b0",
+    "evaluation/native_inputs/premium_100_allin/CHG-M076-01.parquet": "823ef9388bf6466409cdae62b97fa6c0424342edb05854e52fa125b10d852bf6",
+    "evaluation/native_inputs/premium_100_allin/CHG-M080-01.parquet": "07f60453a9f004bdb4ac0e38eca963a4ca4333be570287e0efeba4440590f03a",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-01.parquet": "df524c0fee42c443971a92dead6f337c096fbcef5bc4d2673dfcb1b3cda88395",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-02.parquet": "a93a299916e4606f04615b2e0c418011f56644930ebd8eed75ed1d062c289183",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-03.parquet": "3f89cb6773e56c9b09a0fa785f464679251934504fadae4041e3924f991c5384",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-04.parquet": "43e1c50924ec35f3ef9281331ee9a48b8260a5e61beefc796f1eb08a7296a9a7",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-05.parquet": "cf9bce43e877b05dd0599ba8a803d6327362493aed5ce70c723699545cf36415",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-06.parquet": "a04ce175a6d90c852113e8ed2488a7386f58eec50511171bfaccb53b2a6e70de",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-07.parquet": "a0d5d0d110a7395aa2dfc1bba354df6c9d73e8ddf85a9f0d6a3121ee4805f76c",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-08.parquet": "3cd774c2b1f114548a66403954b31d9c43fe966b5c26c15d38ae7b6379df1f46",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-09.parquet": "6f8260287a9d92b55d56bc00e77b4140130a23fc2e037508bbbeb8c7e28e0a44",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-10.parquet": "2f0e337b36fb6d63f54d701c2a156b8dd7c1961ed54bad762f7b1d0c0394c1fc",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-11.parquet": "b7b7998b172a25190c465186e1cbecfbb051c2b2c90efc01381f09c3bd85eb2c",
+    "evaluation/native_inputs/premium_100_allin/CHG-M081-12.parquet": "924b71299c784b0a5b26106c7bb0c88596ad7b7235d94d19b795624455ab0524",
+    "evaluation/native_inputs/premium_100_allin/CHG-M085-01.parquet": "1e1c50c5db9ae633891622e2eb068252f899c9bef351c9f9775215fa8f2479e2",
+    "evaluation/native_inputs/premium_100_allin/CHG-M086-01.parquet": "3c591ffbae3075245a9af8dd4a7dc84ecba2dda0cea023d4c97990b4d579fd53",
+    "evaluation/native_inputs/premium_100_allin/CHG-M086-02.parquet": "ea87eb76e3548bf99dcb0d769b8f20a9e23eb4c0b99b61b8112ec4b9cbdd34f7",
+    "evaluation/native_inputs/premium_100_allin/CHG-M086-03.parquet": "8e42134ebb28841e73f80d0f0971f075d9cd619df051d6a3b50ea65980febd19",
+    "evaluation/native_inputs/premium_100_allin/CHG-M086-04.parquet": "4bd565fd60e73ee915395d6a452fcdf6895c3ba2ec699e8fdc68d21e53b8c75a",
+    "evaluation/native_inputs/premium_100_allin/CHG-M087-01.parquet": "d9ab139a2e583cc2f510ac3f5c0c6767ddfd96421bddb468c198f960c3152bc9",
+    "evaluation/native_inputs/premium_100_allin/CHG-M087-02.parquet": "f3cc8e3bcc24af144476b4d5623e8615588078618a3d3a3fd17e6cddd17baed3",
+    "evaluation/native_inputs/premium_100_allin/CHG-M089-01.parquet": "6c6735ca8d0cde57d43d18b3296388a12a60bbf2584616a477e9e901977c4da2",
+    "evaluation/native_inputs/premium_100_allin/CHG-M091-01.parquet": "cc76c5c5a1a804e392c81e8072bc4b5c68fb3b8c84daf54618e93ea3d1782d80",
+    "evaluation/native_inputs/premium_100_allin/CHG-M091-02.parquet": "615daab763a020c62eee32c79add11ee5bcd272bf9e71fdc06f9c6601cd5f9bc",
+    "evaluation/native_inputs/premium_100_allin/CHG-M098-01.parquet": "ee82b8180b2bef7292c1df6276d245ca72bbe7b8fa792c1589dc3913a6162c8c",
+    "evaluation/native_inputs/premium_100_allin/CHG-M098-02.parquet": "567a4a70272b2aba0f652d3d39de9b1a8a1984473c04eec61fd3546ea2fbb28e",
+    "evaluation/native_inputs/premium_100_allin/CHG-M098-03.parquet": "7bb745f43f3544ff36269874d028004c682f32776a53536fad8457cd554b9d90",
+    "evaluation/native_inputs/premium_100_allin/CHG-M098-04.parquet": "ea5d5dde9c82c95627bf7ba1a5e6fb45dcd4113b18a84e35bdf061cdc305eb82",
+    "evaluation/native_inputs/premium_100_allin/CHG-M099-01.parquet": "10ddccbf17d1e56a89830d61b3c9a87fc7f8b8060c3e0805e487d15563eb4ebf",
+    "evaluation/native_inputs/premium_100_allin/CHG-M099-02.parquet": "d805335aceef3c2282f47722af13870b15b01567541345e4b21a7a735caa2c1e",
+    "evaluation/native_inputs/premium_100_normal/CHG-M001-01.parquet": "7039620b380cc9f052abe356929b8a5785b56dc193cb6aac8282a88548e6b73d",
+    "evaluation/native_inputs/premium_100_normal/CHG-M002-01.parquet": "37d14a439e7125f2bd2ad16dd45631c851fd2fcb995c85f7e8bf3d1a2115656f",
+    "evaluation/native_inputs/premium_100_normal/CHG-M003-01.parquet": "5530e7daa56fcf144a400303754c526a2f2ba36f10871c3e6a9594383e5672a8",
+    "evaluation/native_inputs/premium_100_normal/CHG-M005-01.parquet": "97e0afffba609fe08ac0526a13487b2c5db75991028366171d7f334aaf7572c9",
+    "evaluation/native_inputs/premium_100_normal/CHG-M006-01.parquet": "42e2b2c7e8d1dd534e376080c522a3cb744f5564c05b200618c9e078a3999f77",
+    "evaluation/native_inputs/premium_100_normal/CHG-M006-02.parquet": "960a72a4ea21dbd40df1aac4f347644db2c960ab544dcb8d16e010396c9841b9",
+    "evaluation/native_inputs/premium_100_normal/CHG-M008-01.parquet": "1fde2f0d5067309c3664aaa638bfdbeb8d56e7988bca4d9c55abc491e01ece0c",
+    "evaluation/native_inputs/premium_100_normal/CHG-M010-01.parquet": "ee501ec0a998f6e0cf9d104834b88286258705ee85ffeaf30c533e29acb9a473",
+    "evaluation/native_inputs/premium_100_normal/CHG-M016-01.parquet": "5a51d9ca1db68379c9175e7266685d990135f51b92237140f45307184269324a",
+    "evaluation/native_inputs/premium_100_normal/CHG-M016-02.parquet": "fadd7d85aced943ed7691005b8f2254e7ad7b6168e0ea19ba9e57cb4c22543d1",
+    "evaluation/native_inputs/premium_100_normal/CHG-M018-01.parquet": "9dfa8a03bc25f73a6371961c66cb5c04b4381c2a6d47e1b6fbad296f0457c517",
+    "evaluation/native_inputs/premium_100_normal/CHG-M020-01.parquet": "60b43dd347ca22bf0a6d37f6d750515185610ba706ee63f5925d0c743aa54ec8",
+    "evaluation/native_inputs/premium_100_normal/CHG-M022-01.parquet": "31bbe6bd13eb6c8f3f946c807780a0cb3bb127c6c778bf005283e7790851ab3c",
+    "evaluation/native_inputs/premium_100_normal/CHG-M024-01.parquet": "2da6facf15e38ea3f7b82856d29bd49150c7a3ec110e264c7daf575feca4f049",
+    "evaluation/native_inputs/premium_100_normal/CHG-M026-01.parquet": "6ad51e3f90896c17b206bab5fdf0139a5a5e7a903958c7f33e8fefb8a497670a",
+    "evaluation/native_inputs/premium_100_normal/CHG-M028-01.parquet": "4d4a7cdbceb85969a389cd2152bab844b3b3b00d44b39ecb7c92fec440da6ed6",
+    "evaluation/native_inputs/premium_100_normal/CHG-M030-01.parquet": "e081acd31c7b746427bfddd014b06d8496979f6e03db7249e5d4e4559c66379e",
+    "evaluation/native_inputs/premium_100_normal/CHG-M034-01.parquet": "dc35444176fd70badaeb892416f4525f0de53d9d159366f24a689d0a300a160c",
+    "evaluation/native_inputs/premium_100_normal/CHG-M038-01.parquet": "34c8187321a4301fc39d6f21839cbbd2007bbefc1aa6d766fee38dc6337c5041",
+    "evaluation/native_inputs/premium_100_normal/CHG-M040-01.parquet": "b72c8e407fe434f060c3361c262e4af9d1b9573a346f815dd8c81569d252ee1b",
+    "evaluation/native_inputs/premium_100_normal/CHG-M040-02.parquet": "e2bbec55949209187bd40e448501ae06d4f18de522ab9651527ed8240e642a14",
+    "evaluation/native_inputs/premium_100_normal/CHG-M042-01.parquet": "8dbfaa218c5e92db691ef7ad4cafc7073492395cf88936e30a592bce56cb37cd",
+    "evaluation/native_inputs/premium_100_normal/CHG-M044-01.parquet": "aff61a16db6f234d2a6893969ff8d635d85adf04ece2306cf091bd9ba9bc153c",
+    "evaluation/native_inputs/premium_100_normal/CHG-M046-01.parquet": "08305b3525d0a3384b719d9cdc46c2d23cbd7cce5a8dd9fd55c698d13cc43563",
+    "evaluation/native_inputs/premium_100_normal/CHG-M048-01.parquet": "646ba63911d527e17423ae6fa33f1d78731b03bcfbbf3bc54e998c7ba7071d38",
+    "evaluation/native_inputs/premium_100_normal/CHG-M050-01.parquet": "7841bbeb96b2de028bd9312c06656f7a7ae724144b7993bec8ab41ed528dcdb6",
+    "evaluation/native_inputs/premium_100_normal/CHG-M052-01.parquet": "ce765ff1c45bae338ec94080c36439cd79f08ca85896d9ccde1c97a2fc7c2b7d",
+    "evaluation/native_inputs/premium_100_normal/CHG-M054-01.parquet": "c90ebc340316bb3051e6602898d5c20a7b07553420c20dd4db5f16cfe8eac488",
+    "evaluation/native_inputs/premium_100_normal/CHG-M056-01.parquet": "78f00b4ae2f53f621c18592596e1274933363066a5eea61ac37b2a8e48c52ed1",
+    "evaluation/native_inputs/premium_100_normal/CHG-M056-02.parquet": "12e5d2ebc2a2e50cd112ec50bd9de243ae3dceba941560b2045d6d0e1618546d",
+    "evaluation/native_inputs/premium_100_normal/CHG-M060-01.parquet": "7b47346f5d22f6468bbc0ad2282e2976c675e5d44b6c89361a14e168ad453a3f",
+    "evaluation/native_inputs/premium_100_normal/CHG-M062-01.parquet": "fb34d17c7c8614003a94f535a3db603d810cffb47e6960142f6d388f5a639fb6",
+    "evaluation/native_inputs/premium_100_normal/CHG-M068-01.parquet": "1c5983512e5cf60917102b601b953f367008c87a1815da96aebb5f941bc096cf",
+    "evaluation/native_inputs/premium_100_normal/CHG-M070-01.parquet": "53f5a3b4f75693b5848bbb50d52fab022d643b5cfddba2db8529f16536461b49",
+    "evaluation/native_inputs/premium_100_normal/CHG-M072-01.parquet": "d828920cb3a5875aa0d23f0f31646fad7778cf091dcd1650be3755eb89d6e3b0",
+    "evaluation/native_inputs/premium_100_normal/CHG-M076-01.parquet": "823ef9388bf6466409cdae62b97fa6c0424342edb05854e52fa125b10d852bf6",
+    "evaluation/native_inputs/premium_100_normal/CHG-M080-01.parquet": "07f60453a9f004bdb4ac0e38eca963a4ca4333be570287e0efeba4440590f03a",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-01.parquet": "da1e4f11a9cfae8b024eefb737f876dbc21c989b402da109661719c74d7046e0",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-02.parquet": "a93a299916e4606f04615b2e0c418011f56644930ebd8eed75ed1d062c289183",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-03.parquet": "3f89cb6773e56c9b09a0fa785f464679251934504fadae4041e3924f991c5384",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-04.parquet": "43e1c50924ec35f3ef9281331ee9a48b8260a5e61beefc796f1eb08a7296a9a7",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-05.parquet": "cf9bce43e877b05dd0599ba8a803d6327362493aed5ce70c723699545cf36415",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-06.parquet": "a04ce175a6d90c852113e8ed2488a7386f58eec50511171bfaccb53b2a6e70de",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-07.parquet": "a0d5d0d110a7395aa2dfc1bba354df6c9d73e8ddf85a9f0d6a3121ee4805f76c",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-08.parquet": "3cd774c2b1f114548a66403954b31d9c43fe966b5c26c15d38ae7b6379df1f46",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-09.parquet": "6f8260287a9d92b55d56bc00e77b4140130a23fc2e037508bbbeb8c7e28e0a44",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-10.parquet": "2f0e337b36fb6d63f54d701c2a156b8dd7c1961ed54bad762f7b1d0c0394c1fc",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-11.parquet": "b7b7998b172a25190c465186e1cbecfbb051c2b2c90efc01381f09c3bd85eb2c",
+    "evaluation/native_inputs/premium_100_normal/CHG-M081-12.parquet": "924b71299c784b0a5b26106c7bb0c88596ad7b7235d94d19b795624455ab0524",
+    "evaluation/native_inputs/premium_100_normal/CHG-M085-01.parquet": "71cd2fab6f437e2cb23e11dcf3d8d045930f6188eca97c141cb4da0aa188401a",
+    "evaluation/native_inputs/premium_100_normal/CHG-M086-01.parquet": "3c591ffbae3075245a9af8dd4a7dc84ecba2dda0cea023d4c97990b4d579fd53",
+    "evaluation/native_inputs/premium_100_normal/CHG-M086-02.parquet": "ea87eb76e3548bf99dcb0d769b8f20a9e23eb4c0b99b61b8112ec4b9cbdd34f7",
+    "evaluation/native_inputs/premium_100_normal/CHG-M086-03.parquet": "8e42134ebb28841e73f80d0f0971f075d9cd619df051d6a3b50ea65980febd19",
+    "evaluation/native_inputs/premium_100_normal/CHG-M086-04.parquet": "4bd565fd60e73ee915395d6a452fcdf6895c3ba2ec699e8fdc68d21e53b8c75a",
+    "evaluation/native_inputs/premium_100_normal/CHG-M087-01.parquet": "d9ab139a2e583cc2f510ac3f5c0c6767ddfd96421bddb468c198f960c3152bc9",
+    "evaluation/native_inputs/premium_100_normal/CHG-M087-02.parquet": "f3cc8e3bcc24af144476b4d5623e8615588078618a3d3a3fd17e6cddd17baed3",
+    "evaluation/native_inputs/premium_100_normal/CHG-M089-01.parquet": "6c6735ca8d0cde57d43d18b3296388a12a60bbf2584616a477e9e901977c4da2",
+    "evaluation/native_inputs/premium_100_normal/CHG-M091-01.parquet": "cc76c5c5a1a804e392c81e8072bc4b5c68fb3b8c84daf54618e93ea3d1782d80",
+    "evaluation/native_inputs/premium_100_normal/CHG-M091-02.parquet": "615daab763a020c62eee32c79add11ee5bcd272bf9e71fdc06f9c6601cd5f9bc",
+    "evaluation/native_inputs/premium_100_normal/CHG-M098-01.parquet": "ee82b8180b2bef7292c1df6276d245ca72bbe7b8fa792c1589dc3913a6162c8c",
+    "evaluation/native_inputs/premium_100_normal/CHG-M098-02.parquet": "567a4a70272b2aba0f652d3d39de9b1a8a1984473c04eec61fd3546ea2fbb28e",
+    "evaluation/native_inputs/premium_100_normal/CHG-M098-03.parquet": "7bb745f43f3544ff36269874d028004c682f32776a53536fad8457cd554b9d90",
+    "evaluation/native_inputs/premium_100_normal/CHG-M098-04.parquet": "ea5d5dde9c82c95627bf7ba1a5e6fb45dcd4113b18a84e35bdf061cdc305eb82",
+    "evaluation/native_inputs/premium_100_normal/CHG-M099-01.parquet": "10ddccbf17d1e56a89830d61b3c9a87fc7f8b8060c3e0805e487d15563eb4ebf",
+    "evaluation/native_inputs/premium_100_normal/CHG-M099-02.parquet": "d805335aceef3c2282f47722af13870b15b01567541345e4b21a7a735caa2c1e",
+    "mobility/EV-M001-01.parquet": "b1ddef49d79c1fc867139e7d2906e54f4d010106e928715aa2b195f57c3b1c35",
+    "mobility/EV-M002-01.parquet": "3cfd6cbcd04bbccf21c67ac79c2f2b80169fe7dd80129962e836ed025bb1b9ad",
+    "mobility/EV-M003-01.parquet": "5b7ef40960b00019a44adae51208fff0f47313bfcaca193fad7d66707ef8b786",
+    "mobility/EV-M005-01.parquet": "69ec02424a9cb533bc05214df0723326df8d09f2ead9c7699b4386fa67fc0c63",
+    "mobility/EV-M006-01.parquet": "fb61a8eeea45fdc7d06cca6375fbf4880428c39a47c10335bd7291f5ee2bf777",
+    "mobility/EV-M006-02.parquet": "1b390086b46bdb5eac339f35fbf9391d3b01a232515e8413aebc0815633c21fe",
+    "mobility/EV-M008-01.parquet": "b304e6cfb092c84fb45127fd3bbc79844ffcd8e7dce32b205328767cff089a92",
+    "mobility/EV-M010-01.parquet": "8d4a4de6134513b11b4e57af5b6fb2ca1cbe7f53f402dc3ef4efedea38e1ea33",
+    "mobility/EV-M016-01.parquet": "40a25512294041629e5874640e40380487614858b8858de65417eb101c12bff3",
+    "mobility/EV-M016-02.parquet": "ac29402dedb3660f67c432caff3e71d8defac2878f00ff216e7f0825382ceff9",
+    "mobility/EV-M018-01.parquet": "b7f189d62666655421967acbc05d7cac2e86bd31892a0e74456eaef7c7afc935",
+    "mobility/EV-M020-01.parquet": "eb5b7fdcfc7d693312b4d679abe7f2e271350904357a086f07eae9b2f227c9bc",
+    "mobility/EV-M022-01.parquet": "ea2f2c38b265c55ad567fac833608f052beb19a90d23a2ce6cfc0a7b26e034c7",
+    "mobility/EV-M024-01.parquet": "d598101e2c5aef448be078edac79129234deea9e2b2f22b0a49320b50b69c917",
+    "mobility/EV-M026-01.parquet": "1a36730d0749d17e56cabe2e6b4b7ff74e5112e5eae26acd2f555e421d9e81c7",
+    "mobility/EV-M028-01.parquet": "1deaaab2363cc658fe13e57056f59460218bc38fc59a8eb2b2e5b2f22049c69f",
+    "mobility/EV-M030-01.parquet": "3628d8e608a8cdd11bdf5c58abfc1073532772c0289649502ebfe54c2f0ad7fb",
+    "mobility/EV-M034-01.parquet": "6a98e2b81e0f9511866ae8e0de5a26e91a66ac76bd3911e9f1cecc30f717fc9d",
+    "mobility/EV-M038-01.parquet": "11cb023fbe149d658b04b12120f2cd5bdf07ae3052b3b287eba6c6b806a63696",
+    "mobility/EV-M040-01.parquet": "52d4d0859026b8c608f3817db1333569f227d28bb19ed5ed632365983542a8e4",
+    "mobility/EV-M040-02.parquet": "2288a2e4463b7ec8787f032bb2e764eddba8adac50a6b44985e00be816c586d7",
+    "mobility/EV-M042-01.parquet": "9775208af582b253d43ef532258129e426031443e91a51b98d25065073e751d9",
+    "mobility/EV-M044-01.parquet": "6010b6435b8d12fdc3ff7029e6e094e70d329724d2fbcb8d3e3eccdaf53614ad",
+    "mobility/EV-M046-01.parquet": "cf49b9ebdcab6579316570ba10ca0d64012de9e6c4abbd32ea48fcd4d04d5950",
+    "mobility/EV-M048-01.parquet": "33733da98364baf44d50ca10fc7ea195abe688f74546dfe8ff60b2956e9e07d1",
+    "mobility/EV-M050-01.parquet": "6df34fd30c2bf4681313d14a3ea0b1f178434b39d92c28cf030188a4b5ab4906",
+    "mobility/EV-M052-01.parquet": "71587dae65c0162cda5a2b048fe40015c51e73d5b42bcbe14dcb5251858b5a0e",
+    "mobility/EV-M054-01.parquet": "d10d2556a77bc487ab081abbbb414097a21e4c987da594ddb9d602b6e282059c",
+    "mobility/EV-M056-01.parquet": "3bc90940c2d0b9ec76282e1f985d851a3eee4cb393ddcaeba1396ec7c43d07e0",
+    "mobility/EV-M056-02.parquet": "60b55e9b5f16c500b684397955187bddc2acd9de139470b2e861539219362ac6",
+    "mobility/EV-M060-01.parquet": "6f0877df079962a324279ee63be2f2acb2f266afa51b1a1611222ba5d5605f16",
+    "mobility/EV-M062-01.parquet": "0dd78c4d1e7067607ce273666cd9b1add2b99f054102aed4b85159526c2f5c04",
+    "mobility/EV-M068-01.parquet": "0f9b3e5f408803a639bcd738ee6f10bea3d6a61026b47ebfb6bd1ff4485fe58d",
+    "mobility/EV-M070-01.parquet": "d74801edc13595fe803ee1a23587756cef08ee8edf78bdac08b851924d2aa167",
+    "mobility/EV-M072-01.parquet": "4e96fb4ea07c3fb9a96caf466bd74d08cf219554fa3989199c60d6383e86cf81",
+    "mobility/EV-M076-01.parquet": "10203276d9a1cb572eac83a659bf5dad47eb842a44b6f0714ed2c23187f3bfcf",
+    "mobility/EV-M080-01.parquet": "b34ec4ace4b288f534ad39094f578884c554ba7e887c18075f13b984d5b92931",
+    "mobility/EV-V081-05-0.parquet": "6c510721e523356fe8e7ae1ef328368a65056ceaae637851c79794ecd586b024",
+    "mobility/EV-V081-05-1.parquet": "b0d84c72d8b5b8ac685b97d923c771b0768c7f5c5444c3ff05794c5cbb51ec1e",
+    "mobility/EV-V081-06-0.parquet": "3e266038669df36adddfde3ba5a5a8536326e1d49eb7dbe021cba33cb09915e8",
+    "mobility/EV-V081-06-1.parquet": "033e3d5915445d49c0340de6499e1a65ea6d3a8c86b7ebc987def67d5fabb7de",
+    "mobility/EV-V081-07-0.parquet": "cd5a74d1f7f2e00266f2d8655555be965c121b026fbcd00fa114195d22386238",
+    "mobility/EV-V081-07-1.parquet": "98fc6195747db92c926384d173015f7f1bcfa2ddcaf33ba10958a012cbd1183c",
+    "mobility/EV-V081-08-0.parquet": "afeef3335f309b4c44b8d48e9a2509eac31d0de967c7435536a50952fbc1ccdf",
+    "mobility/EV-V081-08-1.parquet": "07fcd1c6265e9160061594862e5aa419754e42c47c92e44d788106793d91bbb6",
+    "mobility/EV-V081-09-0.parquet": "7d9e33867530cae162223788e7aa53636743fdbd7ea92d602adbba8375285141",
+    "mobility/EV-V081-09-1.parquet": "b9ca774f23b89d55a66a3e3b4a03ec2374789e35e5a80b9284a2d149448c4c46",
+    "mobility/EV-V081-10-0.parquet": "97f6bc19ac47c2466b77897213819ec177c915403a94aa150cc3c07d04d7be43",
+    "mobility/EV-V081-10-1.parquet": "662e7ce3adeec215d8b6e0088356dafcc9ce9407f88f91c303e9453f1fe880b2",
+    "mobility/EV-V081-11-0.parquet": "0fb9d02f4aa8cedd0db199a5d62beb4c5e53f183c1aecb398cf76ae5e8fa4eca",
+    "mobility/EV-V081-11-1.parquet": "541ff3f9ea67468472a10ee0aefa563a020a0787012517febab2a8b200ce44d8",
+    "mobility/EV-V081-12-0.parquet": "6e2aca1488b38f3fe10cf86dacce06f9095583d35c5c5e5192e2ae2f488426e3",
+    "mobility/EV-V081-12-1.parquet": "06debcfc619037a0bf541eab9d10fa970e08a525bf28690eb9e855bb87a82c84",
+    "mobility/EV-V085-01-0.parquet": "b0f2d8e2cfbe18b76784330ec12f10d9ce2cac039a8fcfb0ac4f2bdbc8129f18",
+    "mobility/EV-V085-01-1.parquet": "0dd24567d6671ddc43e1bccedcae55a2cd4f6b91c3f55f4ef3beee01dbd2a939",
+    "mobility/EV-V086-01-0.parquet": "eef07f2bc10bda4984c8a6326ea7a4538160c5bbd1e7a8145047b06a3832a9c4",
+    "mobility/EV-V086-01-1.parquet": "126b9e1683f39e9de3433ca8fa939453a0d322c1f8c58d49ceadf95efe99abf0",
+    "mobility/EV-V086-02-0.parquet": "309660926efcca02e498acf5a569b231d4a526d28f4b9b5a8c3be2f0a2e9abf2",
+    "mobility/EV-V086-02-1.parquet": "d1b6ac8c8743e91b3b45aea914eb38f69d5576fdd9aeccbc795d0c683d229178",
+    "mobility/EV-V086-03-0.parquet": "f63dcf55e52a1893af3f98eb2ac9b45651feadc9eb741a461379b3969c667f9a",
+    "mobility/EV-V086-03-1.parquet": "d68c77f23535d62f0f62ea2eb5934189a78b4b155a15a5bad4a807d8fd2a242d",
+    "mobility/EV-V086-04-0.parquet": "45e81a441b98ceb93e004397d001decfc09ece772338ed4ec511bc851a0e6ae1",
+    "mobility/EV-V086-04-1.parquet": "f169c9de3154c1932831d79555ccf3263e1886fd837d6ba5017e8955f4f2d11d",
+    "mobility/EV-V087-01-0.parquet": "332b39dee72126855963f072b810a3c97ffcfcab412848ae427d743256d494ed",
+    "mobility/EV-V087-01-1.parquet": "ef67501bae9923e309bc17c9dca37a8f9ef40303b54273d5ce3d0df2378b2b6a",
+    "mobility/EV-V087-02-0.parquet": "11bf29997e45f841e0e1c66b55d0816ba39d897ef266c6b09c0778087d1c01ff",
+    "mobility/EV-V087-02-1.parquet": "942effc43a9f9ad16c88d926e4a71bf41ed73a98fbcba7b2c1e2909a94478f1b",
+    "mobility/EV-V089-01-0.parquet": "fa7d25d68a801e81103cb3393e01c166d6fa9cf3fc8fa1f966c8bab9afc46fcf",
+    "mobility/EV-V089-01-1.parquet": "286fdde5ef8077e24643d8a3c52ec1d2a67d0884c50a5ca6e6b5a522a815ef13",
+    "mobility/EV-V091-01-0.parquet": "cc6c921fbe7ac0d2e179dfc1de5d9780e2bff82558d46480a8084ea7753152d8",
+    "mobility/EV-V091-01-1.parquet": "6d9638f5254e3ef7842e6f02c33352591dba9579675eb84e35bee0f32e0d8b6b",
+    "mobility/EV-V091-02-0.parquet": "3e9b81ca9ba70b929683068189a6bca4a13e9f22190af5d150c9680ddabbc2f6",
+    "mobility/EV-V091-02-1.parquet": "fe34aa5dec730b22821d0a0c1665fd831bd724d6107eac2f1a1604abc6f3dd40",
+    "mobility/EV-V098-01-0.parquet": "43517afd7f8a53e441bb403a84033014d77eff583b498ec970db2f5d1ac209d0",
+    "mobility/EV-V098-01-1.parquet": "b52d10e37729fb0bf50b323e8de9f245b4a1d6bbee35a5aec8a933e5dd478d19",
+    "mobility/EV-V098-02-0.parquet": "549b53b842831fac4127ab46951ca0f879a25c133f09e1e797730b1621715bdd",
+    "mobility/EV-V098-02-1.parquet": "5d8133dd843e2fcec884ebca484f22e1f072c365c489157e261e532824c5dfa3",
+    "mobility/EV-V098-03-0.parquet": "4e635ac996bc1d71eff94655047ceeb5cb24a67a310423489c0bcd1512d58752",
+    "mobility/EV-V098-03-1.parquet": "fdd727dfe43006bc1d4d11787a229ef425d5642989ea8c3f45b24f74fed51e0c",
+    "mobility/EV-V098-04-0.parquet": "bdcffe0d7737550ebe19c08c243ad620f1f44c58ff6705869d5ddcb8a33b541f",
+    "mobility/EV-V098-04-1.parquet": "b4af6092c032ae40f00260d0af988e7abe7e631d32c9dcbee0f9b5ff07fb468b",
+    "mobility/EV-V099-01-0.parquet": "f386aef2bd2b1142353f5761f76e43a78017da8d74591fb8edb7ccd6ab9b9d8f",
+    "mobility/EV-V099-01-1.parquet": "419fceeee7043bb0fc125de069e4222c4581dd802185c917373b7953bd583a43",
+    "mobility/EV-V099-02-0.parquet": "5862f2c9040c0da1781d8ec1fc7c39b91849537892538174e24a7206b7d00e0d",
+    "mobility/EV-V099-02-1.parquet": "5c136386195d42bce895d113bac128d7b4194a07972b4a7865c2a07ed1f36103"
+  }
+}

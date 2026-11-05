@@ -189,6 +189,8 @@ results/*
 results/portugal_rec_native/*
 !results/portugal_rec_native/boundary_integrity.json
 !results/portugal_rec_native/boundary_validation.json
+!results/portugal_rec_native/realism_validation.json
+!results/portugal_rec_native/accounting_validation.json
 !results/portugal_rec_native/heldout_2024/
 runtime.csv
 *-runtime.csv
@@ -211,9 +213,15 @@ data/datasets/citylearn_three_phase_electrical_service_demo_15s_parquet/
 # Rebuildable Portugal delivery package
 docs/portugal_rec_native.zip
 
+# Reproducible empirical and seed-audit evidence for Portugal.
+!results/portugal_rec_native/empirical_validation.json
+!results/portugal_rec_native/ensemble_validation.json
+
 # Work material and execution evidence: keep outside the source checkout.
 docs/empirical_calibration_readiness.md
 docs/releases/*-validation.json
 docs/portugal_rec_native/dataset_description/report_qa.json
 docs/portugal_rec_native/dataset_description/report_structure.json
 sample_observations.txt
+
+!results/portugal_rec_native/commercial_appliance_validation.json

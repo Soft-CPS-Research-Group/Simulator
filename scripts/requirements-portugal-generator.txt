@@ -1,5 +1,8 @@
 # Scientific generator, in addition to the simulator's environment
 pvlib==0.15.2
+scipy>=1.10,<2
+# Optional reacquisition of the published empirical reference files:
+requests>=2,<3
 # Static forecast audit figures (not needed for physical generation):
 matplotlib>=3.6,<4
 # Archived XLSX-to-CSV conversion (generation consumes the archived CSV):

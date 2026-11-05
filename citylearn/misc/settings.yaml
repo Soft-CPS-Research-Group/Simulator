@@ -2,8 +2,6 @@
 default_time_series_variables:
   - net_electricity_consumption
   - net_electricity_consumption_without_storage
-  - net_electricity_consumption_without_storage_and_partial_load
-  - net_electricity_consumption_without_storage_and_partial_load_and_pv
   - solar_generation
   - cooling_electricity_consumption
   - heating_electricity_consumption
@@ -14,9 +12,7 @@ default_time_series_variables:
   - dhw_storage_electricity_consumption
   - electrical_storage_electricity_consumption
   - cooling_demand
-  - cooling_demand_without_partial_load
   - heating_demand
-  - heating_demand_without_partial_load
   - dhw_demand
   - non_shiftable_load
   - energy_from_cooling_device
@@ -39,7 +35,6 @@ default_time_series_variables:
   - dhw_storage.soc
   - electrical_storage.soc
   - indoor_dry_bulb_temperature
-  - indoor_dry_bulb_temperature_without_partial_load
   - energy_simulation.indoor_dry_bulb_temperature_cooling_set_point
   - energy_simulation.indoor_dry_bulb_temperature_heating_set_point
   - energy_simulation.occupant_count

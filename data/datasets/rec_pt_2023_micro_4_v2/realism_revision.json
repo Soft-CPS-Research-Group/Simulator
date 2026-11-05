@@ -1,0 +1,380 @@
+{
+  "revision": "portugal-realism-4",
+  "immutable_source_commit": "c54b13b62823fb1256397ea98cb37a830a24124d",
+  "configuration": {
+    "revision": "portugal-realism-4",
+    "seed": 20261105,
+    "parameter_status": "Residential aggregate parameters developed on seven raw SHEERM houses; commercial hourly anchors from predeclared BDG2 development buildings; domestic program shapes from REFIT houses 3/5. Independent identities held out. Transfer weights, service activities, occupancy, charging, flexibility and other behaviour remain scenario priors, not a Portuguese population fit.",
+    "activity": {
+      "weekend_trip_rate_gamma_shape": 1.5,
+      "weekend_trip_rate_gamma_scale": 1.5,
+      "holiday_bridge_probability": 0.22,
+      "vacation_travel_probability": 0.8,
+      "hybrid_exception_probability": 0.08,
+      "annual_load_log_sigma": 0.04,
+      "dhw_standing_loss_fraction": 0.12,
+      "destination_trip_daily_probability": 0.6,
+      "leave_start_jitter_days": 4.0,
+      "work_exception_probability": 0.025
+    },
+    "appliances": {
+      "variants_per_program": 12,
+      "energy_log_sigma": 0.12,
+      "duration_factors": [
+        0.85,
+        1.15
+      ],
+      "slack_log_sigma": 0.45,
+      "empirical_program_variants": 48,
+      "empirical_energy_jitter_sigma": 0.08,
+      "catering_batches_per_service_day": 5.5,
+      "catering_holding_kw": [
+        0.1,
+        0.25
+      ],
+      "linen_reference": {
+        "source": "Miele-PWM912-PT",
+        "full_load_kg": 12.0,
+        "full_load_cold_60c_kwh": 1.68,
+        "cold_60c_minutes": 49.0,
+        "reference_heater_kw": 9.0,
+        "motor_component_kwh_prior": 0.25,
+        "auxiliary_power_kw_prior": 0.6,
+        "temperature_celsius": [
+          40,
+          60
+        ],
+        "temperature_probabilities": [
+          0.2,
+          0.8
+        ],
+        "status": "Portuguese manufacturer sheet, not Portuguese field data. Only cold-water 60C full load is a measured specification. Load fraction, 40C scaling, power-adjusted duration and profile shape are engineering priors. Installed 4.6 kW unchanged; no unaccounted hot-water heat."
+      }
+    },
+    "demand": {
+      "daily_log_sigma": 0.35,
+      "daily_persistence": 0.35,
+      "episode_fraction": 0.65,
+      "episodes_per_day": 24,
+      "episode_persistence": 0.7,
+      "timing_jitter_hours": 0.75
+    },
+    "charging": {
+      "threshold_std": 0.08,
+      "delayed_connection_probability": 0.3
+    },
+    "events": {
+      "local_outages_per_member_year": 1.1300000000000001,
+      "outage_median_minutes": 42.450809643801264,
+      "outage_log_sigma": 0.65,
+      "common_outage_probability_per_year": 0.2,
+      "common_pv_telemetry_probability_per_year": 0.25,
+      "local_pv_faults_per_member_year": 1.2,
+      "event_duration_log_sigma": 0.45,
+      "dr_target_log_sigma": 0.2,
+      "controlled_grid_stress_hours_per_year": 2,
+      "common_outage_median_minutes": 49.62563958764636,
+      "empirical_moment_target": {
+        "source": "https://www.e-redes.pt/sites/eredes/files/2025-06/Relat%C3%B3rio%20da%20Qualidade%20de%20Servi%C3%A7o%202024_v2_0.pdf",
+        "table": "3.10, printed page 34",
+        "year": 2024,
+        "saifi_per_customer": 1.33,
+        "saidi_minutes_per_customer": 70.57,
+        "scope": "Published BT totals 1.32+0.01 interruptions and 69.70+0.87 minutes. Moment matching for exposed cohort, excluding controlled stress. Not a fitted event-duration distribution, local/common decomposition or Lisbon-specific reliability model. 15-minute representation cannot reproduce sub-15-minute interruptions."
+      }
+    },
+    "preserved_controls": [
+      "physical equipment and service limits",
+      "EV annual driving energy",
+      "OMIE nonnegative price and 0.8 local ratio",
+      "matched scenario random realizations",
+      "lifecycle histories",
+      "1500 kW impossible DR stress"
+    ],
+    "sources": [
+      {
+        "id": "CREST",
+        "url": "https://doi.org/10.1016/j.enbuild.2010.05.023",
+        "role": "Activity-conditioned bottom-up generation; methodology only, no imported transition probabilities."
+      },
+      {
+        "id": "ResStock",
+        "url": "https://arxiv.org/abs/2111.01881",
+        "role": "Heterogeneous stochastic activity and duration modelling; US evidence, not Portuguese calibration."
+      },
+      {
+        "id": "REFIT",
+        "url": "https://doi.org/10.1038/sdata.2016.122",
+        "role": "Development houses 3/5 supply house-balanced detected program candidates; houses 2/11 are held out. UK cleaned appliance traces, not measured deadlines, commercial machines or Portuguese 2024 population."
+      },
+      {
+        "id": "ACN-Data",
+        "url": "https://ev.caltech.edu/assets/pub/ACN_Data_Analysis_and_Applications.pdf",
+        "role": "Joint session duration/energy/workplace behaviour; does not measure arrival SOC. Methodological reference, not fitted parameters."
+      },
+      {
+        "id": "Electric-Nation",
+        "url": "https://eatechnology.com/media/girhcnsc/electric-nation-customer-trial-report.pdf",
+        "role": "Evidence of heterogeneous, non-daily charging; mixed UK BEV/PHEV cohort, not a Portuguese frequency target."
+      },
+      {
+        "id": "ERSE-2024",
+        "url": "https://www.erse.pt/media/kwcb5jqq/relat%C3%B3rio-qst-eletricidade_2024.pdf",
+        "role": "Separate individual continuity indicators and exceptional common events. Outage parameters here are sensitivity priors, not fitted SAIFI/SAIDI."
+      },
+      {
+        "id": "ERA5",
+        "url": "https://open-meteo.com/en/docs/historical-weather-api",
+        "role": "Measured/reanalysis exogenous source, uniform 2023/2024 humidity provenance; hourly data interpolated, not measured 15-minute weather."
+      },
+      {
+        "id": "SHEERM-raw",
+        "url": "https://doi.org/10.5281/zenodo.13972210",
+        "role": "Raw 15-minute Portuguese meter measurements. Seven odd-ID houses develop aggregate load episode parameters; six even-ID houses reserved for independent evaluation. Published imputed files excluded."
+      },
+      {
+        "id": "SINTEF-residential-EV",
+        "url": "https://doi.org/10.5281/zenodo.13896176",
+        "role": "Measured plug-in/out and delivered AC energy only; Norway 2018-2021, separate cohort, no fit to predicted SOC/battery fields."
+      },
+      {
+        "id": "E-REDES-BT-2024",
+        "url": "https://www.e-redes.pt/sites/eredes/files/2025-06/Relat%C3%B3rio%20da%20Qualidade%20de%20Servi%C3%A7o%202024_v2_0.pdf",
+        "role": "Table 3.10 annual frequency/duration totals anchor exposed-cohort moments after 15-minute quantization; imposed stress excluded."
+      },
+      {
+        "id": "BDG2",
+        "url": "https://doi.org/10.1038/s41597-020-00712-x",
+        "role": "Predeclared development/heldout buildings; commercial hourly structure and bounded partial transfer of annual electricity intensity. Different geography, size and energy services; industrial buildings are context only."
+      },
+      {
+        "id": "FIKElectricity",
+        "url": "https://doi.org/10.1038/s41597-023-02698-8",
+        "role": "Portuguese professional kitchens, external structural diagnostic. Heater bursts are not annotated dishwasher jobs; kitchen aggregate is not whole-cafe consumption."
+      },
+      {
+        "id": "Costa-2021",
+        "url": "https://fenix.tecnico.ulisboa.pt/departamentos/decivil/dissertacao/846778572212503",
+        "role": "2019 billed office electricity mean, explicit missing area/employee records and PV/EV boundary uncertainty; calibration reference, not independent validation."
+      },
+      {
+        "id": "Sequeira-2016",
+        "url": "https://run.unl.pt/bitstream/10362/19555/1/Sequeira_2016.pdf",
+        "role": "Tables 4.1/4.3, electricity-only bottom-up annual audits, eight of thirteen invoice checked; general retail/catering/refrigerated retail partial-transfer priors. Not clinic, factory or population observations."
+      },
+      {
+        "id": "Miele-PWM912-PT",
+        "url": "https://media.miele.com/downloads/t-/pt/FS_11496730_PTP_PT-pt-PT.pdf",
+        "role": "12 kg cold-water 60C programme energy and reference time; lower installed power handled explicitly. Manufacturer test, not field consumption or measured cycle frequency."
+      }
+    ],
+    "commercial": {
+      "energy_transfer_weight": 0.5,
+      "shape_transfer_weight": 0.65,
+      "daily_sigma_multiplier": 1.0,
+      "timing_jitter_hours": 0.5,
+      "intraday_log_sigma": 0.12,
+      "development_anchors": {
+        "cafe": {
+          "electricity_kwh_m2_year": 242.453109,
+          "daily_log_sigma": 0.202645,
+          "daily_persistence": 0.881473,
+          "night_day_ratio": 0.732202
+        },
+        "care_home": {
+          "electricity_kwh_m2_year": 172.916067,
+          "daily_log_sigma": 0.204684,
+          "daily_persistence": 0.698812,
+          "night_day_ratio": 0.59905
+        },
+        "clinic": {
+          "electricity_kwh_m2_year": 106.198785,
+          "daily_log_sigma": 0.094577,
+          "daily_persistence": 0.700126,
+          "night_day_ratio": 0.662919
+        },
+        "office": {
+          "electricity_kwh_m2_year": 154.555966,
+          "daily_log_sigma": 0.151822,
+          "daily_persistence": 0.584246,
+          "night_day_ratio": 0.718889
+        },
+        "retail": {
+          "electricity_kwh_m2_year": 60.606853,
+          "daily_log_sigma": 0.20779,
+          "daily_persistence": 0.737977,
+          "night_day_ratio": 0.451762
+        },
+        "sports_centre": {
+          "electricity_kwh_m2_year": 73.421727,
+          "daily_log_sigma": 0.173869,
+          "daily_persistence": 0.607478,
+          "night_day_ratio": 0.60235
+        },
+        "workshop": {
+          "electricity_kwh_m2_year": 285.567534,
+          "daily_log_sigma": 0.126182,
+          "daily_persistence": 0.767749,
+          "night_day_ratio": 0.860654
+        },
+        "grocery": {
+          "electricity_kwh_m2_year": 140.0,
+          "daily_log_sigma": 0.18,
+          "daily_persistence": 0.6,
+          "night_day_ratio": 0.6
+        }
+      },
+      "parameter_status": "Portuguese office published mean and three small-commerce audit means inform annual scenario budgets. Weak cohort transfer and dispersion remain explicit priors; other sector annual/hourly anchors remain BDG2 development transfer. Independent discrete presence is not empirically calibrated. All annual building budgets include fixed and controlled appliance requests once, exclude EV charging.",
+      "portuguese_annual_anchors": {
+        "office": {
+          "electricity_kwh_m2_year": 94.4,
+          "transfer_weight": 1.0,
+          "source": "Costa-2021",
+          "status": "Published 2019 billed cohort mean; 104 total sites, 58 with area. Corporate offices, not nationally representative gross end use. Dispersion is a prior."
+        },
+        "retail": {
+          "electricity_kwh_m2_year": 39.0,
+          "transfer_weight": 0.5,
+          "source": "Sequeira-2016",
+          "status": "Five general retail audits; geometric half-transfer from immutable inventory due size/year mismatch."
+        },
+        "cafe": {
+          "electricity_kwh_m2_year": 271.0,
+          "transfer_weight": 0.5,
+          "source": "Sequeira-2016",
+          "status": "Two small catering audits; geometric half-transfer, not population calibration."
+        },
+        "grocery": {
+          "electricity_kwh_m2_year": 531.0,
+          "transfer_weight": 0.5,
+          "source": "Sequeira-2016",
+          "status": "Two refrigerated retailers, approximately 36 and 80 m2 vs synthetic 500 m2. Half-transfer scenario; cannot represent a fully calibrated supermarket."
+        }
+      },
+      "office_between_building_log_sigma": 0.25,
+      "presence": {
+        "attendance_mean": 0.85,
+        "load_coupling_weight": 0.3,
+        "care_resident_fraction": 0.65,
+        "staff_fraction": {
+          "office": 0.85,
+          "retail": 0.15,
+          "clinic": 0.55,
+          "cafe": 0.2,
+          "workshop": 0.8,
+          "sports_centre": 0.15,
+          "grocery": 0.12,
+          "care_home": 0.2
+        },
+        "client_fraction": {
+          "office": 0.04,
+          "retail": 0.35,
+          "clinic": 0.25,
+          "cafe": 0.45,
+          "workshop": 0.08,
+          "sports_centre": 0.4,
+          "grocery": 0.35,
+          "care_home": 0.08
+        },
+        "dwell_hours": {
+          "office": 0.5,
+          "retail": 0.5,
+          "clinic": 1.0,
+          "cafe": 0.75,
+          "workshop": 0.5,
+          "sports_centre": 1.25,
+          "grocery": 0.5,
+          "care_home": 1.0
+        },
+        "status": "Explicit scenario priors. No comparable measured Portuguese commercial occupancy series found. Staff shifts, client turnover and persistent residents are separate processes; energy noise cannot generate people.",
+        "care_visiting_hours": [
+          10.0,
+          20.0
+        ],
+        "care_visiting_status": "Explicit 10:00-20:00 scenario prior, independent of 24/7 residents and staff. No claim of Portuguese regulatory or population visiting hours."
+      },
+      "between_building_log_sigma": {
+        "retail": 0.3071561252611961,
+        "cafe": 0.2603389601045012,
+        "grocery": 0.21294500648010262,
+        "clinic": 0.3,
+        "workshop": 0.3,
+        "sports_centre": 0.3,
+        "care_home": 0.3
+      },
+      "between_building_status": "Log-space population standard deviation of the small published Portuguese audit values for retail/cafe/grocery; descriptive only and attenuated by transfer weight. Other sectors 0.30, office 0.25 are scenario priors. Stable by physical member across years; not nationally estimated dispersion."
+    }
+  },
+  "empirical_validation": "Residential aggregate developed on seven raw SHEERM houses, six held out. Commercial annual budgets incorporate Portuguese office/small-commerce references with explicit boundary/transfer uncertainty; discrete occupancy remains a prior. Commercial hourly anchors use BDG2 development buildings, domestic programmes use REFIT houses 3/5; separate identities held out. FIKElectricity is a professional-kitchen structural diagnostic. See empirical_validation.json and commercial_appliance_validation.json for explicit cohort mismatches and unvalidated priors. EV Norwegian measured sessions do not validate arrival SOC. Outage exposed-cohort moments anchored to E-REDES BT 2024; stress excluded.",
+  "forecast_method": "Causal daily persistence + latest anomaly with 6h exponential decay; benchmark, not a fitted operational forecast",
+  "output_checksums": {
+    "catalogs/chargers.parquet": "83c0cf7541b892e557459f81213439c6845fa6bdcd5c6ab8d16d9596e4e94d18",
+    "catalogs/charging_sessions.parquet": "2b9e0ff885e7e9a872e0cc18fcd5a8c89bde5a867e633335b5987476080ff97c",
+    "catalogs/deferrables.parquet": "196dd26888c9c8b479e215016adc7c86f2df1a8d5615e708db66fd6e14e85639",
+    "catalogs/electric_vehicles.parquet": "37a82c3399466de8727ba93dd60337679d6f210ef83cd04944a89ca94b5a797b",
+    "catalogs/ev_annual_energy.parquet": "1f5bb76fb81e1fbadd72f37ce5b1793badb92a22bea12df4982ce68ab97cd034",
+    "catalogs/grid_event_programme.parquet": "65494506f26a64a16b54d259e85339949fe9b22ca8d0b028f2bae972c0f5a6b3",
+    "catalogs/household_activity.parquet": "17b69bca486b0e5139a7e4c923e2f2f400a2c540d22c7ba4bd56e764bb89f429",
+    "catalogs/member_year_totals.parquet": "9f61d352eb5c6376ff569461f87533d696c23eb45bea26ab9d7c6de334f68a5a",
+    "catalogs/mobility_episodes.parquet": "2ea4c3f298129270491a325c7782b8cea5a946995f4058ec46cb0f24dc6600fe",
+    "chargers/CHG-M001-01.parquet": "b7769fd3e9389ef122edcaa2e2011d83d8d874c944a3f540208d9f557a1dcd46",
+    "chargers/CHG-M003-01.parquet": "37c31f4c0dba757081820bc50e32d6961ec3172e11a246858b11ce75544a8791",
+    "deferrables/DEF-M001-01_profiles.parquet": "56861e3fdceed7efbda0d7213e26cb93f19f80459f48f6e00035f9d8d696a023",
+    "deferrables/DEF-M001-01_schedule.parquet": "174ce3a120f1cf965ab09165cd3e043736acfaa01fe5a11f187ce4bcb73b1b50",
+    "deferrables/DEF-M001-02_profiles.parquet": "cad8d454946c36b87660aab77fb0d742f709d3c17ce21703583a265ea136b39d",
+    "deferrables/DEF-M001-02_schedule.parquet": "971b77b923e0d6ff2df26a600beb9264b5194a6b1b80704f9b46d5281a59009f",
+    "deferrables/DEF-M002-01_profiles.parquet": "13318963c4e388f14a33be8f3916d7a8e1f538ab91195b0e6116be5fd55cfcb5",
+    "deferrables/DEF-M002-01_schedule.parquet": "1f8986e4f0aa8900105e186499a369a941863b309fd61705bade387e791d33fa",
+    "deferrables/DEF-M002-02_profiles.parquet": "a9aee8daeaff393a41354b75139430ebb61a36a18cf9079bc74e0112070a49b8",
+    "deferrables/DEF-M002-02_schedule.parquet": "8f3576352794f71f1d95f72d29de9c4ef5c64cbdf243d2d42010be0d6a28aec1",
+    "deferrables/DEF-M003-01_profiles.parquet": "9e938bf4964ba105beda5fcbbf800d4b779952301154d3ed8307cfcea6e26472",
+    "deferrables/DEF-M003-01_schedule.parquet": "2a51c0bc2d1349aabf8026895ffe71a3716a8b2a5216a7af16944f3249b092bf",
+    "deferrables/DEF-M003-02_profiles.parquet": "5caf8ca25831d7d4133047a859d73c1bf6f014a91d7806b13ca1e7f69a66e1d7",
+    "deferrables/DEF-M003-02_schedule.parquet": "8a91ac44ba0520d6d03d2622c9a4178c18fc4a4859ae8fb1d5ba75cdcc4b936f",
+    "deferrables/DEF-M004-01_profiles.parquet": "a4d00233919e6151ee42d78528ae6efd92cb471dee71128da128e2b4c1a5b462",
+    "deferrables/DEF-M004-01_schedule.parquet": "80b0dc7dac40cdf8a1125684322ee21a537911642c2df06467908ce2074df43c",
+    "end_uses/Member_001.parquet": "42df2704c5bcb1256d3d45f647ee9452c36c7f357fb1f2c1ebb6a3cdd73274a4",
+    "end_uses/Member_002.parquet": "3d9005f5c68eb16d1b463f8fcf120f5f1ca13f954efa14226b6b4a2fd3beca3e",
+    "end_uses/Member_003.parquet": "60c8e8cb2288d4ff928a87484184def53b98b967355c66c199e66c5f58542720",
+    "end_uses/Member_004.parquet": "f30ca446869dd31b7ad604d45f55a85523ce6e4fe9cac793fa7773b238f6b63b",
+    "evaluation/campaign_2024/source_lifecycle_plan.json": "823837b9828ec45834d5878203e2900c162e2001c814077ad13e4f7a399bdb05",
+    "evaluation/campaign_2024/source_schemas/core_4.json": "a72da06cd08e275659e73cf82b6c1ef7c40d3704bc11209380208acb11dd00e6",
+    "evaluation/core_4.json": "5cae3bfb7c279de8a9c792700bfa2af35053e894a72cc6c0e322880e8f131dfd",
+    "evaluation/native_inputs/core_4/CHG-M001-01.parquet": "b7769fd3e9389ef122edcaa2e2011d83d8d874c944a3f540208d9f557a1dcd46",
+    "evaluation/native_inputs/core_4/CHG-M003-01.parquet": "37c31f4c0dba757081820bc50e32d6961ec3172e11a246858b11ce75544a8791",
+    "evaluation/native_inputs/core_4/DEF-M002-01_schedule.parquet": "1f8986e4f0aa8900105e186499a369a941863b309fd61705bade387e791d33fa",
+    "evaluation/native_inputs/core_4/DEF-M002-02_schedule.parquet": "8f3576352794f71f1d95f72d29de9c4ef5c64cbdf243d2d42010be0d6a28aec1",
+    "evaluation/native_inputs/core_4/Member_001.parquet": "9aacc48f99fa332463e088bf748dba576e5f2a967335c09ca91bbaa6f67f76db",
+    "evaluation/native_inputs/core_4/Member_002.parquet": "def2cfa7f7fe4186984e966a28dc9d4fe4bf8ec01d0a9630cf0c27e047bf4ac2",
+    "evaluation/native_inputs/core_4/Member_003.parquet": "b5275dee41b42d87674d1fb191a693e3a2b3709f66d6857ca4cad117fd5899b7",
+    "evaluation/native_inputs/core_4/Member_004.parquet": "8e5085627eded4aabc801fad21ff18907d1302655cc7ff90dc21f73e8170b03f",
+    "evaluation/preparation_2023/core_4.json": "e6d96ebff8838856e9c8d08253f2ed7da336fe916e6e851c0566b4abb9213406",
+    "mobility/EV-M001-01.parquet": "7835754638927ad6a5c7ec4c173ef84a06e7690bdc300f135f87aa7d53763889",
+    "mobility/EV-M003-01.parquet": "d1f4a5b2e13c911d2a0db93c01193c764f67747ef77647deb6751c84129a66b4",
+    "schema.json": "defb192645bc659aa0fa3db22f7333bc4d12bd23dc040c8e6fff124149be807a",
+    "shared/weather.parquet": "88d1babdfc15ccefed6e9be60dc1fe197ddc8138573230f586c7fafae9e5e88a",
+    "timeseries/Member_001.parquet": "df0bc95d0daea7ff18e5af039ab04c75da44511393f4a4b1488da67273a984d9",
+    "timeseries/Member_002.parquet": "3a9eefb0b1bedba21db50b9bcacfe363e53dd68af73cb66da9c4f968e92f0d1c",
+    "timeseries/Member_003.parquet": "30bfe0818d341bd2ca6107d9ddff65e7b599c63b85bb02b0a800cdf93c510515",
+    "timeseries/Member_004.parquet": "15e49879ede9e7054d2d8a18e2c7566bbe33edcddb79cabf8f1cc9045c3d80f3"
+  },
+  "additional_source_checksums": {
+    "data/portugal_reference_2023/era5_open_meteo_2023.json.gz": "b14918e278a7f45a344a19b9444b8f204de10c28787bcba6c1fa3f6b971d6f52",
+    "data/portugal_validation_reference/refit_house_3_cycles.parquet": "f8c2075acf13d0e105bc99b2e847c9d53deec45ac5a717ffffe5fc9acc398ced",
+    "data/portugal_validation_reference/refit_house_5_cycles.parquet": "3a75389945d0ba04bd644dfff584f84f4046d82187fe81f7647fbd7f77a4cf43"
+  },
+  "annual_physical_nonshiftable_kwh": [
+    {
+      "year": 2023,
+      "original": 12100.843505859375,
+      "revised": 11967.4921875,
+      "scope": "physical inventory, not topology-filtered executed annual controller demand"
+    },
+    {
+      "year": 2024,
+      "original": 11789.879122086855,
+      "revised": 11252.310791015625,
+      "scope": "physical inventory, not topology-filtered executed annual controller demand"
+    }
+  ]
+}

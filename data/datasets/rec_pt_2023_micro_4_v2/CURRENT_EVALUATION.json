@@ -20,7 +20,7 @@
         "D": false
       },
       "schema": "data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json",
-      "sha256": "6ac61417f794e372db92ceee19ea1934b9aca1d6998800d8ec6a5c448b952e94",
+      "sha256": "5cae3bfb7c279de8a9c792700bfa2af35053e894a72cc6c0e322880e8f131dfd",
       "frozen_2023_source_fingerprint": "c073ab395a0a6340dfb4ababec167aeab2c733e22c2eff70facc09a90dc2596a"
     }
   ],
@@ -33,12 +33,17 @@
     {
       "variant": "core_4",
       "schema": "data/datasets/rec_pt_2023_micro_4_v2/evaluation/preparation_2023/core_4.json",
-      "sha256": "43dc371552065aa3e277fa92335400d15567322db30603d639a2a55011964bb1",
+      "sha256": "e6d96ebff8838856e9c8d08253f2ed7da336fe916e6e851c0566b4abb9213406",
       "interval": [
         0,
         35039
       ],
       "role": "Preparation entry point, not an additional experimental scenario"
     }
-  ]
+  ],
+  "mobility_revision": "portugal-ev-mobility-1",
+  "mobility_evidence": "ev_mobility_revision.json",
+  "mobility_catalogue_scope": "charging_profile, charging_sessions, mobility_episodes and ev_annual_energy describe current mobility. soc_preference, reserve_soc, member prose and planning energy fields retain historical sizing provenance; reserve_soc is not a minimum allowed SOC in this revision. Prior controller evaluations do not evaluate this mobility revision.",
+  "realism_revision": "portugal-realism-4",
+  "realism_evidence": "realism_revision.json"
 }

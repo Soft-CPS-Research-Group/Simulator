@@ -121,7 +121,9 @@ def verify_pair(repo, pair):
             original = pd.read_parquet(root/building['energy_simulation'])
             actual = pd.read_parquet(root/other['energy_simulation'])
             outage = original.power_outage.gt(0)
-            assert outage.any() and actual.power_outage.eq(0).all()
+            # A stochastic programme can fall entirely after this owner's exit.
+            # The paired reference must still be identical outside actual cuts.
+            assert actual.power_outage.eq(0).all()
             pd.testing.assert_frame_equal(original.drop(columns=['power_outage', 'solar_generation']), actual.drop(columns=['power_outage', 'solar_generation']))
             np.testing.assert_array_equal(original.loc[~outage, 'solar_generation'], actual.loc[~outage, 'solar_generation'])
             live, pv, _ = active_masks(a, m)
@@ -156,7 +158,25 @@ def static_audit(repo=ROOT, write_cohorts=False):
     manifest = read_json(repo/'results/portugal_rec_native/manifest.json')
     assert manifest['version'] == VERSION
     for relative, expected in read_json(record/'source_input_checksums.json').items():
-        assert digest(repo/relative) == expected, ('Previous physical/exogenous input changed', relative)
+        actual = digest(repo/relative)
+        if actual != expected:
+            root = repo/Path(*Path(relative).parts[:3])
+            local = str((repo/relative).relative_to(root))
+            realism_path = root/'realism_revision.json'
+            realism = read_json(realism_path) if realism_path.exists() else {}
+            if (realism.get('revision') in {'portugal-realism-1', 'portugal-realism-2', 'portugal-realism-3', 'portugal-realism-4'}
+                    and realism.get('revision') == manifest.get('realism_revision')
+                    and realism.get('output_checksums', {}).get(local) == actual):
+                continue
+            # The EV revision explicitly supersedes mobility inputs in both
+            # arms of the matched experiment. Other source inputs stay frozen.
+            root = repo/Path(*Path(relative).parts[:3])
+            local = str((repo/relative).relative_to(root))
+            allowed = (Path(local).name.startswith('CHG-') or local in {
+                'catalogs/charging_sessions.parquet', 'catalogs/electric_vehicles.parquet',
+                'catalogs/chargers.parquet'})
+            revision = read_json(root/'ev_mobility_revision.json') if allowed and (root/'ev_mobility_revision.json').exists() else {}
+            assert revision.get('revision') == 'portugal-ev-mobility-1' and revision.get('output_checksums', {}).get(local) == actual, ('Previous physical/exogenous input changed without a matching mobility revision', relative)
     assert len(manifest['variants']) == 9 and len(manifest['references']) == 6
     pairs = [verify_pair(repo, p) for p in campaign['pairs']]
     preparation = []
@@ -242,7 +262,7 @@ def static_audit(repo=ROOT, write_cohorts=False):
             cohort_summary.append(dict(variant=variant, source_sessions=len(rows), previous_offered=len(before), current_offered=len(after),
                 excluded_by_2024_departure=len(removed), excluded_requested_energy_reference_kwh=float(rows.loc[rows.session_id.isin(removed), 'requested_energy_reference_kwh'].sum()),
                 affected_inflight_sessions=0, shared_service_requests_unchanged=True,
-                appliances='All existing appliance schedules and profiles unchanged; exiting member owns no controllable appliance'))
+                appliances='Current appliance realization is shared across matched arms; exiting member owns no controllable appliance'))
             schemas.append(dict(variant=variant, status='pass', events_2024=len(events), inherited_members=expected_initial,
                 peak_members=expected_initial+1, final_members=expected_initial))
     for entry in manifest['variants']+manifest['references']+manifest['preparation_schemas']:
@@ -253,7 +273,9 @@ def static_audit(repo=ROOT, write_cohorts=False):
         root = repo/f'data/datasets/rec_pt_2023_{row["family"]}_v2'
         pd.testing.assert_frame_equal(pd.read_parquet(root/row['path']).iloc[:N23], pd.read_parquet(root/row['source']).iloc[:N23])
     return dict(status='pass', pairs=pairs, scenarios=schemas, cohorts=cohort_summary, preparation=preparation,
-                preparation_year_preserved=True, declared_2024_events=len(campaign['events']))
+                preparation_year_preserved=True,
+                preparation_preservation_scope='Matched 2023 inputs across current campaign and references; declared mobility/realism revisions apply to both.',
+                mobility_revision=manifest.get('mobility_revision'), declared_2024_events=len(campaign['events']))
 
 
 def runtime_window(path, start, end, label):
@@ -328,23 +350,26 @@ def main():
     execution = parser.add_mutually_exclusive_group()
     execution.add_argument('--runtime', action='store_true')
     execution.add_argument('--reuse-runtime', action='store_true', help='Reuse completed windows only if executable inputs and engine hashes match')
+    execution.add_argument('--resume-runtime', action='store_true', help='Resume partial event windows with identical executable inputs')
     parser.add_argument('--half-window', type=int, default=48, help='Transitions either side of each actual event (default 12 h)')
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
     record = args.repo/'results/portugal_rec_native/heldout_2024'
     output = args.output or record/'validation.json'
     fingerprint = runtime_fingerprint(args.repo)
-    previous = read_json(output) if args.reuse_runtime else None
+    previous = read_json(output) if args.reuse_runtime or args.resume_runtime else None
     if previous:
-        assert previous.get('status') == 'pass' and previous.get('runtime_input_fingerprint') == fingerprint, 'Execution evidence is stale'
-        assert len(previous['runtime']) == 72 and all(r['status']=='pass' for r in previous['runtime'])
+        assert previous.get('runtime_input_fingerprint') == fingerprint, 'Execution evidence is stale'
+        assert all(r['status']=='pass' for r in previous['runtime'])
+        if args.reuse_runtime:
+            assert previous.get('status') == 'pass' and len(previous['runtime']) == 72
     report = dict(version=VERSION, revision=REVISION, static=static_audit(args.repo, write_cohorts=True), runtime=[])
     report['runtime_input_fingerprint'] = fingerprint
     if previous:
         report['runtime'] = previous['runtime']
         report['runtime_evidence_reused_with_identical_executable_inputs'] = True
     dump(output, report)
-    if args.runtime:
+    if args.runtime or args.resume_runtime:
         campaign = read_json(record/'campaign.json')
         manifest = read_json(args.repo/'results/portugal_rec_native/manifest.json')
         for entry in manifest['variants']+manifest['references']:
@@ -354,6 +379,8 @@ def main():
             windows = [('year_boundary', N23-8, N23+8), ('terminal_boundary', TOTAL-17, TOTAL-1)]
             windows += [(e['id'], e['time_step']-args.half_window, e['time_step']+args.half_window) for e in events]
             for label, start, end in windows:
+                if any(r['schema']==path.name and r['label']==label and r['start']==start and r['end']==end for r in report['runtime']):
+                    continue
                 row = runtime_window(path, start, end, label)
                 report['runtime'].append(row)
                 dump(output, report)

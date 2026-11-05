@@ -1,0 +1,141 @@
+{
+  "revision": "portugal-empirical-1",
+  "sources": [
+    {
+      "record": "13972210",
+      "filename": "Load House 7_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%207_raw.csv/content",
+      "bytes": 461135,
+      "checksum": "md5:1849b66f6858b660bf8b71760ad66671",
+      "sha256": "6fcbb9df86a5c605db4fb6bce6bba26b5a69206678c3bdf6f8b47a67e69ecdca",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 4_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%204_raw.csv/content",
+      "bytes": 2786446,
+      "checksum": "md5:39d233618935b712a701a7e1edd6eb2e",
+      "sha256": "ec234654481e2c312b8b30fc831aa691acfa9e86f0feb0f786351034e0776640",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 11_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%2011_raw.csv/content",
+      "bytes": 2541370,
+      "checksum": "md5:f30e00654715294d8d65cb5eeef0aae7",
+      "sha256": "437091c3e7cf8b76ba696bf1951f4deb6992a85eecfa10b3ded424af01485995",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 10_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%2010_raw.csv/content",
+      "bytes": 2250938,
+      "checksum": "md5:e688fc27fed4f3b81a13ec38bfc8243e",
+      "sha256": "f7645fb69b5efc3b708674bf27ad0677d498a6fafeaf52dd76f6dec9c76c58de",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 2_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%202_raw.csv/content",
+      "bytes": 3341320,
+      "checksum": "md5:0ed148efe5b23bcd56e6788c28a1f1c0",
+      "sha256": "c829dd332c6f56b8dd74cf32582b62c66ca104a57a9f13014f8e0ac31c73f07a",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 1_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%201_raw.csv/content",
+      "bytes": 3523843,
+      "checksum": "md5:9d21bbf28b79ff9334bdc47494dd7fec",
+      "sha256": "edabe7ad5658b38766a3557289c1eb331fce8038d188847cbc809b5e8e12ac08",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 13_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%2013_raw.csv/content",
+      "bytes": 2594178,
+      "checksum": "md5:3975df70e7e9762525b0e4ef49a601a9",
+      "sha256": "160fd7a41e6c7cb0ed9611de088a9b47b1c56be82bc85953644058aa362b6b7f",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 5_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%205_raw.csv/content",
+      "bytes": 2169689,
+      "checksum": "md5:d9c75a0fdcdb73b6dfe5a2965445b9bc",
+      "sha256": "56688df5f34325046c8ce49ded52d9ee0eee60ef64eb920363ec2fb58a268b0b",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 6_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%206_raw.csv/content",
+      "bytes": 463143,
+      "checksum": "md5:719a48a7d186740b4de4c3aed2c76b64",
+      "sha256": "63ab7d32a5ff649f3249c3117a52f80da61bc05ae9d562e47744b2405051ff12",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 3_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%203_raw.csv/content",
+      "bytes": 3554270,
+      "checksum": "md5:a17adabed88b11403d2bbf785c7254f2",
+      "sha256": "6152042b4c3883abedc9ecf471669a9adc56a62db6dd1ff2ba6264fd6bf6a2de",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 9_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%209_raw.csv/content",
+      "bytes": 3460506,
+      "checksum": "md5:5a7bf4f02d12a6d95b5f0f04f7b7ab5e",
+      "sha256": "7b64d597cc9e6f1468aa0d0fdcd22d201e9c6851576c1cf70854fd8999d55c40",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 12_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%2012_raw.csv/content",
+      "bytes": 3519833,
+      "checksum": "md5:4266839940fe36837df453197c56a8a8",
+      "sha256": "49335a7165b109c573b552fd79298e3f8b1dc7e781f77aa5be2f46fa90be5383",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13972210",
+      "filename": "Load House 8_raw.csv",
+      "url": "https://zenodo.org/api/records/13972210/files/Load%20House%208_raw.csv/content",
+      "bytes": 3093967,
+      "checksum": "md5:30e770c188fc0229f012fcac73a3cc4f",
+      "sha256": "99391a7a78bd9967510afc66a412950b3a235893dc63585292cb4d37cc10fda9",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "record": "13896176",
+      "filename": "Dataset1_charging_reports.csv",
+      "url": "https://zenodo.org/api/records/13896176/files/Dataset1_charging_reports.csv/content",
+      "bytes": 3105240,
+      "checksum": "md5:8bb7463d760cc846271b1ed9bdf808fd",
+      "sha256": "48c15189e2c1acca7a34d4e3789b1d615ddd091849a9803ae39aee8aec474ed2",
+      "license": "CC-BY-4.0"
+    }
+  ],
+  "acquisition_date": "2026-11-05",
+  "load_units": "Published mean kW per 15-minute interval; kWh = kW/4",
+  "load_quality": "Raw-tagged meter files; no gap-filled version or interpolation added by this audit. Upstream meter filtering cannot be independently excluded. Complete 96-slot civil days only; duplicates, missing intervals and Lisbon DST dates excluded.",
+  "split": "Declared before metric inspection: odd SHEERM houses for development, even houses for held-out validation. SINTEF users split by SHA-256 parity.",
+  "scope": "Small, nonrepresentative household cohorts; Portuguese meters and Norwegian residential EV sessions are separate populations. No empirical arrival-SOC validation.",
+  "derived_sha256": {
+    "sheerm_raw_load.parquet": "21a2a1fae5a0c101c13a237f71d88afe79f1a4b77a454bf37ba5888038526b23",
+    "sintef_measured_sessions.parquet": "e5086b69c2b808ae05e83dcd0b310ea8a0aeb24fda406f89c7aa19505f7f0306"
+  },
+  "load_cohort_limitations": "Thirteen mainland Portuguese households; exact equipment/occupants not fully known. Source paper identifies non-electric heating in houses 8-10. No PV output validation uses SHEERM: its PV traces are modelled, not measured generation."
+}

@@ -1,0 +1,304 @@
+{
+  "revision": "portugal-realism-4",
+  "seed": 20261105,
+  "parameter_status": "Residential aggregate parameters developed on seven raw SHEERM houses; commercial hourly anchors from predeclared BDG2 development buildings; domestic program shapes from REFIT houses 3/5. Independent identities held out. Transfer weights, service activities, occupancy, charging, flexibility and other behaviour remain scenario priors, not a Portuguese population fit.",
+  "activity": {
+    "weekend_trip_rate_gamma_shape": 1.5,
+    "weekend_trip_rate_gamma_scale": 1.5,
+    "holiday_bridge_probability": 0.22,
+    "vacation_travel_probability": 0.8,
+    "hybrid_exception_probability": 0.08,
+    "annual_load_log_sigma": 0.04,
+    "dhw_standing_loss_fraction": 0.12,
+    "destination_trip_daily_probability": 0.6,
+    "leave_start_jitter_days": 4.0,
+    "work_exception_probability": 0.025
+  },
+  "appliances": {
+    "variants_per_program": 12,
+    "energy_log_sigma": 0.12,
+    "duration_factors": [
+      0.85,
+      1.15
+    ],
+    "slack_log_sigma": 0.45,
+    "empirical_program_variants": 48,
+    "empirical_energy_jitter_sigma": 0.08,
+    "catering_batches_per_service_day": 5.5,
+    "catering_holding_kw": [
+      0.1,
+      0.25
+    ],
+    "linen_reference": {
+      "source": "Miele-PWM912-PT",
+      "full_load_kg": 12.0,
+      "full_load_cold_60c_kwh": 1.68,
+      "cold_60c_minutes": 49.0,
+      "reference_heater_kw": 9.0,
+      "motor_component_kwh_prior": 0.25,
+      "auxiliary_power_kw_prior": 0.6,
+      "temperature_celsius": [
+        40,
+        60
+      ],
+      "temperature_probabilities": [
+        0.2,
+        0.8
+      ],
+      "status": "Portuguese manufacturer sheet, not Portuguese field data. Only cold-water 60C full load is a measured specification. Load fraction, 40C scaling, power-adjusted duration and profile shape are engineering priors. Installed 4.6 kW unchanged; no unaccounted hot-water heat."
+    }
+  },
+  "demand": {
+    "daily_log_sigma": 0.35,
+    "daily_persistence": 0.35,
+    "episode_fraction": 0.65,
+    "episodes_per_day": 24,
+    "episode_persistence": 0.7,
+    "timing_jitter_hours": 0.75
+  },
+  "charging": {
+    "threshold_std": 0.08,
+    "delayed_connection_probability": 0.3
+  },
+  "events": {
+    "local_outages_per_member_year": 1.1300000000000001,
+    "outage_median_minutes": 42.450809643801264,
+    "outage_log_sigma": 0.65,
+    "common_outage_probability_per_year": 0.2,
+    "common_pv_telemetry_probability_per_year": 0.25,
+    "local_pv_faults_per_member_year": 1.2,
+    "event_duration_log_sigma": 0.45,
+    "dr_target_log_sigma": 0.2,
+    "controlled_grid_stress_hours_per_year": 2,
+    "common_outage_median_minutes": 49.62563958764636,
+    "empirical_moment_target": {
+      "source": "https://www.e-redes.pt/sites/eredes/files/2025-06/Relat%C3%B3rio%20da%20Qualidade%20de%20Servi%C3%A7o%202024_v2_0.pdf",
+      "table": "3.10, printed page 34",
+      "year": 2024,
+      "saifi_per_customer": 1.33,
+      "saidi_minutes_per_customer": 70.57,
+      "scope": "Published BT totals 1.32+0.01 interruptions and 69.70+0.87 minutes. Moment matching for exposed cohort, excluding controlled stress. Not a fitted event-duration distribution, local/common decomposition or Lisbon-specific reliability model. 15-minute representation cannot reproduce sub-15-minute interruptions."
+    }
+  },
+  "preserved_controls": [
+    "physical equipment and service limits",
+    "EV annual driving energy",
+    "OMIE nonnegative price and 0.8 local ratio",
+    "matched scenario random realizations",
+    "lifecycle histories",
+    "1500 kW impossible DR stress"
+  ],
+  "sources": [
+    {
+      "id": "CREST",
+      "url": "https://doi.org/10.1016/j.enbuild.2010.05.023",
+      "role": "Activity-conditioned bottom-up generation; methodology only, no imported transition probabilities."
+    },
+    {
+      "id": "ResStock",
+      "url": "https://arxiv.org/abs/2111.01881",
+      "role": "Heterogeneous stochastic activity and duration modelling; US evidence, not Portuguese calibration."
+    },
+    {
+      "id": "REFIT",
+      "url": "https://doi.org/10.1038/sdata.2016.122",
+      "role": "Development houses 3/5 supply house-balanced detected program candidates; houses 2/11 are held out. UK cleaned appliance traces, not measured deadlines, commercial machines or Portuguese 2024 population."
+    },
+    {
+      "id": "ACN-Data",
+      "url": "https://ev.caltech.edu/assets/pub/ACN_Data_Analysis_and_Applications.pdf",
+      "role": "Joint session duration/energy/workplace behaviour; does not measure arrival SOC. Methodological reference, not fitted parameters."
+    },
+    {
+      "id": "Electric-Nation",
+      "url": "https://eatechnology.com/media/girhcnsc/electric-nation-customer-trial-report.pdf",
+      "role": "Evidence of heterogeneous, non-daily charging; mixed UK BEV/PHEV cohort, not a Portuguese frequency target."
+    },
+    {
+      "id": "ERSE-2024",
+      "url": "https://www.erse.pt/media/kwcb5jqq/relat%C3%B3rio-qst-eletricidade_2024.pdf",
+      "role": "Separate individual continuity indicators and exceptional common events. Outage parameters here are sensitivity priors, not fitted SAIFI/SAIDI."
+    },
+    {
+      "id": "ERA5",
+      "url": "https://open-meteo.com/en/docs/historical-weather-api",
+      "role": "Measured/reanalysis exogenous source, uniform 2023/2024 humidity provenance; hourly data interpolated, not measured 15-minute weather."
+    },
+    {
+      "id": "SHEERM-raw",
+      "url": "https://doi.org/10.5281/zenodo.13972210",
+      "role": "Raw 15-minute Portuguese meter measurements. Seven odd-ID houses develop aggregate load episode parameters; six even-ID houses reserved for independent evaluation. Published imputed files excluded."
+    },
+    {
+      "id": "SINTEF-residential-EV",
+      "url": "https://doi.org/10.5281/zenodo.13896176",
+      "role": "Measured plug-in/out and delivered AC energy only; Norway 2018-2021, separate cohort, no fit to predicted SOC/battery fields."
+    },
+    {
+      "id": "E-REDES-BT-2024",
+      "url": "https://www.e-redes.pt/sites/eredes/files/2025-06/Relat%C3%B3rio%20da%20Qualidade%20de%20Servi%C3%A7o%202024_v2_0.pdf",
+      "role": "Table 3.10 annual frequency/duration totals anchor exposed-cohort moments after 15-minute quantization; imposed stress excluded."
+    },
+    {
+      "id": "BDG2",
+      "url": "https://doi.org/10.1038/s41597-020-00712-x",
+      "role": "Predeclared development/heldout buildings; commercial hourly structure and bounded partial transfer of annual electricity intensity. Different geography, size and energy services; industrial buildings are context only."
+    },
+    {
+      "id": "FIKElectricity",
+      "url": "https://doi.org/10.1038/s41597-023-02698-8",
+      "role": "Portuguese professional kitchens, external structural diagnostic. Heater bursts are not annotated dishwasher jobs; kitchen aggregate is not whole-cafe consumption."
+    },
+    {
+      "id": "Costa-2021",
+      "url": "https://fenix.tecnico.ulisboa.pt/departamentos/decivil/dissertacao/846778572212503",
+      "role": "2019 billed office electricity mean, explicit missing area/employee records and PV/EV boundary uncertainty; calibration reference, not independent validation."
+    },
+    {
+      "id": "Sequeira-2016",
+      "url": "https://run.unl.pt/bitstream/10362/19555/1/Sequeira_2016.pdf",
+      "role": "Tables 4.1/4.3, electricity-only bottom-up annual audits, eight of thirteen invoice checked; general retail/catering/refrigerated retail partial-transfer priors. Not clinic, factory or population observations."
+    },
+    {
+      "id": "Miele-PWM912-PT",
+      "url": "https://media.miele.com/downloads/t-/pt/FS_11496730_PTP_PT-pt-PT.pdf",
+      "role": "12 kg cold-water 60C programme energy and reference time; lower installed power handled explicitly. Manufacturer test, not field consumption or measured cycle frequency."
+    }
+  ],
+  "commercial": {
+    "energy_transfer_weight": 0.5,
+    "shape_transfer_weight": 0.65,
+    "daily_sigma_multiplier": 1.0,
+    "timing_jitter_hours": 0.5,
+    "intraday_log_sigma": 0.12,
+    "development_anchors": {
+      "cafe": {
+        "electricity_kwh_m2_year": 242.453109,
+        "daily_log_sigma": 0.202645,
+        "daily_persistence": 0.881473,
+        "night_day_ratio": 0.732202
+      },
+      "care_home": {
+        "electricity_kwh_m2_year": 172.916067,
+        "daily_log_sigma": 0.204684,
+        "daily_persistence": 0.698812,
+        "night_day_ratio": 0.59905
+      },
+      "clinic": {
+        "electricity_kwh_m2_year": 106.198785,
+        "daily_log_sigma": 0.094577,
+        "daily_persistence": 0.700126,
+        "night_day_ratio": 0.662919
+      },
+      "office": {
+        "electricity_kwh_m2_year": 154.555966,
+        "daily_log_sigma": 0.151822,
+        "daily_persistence": 0.584246,
+        "night_day_ratio": 0.718889
+      },
+      "retail": {
+        "electricity_kwh_m2_year": 60.606853,
+        "daily_log_sigma": 0.20779,
+        "daily_persistence": 0.737977,
+        "night_day_ratio": 0.451762
+      },
+      "sports_centre": {
+        "electricity_kwh_m2_year": 73.421727,
+        "daily_log_sigma": 0.173869,
+        "daily_persistence": 0.607478,
+        "night_day_ratio": 0.60235
+      },
+      "workshop": {
+        "electricity_kwh_m2_year": 285.567534,
+        "daily_log_sigma": 0.126182,
+        "daily_persistence": 0.767749,
+        "night_day_ratio": 0.860654
+      },
+      "grocery": {
+        "electricity_kwh_m2_year": 140.0,
+        "daily_log_sigma": 0.18,
+        "daily_persistence": 0.6,
+        "night_day_ratio": 0.6
+      }
+    },
+    "parameter_status": "Portuguese office published mean and three small-commerce audit means inform annual scenario budgets. Weak cohort transfer and dispersion remain explicit priors; other sector annual/hourly anchors remain BDG2 development transfer. Independent discrete presence is not empirically calibrated. All annual building budgets include fixed and controlled appliance requests once, exclude EV charging.",
+    "portuguese_annual_anchors": {
+      "office": {
+        "electricity_kwh_m2_year": 94.4,
+        "transfer_weight": 1.0,
+        "source": "Costa-2021",
+        "status": "Published 2019 billed cohort mean; 104 total sites, 58 with area. Corporate offices, not nationally representative gross end use. Dispersion is a prior."
+      },
+      "retail": {
+        "electricity_kwh_m2_year": 39.0,
+        "transfer_weight": 0.5,
+        "source": "Sequeira-2016",
+        "status": "Five general retail audits; geometric half-transfer from immutable inventory due size/year mismatch."
+      },
+      "cafe": {
+        "electricity_kwh_m2_year": 271.0,
+        "transfer_weight": 0.5,
+        "source": "Sequeira-2016",
+        "status": "Two small catering audits; geometric half-transfer, not population calibration."
+      },
+      "grocery": {
+        "electricity_kwh_m2_year": 531.0,
+        "transfer_weight": 0.5,
+        "source": "Sequeira-2016",
+        "status": "Two refrigerated retailers, approximately 36 and 80 m2 vs synthetic 500 m2. Half-transfer scenario; cannot represent a fully calibrated supermarket."
+      }
+    },
+    "office_between_building_log_sigma": 0.25,
+    "presence": {
+      "attendance_mean": 0.85,
+      "load_coupling_weight": 0.3,
+      "care_resident_fraction": 0.65,
+      "staff_fraction": {
+        "office": 0.85,
+        "retail": 0.15,
+        "clinic": 0.55,
+        "cafe": 0.2,
+        "workshop": 0.8,
+        "sports_centre": 0.15,
+        "grocery": 0.12,
+        "care_home": 0.2
+      },
+      "client_fraction": {
+        "office": 0.04,
+        "retail": 0.35,
+        "clinic": 0.25,
+        "cafe": 0.45,
+        "workshop": 0.08,
+        "sports_centre": 0.4,
+        "grocery": 0.35,
+        "care_home": 0.08
+      },
+      "dwell_hours": {
+        "office": 0.5,
+        "retail": 0.5,
+        "clinic": 1.0,
+        "cafe": 0.75,
+        "workshop": 0.5,
+        "sports_centre": 1.25,
+        "grocery": 0.5,
+        "care_home": 1.0
+      },
+      "status": "Explicit scenario priors. No comparable measured Portuguese commercial occupancy series found. Staff shifts, client turnover and persistent residents are separate processes; energy noise cannot generate people.",
+      "care_visiting_hours": [
+        10.0,
+        20.0
+      ],
+      "care_visiting_status": "Explicit 10:00-20:00 scenario prior, independent of 24/7 residents and staff. No claim of Portuguese regulatory or population visiting hours."
+    },
+    "between_building_log_sigma": {
+      "retail": 0.3071561252611961,
+      "cafe": 0.2603389601045012,
+      "grocery": 0.21294500648010262,
+      "clinic": 0.3,
+      "workshop": 0.3,
+      "sports_centre": 0.3,
+      "care_home": 0.3
+    },
+    "between_building_status": "Log-space population standard deviation of the small published Portuguese audit values for retail/cafe/grocery; descriptive only and attenuated by transfer weight. Other sectors 0.30, office 0.25 are scenario priors. Stable by physical member across years; not nationally estimated dispersion."
+  }
+}

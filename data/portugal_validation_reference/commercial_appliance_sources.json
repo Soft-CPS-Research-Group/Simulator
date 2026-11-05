@@ -1,0 +1,1122 @@
+{
+  "revision": "portugal-commercial-appliance-1",
+  "sources": [
+    {
+      "dataset": "BDG2",
+      "url": "https://media.githubusercontent.com/media/buds-lab/building-data-genome-project-2/9b97ccbe90096aff42ed4fd6493bf7ae692d7118/data/metadata/metadata.csv",
+      "bytes": 272024,
+      "sha256": "992d0b29f24f96ad4332bc4dbb534b7bdd7dd2689aad093f94e93068ecddca02",
+      "license": "CC-BY-SA-4.0"
+    },
+    {
+      "dataset": "BDG2",
+      "url": "https://media.githubusercontent.com/media/buds-lab/building-data-genome-project-2/9b97ccbe90096aff42ed4fd6493bf7ae692d7118/data/meters/raw/electricity.csv",
+      "bytes": 174239039,
+      "sha256": "039d909d8981e2d69eaeb366144e6ab7e84fa5e7e216aee42bddd95384a66418",
+      "license": "CC-BY-SA-4.0"
+    }
+  ],
+  "commercial_protocol": {
+    "commit": "9b97ccbe90096aff42ed4fd6493bf7ae692d7118",
+    "selection": "Metadata labels/areas and SHA-256 rank only, frozen before reading meters. Alternate physical buildings within sector; first heldout. Office <=3000 sqm. Up to 24 offices, 12 other sector buildings. Single-building sectors are heldout diagnostics only.",
+    "selected": [
+      {
+        "building_id": "Fox_food_Scott",
+        "site_id": "Fox",
+        "sector": "cafe",
+        "split": "heldout",
+        "sqm": 2681.4,
+        "timezone": "US/Mountain"
+      },
+      {
+        "building_id": "Fox_food_Francesco",
+        "site_id": "Fox",
+        "sector": "cafe",
+        "split": "development",
+        "sqm": 2310.2,
+        "timezone": "US/Mountain"
+      },
+      {
+        "building_id": "Eagle_food_Jennifer",
+        "site_id": "Eagle",
+        "sector": "cafe",
+        "split": "heldout",
+        "sqm": 3307.8,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Eagle_food_Kay",
+        "site_id": "Eagle",
+        "sector": "cafe",
+        "split": "development",
+        "sqm": 6491.7,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Hog_food_Morgan",
+        "site_id": "Hog",
+        "sector": "cafe",
+        "split": "heldout",
+        "sqm": 3085.8,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Rat_health_Rosaria",
+        "site_id": "Rat",
+        "sector": "care_home",
+        "split": "heldout",
+        "sqm": 1393.5,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Rat_health_Mildred",
+        "site_id": "Rat",
+        "sector": "care_home",
+        "split": "development",
+        "sqm": 911.7,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Rat_health_Tanya",
+        "site_id": "Rat",
+        "sector": "clinic",
+        "split": "heldout",
+        "sqm": 2712.0,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Fox_health_Lorena",
+        "site_id": "Fox",
+        "sector": "clinic",
+        "split": "development",
+        "sqm": 3428.5,
+        "timezone": "US/Mountain"
+      },
+      {
+        "building_id": "Lamb_food_Sylvia",
+        "site_id": "Lamb",
+        "sector": "grocery",
+        "split": "heldout",
+        "sqm": 3280.0,
+        "timezone": "Europe/London"
+      },
+      {
+        "building_id": "Hog_industrial_Quentin",
+        "site_id": "Hog",
+        "sector": "industrial_reference_only",
+        "split": "heldout",
+        "sqm": 7559.7,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Lamb_industrial_Enrique",
+        "site_id": "Lamb",
+        "sector": "industrial_reference_only",
+        "split": "development",
+        "sqm": 358.0,
+        "timezone": "Europe/London"
+      },
+      {
+        "building_id": "Lamb_industrial_Carla",
+        "site_id": "Lamb",
+        "sector": "industrial_reference_only",
+        "split": "heldout",
+        "sqm": 8426.0,
+        "timezone": "Europe/London"
+      },
+      {
+        "building_id": "Cockatoo_office_Roxanna",
+        "site_id": "Cockatoo",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 2008.4,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Fox_office_Easter",
+        "site_id": "Fox",
+        "sector": "office",
+        "split": "development",
+        "sqm": 2766.5,
+        "timezone": "US/Mountain"
+      },
+      {
+        "building_id": "Wolf_office_Elisabeth",
+        "site_id": "Wolf",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 2591.0,
+        "timezone": "Europe/Dublin"
+      },
+      {
+        "building_id": "Eagle_office_Sheree",
+        "site_id": "Eagle",
+        "sector": "office",
+        "split": "development",
+        "sqm": 2907.9,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Rat_office_Olivia",
+        "site_id": "Rat",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 2564.1,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Gator_office_Betty",
+        "site_id": "Gator",
+        "sector": "office",
+        "split": "development",
+        "sqm": 542.5,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Robin_office_Addie",
+        "site_id": "Robin",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 1495.0,
+        "timezone": "Europe/London"
+      },
+      {
+        "building_id": "Rat_office_Annis",
+        "site_id": "Rat",
+        "sector": "office",
+        "split": "development",
+        "sqm": 594.6,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Robin_office_Adolph",
+        "site_id": "Robin",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 1321.0,
+        "timezone": "Europe/London"
+      },
+      {
+        "building_id": "Panther_office_Karla",
+        "site_id": "Panther",
+        "sector": "office",
+        "split": "development",
+        "sqm": 2508.4,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Panther_office_Catherine",
+        "site_id": "Panther",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 2504.0,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Rat_office_Ashlee",
+        "site_id": "Rat",
+        "sector": "office",
+        "split": "development",
+        "sqm": 2186.9,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Shrew_office_Rose",
+        "site_id": "Shrew",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 1058.0,
+        "timezone": "Europe/London"
+      },
+      {
+        "building_id": "Rat_office_Mei",
+        "site_id": "Rat",
+        "sector": "office",
+        "split": "development",
+        "sqm": 743.2,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Hog_office_Thomas",
+        "site_id": "Hog",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 2092.9,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Hog_office_Simon",
+        "site_id": "Hog",
+        "sector": "office",
+        "split": "development",
+        "sqm": 2550.4,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Rat_office_Rosemary",
+        "site_id": "Rat",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 2787.1,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Hog_office_Buford",
+        "site_id": "Hog",
+        "sector": "office",
+        "split": "development",
+        "sqm": 2521.9,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Hog_office_Lavon",
+        "site_id": "Hog",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 1530.3,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Peacock_office_Glenn",
+        "site_id": "Peacock",
+        "sector": "office",
+        "split": "development",
+        "sqm": 2179.3,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Peacock_office_Burl",
+        "site_id": "Peacock",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 1661.0,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Eagle_office_Phyllis",
+        "site_id": "Eagle",
+        "sector": "office",
+        "split": "development",
+        "sqm": 1994.5,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Panther_office_Danica",
+        "site_id": "Panther",
+        "sector": "office",
+        "split": "heldout",
+        "sqm": 210.0,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Lamb_office_Joanna",
+        "site_id": "Lamb",
+        "sector": "office",
+        "split": "development",
+        "sqm": 1103.0,
+        "timezone": "Europe/London"
+      },
+      {
+        "building_id": "Rat_retail_Jeffrey",
+        "site_id": "Rat",
+        "sector": "retail",
+        "split": "heldout",
+        "sqm": 1532.9,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Wolf_retail_Toshia",
+        "site_id": "Wolf",
+        "sector": "retail",
+        "split": "development",
+        "sqm": 4209.0,
+        "timezone": "Europe/Dublin"
+      },
+      {
+        "building_id": "Wolf_retail_Marcella",
+        "site_id": "Wolf",
+        "sector": "retail",
+        "split": "heldout",
+        "sqm": 363.0,
+        "timezone": "Europe/Dublin"
+      },
+      {
+        "building_id": "Fox_retail_Manie",
+        "site_id": "Fox",
+        "sector": "retail",
+        "split": "development",
+        "sqm": 4201.4,
+        "timezone": "US/Mountain"
+      },
+      {
+        "building_id": "Wolf_retail_Harriett",
+        "site_id": "Wolf",
+        "sector": "retail",
+        "split": "heldout",
+        "sqm": 4108.0,
+        "timezone": "Europe/Dublin"
+      },
+      {
+        "building_id": "Panther_retail_Kristina",
+        "site_id": "Panther",
+        "sector": "retail",
+        "split": "development",
+        "sqm": 5487.9,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Panther_retail_Felix",
+        "site_id": "Panther",
+        "sector": "retail",
+        "split": "heldout",
+        "sqm": 2941.9,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Panther_retail_Gilbert",
+        "site_id": "Panther",
+        "sector": "retail",
+        "split": "development",
+        "sqm": 1421.8,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Panther_retail_Romeo",
+        "site_id": "Panther",
+        "sector": "retail",
+        "split": "heldout",
+        "sqm": 15027.5,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Panther_retail_Lester",
+        "site_id": "Panther",
+        "sector": "retail",
+        "split": "development",
+        "sqm": 840.3,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Fox_assembly_Johnnie",
+        "site_id": "Fox",
+        "sector": "sports_centre",
+        "split": "heldout",
+        "sqm": 23668.5,
+        "timezone": "US/Mountain"
+      },
+      {
+        "building_id": "Bobcat_assembly_Franklin",
+        "site_id": "Bobcat",
+        "sector": "sports_centre",
+        "split": "development",
+        "sqm": 15047.4,
+        "timezone": "US/Mountain"
+      },
+      {
+        "building_id": "Hog_assembly_Arlie",
+        "site_id": "Hog",
+        "sector": "sports_centre",
+        "split": "heldout",
+        "sqm": 11058.2,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Cockatoo_assembly_Valencia",
+        "site_id": "Cockatoo",
+        "sector": "sports_centre",
+        "split": "development",
+        "sqm": 14112.0,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Cockatoo_assembly_Genoveva",
+        "site_id": "Cockatoo",
+        "sector": "sports_centre",
+        "split": "heldout",
+        "sqm": 1519.1,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Cockatoo_assembly_Tabitha",
+        "site_id": "Cockatoo",
+        "sector": "sports_centre",
+        "split": "development",
+        "sqm": 1589.0,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Gator_assembly_Kimberly",
+        "site_id": "Gator",
+        "sector": "sports_centre",
+        "split": "heldout",
+        "sqm": 81290.1,
+        "timezone": "US/Eastern"
+      },
+      {
+        "building_id": "Hog_assembly_Jasmine",
+        "site_id": "Hog",
+        "sector": "sports_centre",
+        "split": "development",
+        "sqm": 5314.1,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Robin_assembly_Colleen",
+        "site_id": "Robin",
+        "sector": "sports_centre",
+        "split": "heldout",
+        "sqm": 5948.0,
+        "timezone": "Europe/London"
+      },
+      {
+        "building_id": "Hog_assembly_Edward",
+        "site_id": "Hog",
+        "sector": "sports_centre",
+        "split": "development",
+        "sqm": 1807.3,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Hog_assembly_Maribel",
+        "site_id": "Hog",
+        "sector": "sports_centre",
+        "split": "heldout",
+        "sqm": 13306.3,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Hog_assembly_Pedro",
+        "site_id": "Hog",
+        "sector": "sports_centre",
+        "split": "development",
+        "sqm": 24942.6,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Hog_services_Kerrie",
+        "site_id": "Hog",
+        "sector": "workshop",
+        "split": "heldout",
+        "sqm": 2501.5,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Hog_services_Adrianna",
+        "site_id": "Hog",
+        "sector": "workshop",
+        "split": "development",
+        "sqm": 4696.4,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Hog_services_Joe",
+        "site_id": "Hog",
+        "sector": "workshop",
+        "split": "heldout",
+        "sqm": 3904.5,
+        "timezone": "US/Central"
+      },
+      {
+        "building_id": "Hog_services_Marshall",
+        "site_id": "Hog",
+        "sector": "workshop",
+        "split": "development",
+        "sqm": 6506.9,
+        "timezone": "US/Central"
+      }
+    ],
+    "limitations": "North American/European 2016-2017 buildings, generally larger than Portuguese fictional sites; electricity meters can exclude district heating/cooling. Building split, not independent site/climate split. Factories are context only: current inventory contains workshops, not factories."
+  },
+  "derived_sha256": {
+    "bdg2_commercial_metadata.parquet": "97c164428a636654eff75c9258a9f761aa7e702ba9afe4f611f473231f8cc822",
+    "bdg2_commercial_hourly.parquet": "5bff50e4a1a9b7c0848fe7c98ea2b689fd4d6945b65e932c77f79498c5692ccc",
+    "refit_house_2_cycles.parquet": "bad8e72cd3600898aa9cece9ce4c0743d26582f732f9714d7714ba5c33a8e593",
+    "refit_house_2_days.parquet": "a235632dd28902ff6aaf1704d01ec1c59f5cd0beb7626c5a37ab58a9956e7e2c",
+    "refit_house_3_cycles.parquet": "f8c2075acf13d0e105bc99b2e847c9d53deec45ac5a717ffffe5fc9acc398ced",
+    "refit_house_3_days.parquet": "40f12933ea7ceceb5cb126f466b19262285c047c5b47bd10502d1d24b2b96fdc",
+    "refit_house_5_cycles.parquet": "3a75389945d0ba04bd644dfff584f84f4046d82187fe81f7647fbd7f77a4cf43",
+    "refit_house_5_days.parquet": "6f0b57c04ec58e066c40e79fb1714e631776ff002b5c2b4c4f7581fd8a3b063e",
+    "refit_house_11_cycles.parquet": "4a603ba6aa1bd86ab7b213169bf2f5b6ecfe65529f426d0406668c780c929ec9",
+    "refit_house_11_days.parquet": "33a3806e5aaead50f817f1194e421bc0e36c8b544eee3c72a97400506666559d",
+    "fik_kitchen_1_15min.parquet": "e0f2f143cc71be2adfec4aef404e0d0d1253d492f1c6f1fb3334296f6b04085e",
+    "fik_kitchen_2_15min.parquet": "09362d598a4d0178b5f18c24ed551e48646b8edd5398ef88eea9ca53d2ec655f",
+    "fik_kitchen_3_15min.parquet": "66bd82dee6fe97a0201ccb2acbb17d60e8fe8df8f4fe492f23692cc001742632",
+    "fik_dishwasher_15min.parquet": "4de1040cc090805c7768c358079497354db5077d44844d0113d3b83c4e457565",
+    "fik_glasswasher_15min.parquet": "5d4c5cd80a7f229fdba3d025a3aafb052414e6c8788708ecc54dea55592cdbcd"
+  },
+  "commercial_units": "Published hourly electricity kWh per interval; same numeric value as mean kW over one hour. Local civil timestamps; compare at hourly resolution, without invented 15-minute observations.",
+  "appliance_protocol": {
+    "house_split": {
+      "2": "heldout",
+      "3": "development",
+      "5": "development",
+      "11": "heldout"
+    },
+    "channels": {
+      "2": {
+        "washing_machine": 2,
+        "dishwasher": 3
+      },
+      "3": {
+        "washing_machine": 6,
+        "dishwasher": 5
+      },
+      "5": {
+        "washing_machine": 3,
+        "dishwasher": 4
+      },
+      "11": {
+        "washing_machine": 3,
+        "dishwasher": 4
+      }
+    },
+    "metadata_commit": "8967bd1fde24d0c8d89408179dd2499d8e60b4c3",
+    "selection": "Four complete published house files, selected before power inspection: development houses 3/5, heldout 2/11. Distinct physical households; only washing machine and dishwasher channels.",
+    "extraction": "10 W threshold / 15-minute within-program gaps; sensitivity 5/20 W and 5/30-minute gaps. Discard censored, >120-second-gap, <98% observed duration or implausible cycles. Integrate measured W with observed intervals, cap held samples at 16 seconds. Preserve the Issues fraction (sum of IAMs exceeding aggregate; not a per-channel failure) for separate quality sensitivity, rather than discarding a whole multi-hour cycle for one flagged row. Retain aggregate cycle/day summaries, not raw CSV copies.",
+    "limits": "UK 2013-2015 appliances, not 2024 Portuguese equipment. Cleaned REFIT filled short gaps and zeroed long gaps upstream; unflagged zero gaps cannot be recovered. Detected candidates are not ground-truth program labels or measured user deadlines."
+  },
+  "refit_house_evidence": {
+    "2": {
+      "filename": "CLEAN_House2.csv",
+      "url": "https://zenodo.org/api/records/5063428/files/CLEAN_House2.csv/content",
+      "bytes": 325391201,
+      "md5": "md5:13957fd139bf8f6ba8bceea36e85bb3d",
+      "sha256": "5e3b8b30734070692bb6ac12504a26f5a1394aabe050199a1f7b7c5f88065561",
+      "license": "CC-BY-4.0",
+      "metadata_url": "https://raw.githubusercontent.com/nilmtk/nilmtk/8967bd1fde24d0c8d89408179dd2499d8e60b4c3/nilmtk/dataset_converters/refit/metadata/building2.yaml",
+      "metadata_sha256": "3062071e8651ff60654471ee5973cf7e1c17590d74d50ef9db6e64d932aeaa3c",
+      "raw_rows": 5733526,
+      "quality": [
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 900,
+          "active_points": 239363,
+          "accepted": 301,
+          "rejected": 82
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 5,
+          "gap_seconds": 900,
+          "active_points": 277988,
+          "accepted": 297,
+          "rejected": 111
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 20,
+          "gap_seconds": 900,
+          "active_points": 213777,
+          "accepted": 301,
+          "rejected": 70
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 300,
+          "active_points": 239363,
+          "accepted": 330,
+          "rejected": 86
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 1800,
+          "active_points": 239363,
+          "accepted": 285,
+          "rejected": 75
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 900,
+          "active_points": 449765,
+          "accepted": 435,
+          "rejected": 539
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 5,
+          "gap_seconds": 900,
+          "active_points": 451548,
+          "accepted": 435,
+          "rejected": 548
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 20,
+          "gap_seconds": 900,
+          "active_points": 444756,
+          "accepted": 435,
+          "rejected": 530
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 300,
+          "active_points": 449765,
+          "accepted": 462,
+          "rejected": 549
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 1800,
+          "active_points": 449765,
+          "accepted": 425,
+          "rejected": 113
+        }
+      ],
+      "extraction_revision": 2
+    },
+    "3": {
+      "filename": "CLEAN_House3.csv",
+      "url": "https://zenodo.org/api/records/5063428/files/CLEAN_House3.csv/content",
+      "bytes": 407273065,
+      "md5": "md5:ab6e34ea386eb4563bfcb9762619dc8f",
+      "sha256": "3694186fd607a779d90dc34f834db908c152a86cfb0fd32e4bf009d86e444e97",
+      "license": "CC-BY-4.0",
+      "metadata_url": "https://raw.githubusercontent.com/nilmtk/nilmtk/8967bd1fde24d0c8d89408179dd2499d8e60b4c3/nilmtk/dataset_converters/refit/metadata/building3.yaml",
+      "metadata_sha256": "2a9c6abf4b62f669ae6f012b7e07fb6b3d333e7c1c79125b37d6c83d3c74074b",
+      "raw_rows": 6994594,
+      "quality": [
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 900,
+          "active_points": 344207,
+          "accepted": 609,
+          "rejected": 301
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 5,
+          "gap_seconds": 900,
+          "active_points": 359192,
+          "accepted": 606,
+          "rejected": 331
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 20,
+          "gap_seconds": 900,
+          "active_points": 314909,
+          "accepted": 610,
+          "rejected": 267
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 300,
+          "active_points": 344207,
+          "accepted": 651,
+          "rejected": 330
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 1800,
+          "active_points": 344207,
+          "accepted": 558,
+          "rejected": 257
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 900,
+          "active_points": 291182,
+          "accepted": 425,
+          "rejected": 82
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 5,
+          "gap_seconds": 900,
+          "active_points": 297191,
+          "accepted": 425,
+          "rejected": 85
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 20,
+          "gap_seconds": 900,
+          "active_points": 278768,
+          "accepted": 427,
+          "rejected": 73
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 300,
+          "active_points": 291182,
+          "accepted": 432,
+          "rejected": 519
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 1800,
+          "active_points": 291182,
+          "accepted": 423,
+          "rejected": 79
+        }
+      ],
+      "extraction_revision": 2
+    },
+    "5": {
+      "filename": "CLEAN_House5.csv",
+      "url": "https://zenodo.org/api/records/5063428/files/CLEAN_House5.csv/content",
+      "bytes": 435272416,
+      "md5": "md5:03938c844fdb09d787eb637bcf65f956",
+      "sha256": "897defbaeadb048ced0d7f6b0ba262a7fa701b7a6943b6a7ca8ad515d7fa3c50",
+      "license": "CC-BY-4.0",
+      "metadata_url": "https://raw.githubusercontent.com/nilmtk/nilmtk/8967bd1fde24d0c8d89408179dd2499d8e60b4c3/nilmtk/dataset_converters/refit/metadata/building5.yaml",
+      "metadata_sha256": "9b1b622e1e083dfe09794e450c681ceb2058764d757f4f191b84b9f8c11abfab",
+      "raw_rows": 7430755,
+      "quality": [
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 900,
+          "active_points": 560480,
+          "accepted": 605,
+          "rejected": 596
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 5,
+          "gap_seconds": 900,
+          "active_points": 597210,
+          "accepted": 602,
+          "rejected": 632
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 20,
+          "gap_seconds": 900,
+          "active_points": 508004,
+          "accepted": 608,
+          "rejected": 542
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 300,
+          "active_points": 560480,
+          "accepted": 688,
+          "rejected": 740
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 1800,
+          "active_points": 560480,
+          "accepted": 536,
+          "rejected": 542
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 900,
+          "active_points": 712902,
+          "accepted": 697,
+          "rejected": 813
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 5,
+          "gap_seconds": 900,
+          "active_points": 787667,
+          "accepted": 683,
+          "rejected": 644
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 20,
+          "gap_seconds": 900,
+          "active_points": 671777,
+          "accepted": 697,
+          "rejected": 258
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 300,
+          "active_points": 712902,
+          "accepted": 708,
+          "rejected": 877
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 1800,
+          "active_points": 712902,
+          "accepted": 695,
+          "rejected": 757
+        }
+      ],
+      "extraction_revision": 2
+    },
+    "11": {
+      "filename": "CLEAN_House11.csv",
+      "url": "https://zenodo.org/api/records/5063428/files/CLEAN_House11.csv/content",
+      "bytes": 255832544,
+      "md5": "md5:5b41bae97ab28871fcfe5167b41c0347",
+      "sha256": "e06bff467bf771191610670f2b6ae3f71acfad7aad37f1a16e0163305cdda113",
+      "license": "CC-BY-4.0",
+      "metadata_url": "https://raw.githubusercontent.com/nilmtk/nilmtk/8967bd1fde24d0c8d89408179dd2499d8e60b4c3/nilmtk/dataset_converters/refit/metadata/building11.yaml",
+      "metadata_sha256": "81047ca52c71112adcb75a0116f0591eaa8b1493d0d61ad0e2ac5206f1e061fb",
+      "raw_rows": 4431541,
+      "quality": [
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 900,
+          "active_points": 55141,
+          "accepted": 112,
+          "rejected": 86
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 5,
+          "gap_seconds": 900,
+          "active_points": 57522,
+          "accepted": 112,
+          "rejected": 90
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 20,
+          "gap_seconds": 900,
+          "active_points": 49973,
+          "accepted": 111,
+          "rejected": 81
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 300,
+          "active_points": 55141,
+          "accepted": 116,
+          "rejected": 133
+        },
+        {
+          "appliance_type": "washing_machine",
+          "threshold_w": 10,
+          "gap_seconds": 1800,
+          "active_points": 55141,
+          "accepted": 110,
+          "rejected": 80
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 900,
+          "active_points": 30160,
+          "accepted": 42,
+          "rejected": 113
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 5,
+          "gap_seconds": 900,
+          "active_points": 32327,
+          "accepted": 41,
+          "rejected": 123
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 20,
+          "gap_seconds": 900,
+          "active_points": 29945,
+          "accepted": 41,
+          "rejected": 104
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 300,
+          "active_points": 30160,
+          "accepted": 42,
+          "rejected": 129
+        },
+        {
+          "appliance_type": "dishwasher",
+          "threshold_w": 10,
+          "gap_seconds": 1800,
+          "active_points": 30160,
+          "accepted": 41,
+          "rejected": 108
+        }
+      ],
+      "extraction_revision": 2
+    }
+  },
+  "kitchen_protocol": {
+    "role": "External structural diagnostic only; no numerical fitting or population representativeness claim. Three Portuguese professional kitchens for 3-4 weeks. One dishwasher and one glasswasher in kitchen 1: not independent-device heldout validation.",
+    "integration": "Published active watts, UTC timestamps converted to Europe/Lisbon for civil comparisons. Piecewise constant integration, held intervals bounded at twice the median sampling interval; retain observed seconds per 15-minute bin. No zero-fill/interpolation of absent samples.",
+    "limitations": "Kitchen aggregate is not whole-cafe electricity; unmonitored circuits are not classified as non-shiftable. Heater bursts are not annotated washing cycles. Professional machines differ in size/rating from the fictional cafe."
+  },
+  "kitchen_evidence": {
+    "kitchen_1": {
+      "url": "https://osf.io/download/b9x84/",
+      "osf_file_id": "652445f79907550056a1d414",
+      "bytes": 167969377,
+      "sha256": "97322f84be6e055c4753899ea1ae089d4f2b9d79fbfdcec107505731c0d04e2b",
+      "license": "CC-BY-4.0",
+      "rows": 829884,
+      "median_sample_seconds": 1.0,
+      "positive_power_kw_quantiles": [
+        3.3,
+        8.25,
+        24.84,
+        36.23939999999944
+      ]
+    },
+    "kitchen_2": {
+      "url": "https://osf.io/download/bgyvf/",
+      "osf_file_id": "652447819907550051a1d807",
+      "bytes": 337226869,
+      "sha256": "0cf5cc7e935173dd4f441ac776a3b01af01f5c77f8a20ba1f90a281ee1c56646",
+      "license": "CC-BY-4.0",
+      "rows": 1938338,
+      "median_sample_seconds": 1.0,
+      "positive_power_kw_quantiles": [
+        1.44,
+        2.82,
+        12.81,
+        21.72
+      ]
+    },
+    "kitchen_3": {
+      "url": "https://osf.io/download/3ahsq/",
+      "osf_file_id": "6524478b7bfe18005f5bb066",
+      "bytes": 345526779,
+      "sha256": "e353d30fb72cffb89bdf8f5d336609f05aec095126d3bdfee878d9de7e16329a",
+      "license": "CC-BY-4.0",
+      "rows": 1985701,
+      "median_sample_seconds": 1.0,
+      "positive_power_kw_quantiles": [
+        5.7,
+        13.98,
+        28.05,
+        44.97
+      ]
+    },
+    "dishwasher": {
+      "url": "https://osf.io/download/dmj46/",
+      "osf_file_id": "65252ff87bfe1801015bb43c",
+      "bytes": 49665508,
+      "sha256": "aa9a7aee5fcbd19b95cac58ae4d742a7949e1fed831fda3ad21781c737a7879f",
+      "license": "CC-BY-4.0",
+      "rows": 403480,
+      "median_sample_seconds": 5.0,
+      "positive_power_kw_quantiles": [
+        2.83,
+        3.115,
+        4.164,
+        4.338
+      ]
+    },
+    "glasswasher": {
+      "url": "https://osf.io/download/x3wpd/",
+      "osf_file_id": "6525302c7bfe1801015bb457",
+      "bytes": 29264761,
+      "sha256": "91b878efe9e16ea122921ac497190c39b8a4ae9ab26671ccee4de78acc7302b9",
+      "license": "CC-BY-4.0",
+      "rows": 429084,
+      "median_sample_seconds": 5.0,
+      "positive_power_kw_quantiles": [
+        0.293,
+        0.3,
+        1.4260000000000073,
+        1.795
+      ]
+    }
+  },
+  "portuguese_revision_evidence": {
+    "access_date": "2026-11-05",
+    "role": "Published aggregates for scenario calibration/engineering; not newly held-out observations. Raw PDFs not retained.",
+    "office": {
+      "id": "Costa-2021",
+      "url": "https://fenix.tecnico.ulisboa.pt/downloadFile/1689244997262014/Extend%20Abstract%20-%20Carolina_79663.pdf",
+      "sha256": "3fc029a450372bafb79e08ec2ee96bc40ba2be66ddc673f8e9723686a6638280",
+      "location": "Extended abstract pp. 2-5, tables 1 and 3",
+      "reference_year": 2019,
+      "total_offices": 104,
+      "with_area": 58,
+      "with_employees": 59,
+      "with_billed_2019": 96,
+      "published_mean_kwh_m2_year": 94.4,
+      "published_mean_kwh_employee_year": 2500,
+      "cautions": "Incomplete overlapping cohorts; do not divide the two means to infer occupancy. One corporate sample; billed imports may exclude PV self-consumption and include EV charging. No gross electricity correction invented. Monthly indices not forced onto each site."
+    },
+    "small_commerce": {
+      "id": "Sequeira-2016",
+      "url": "https://run.unl.pt/bitstream/10362/19555/1/Sequeira_2016.pdf",
+      "location": "Printed pp. 55-58 and 77-80; tables 3.1, 4.1, 4.3",
+      "retrieval": "Web-indexed PDF text verified; direct repository response was HTML, not PDF, so no false document checksum recorded.",
+      "method": "13 detailed bottom-up electricity audits; only eight checked against bills, 27 meter-reading intervals. Not thirteen year-long meter traces. 37 additional simple audits are not additional measured annual energy samples.",
+      "sectors": {
+        "retail": {
+          "n": 5,
+          "individual_kwh_m2_year": [
+            32,
+            49,
+            31,
+            25,
+            57
+          ],
+          "published_mean": 39
+        },
+        "cafe": {
+          "n": 2,
+          "individual_kwh_m2_year": [
+            340,
+            202
+          ],
+          "published_mean": 271
+        },
+        "grocery": {
+          "n": 2,
+          "individual_kwh_m2_year": [
+            643,
+            420
+          ],
+          "published_mean": 531
+        }
+      },
+      "cautions": "Small voluntary local sample from 2015-2016 work, not 2024 stock. Rounded published sector means retained; never count extrapolated 107 neighbourhood businesses as measured. Health/beauty excluded as clinic target; print shop excluded as workshop/factory target."
+    },
+    "linen": {
+      "id": "Miele-PWM912-PT",
+      "url": "https://media.miele.com/downloads/t-/pt/FS_11496730_PTP_PT-pt-PT.pdf",
+      "sha256": "587210d8fbfe0771b33169d200e8bc67384218dc348cd179a45271359933beb2",
+      "load_kg": 12,
+      "cold_water_60c_kwh": 1.68,
+      "cold_water_minutes": 49,
+      "hot_water_electric_kwh": 0.72,
+      "heater_kw": 9.0,
+      "total_kw": 9.6,
+      "cautions": "Manufacturer test specification in Portuguese, not Portuguese field traces. Synthetic installed power remains 4.6 kW, with explicit slower-heating transfer. Cold inlet only; no thermal energy silently omitted via hot-water electricity figure."
+    },
+    "linen_crosscheck": {
+      "id": "Electrolux-WH6-11-PT",
+      "url": "https://tools.electroluxprofessional.com/Mirror/Doc/ELS/PDS/PDS_WH6-11_438908682_PT.pdf?version=1751975878",
+      "sha256": "281fb691f2787b1cfc5143c01560eb7d553fc50d376a7922f093bf5304b7652e",
+      "role": "Engineering context only, not fitted or independent field validation. Separates motor, electric heater and hot-water energy; do not sum steam/hot-water figures as electricity."
+    },
+    "not_used_for_numeric_fit": [
+      {
+        "url": "https://www.sce.pt/estatisticas/download-de-informacao-estatistica/",
+        "reason": "Energy certificates/energy-form fields are not established annual metered gross-electricity observations; no unverified conversion from primary/standardized to actual energy."
+      },
+      {
+        "url": "https://liacc.ufp.pt/research/airmon-iot-system-for-monitoring-and-classroom-occupancy-classification/",
+        "reason": "Portuguese classroom observations, not commercial staff/customer occupancy; no rates transferred to offices/shops."
+      }
+    ],
+    "occupancy_gap": "No comparable Portuguese measured commercial arrival/departure, staff attendance, customer dwell or linen throughput dataset used. These remain named scenario priors and undergo seed/sensitivity/coherence tests."
+  }
+}

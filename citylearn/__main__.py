@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import concurrent.futures
 import datetime
@@ -26,7 +28,7 @@ try:
     from stable_baselines3.common.base_class import BaseAlgorithm as StableBaselines3Agent
 
 except (ImportError, ModuleNotFoundError):
-    pass
+    StableBaselines3Agent = None
 
 def run_work_order(work_order_filepath, max_workers=None, start_index=None, end_index=None, virtual_environment_path=None, windows_system=None):
     work_order_filepath = Path(work_order_filepath)
@@ -223,25 +225,20 @@ class Simulator:
 
     def __get_time_series(self) -> pd.DataFrame:
         data_list = []
+        executed_steps = self.env.unwrapped.time_step
 
         for b in self.env.unwrapped.buildings:
             data = {}
 
             for variable in self.time_series_variables:
-                key = b
-                values = variable.split('.')
-
-                for i in range(len(values)):
-                    if hasattr(key, values[i]):
-                        value = getattr(key, values[i])
-                        key = value
-                    
-                    else:
-                        pass
-                
-                data[variable.replace('.', '_')] = value
+                value = b
+                for component in variable.split('.'):
+                    value = getattr(value, component)
+                # Input/state arrays may include the terminal observation;
+                # energy histories contain only executed intervals.
+                data[variable.replace('.', '_')] = pd.Series(value).iloc[:executed_steps]
             
-            data = pd.DataFrame(data)
+            data = pd.DataFrame(data, index=range(executed_steps))
             data.insert(0, 'time_step', data.index)
             data.insert(1, 'building_name', b.name)
             data_list.append(data)
@@ -267,14 +264,14 @@ class Simulator:
     def __evaluate(self):
         observations, _ = self.env.reset()
         actions_list = []
-        self.__evaluation_start_timestamp = datetime.datetime.now(datetime.UTC)
+        self.__evaluation_start_timestamp = datetime.datetime.now(datetime.timezone.utc)
         
         while not self.env.terminated:
             if isinstance(self.agent, CityLearnAgent):
                 actions = self.agent.predict(observations, deterministic=True)
                 actions_list.append(self.env.unwrapped._parse_actions(actions))
             
-            elif isinstance(self.agent, StableBaselines3Agent):
+            elif StableBaselines3Agent is not None and isinstance(self.agent, StableBaselines3Agent):
                 actions, _ = self.agent.predict(observations, deterministic=True)
                 actions_list.append(self.env.unwrapped._parse_actions([actions]))
 
@@ -283,12 +280,12 @@ class Simulator:
 
             observations, _, _, _, _ = self.env.step(actions)
 
-        self.__evaluation_end_timestamp = datetime.datetime.now(datetime.UTC)
+        self.__evaluation_end_timestamp = datetime.datetime.now(datetime.timezone.utc)
         self.__actions_list = actions_list
 
     def __train(self, episodes: int):
         kwargs = {}
-        self.__train_start_timestamp = datetime.datetime.now(datetime.UTC)
+        self.__train_start_timestamp = datetime.datetime.now(datetime.timezone.utc)
         env = self.env.unwrapped
         previous_final_export_episode_index = (
             env.plan_final_episode_exports(episodes)
@@ -307,7 +304,7 @@ class Simulator:
             if hasattr(env, 'plan_final_episode_exports'):
                 env._final_export_episode_index = previous_final_export_episode_index
 
-        self.__train_end_timestamp = datetime.datetime.now(datetime.UTC)
+        self.__train_end_timestamp = datetime.datetime.now(datetime.timezone.utc)
 
     def __save_agent(self):
         if isinstance(self.agent, CityLearnAgent):
@@ -332,6 +329,8 @@ class Simulator:
                 agent.env = self.env
 
             else:
+                if StableBaselines3Agent is None:
+                    raise ImportError('Loading this saved agent requires the optional stable_baselines3 package.')
                 agent = StableBaselines3Agent.load(self.agent_filepath, self.env)
 
         return agent
