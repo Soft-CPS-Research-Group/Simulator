@@ -25,7 +25,11 @@ Release owner: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)
   successful download. Failed downloads can be retried without accepting a partial
   dataset. Add online-loader regressions and fetch the immutable source commit in CI.
 - Allow the command-line interface to start without optional Stable Baselines3;
-  loading an SB3 agent explicitly reports the missing dependency.
+  loading an SB3 agent explicitly reports the missing dependency. Keep CLI UTC
+  timestamps compatible with Python 3.9/3.10 and align evaluation time-series
+  exports to executed intervals, excluding the terminal observation. Remove five
+  obsolete partial-load default columns that no longer exist on Building; explicit
+  invalid variable names now fail instead of repeating the preceding column.
 - Keep simulation dynamics, public interfaces and the OMIE pricing convention
   unchanged. Old experiment results must retain their original dataset reference;
   upgrading the default dataset changes the benchmark inputs.

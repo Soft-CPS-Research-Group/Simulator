@@ -25,7 +25,11 @@ Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca))
   completar todos os ficheiros. Downloads interrompidos podem ser repetidos.
   Acrescenta regressões do carregamento e obtém o commit de origem fixa no CI.
 - Permite iniciar a interface de linha de comandos sem Stable Baselines3;
-  carregar um agente SB3 indica explicitamente a dependência em falta.
+  carregar um agente SB3 indica explicitamente a dependência em falta. Corrige
+  as horas UTC em Python 3.9/3.10 e alinha a exportação da avaliação com os
+  intervalos executados, excluindo a observação terminal. Remove cinco colunas
+  obsoletas de carga parcial; nomes inválidos explícitos passam a falhar, em vez
+  de repetir silenciosamente a coluna anterior.
 - Mantém a dinâmica da simulação, interfaces e convenção de preços OMIE.
   Resultados anteriores precisam da revisão original dos dados para comparação.
 
