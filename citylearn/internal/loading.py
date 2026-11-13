@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import importlib
+import logging
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Tuple, Union
 
@@ -22,6 +23,8 @@ from citylearn.energy_model import Battery, DeferrableAppliance, Escalator
 from citylearn.reward_function import MultiBuildingRewardFunction, RewardFunction
 from citylearn.utilities import parse_bool
 from citylearn.internal import loading_inputs, loading_components
+
+LOGGER = logging.getLogger()
 
 if TYPE_CHECKING:
     from citylearn.citylearn import CityLearnEnv
@@ -312,8 +315,16 @@ class CityLearnLoadingService:
         reward_type = reward_schema['type']
         reward_attrs = reward_schema.get('attributes', {})
         is_multi = isinstance(reward_type, dict)
+        reward_override = kwargs.get('reward_function')
+        reward_override_kwargs = kwargs.get('reward_function_kwargs')
 
-        if is_multi:
+        if reward_override is not None:
+            # The constructor argument overrides the schema definition, including per-building ones.
+            reward_function = self._construct_reward_override(
+                reward_override, reward_override_kwargs, None if is_multi else reward_type, reward_attrs,
+            )
+
+        elif is_multi:
             default_type = reward_type.get('default')
             if default_type is None and reward_type:
                 default_type = next(iter(reward_type.values()))
@@ -340,20 +351,8 @@ class CityLearnLoadingService:
             reward_function = MultiBuildingRewardFunction(None, reward_functions)
 
         else:
-            if 'reward_function' in kwargs and kwargs['reward_function'] is not None:
-                reward_function_type = kwargs['reward_function']
-                if not isinstance(reward_function_type, str):
-                    reward_function_type = f"{reward_function_type.__module__}.{reward_function_type.__name__}"
-            else:
-                reward_function_type = reward_type
-
-            reward_function_attributes = kwargs.get('reward_function_kwargs') or reward_attrs or {}
-
-            module_name = '.'.join(reward_function_type.split('.')[:-1])
-            class_name = reward_function_type.split('.')[-1]
-            module = importlib.import_module(module_name)
-            constructor = getattr(module, class_name)
-            reward_function = constructor(None, **reward_function_attributes)
+            reward_function_attributes = reward_attrs if reward_override_kwargs is None else reward_override_kwargs
+            reward_function = self._import_object(reward_type)(None, **(reward_function_attributes or {}))
 
         return (
             schema['root_directory'],
@@ -368,6 +367,48 @@ class CityLearnLoadingService:
             schema['shared_observations'],
             episode_tracker,
         )
+
+    @staticmethod
+    def _import_object(path: str):
+        module_name, _, attribute_name = path.rpartition('.')
+        return getattr(importlib.import_module(module_name), attribute_name)
+
+    def _construct_reward_override(self, reward_override, reward_override_kwargs, schema_type, schema_attributes):
+        """Build the reward function passed to the constructor.
+
+        An instance is used as given (the environment sets its metadata). A class or import path is
+        constructed with ``reward_override_kwargs`` when provided. Otherwise the schema's attributes are
+        used only if the override is the schema's own reward type, because they parameterize that type.
+        """
+
+        if isinstance(reward_override, RewardFunction):
+            if reward_override_kwargs:
+                LOGGER.warning('reward_function_kwargs are ignored when reward_function is an instance.')
+
+            return reward_override
+
+        if isinstance(reward_override, str):
+            path = reward_override
+            constructor = self._import_object(path)
+        else:
+            constructor = reward_override
+            path = f'{constructor.__module__}.{constructor.__name__}'
+
+        if reward_override_kwargs is not None:
+            attributes = reward_override_kwargs
+        elif schema_type is not None and path == schema_type:
+            attributes = schema_attributes
+        else:
+            if schema_attributes:
+                LOGGER.warning(
+                    'Schema reward_function attributes %s belong to %s and are not applied to the override %s; '
+                    'pass reward_function_kwargs to configure it.',
+                    sorted(schema_attributes), schema_type or 'the per-building schema reward functions', path,
+                )
+
+            attributes = {}
+
+        return constructor(None, **(attributes or {}))
 
     def load_building(
         self,
@@ -603,6 +644,13 @@ class CityLearnLoadingService:
         else:
             loss_coefficient = float(loss_coefficient)
 
+        # Each EV draws its unspecified battery parameters (efficiency, curves, capacity fade) from
+        # its own seed, as `initial_soc` above does; a shared seed gave every EV identical values.
+        battery_random_seed = attrs.get('random_seed')
+        if battery_random_seed is None:
+            seed_source = f"{schema['random_seed']}:{electric_vehicle_name}:battery"
+            battery_random_seed = int(hashlib.md5(seed_source.encode('utf-8')).hexdigest()[:8], 16)
+
         battery_kwargs = {
             'capacity': capacity,
             'nominal_power': nominal_power,
@@ -610,7 +658,7 @@ class CityLearnLoadingService:
             'loss_coefficient': loss_coefficient,
             'seconds_per_time_step': schema['seconds_per_time_step'],
             'time_step_ratio': time_step_ratio,
-            'random_seed': schema['random_seed'],
+            'random_seed': battery_random_seed,
             'episode_tracker': episode_tracker,
             'depth_of_discharge': depth_of_discharge,
         }
@@ -759,13 +807,20 @@ class CityLearnLoadingService:
 
         return 'csv'
 
-    def _read_simulation_dataframe(self, schema: Mapping[str, Any], filepath: Union[str, os.PathLike]) -> pd.DataFrame:
+    def _read_simulation_dataframe(
+        self,
+        schema: Mapping[str, Any],
+        filepath: Union[str, os.PathLike],
+        *,
+        csv_dtypes: Optional[Mapping[str, Any]] = None,
+    ) -> pd.DataFrame:
         """Read only the configured simulation window from a CSV or Parquet time series file."""
 
         dataframe = self._read_timeseries_dataframe(
             filepath,
             start_time_step=int(schema['simulation_start_time_step']),
             end_time_step=int(schema['simulation_end_time_step']),
+            csv_dtypes=csv_dtypes,
         )
         if not parse_bool(
             schema.get('terminal_observation_padding', False),
@@ -846,6 +901,7 @@ class CityLearnLoadingService:
         *,
         start_time_step: Optional[int] = None,
         end_time_step: Optional[int] = None,
+        csv_dtypes: Optional[Mapping[str, Any]] = None,
     ) -> pd.DataFrame:
         if start_time_step is not None and end_time_step is not None and end_time_step < start_time_step:
             raise ValueError(
@@ -863,9 +919,9 @@ class CityLearnLoadingService:
         nrows = None if end_time_step is None else int(end_time_step) - int(start_time_step or 0) + 1
 
         if start_time_step is None or int(start_time_step) <= 0:
-            return pd.read_csv(filepath, nrows=nrows)
+            return pd.read_csv(filepath, nrows=nrows, dtype=csv_dtypes)
 
-        return pd.read_csv(filepath, skiprows=range(1, int(start_time_step) + 1), nrows=nrows)
+        return pd.read_csv(filepath, skiprows=range(1, int(start_time_step) + 1), nrows=nrows, dtype=csv_dtypes)
 
     @staticmethod
     def _read_parquet_timeseries_dataframe(

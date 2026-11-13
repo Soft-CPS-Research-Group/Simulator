@@ -110,7 +110,10 @@ def load_chargers(loader: "CityLearnLoadingService", building_name, building_sch
             noise_std = charger_config.get('noise_std', 0.0)
 
             charger_simulation_filepath = os.path.join(schema['root_directory'], charger_config['charger_simulation'])
-            charger_simulation_file = loader._read_simulation_dataframe(schema, charger_simulation_filepath)
+            # CSV has no column types. Preserve textual IDs such as "01" and "1" before inference.
+            charger_simulation_file = loader._read_simulation_dataframe(
+                schema, charger_simulation_filepath, csv_dtypes={'electric_vehicle_session_id': object},
+            )
             charger_window = loader._dynamic_charger_windows.get((building_name, charger_name))
             charger_simulation_file = loader._align_dynamic_timeseries_dataframe(
                 charger_simulation_file,
@@ -164,6 +167,8 @@ def load_chargers(loader: "CityLearnLoadingService", building_name, building_sch
             charger_class = component_constructor(charger_type, f'buildings.{building_name}.chargers.{charger_name}.type')
             charger_attributes = dict(charger_config.get('attributes', {}) or {})
             charger_attributes['episode_tracker'] = episode_tracker
+            # Chargers draw no random values, but an unseeded one draws its seed from Python's global `random`.
+            charger_attributes.setdefault('random_seed', schema['random_seed'])
             charger_object = charger_class(
                 charger_simulation=charger_simulation,
                 charger_id=charger_name,
@@ -173,6 +178,16 @@ def load_chargers(loader: "CityLearnLoadingService", building_name, building_sch
             )
             chargers_list.append(charger_object)
     return chargers_list
+
+
+def solar_generation_enabled(solar_generation, index: int) -> bool:
+    """Whether the `solar_generation` constructor argument keeps the PV of the building loaded at `index`.
+
+    It is one value for every building or a list in the env's building order; None keeps the PV.
+    """
+    solar_generation = True if solar_generation is None else solar_generation
+    solar_generation = solar_generation[index] if isinstance(solar_generation, list) else solar_generation
+    return bool(solar_generation)
 
 
 def configure_devices(building, building_name, building_type, building_schema, schema,
@@ -187,9 +202,7 @@ def configure_devices(building, building_name, building_type, building_schema, s
         'electrical_storage': {'autosizer': building.autosize_electrical_storage},
         'pv': {'autosizer': building.autosize_pv},
     }
-    solar_generation = kwargs.get('solar_generation')
-    solar_generation = True if solar_generation is None else solar_generation
-    solar_generation = solar_generation[index] if isinstance(solar_generation, list) else solar_generation
+    solar_generation = solar_generation_enabled(kwargs.get('solar_generation'), index)
 
     for device_name in device_metadata:
         if building_schema.get(device_name, None) is None:
@@ -227,6 +240,10 @@ def configure_devices(building, building_name, building_type, building_schema, s
                 path=f'buildings.{building.name}.{device_name}.autosize',
             )
             building.__setattr__(device_name, device)
+            # Schema-built devices do not know the dataset/control-step ratio yet, but the autosizers
+            # convert dataset-resolution demand with it. Without this, hourly data run at 15-minute
+            # control sizes thermal devices and batteries 4x too large.
+            device.time_step_ratio = building.time_step_ratio
 
             if autosize:
                 autosizer = device_metadata[device_name]['autosizer']

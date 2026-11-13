@@ -388,6 +388,13 @@ class CityLearnRobustnessService:
                 mode = "dropout" if event.mode == "dropout" else event.mode
                 self._record_application(event, "action", descriptor, mode=mode)
 
+        # A PV array has no agent action; an unavailable control port takes it
+        # out of service, so it produces nothing during this step.
+        for event in availability_events:
+            for building, descriptor in self._pv_outage_targets(event):
+                building._set_pv_out_of_service(building.time_step)
+                self._record_application(event, "asset", descriptor, mode="unavailable")
+
         return actions
 
     def adjust_observation_space(self, observation_space: Any) -> Any:
@@ -837,9 +844,9 @@ class CityLearnRobustnessService:
             return self._event_replacement_value(event)
         if event.mode == "noise":
             std = 0.0 if event.std is None else float(event.std)
-            return float(original + self._noise(event, target_key, step, std))
+            return float(original) + float(self._noise(event, target_key, step, std))
         if event.mode == "bias":
-            return float(original + (0.0 if event.value is None else float(event.value)))
+            return float(original) + (0.0 if event.value is None else float(event.value))
         if event.mode == "stuck":
             key = (event.event_id, target_key)
             if key not in self._stuck_values:
@@ -857,9 +864,9 @@ class CityLearnRobustnessService:
             return 0.0
         if event.mode == "noise":
             std = 0.0 if event.std is None else float(event.std)
-            return float(original + self._noise(event, target_key, step, std))
+            return float(original) + float(self._noise(event, target_key, step, std))
         if event.mode == "bias":
-            return float(original + (0.0 if event.value is None else float(event.value)))
+            return float(original) + (0.0 if event.value is None else float(event.value))
         if event.mode == "stuck":
             key = (event.event_id, target_key)
             if key not in self._stuck_values:
@@ -1043,9 +1050,38 @@ class CityLearnRobustnessService:
 
         if event.module == "asset" and event.target_feature in self.CONTROL_FEATURES:
             descriptors = self._validation_action_descriptors()
-            return any(self._asset_control_event_matches(event, descriptor) for descriptor in descriptors)
+            return (
+                any(self._asset_control_event_matches(event, descriptor) for descriptor in descriptors)
+                or bool(self._pv_outage_targets(event))
+            )
 
         return False
+
+    def _pv_outage_targets(self, event: RobustnessEvent) -> List[Tuple[Any, Mapping[str, Any]]]:
+        """PV arrays taken out of service by an asset-control unavailability event.
+
+        Only events that target ``pv`` explicitly match. Descriptors use the PV
+        entity identity, so the telemetry and control effects of one event count
+        as one asset-unavailable application per step.
+        """
+
+        if event.target_type != "pv":
+            return []
+
+        from citylearn.internal.entity_interface import CityLearnEntityInterfaceService
+
+        targets = []
+        for building in getattr(self.env, "buildings", []) or []:
+            if not CityLearnEntityInterfaceService._has_pv_asset(building):
+                continue
+            global_id = f"{building.name}/pv"
+            descriptor = self._observation_descriptor(
+                "pv", global_id, "generation", building_name=building.name, raw_id=global_id, global_id=global_id,
+            )
+            if self._asset_control_event_matches(event, descriptor):
+                targets.append((building, descriptor))
+
+        return targets
 
     def _validation_action_descriptors(self) -> List[Mapping[str, Any]]:
         zero_actions = []

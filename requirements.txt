@@ -1,9 +1,12 @@
 doe_xstock>=2.0.0
-gymnasium<=0.28.1
-numpy<2.0.0
+filelock
+gymnasium>=0.28.1,<2.0.0
+numpy<3.0.0
 pandas
+platformdirs
 pyyaml
-scikit-learn<=1.2.2
+requests
+scikit-learn
 simplejson
 torch
 torchvision

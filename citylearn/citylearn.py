@@ -150,6 +150,10 @@ class CityLearnEnv(Environment, Env):
         Symmetric SOC target accuracy tolerance used by EV departure within-tolerance KPIs. Defaults to ``0.05``.
     ev_departure_service_tolerance: float, optional
         Lower SOC service tolerance used by EV departure minimum-acceptable KPIs. Defaults to ``0.05``.
+    energy_provenance: bool, optional
+        Whether to keep the per-step electricity provenance ledger (``*_energy_provenance_*`` KPIs and
+        provenance audits). Defaults to ``True``. Disabling it does not change any simulated quantity and
+        makes ``step()`` substantially faster, e.g. for training runs that do not report provenance KPIs.
     **kwargs : dict
         Other keyword arguments used to initialize super classes.
 
@@ -185,6 +189,7 @@ class CityLearnEnv(Environment, Env):
         debug_timing = kwargs.pop('debug_timing', None)
         check_observation_limits = kwargs.pop('check_observation_limits', None)
         physics_invariant_checks = kwargs.pop('physics_invariant_checks', None)
+        energy_provenance = kwargs.pop('energy_provenance', None)
         metrics_log_interval = kwargs.pop('metrics_log_interval', None)
         ev_departure_within_tolerance = kwargs.pop('ev_departure_within_tolerance', None)
         ev_departure_service_tolerance = kwargs.pop('ev_departure_service_tolerance', None)
@@ -259,6 +264,11 @@ class CityLearnEnv(Environment, Env):
             default=False,
             path='physics_invariant_checks',
         )
+        self.energy_provenance = parse_bool(
+            self.schema.get('energy_provenance', True) if energy_provenance is None else energy_provenance,
+            default=True,
+            path='energy_provenance',
+        )
         self.metrics_log_interval = int(self.schema.get('metrics_log_interval', 0) if metrics_log_interval is None else metrics_log_interval)
         self.ev_departure_within_tolerance = self._parse_non_negative_float(
             self.schema.get('ev_departure_within_tolerance', CityLearnKPIService.EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT)
@@ -294,6 +304,16 @@ class CityLearnEnv(Environment, Env):
                 raise ValueError('render_session_name must be a relative path. Use render_directory to choose an absolute location.')
             elif '..' in Path(self.render_session_name).parts:
                 raise ValueError('render_session_name cannot contain parent directory references (“..”).')
+        # The business-as-usual sidecar is rebuilt from `schema`, which these overrides do not
+        # modify, so it must re-apply them to simulate the same devices, PV and outages.
+        self._constructor_overrides = deepcopy({
+            'active_observations': active_observations,
+            'inactive_observations': inactive_observations,
+            'active_actions': active_actions,
+            'inactive_actions': inactive_actions,
+            'simulate_power_outage': simulate_power_outage,
+            'solar_generation': solar_generation,
+        })
         self._loading_service = CityLearnLoadingService(self)
         self._runtime_service = CityLearnRuntimeService(self)
         self._kpi_service = CityLearnKPIService(self)
@@ -1458,6 +1478,10 @@ class CityLearnEnv(Environment, Env):
 
         Callback failures are logged and disable reporting, preserving evaluation.
         No progress events or timings are added to the returned KPI table.
+
+        With `include_business_as_usual`, the native BAU reference is rebuilt from the schema and
+        the constructor arguments. A `ValueError` names the setting when it differs from this env as
+        captured at its last `reset()`; see the baselines guide for the settings that are compared.
         """
 
         return self._kpi_service.evaluate_v2(
@@ -1629,6 +1653,9 @@ class CityLearnEnv(Environment, Env):
         else:
             pass
 
+        # Gymnasium API: reset(seed=...) also seeds the environment's own `np_random` generator.
+        Env.reset(self, seed=seed)
+
         # update time steps for time series
         self._episode_index_explicit = bool(options and 'episode_index' in options)
         if self._episode_index_explicit:
@@ -1653,8 +1680,11 @@ class CityLearnEnv(Environment, Env):
         self._robustness_service.reset()
         self.associate_chargers_to_electric_vehicles()
         self._provenance_service.reset()
-        from citylearn.internal.comparison import inventory
+        from citylearn.internal.comparison import equipment, inventory, reference_configuration
         self._comparison_initial_inventory = inventory(self)
+        self._comparison_initial_configuration = reference_configuration(self)
+        # Taken here because the dynamic topology adds and removes devices during the episode.
+        self._comparison_initial_equipment = equipment(self)
 
         # reset reward function (does nothing by default)
         self.reward_function.reset()
@@ -1672,6 +1702,7 @@ class CityLearnEnv(Environment, Env):
         self._reset_seed_explicit = seed is not None
         self._ev_drift_seed = int(self.random_seed) if seed is not None else int(self.random_seed) + episode_index
         self._ev_drift_random_state = np.random.RandomState(self._ev_drift_seed)
+        self._ev_suspended_drift_random_state = None
         self._render_buffer.clear()
         self._refresh_action_cache()
         self.update_variables()

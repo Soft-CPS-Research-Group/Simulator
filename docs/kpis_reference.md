@@ -81,7 +81,15 @@ ratio_to_business_as_usual_x = control_x / business_as_usual_x
 self_consumption = (solar_generation_total - export_total) / solar_generation_total
 ```
 
-Safe division returns `None` or a safe placeholder when the denominator is not physically meaningful.
+The equations above apply to positive reference totals. Net exchange and cost can
+have negative reference totals. For those totals, the baseline and BAU ratios use
+`1 + (control - reference) / abs(reference)`, so 1 means no change and a higher
+control total gives a higher ratio. If a reference is effectively zero, the ratio
+is 1 when the control total is also effectively zero and `None` otherwise.
+
+During a grid outage the legacy counterfactual reports zero grid exchange, grid
+cost and grid emissions. With the community market enabled, the cost comparison
+settles both runs under the same market rules.
 
 ## KPI Families
 

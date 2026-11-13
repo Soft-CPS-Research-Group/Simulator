@@ -95,10 +95,11 @@ Cooling and heating demand cannot both be positive in the same timestep.
 |---|---:|---|
 | `electric_vehicle_charger_state` | enum | 1 connected, 2 incoming, 3 away/commuting. |
 | `electric_vehicle_id` | string | EV ID. |
+| `electric_vehicle_session_id` | string | Optional session ID. A different non-empty ID starts a new session, even if the same EV is present on consecutive rows. Numeric-looking CSV IDs retain their original text. |
 | `electric_vehicle_departure_time` | steps | Steps until departure. Internal default `-1`. |
 | `electric_vehicle_required_soc_departure` | percent | Required departure SOC. Converted to ratio. |
 | `electric_vehicle_estimated_arrival_time` | steps | Steps until arrival. Internal default `-1`. |
-| `electric_vehicle_estimated_soc_arrival` | percent | Estimated arrival SOC. Converted to ratio. |
+| `electric_vehicle_estimated_soc_arrival` | percent | Estimated arrival SOC. Converted to ratio. Use the latest valid estimate from the same incoming session, then the plug-in row if needed. |
 | `electric_vehicle_current_soc` | percent or ratio | Optional current-SOC telemetry for session-based datasets. The current Portugal native inputs use prescribed arrival SOC per session; longitudinal mobility ledgers are descriptive only. |
 
 For sub-hourly datasets, countdown fields must be expressed in timesteps at the dataset resolution. Example: 1 hour at 15s is 240 steps.

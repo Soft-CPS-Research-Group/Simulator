@@ -148,7 +148,8 @@ charger_units = specs["tables"]["charger"]["units"]
 |---|---|
 | Exogenous observations | Read at timestep `t`. Examples: weather, pricing, schedules. |
 | Endogenous observations | Read at settled `t-1`. Examples: previous consumption and SOC after the last action. |
-| Topology events | Events at `k` are applied after transition `k-1 -> k` and before observation `k`. |
+| Terminal observation | Calendar and other exogenous values use the last input row. Endogenous values come from the last executed interval. |
+| Topology events | Events at `k` are applied after interval `k-1` and before EV association and observation at `k`. |
 
 ## Entity Bundles
 
@@ -209,3 +210,12 @@ has the same topology event timeline as recreating the environment for each epis
 | Running statistics | Maintain stats per feature, not per fixed row. |
 | Removed assets | Ignore IDs that disappear from `active_ids`. |
 | Added assets | Initialize model memory/hidden state for new IDs. |
+
+A stationary battery starts at its configured SOC when added or recommissioned.
+A discharge reserve limits discharge. It does not add energy to the opening stock.
+
+EV identity is independent of the charger. While an EV has no participating
+charger, its battery follows standby losses and seeded away mobility. A first
+activation uses the configured initial SOC, and an explicit arrival SOC enters
+the energy balance as an external adjustment. Departure metrics use the
+actual connection boundary. Charger exports report the port that served the EV.

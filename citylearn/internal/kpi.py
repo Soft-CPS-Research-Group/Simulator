@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import copy
 from citylearn.internal.kpi_population import current_population, population_scope
+from functools import wraps
 from citylearn.internal.market_history import MarketSettlementHistory
 from citylearn.internal.evaluation_progress import EvaluationProgress, run, span
 from types import SimpleNamespace
@@ -16,10 +17,24 @@ from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Sequence, Tuple
 import numpy as np
 import pandas as pd
 
-from citylearn.data import ZERO_DIVISION_PLACEHOLDER
+from citylearn.data import ZERO_DIVISION_PLACEHOLDER, ChargerSimulation
 
 if TYPE_CHECKING:
     from citylearn.citylearn import CityLearnEnv
+
+
+def settled_cost_scope(function):
+    """Share market-settled cost series across the KPI readers of one evaluation call."""
+    @wraps(function)
+    def wrapper(service, *args, **kwargs):
+        if getattr(service, '_settled_cost_cache', None) is not None:
+            return function(service, *args, **kwargs)
+        service._settled_cost_cache = {}
+        try:
+            return function(service, *args, **kwargs)
+        finally:
+            service._settled_cost_cache = None
+    return wrapper
 
 
 class CityLearnKPIService:
@@ -166,6 +181,22 @@ class CityLearnKPIService:
         return c / b
 
     @staticmethod
+    def _signed_ratio(control_value: float, baseline_value: float):
+        """Lower-is-better ratio for totals that can be negative, e.g. net exchange.
+
+        Equals `control / baseline` for a positive baseline. For a negative
+        baseline (a net exporter) it is `1 + (control - baseline) / |baseline|`,
+        so a higher control total never reads as an improvement.
+        """
+        ratio = CityLearnKPIService._safe_div(control_value, baseline_value)
+        b = CityLearnKPIService._to_scalar(baseline_value, 0.0)
+
+        if ratio is None or b >= -float(ZERO_DIVISION_PLACEHOLDER):
+            return ratio
+
+        return 2.0 - ratio
+
+    @staticmethod
     def _window_steps(window_seconds: float, seconds_per_time_step: float) -> int:
         step_seconds = max(float(seconds_per_time_step), 1.0)
         return max(1, int(round(float(window_seconds) / step_seconds)))
@@ -305,32 +336,34 @@ class CityLearnKPIService:
 
         return start
 
+    def _ev_kpi_connection_boundary(self, charger, sim, ev, states, departure_index):
+        boundary_soc = getattr(charger, '_topology_connection_soc', {})
+        if boundary_soc:
+            start = ev_departure_audit.connected_start(self, charger, sim, ev, states, departure_index)
+            if start in boundary_soc:
+                return start, boundary_soc[start]
+        else:
+            start = self._ev_connected_interval_start(sim, states, departure_index)
+        return start, self._ev_arrival_soc_for_interval(sim, ev, states, start)
+
     def _ev_arrival_soc_for_interval(self, sim, ev, states: np.ndarray, interval_start: int) -> Optional[float]:
         estimated_soc_arrival = getattr(sim, 'electric_vehicle_estimated_soc_arrival', None)
         current_soc_reference = getattr(sim, 'electric_vehicle_current_soc', None)
-        ev_ids = getattr(sim, 'electric_vehicle_id', None)
-        current_ev_id = self._normal_ev_id(self._safe_sequence_value(ev_ids, interval_start))
         # This is the same boundary reference used by the runtime for a normal
         # arrival, a partial-window reset, or a topology activation that exposes
         # an already occupied charger.  It is a boundary value only, not an
         # exogenous trajectory that may overwrite subsequent control.
         candidates = [self._safe_sequence_value(current_soc_reference, interval_start)]
-
-        if interval_start > 0:
-            previous_state = self._to_scalar(states[interval_start - 1], np.nan)
-            previous_ev_id = self._normal_ev_id(self._safe_sequence_value(ev_ids, interval_start - 1))
-
-            if (
-                previous_state in (2, 3)
-                and (
-                    current_ev_id is None
-                    or previous_ev_id is None
-                    or previous_ev_id == current_ev_id
-                )
-            ):
-                candidates.append(self._safe_sequence_value(estimated_soc_arrival, interval_start - 1))
-
-        candidates.append(self._safe_sequence_value(estimated_soc_arrival, interval_start))
+        # Same estimate row as the runtime arrival. Without one the runtime
+        # keeps the simulated SOC, which the battery candidates below give.
+        index = ChargerSimulation.arrival_soc_index(
+            states,
+            getattr(sim, 'electric_vehicle_id', None),
+            estimated_soc_arrival,
+            interval_start,
+            getattr(sim, 'electric_vehicle_session_id', None),
+        )
+        candidates.append(self._safe_sequence_value(estimated_soc_arrival, index))
 
         battery = getattr(ev, 'battery', None)
         battery_soc = getattr(battery, 'soc', None)
@@ -660,10 +693,12 @@ class CityLearnKPIService:
         ):
             return None
 
-        interval_start = (audit_interval_start if audit else
-                          self._ev_connected_interval_start(sim, states, departure_index))
-        arrival_soc = (audit_arrival_soc if audit else
-                       self._ev_arrival_soc_for_interval(sim, ev, states, interval_start))
+        if audit:
+            interval_start, arrival_soc = audit_interval_start, audit_arrival_soc
+        else:
+            interval_start, arrival_soc = self._ev_kpi_connection_boundary(
+                charger, sim, ev, states, departure_index,
+            )
 
         if arrival_soc is None:
             return None
@@ -1109,13 +1144,7 @@ class CityLearnKPIService:
                 if not np.isfinite(actual_soc):
                     continue
 
-                interval_start = self._ev_connected_interval_start(sim, states, t)
-                arrival_soc = self._ev_arrival_soc_for_interval(
-                    sim,
-                    ev,
-                    states,
-                    interval_start,
-                )
+                _, arrival_soc = self._ev_kpi_connection_boundary(charger, sim, ev, states, t)
                 capacity_kwh = self._to_scalar(
                     getattr(ev.battery, 'capacity', np.nan),
                     np.nan,
@@ -1484,6 +1513,7 @@ class CityLearnKPIService:
         return expected, served
 
     @population_scope
+    @settled_cost_scope
     def family_audit(self, comfort_band=None, control_condition=None, baseline_condition=None, *, progress=None):
         from citylearn.internal.kpi_family_audit import thermal_counts, thermal_metrics, pool_thermal, equity_metrics
         from citylearn.citylearn import EvaluationCondition
@@ -1503,8 +1533,16 @@ class CityLearnKPIService:
                 control = control_condition if control_condition is not None else (EvaluationCondition.WITH_STORAGE_AND_PARTIAL_LOAD_AND_PV if dynamic else EvaluationCondition.WITH_STORAGE_AND_PV)
                 baseline = baseline_condition if baseline_condition is not None else (EvaluationCondition.WITHOUT_STORAGE_AND_PARTIAL_LOAD_BUT_WITH_PV if dynamic else EvaluationCondition.WITHOUT_STORAGE_BUT_WITH_PV)
                 conditions[building.name] = dict(control=getattr(control,'name',control.value), reference=getattr(baseline,'name',baseline.value))
-                costs.append((self._sum_finite(self._energy_values(building,getattr(building,'net_electricity_consumption_cost'+control.value))),
-                              self._sum_finite(self._energy_values(building,getattr(building,'net_electricity_consumption_cost'+baseline.value)))))
+                if getattr(self.env, 'community_market_enabled', False):
+                    control_costs, baseline_costs = self._market_cost_series(
+                        control_condition, baseline_condition,
+                        evaluation_condition_cls=EvaluationCondition, dynamics_building_cls=DynamicsBuilding,
+                    )
+                    costs.append((self._sum_finite(control_costs[building.name]),
+                                  self._sum_finite(baseline_costs[building.name])))
+                else:
+                    costs.append((self._sum_finite(self._energy_values(building,getattr(building,'net_electricity_consumption_cost'+control.value))),
+                                  self._sum_finite(self._energy_values(building,getattr(building,'net_electricity_consumption_cost'+baseline.value)))))
         return dict(buildings=rows,district=thermal_metrics(pool_thermal(counts)),equity=equity_metrics(costs),equity_conditions=conditions)
 
     def _building_days(self, building, t_start, t_final):
@@ -1559,13 +1597,71 @@ class CityLearnKPIService:
         *,
         condition_by_building: Mapping[str, object],
     ) -> Tuple[Mapping[str, float], float]:
+        series = self._settled_cost_series(condition_by_building=condition_by_building)
+        totals = {}
+        for name, values in series.items():
+            total = 0.0
+            # Sequential sum in step order, as the totals were accumulated before; inactive steps add 0.0.
+            for value in values.tolist():
+                total += value
+            totals[name] = total
+
+        district_total = float(sum(totals.values()))
+        return totals, district_total
+
+    def _market_cost_series(
+        self,
+        control_condition,
+        baseline_condition,
+        *,
+        evaluation_condition_cls,
+        dynamics_building_cls,
+    ) -> Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
+        """Control and reference cost series per member, both settled by the community market."""
+        control_condition_by_building = {}
+        baseline_condition_by_building = {}
+        for building in self._get_kpi_buildings():
+            c_cond, b_cond = self._default_building_conditions(
+                building,
+                control_condition,
+                baseline_condition,
+                evaluation_condition_cls=evaluation_condition_cls,
+                dynamics_building_cls=dynamics_building_cls,
+            )
+            control_condition_by_building[building.name] = c_cond
+            baseline_condition_by_building[building.name] = b_cond
+
+        return (
+            self._settled_cost_series(condition_by_building=control_condition_by_building),
+            self._settled_cost_series(condition_by_building=baseline_condition_by_building),
+        )
+
+    def _settled_cost_series(
+        self,
+        *,
+        condition_by_building: Mapping[str, object],
+    ) -> Dict[str, np.ndarray]:
+        """Per-member cost series with the community market settled over each member's condition flows.
+
+        The stored control cost is settled during simulation, but reference conditions are not;
+        comparing the two would credit the market's savings to the controller. Every cost
+        comparison therefore settles both sides here with the same rules.
+        """
+        cache = getattr(self, '_settled_cost_cache', None)
+        cache_key = tuple(sorted(
+            (name, getattr(condition, 'value', condition)) for name, condition in condition_by_building.items()
+        ))
+        if cache is not None and cache_key in cache:
+            return cache[cache_key]
+
         env = self.env
         buildings = self._get_kpi_buildings()
         building_names = [b.name for b in buildings]
         windows = {b.name: self._building_active_window(b) for b in buildings}
-        totals = {name: 0.0 for name in building_names}
+        step_count = max(int(getattr(env, 'time_step', 0)), 0)
+        series = {name: np.zeros(step_count, dtype='float64') for name in building_names}
         if len(building_names) == 0:
-            return totals, 0.0
+            return series
 
         final_t = int(max(getattr(env, 'time_step', 0), 0))
         ratio = self._to_scalar(getattr(env, 'community_market_sell_ratio', 0.8), 0.8)
@@ -1660,12 +1756,15 @@ class CityLearnKPIService:
                     - local_export[idx] * local_sell_price
                     - grid_export_remaining * grid_export_price
                 )
-                totals[building.name] += float(cost)
+                series[building.name][t] = float(cost)
 
-        district_total = float(sum(totals.values()))
-        return totals, district_total
+        if cache is not None:
+            cache[cache_key] = series
+
+        return series
 
     @population_scope
+    @settled_cost_scope
     def evaluate(
         self,
         control_condition=None,
@@ -1738,6 +1837,55 @@ class CityLearnKPIService:
             tokens.append(str(unit))
 
         return '_'.join(tokens)
+
+    @classmethod
+    def total_ratio_components(cls, level: str) -> Dict[str, Tuple[str, str, bool]]:
+        """V2 ratio KPIs defined as a control total over a reference total.
+
+        Maps each ratio name to `(control_total_name, reference_total_name, signed)`.
+        Only ratios whose two totals add up across members are listed, so a pooled
+        ratio can be rebuilt from summed totals. `signed` totals can be negative and
+        use `_signed_ratio`; the others use `_safe_div`.
+        """
+        v2 = cls._v2_name
+        components: Dict[str, Tuple[str, str, bool]] = {}
+
+        for reference, subfamily in (('baseline', 'ratio_to_baseline'), ('business_as_usual', 'ratio_to_business_as_usual')):
+            for family, unit, signed in (('cost', 'eur', True), ('emissions', 'kgco2', False)):
+                components[v2(level, family, subfamily, 'total', None, 'ratio')] = (
+                    v2(level, family, 'total', 'control', None, unit),
+                    v2(level, family, 'total', reference, None, unit),
+                    signed,
+                )
+
+            for metric in ('import', 'export', 'net_exchange'):
+                components[v2(level, 'energy_grid', subfamily, f'{metric}_total', None, 'ratio')] = (
+                    v2(level, 'energy_grid', 'total', metric, 'control', 'kwh'),
+                    v2(level, 'energy_grid', 'total', metric, reference, 'kwh'),
+                    metric == 'net_exchange',
+                )
+
+        # Business-as-usual references of additive equipment and service totals.
+        for family, subfamily, metric, unit, ratio_metric in (
+            ('solar_self_consumption', 'total', 'generation', 'kwh', 'generation_total'),
+            ('solar_self_consumption', 'total', 'export', 'kwh', 'export_total'),
+            ('ev', 'total', 'charge', 'kwh', 'charge_total'),
+            ('ev', 'total', 'v2g_export', 'kwh', 'v2g_export_total'),
+            ('battery', 'total', 'charge', 'kwh', 'charge'),
+            ('battery', 'total', 'discharge', 'kwh', 'discharge'),
+            ('battery', 'total', 'throughput', 'kwh', 'throughput'),
+            ('deferrable_appliance', 'service', 'completed_cycles', 'count', 'completed_cycles'),
+            ('deferrable_appliance', 'service', 'missed_cycles', 'count', 'missed_cycles'),
+            ('deferrable_appliance', 'service', 'served_energy_total', 'kwh', 'served_energy_total'),
+            ('deferrable_appliance', 'service', 'unserved_energy_total', 'kwh', 'unserved_energy_total'),
+        ):
+            components[v2(level, family, 'ratio_to_business_as_usual', ratio_metric, None, 'ratio')] = (
+                v2(level, family, subfamily, metric, None, unit),
+                v2(level, family, subfamily, metric, 'business_as_usual', unit),
+                False,
+            )
+
+        return components
 
     def evaluate_legacy(
         self,
@@ -1829,6 +1977,7 @@ class CityLearnKPIService:
             control_variant: Optional[str] = None,
             bau_variant: Optional[str] = None,
             delta_variant: Optional[str] = None,
+            signed: bool = False,
         ):
             control_total_key = v2(level, family, total_subfamily, control_total_metric, control_variant, unit)
             bau_total = bau(level, name, control_total_key)
@@ -1844,7 +1993,7 @@ class CityLearnKPIService:
                 level,
                 name,
                 v2(level, family, 'ratio_to_business_as_usual', ratio_metric, None, 'ratio'),
-                self._safe_div(control_total, bau_total),
+                (self._signed_ratio if signed else self._safe_div)(control_total, bau_total),
             )
 
             control_daily_key = v2(level, family, daily_subfamily, control_daily_metric, control_variant, unit)
@@ -1905,6 +2054,7 @@ class CityLearnKPIService:
                     delta_daily_metric='delta_to_business_as_usual',
                     ratio_metric='total',
                     unit='eur',
+                    signed=True,
                 )
                 add_total_daily_ratio(
                     level,
@@ -1944,6 +2094,7 @@ class CityLearnKPIService:
                         control_variant='control',
                         bau_variant='business_as_usual',
                         delta_variant='delta_to_business_as_usual',
+                        signed=metric == 'net_exchange',
                     )
 
                 for metric, unit in [
@@ -2096,6 +2247,7 @@ class CityLearnKPIService:
             }
 
     @population_scope
+    @settled_cost_scope
     def evaluate_v2(
         self, control_condition=None, baseline_condition=None, comfort_band=None,
         include_business_as_usual=True, *, evaluation_condition_cls,
@@ -2547,7 +2699,7 @@ class CityLearnKPIService:
             put('building', building_name, v2('building', 'cost', 'daily_average', 'control', None, 'eur'), self._daily_average(control_total, building_days))
             put('building', building_name, v2('building', 'cost', 'daily_average', 'baseline', None, 'eur'), self._daily_average(baseline_total, building_days))
             put('building', building_name, v2('building', 'cost', 'daily_average', 'delta', None, 'eur'), self._daily_average(delta_total, building_days))
-            put('building', building_name, v2('building', 'cost', 'ratio_to_baseline', 'total', None, 'ratio'), self._safe_div(control_total, baseline_total))
+            put('building', building_name, v2('building', 'cost', 'ratio_to_baseline', 'total', None, 'ratio'), self._signed_ratio(control_total, baseline_total))
 
         district_delta_total = district_control_total - district_baseline_total
         put('district', 'District', v2('district', 'cost', 'total', 'control', None, 'eur'), district_control_total)
@@ -2556,7 +2708,7 @@ class CityLearnKPIService:
         put('district', 'District', v2('district', 'cost', 'daily_average', 'control', None, 'eur'), self._daily_average(district_control_total, simulated_days))
         put('district', 'District', v2('district', 'cost', 'daily_average', 'baseline', None, 'eur'), self._daily_average(district_baseline_total, simulated_days))
         put('district', 'District', v2('district', 'cost', 'daily_average', 'delta', None, 'eur'), self._daily_average(district_delta_total, simulated_days))
-        put('district', 'District', v2('district', 'cost', 'ratio_to_baseline', 'total', None, 'ratio'), self._safe_div(district_control_total, district_baseline_total))
+        put('district', 'District', v2('district', 'cost', 'ratio_to_baseline', 'total', None, 'ratio'), self._signed_ratio(district_control_total, district_baseline_total))
 
         # Equity metrics are recomputed from cost totals for consistency.
         equity_valid_benefits: Dict[str, float] = {}
@@ -2585,7 +2737,7 @@ class CityLearnKPIService:
         put('district', 'District', v2('district', 'equity', 'distribution', 'bpr_asset_poor_over_rich', None, 'ratio'), equity_bpr)
 
         provenance = getattr(env, '_provenance_service', None)
-        if provenance is not None:
+        if provenance is not None and getattr(provenance, 'enabled', True):
             members, district = run(progress, 'provenance', provenance.summary)
             for name, metrics in members.items():
                 for metric, value in metrics.items():

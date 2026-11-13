@@ -96,6 +96,14 @@ with identical bytes does not invalidate an input. The native BAU rejects change
 inputs instead of comparing the old controlled data with a newly loaded reference.
 The comparator does not treat that evidence as safely paired.
 
+The native BAU reference reuses the evaluated episode's equipment and constructor
+overrides, including PV and outage settings. Equipment sized from input data is
+sized over the same loaded window as in the evaluated environment. The reference
+checks the configuration captured at reset and rejects differences it cannot
+reconstruct. Built-in stochastic outages use the configured model seed or a seed
+derived from the episode and building, so the controller and its BAU reference
+receive the same outage sequence.
+
 The manifest includes initialization/reset/away-EV seeds, episode index, clock
 contract, padding, Python/platform and relevant installed dependency versions.
 Pairing evidence includes temporal initialization conditions and runtime versions;

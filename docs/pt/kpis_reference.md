@@ -78,7 +78,16 @@ ratio_to_business_as_usual_x = control_x / business_as_usual_x
 self_consumption = (solar_generation_total - export_total) / solar_generation_total
 ```
 
-Safe division devolve `None`/placeholder quando o denominador nao e fisicamente valido.
+As equações acima aplicam-se a totais de referência positivos. A troca líquida
+com a rede e o custo podem ter referências negativas. Nesses casos, os rácios
+face à baseline e ao BAU usam `1 + (controlo - referência) / abs(referência)`.
+Um rácio de 1 significa que o total é igual ao da referência. Se a referência
+for aproximadamente zero, o rácio é 1 quando o total controlado também for
+aproximadamente zero e `None` nos restantes casos.
+
+Durante um corte, o contrafactual convencional reporta zero trocas com a rede,
+custo de rede e emissões da rede. Com o mercado comunitário ativo, a comparação
+de custos aplica as mesmas regras de mercado aos dois cenários.
 
 ## Familias Principais
 

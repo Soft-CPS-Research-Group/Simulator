@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from copy import deepcopy
 import time
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Sequence, Union
 
 import numpy as np
+
+from citylearn.internal.scalars import numpy1_scalar
 
 from citylearn.base import Environment
 from citylearn.data import ChargerSimulation
@@ -305,24 +308,10 @@ class CityLearnRuntimeService:
             timings['next_time_step_time'] = time.perf_counter() - timer_start
             timings.update(getattr(env, '_last_next_time_step_debug_timing', {}))
 
-        topology_changed = False
-        timer_start = time.perf_counter() if debug_timing else 0.0
-        if getattr(env, 'topology_mode', 'static') == 'dynamic':
-            topology_changed = env._topology_service.apply_events_for_time_step(int(env.time_step))
-            if topology_changed:
-                # Re-associate only when topology actually changed (e.g., added member/charger).
-                # Otherwise this would duplicate the association already done in `next_time_step()`.
-                self.associate_chargers_to_electric_vehicles()
-                env._refresh_action_cache()
-                env._entity_service.invalidate()
-                env.reward_function.env_metadata = env.get_metadata()
         env._provenance_service.synchronize()
         topology_events_applied = list(
             (getattr(env, 'topology_event_log', []) or [])[topology_log_size_before:]
         )
-        if debug_timing:
-            timings['topology_time'] = time.perf_counter() - timer_start
-
         end_export_time = 0.0
         final_kpi_export_time = 0.0
         timer_start = time.perf_counter() if debug_timing else 0.0
@@ -765,14 +754,6 @@ class CityLearnRuntimeService:
 
         self.next_time_step()
 
-        if getattr(env, 'topology_mode', 'static') == 'dynamic':
-            topology_changed = env._topology_service.apply_events_for_time_step(int(env.time_step))
-            if topology_changed:
-                self.associate_chargers_to_electric_vehicles()
-                env._refresh_action_cache()
-                env._entity_service.invalidate()
-                env.reward_function.env_metadata = env.get_metadata()
-
         env._provenance_service.synchronize()
         return env.terminated, env.truncated
 
@@ -904,6 +885,8 @@ class CityLearnRuntimeService:
         current_step = int(env.time_step)
         last_action_step = max(env.time_steps - 2, 0)
         reached_terminal_transition = current_step >= last_action_step
+        topology = env._topology_service if env.topology_mode == 'dynamic' else None
+        suspended_evs = topology.suspended_evs if topology is not None else ()
 
         partial_render_time = 0.0
         if getattr(env, 'render_enabled', False):
@@ -927,6 +910,8 @@ class CityLearnRuntimeService:
             timer_start = time.perf_counter() if debug_timing else 0.0
             for electric_vehicle in env.electric_vehicles:
                 electric_vehicle.next_time_step()
+            for electric_vehicle in suspended_evs:
+                electric_vehicle.next_time_step()
             if debug_timing:
                 timings['next_time_step_electric_vehicles_time'] = time.perf_counter() - timer_start
         elif debug_timing:
@@ -938,19 +923,44 @@ class CityLearnRuntimeService:
         if debug_timing:
             timings['next_time_step_environment_time'] = time.perf_counter() - timer_start
 
+        if reached_terminal_transition:
+            # Buildings stay on the last executed interval so their series hold only
+            # committed intervals. The terminal observation is still for the new
+            # environment time step: exogenous data at it, endogenous at the last interval.
+            for building in env.buildings:
+                building._terminal_observation_time_step = int(env.time_step)
+
+        # Apply the topology for the new interval before reading charger schedules.
+        # An EV suspended over the elapsed interval still receives its mobility update on reentry.
+        timer_start = time.perf_counter() if debug_timing else 0.0
+        previous_active_evs = env.electric_vehicles
+        topology_changed = topology is not None and topology.apply_events_for_time_step(int(env.time_step))
+        if debug_timing:
+            timings['topology_time'] = time.perf_counter() - timer_start
+
         if not reached_terminal_transition:
             timer_start = time.perf_counter() if debug_timing else 0.0
-            self.simulate_unconnected_ev_soc()
+            continuing_evs = None
+            if topology_changed:
+                continuing_evs = set(previous_active_evs).intersection(env.electric_vehicles)
+            self.simulate_unconnected_ev_soc(continuing_evs=continuing_evs, suspended_evs=suspended_evs)
             if debug_timing:
                 timings['next_time_step_unconnected_ev_soc_time'] = time.perf_counter() - timer_start
+        elif debug_timing:
+            timings['next_time_step_unconnected_ev_soc_time'] = 0.0
 
+        if topology_changed or not reached_terminal_transition:
             timer_start = time.perf_counter() if debug_timing else 0.0
             self.associate_chargers_to_electric_vehicles()
             if debug_timing:
                 timings['next_time_step_associate_chargers_time'] = time.perf_counter() - timer_start
         elif debug_timing:
-            timings['next_time_step_unconnected_ev_soc_time'] = 0.0
             timings['next_time_step_associate_chargers_time'] = 0.0
+
+        if topology_changed:
+            env._refresh_action_cache()
+            env._entity_service.invalidate()
+            env.reward_function.env_metadata = env.get_metadata()
 
         if debug_timing:
             env._last_next_time_step_debug_timing = timings
@@ -976,139 +986,205 @@ class CityLearnRuntimeService:
                 if isinstance(current_value, (float, np.floating)) and not np.isnan(current_value) and 0.0 <= current_value <= 1.0:
                     return float(current_value)
 
-            candidate_index = None
-
             if prev_state in (2, 3) and step > 0:
                 if isinstance(prev_id, str) and prev_id.strip() not in {'', 'nan'} and prev_id != ev_identifier:
                     raise ValueError(
                         f"Charger dataset EV mismatch: expected '{ev_identifier}' but found '{prev_id}' at time step {step - 1}."
                     )
-                candidate_index = step - 1
 
-            elif 0 <= step < len(simulation.electric_vehicle_estimated_soc_arrival):
-                candidate_index = step
-
-            soc_value = None
-
-            if candidate_index is not None and 0 <= candidate_index < len(simulation.electric_vehicle_estimated_soc_arrival):
-                candidate = simulation.electric_vehicle_estimated_soc_arrival[candidate_index]
-                if isinstance(candidate, (float, np.floating)) and not np.isnan(candidate) and 0.0 <= candidate <= 1.0:
-                    soc_value = float(candidate)
+            # The estimate sits on the incoming rows of this session, not always on the last one, or
+            # else on the connection row; the KPI and departure-audit references use the same row.
+            estimated_soc_arrival = simulation.electric_vehicle_estimated_soc_arrival
+            index = ChargerSimulation.arrival_soc_index(
+                simulation.electric_vehicle_charger_state, simulation.electric_vehicle_id, estimated_soc_arrival, step,
+                getattr(simulation, 'electric_vehicle_session_id', None),
+            )
+            soc_value = None if index is None else float(estimated_soc_arrival[index])
 
             return soc_value
 
-        for building in env.buildings:
-            if building.electric_vehicle_chargers is None:
+        chargers = [
+            charger
+            for building in env.buildings
+            for charger in (building.electric_vehicle_chargers or [])
+        ]
+        # One EV can be plugged into only one charger. Overlapping charger schedules, e.g. a
+        # charger cloned by a topology event while its source is still active, would otherwise
+        # charge the same battery through two chargers at once. The charger that held the EV in
+        # the previous step keeps it; otherwise chargers loaded from the schema come before
+        # chargers added by topology events (earliest first), then building order.
+        holder_by_ev = {}
+        for charger in chargers:
+            if charger.connected_electric_vehicle is not None:
+                holder_by_ev[charger.connected_electric_vehicle.name] = charger
+
+        def _continues_session(charger) -> bool:
+            t = env.time_step
+            if t <= 0 or t - 1 >= len(charger.past_connected_evs):
+                return False
+            previous = charger.past_connected_evs[t - 1]
+            return previous is not None and previous.name == charger.charger_simulation.electric_vehicle_id[t]
+
+        chargers.sort(key=lambda c: (
+            0 if _continues_session(c) else 1,
+            getattr(c, '_topology_added_time_step', -1),
+        ))
+
+        for charger in chargers:
+            sim = charger.charger_simulation
+            state = sim.electric_vehicle_charger_state[env.time_step]
+
+            if np.isnan(state) or state not in [1, 2]:
                 continue
 
-            for charger in building.electric_vehicle_chargers:
-                sim = charger.charger_simulation
-                state = sim.electric_vehicle_charger_state[env.time_step]
+            ev_id = sim.electric_vehicle_id[env.time_step]
+            prev_state = np.nan
+            prev_ev_id = None
+            if env.time_step > 0:
+                idx = env.time_step - 1
+                if idx < len(sim.electric_vehicle_charger_state):
+                    prev_state = sim.electric_vehicle_charger_state[idx]
+                if idx < len(sim.electric_vehicle_id):
+                    prev_ev_id = sim.electric_vehicle_id[idx]
 
-                if np.isnan(state) or state not in [1, 2]:
+            if isinstance(ev_id, str) and ev_id.strip() not in ['', 'nan']:
+                ev = ev_by_name.get(ev_id)
+                if ev is None:
                     continue
 
-                ev_id = sim.electric_vehicle_id[env.time_step]
-                prev_state = np.nan
-                prev_ev_id = None
-                if env.time_step > 0:
-                    idx = env.time_step - 1
-                    if idx < len(sim.electric_vehicle_charger_state):
-                        prev_state = sim.electric_vehicle_charger_state[idx]
-                    if idx < len(sim.electric_vehicle_id):
-                        prev_ev_id = sim.electric_vehicle_id[idx]
-
-                if isinstance(ev_id, str) and ev_id.strip() not in ['', 'nan']:
-                    ev = ev_by_name.get(ev_id)
-                    if ev is None:
+                if state == 1:
+                    holder = holder_by_ev.get(ev.name)
+                    if holder is not None and holder is not charger:
+                        self._warn_ev_double_booking(ev, charger, holder)
                         continue
 
-                    if state == 1:
-                        # Idempotent behavior: the method may be called again in the same
-                        # time step when topology changed and action/observation layouts are refreshed.
-                        just_connected = False
-                        if charger.connected_electric_vehicle is None:
-                            charger.plug_car(ev)
-                            just_connected = True
-                        elif charger.connected_electric_vehicle is not ev:
-                            raise ValueError(
-                                f"Charger '{charger.charger_id}' already connected to "
-                                f"'{charger.connected_electric_vehicle.name}' but dataset requires '{ev.name}' "
-                                f"at time step {env.time_step}."
+                    # Idempotent behavior: the method may be called again in the same
+                    # time step when topology changed and action/observation layouts are refreshed.
+                    just_connected = False
+                    if charger.connected_electric_vehicle is None:
+                        charger.plug_car(ev)
+                        holder_by_ev[ev.name] = charger
+                        just_connected = True
+                    elif charger.connected_electric_vehicle is not ev:
+                        raise ValueError(
+                            f"Charger '{charger.charger_id}' already connected to "
+                            f"'{charger.connected_electric_vehicle.name}' but dataset requires '{ev.name}' "
+                            f"at time step {env.time_step}."
+                        )
+                    # ``Charger.next_time_step`` clears the live object
+                    # reference before association, so ``just_connected``
+                    # is true on every connected control step.  It must not
+                    # be used as the session boundary: doing so would force
+                    # a dataset current-SOC reference at every step and
+                    # overwrite the controller's charging decision.  The
+                    # committed runtime history distinguishes a continuing
+                    # session from a true arrival or from a charger/member
+                    # that has just appeared mid-session.
+                    previous_runtime_ev = (
+                        charger.past_connected_evs[env.time_step - 1]
+                        if env.time_step > 0
+                        and env.time_step - 1 < len(charger.past_connected_evs)
+                        else None
+                    )
+                    session_ids = getattr(
+                        sim, 'electric_vehicle_session_id', None
+                    )
+                    session_id = (
+                        session_ids[env.time_step]
+                        if session_ids is not None
+                        and env.time_step < len(session_ids)
+                        else None
+                    )
+                    previous_session_id = (
+                        session_ids[env.time_step - 1]
+                        if session_ids is not None
+                        and env.time_step > 0
+                        and env.time_step - 1 < len(session_ids)
+                        else None
+                    )
+                    has_session_identity = (
+                        isinstance(session_id, str)
+                        and session_id.strip() not in {'', 'nan'}
+                    )
+                    session_changed = (
+                        has_session_identity
+                        and isinstance(previous_session_id, str)
+                        and previous_session_id.strip() not in {'', 'nan'}
+                        and session_id != previous_session_id
+                    )
+                    # Legacy charger files do not expose session identity.
+                    # A countdown reset after a value of one is the exact
+                    # boundary-compatible fallback for a back-to-back
+                    # session of the same EV.
+                    if not session_changed and not has_session_identity and env.time_step > 0:
+                        departure_time = getattr(
+                            sim, 'electric_vehicle_departure_time', None
+                        )
+                        if (
+                            departure_time is not None
+                            and env.time_step < len(departure_time)
+                        ):
+                            previous_countdown = departure_time[env.time_step - 1]
+                            current_countdown = departure_time[env.time_step]
+                            session_changed = (
+                                np.isfinite(previous_countdown)
+                                and np.isfinite(current_countdown)
+                                and previous_countdown <= 1
+                                and current_countdown > previous_countdown
                             )
-                        # ``Charger.next_time_step`` clears the live object
-                        # reference before association, so ``just_connected``
-                        # is true on every connected control step.  It must not
-                        # be used as the session boundary: doing so would force
-                        # a dataset current-SOC reference at every step and
-                        # overwrite the controller's charging decision.  The
-                        # committed runtime history distinguishes a continuing
-                        # session from a true arrival or from a charger/member
-                        # that has just appeared mid-session.
-                        previous_runtime_ev = (
-                            charger.past_connected_evs[env.time_step - 1]
-                            if env.time_step > 0
-                            and env.time_step - 1 < len(charger.past_connected_evs)
-                            else None
+                    is_new_connection = just_connected and (
+                        previous_runtime_ev is not ev or session_changed
+                    )
+                    if is_new_connection:
+                        continuing_schedule = prev_state == 1 and prev_ev_id == ev_id and not session_changed
+                        topology_connection = env._topology_service.enabled and (
+                            getattr(charger, '_topology_added_time_step', None) == env.time_step
+                            or continuing_schedule
                         )
-                        session_ids = getattr(
-                            sim, 'electric_vehicle_session_id', None
+                        # Changing ports mid-session must not reapply telemetry for a vehicle
+                        # that has already been served at the preceding interval.
+                        handover = topology_connection and continuing_schedule and (
+                            env._topology_service.was_ev_connected(ev, env.time_step - 1)
                         )
-                        session_id = (
-                            session_ids[env.time_step]
-                            if session_ids is not None
-                            and env.time_step < len(session_ids)
-                            else None
+                        soc_value = None if handover else _resolve_arrival_soc(
+                            sim, env.time_step, prev_state, prev_ev_id, ev_id,
                         )
-                        previous_session_id = (
-                            session_ids[env.time_step - 1]
-                            if session_ids is not None
-                            and env.time_step > 0
-                            and env.time_step - 1 < len(session_ids)
-                            else None
-                        )
-                        has_session_identity = (
-                            isinstance(session_id, str)
-                            and session_id.strip() not in {'', 'nan'}
-                        )
-                        session_changed = (
-                            has_session_identity
-                            and isinstance(previous_session_id, str)
-                            and previous_session_id.strip() not in {'', 'nan'}
-                            and session_id != previous_session_id
-                        )
-                        # Legacy charger files do not expose session identity.
-                        # A countdown reset after a value of one is the exact
-                        # boundary-compatible fallback for a back-to-back
-                        # session of the same EV.
-                        if not session_changed and not has_session_identity and env.time_step > 0:
-                            departure_time = getattr(
-                                sim, 'electric_vehicle_departure_time', None
-                            )
-                            if (
-                                departure_time is not None
-                                and env.time_step < len(departure_time)
-                            ):
-                                previous_countdown = departure_time[env.time_step - 1]
-                                current_countdown = departure_time[env.time_step]
-                                session_changed = (
-                                    np.isfinite(previous_countdown)
-                                    and np.isfinite(current_countdown)
-                                    and previous_countdown <= 1
-                                    and current_countdown > previous_countdown
-                                )
-                        is_new_connection = just_connected and (
-                            previous_runtime_ev is not ev or session_changed
-                        )
-                        if is_new_connection:
-                            soc_value = _resolve_arrival_soc(sim, env.time_step, prev_state, prev_ev_id, ev_id)
-                            if soc_value is not None:
-                                ev.battery.force_set_soc(soc_value)
-                                ev._arrival_soc_time_step = env.time_step
-                    elif state == 2:
-                        charger.associate_incoming_car(ev)
+                        if soc_value is not None:
+                            ev.battery.force_set_soc(soc_value)
+                            ev._arrival_soc_time_step = env.time_step
+                        if topology_connection:
+                            # Capture the real boundary before any action changes the new stock.
+                            boundary_soc = getattr(charger, '_topology_connection_soc', None)
+                            if boundary_soc is None:
+                                boundary_soc = charger._topology_connection_soc = {}
+                            boundary_soc[env.time_step] = float(ev.battery.soc[env.time_step])
+                            ev._arrival_soc_time_step = env.time_step
+                elif state == 2:
+                    charger.associate_incoming_car(ev)
 
-    def simulate_unconnected_ev_soc(self):
+    def _warn_ev_double_booking(self, ev, charger, holder):
+        """Warn once per charger pair that a schedule asked for an EV plugged in elsewhere."""
+
+        env = self.env
+        warned = getattr(env, '_ev_double_booking_warnings', None)
+        if warned is None:
+            warned = set()
+            env._ev_double_booking_warnings = warned
+
+        key = (ev.name, charger.charger_id, holder.charger_id)
+        if key in warned:
+            return
+
+        warned.add(key)
+        warnings.warn(
+            f"Charger '{charger.charger_id}' is scheduled to connect '{ev.name}' at time step {env.time_step}, "
+            f"but it is already plugged into charger '{holder.charger_id}'; '{charger.charger_id}' stays idle "
+            "while that session lasts.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
+    def simulate_unconnected_ev_soc(self, *, continuing_evs=None, suspended_evs=()):
         """Simulate SOC changes for EVs that are not under charger control at t+1."""
 
         env = self.env
@@ -1149,16 +1225,17 @@ class CityLearnRuntimeService:
                 if not is_connecting:
                     continue
 
-                is_incoming = isinstance(curr_id, str) and curr_id == next_id and curr_state == 2
-                soc_index = t if is_incoming else t + 1
-                soc = (
-                    sim.electric_vehicle_estimated_soc_arrival[soc_index]
-                    if soc_index < len(sim.electric_vehicle_estimated_soc_arrival)
-                    else np.nan
+                # The same estimate the connection at t + 1 starts from.
+                soc_index = ChargerSimulation.arrival_soc_index(
+                    sim.electric_vehicle_charger_state, sim.electric_vehicle_id,
+                    sim.electric_vehicle_estimated_soc_arrival, t + 1, getattr(sim, 'electric_vehicle_session_id', None),
                 )
+                soc = np.nan if soc_index is None else sim.electric_vehicle_estimated_soc_arrival[soc_index]
                 charger_event_by_ev_id.setdefault(next_id, ('connecting', soc))
 
         for ev in env.electric_vehicles:
+            if continuing_evs is not None and ev not in continuing_evs:
+                continue
             ev_id = ev.name
             event = charger_event_by_ev_id.get(ev_id)
             if event is not None:
@@ -1177,6 +1254,19 @@ class CityLearnRuntimeService:
                 variability = np.clip(random_state.normal(1.0, drift_std), 0.6, 1.4)
                 # Exogenous away-from-home movement: driving can reduce SOC, offsite charging can raise it.
                 ev.battery.force_set_soc(float(np.clip(last_soc * variability, 0.0, 1.0)))
+
+        if suspended_evs:
+            # Use a separate stream so suspension does not shift mobility draws for participating EVs.
+            suspended_random = getattr(env, '_ev_suspended_drift_random_state', None)
+            if suspended_random is None:
+                seed = np.random.SeedSequence([env._ev_drift_seed, 1]).generate_state(1)[0]
+                suspended_random = env._ev_suspended_drift_random_state = np.random.RandomState(seed)
+            drift_std = self._ev_unconnected_drift_std(env.seconds_per_time_step)
+            for ev in suspended_evs:
+                battery = ev.battery
+                soc_after_standby = float(battery.soc[t])
+                variability = np.clip(suspended_random.normal(1.0, drift_std), 0.6, 1.4)
+                battery.force_set_soc(float(np.clip(soc_after_standby * variability, 0.0, 1.0)))
 
     def _record_deferrable_service_interval(self):
         for building in self.env.buildings:
@@ -1224,13 +1314,14 @@ class CityLearnRuntimeService:
                 lst.append(value)
 
         timer_start = time.perf_counter() if debug_timing else 0.0
-        total = sum(building.net_electricity_consumption[env.time_step] for building in env.buildings)
+        # NumPy 1 summed these float32 values from an int start in float64; keep that under NEP 50.
+        total = sum((building.net_electricity_consumption[env.time_step] for building in env.buildings), numpy1_scalar(0))
         _set_or_append(env.net_electricity_consumption, total)
 
-        total_cost = sum(building.net_electricity_consumption_cost[env.time_step] for building in env.buildings)
+        total_cost = sum((building.net_electricity_consumption_cost[env.time_step] for building in env.buildings), numpy1_scalar(0))
         _set_or_append(env.net_electricity_consumption_cost, total_cost)
 
-        total_emission = sum(building.net_electricity_consumption_emission[env.time_step] for building in env.buildings)
+        total_emission = sum((building.net_electricity_consumption_emission[env.time_step] for building in env.buildings), numpy1_scalar(0))
         _set_or_append(env.net_electricity_consumption_emission, total_emission)
         if debug_timing:
             timings['district_aggregate_update_time'] = time.perf_counter() - timer_start
