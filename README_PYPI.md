@@ -14,9 +14,9 @@ It is a fork-based project used for research and experimentation on:
   feasible action capacity and requested/limited/applied action feedback.
 - dynamic member and asset topology with repeatable multi-episode reset semantics.
 
-Current source release: `2.0.2`. This patch delivers the revised Portugal
-two-year datasets, complete online downloads of nested files, and command-line
-compatibility fixes. Dataset-dependent results require matching revisions.
+Current source release: `2.1.0`. This release improves battery and EV physics,
+BAU and KPI comparisons, and support for NumPy 1 and 2 and Gymnasium 1.x.
+The Portugal dataset files are unchanged from 2.0.2.
 See the [release history](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/releases.md) for validation, measured gains and scope limits.
 
 ## Project Positioning

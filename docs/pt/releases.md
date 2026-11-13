@@ -9,6 +9,22 @@ compatibilidade, alterações de contratos e âmbito da validação.
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.1.0 — 2026-11-13 — baterias, ciclo de vida dos EVs e compatibilidade
+
+Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+- A reserva limita a descarga e a bateria inicia no SOC configurado. Um EV
+  mantém a identidade quando muda de carregador ou volta a ligar-se. O SOC
+  evolui com perdas e mobilidade, e os exports mostram o carregador efetivo.
+- O BAU usa o mesmo equipamento, PV e cortes de rede que o controlador.
+  Corrige os rácios com referências negativas, a comparação de custos do
+  mercado e a agregação dos KPIs.
+- Suporta NumPy 1 e 2 e Gymnasium 1.x. Mantém os modelos de ocupação antigos,
+  retoma agentes guardados e protege a cache de datasets com subpastas.
+- A validação incluiu 1.762 testes locais, 16 auditorias físicas, cenários
+  portugueses de 4, 30 e 100 membros e exports CSV/Parquet abertos na UI.
+  Os ficheiros dos datasets Portugal são os mesmos da 2.0.2.
+
 ## v2.0.2 — 2026-11-05 — datasets Portugal reproduzíveis e downloads completos
 
 Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).

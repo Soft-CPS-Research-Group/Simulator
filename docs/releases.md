@@ -9,6 +9,27 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.1.0 — 2026-11-13 — storage, EV lifecycle and compatibility
+
+Release maintainer: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+### What's new
+
+- **Battery and EV physics.** A battery starts from its configured SOC on activation, including below the discharge reserve. The same EV keeps its identity and its battery evolves through charger removal, re-entry and handover. The energy ledger records standby losses, mobility and explicit arrival energy. CSV and Parquet exports identify the charger that served the vehicle.
+- **BAU and KPIs.** The controller and native BAU use matching equipment, PV settings and outages. The BAU cache retains the latest reference. Cost and net-exchange ratios, community-market comparisons and portfolio aggregation are corrected.
+- **Compatibility and robustness.** Support NumPy 1 and 2, Gymnasium 0.28.1 and 1.x, legacy occupant models and older SAC/MARLISA checkpoints. Keep EV session identifiers and publish complete caches for datasets with nested files. The Portugal mobility verification now reproduces the published phase-power calculation across both NumPy versions.
+
+The Portugal datasets and market settings are preserved. The package is still `softcpsrecsimulator` and the Python import is `citylearn`. Use the `parquet` extra for Portugal. Results involving the corrected paths may differ from 2.0.2. Rerun the controller and reference together when comparing those cases.
+
+### Validation
+
+- The backport passed 1,762 local tests on NumPy 1, with one Windows-only skip, and 16 physical audits. The Portugal mobility tests were run on both NumPy versions after the phase-power verification fix.
+- Short runs covered 4, 30 and 100 members, including active outages in Premium All-in. Market KPIs reconciled against the interval totals. A BAU self-comparison gave a ratio of 1 for every defined relative KPI.
+- The CityLearn UI opened the Portugal export. CSV and Parquet exports of the EV handover displayed identical scorecards. The installed wheel passed the KPI, BAU and manifest export check.
+- In the 600-step local benchmark, mean step time went from 5.33 to 5.22 ms in flat mode and from 9.91 to 9.94 ms in entity mode. These measurements are for that benchmark.
+
+[Full changelog](https://github.com/Soft-CPS-Research-Group/Simulator/compare/softcpsrecsimulator-v2.0.2...softcpsrecsimulator-v2.1.0)
+
 ## v2.0.2 — 2026-11-05 — reproducible Portugal datasets and nested downloads
 
 Release owner: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).

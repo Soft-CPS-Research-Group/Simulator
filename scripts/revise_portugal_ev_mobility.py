@@ -220,7 +220,10 @@ def power_budgets(root, schema):
                     count = sum(x[j] > 0 for x in splits.values())
                     # Reserve the entire appliance envelope on each used phase;
                     # this is safe even when appliance phase declarations differ.
-                    headroom = np.maximum(0., service["limits"]["per_phase"][phase]["import_kw"]-net*split[j]-appliance_peak)
+                    # Keep the phase share weak so the float32 input keeps the
+                    # rounding used to generate the published ledgers under NumPy 1.
+                    phase_net = net*float(split[j])
+                    headroom = np.maximum(0., service["limits"]["per_phase"][phase]["import_kw"]-phase_net-appliance_peak)
                     power = np.minimum(power, headroom/count/splits[cid][j])
             power[power < attrs["min_charging_power"]] = 0.
             result[cid] = power*attrs["efficiency"]
