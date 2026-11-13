@@ -247,6 +247,10 @@
 <span class="sd">        Symmetric SOC target accuracy tolerance used by EV departure within-tolerance KPIs. Defaults to ``0.05``.</span>
 <span class="sd">    ev_departure_service_tolerance: float, optional</span>
 <span class="sd">        Lower SOC service tolerance used by EV departure minimum-acceptable KPIs. Defaults to ``0.05``.</span>
+<span class="sd">    energy_provenance: bool, optional</span>
+<span class="sd">        Whether to keep the per-step electricity provenance ledger (``*_energy_provenance_*`` KPIs and</span>
+<span class="sd">        provenance audits). Defaults to ``True``. Disabling it does not change any simulated quantity and</span>
+<span class="sd">        makes ``step()`` substantially faster, e.g. for training runs that do not report provenance KPIs.</span>
 <span class="sd">    **kwargs : dict</span>
 <span class="sd">        Other keyword arguments used to initialize super classes.</span>
 
@@ -282,6 +286,7 @@
         <span class="n">debug_timing</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'debug_timing'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">check_observation_limits</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'check_observation_limits'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">physics_invariant_checks</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'physics_invariant_checks'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">energy_provenance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'energy_provenance'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">metrics_log_interval</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'metrics_log_interval'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">ev_departure_within_tolerance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'ev_departure_within_tolerance'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">ev_departure_service_tolerance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'ev_departure_service_tolerance'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -356,6 +361,11 @@
             <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">path</span><span class="o">=</span><span class="s1">'physics_invariant_checks'</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_provenance</span> <span class="o">=</span> <span class="n">parse_bool</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'energy_provenance'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">energy_provenance</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">energy_provenance</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="s1">'energy_provenance'</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metrics_log_interval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'metrics_log_interval'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">metrics_log_interval</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">metrics_log_interval</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ev_departure_within_tolerance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_non_negative_float</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ev_departure_within_tolerance'</span><span class="p">,</span> <span class="n">CityLearnKPIService</span><span class="o">.</span><span class="n">EV_DEPARTURE_WITHIN_TOLERANCE_DEFAULT</span><span class="p">)</span>
@@ -391,6 +401,16 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'render_session_name must be a relative path. Use render_directory to choose an absolute location.'</span><span class="p">)</span>
             <span class="k">elif</span> <span class="s1">'..'</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_session_name</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'render_session_name cannot contain parent directory references (“..”).'</span><span class="p">)</span>
+        <span class="c1"># The business-as-usual sidecar is rebuilt from `schema`, which these overrides do not</span>
+        <span class="c1"># modify, so it must re-apply them to simulate the same devices, PV and outages.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_constructor_overrides</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">({</span>
+            <span class="s1">'active_observations'</span><span class="p">:</span> <span class="n">active_observations</span><span class="p">,</span>
+            <span class="s1">'inactive_observations'</span><span class="p">:</span> <span class="n">inactive_observations</span><span class="p">,</span>
+            <span class="s1">'active_actions'</span><span class="p">:</span> <span class="n">active_actions</span><span class="p">,</span>
+            <span class="s1">'inactive_actions'</span><span class="p">:</span> <span class="n">inactive_actions</span><span class="p">,</span>
+            <span class="s1">'simulate_power_outage'</span><span class="p">:</span> <span class="n">simulate_power_outage</span><span class="p">,</span>
+            <span class="s1">'solar_generation'</span><span class="p">:</span> <span class="n">solar_generation</span><span class="p">,</span>
+        <span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_loading_service</span> <span class="o">=</span> <span class="n">CityLearnLoadingService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_service</span> <span class="o">=</span> <span class="n">CityLearnRuntimeService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kpi_service</span> <span class="o">=</span> <span class="n">CityLearnKPIService</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1584,6 +1604,10 @@
 
 <span class="sd">        Callback failures are logged and disable reporting, preserving evaluation.</span>
 <span class="sd">        No progress events or timings are added to the returned KPI table.</span>
+
+<span class="sd">        With `include_business_as_usual`, the native BAU reference is rebuilt from the schema and</span>
+<span class="sd">        the constructor arguments. A `ValueError` names the setting when it differs from this env as</span>
+<span class="sd">        captured at its last `reset()`; see the baselines guide for the settings that are compared.</span>
 <span class="sd">        """</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpi_service</span><span class="o">.</span><span class="n">evaluate_v2</span><span class="p">(</span>
@@ -1785,6 +1809,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">pass</span>
 
+        <span class="c1"># Gymnasium API: reset(seed=...) also seeds the environment's own `np_random` generator.</span>
+        <span class="n">Env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
         <span class="c1"># update time steps for time series</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_episode_index_explicit</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">options</span> <span class="ow">and</span> <span class="s1">'episode_index'</span> <span class="ow">in</span> <span class="n">options</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_episode_index_explicit</span><span class="p">:</span>
@@ -1809,8 +1836,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_robustness_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">associate_chargers_to_electric_vehicles</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_provenance_service</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.comparison</span><span class="w"> </span><span class="kn">import</span> <span class="n">inventory</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">citylearn.internal.comparison</span><span class="w"> </span><span class="kn">import</span> <span class="n">equipment</span><span class="p">,</span> <span class="n">inventory</span><span class="p">,</span> <span class="n">reference_configuration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_comparison_initial_inventory</span> <span class="o">=</span> <span class="n">inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_comparison_initial_configuration</span> <span class="o">=</span> <span class="n">reference_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># Taken here because the dynamic topology adds and removes devices during the episode.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_comparison_initial_equipment</span> <span class="o">=</span> <span class="n">equipment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># reset reward function (does nothing by default)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
@@ -1828,6 +1858,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_seed_explicit</span> <span class="o">=</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span><span class="p">)</span> <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span><span class="p">)</span> <span class="o">+</span> <span class="n">episode_index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ev_drift_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ev_suspended_drift_random_state</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_render_buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_action_cache</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_variables</span><span class="p">()</span>

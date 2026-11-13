@@ -264,19 +264,6 @@ limitations, losses to the environment quantified by <cite>efficiency</cite>, <c
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="citylearn.energy_model.Battery.force_set_soc">
-<span class="sig-name descname"><span class="pre">force_set_soc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.force_set_soc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.force_set_soc" title="Link to this definition"></a></dt>
-<dd><p>Forcefully set the battery’s state-of-charge (SOC) for the current time step,
-bypassing restrictions such as efficiency losses, power limits, and degradation.</p>
-<p>This is used for reconnections of the EV to the platform.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>soc</strong> (<em>float</em>) – Desired state-of-charge as a fraction (between 0 and 1). Values outside this range are not accepted.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.Battery.get_current_efficiency">
 <span class="sig-name descname"><span class="pre">get_current_efficiency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.get_current_efficiency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.get_current_efficiency" title="Link to this definition"></a></dt>
 <dd><p>Get technical efficiency while considering <cite>power_efficiency_curve</cite> limitations.</p>
@@ -348,6 +335,22 @@ bypassing restrictions such as efficiency losses, power limits, and degradation.
 <dt class="sig sig-object py" id="citylearn.energy_model.Battery.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.reset" title="Link to this definition"></a></dt>
 <dd><p>Reset <cite>Battery</cite> to initial state.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.energy_model.Battery.set_rated_efficiency">
+<span class="sig-name descname"><span class="pre">set_rated_efficiency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">efficiency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#Battery.set_rated_efficiency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.Battery.set_rated_efficiency" title="Link to this definition"></a></dt>
+<dd><p>Replace the rated efficiency outside a simulation, e.g. with a datasheet value after autosizing.</p>
+<p>During simulation <cite>efficiency</cite> is read from <cite>power_efficiency_curve</cite> at every charge or discharge,
+and <a class="reference internal" href="#citylearn.energy_model.Battery.reset" title="citylearn.energy_model.Battery.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset()</span></code></a> restores the first recorded value. Assigning <cite>efficiency</cite> directly therefore
+neither changes the simulated efficiency nor survives a reset. This method makes <cite>efficiency</cite>
+the reset value and rescales a generated <cite>power_efficiency_curve</cite> so that its rated point equals
+it. A user-supplied curve is left unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>efficiency</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>]</em>) – Rated efficiency. <cite>None</cite> or NaN draws the default, as the <cite>efficiency</cite> setter does.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -1057,7 +1060,8 @@ largest control-step demand, rather than a power in [kW].</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.force_set_soc">
 <span class="sig-name descname"><span class="pre">force_set_soc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#StorageDevice.force_set_soc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.StorageDevice.force_set_soc" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Assign an external SOC in [0, 1], independently of the discharge reserve.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.get_metadata">
@@ -1080,6 +1084,12 @@ largest control-step demand, rather than a power in [kW].</p></li>
 <dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.initial_soc">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_soc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#citylearn.energy_model.StorageDevice.initial_soc" title="Link to this definition"></a></dt>
 <dd><p>State of charge when <cite>time_step</cite> = 0 in [kWh].</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="citylearn.energy_model.StorageDevice.initialize_at_activation">
+<span class="sig-name descname"><span class="pre">initialize_at_activation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/citylearn/energy_model.html#StorageDevice.initialize_at_activation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#citylearn.energy_model.StorageDevice.initialize_at_activation" title="Link to this definition"></a></dt>
+<dd><p>Record the opening stock of a device entering the simulation mid-episode.</p>
 </dd></dl>
 
 <dl class="py property">
