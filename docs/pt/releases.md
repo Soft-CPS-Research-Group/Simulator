@@ -9,6 +9,24 @@ compatibilidade, alterações de contratos e âmbito da validação.
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.1.1 — 2026-11-16 — referência BAU nativa em schemas entity estáticos
+
+Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+- O `evaluate_v2()` com a referência BAU nativa (o valor por defeito) falhava em
+  schemas entity com topologia estática e eventos de robustez sobre observações
+  de EVs, baterias ou PV, como o REC-30 robustez de Portugal. A referência era
+  criada em modo flat, que não expõe esses alvos, salvo com topologia dinâmica ou
+  demand response. Passa a usar a interface entity sempre que o ambiente avaliado
+  a usa.
+- O agente BAU lê o estado do simulador, por isso as suas ações e KPIs não
+  dependem da interface. Datasets, schemas e API mantêm-se.
+- A validação incluiu a suite completa (1.758 testes, 6 ignorados), com um novo
+  teste de regressão, e a auditoria completa (física, contratos entity, os 61
+  datasets incluídos e paridade). Os 13 schemas de Portugal correram 96 passos
+  com a referência BAU. Os 12 que já corriam na 2.1.0 deram KPIs idênticos e o
+  REC-30 robustez passou a correr. Janelas maiores não foram repetidas.
+
 ## v2.1.0 — 2026-11-13 — baterias, ciclo de vida dos EVs e compatibilidade
 
 Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).

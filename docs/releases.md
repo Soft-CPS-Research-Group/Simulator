@@ -9,6 +9,23 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.1.1 — 2026-11-16 — native BAU reference for static entity schemas
+
+Release maintainer: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+### What's fixed
+
+- **Native BAU reference with entity-only robustness targets.** `evaluate_v2()` with the native BAU reference (the default) failed on static-topology entity schemas whose robustness events target EV, storage or PV observations, such as Portugal REC-30 robustness. The reference was built in flat mode unless topology was dynamic or demand response was enabled, and the flat layout does not expose those targets. It now uses the entity interface whenever the evaluated environment does.
+
+The BAU agent reads simulator state directly, so its actions and KPIs do not depend on the interface. Datasets, schemas and the API are unchanged.
+
+### Validation
+
+- The full suite passed locally (1,758 tests, 6 skipped), including a new regression test with static topology, the entity interface, EV SOC noise and `evaluate_v2()` with the BAU reference. The full audit passed: physics, entity contracts, all 61 packaged datasets and refactor parity.
+- All 13 Portugal schemas completed a 96-step BAU run with `evaluate_v2()` and the BAU reference. The 12 that also complete on 2.1.0 gave identical KPIs. REC-30 robustness, which failed on 2.1.0, now completes. Windows beyond 96 steps were not rerun.
+
+[Full changelog](https://github.com/Soft-CPS-Research-Group/Simulator/compare/softcpsrecsimulator-v2.1.0...softcpsrecsimulator-v2.1.1)
+
 ## v2.1.0 — 2026-11-13 — storage, EV lifecycle and compatibility
 
 Release maintainer: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
