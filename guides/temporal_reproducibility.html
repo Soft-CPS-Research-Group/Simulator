@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temporal coherence and reproducibility &mdash; CityLearn 2.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css?v=995e94df" />
+      <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css?v=21c0b90a" />
+      <link rel="stylesheet" type="text/css" href="../_static/citylearn.css?v=867a8231" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b21de401"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CityLearn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Your first simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Moving an existing project to CityLearn v3</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configure and run</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="running_simulations.html">Running Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_reference.html">Schema Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_reference.html">Dataset Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="portugal_rec_datasets.html">Portugal REC Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_unit_contract.html">Data Unit Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces_flat_entity.html">Flat and Entity Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="observations_reference.html">Observations Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions_reference.html">Actions Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_community_reference.html">Multi-Community Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_reference.html">Robustness Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Evaluate</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="baselines.html">Baselines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kpis.html">KPIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard.html">How to read the scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard_kpi_names.html">Default scorecard KPI names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpis_reference.html">KPIs Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KPI_V2_TREE.html">KPI v2 Naming Tree</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualize</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Concepts and tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Core concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citylearn_challenge/index.html">The CityLearn Challenge</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../publications.html">Publications and applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation and performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publishing.html">Publishing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases_archive.html">Earlier releases</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CityLearn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Temporal coherence and reproducibility</li>
+      <li class="wy-breadcrumbs-aside">
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/temporal_reproducibility.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="temporal-coherence-and-reproducibility">
+<h1>Temporal coherence and reproducibility<a class="headerlink" href="#temporal-coherence-and-reproducibility" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">temporal-evidence-v1</span></code>, available from v1.9.9, records source clocks, loaded
+inputs and initialization conditions. It supports timing checks and deterministic
+replays without rewriting datasets. It does not establish field calibration or
+annual validation of every controller.</p>
+<section id="one-source-row-clock">
+<h2>One source-row clock<a class="headerlink" href="#one-source-row-clock" title="Link to this heading"></a></h2>
+<p>An optional schema <code class="docutils literal notranslate"><span class="pre">time_axis.calendar_file</span></code> points to a CSV/Parquet calendar with
+contiguous <code class="docutils literal notranslate"><span class="pre">time_step</span></code> indexes starting at zero and unique, increasing, regular
+<code class="docutils literal notranslate"><span class="pre">timestamp_utc</span></code> instants. A supplied <code class="docutils literal notranslate"><span class="pre">timestamp_local</span></code> must describe the same
+instants. Portuguese datasets automatically use their existing
+<code class="docutils literal notranslate"><span class="pre">shared/calendar.parquet</span></code>. The IANA <code class="docutils literal notranslate"><span class="pre">timezone</span></code>, when supplied, determines display
+time. No timezone or DST information is inferred from repeated local clock hours.</p>
+<p>Calendar timestamp integer units are normalized to nanoseconds before calculating
+spacing or comparing UTC/local instants. Parquet precision does not change the
+physical interval.</p>
+<p>The canonical UTC spacing overrides inference from the first two local hour/minute
+labels. Otherwise a spring jump can look like a 75-minute sample and an autumn
+fold like a 23-hour-15-minute sample. Native datasets remain on 900-second UTC
+intervals through both transitions. Default exported timestamps use the canonical
+sample index and include the local offset. The two occurrences of a repeated local
+hour remain different instants. Leap-day and year boundaries use the same axis.</p>
+<p>An explicit render <code class="docutils literal notranslate"><span class="pre">start_date</span></code> override retains its historical display behaviour
+and is marked in metadata. Without a canonical calendar, legacy naive timestamps
+remain available; the manifest does not invent a verified UTC origin. An optional
+<code class="docutils literal notranslate"><span class="pre">dataset_seconds_per_time_step</span></code> declares spacing where no calendar is available.
+It must agree with a supplied calendar. Declaration alone does not independently
+verify the civil labels of source rows.</p>
+<p>Changing <code class="docutils literal notranslate"><span class="pre">seconds_per_time_step</span></code> still <strong>does not resample rows or events</strong>. The
+source row clock, control duration, per-member inferred spacing and consistency
+flag are explicit. Runtime energy scaling is labelled
+<code class="docutils literal notranslate"><span class="pre">none_runtime_energy_scaling_only</span></code>. Such a run is not a resolution-equivalence
+experiment simply because its total energy has been scaled.</p>
+</section>
+<section id="observations-and-executed-intervals">
+<h2>Observations and executed intervals<a class="headerlink" href="#observations-and-executed-intervals" title="Link to this heading"></a></h2>
+<p>The environment’s current observation has not yet been dispatched. The manifest
+separates its global index/UTC timestamp from the executed global interval range.
+Daily member averages now use executed <strong>active</strong> participation, excluding an
+unexecuted current observation and removal/re-entry gaps. Zero elapsed duration
+has undefined daily averages. Historical custom facades without an environment
+clock retain their compatibility convention.
+These are rates per 86,400 seconds of active exposure, not means over civil dates
+that can contain 23 or 25 hours.</p>
+<p>With the usual N observations, an episode executes N-1 intervals. A full input
+file with N interval values therefore needs an explicit terminal-observation
+policy to execute the last interval. The existing
+<code class="docutils literal notranslate"><span class="pre">terminal_observation_padding=true</span></code> holds the last observation and permits only
+the terminal calendar index N to extend by one source interval. That extra
+observation is not another energy dispatch or an invented future tariff sample.
+No padding is silently added. This boundary matters when planning an annual run.</p>
+</section>
+<section id="seeds-and-reset">
+<h2>Seeds and reset<a class="headerlink" href="#seeds-and-reset" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">reset(seed=s)</span></code> now restarts the away-EV stream with s, independently of the
+episode counter. Ordinary unseeded resets retain per-episode variation. Calendar
+split selection still advances unless explicitly selected:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">"episode_index"</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Repeating that seed/index selects the same random or sequential split. Reset does
+not freeze the split index by default. Random splits use the bounded
+<code class="docutils literal notranslate"><span class="pre">sha256_seed_episode_v1</span></code> stream so seed zero varies across episodes and large valid
+seeds cannot overflow on later episodes. This changes historical random split
+sequences; rerun affected studies rather than mixing the two protocols. Reset does
+not reconstruct equipment defaults or reload input noise: the <strong>initialization
+seed</strong> and current environment/reset seed are recorded separately. A native BAU
+loads with the source initialization seed, then uses the current environment and
+away-EV seeds. It therefore retains initial defaults/noisy inputs after an explicit
+reset seed change. Default robustness noise follows the reset seed; a declared
+robustness seed remains its own independent choice.</p>
+<p>Loader-created observation noise uses owned indexed streams. Component labels,
+initialization seed, channel and absolute source-row offset determine the draws.
+The same overlap of two input windows gets the same noise, and loading does not
+consume NumPy’s global RNG. Direct low-level data constructors without a noise
+seed retain their legacy behaviour; custom controller/global Python/Torch RNGs
+are not silently reseeded. Controllers must identify their own randomness.</p>
+</section>
+<section id="file-and-environment-evidence">
+<h2>File and environment evidence<a class="headerlink" href="#file-and-environment-evidence" title="Link to this heading"></a></h2>
+<p>Before loading, the environment snapshots SHA-256 hashes and file identities of
+declared supported input files, including model weights, plus the canonical clock.
+Construction checks for intervening content changes. Exports retain the <strong>loaded
+hashes</strong>, with changed/missing files reported separately. A metadata-only touch
+with identical bytes does not invalidate an input. The native BAU rejects changed
+inputs instead of comparing the old controlled data with a newly loaded reference.
+The comparator does not treat that evidence as safely paired.</p>
+<p>The native BAU reference reuses the evaluated episode’s equipment and constructor
+overrides, including PV and outage settings. Equipment sized from input data is
+sized over the same loaded window as in the evaluated environment. The reference
+checks the configuration captured at reset and rejects differences it cannot
+reconstruct. Built-in stochastic outages use the configured model seed or a seed
+derived from the episode and building, so the controller and its BAU reference
+receive the same outage sequence.</p>
+<p>The manifest includes initialization/reset/away-EV seeds, episode index, clock
+contract, padding, Python/platform and relevant installed dependency versions.
+Pairing evidence includes temporal initialization conditions and runtime versions;
+different noisy initialization cannot become paired merely by later resetting both
+environments to the same seed. Historical paired-v1 exports without the temporal
+extension do not certify the new temporal contract. Installed wheels still report
+an unavailable Git revision rather than an unrelated checkout revision.</p>
+<p>The file snapshot covers schema-declared dependencies and the discovered clock,
+not arbitrary external reads by custom plugins. It records ordinary filesystem
+content consistency, not an adversarial transactional filesystem guarantee.</p>
+</section>
+<section id="explicit-resampling-utilities">
+<h2>Explicit resampling utilities<a class="headerlink" href="#explicit-resampling-utilities" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">citylearn.internal.temporal.resample_series(values,</span> <span class="pre">source_seconds,</span> <span class="pre">target_seconds,</span> <span class="pre">kind=...,</span> <span class="pre">weights=None)</span></code> requires a complete common duration:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Kind</p></th>
+<th class="head"><p>Rule</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+<td><p>Distribute interval kWh by overlap; sum on coarsening.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">power</span></code></p></td>
+<td><p>Average kW by overlap duration; preserve integrated energy.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">price</span></code>, <code class="docutils literal notranslate"><span class="pre">intensity</span></code></p></td>
+<td><p>Time mean by default; optional nonnegative energy weights preserve acquisition cost/carbon for those weights.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Zero energy weight produces an undefined weighted value. Time averaging prices
+does not generally preserve a bill with varying load. Categorical states and
+events are rejected by the averaging API. <code class="docutils literal notranslate"><span class="pre">map_interval</span></code> requires exactly
+representable boundaries and an explicit inclusive-end convention; arrivals,
+departures and short appliance cycles cannot be silently rounded away.</p>
+<p><code class="docutils literal notranslate"><span class="pre">rescale_step_loss</span></code> converts a per-control-step loss fraction while preserving
+retention over equal physical time. It does not calibrate a battery model.
+Changing resolution does not automatically adjust model loss coefficients,
+normalised capacity actions, short profiles or event schedules. These utilities
+prepare explicit conversions; they do not automatically rewrite a whole dataset.
+Resample interval values, not an unexecuted terminal observation, and declare how
+the target terminal observation is supplied. Coarsening loses peaks and within-step
+ordering even when total energy is conserved.</p>
+<p>An analytical constant 2 kW load over one hour is exercised through the simulator
+at 900 and 300 seconds. Both give 2 kWh, EUR 0.50 and 0.50 kgCO2 under the declared
+piecewise tariffs and carbon intensity. That equivalence does not extend to
+arbitrary storage/controller dynamics without additional assumptions.</p>
+</section>
+<section id="bounded-audit-and-limitations">
+<h2>Bounded audit and limitations<a class="headerlink" href="#bounded-audit-and-limitations" title="Link to this heading"></a></h2>
+<p>The input-clock audit reads the canonical calendar (<code class="docutils literal notranslate"><span class="pre">shared/calendar.parquet</span></code>),
+which the shipped <code class="docutils literal notranslate"><span class="pre">pt_rec_*</span></code> datasets do not include. Run it on a local Portugal
+generator build (<code class="docutils literal notranslate"><span class="pre">rec_pt_2023_*_v2</span></code>, built by the <code class="docutils literal notranslate"><span class="pre">scripts/*portugal*</span></code> tools):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/audit/audit_temporal.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--schema<span class="w"> </span>data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--start<span class="w"> </span><span class="m">43683</span><span class="w"> </span>--transitions<span class="w"> </span><span class="m">8</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span>--output<span class="w"> </span>/tmp/time-audit.json
+</pre></div>
+</div>
+<p>Without <code class="docutils literal notranslate"><span class="pre">--start</span></code>, the CLI checks source clocks, common row coverage, local labels,
+structural event timestamps and EV catalogue boundaries. With <code class="docutils literal notranslate"><span class="pre">--start</span></code>, it also
+compares repeated, fresh-environment and KPI-query rollouts with BusinessAsUsualAgent and
+physical checks. Exact trace equality is scoped to the exercised software/platform
+and deterministic policy; it is not cross-hardware bitwise certification.</p>
+<p>Validation covers nine native Portuguese configurations and selected windows
+through New Year, 29 February, both DST transitions, Core-30 robustness and Premium
+operation. Calendar checks verify 96 leap-day intervals and 92/100 local intervals
+on the spring/autumn transition days. Event/session boundaries use their declared
+inclusive/exclusive conventions; open terminal sessions remain unknown.</p>
+<p>Rerun affected DST-started windows, explicit-seed repeated episodes, noisy inputs,
+partial/re-entry daily rates and reference comparisons after release. Long-run
+memory/performance and cumulative balances remain iteration 7; calibration remains
+iteration 8. No annual controller ranking or empirical validation is claimed here.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jose Ramon Vazquez-Canteli, Kingsley Nweye, Zoltan Nagy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -4,24 +4,84 @@
 Installation
 ============
 
-Install the latest CityLearn version from PyPi with the :code:`pip` command:
+SoftCPS REC Simulator is distributed as ``softcpsrecsimulator`` on PyPI and
+requires Python 3.9 or newer. It supports NumPy 1.x and 2.x: observations, rewards and simulated time
+series are bit-identical on both. KPIs can differ in the last binary digits
+(relative differences of order 1e-15), for two reasons. NumPy 2.3 and later add
+up more than 8,192 values in a different order, which affects totals over
+episodes longer than 8,192 time steps, such as a full year of hourly steps, and
+the district Gini ratio of more than 90 members. The equity audit's Gini ratio
+uses a BLAS dot product, whose last digit depends on the BLAS build and the
+CPU, and NumPy 1 and 2 wheels ship different OpenBLAS releases.
+
+Use a virtual environment to keep its dependencies separate.
 
 .. code-block:: console
 
-   pip install CityLearn
+   python -m venv .venv
 
-Alternatively, install a specific version:
+Activate it on Linux or macOS:
 
 .. code-block:: console
 
-   pip install CityLearn==2.0.0
+   source .venv/bin/activate
 
-.. warning::
-   Version ``1.8.0`` and earlier do not support temperature dynamic buildings class :py:class:`citylearn.building.DynamicsBuilding` and its descendant classes. Thus, `cooling_device` and `heating_device` control for partial load is not supported by these versions.
+On Windows PowerShell:
 
-.. warning::
-   Version ``1.1.0`` and earlier are not installable via :code:`pip`. Instead, clone earlier versions like:
+.. code-block:: powershell
 
-   .. code-block:: bash
+   .venv\Scripts\Activate.ps1
 
-        git clone -b v1.1.0 https://github.com/intelligent-environments-lab/CityLearn.git
+Install and check the package:
+
+.. code-block:: console
+
+   python -m pip install --upgrade pip
+   python -m pip install softcpsrecsimulator
+   python -c "from citylearn import __version__; print(__version__)"
+
+Continue with :doc:`quickstart`. The Python import name is ``citylearn``, as in
+CityLearn.
+
+Optional dependencies
+*********************
+
+For Parquet datasets or exports:
+
+.. code-block:: console
+
+   python -m pip install "softcpsrecsimulator[parquet]"
+
+For PV autosizing from EPW weather using PySAM:
+
+.. code-block:: console
+
+   python -m pip install "softcpsrecsimulator[pysam]"
+
+For building new datasets from End-Use Load Profiles with
+``citylearn.end_use_load_profiles`` (installs ``doe_xstock`` and OpenStudio):
+
+.. code-block:: console
+
+   python -m pip install "softcpsrecsimulator[end_use_load_profiles]"
+
+Datasets
+********
+
+Public datasets are downloaded from the official repository and cached locally.
+The first download needs internet access. List the available names in Python:
+
+.. code-block:: python
+
+   from citylearn.data import DataSet
+   print(DataSet().get_dataset_names())
+
+For your own data, pass a local ``schema.json`` path instead of a dataset name.
+See :doc:`guides/dataset_reference` for files, units and offline use.
+
+Existing projects and development
+*********************************
+
+Record the installed version with the command above and pin that version
+in your project dependencies. Read :doc:`guides/migration` when updating a project.
+To work on CityLearn itself, follow :doc:`guides/developer_guide`.

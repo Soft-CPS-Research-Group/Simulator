@@ -1,0 +1,335 @@
+# Developer Guide
+
+Set up a development environment, run regression checks and profile the runtime.
+For simulation-level checks and published measurements, start with
+[Validation and performance](validation.md).
+
+## Local Environment
+
+Create an isolated environment from a repository checkout:
+
+```console
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt -r test_requirements.txt
+python -m pip install -e .
+```
+
+Optional dependencies:
+
+| Feature | Command |
+|---|---|
+| Parquet datasets | `.venv/bin/pip install pyarrow` |
+| PV autosizing | `.venv/bin/pip install ".[pysam]"` |
+| Build checks | `.venv/bin/pip install build twine` |
+
+## Portable experiment evidence
+
+`.gitattributes` makes every checkout byte-identical to the repository: text
+files use LF and files under `data/` and `tests/data/` are never converted, even
+with Git for Windows' default `core.autocrlf=true`. Experiment manifests hash
+these files, so the hashes then agree on all platforms. A checkout made before
+`.gitattributes` existed may still hold CRLF copies; `git status` lists converted
+data files as modified. Make a fresh clone and set it up as in
+[Local Environment](#local-environment): the clone applies the new checkout
+rules and leaves the existing working copy, including uncommitted changes,
+untouched. Then clear the dataset cache, which may hold copies made from the old
+checkout:
+
+```console
+git clone https://github.com/Soft-CPS-Research-Group/Simulator.git
+python -c "from citylearn.data import DataSet; DataSet().clear_cache()"
+```
+
+Manifests record each input file by its path below the dataset root, with `/`
+separators, so a moved or copied dataset keeps its evidence. On Windows, where
+`\` and `/` are both separators and file names ignore case, a reference that
+differs from the file's path only in separators or case records the file's
+on-disk spelling: with the dataset root `C:\data\demo` and the file
+`C:\data\demo\sub\weather.csv`, the references `sub\Weather.csv`,
+`SUB/weather.csv` and `C:\Data\Demo\sub\WEATHER.csv` all record
+`sub/weather.csv`. Other spellings of an input file keep their text, with `/`
+for `\` on Windows: `.` or `..` components, repeated separators, links, 8.3
+short names and files outside the dataset root. Strings that are not hashed
+input files (see `FILE_TYPES` in `citylearn/internal/temporal.py`) keep their
+text without the dataset root. On Linux and macOS every reference keeps its
+text, without the dataset root; macOS file names ignore case by default, but the
+evidence does not. If two runs spell one file in ways that are not normalised,
+the comparison reports `incompatible` rather than a pair.
+
+## Core Validation
+
+| Check | Command |
+|---|---|
+| Full test suite | `.venv/bin/pytest -q` |
+| Critical lint | `.venv/bin/python -m ruff check citylearn tests scripts/manual scripts/ci --select E9,F821` |
+| Entity contract audit | `.venv/bin/python scripts/audit/audit_entity_contract.py --strict` |
+| Physics audit | `.venv/bin/python scripts/audit/audit_physics.py` |
+| Diff whitespace check | `git diff --check` |
+
+The physics audit intentionally exercises resolution conversion paths, so unit-conversion warnings can be expected when the audit fixture forces dataset/schema mismatches.
+
+## Portable tests and mandatory audit verification
+
+Test fixtures are resolved from their source files, not the current working
+directory. Missing required schemas fail clearly; a synthetic or cached dataset
+must not silently replace a missing fixture. To check portability, run the same
+suite from the checkout and from another directory, using absolute paths to the
+checkout's Python and `tests` directory for the latter invocation.
+
+```console
+.venv/bin/python scripts/audit/run_full_audit.py --output-dir /tmp/simulator-audit
+```
+
+The default is verification: any failed/missing auditor or dependency exit blocks
+success. `--strict` remains an alias for that mode. `--report-only` explicitly
+collects diagnostics with exit code zero; inspect `verification_passed` in its
+summary rather than interpreting that exit as approval. Relative output paths
+are resolved from the caller's directory before subprocesses start.
+
+Default coverage is physics, entity contracts, bounded offline dataset rollouts
+and the fixed-command refactoring references below. The summary names the selected
+families and whether all defaults were selected. `--audits` can select a subset;
+that subset does not certify the entire simulator or replace pytest, extended
+campaigns or empirical calibration. The legacy `performance_results` audit
+includes RBC/SAC comparisons and is opt-in, outside the default simulator checks.
+Snapshot-changing flags require `--report-only`; a verification cannot update its
+own references. Work reports belong outside the versioned source tree.
+
+## References for internal refactoring
+
+`audit_refactor_parity.py` uses six short, deterministic fixed-command cases:
+flat/entity interfaces, 60/300/900/3600-second steps, phase limits, outages and
+member lifecycle/fault composition. It reuses the checkout's bounded test fixture
+factory and requires `test_requirements.txt` as well as runtime dependencies.
+It runs no agent, training or BAU sidecar. The versioned fixture
+`scripts/audit/snapshots/refactor_parity.json` freezes the corrected behaviour on the 1.9.11
+base before subsequent internal refactoring.
+
+Each case independently checks energy, cash and provenance, then compares input
+fingerprints, requested/executed actions, SOC, flows, rewards, machine service,
+KPIs, interface layouts/spaces and CSV/JSON export semantics. Runtime versions,
+commit IDs and temporary paths are not behaviour references. Layouts are stored
+once per topology change. Both delivered and unserved machine requests are
+covered; references establish behavioural parity, not optimal scheduling.
+
+```console
+.venv/bin/python scripts/audit/audit_refactor_parity.py --output /tmp/parity-check.json
+```
+
+Units determine numeric tolerances: kWh `1e-6`, EUR `1e-7`, SOC/ratios `1e-7`,
+kW `1e-5`, other numeric values `1e-6` absolute, all with `1e-7` relative tolerance.
+Counts, tolerance policy, flags, names, ordering, missing keys and unknown/zero
+distinctions remain exact. Non-finite values are explicitly represented in the
+fixture. A mismatch or missing reference fails; checks never regenerate it.
+
+For an intentional contract change, capture a separate **new** proposal, inspect
+the differences and physical/service consequences, and only then replace the
+reviewed fixture as a deliberate change:
+
+```console
+.venv/bin/python scripts/audit/audit_refactor_parity.py --capture-reference /tmp/parity-proposal.json --output /tmp/parity-capture.json
+```
+
+Capture refuses to overwrite an existing file and reports `reference_proposal`
+with `verification_passed=false`. It is not a successful verification. The saved
+JSON is a test baseline; development diaries and execution reports are not fixtures.
+Report destinations must also differ from references/proposals, including path aliases.
+
+## Manual Simulation Scripts
+
+Manual utility scripts live in `scripts/manual` and are excluded from default pytest collection.
+
+```console
+.venv/bin/python scripts/manual/demo_ev_rbc.py
+.venv/bin/python scripts/manual/demo_ev_rbc_export_end.py
+```
+
+Runtime benchmark:
+
+```console
+.venv/bin/python scripts/manual/bench_runtime.py --seconds 5 60 --render-modes none end --episode-steps 1200
+```
+
+CI performance smoke check:
+
+```console
+.venv/bin/python scripts/ci/perf_smoke.py --episode-steps 600 --seconds 60 --baseline-file scripts/ci/perf_baseline.json
+```
+
+Step/component profiling:
+
+```console
+.venv/bin/python scripts/audit/profile_step_breakdown.py --episode-steps 300 --seconds 60 --agent rbc --interface flat --render-mode none --no-write --table-limit 14
+```
+
+Lifecycle and KPI/BAU profiling:
+
+```console
+.venv/bin/python scripts/audit/profile_lifecycle.py --episode-steps 300 --seconds 60 --skip-exports --no-write
+```
+
+Drop `--skip-exports` when the CSV export paths themselves need to be timed.
+
+For ad hoc code, pass `debug_timing=True` to `CityLearnEnv` and inspect `info` keys such as `apply_actions_time`, `reward_observations_time`, `next_observations_time`, `terminal_export_time` and `step_total_time`.
+
+## Internal Architecture
+
+Public APIs remain centered on `CityLearnEnv` and `Building`. Internal orchestration is split into service modules under `citylearn/internal`.
+
+| Module | Responsibility |
+|---|---|
+| `loading.py` | Schema-driven loading and building assembly. |
+| `loading_inputs.py` | Building input series, shared-cache access, dynamic windows and time-step conversion. |
+| `loading_components.py` | Component constructor lookup, optional models, chargers, device seeds and autosizing. |
+| `runtime.py` | Episode runtime orchestration, `step`, action parsing, time progression and EV/charger association. |
+| `building_ops.py` | Building observation/action orchestration. |
+| `electrical_limits.py` | Pure kW allocation used by runtime service limiting. |
+| `kpi.py` | KPI/evaluation pipeline. |
+| `kpi_energy.py` | Energy, carbon, cost, comfort and district grid-shape records. |
+| `kpi_equipment.py` | Equipment calculations and per-evaluation EV/BESS/PV/phase aggregation. |
+| `kpi_community.py` | Community settlement and equity records. |
+| `kpi_service_metrics.py` | Executed/requested appliance and escalator service aggregation. |
+| `entity_interface.py` | Entity tables, edges, action specs and observation bundles. |
+| `entity_observations.py` | Per-table observation population, relation masks, sanitisation and independent payload copies. |
+| `entity_layout.py` | Static observation rows, numeric spaces and declarative interface specifications. |
+
+Electrical-service allocation takes signed total/phase requests and a caller's
+base-load estimate, returning proportional reductions and requested/residual
+pressure without changing devices. It preserves total-before-phase,
+import-before-export ordering and the eight-pass maximum, recalculating totals
+after every reduction. Uncontrollable overload remains visible as residual
+pressure; the calculation cannot create supply or shed fixed loads.
+
+A controller may predict with prospective loads. Runtime independently recalculates limits,
+converts powers to device actions, records feedback and applies battery/charger
+physics. During outages it additionally reads the live remaining kWh before each
+controllable load; do not replace that sequential check with a predicted budget.
+The legacy charger-only limiter and future appliance-profile feasibility checks
+retain their distinct contracts. The baselines submit their requests and the
+runtime shares the service limit; see [baselines](baselines.md) for each policy.
+
+## Build and check the documentation
+
+The canonical English guides are `docs/*.md`. The Sphinx extension copies them
+into the generated `docs/source/guides/` directory at build time, preserving
+cross-links and publishing the same text as the repository. Do not edit the
+generated directory. The scorecard name list is generated from the runtime
+selection. Historical releases appear under Project, not in the README.
+
+```console
+python -m pip install -r docs/requirements.txt
+sphinx-apidoc citylearn -o docs/source/api -e -M
+sphinx-build -b html docs/source docs/build/html
+python scripts/ci/check_docs.py docs/build/html
+python -m pytest -q tests/test_documentation_examples.py
+```
+
+Install Pandoc for the retained notebook tutorials. Use the `sphinx-build`
+executable: the current CLI reference detects that executable when returning
+its argument parser. Documentation examples are tested separately; the site
+build does not train learning agents.
+
+## Development rules
+
+| Rule | Reason |
+|---|---|
+| Keep schema/API changes documented in the same change. | Algorithms and datasets depend on explicit contracts. |
+| Add tests for new physics or observations. | Sub-hourly and entity behavior are easy to regress silently. |
+| Prefer additive observations in patch releases. | Avoid breaking trained algorithms and wrappers. |
+| Run audits before tagging. | They catch contract drift outside normal unit tests. |
+
+## Repository content
+
+Keep runtime code, required product/dataset documentation, licences, the central
+changelog, normative test fixtures and necessary dataset provenance in source
+control. Planning notes, development diaries, release-run JSON, rendering QA and
+ad hoc observation dumps belong outside the checkout or in CI/release artifacts.
+Before removing work material, archive it externally and verify hashes; keep the
+source/destination mapping with that external evidence. Do not rewrite Git history.
+The [dataset catalogue](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/portugal_rec_native/README.md#proveniência-conservada-no-produto)
+identifies the retained provenance files and their consumers. Distribution
+checksums describe the current package, not a previous documentation bundle.
+
+## Verification and internal modules in 3.1
+
+Run `python scripts/audit/run_full_audit.py --strict --output-dir /tmp/citylearn-audit`
+to verify physics, entity contracts, official datasets and six fixed-command
+reference trajectories. Missing dependencies/scripts, child failures and reference
+drift fail verification; ordinary runs do not rewrite snapshots. Algorithm audits
+remain explicit opt-in tools. Reference tests generate small temporary cases from
+existing fixtures; no SoftCPS production datasets are included.
+
+Public facades delegate to focused internal modules for energy/equipment/service/
+community KPIs, entity observation/layout preparation, loading inputs/components
+and robustness contracts/auditing. Electrical-service allocation is shared by
+control and runtime. Public imports, executable examples and the official registry
+retain CityLearn identity; internal modules are not stable extension APIs.
+
+### Evaluation progress
+
+`env.evaluate_v2(progress_callback=callback)` optionally reports scalar stage events
+without adding timings to the KPI table or its attributes. Each event includes a
+sequence number, stage, status and elapsed seconds. Member stages and their equipment
+families also include the member ID, index and total. Completed/failed stages include
+the stage duration. Observers receive fresh dictionaries; they must avoid slow I/O
+and must not mutate the environment. A failing observer is logged and disabled;
+actual evaluation errors still propagate with failed-stage events.
+
+The long-run auditor writes `phase` in `summary.json`, the latest KPI stage in
+`evaluation-progress.json` and the event history in `evaluation-progress.jsonl`.
+It distinguishes loading, dispatch, final evaluation, KPI export, reconciliation
+and evidence export. `kpi_evaluation_seconds` excludes export/reconciliation;
+`final_kpi_and_export_seconds` retains its existing combined meaning. Progress is
+reported at stage boundaries, so a long individual family may stay active for some
+time. No background thread or per-step callback is installed by KPI reporting.
+
+### Market settlement history
+
+The internal settlement history stores binary64 numeric columns and member IDs,
+with offsets for each executed interval. No rows are sampled or rounded. Indexing,
+slicing and iteration expose ordinary per-step lists of dictionaries as detached
+snapshots; assign an edited step back to persist it. Use a slice to read a window
+or iterate to stream the history, rather than materializing an entire long run.
+The current-step settlement and export schemas are unchanged. Legacy rows with
+additional/missing fields are retained in full. Market KPI totals are accumulated
+in chronological order and rebuilt after historical edits. Reset clears both
+history and totals.
+
+### Robustness application journal
+
+The sparse robustness journal retains every recorded application and its order.
+Completed steps use integer references to shared descriptions; the current step
+keeps writable sets for identical deduplication. Summaries accumulate completed
+steps and handle unexecuted terminal telemetry separately. No numeric channel
+values, RNG state, event application rules or physical state are changed.
+`env._robustness_service.history` keeps its complete public dictionary contract.
+For bounded reads, use `history_window(start, stop)` or `iter_history(start, stop)`
+on that service; bounds are global step indices, start inclusive and stop exclusive.
+These window/stream records are detached snapshots. Reset clears journal and
+summary counters together. The bounded action-delay buffer remains unchanged.
+
+### KPI active populations
+
+Dynamic KPI evaluation snapshots sparse membership transitions and lifecycle
+metadata once. Nested KPI families reuse read-only masks keyed by member, series
+horizon and semantics. Energy masking retains absent intervals as zero; thermal
+selection removes absent samples. Completed intervals still exclude the terminal
+observation, and historical assets continue to use their existing readers.
+The scope includes environment, episode window, executed horizon, history identity
+and topology version. It refreshes if those change and releases masks after each
+evaluation, including exceptions; no physical values or KPI results are cached.
+Public topology queries still return independent lists with their original rules.
+
+### EV departure replay reuse
+
+Departure feasibility compares target, minimum acceptable and tolerance thresholds
+against one maximum-charge replay per departure/context. The existing single-
+threshold helper remains available. Legacy and audited batches stay separate: their
+arrival boundaries and outage rules can differ. The replay still runs through the
+whole connection interval, including losses after a target may have been reached.
+Physical charge/efficiency/taper/capacity/deadband/service-limit rules are unchanged.
+Missing-input permissive legacy results and audited unknown classifications keep
+their existing contracts. No memo or replay battery is retained between batches,
+sessions, evaluations or episodes; only the departure endpoint is shared within
+the three comparisons. Native BAU actions and real battery histories are untouched.

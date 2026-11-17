@@ -1,0 +1,316 @@
+# Releases
+
+This is the changelog for the fork. Version policy, the release template and
+publication procedure are maintained in the [publishing guide](publishing.md).
+Historical validation links point to immutable evidence in Git history; they
+describe the scope of that release rather than a new execution on this checkout.
+
+Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
+
+## v2.2.0 — 2026-11-17 — aligned with CityLearn 3.5.0
+
+Release maintainer: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+SoftCPS REC Simulator 2.2.0 runs the same simulator code, tests and documentation as
+[CityLearn 3.5.0](https://github.com/citylearn-project/CityLearn/releases/tag/v3.5.0).
+Only the distribution name (`softcpsrecsimulator`), the version, the dataset
+download defaults, the release documentation and the additional SoftCPS datasets
+differ. The Python import is still `citylearn`.
+
+### What's new
+
+- **New BAU, with changed BAU-relative KPIs.** `BusinessAsUsualAgent` is the
+  CityLearn 3.4.0 BAU: it decides from the entity observations and charges a
+  connected EV at once to 100% by default (`immediate-full-charge-v2`). With
+  `ev_charge_target='requested'` (`immediate-user-target-v1`) it stops at the
+  user's requested departure SOC; `business_as_usual_ev_charge_target` selects the
+  one `evaluate_v2()` uses as the KPI reference. **Every `business_as_usual`,
+  `delta_to_business_as_usual` and `ratio_to_business_as_usual` KPI can differ
+  from 2.1.1**, including those of the Portugal datasets. Rerun the controller
+  and its reference together.
+- **Basic, Smart and Community baselines.** `RBCBasicPolicy`, `RBCSmartPolicy`
+  and `RBCCommunityPolicy` are the baselines validated in the Soft-CPS Algorithms
+  repository. `NormalPolicy`, `NormalTargetPolicy`, `NormalNoBatteryPolicy`,
+  `ServiceOnlyBaselineAgent`, `GridAwareBaselineAgent` and
+  `CommunityAwareBaselineAgent` are removed.
+- **Unlimited headroom is 1,000,000 kW.** Entity headroom features of a building
+  without an electrical service limit read 1,000,000 kW (the observation bound)
+  instead of 0 kW, which read as "no capacity left".
+- **Portugal datasets renamed to CityLearn's `pt_rec_*`.** `pt_rec_4`,
+  `pt_rec_15`, `pt_rec_30` and `pt_rec_100`, byte-identical to CityLearn 3.5.0,
+  replace `rec_pt_2023_micro_4_v2`, `rec_pt_2023_core_15_v2`,
+  `rec_pt_2023_core_30_v2` and `rec_pt_2023_premium_100_v2`, which are removed.
+  Evaluation schemas are renamed too, for example
+  `rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json` becomes
+  `pt_rec_30/evaluation/rec_30_robustness.json`. The full mapping is in the
+  [migration guide](migration.md#upgrade-from-softcps-211-to-220); see also the
+  [Portugal REC datasets](portugal_rec_datasets.md) guide.
+- **Nested dataset downloads.** `DataSet.get_dataset()` takes CityLearn's
+  implementation: two GitHub API requests per dataset however deeply nested,
+  files from raw.githubusercontent.com, `CITYLEARN_GITHUB_TOKEN` or
+  `GITHUB_TOKEN` when set, and the account and repository given to `DataSet`. The
+  defaults remain `Soft-CPS-Research-Group/Simulator` at
+  `softcpsrecsimulator-v{version}`.
+- **CityLearn fixes and documentation.** Schema roots resolve from the schema
+  file, dynamic-topology physics checks cover active members only, and the
+  CityLearn guides, examples, documentation build and CI matrix (Python 3.9,
+  3.10 and 3.12; NumPy 1 and 2) are included.
+- **Dependencies.** `doe_xstock`, `openstudio` and `torchvision` are no longer
+  installed by default; `citylearn.end_use_load_profiles` needs the
+  `end_use_load_profiles` extra.
+
+SoftCPS keeps the 19 `ALADI *` datasets, `EC_Ermesinde` and its CLI fix for runs
+without Stable Baselines3. **The Portugal generator stays in SoftCPS**: its
+scripts, sources, results and catalogue still build the full `rec_pt_2023_*_v2`
+packages, now as a local working copy under `data/datasets` that Git ignores,
+while the shipped datasets match CityLearn 3.5.0. Generator tests that need such
+a build skip without it; the others run on `pt_rec_*`. See the
+[migration guide](migration.md#upgrade-from-softcps-211-to-220).
+
+### Validation
+
+- **Tests.** 1,741 passed and 35 skipped. Of the skips, 34 are Portugal generator tests that need a local `rec_pt_2023_*_v2` build, and one is Windows-only. With the 2.1.1 packages present as that build, all 149 Portugal tests passed. `test_energy_provenance_toggle` failed once under four parallel workers and passed when rerun alone. Its fixture copies the dataset into the shared user cache, which races between workers; CityLearn's test fixture is the same.
+- **Audits and packaging.** The full audit passed: 16 physics scenarios, entity contracts, all 61 packaged datasets and refactor parity. The wheel and sdist passed `twine check`. The installed wheel passed the KPI, BAU and manifest export check outside the checkout.
+- **Portugal REC.** All 19 `pt_rec_*` schemas ran a 96-step episode with `BusinessAsUsualAgent` and `evaluate_v2()` including the native BAU reference: the four `schema.json` files, nine main and six comparison scenarios. Peak memory was 1.0 GB. District BAU-relative ratios were exactly 1, as expected for BAU against its own reference. Longer windows were not run. Each `pt_rec_*` folder is byte-identical to CityLearn `v3.5.0`.
+
+### Credits
+
+**Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)) developed the
+CityLearn 3.4.0 baselines and 3.5.0 datasets and aligned SoftCPS with CityLearn 3.5.0.
+
+[Full changelog](https://github.com/Soft-CPS-Research-Group/Simulator/compare/softcpsrecsimulator-v2.1.1...softcpsrecsimulator-v2.2.0)
+
+## v2.1.1 — 2026-11-16 — native BAU reference for static entity schemas
+
+Release maintainer: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+### What's fixed
+
+- **Native BAU reference with entity-only robustness targets.** `evaluate_v2()` with the native BAU reference (the default) failed on static-topology entity schemas whose robustness events target EV, storage or PV observations, such as Portugal REC-30 robustness. The reference was built in flat mode unless topology was dynamic or demand response was enabled, and the flat layout does not expose those targets. It now uses the entity interface whenever the evaluated environment does.
+
+The BAU agent reads simulator state directly, so its actions and KPIs do not depend on the interface. Datasets, schemas and the API are unchanged.
+
+### Validation
+
+- The full suite passed locally (1,758 tests, 6 skipped), including a new regression test with static topology, the entity interface, EV SOC noise and `evaluate_v2()` with the BAU reference. The full audit passed: physics, entity contracts, all 61 packaged datasets and refactor parity.
+- All 13 Portugal schemas completed a 96-step BAU run with `evaluate_v2()` and the BAU reference. The 12 that also complete on 2.1.0 gave identical KPIs. REC-30 robustness, which failed on 2.1.0, now completes. Windows beyond 96 steps were not rerun.
+
+[Full changelog](https://github.com/Soft-CPS-Research-Group/Simulator/compare/softcpsrecsimulator-v2.1.0...softcpsrecsimulator-v2.1.1)
+
+## v2.1.0 — 2026-11-13 — storage, EV lifecycle and compatibility
+
+Release maintainer: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+### What's new
+
+- **Battery and EV physics.** A battery starts from its configured SOC on activation, including below the discharge reserve. The same EV keeps its identity and its battery evolves through charger removal, re-entry and handover. The energy ledger records standby losses, mobility and explicit arrival energy. CSV and Parquet exports identify the charger that served the vehicle.
+- **BAU and KPIs.** The controller and native BAU use matching equipment, PV settings and outages. The BAU cache retains the latest reference. Cost and net-exchange ratios, community-market comparisons and portfolio aggregation are corrected.
+- **Compatibility and robustness.** Support NumPy 1 and 2, Gymnasium 0.28.1 and 1.x, legacy occupant models and older SAC/MARLISA checkpoints. Keep EV session identifiers and publish complete caches for datasets with nested files. The Portugal mobility verification now reproduces the published phase-power calculation across both NumPy versions.
+
+The Portugal datasets and market settings are preserved. The package is still `softcpsrecsimulator` and the Python import is `citylearn`. Use the `parquet` extra for Portugal. Results involving the corrected paths may differ from 2.0.2. Rerun the controller and reference together when comparing those cases.
+
+### Validation
+
+- The backport passed 1,762 local tests on NumPy 1, with one Windows-only skip, and 16 physical audits. The Portugal mobility tests were run on both NumPy versions after the phase-power verification fix.
+- Short runs covered 4, 30 and 100 members, including active outages in Premium All-in. Market KPIs reconciled against the interval totals. A BAU self-comparison gave a ratio of 1 for every defined relative KPI.
+- The CityLearn UI opened the Portugal export. CSV and Parquet exports of the EV handover displayed identical scorecards. The installed wheel passed the KPI, BAU and manifest export check.
+- In the 600-step local benchmark, mean step time went from 5.33 to 5.22 ms in flat mode and from 9.91 to 9.94 ms in entity mode. These measurements are for that benchmark.
+
+[Full changelog](https://github.com/Soft-CPS-Research-Group/Simulator/compare/softcpsrecsimulator-v2.0.2...softcpsrecsimulator-v2.1.0)
+
+## v2.0.2 — 2026-11-05 — reproducible Portugal datasets and nested downloads
+
+Release owner: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+- Deliver `portugal-realism-4` and `portugal-ev-mobility-1` for all four Portugal
+  communities across 2023/2024: diverse charging sessions, household activity,
+  commercial occupancy and equipment, annual consumption budgets, and irregular
+  local faults and demand-response requests. Preserve labelled stress cases,
+  equipment inventories, nine main scenarios and six matched references.
+- Include the deterministic generator, compact empirical references, assumptions,
+  seed/sensitivity checks and reproducibility evidence. These are synthetic
+  benchmarks, not measurements representative of the Portuguese population.
+- Download nested dataset directories and expose the cache only after a complete,
+  successful download. Failed downloads can be retried without accepting a partial
+  dataset. Add online-loader regressions and fetch the immutable source commit in CI.
+- Allow the command-line interface to start without optional Stable Baselines3;
+  loading an SB3 agent explicitly reports the missing dependency. Keep CLI UTC
+  timestamps compatible with Python 3.9/3.10 and align evaluation time-series
+  exports to executed intervals, excluding the terminal observation. Remove five
+  obsolete partial-load default columns that no longer exist on Building; explicit
+  invalid variable names now fail instead of repeating the preceding column.
+- Keep simulation dynamics, dataset schemas and the OMIE pricing convention
+  unchanged. Old experiment results must retain their original dataset reference;
+  upgrading the default dataset changes the benchmark inputs.
+
+Pre-release data validation passed 161 focused tests, 72 boundary windows,
+27 fault probes and 18 accounting windows; two regenerations produced identical
+Parquet files. Release-wide tests, audits and installed-package verification are
+reported with the GitHub release. No annual controller campaign or MARL training
+is included. Reference-data reuse and empirical limitations are documented in
+[the dataset validation](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/portugal_rec_native/Heldout_2024.md).
+
+Package/import names remain `softcpsrecsimulator` / `citylearn`. The release tag
+and default online dataset ref are `softcpsrecsimulator-v2.0.2`. Install the
+`parquet` extra for the Portugal datasets. Explicit dataset-ref overrides remain
+supported; no schema migration is required.
+
+## v2.0.1 — 2026-11-04 — episode selection and subhourly corrections
+
+Release owner: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+- Honor explicit `random_episode_split=True` and `False` constructor overrides;
+  `None` continues to inherit the schema setting.
+- Compound the configured hourly standby-loss fraction over the physical step,
+  independently of dataset cadence. A 1% hourly loss leaves 99% after one hour
+  at both hourly and 15-minute resolution, within float precision.
+- Convert dataset energy to average step power when autosizing heat pumps,
+  electric heaters and batteries; calculate daily battery peaks over physical
+  24-hour periods. Thermal capacity remains energy for one control step.
+- Retain public energy-command interfaces, explicitly configured equipment, BAU
+  control logic, KPI definitions, dataset files and CSV/Parquet exports.
+  Subhourly SOC, derived KPIs and automatically selected equipment can change;
+  compare matching versions and resolved equipment. No file migration is needed.
+- Keep release documentation concise and use CPU-only PyTorch wheels in hosted
+  CI to avoid runner disk exhaustion; runtime dependency requirements are unchanged.
+
+The corrected runtime passed 1,300 CI tests, the physical-step/topology audit,
+Portuguese winter/summer windows and supported-dataset checks. The common
+standby/autosizing/BAU/reference subset passed 223 local tests. The reviewed
+fixed-command reference reproduces the old baseline exactly when only the old
+loss formula is restored; hourly reference results are unchanged.
+Release CI and installed-distribution checks accompany the GitHub release.
+The two-year campaign and performance measurements below describe the earlier
+runtime: they have not been repeated for this patch, and no new speedup, full
+annual equivalence or empirical equipment calibration is claimed.
+
+Package/import names remain `softcpsrecsimulator` / `citylearn`. The release tag
+and default online dataset ref are `softcpsrecsimulator-v2.0.1`; dataset files
+are unchanged from 2.0.0. Explicit dataset-ref overrides remain supported.
+
+## v2.0.0 — 2026-11-02 — audited-runtime consolidation milestone
+
+- Close the audit, robustness, internal-organization and performance phase by
+  releasing the v1.9.13 runtime as v2.0.0. This major-number milestone introduces
+  no functional change or migration requirement.
+- Preserve physical models, BAU/NormalPolicy, KPI formulas/tolerances, rewards,
+  complete histories, export schemas, dependencies and the current datasets.
+- Keep the distribution name `softcpsrecsimulator` and import namespace `citylearn`.
+  The fork tag is `softcpsrecsimulator-v2.0.0`; the inherited upstream `v2.0.0`
+  tag remains unchanged.
+
+Validation: all 81 runtime Python files match v1.9.13 byte for byte, allowing
+only the version literal in `citylearn/__init__.py` and the release-tag prefix
+in `DataSet.REPOSITORY_TAG`. Online data use the namespaced fork tag so they
+resolve the same dataset content rather than the inherited upstream tag. Explicit
+environment/constructor overrides are preserved and regression-tested. Wheel/sdist
+checks and isolated installed KPI/BAU/manifest exports passed. Datasets, workflows
+and all physical, BAU, KPI and optimization implementations are unchanged.
+The unchanged runtime retains the v1.9.13 validation: 1,186 local integration tests,
+four strict auditors and the nine-case campaign (631,575 transitions; 197,347,896
+physical/accounting checks; 77,603 exact KPI comparisons across seven complete
+historical references). The current release CI and publication checks are recorded
+in the release artifacts. The long campaign is reused, not repeated for renumbering.
+Performance measurements and their method remain in the v1.9.13 entry below.
+
+Scope limits remain unchanged: isolated exact SOC-target misses need diagnosis;
+all observed minimum acceptable service was met. The long campaign used the
+pre-v3.3 inputs, while current v3.3 data passed bounded integration checks.
+Empirical equipment calibration remains outside this validation.
+
+## v1.9.13 — 2026-11-02 — lower-memory histories and faster evaluation
+
+- expose evaluation progress by stage/member/KPI family, with optional callback
+  and auditor progress files; instrumentation does not add values to KPI results.
+- retain complete market and robustness histories in compact lossless
+  representations with bounded window/stream readers and compatible public views.
+- reuse active-population masks within an evaluation and maximum-charge EV
+  feasibility replay within each departure/context, without caching physical state.
+- index deferrable-appliance cycles and reuse observation/forecast preparation
+  within a request, including a narrowly guarded default-reward fast path. Custom
+  rewards retain the full observation contract; state/RNG/physics are unchanged.
+- integrate installed-export checks, regression tests and final long-run evidence.
+
+### Observed two-year campaign performance
+
+Each case executes 70,175 transitions, seed 0, NormalPolicy/BAU and active physical
+checks. RSS is the process high-water mark in MiB; wall time includes load, dispatch,
+independent auditing, final KPI evaluation and export. Baseline and optimized runs
+are separate observations on the same host, not a repeated controlled benchmark.
+
+| Scenario | Peak RSS before → after (MiB) | Total wall before → after | KPI/export before → after (s) |
+|---|---:|---:|---:|
+| Micro4 | 920.5 → 691.6 | 7m04s → 4m31s | 51.7 → 21.1 |
+| Premium All-in | 13,709.7 → 5,333.4 | 4h23m01s → 2h08m40s | 4,667.2 → 479.9 |
+| Core30 Topology | 3,521.1 → 1,844.1 | 57m57s → 26m51s | 646.3 → 110.1 |
+| Core30 Combined | 3,536.2 → 1,849.2 | 52m43s → 27m25s | 647.5 → 112.9 |
+| Core30 Safety | 3,821.7 → 1,899.7 | 50m04s → 29m26s | 290.8 → 115.9 |
+| Core30 Normal | 3,822.7 → 1,902.2 | 50m49s → 29m30s | 293.2 → 116.9 |
+| Core15 | 2,036.3 → 1,158.3 | 24m39s → 14m46s | 162.8 → 65.5 |
+
+Premium All-in peak RSS fell 61.1%, total wall time 51.1%, and KPI/export time
+89.7%. Audit-inclusive mean dispatch time fell from 157.97 to 102.79 ms/transition.
+Core30 Robustness completed in 43m51s at 2,045.8 MiB and Premium Normal in 1h53m07s
+at 5,523.6 MiB. Their old runs were incomplete: no final historical speedup or
+full historical KPI-equivalence claim is made for these two cases.
+
+Validation: all nine cases passed, totaling 631,575 transitions and 197,347,896
+physical/accounting checks. The seven complete historical comparisons matched
+77,603 KPI rows exactly, including identities and undefined values. Independent
+reconciliation passed in all nine cases. All 3,499 campaign input hashes were
+preserved. The campaign used the pre-v3.3 dataset edition on the frozen P8 source;
+it does NOT certify a full annual run of the newer heldout-2024 scenarios now on
+master. The measured input edition is retained at commit
+`8157f605e26fb75651037451fb453b1a48056787`; combine those data with the
+v1.9.13 runtime for reproduction, resolving the archived local paths for your machine.
+Current-master tests and bounded audits are recorded separately in release
+artifacts. Measured runtime modules match the release except for the version string.
+The frozen auditor adds measurement-only dispatch timing; parity of its results
+was checked before running the campaign.
+
+Current-master integration: 1,186 local tests passed (22 known Gymnasium
+float32-bound warnings); four strict auditors, critical lint, performance smoke,
+wheel/sdist checks and isolated wheel export passed.
+
+[Campaign evidence](https://github.com/Soft-CPS-Research-Group/Simulator/releases/download/v1.9.13/campaign-P8-evidence.zip) ·
+[Release integration evidence](https://github.com/Soft-CPS-Research-Group/Simulator/releases/download/v1.9.13/validation-1.9.13.zip).
+
+Compatibility: no information sampling/discard, relaxed tolerances, changes to
+physical equipment, BAU strategy, reward values, tariffs, KPI formulas or export
+schemas. Minimum SOC service was met for every observed departure; isolated exact
+target misses remain, with diagnosis pending. Accounting PASS is not a guarantee
+of target attainment, universal scheduling feasibility or real-equipment calibration.
+
+## v1.9.12 — 2026-11-02 — robustness contracts and maintainable internals
+
+- Support deterministic composition of robustness events, explicit
+  observation/action-space and target contracts, and versioned robustness audit
+  metadata available in evaluation and export sidecars.
+- Share electrical-service allocation between NormalPolicy and runtime limiting;
+  preserve sequential outage budgets and immediate maximum charging BAU rules.
+- Split KPI, entity-observation, loading and robustness responsibilities into
+  focused internal modules while keeping the public facades and export contracts.
+- Make audit references verifiable without silently rewriting expected results;
+  add portable fixtures, physical regressions and installed-distribution checks.
+- Remove temporary release-run notes and frozen working evidence from the source
+  tree. Keep maintained product documentation and immutable historical links.
+- Preserve the Portugal v3.3 datasets and matched 2024 references already merged
+  on master; their edition is separate from the simulator version. Reconcile the
+  documentation bundle after cleanup without regenerating physical inputs.
+
+Validation: the corrected runtime previously passed 1,020 tests, 16 physical
+scenarios, 63 dataset-interface audits, two Portuguese outage windows, six installed
+reference cases and four installed export formats. The release integration is
+retested against current master; current-run evidence is attached to the GitHub
+Release. The performance improvements are released separately in v1.9.13.
+
+Release integration: 1,063 tests passed on current master; all four strict
+auditors, critical lint, performance smoke, wheel/sdist checks and installed-wheel
+KPI/BAU/manifest export passed. No reference snapshots were rewritten.
+
+Compatibility: no change to BAU scheduling, physical models, KPI definitions or
+numerical tolerances. Internal modules are implementation details. Exact target
+SOC is not guaranteed by immediate-charging BAU; minimum service and target service
+remain separate metrics. No empirical equipment calibration is claimed.
+
+Earlier releases, with their original validation notes: [release archive](releases_archive.md).

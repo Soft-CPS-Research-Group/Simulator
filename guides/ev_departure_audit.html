@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EV departure audit: information quality and observed service &mdash; CityLearn 2.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css?v=995e94df" />
+      <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css?v=21c0b90a" />
+      <link rel="stylesheet" type="text/css" href="../_static/citylearn.css?v=867a8231" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b21de401"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CityLearn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Your first simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Moving an existing project to CityLearn v3</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configure and run</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="running_simulations.html">Running Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_reference.html">Schema Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_reference.html">Dataset Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="portugal_rec_datasets.html">Portugal REC Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_unit_contract.html">Data Unit Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces_flat_entity.html">Flat and Entity Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="observations_reference.html">Observations Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions_reference.html">Actions Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_community_reference.html">Multi-Community Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_reference.html">Robustness Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Evaluate</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="baselines.html">Baselines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kpis.html">KPIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard.html">How to read the scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard_kpi_names.html">Default scorecard KPI names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpis_reference.html">KPIs Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KPI_V2_TREE.html">KPI v2 Naming Tree</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualize</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Concepts and tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Core concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citylearn_challenge/index.html">The CityLearn Challenge</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../publications.html">Publications and applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation and performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publishing.html">Publishing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases_archive.html">Earlier releases</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CityLearn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">EV departure audit: information quality and observed service</li>
+      <li class="wy-breadcrumbs-aside">
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/ev_departure_audit.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ev-departure-audit-information-quality-and-observed-service">
+<h1>EV departure audit: information quality and observed service<a class="headerlink" href="#ev-departure-audit-information-quality-and-observed-service" title="Link to this heading"></a></h1>
+<p>Definition: <code class="docutils literal notranslate"><span class="pre">ev-departure-audit-v1</span></code>. The additive family is exported by
+<code class="docutils literal notranslate"><span class="pre">evaluate_v2()</span></code>, final KPI CSVs and the installed distribution. Each name starts
+with <code class="docutils literal notranslate"><span class="pre">building_ev_departure_audit_</span></code> or <code class="docutils literal notranslate"><span class="pre">district_ev_departure_audit_</span></code>.
+The export manifest records this definition, population, denominators and limits.</p>
+<section id="population-and-compatibility">
+<h2>Population and compatibility<a class="headerlink" href="#population-and-compatibility" title="Link to this heading"></a></h2>
+<p>Count actual departure events on active charger instances in the evaluated member
+window, including events
+without a target, vehicle history or observed SOC. A transition away from a
+connection, an identity/session change, or a declared terminal departure is an
+event. An open session at the end of an episode is not an invented departure.
+A missing schedule cannot establish an event and is outside this population.</p>
+<p>Service and feasibility are independent questions. A departure may have known
+observed service but unknown feasibility, or a known physical opportunity but
+missing observed service. Neither unknown case becomes success or failure.</p>
+<p>The historical <code class="docutils literal notranslate"><span class="pre">*_ev_events_*</span></code> and <code class="docutils literal notranslate"><span class="pre">*_ev_performance_*</span></code> names keep their existing
+definitions. In particular, their feasibility helper remains permissive when
+input data is missing; its battery adapters and arrival fallbacks are retained.
+Its invalid/non-finite interval duration now follows that same permissive rule
+instead of attempting an invalid replay. Do not combine historical and audited
+feasibility counts. The default scorecard selects the audited service ratios and
+also includes coverage and unknown counts. Consumers with fixed KPI lists must
+select the new names explicitly; exporting them does not change external jobs.</p>
+</section>
+<section id="counts-and-denominators">
+<h2>Counts and denominators<a class="headerlink" href="#counts-and-denominators" title="Link to this heading"></a></h2>
+<p>For each threshold <code class="docutils literal notranslate"><span class="pre">T</span></code> in <code class="docutils literal notranslate"><span class="pre">target</span></code>, <code class="docutils literal notranslate"><span class="pre">min_acceptable</span></code>, <code class="docutils literal notranslate"><span class="pre">within_tolerance</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Suffix after the family prefix</p></th>
+<th class="head"><p>Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">departures_count</span></code></p></td>
+<td><p>All detected departures, D.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">service_observed_count</span></code></p></td>
+<td><p>Departures with a valid target and finite observed SOC in [0, 1], O.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">service_unknown_count</span></code></p></td>
+<td><p>D − O.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">service_coverage_ratio</span></code></p></td>
+<td><p>O / D.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">T_feasible_count</span></code></p></td>
+<td><p>Confirmed individually feasible departures, F.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">T_infeasible_count</span></code></p></td>
+<td><p>Confirmed individually infeasible departures, I.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">T_unknown_count</span></code></p></td>
+<td><p>Insufficient information, U. D = F + I + U for each T.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">T_coverage_ratio</span></code></p></td>
+<td><p>(F + I) / D.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">T_unknown_REASON_count</span></code></p></td>
+<td><p>One primary reason per unknown departure; reason counts sum to U.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">T_service_met_count</span></code></p></td>
+<td><p>Observed departures meeting the service criterion, M.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">T_service_observed_ratio</span></code></p></td>
+<td><p>M / O, without filtering on feasibility.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">T_feasible_service_observed_count</span></code></p></td>
+<td><p>Confirmed feasible departures with observed service, OF.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">T_feasible_service_met_count</span></code></p></td>
+<td><p>Departures in OF that meet the service criterion, MF.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">T_service_feasible_ratio</span></code></p></td>
+<td><p>MF / OF.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Zero denominators produce <code class="docutils literal notranslate"><span class="pre">None</span></code>/NaN (blank in CSV), not zero or full success.
+District counts sum building counts; district ratios are recomputed from those
+counts, never averaged across buildings.</p>
+<p>The target criterion is SOC ≥ requested SOC. Minimum acceptable service uses
+SOC ≥ target − <code class="docutils literal notranslate"><span class="pre">ev_departure_service_tolerance</span></code>. Symmetric accuracy uses
+abs(SOC − target) ≤ <code class="docutils literal notranslate"><span class="pre">ev_departure_within_tolerance</span></code>. The latter’s feasibility
+test concerns reaching its lower SOC threshold; it does not prove that every
+charging policy can stop inside the symmetric band. Existing numerical SOC
+tolerance is retained.</p>
+<p>Example: four observed departures, two confirmed feasible, one infeasible and
+one unknown. If one feasible and the unknown departure meet the target, coverage
+is 3/4, observed service is 2/4, and service among confirmed feasible departures
+is 1/2. The unknown departure is not credited as confirmed feasible.</p>
+</section>
+<section id="missing-information-exclusive-reasons-in-precedence-order">
+<h2>Missing information: exclusive reasons in precedence order<a class="headerlink" href="#missing-information-exclusive-reasons-in-precedence-order" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">missing_target</span></code>: target absent, non-finite or outside supported SOC units.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">missing_ev</span></code>: no vehicle in the connection history at departure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">missing_battery</span></code>: the recorded vehicle has no battery.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invalid_capacity</span></code>: capacity missing, non-finite or non-positive.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invalid_charger_power</span></code>: charger power missing, non-finite or negative. Zero
+power is valid: initial energy may suffice, subject to standby losses.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invalid_charger_efficiency</span></code>: efficiency missing or outside [0, 1].</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invalid_time_step</span></code>: resolved charger/battery/environment interval missing,
+non-finite or non-positive. There is no implicit one-hour audit fallback.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">missing_arrival_soc</span></code>: no valid boundary SOC. Use the schedule’s current SOC,
+an applicable arrival estimate, or initial SOC at episode index zero; never
+use the post-action departure SOC as its own starting evidence.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unsupported_battery_model</span></code>: a historical adapter does not implement the
+native Battery replay contract. Battery and InventoryBattery are supported.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invalid_battery_parameters</span></code>: native power, efficiency, standby-loss or SOC
+bounds are invalid, or the replay yields a non-finite SOC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">outage_supply_not_replayed</span></code>: the conservative replay fails during a session
+with an outage, and local PV/storage allocation has not been replayed.</p></li>
+</ol>
+<p>No early success shortcut is used for a zero threshold before validating the
+data. Unknown means the audit cannot establish the answer, not that the
+simulation necessarily contains invalid data.</p>
+</section>
+<section id="window-dynamics-and-outage-limits">
+<h2>Window, dynamics and outage limits<a class="headerlink" href="#window-dynamics-and-outage-limits" title="Link to this heading"></a></h2>
+<p>Replay starts at the observed session boundary. It intersects the schedule with
+the connection history, so it cannot borrow charging time before a dynamic
+activation or from an earlier back-to-back session. A window that starts inside
+a session evaluates feasibility from its declared boundary SOC, not from an
+unobserved original arrival. Removed chargers remain available through the
+topology history; a replacement does not duplicate departures scheduled while
+that instance was inactive. Repeated evaluation does not advance the real vehicle, battery,
+episode, or physical trajectory.</p>
+<p>The replay remains individual, conditioned on the existing electrical-service
+limits and base-load estimation. It is not a joint scheduler for competing EVs
+and does not prove joint service feasibility. Default model parameters are part
+of the declared model, not field measurements. It does not reconstruct all
+robustness events or solve local outage dispatch.</p>
+<p>During an outage the audit conservatively assigns zero charging to the replay.
+If subsequent charging still reaches the threshold, that is sufficient for this
+individual test. If it does not, the result is unknown rather than a false
+infeasibility claim: actual local generation/storage may have served the EV.
+Observed departure service is still reported independently. Deferred charging
+that is recovered before departure is not missed service. Tests include both
+recovery and an actual departure shortfall with physical invariants enabled.</p>
+</section>
+<section id="validation-scope">
+<h2>Validation scope<a class="headerlink" href="#validation-scope" title="Link to this heading"></a></h2>
+<p>Regression cases cover each missing-data reason, analytical mixed populations,
+threshold differences, zero denominators, censored and partial sessions,
+activation boundaries, back-to-back sessions, removed chargers, reset,
+non-mutating evaluation, outage recovery/shortfall and CSV/manifest exports.
+Historical KPI tests remain part of the compatibility check. This iteration
+does not modify datasets, physical dispatch, rewards or market pricing, and
+does not claim an annual campaign or calibration against real equipment.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jose Ramon Vazquez-Canteli, Kingsley Nweye, Zoltan Nagy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

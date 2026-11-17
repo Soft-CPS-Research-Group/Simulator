@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auditing demand response, thermal service and equity &mdash; CityLearn 2.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css?v=995e94df" />
+      <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css?v=21c0b90a" />
+      <link rel="stylesheet" type="text/css" href="../_static/citylearn.css?v=867a8231" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b21de401"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CityLearn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Your first simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Moving an existing project to CityLearn v3</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configure and run</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="running_simulations.html">Running Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_reference.html">Schema Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_reference.html">Dataset Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="portugal_rec_datasets.html">Portugal REC Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_unit_contract.html">Data Unit Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces_flat_entity.html">Flat and Entity Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="observations_reference.html">Observations Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions_reference.html">Actions Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_community_reference.html">Multi-Community Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_reference.html">Robustness Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Evaluate</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="baselines.html">Baselines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kpis.html">KPIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard.html">How to read the scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard_kpi_names.html">Default scorecard KPI names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpis_reference.html">KPIs Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KPI_V2_TREE.html">KPI v2 Naming Tree</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualize</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Concepts and tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Core concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citylearn_challenge/index.html">The CityLearn Challenge</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../publications.html">Publications and applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation and performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publishing.html">Publishing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases_archive.html">Earlier releases</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CityLearn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Auditing demand response, thermal service and equity</li>
+      <li class="wy-breadcrumbs-aside">
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/kpi_family_audit.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="auditing-demand-response-thermal-service-and-equity">
+<h1>Auditing demand response, thermal service and equity<a class="headerlink" href="#auditing-demand-response-thermal-service-and-equity" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">kpi-families-audit-v1</span></code> and <code class="docutils literal notranslate"><span class="pre">demand-response-audit-v1</span></code> check thermal service,
+equity and demand-response accounting. Available from v1.9.8, they check model
+consistency without changing dispatch, settlement or rewards. They do not
+calibrate the model against real equipment.</p>
+<section id="interfaces-and-evidence">
+<h2>Interfaces and evidence<a class="headerlink" href="#interfaces-and-evidence" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">env.get_kpi_family_audit()</span></code> returns member/district thermal populations and
+district equity coverage. It accepts the same optional <code class="docutils literal notranslate"><span class="pre">comfort_band</span></code>,
+<code class="docutils literal notranslate"><span class="pre">control_condition</span></code> and <code class="docutils literal notranslate"><span class="pre">baseline_condition</span></code> as evaluation. It is read-only.
+V2 adds <code class="docutils literal notranslate"><span class="pre">building_thermal_service_audit_*</span></code>, <code class="docutils literal notranslate"><span class="pre">district_thermal_service_audit_*</span></code>
+and <code class="docutils literal notranslate"><span class="pre">district_equity_audit_*</span></code>. The default scorecard pairs service rates with
+coverage. The export manifest identifies definitions, DR preparation/aggregation
+and the resolved reward class, configured attributes and available public
+parameters. Custom reward semantics still require inspection. Core settlement
+does not automatically add DR cash to the grid bill or reward.</p>
+<p>Thermal/equity evaluation supports flat and entity interfaces. Demand response
+continues to require entity. Simultaneous overlapping DR requests remain explicitly
+unsupported; the existing rejection is preserved. No UI application is modified.</p>
+</section>
+<section id="demand-response">
+<h2>Demand response<a class="headerlink" href="#demand-response" title="Link to this heading"></a></h2>
+<p>The baseline is the mean of the <strong>completed</strong> pre-event net-power samples. The
+preparation interval count is <code class="docutils literal notranslate"><span class="pre">ceil(baseline_window_seconds</span> <span class="pre">/</span> <span class="pre">step_seconds)</span></code>, with
+at least one interval, so the requested duration is never rounded down. A 3600 s
+window needs four 900 s samples or two 2500 s samples. The effective duration is
+reported. This does not resample a dataset or create history before an episode.</p>
+<p>The preparation period and settled event interval must have stable structural
+topology. A member/asset change makes the reference invalid, including after an
+initially valid cached baseline. Invalid intervals retain requested energy but
+receive no inferred delivery, revenue or penalty. They are excluded from valid
+service denominators and expose a reason: insufficient history, nonfinite history,
+no members or topology change. A lower penalty due to missing reference is not
+evidence of better control. A rolling baseline remains an operational reference,
+not a counterfactual causal model; previous load/DR behaviour can affect it.</p>
+<p>For step duration <code class="docutils literal notranslate"><span class="pre">h</span></code>, baseline power <code class="docutils literal notranslate"><span class="pre">B</span></code>, actual power <code class="docutils literal notranslate"><span class="pre">P</span></code>, target <code class="docutils literal notranslate"><span class="pre">T</span></code> and
+tolerance <code class="docutils literal notranslate"><span class="pre">epsilon</span></code>, in the declared <strong>load perspective</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">up</span></code>: delivered power is <code class="docutils literal notranslate"><span class="pre">P</span> <span class="pre">-</span> <span class="pre">B</span></code>; <code class="docutils literal notranslate"><span class="pre">down</span></code>: <code class="docutils literal notranslate"><span class="pre">B</span> <span class="pre">-</span> <span class="pre">P</span></code>.</p></li>
+<li><p>Signed delivered energy is delivered power times <code class="docutils literal notranslate"><span class="pre">h</span></code>.</p></li>
+<li><p>Credited energy is <code class="docutils literal notranslate"><span class="pre">min(max(delivered_power,</span> <span class="pre">0),</span> <span class="pre">T)</span> <span class="pre">*</span> <span class="pre">h</span></code>.</p></li>
+<li><p>Shortfall is <code class="docutils literal notranslate"><span class="pre">max(T</span> <span class="pre">-</span> <span class="pre">delivered_power</span> <span class="pre">-</span> <span class="pre">epsilon,</span> <span class="pre">0)</span> <span class="pre">*</span> <span class="pre">h</span></code>.</p></li>
+<li><p>Revenue and penalty multiply their corresponding energy by the declared prices;
+net revenue is revenue minus penalty. Compliance is credited / valid requested
+energy. No valid requested energy gives an undefined rate.</p></li>
+</ul>
+<p>Member signed delivery, requested energy and cash are additive. Member credit is
+the <strong>uncapped positive contribution</strong>; member shortfall uses an equal share of
+the target and does not apply district tolerance. They are allocation diagnostics,
+not additive versions of the district credited energy or shortfall. For example,
+two members delivering +2 and -3 kW against a 2 kW downward request over 15 minutes
+give district delivery -0.25 kWh, credit 0, shortfall 0.75 kWh. Individual credits
+sum to 0.5 kWh and individual shortfalls to 1 kWh; cash still reconciles. These
+established allocation rules are unchanged.</p>
+<p>Request IDs must be unique. An optional request-file <code class="docutils literal notranslate"><span class="pre">purpose</span></code> column or
+<code class="docutils literal notranslate"><span class="pre">demand_response.request_purposes</span></code> map declares <code class="docutils literal notranslate"><span class="pre">service</span></code>, <code class="docutils literal notranslate"><span class="pre">stress</span></code> or <code class="docutils literal notranslate"><span class="pre">unspecified</span></code>.
+The map takes precedence and unknown IDs/labels are rejected. Without a
+declaration the purpose is <strong>unspecified</strong>. Feasibility, purpose and observed
+fulfilment are separate questions; a failed request is never automatically called
+stress. This audit does not prove joint DR scheduling feasibility.</p>
+<p>District <code class="docutils literal notranslate"><span class="pre">demand_response_audit_{all|service|stress|unspecified}_*</span></code> metrics expose
+unique events, active/valid interval counts, exclusion reasons, requested/valid
+requested energy, signed delivery, credit, shortfall and cash. Baseline coverage
+is valid / active intervals; energy coverage is valid requested / requested energy.
+Empty denominators are undefined, not an automatic success.</p>
+</section>
+<section id="comfort-and-resilience">
+<h2>Comfort and resilience<a class="headerlink" href="#comfort-and-resilience" title="Link to this heading"></a></h2>
+<p>The evaluation population is <strong>executed intervals while a member is active</strong>.
+An unexecuted current observation is excluded even during a partial episode.
+Inactive gaps never become fictitious zero-temperature samples. An occupied
+interval has finite occupancy greater than zero. Temperature, both setpoints and
+band must be finite, band nonnegative and heating setpoint no greater than cooling.
+Unknown occupancy and unevaluable occupied samples have explicit counts/coverage.</p>
+<p>Cold means <code class="docutils literal notranslate"><span class="pre">temperature</span> <span class="pre">&lt;</span> <span class="pre">heating_setpoint</span> <span class="pre">-</span> <span class="pre">band</span></code>; hot means
+<code class="docutils literal notranslate"><span class="pre">temperature</span> <span class="pre">&gt;</span> <span class="pre">cooling_setpoint</span> <span class="pre">+</span> <span class="pre">band</span></code>. Equality is comfortable. Rates divide
+discomfort intervals by evaluated occupied intervals, not person count. Native
+per-interval building bands are honoured unless an explicit evaluation override
+is supplied. The legacy rolling ratios now use cumulative observed occupancy;
+cold/hot deviation min/max/mean condition on actual occupied violations. No
+violation gives undefined severity, not a fabricated zero deviation.</p>
+<p>The audit exposes occupied/evaluated/discomfort hours and cold/hot degree-hours.
+Degree-hours use absolute deviation from the corresponding setpoint, restricted
+to violating intervals. During outages, the same definitions apply to the
+occupied outage population. No evaluated occupied outage sample gives an
+undefined outage rate. District audit rates pool exposure and energy before
+division; historical district comfort aggregates retain their member-mean form.</p>
+<p>Service energy covers space cooling, space heating, hot water and base electricity.
+It sums demand energy across those services; it is <strong>not primary electrical
+acquisition</strong>. Device/demand series are converted from dataset resolution to
+control-step kWh; thermal storage balances already use control-step kWh. Deficit
+is calculated separately for each service before summing, so oversupply of one
+cannot cancel an unmet demand elsewhere. The legacy unserved-energy caller also
+uses these corrected units/component caps. This is reporting, not a dispatch fix.</p>
+<p><code class="docutils literal notranslate"><span class="pre">unserved_service_ratio</span></code> is total deficit / total known expected service energy;
+the outage variant restricts both to known outage intervals. Missing/negative
+energy inputs exclude that interval and reduce energy coverage. No expected
+energy gives undefined audit ratios. The historical low-level zero-demand
+unserved function still returns zero for compatibility; use the audit’s population
+and coverage to distinguish zero, unknown and not applicable. Appliances and EV
+departure service retain their dedicated audits from iterations 1 and 2.</p>
+</section>
+<section id="equity">
+<h2>Equity<a class="headerlink" href="#equity" title="Link to this heading"></a></h2>
+<p>Relative benefit remains <code class="docutils literal notranslate"><span class="pre">100</span> <span class="pre">*</span> <span class="pre">(reference_cost</span> <span class="pre">-</span> <span class="pre">actual_cost)</span> <span class="pre">/</span> <span class="pre">reference_cost</span></code>.
+Finite costs and strictly positive reference cost are required. The audit reports
+eligible population, excluded unknown/nonpositive-reference counts and coverage.
+Costs use each member’s executed active participation and the <strong>actual evaluation
+conditions</strong>, which appear in the V2 attributes. Different participation periods
+remain different exposures; this is relative bill benefit, not equal opportunity.</p>
+<p>Losers include eligible negative benefits. Gini and top-20 concentration use the
+nonnegative part, retaining zero positions in the eligible population. Top-20 uses
+<code class="docutils literal notranslate"><span class="pre">ceil(0.2</span> <span class="pre">*</span> <span class="pre">eligible_members)</span></code>. No positive benefit mass makes both undefined.
+The audit independently uses a sorted-rank Gini identity and is checked against
+the legacy pairwise calculation and hand examples. Read concentration with losers
+and coverage. BPR retains manually declared rich/poor groups and positive-part
+group means; absent/invalid groups or a nonpositive rich mean are undefined.</p>
+</section>
+<section id="validation-and-bounded-real-runs">
+<h2>Validation and bounded real runs<a class="headerlink" href="#validation-and-bounded-real-runs" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/audit/audit_kpi_families.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--schema<span class="w"> </span>data/datasets/pt_rec_100/evaluation/rec_100_allin.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--request-id<span class="w"> </span>development_dr_1<span class="w"> </span>--policy<span class="w"> </span>normal<span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output<span class="w"> </span>/tmp/dr-audit.json
+</pre></div>
+</div>
+<p>The CLI includes the required preparation and terminal observation. It independently
+reconstructs DR validity, energy/cash and additive allocations from completed raw
+power samples; it compares exported district DR totals. Thermal/equity evidence is
+a snapshot of the separately tested audit populations, not a second physical model.
+Tolerance is <code class="docutils literal notranslate"><span class="pre">1e-5</span> <span class="pre">+</span> <span class="pre">1e-7</span> <span class="pre">*</span> <span class="pre">max(abs(actual),</span> <span class="pre">abs(expected))</span></code> in the compared units.
+An invalid reference can pass accounting consistency while its evaluation quality
+remains incomplete; the report keeps these statuses separate.</p>
+<p>Regression tests cover independent examples, zero/unknown denominators, negative
+benefits, partial/inactive participation, native bands/overrides, 60/900/3600 s
+units, already-scaled thermal tanks, duplicate IDs, invalidated cached references,
+purpose groups, read-only queries and reward preservation. The eight Premium
+development requests are exercised without editing inputs. The 2023 fourth request
+coincides with retirement of Member_093’s PV at index 30696: all its 16 intervals
+have an invalid structural reference. The other seven have complete references.
+The inputs declare no purpose, so all remain unspecified.</p>
+<p>These corrections require rerunning affected comfort, resilience and DR analyses.
+They do not claim annual validation, equal controller service, global optimality,
+an empirical thermal model or calibration. Full temporal/data alignment and
+reproducibility remain iteration 6; long-run resource validation remains iteration 7.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jose Ramon Vazquez-Canteli, Kingsley Nweye, Zoltan Nagy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

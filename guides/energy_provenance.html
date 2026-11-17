@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Energy provenance and carbon accounting &mdash; CityLearn 2.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css?v=995e94df" />
+      <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css?v=21c0b90a" />
+      <link rel="stylesheet" type="text/css" href="../_static/citylearn.css?v=867a8231" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b21de401"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CityLearn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Your first simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Moving an existing project to CityLearn v3</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configure and run</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="running_simulations.html">Running Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_reference.html">Schema Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_reference.html">Dataset Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="portugal_rec_datasets.html">Portugal REC Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_unit_contract.html">Data Unit Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces_flat_entity.html">Flat and Entity Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="observations_reference.html">Observations Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions_reference.html">Actions Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_community_reference.html">Multi-Community Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_reference.html">Robustness Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Evaluate</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="baselines.html">Baselines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kpis.html">KPIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard.html">How to read the scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard_kpi_names.html">Default scorecard KPI names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpis_reference.html">KPIs Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KPI_V2_TREE.html">KPI v2 Naming Tree</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualize</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Concepts and tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Core concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citylearn_challenge/index.html">The CityLearn Challenge</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../publications.html">Publications and applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation and performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publishing.html">Publishing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases_archive.html">Earlier releases</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CityLearn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Energy provenance and carbon accounting</li>
+      <li class="wy-breadcrumbs-aside">
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/energy_provenance.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="energy-provenance-and-carbon-accounting">
+<h1>Energy provenance and carbon accounting<a class="headerlink" href="#energy-provenance-and-carbon-accounting" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">evaluate_v2()</span></code> provenance families are <code class="docutils literal notranslate"><span class="pre">building_energy_provenance_*</span></code> and
+<code class="docutils literal notranslate"><span class="pre">district_energy_provenance_*</span></code>. The definition version is <strong>1.1</strong>; the complete
+KPI contract version is <strong>1.9.0</strong>. Both are present in environment metadata,
+DataFrame attributes and the JSON manifest accompanying exported KPIs.</p>
+<section id="boundary-and-convention">
+<h2>Boundary and convention<a class="headerlink" href="#boundary-and-convention" title="Link to this heading"></a></h2>
+<p>The accounting boundary contains active member AC buses, stationary electrical
+batteries and connected vehicle batteries. It follows actual terminal transfers
+and changes in stored energy. Thermal tanks remain part of electrical end use;
+the ledger does not claim to trace heat into subsequent thermal services.</p>
+<p>Each member’s AC bus is mixed proportionally over the control interval. Each
+battery is mixed proportionally and all its operations retain their order. A
+linear balance resolves energy charged and discharged within the same interval,
+including transfers between several storages. This is an accounting convention,
+not a claim to identify electrons or the chronology inside a sampled interval.
+No counter changes actions, physical SOC, degradation, rewards or prices.</p>
+<p>Only executed intervals while a member is active contribute energy, PV, cost and
+carbon totals. The terminal observation is not another dispatched interval.
+Completed flows survive member removal and re-entry; recommissioning still starts
+the physical equipment from its configured initial state. The ledger classifies
+retired inventory as an exit and the new initial inventory as unknown input.</p>
+<p>During an outage, PV availability that cannot serve load or charge storage is
+assigned to <code class="docutils literal notranslate"><span class="pre">curtailment</span></code>. It remains part of available generation and is excluded
+from useful load and instantaneous absorption. This is rejected local generation,
+not an external grid export. <code class="docutils literal notranslate"><span class="pre">Building.pv_curtailment</span></code> exposes the interval series.</p>
+<p>PV generated after reset is the current generation cohort. Grid energy carries
+its acquisition carbon mass. Initial SOC and imposed arrival SOC have unknown
+external origin and unknown carbon, even if historically renewable. Producer
+identity survives local sharing and storage. The export manifest contains sparse
+source/producer/recipient/destination totals; no full producer-by-member time
+series is retained.</p>
+<p>With financial settlement enabled, the ledger follows its actual local energy
+allocation, including a disabled local-trading setting. With financial settlement
+disabled, it uses same-interval community netting: imports are allocated with
+member weights and demand caps; exports are allocated proportionally. The
+metadata states which convention applied. No financial transaction is invented.</p>
+</section>
+<section id="metric-suffixes">
+<h2>Metric suffixes<a class="headerlink" href="#metric-suffixes" title="Link to this heading"></a></h2>
+<p>Prepend <code class="docutils literal notranslate"><span class="pre">district_energy_provenance_</span></code> or <code class="docutils literal notranslate"><span class="pre">building_energy_provenance_</span></code> to the
+following suffixes. Energy is in kWh, carbon mass in kgCO2 and ratios are unitless.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Suffix</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pv_generated_kwh</span></code></p></td>
+<td><p>PV produced within the episode and active boundary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pv_load_direct_kwh</span></code></p></td>
+<td><p>PV delivered to electrical end use without passing through a battery. Includes direct community sharing.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pv_load_after_storage_kwh</span></code></p></td>
+<td><p>PV delivered to electrical end use after stationary or EV storage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pv_load_kwh</span></code></p></td>
+<td><p>Sum of direct and after-storage useful building end use.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pv_mobility_kwh</span></code></p></td>
+<td><p>Known PV inventory leaving in a departing connected vehicle. This is delivery to mobility, not measured trip consumption.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pv_grid_export_kwh</span></code></p></td>
+<td><p>PV reaching the external grid, including delayed battery or V2G export.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pv_loss_kwh</span></code></p></td>
+<td><p>PV lost in battery/charger conversion and standby.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pv_curtailment_kwh</span></code></p></td>
+<td><p>Available PV rejected during islanded operation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pv_stored_kwh</span></code></p></td>
+<td><p>PV remaining inside connected/active storage. Not final consumption.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pv_asset_exit_kwh</span></code></p></td>
+<td><p>Inventory leaving with a removed stationary asset/member.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pv_external_reset_kwh</span></code></p></td>
+<td><p>Old inventory retired when an external SOC assignment replaces its provenance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unknown_input_kwh</span></code></p></td>
+<td><p>Initial inventory and imposed external SOC entering the accounting boundary.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">unknown_{destination}_kwh</span></code></p></td>
+<td><p>Energy with unknown origin at the corresponding destination.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">grid_{destination}_kwh</span></code></p></td>
+<td><p>Energy acquired from the grid at the corresponding destination.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">external_import_kwh</span></code></p></td>
+<td><p>External acquisition after the declared sharing/netting convention.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">external_purchase_emissions_kgco2</span></code></p></td>
+<td><p>External imports multiplied by the recipient’s contemporaneous carbon intensity. No export credit.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">carbon_{destination}_kgco2</span></code></p></td>
+<td><p>Known acquisition carbon carried to load, mobility, export, loss, stored stock, asset exit or external reset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">carbon_unknown_{destination}_kwh</span></code></p></td>
+<td><p>Energy whose acquisition carbon is unknown; it is not claimed to have zero carbon.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">local_import_kwh</span></code>, <code class="docutils literal notranslate"><span class="pre">local_export_kwh</span></code></p></td>
+<td><p>Internal transfers, also split by <code class="docutils literal notranslate"><span class="pre">pv_</span></code> and <code class="docutils literal notranslate"><span class="pre">grid_</span></code> prefixes. These are not additional final destinations.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Destination substitutions are <code class="docutils literal notranslate"><span class="pre">load</span></code>, <code class="docutils literal notranslate"><span class="pre">mobility</span></code>, <code class="docutils literal notranslate"><span class="pre">grid_export</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code>, <code class="docutils literal notranslate"><span class="pre">stored</span></code>,
+<code class="docutils literal notranslate"><span class="pre">asset_exit</span></code>, <code class="docutils literal notranslate"><span class="pre">external_reset</span></code> and <code class="docutils literal notranslate"><span class="pre">curtailment</span></code>. Recipient-level PV use can exceed that member’s
+own generation because energy can be received from neighbours. Ratios and cohort
+closure are therefore published at district level:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pv_useful_building_ratio</span> <span class="pre">=</span> <span class="pre">pv_load_kwh</span> <span class="pre">/</span> <span class="pre">pv_generated_kwh</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pv_useful_with_mobility_ratio</span> <span class="pre">=</span> <span class="pre">(pv_load_kwh</span> <span class="pre">+</span> <span class="pre">pv_mobility_kwh)</span> <span class="pre">/</span> <span class="pre">pv_generated_kwh</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pv_balance_residual_kwh</span></code>: generation minus all eight final destinations above.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grid_balance_residual_kwh</span></code> and <code class="docutils literal notranslate"><span class="pre">unknown_balance_residual_kwh</span></code>: acquisition or
+unknown input minus the corresponding destinations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">carbon_balance_residual_kgco2</span></code>: external acquisition emissions minus known
+carbon at all destinations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">storage_max_residual_kwh</span></code> and <code class="docutils literal notranslate"><span class="pre">bus_max_residual_kwh</span></code>: largest reconciliation
+discrepancy observed during accounting.</p></li>
+</ul>
+<p>A zero PV denominator produces an undefined ratio (<code class="docutils literal notranslate"><span class="pre">None</span></code>/NaN), not an artificial
+zero or 100%. Stored energy, losses, curtailment and asset exits are excluded from useful-use
+ratios. Carbon acquisition and carbon use answer different questions; <strong>do not
+add them together</strong>. Unknown-carbon energy is explicitly reported separately.</p>
+<p>BAU values append <code class="docutils literal notranslate"><span class="pre">business_as_usual</span></code> before the unit. Differences append
+<code class="docutils literal notranslate"><span class="pre">delta_to_business_as_usual</span></code>. The sidecar uses the same ledger, boundary,
+configuration, timestep and definition version as the controlled simulation.</p>
+</section>
+<section id="compatibility">
+<h2>Compatibility<a class="headerlink" href="#compatibility" title="Link to this heading"></a></h2>
+<p>Existing PV self-consumption remains <strong>instantaneous absorption</strong>, which includes
+energy entering storage. It does not prove final useful consumption. Existing
+emissions remain the sum of positive member imports before sharing. These old
+names are retained. Definition 1.1 corrects rejected PV being counted as load or
+absorption during outages and excludes unexecuted/inactive intervals from totals.
+Recompute affected experiments; historical 1.0 totals are not interchangeable with
+1.1 results. Recompute using the provenance family to
+answer provenance or external-boundary questions. Historical aggregated exports
+alone cannot reconstruct storage origins; rerun those experiments.</p>
+<p>For example, 1 kWh PV charged and later exported gives 1 kWh of
+<code class="docutils literal notranslate"><span class="pre">pv_grid_export_kwh</span></code>, zero useful PV consumption and zero PV stock at the end.
+An external purchase of 1 kWh at 0.2 kgCO2/kWh gives 0.2 kgCO2 even if gross member
+imports before sharing total 3.5 kWh.</p>
+<p>BESS charge/discharge and charger charge/V2G totals use gross terminal movements
+before netting opposing calls in one interval. Their sum is throughput; net
+exchange and physical dispatch retain their definitions. Legacy custom facades
+without gross traces retain a net-series approximation. An explicit replacement
+of a device terminal reading also replaces its gross trace with that signed net
+reading; it cannot recover unrecorded operations.</p>
+<p>See <a class="reference internal" href="independent_balance_audit.html"><span class="std std-doc">independent balance audit</span></a> for the separate
+reference calculation, tolerances, command and limits. Definition 1.1 and that
+audit are included from v1.9.7 and are absent from v1.9.6.</p>
+</section>
+<section id="ev-feasibility">
+<h2>EV feasibility<a class="headerlink" href="#ev-feasibility" title="Link to this heading"></a></h2>
+<p>Departure feasibility now replays the concrete battery implementation in
+isolated, session-sized buffers. It respects asymmetric power, maximum SOC,
+charger AC losses, battery curves, capacity at the beginning of the session,
+service headroom, deadbands and standby losses. A blocked interval does not end
+the search. The final connected SOC is evaluated rather than an earlier peak.
+The query leaves actual battery arrays, degradation, RNG and episode time intact.</p>
+<p>This is an individual maximum-charging replay under the declared service and
+base-load constraints. It is not a joint schedule for all vehicles, nor a proof
+of global optimality for arbitrary custom non-monotone efficiency models. Legacy
+adapters without a native physical battery retain a compatibility approximation;
+missing physical/arrival data retains the legacy permissive classification.</p>
+</section>
+<section id="reproducibility-and-limitations">
+<h2>Reproducibility and limitations<a class="headerlink" href="#reproducibility-and-limitations" title="Link to this heading"></a></h2>
+<p>Each KPI export writes a sibling <code class="docutils literal notranslate"><span class="pre">.manifest.json</span></code> containing the effective schema,
+market settings, seed, episode window, timestep, definitions, package version,
+Git revision/dirty state when available, SHA-256 hashes of referenced input files,
+accounting totals and source/destination evidence. A wheel outside a Git checkout
+reports the commit as unavailable rather than borrowing an unrelated revision.</p>
+<p>Provenance does not add electrochemical battery temperature, detailed road-trip
+energy, distribution power flow or field validation. Vehicle returns with imposed
+SOC start a new unknown cohort. Escalators remain unsupported in the entity
+interface; DR and dynamic topology require entity. Robustness catalogues targeting
+entity features are not automatically translated into flat observations. Future-data access by some
+reference policies and controller-quality comparisons are separate work.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jose Ramon Vazquez-Canteli, Kingsley Nweye, Zoltan Nagy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

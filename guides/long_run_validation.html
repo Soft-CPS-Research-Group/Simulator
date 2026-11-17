@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Continuous campaign and resource evidence &mdash; CityLearn 2.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css?v=995e94df" />
+      <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css?v=21c0b90a" />
+      <link rel="stylesheet" type="text/css" href="../_static/citylearn.css?v=867a8231" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b21de401"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CityLearn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Your first simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Moving an existing project to CityLearn v3</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configure and run</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="running_simulations.html">Running Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_reference.html">Schema Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_reference.html">Dataset Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="portugal_rec_datasets.html">Portugal REC Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_unit_contract.html">Data Unit Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces_flat_entity.html">Flat and Entity Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="observations_reference.html">Observations Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions_reference.html">Actions Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_community_reference.html">Multi-Community Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_reference.html">Robustness Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Evaluate</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="baselines.html">Baselines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kpis.html">KPIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard.html">How to read the scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard_kpi_names.html">Default scorecard KPI names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpis_reference.html">KPIs Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KPI_V2_TREE.html">KPI v2 Naming Tree</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualize</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Concepts and tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Core concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citylearn_challenge/index.html">The CityLearn Challenge</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../publications.html">Publications and applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation and performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publishing.html">Publishing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases_archive.html">Earlier releases</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CityLearn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Continuous campaign and resource evidence</li>
+      <li class="wy-breadcrumbs-aside">
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/long_run_validation.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="continuous-campaign-and-resource-evidence">
+<h1>Continuous campaign and resource evidence<a class="headerlink" href="#continuous-campaign-and-resource-evidence" title="Link to this heading"></a></h1>
+<p>The offline <code class="docutils literal notranslate"><span class="pre">long-run-audit-v1</span></code> CLI keeps runtime physical
+checks active throughout a continuous episode and records the exact schema,
+loaded-input hashes, software versions, BusinessAsUsualAgent parameters and audit-script
+hash. It does not change datasets, dispatch, market pricing or rewards.</p>
+<section id="run">
+<h2>Run<a class="headerlink" href="#run" title="Link to this heading"></a></h2>
+<p>Run this repository script from a source checkout of v1.9.10 or later, with the
+required dataset available. It is not an installed PyPI console command.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/audit/audit_long_run.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--schema<span class="w"> </span>data/datasets/pt_rec_4/evaluation/rec_4.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--start<span class="w"> </span><span class="m">0</span><span class="w"> </span>--transitions<span class="w"> </span><span class="m">35040</span><span class="w"> </span>--block-steps<span class="w"> </span><span class="m">960</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span>--output<span class="w"> </span>/tmp/micro4-year2023
+</pre></div>
+</div>
+<p>The output directory must be empty. The requested window must contain its terminal
+observation: 35,040 dispatched 900-second intervals require 35,041 observations.
+The CLI preserves the declared native market: internal price 80% of purchase
+price, zero export price. Other market contracts require their own audit.</p>
+<p>The BAU is identified by its definition version, parameters and observation access. Declared robustness seeds
+and events remain enabled; <code class="docutils literal notranslate"><span class="pre">--seed</span></code> does not silently rewrite explicit schema
+seeds. The campaign is not a comparison between controllers.</p>
+</section>
+<section id="what-is-checked">
+<h2>What is checked<a class="headerlink" href="#what-is-checked" title="Link to this heading"></a></h2>
+<p>Measurements are captured after dispatch/settlement and before advancing topology
+to the next interval, so equipment replacement cannot rewrite an executed sample.
+Every executed interval checks finite reward, active member identities, measured
+device terminals against the member bus, excess local energy as curtailment in a
+grid outage, net import/export against settlement, internal energy/cash balance
+and native prices. Independent streaming totals are retained by member identity,
+including removed/re-entered members, and compared with final member/district
+KPIs. Appliance physical energy is reconciled with the service audit. Runtime
+checks independently enforce storage energy changes, SOC and equipment powers.</p>
+<p>The final report also checks the production provenance ledger’s cumulative
+energy/carbon residuals, records source/destination inventories and distinguishes
+service coverage/unknowns from successful departures. Capacity changes are the
+model’s simplified degradation, not empirically validated ageing.</p>
+<p>This CLI does not solve a second independent producer/recipient flow network at
+every annual interval. The independent-flow audit from iteration 4 and the
+physical CI matrix provide that separate, bounded evidence. The long campaign
+extends duration and checks aggregate/meter consistency; it does not relabel
+production provenance residuals as an independent provenance proof.</p>
+</section>
+<section id="files-and-resources">
+<h2>Files and resources<a class="headerlink" href="#files-and-resources" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">intervals.csv</span></code> contains executed global indexes, active member counts, energy,
+cost and outage membership. <code class="docutils literal notranslate"><span class="pre">summary.json</span></code> is replaced atomically after each
+block and on completion/failure. Errors identify the failed phase and dispatch
+index where applicable. Progress is evidence, not a resumable environment snapshot.</p>
+<p><code class="docutils literal notranslate"><span class="pre">kpis.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">service.json</span></code> and <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> accompany successful runs. Undefined
+EV ratios are JSON null; physical non-finite values fail the audit. Failed runs
+are not accepted even if they have partial exports.</p>
+<p>RSS and peak RSS are Linux process measurements, including the interpreter,
+loaded inputs, runtime histories and audit overhead. Blocks record duration,
+active population, settlement-history length and retained provenance aggregate
+bytes. These distinguish expected episode-history growth from aggregate growth;
+they do not establish leak freedom for every configuration or reset pattern.
+Resource limits are measured after load/reset, at blocks and after final
+evaluation/export; they are not an OS-level hard memory/time reservation.</p>
+<p>The declared campaign uses an 8,192 MiB RSS threshold and 14,400 seconds per case.
+The report records actual observed consumption and whether each threshold passed.
+Extrapolating an intermediate Premium window to a year is indicative: changes of
+topology, seasonal activity, allocator behaviour and final evaluation can change
+both time and memory. A projection is not annual validation.</p>
+</section>
+<section id="selected-campaign">
+<h2>Selected campaign<a class="headerlink" href="#selected-campaign" title="Link to this heading"></a></h2>
+<p>The prepared sequence starts with a full 2023 year in Micro-4, then a full 2023
+year in Core-30 with dynamic topology/robustness, then 60 continuous days in the
+nominal Premium-100 configuration from global index 39,360. The latter crosses
+29 February and the spring 2024 DST transition. Actual active members, not nominal
+configuration names, determine reported participation.</p>
+<p>The machine-readable plan and final case reports identify precisely which stages
+passed, failed or were not run. Prior iteration 6 windows supply separately scoped
+calendar/replay evidence, including autumn 2024. No claim of continuous execution
+of both years in every Portuguese configuration follows from these selected runs.
+Empirical calibration remains iteration 8 and requires appropriate measurements.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">topology_events</span></code> field counts topology log entries, including replay before
+the selected window. It is not a count of structural events inside that window.
+The campaign summary separately reports declared events inside executed indexes.
+Service shortfalls are reported alongside coverage; a feasible individual replay
+does not certify joint scheduling feasibility or policy success.</p>
+</section>
+<section id="local-selected-campaign-result-2026-10-30">
+<h2>Local selected-campaign result (2026-10-30)<a class="headerlink" href="#local-selected-campaign-result-2026-10-30" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Caso</p></th>
+<th class="head text-right"><p>Intervalos</p></th>
+<th class="head text-right"><p>Dias</p></th>
+<th class="head"><p>Membros ativos</p></th>
+<th class="head text-right"><p>Minutos</p></th>
+<th class="head text-right"><p>Pico observado MiB</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>micro4-year2023</p></td>
+<td class="text-right"><p>35040</p></td>
+<td class="text-right"><p>365</p></td>
+<td><p>4–4</p></td>
+<td class="text-right"><p>3.89</p></td>
+<td class="text-right"><p>692.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>core30-year2023</p></td>
+<td class="text-right"><p>35040</p></td>
+<td class="text-right"><p>365</p></td>
+<td><p>26–27</p></td>
+<td class="text-right"><p>28.81</p></td>
+<td class="text-right"><p>2029.9</p></td>
+</tr>
+<tr class="row-even"><td><p>premium60days2024</p></td>
+<td class="text-right"><p>5760</p></td>
+<td class="text-right"><p>60</p></td>
+<td><p>88–88</p></td>
+<td class="text-right"><p>19.62</p></td>
+<td class="text-right"><p>1708.3</p></td>
+</tr>
+</tbody>
+</table>
+<p>All three selected cases passed, with runtime physics enabled, independent meter/cash
+reconciliation and service/KPI exports. The final local suite passed 767 tests
+(10 new). Premium annual execution was not performed; projections are indicative.
+These selected-campaign results are recorded in v1.9.10; they were measured on
+the identical physical runtime in v1.9.9. The source-checkout audit CLI and these
+reports accompany the release; the PyPI wheel contains the runtime, not repository
+audit scripts or datasets.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jose Ramon Vazquez-Canteli, Kingsley Nweye, Zoltan Nagy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paired comparisons and reference interpretation &mdash; CityLearn 2.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css?v=995e94df" />
+      <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css?v=21c0b90a" />
+      <link rel="stylesheet" type="text/css" href="../_static/citylearn.css?v=867a8231" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b21de401"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CityLearn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Your first simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Moving an existing project to CityLearn v3</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configure and run</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="running_simulations.html">Running Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_reference.html">Schema Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_reference.html">Dataset Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="portugal_rec_datasets.html">Portugal REC Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_unit_contract.html">Data Unit Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces_flat_entity.html">Flat and Entity Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="observations_reference.html">Observations Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions_reference.html">Actions Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_community_reference.html">Multi-Community Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_reference.html">Robustness Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Evaluate</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="baselines.html">Baselines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kpis.html">KPIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard.html">How to read the scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard_kpi_names.html">Default scorecard KPI names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpis_reference.html">KPIs Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KPI_V2_TREE.html">KPI v2 Naming Tree</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualize</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Concepts and tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Core concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citylearn_challenge/index.html">The CityLearn Challenge</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../publications.html">Publications and applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation and performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publishing.html">Publishing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases_archive.html">Earlier releases</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CityLearn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Paired comparisons and reference interpretation</li>
+      <li class="wy-breadcrumbs-aside">
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/experiment_comparisons.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="paired-comparisons-and-reference-interpretation">
+<h1>Paired comparisons and reference interpretation<a class="headerlink" href="#paired-comparisons-and-reference-interpretation" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">paired-experiment-v1</span></code> records the conditions needed to compare KPI exports.
+It is available from v1.9.6; v1.9.9 adds <a class="reference internal" href="temporal_reproducibility.html"><span class="std std-doc">temporal and input-load evidence</span></a>,
+including file hashes, initialization seeds, runtime versions and source clocks.
+Changed or undocumented inputs prevent a matched comparison. Older exports
+without temporal evidence do not establish that part of the contract.</p>
+<section id="identity-and-pairing">
+<h2>Identity and pairing<a class="headerlink" href="#identity-and-pairing" title="Link to this heading"></a></h2>
+<p>Before a custom-controller run, declare its implementation, version and resolved
+parameters using <code class="docutils literal notranslate"><span class="pre">env.set_experiment_identity(implementation,</span> <span class="pre">version,</span> <span class="pre">parameters,</span> <span class="pre">observation_access='agent_payload')</span></code>. Native operational agents provide their
+actual identity and parameters when passed as <code class="docutils literal notranslate"><span class="pre">model</span></code> to <code class="docutils literal notranslate"><span class="pre">export_final_kpis</span></code>.
+An unspecified controller remains unknown; a file name is not proof of identity.</p>
+<p>The manifest records data hashes, a normalized physical configuration hash, actual
+episode window and completed intervals, time resolution, effective away-EV seed,
+initial inventory, service tolerances, resolved market, source-code fingerprint,
+observation contract and reference definition. Moving the same data to another
+root does not change the normalized contract. Changing an input, seed, target,
+asset or reference cannot silently become a paired controller comparison.</p>
+<p>Native BAU is identified by implementation, simulator version, definition
+version (<code class="docutils literal notranslate"><span class="pre">immediate-full-charge-v2</span></code>, or <code class="docutils literal notranslate"><span class="pre">immediate-user-target-v1</span></code> with
+<code class="docutils literal notranslate"><span class="pre">business_as_usual_ev_charge_target='requested'</span></code>) and resolved parameters. It
+reads entity observations (<code class="docutils literal notranslate"><span class="pre">observation_access='entity_observations'</span></code>). The reference reuses the source episode’s away-EV random stream, including
+after repeated resets, and its resolved EV service tolerances. Initial inventory
+must agree before reference KPIs are produced. Definition agreement with Algorithms
+is not proof of numerical equivalence between independent implementations.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">citylearn.internal.comparison.compare_exports(left,</span> <span class="pre">right,</span> <span class="pre">mode='controller')</span></code>
+or the repository CLI:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">scripts</span><span class="o">/</span><span class="n">audit</span><span class="o">/</span><span class="n">compare_experiments</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">left</span> <span class="n">run_a</span><span class="o">/</span><span class="n">kpis</span><span class="o">.</span><span class="n">csv</span> \
+  <span class="o">--</span><span class="n">right</span> <span class="n">run_b</span><span class="o">/</span><span class="n">kpis</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">mode</span> <span class="n">controller</span> <span class="o">--</span><span class="n">output</span> <span class="n">comparison</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+<p>Each CSV/Parquet export must have its adjacent <code class="docutils literal notranslate"><span class="pre">.manifest.json</span></code>. V2 wide CSVs and
+long-form name/cost_function/value exports are supported. Duplicate KPI/name rows
+are rejected. The CLI returns 0 only for paired conditions; 2 means incompatible
+or insufficient evidence. Numerical deltas remain available for inspection, but
+<code class="docutils literal notranslate"><span class="pre">permitted_claim</span></code> is empty unless the pairing checks pass. Older exports without
+the contract are unknown and must not be silently labelled matched. The existing
+<code class="docutils literal notranslate"><span class="pre">compare_equity_runs.py</span></code> CLI uses the same gate, accepts V2 wide exports and reports
+raw differences without a universal higher/lower-is-better assertion.</p>
+<p><code class="docutils literal notranslate"><span class="pre">controller</span></code> comparisons require equal market and observation conditions. Policy
+parameters can differ. <code class="docutils literal notranslate"><span class="pre">sharing</span></code> comparisons require the same controller and
+allow only the market/local-trading enable flags to differ. Tariffs, internal
+price ratio, export price and settlement rules must still agree. Combined policy
+and sharing changes are not isolated sharing benefits. Observation access must
+agree: privileged internal-state access is not the same as agent payload access.</p>
+</section>
+<section id="read-outcomes-together">
+<h2>Read outcomes together<a class="headerlink" href="#read-outcomes-together" title="Link to this heading"></a></h2>
+<p>The comparison report exposes district cost, audited EV/appliance service and
+coverage, useful solar use, external purchase emissions and per-asset final
+inventory differences. Active stationary storage and the whole EV fleet,
+including away vehicles, have separate scopes. Final snapshots include boundary
+events after the last transition. They are not an automatic monetary credit.
+Lower cost with lower service or a depleted battery is a joint outcome, not proof
+of equal-service operational savings. No arbitrary terminal-energy price is added.</p>
+<p>Historical solar absorption can include charging a battery. Provenance-based
+useful solar use counts final building load or mobility and reports stored energy
+separately. External carbon purchases differ from internal carbon allocation;
+internal trading does not erase purchased carbon. Read the actual zero-export
+price and 80% local-price configuration from the resolved market, rather than
+assuming every historical experiment used it.</p>
+</section>
+<section id="hidden-fault-agent-observations">
+<h2>Hidden-fault agent observations<a class="headerlink" href="#hidden-fault-agent-observations" title="Link to this heading"></a></h2>
+<p>Compatibility defaults to <code class="docutils literal notranslate"><span class="pre">known_faults</span></code>: existing diagnostic metadata is visible
+and the manifest says so. For a study without event labels, explicitly configure:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"robustness"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"events_file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"robustness_events.csv"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"agent_observation_contract"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"mode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hidden_faults"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"features"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"building"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"non_shiftable_load"</span><span class="p">,</span><span class="w"> </span><span class="s2">"hour"</span><span class="p">]}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The entity interface is currently required. Every unlisted numeric feature is
+masked to -9999 for the entire run, including fault-free intervals. Shapes and
+entity identities remain stable. Entity IDs, edges and connection masks remain
+visible as structural inputs. Metadata uses a safe temporal/topology allowlist;
+event IDs, fault causes, runtime status and fault diagnostic features are absent.
+Automatic action-execution diagnostics are also withheld. Audit metadata remains
+available to the researcher through <code class="docutils literal notranslate"><span class="pre">get_metadata</span></code> and the manifest.</p>
+<p>The contract rejects unknown features, fault diagnostic features, duplicate direct
+measurement aliases and a selected clean alternate of a targeted noisy channel.
+For example, targeting <code class="docutils literal notranslate"><span class="pre">non_shiftable_load</span></code> while exposing <code class="docutils literal notranslate"><span class="pre">load_power_kw</span></code> cannot
+silently bypass the perturbation; the experiment fails configuration validation.
+PV energy/power/building aliases and SOC aliases are also checked. Hidden-mode
+observation bounds allow perturbed values and the sentinel. Physics, rewards and
+KPI accounting use the underlying simulator state; masking alone does not change
+those trajectories under identical actions.</p>
+<p>The allowlist is part of the scientific experiment. Hiding labels does not prove
+that a fault is statistically undetectable through independent measurements or
+physical inference. Review derived signals before claiming a particular sensing
+model. In-process agents with direct environment access, including native BAU,
+remain privileged; the API payload contract is not a process-isolation boundary.
+External analysis UIs must consume the pairing report before claiming a matched
+comparison. This repository adds the packaged API and CLI, not an update to a
+separately maintained UI. General re-entry energy-history reconciliation, annual controller
+campaigns and empirical calibration are outside this comparison contract.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jose Ramon Vazquez-Canteli, Kingsley Nweye, Zoltan Nagy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

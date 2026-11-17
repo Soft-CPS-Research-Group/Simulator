@@ -1,0 +1,539 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Releases &mdash; CityLearn 2.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css?v=995e94df" />
+      <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css?v=21c0b90a" />
+      <link rel="stylesheet" type="text/css" href="../_static/citylearn.css?v=867a8231" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b21de401"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Earlier releases" href="releases_archive.html" />
+    <link rel="prev" title="Publishing Guide" href="publishing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CityLearn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Your first simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Moving an existing project to CityLearn v3</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configure and run</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="running_simulations.html">Running Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_reference.html">Schema Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_reference.html">Dataset Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="portugal_rec_datasets.html">Portugal REC Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_unit_contract.html">Data Unit Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces_flat_entity.html">Flat and Entity Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="observations_reference.html">Observations Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions_reference.html">Actions Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_community_reference.html">Multi-Community Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_reference.html">Robustness Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Evaluate</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="baselines.html">Baselines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kpis.html">KPIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard.html">How to read the scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scorecard_kpi_names.html">Default scorecard KPI names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpis_reference.html">KPIs Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KPI_V2_TREE.html">KPI v2 Naming Tree</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualize</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">CityLearn UI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Concepts and tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Core concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citylearn_challenge/index.html">The CityLearn Challenge</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../publications.html">Publications and applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation and performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publishing.html">Publishing Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Releases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v2-2-0-2026-11-17-aligned-with-citylearn-3-5-0">v2.2.0 — 2026-11-17 — aligned with CityLearn 3.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-s-new">What’s new</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#credits">Credits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v2-1-1-2026-11-16-native-bau-reference-for-static-entity-schemas">v2.1.1 — 2026-11-16 — native BAU reference for static entity schemas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-s-fixed">What’s fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v2-1-0-2026-11-13-storage-ev-lifecycle-and-compatibility">v2.1.0 — 2026-11-13 — storage, EV lifecycle and compatibility</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">What’s new</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v2-0-2-2026-11-05-reproducible-portugal-datasets-and-nested-downloads">v2.0.2 — 2026-11-05 — reproducible Portugal datasets and nested downloads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v2-0-1-2026-11-04-episode-selection-and-subhourly-corrections">v2.0.1 — 2026-11-04 — episode selection and subhourly corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v2-0-0-2026-11-02-audited-runtime-consolidation-milestone">v2.0.0 — 2026-11-02 — audited-runtime consolidation milestone</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v1-9-13-2026-11-02-lower-memory-histories-and-faster-evaluation">v1.9.13 — 2026-11-02 — lower-memory histories and faster evaluation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#observed-two-year-campaign-performance">Observed two-year campaign performance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v1-9-12-2026-11-02-robustness-contracts-and-maintainable-internals">v1.9.12 — 2026-11-02 — robustness contracts and maintainable internals</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="releases_archive.html">Earlier releases</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CityLearn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Releases</li>
+      <li class="wy-breadcrumbs-aside">
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/releases.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="releases">
+<h1>Releases<a class="headerlink" href="#releases" title="Link to this heading"></a></h1>
+<p>This is the changelog for the fork. Version policy, the release template and
+publication procedure are maintained in the <a class="reference internal" href="publishing.html"><span class="std std-doc">publishing guide</span></a>.
+Historical validation links point to immutable evidence in Git history; they
+describe the scope of that release rather than a new execution on this checkout.</p>
+<p>Default release owner for this fork: <a class="reference external" href="https://github.com/calofonseca">&#64;calofonseca</a>.</p>
+<section id="v2-2-0-2026-11-17-aligned-with-citylearn-3-5-0">
+<span id="v220--2026-11-17--aligned-with-citylearn-350"></span><h2>v2.2.0 — 2026-11-17 — aligned with CityLearn 3.5.0<a class="headerlink" href="#v2-2-0-2026-11-17-aligned-with-citylearn-3-5-0" title="Link to this heading"></a></h2>
+<p>Release maintainer: <strong>Tiago Fonseca</strong> (<a class="reference external" href="https://github.com/calofonseca">&#64;calofonseca</a>).</p>
+<p>SoftCPS REC Simulator 2.2.0 runs the same simulator code, tests and documentation as
+<a class="reference external" href="https://github.com/citylearn-project/CityLearn/releases/tag/v3.5.0">CityLearn 3.5.0</a>.
+Only the distribution name (<code class="docutils literal notranslate"><span class="pre">softcpsrecsimulator</span></code>), the version, the dataset
+download defaults, the release documentation and the additional SoftCPS datasets
+differ. The Python import is still <code class="docutils literal notranslate"><span class="pre">citylearn</span></code>.</p>
+<section id="what-s-new">
+<span id="whats-new"></span><h3>What’s new<a class="headerlink" href="#what-s-new" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>New BAU, with changed BAU-relative KPIs.</strong> <code class="docutils literal notranslate"><span class="pre">BusinessAsUsualAgent</span></code> is the
+CityLearn 3.4.0 BAU: it decides from the entity observations and charges a
+connected EV at once to 100% by default (<code class="docutils literal notranslate"><span class="pre">immediate-full-charge-v2</span></code>). With
+<code class="docutils literal notranslate"><span class="pre">ev_charge_target='requested'</span></code> (<code class="docutils literal notranslate"><span class="pre">immediate-user-target-v1</span></code>) it stops at the
+user’s requested departure SOC; <code class="docutils literal notranslate"><span class="pre">business_as_usual_ev_charge_target</span></code> selects the
+one <code class="docutils literal notranslate"><span class="pre">evaluate_v2()</span></code> uses as the KPI reference. <strong>Every <code class="docutils literal notranslate"><span class="pre">business_as_usual</span></code>,
+<code class="docutils literal notranslate"><span class="pre">delta_to_business_as_usual</span></code> and <code class="docutils literal notranslate"><span class="pre">ratio_to_business_as_usual</span></code> KPI can differ
+from 2.1.1</strong>, including those of the Portugal datasets. Rerun the controller
+and its reference together.</p></li>
+<li><p><strong>Basic, Smart and Community baselines.</strong> <code class="docutils literal notranslate"><span class="pre">RBCBasicPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">RBCSmartPolicy</span></code>
+and <code class="docutils literal notranslate"><span class="pre">RBCCommunityPolicy</span></code> are the baselines validated in the Soft-CPS Algorithms
+repository. <code class="docutils literal notranslate"><span class="pre">NormalPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">NormalTargetPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">NormalNoBatteryPolicy</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ServiceOnlyBaselineAgent</span></code>, <code class="docutils literal notranslate"><span class="pre">GridAwareBaselineAgent</span></code> and
+<code class="docutils literal notranslate"><span class="pre">CommunityAwareBaselineAgent</span></code> are removed.</p></li>
+<li><p><strong>Unlimited headroom is 1,000,000 kW.</strong> Entity headroom features of a building
+without an electrical service limit read 1,000,000 kW (the observation bound)
+instead of 0 kW, which read as “no capacity left”.</p></li>
+<li><p><strong>Portugal datasets renamed to CityLearn’s <code class="docutils literal notranslate"><span class="pre">pt_rec_*</span></code>.</strong> <code class="docutils literal notranslate"><span class="pre">pt_rec_4</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pt_rec_15</span></code>, <code class="docutils literal notranslate"><span class="pre">pt_rec_30</span></code> and <code class="docutils literal notranslate"><span class="pre">pt_rec_100</span></code>, byte-identical to CityLearn 3.5.0,
+replace <code class="docutils literal notranslate"><span class="pre">rec_pt_2023_micro_4_v2</span></code>, <code class="docutils literal notranslate"><span class="pre">rec_pt_2023_core_15_v2</span></code>,
+<code class="docutils literal notranslate"><span class="pre">rec_pt_2023_core_30_v2</span></code> and <code class="docutils literal notranslate"><span class="pre">rec_pt_2023_premium_100_v2</span></code>, which are removed.
+Evaluation schemas are renamed too, for example
+<code class="docutils literal notranslate"><span class="pre">rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json</span></code> becomes
+<code class="docutils literal notranslate"><span class="pre">pt_rec_30/evaluation/rec_30_robustness.json</span></code>. The full mapping is in the
+<a class="reference internal" href="migration.html#upgrade-from-softcps-2-1-1-to-2-2-0"><span class="std std-ref">migration guide</span></a>; see also the
+<a class="reference internal" href="portugal_rec_datasets.html"><span class="std std-doc">Portugal REC datasets</span></a> guide.</p></li>
+<li><p><strong>Nested dataset downloads.</strong> <code class="docutils literal notranslate"><span class="pre">DataSet.get_dataset()</span></code> takes CityLearn’s
+implementation: two GitHub API requests per dataset however deeply nested,
+files from raw.githubusercontent.com, <code class="docutils literal notranslate"><span class="pre">CITYLEARN_GITHUB_TOKEN</span></code> or
+<code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code> when set, and the account and repository given to <code class="docutils literal notranslate"><span class="pre">DataSet</span></code>. The
+defaults remain <code class="docutils literal notranslate"><span class="pre">Soft-CPS-Research-Group/Simulator</span></code> at
+<code class="docutils literal notranslate"><span class="pre">softcpsrecsimulator-v{version}</span></code>.</p></li>
+<li><p><strong>CityLearn fixes and documentation.</strong> Schema roots resolve from the schema
+file, dynamic-topology physics checks cover active members only, and the
+CityLearn guides, examples, documentation build and CI matrix (Python 3.9,
+3.10 and 3.12; NumPy 1 and 2) are included.</p></li>
+<li><p><strong>Dependencies.</strong> <code class="docutils literal notranslate"><span class="pre">doe_xstock</span></code>, <code class="docutils literal notranslate"><span class="pre">openstudio</span></code> and <code class="docutils literal notranslate"><span class="pre">torchvision</span></code> are no longer
+installed by default; <code class="docutils literal notranslate"><span class="pre">citylearn.end_use_load_profiles</span></code> needs the
+<code class="docutils literal notranslate"><span class="pre">end_use_load_profiles</span></code> extra.</p></li>
+</ul>
+<p>SoftCPS keeps the 19 <code class="docutils literal notranslate"><span class="pre">ALADI</span> <span class="pre">*</span></code> datasets, <code class="docutils literal notranslate"><span class="pre">EC_Ermesinde</span></code> and its CLI fix for runs
+without Stable Baselines3. <strong>The Portugal generator stays in SoftCPS</strong>: its
+scripts, sources, results and catalogue still build the full <code class="docutils literal notranslate"><span class="pre">rec_pt_2023_*_v2</span></code>
+packages, now as a local working copy under <code class="docutils literal notranslate"><span class="pre">data/datasets</span></code> that Git ignores,
+while the shipped datasets match CityLearn 3.5.0. Generator tests that need such
+a build skip without it; the others run on <code class="docutils literal notranslate"><span class="pre">pt_rec_*</span></code>. See the
+<a class="reference internal" href="migration.html#upgrade-from-softcps-2-1-1-to-2-2-0"><span class="std std-ref">migration guide</span></a>.</p>
+</section>
+<section id="validation">
+<h3>Validation<a class="headerlink" href="#validation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Tests.</strong> 1,741 passed and 35 skipped. Of the skips, 34 are Portugal generator tests that need a local <code class="docutils literal notranslate"><span class="pre">rec_pt_2023_*_v2</span></code> build, and one is Windows-only. With the 2.1.1 packages present as that build, all 149 Portugal tests passed. <code class="docutils literal notranslate"><span class="pre">test_energy_provenance_toggle</span></code> failed once under four parallel workers and passed when rerun alone. Its fixture copies the dataset into the shared user cache, which races between workers; CityLearn’s test fixture is the same.</p></li>
+<li><p><strong>Audits and packaging.</strong> The full audit passed: 16 physics scenarios, entity contracts, all 61 packaged datasets and refactor parity. The wheel and sdist passed <code class="docutils literal notranslate"><span class="pre">twine</span> <span class="pre">check</span></code>. The installed wheel passed the KPI, BAU and manifest export check outside the checkout.</p></li>
+<li><p><strong>Portugal REC.</strong> All 19 <code class="docutils literal notranslate"><span class="pre">pt_rec_*</span></code> schemas ran a 96-step episode with <code class="docutils literal notranslate"><span class="pre">BusinessAsUsualAgent</span></code> and <code class="docutils literal notranslate"><span class="pre">evaluate_v2()</span></code> including the native BAU reference: the four <code class="docutils literal notranslate"><span class="pre">schema.json</span></code> files, nine main and six comparison scenarios. Peak memory was 1.0 GB. District BAU-relative ratios were exactly 1, as expected for BAU against its own reference. Longer windows were not run. Each <code class="docutils literal notranslate"><span class="pre">pt_rec_*</span></code> folder is byte-identical to CityLearn <code class="docutils literal notranslate"><span class="pre">v3.5.0</span></code>.</p></li>
+</ul>
+</section>
+<section id="credits">
+<h3>Credits<a class="headerlink" href="#credits" title="Link to this heading"></a></h3>
+<p><strong>Tiago Fonseca</strong> (<a class="reference external" href="https://github.com/calofonseca">&#64;calofonseca</a>) developed the
+CityLearn 3.4.0 baselines and 3.5.0 datasets and aligned SoftCPS with CityLearn 3.5.0.</p>
+<p><a class="reference external" href="https://github.com/Soft-CPS-Research-Group/Simulator/compare/softcpsrecsimulator-v2.1.1...softcpsrecsimulator-v2.2.0">Full changelog</a></p>
+</section>
+</section>
+<section id="v2-1-1-2026-11-16-native-bau-reference-for-static-entity-schemas">
+<span id="v211--2026-11-16--native-bau-reference-for-static-entity-schemas"></span><h2>v2.1.1 — 2026-11-16 — native BAU reference for static entity schemas<a class="headerlink" href="#v2-1-1-2026-11-16-native-bau-reference-for-static-entity-schemas" title="Link to this heading"></a></h2>
+<p>Release maintainer: <strong>Tiago Fonseca</strong> (<a class="reference external" href="https://github.com/calofonseca">&#64;calofonseca</a>).</p>
+<section id="what-s-fixed">
+<span id="whats-fixed"></span><h3>What’s fixed<a class="headerlink" href="#what-s-fixed" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Native BAU reference with entity-only robustness targets.</strong> <code class="docutils literal notranslate"><span class="pre">evaluate_v2()</span></code> with the native BAU reference (the default) failed on static-topology entity schemas whose robustness events target EV, storage or PV observations, such as Portugal REC-30 robustness. The reference was built in flat mode unless topology was dynamic or demand response was enabled, and the flat layout does not expose those targets. It now uses the entity interface whenever the evaluated environment does.</p></li>
+</ul>
+<p>The BAU agent reads simulator state directly, so its actions and KPIs do not depend on the interface. Datasets, schemas and the API are unchanged.</p>
+</section>
+<section id="id1">
+<span id="validation-1"></span><h3>Validation<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>The full suite passed locally (1,758 tests, 6 skipped), including a new regression test with static topology, the entity interface, EV SOC noise and <code class="docutils literal notranslate"><span class="pre">evaluate_v2()</span></code> with the BAU reference. The full audit passed: physics, entity contracts, all 61 packaged datasets and refactor parity.</p></li>
+<li><p>All 13 Portugal schemas completed a 96-step BAU run with <code class="docutils literal notranslate"><span class="pre">evaluate_v2()</span></code> and the BAU reference. The 12 that also complete on 2.1.0 gave identical KPIs. REC-30 robustness, which failed on 2.1.0, now completes. Windows beyond 96 steps were not rerun.</p></li>
+</ul>
+<p><a class="reference external" href="https://github.com/Soft-CPS-Research-Group/Simulator/compare/softcpsrecsimulator-v2.1.0...softcpsrecsimulator-v2.1.1">Full changelog</a></p>
+</section>
+</section>
+<section id="v2-1-0-2026-11-13-storage-ev-lifecycle-and-compatibility">
+<span id="v210--2026-11-13--storage-ev-lifecycle-and-compatibility"></span><h2>v2.1.0 — 2026-11-13 — storage, EV lifecycle and compatibility<a class="headerlink" href="#v2-1-0-2026-11-13-storage-ev-lifecycle-and-compatibility" title="Link to this heading"></a></h2>
+<p>Release maintainer: <strong>Tiago Fonseca</strong> (<a class="reference external" href="https://github.com/calofonseca">&#64;calofonseca</a>).</p>
+<section id="id2">
+<span id="whats-new-1"></span><h3>What’s new<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Battery and EV physics.</strong> A battery starts from its configured SOC on activation, including below the discharge reserve. The same EV keeps its identity and its battery evolves through charger removal, re-entry and handover. The energy ledger records standby losses, mobility and explicit arrival energy. CSV and Parquet exports identify the charger that served the vehicle.</p></li>
+<li><p><strong>BAU and KPIs.</strong> The controller and native BAU use matching equipment, PV settings and outages. The BAU cache retains the latest reference. Cost and net-exchange ratios, community-market comparisons and portfolio aggregation are corrected.</p></li>
+<li><p><strong>Compatibility and robustness.</strong> Support NumPy 1 and 2, Gymnasium 0.28.1 and 1.x, legacy occupant models and older SAC/MARLISA checkpoints. Keep EV session identifiers and publish complete caches for datasets with nested files. The Portugal mobility verification now reproduces the published phase-power calculation across both NumPy versions.</p></li>
+</ul>
+<p>The Portugal datasets and market settings are preserved. The package is still <code class="docutils literal notranslate"><span class="pre">softcpsrecsimulator</span></code> and the Python import is <code class="docutils literal notranslate"><span class="pre">citylearn</span></code>. Use the <code class="docutils literal notranslate"><span class="pre">parquet</span></code> extra for Portugal. Results involving the corrected paths may differ from 2.0.2. Rerun the controller and reference together when comparing those cases.</p>
+</section>
+<section id="id3">
+<span id="validation-2"></span><h3>Validation<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>The backport passed 1,762 local tests on NumPy 1, with one Windows-only skip, and 16 physical audits. The Portugal mobility tests were run on both NumPy versions after the phase-power verification fix.</p></li>
+<li><p>Short runs covered 4, 30 and 100 members, including active outages in Premium All-in. Market KPIs reconciled against the interval totals. A BAU self-comparison gave a ratio of 1 for every defined relative KPI.</p></li>
+<li><p>The CityLearn UI opened the Portugal export. CSV and Parquet exports of the EV handover displayed identical scorecards. The installed wheel passed the KPI, BAU and manifest export check.</p></li>
+<li><p>In the 600-step local benchmark, mean step time went from 5.33 to 5.22 ms in flat mode and from 9.91 to 9.94 ms in entity mode. These measurements are for that benchmark.</p></li>
+</ul>
+<p><a class="reference external" href="https://github.com/Soft-CPS-Research-Group/Simulator/compare/softcpsrecsimulator-v2.0.2...softcpsrecsimulator-v2.1.0">Full changelog</a></p>
+</section>
+</section>
+<section id="v2-0-2-2026-11-05-reproducible-portugal-datasets-and-nested-downloads">
+<span id="v202--2026-11-05--reproducible-portugal-datasets-and-nested-downloads"></span><h2>v2.0.2 — 2026-11-05 — reproducible Portugal datasets and nested downloads<a class="headerlink" href="#v2-0-2-2026-11-05-reproducible-portugal-datasets-and-nested-downloads" title="Link to this heading"></a></h2>
+<p>Release owner: <strong>Tiago Fonseca</strong> (<a class="reference external" href="https://github.com/calofonseca">&#64;calofonseca</a>).</p>
+<ul class="simple">
+<li><p>Deliver <code class="docutils literal notranslate"><span class="pre">portugal-realism-4</span></code> and <code class="docutils literal notranslate"><span class="pre">portugal-ev-mobility-1</span></code> for all four Portugal
+communities across 2023/2024: diverse charging sessions, household activity,
+commercial occupancy and equipment, annual consumption budgets, and irregular
+local faults and demand-response requests. Preserve labelled stress cases,
+equipment inventories, nine main scenarios and six matched references.</p></li>
+<li><p>Include the deterministic generator, compact empirical references, assumptions,
+seed/sensitivity checks and reproducibility evidence. These are synthetic
+benchmarks, not measurements representative of the Portuguese population.</p></li>
+<li><p>Download nested dataset directories and expose the cache only after a complete,
+successful download. Failed downloads can be retried without accepting a partial
+dataset. Add online-loader regressions and fetch the immutable source commit in CI.</p></li>
+<li><p>Allow the command-line interface to start without optional Stable Baselines3;
+loading an SB3 agent explicitly reports the missing dependency. Keep CLI UTC
+timestamps compatible with Python 3.9/3.10 and align evaluation time-series
+exports to executed intervals, excluding the terminal observation. Remove five
+obsolete partial-load default columns that no longer exist on Building; explicit
+invalid variable names now fail instead of repeating the preceding column.</p></li>
+<li><p>Keep simulation dynamics, dataset schemas and the OMIE pricing convention
+unchanged. Old experiment results must retain their original dataset reference;
+upgrading the default dataset changes the benchmark inputs.</p></li>
+</ul>
+<p>Pre-release data validation passed 161 focused tests, 72 boundary windows,
+27 fault probes and 18 accounting windows; two regenerations produced identical
+Parquet files. Release-wide tests, audits and installed-package verification are
+reported with the GitHub release. No annual controller campaign or MARL training
+is included. Reference-data reuse and empirical limitations are documented in
+<a class="reference external" href="https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/portugal_rec_native/Heldout_2024.md">the dataset validation</a>.</p>
+<p>Package/import names remain <code class="docutils literal notranslate"><span class="pre">softcpsrecsimulator</span></code> / <code class="docutils literal notranslate"><span class="pre">citylearn</span></code>. The release tag
+and default online dataset ref are <code class="docutils literal notranslate"><span class="pre">softcpsrecsimulator-v2.0.2</span></code>. Install the
+<code class="docutils literal notranslate"><span class="pre">parquet</span></code> extra for the Portugal datasets. Explicit dataset-ref overrides remain
+supported; no schema migration is required.</p>
+</section>
+<section id="v2-0-1-2026-11-04-episode-selection-and-subhourly-corrections">
+<span id="v201--2026-11-04--episode-selection-and-subhourly-corrections"></span><h2>v2.0.1 — 2026-11-04 — episode selection and subhourly corrections<a class="headerlink" href="#v2-0-1-2026-11-04-episode-selection-and-subhourly-corrections" title="Link to this heading"></a></h2>
+<p>Release owner: <strong>Tiago Fonseca</strong> (<a class="reference external" href="https://github.com/calofonseca">&#64;calofonseca</a>).</p>
+<ul class="simple">
+<li><p>Honor explicit <code class="docutils literal notranslate"><span class="pre">random_episode_split=True</span></code> and <code class="docutils literal notranslate"><span class="pre">False</span></code> constructor overrides;
+<code class="docutils literal notranslate"><span class="pre">None</span></code> continues to inherit the schema setting.</p></li>
+<li><p>Compound the configured hourly standby-loss fraction over the physical step,
+independently of dataset cadence. A 1% hourly loss leaves 99% after one hour
+at both hourly and 15-minute resolution, within float precision.</p></li>
+<li><p>Convert dataset energy to average step power when autosizing heat pumps,
+electric heaters and batteries; calculate daily battery peaks over physical
+24-hour periods. Thermal capacity remains energy for one control step.</p></li>
+<li><p>Retain public energy-command interfaces, explicitly configured equipment, BAU
+control logic, KPI definitions, dataset files and CSV/Parquet exports.
+Subhourly SOC, derived KPIs and automatically selected equipment can change;
+compare matching versions and resolved equipment. No file migration is needed.</p></li>
+<li><p>Keep release documentation concise and use CPU-only PyTorch wheels in hosted
+CI to avoid runner disk exhaustion; runtime dependency requirements are unchanged.</p></li>
+</ul>
+<p>The corrected runtime passed 1,300 CI tests, the physical-step/topology audit,
+Portuguese winter/summer windows and supported-dataset checks. The common
+standby/autosizing/BAU/reference subset passed 223 local tests. The reviewed
+fixed-command reference reproduces the old baseline exactly when only the old
+loss formula is restored; hourly reference results are unchanged.
+Release CI and installed-distribution checks accompany the GitHub release.
+The two-year campaign and performance measurements below describe the earlier
+runtime: they have not been repeated for this patch, and no new speedup, full
+annual equivalence or empirical equipment calibration is claimed.</p>
+<p>Package/import names remain <code class="docutils literal notranslate"><span class="pre">softcpsrecsimulator</span></code> / <code class="docutils literal notranslate"><span class="pre">citylearn</span></code>. The release tag
+and default online dataset ref are <code class="docutils literal notranslate"><span class="pre">softcpsrecsimulator-v2.0.1</span></code>; dataset files
+are unchanged from 2.0.0. Explicit dataset-ref overrides remain supported.</p>
+</section>
+<section id="v2-0-0-2026-11-02-audited-runtime-consolidation-milestone">
+<span id="v200--2026-11-02--audited-runtime-consolidation-milestone"></span><h2>v2.0.0 — 2026-11-02 — audited-runtime consolidation milestone<a class="headerlink" href="#v2-0-0-2026-11-02-audited-runtime-consolidation-milestone" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Close the audit, robustness, internal-organization and performance phase by
+releasing the v1.9.13 runtime as v2.0.0. This major-number milestone introduces
+no functional change or migration requirement.</p></li>
+<li><p>Preserve physical models, BAU/NormalPolicy, KPI formulas/tolerances, rewards,
+complete histories, export schemas, dependencies and the current datasets.</p></li>
+<li><p>Keep the distribution name <code class="docutils literal notranslate"><span class="pre">softcpsrecsimulator</span></code> and import namespace <code class="docutils literal notranslate"><span class="pre">citylearn</span></code>.
+The fork tag is <code class="docutils literal notranslate"><span class="pre">softcpsrecsimulator-v2.0.0</span></code>; the inherited upstream <code class="docutils literal notranslate"><span class="pre">v2.0.0</span></code>
+tag remains unchanged.</p></li>
+</ul>
+<p>Validation: all 81 runtime Python files match v1.9.13 byte for byte, allowing
+only the version literal in <code class="docutils literal notranslate"><span class="pre">citylearn/__init__.py</span></code> and the release-tag prefix
+in <code class="docutils literal notranslate"><span class="pre">DataSet.REPOSITORY_TAG</span></code>. Online data use the namespaced fork tag so they
+resolve the same dataset content rather than the inherited upstream tag. Explicit
+environment/constructor overrides are preserved and regression-tested. Wheel/sdist
+checks and isolated installed KPI/BAU/manifest exports passed. Datasets, workflows
+and all physical, BAU, KPI and optimization implementations are unchanged.
+The unchanged runtime retains the v1.9.13 validation: 1,186 local integration tests,
+four strict auditors and the nine-case campaign (631,575 transitions; 197,347,896
+physical/accounting checks; 77,603 exact KPI comparisons across seven complete
+historical references). The current release CI and publication checks are recorded
+in the release artifacts. The long campaign is reused, not repeated for renumbering.
+Performance measurements and their method remain in the v1.9.13 entry below.</p>
+<p>Scope limits remain unchanged: isolated exact SOC-target misses need diagnosis;
+all observed minimum acceptable service was met. The long campaign used the
+pre-v3.3 inputs, while current v3.3 data passed bounded integration checks.
+Empirical equipment calibration remains outside this validation.</p>
+</section>
+<section id="v1-9-13-2026-11-02-lower-memory-histories-and-faster-evaluation">
+<span id="v1913--2026-11-02--lower-memory-histories-and-faster-evaluation"></span><h2>v1.9.13 — 2026-11-02 — lower-memory histories and faster evaluation<a class="headerlink" href="#v1-9-13-2026-11-02-lower-memory-histories-and-faster-evaluation" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>expose evaluation progress by stage/member/KPI family, with optional callback
+and auditor progress files; instrumentation does not add values to KPI results.</p></li>
+<li><p>retain complete market and robustness histories in compact lossless
+representations with bounded window/stream readers and compatible public views.</p></li>
+<li><p>reuse active-population masks within an evaluation and maximum-charge EV
+feasibility replay within each departure/context, without caching physical state.</p></li>
+<li><p>index deferrable-appliance cycles and reuse observation/forecast preparation
+within a request, including a narrowly guarded default-reward fast path. Custom
+rewards retain the full observation contract; state/RNG/physics are unchanged.</p></li>
+<li><p>integrate installed-export checks, regression tests and final long-run evidence.</p></li>
+</ul>
+<section id="observed-two-year-campaign-performance">
+<h3>Observed two-year campaign performance<a class="headerlink" href="#observed-two-year-campaign-performance" title="Link to this heading"></a></h3>
+<p>Each case executes 70,175 transitions, seed 0, NormalPolicy/BAU and active physical
+checks. RSS is the process high-water mark in MiB; wall time includes load, dispatch,
+independent auditing, final KPI evaluation and export. Baseline and optimized runs
+are separate observations on the same host, not a repeated controlled benchmark.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Scenario</p></th>
+<th class="head text-right"><p>Peak RSS before → after (MiB)</p></th>
+<th class="head text-right"><p>Total wall before → after</p></th>
+<th class="head text-right"><p>KPI/export before → after (s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Micro4</p></td>
+<td class="text-right"><p>920.5 → 691.6</p></td>
+<td class="text-right"><p>7m04s → 4m31s</p></td>
+<td class="text-right"><p>51.7 → 21.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Premium All-in</p></td>
+<td class="text-right"><p>13,709.7 → 5,333.4</p></td>
+<td class="text-right"><p>4h23m01s → 2h08m40s</p></td>
+<td class="text-right"><p>4,667.2 → 479.9</p></td>
+</tr>
+<tr class="row-even"><td><p>Core30 Topology</p></td>
+<td class="text-right"><p>3,521.1 → 1,844.1</p></td>
+<td class="text-right"><p>57m57s → 26m51s</p></td>
+<td class="text-right"><p>646.3 → 110.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Core30 Combined</p></td>
+<td class="text-right"><p>3,536.2 → 1,849.2</p></td>
+<td class="text-right"><p>52m43s → 27m25s</p></td>
+<td class="text-right"><p>647.5 → 112.9</p></td>
+</tr>
+<tr class="row-even"><td><p>Core30 Safety</p></td>
+<td class="text-right"><p>3,821.7 → 1,899.7</p></td>
+<td class="text-right"><p>50m04s → 29m26s</p></td>
+<td class="text-right"><p>290.8 → 115.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>Core30 Normal</p></td>
+<td class="text-right"><p>3,822.7 → 1,902.2</p></td>
+<td class="text-right"><p>50m49s → 29m30s</p></td>
+<td class="text-right"><p>293.2 → 116.9</p></td>
+</tr>
+<tr class="row-even"><td><p>Core15</p></td>
+<td class="text-right"><p>2,036.3 → 1,158.3</p></td>
+<td class="text-right"><p>24m39s → 14m46s</p></td>
+<td class="text-right"><p>162.8 → 65.5</p></td>
+</tr>
+</tbody>
+</table>
+<p>Premium All-in peak RSS fell 61.1%, total wall time 51.1%, and KPI/export time
+89.7%. Audit-inclusive mean dispatch time fell from 157.97 to 102.79 ms/transition.
+Core30 Robustness completed in 43m51s at 2,045.8 MiB and Premium Normal in 1h53m07s
+at 5,523.6 MiB. Their old runs were incomplete: no final historical speedup or
+full historical KPI-equivalence claim is made for these two cases.</p>
+<p>Validation: all nine cases passed, totaling 631,575 transitions and 197,347,896
+physical/accounting checks. The seven complete historical comparisons matched
+77,603 KPI rows exactly, including identities and undefined values. Independent
+reconciliation passed in all nine cases. All 3,499 campaign input hashes were
+preserved. The campaign used the pre-v3.3 dataset edition on the frozen P8 source;
+it does NOT certify a full annual run of the newer heldout-2024 scenarios now on
+master. The measured input edition is retained at commit
+<code class="docutils literal notranslate"><span class="pre">8157f605e26fb75651037451fb453b1a48056787</span></code>; combine those data with the
+v1.9.13 runtime for reproduction, resolving the archived local paths for your machine.
+Current-master tests and bounded audits are recorded separately in release
+artifacts. Measured runtime modules match the release except for the version string.
+The frozen auditor adds measurement-only dispatch timing; parity of its results
+was checked before running the campaign.</p>
+<p>Current-master integration: 1,186 local tests passed (22 known Gymnasium
+float32-bound warnings); four strict auditors, critical lint, performance smoke,
+wheel/sdist checks and isolated wheel export passed.</p>
+<p><a class="reference external" href="https://github.com/Soft-CPS-Research-Group/Simulator/releases/download/v1.9.13/campaign-P8-evidence.zip">Campaign evidence</a> ·
+<a class="reference external" href="https://github.com/Soft-CPS-Research-Group/Simulator/releases/download/v1.9.13/validation-1.9.13.zip">Release integration evidence</a>.</p>
+<p>Compatibility: no information sampling/discard, relaxed tolerances, changes to
+physical equipment, BAU strategy, reward values, tariffs, KPI formulas or export
+schemas. Minimum SOC service was met for every observed departure; isolated exact
+target misses remain, with diagnosis pending. Accounting PASS is not a guarantee
+of target attainment, universal scheduling feasibility or real-equipment calibration.</p>
+</section>
+</section>
+<section id="v1-9-12-2026-11-02-robustness-contracts-and-maintainable-internals">
+<span id="v1912--2026-11-02--robustness-contracts-and-maintainable-internals"></span><h2>v1.9.12 — 2026-11-02 — robustness contracts and maintainable internals<a class="headerlink" href="#v1-9-12-2026-11-02-robustness-contracts-and-maintainable-internals" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Support deterministic composition of robustness events, explicit
+observation/action-space and target contracts, and versioned robustness audit
+metadata available in evaluation and export sidecars.</p></li>
+<li><p>Share electrical-service allocation between NormalPolicy and runtime limiting;
+preserve sequential outage budgets and immediate maximum charging BAU rules.</p></li>
+<li><p>Split KPI, entity-observation, loading and robustness responsibilities into
+focused internal modules while keeping the public facades and export contracts.</p></li>
+<li><p>Make audit references verifiable without silently rewriting expected results;
+add portable fixtures, physical regressions and installed-distribution checks.</p></li>
+<li><p>Remove temporary release-run notes and frozen working evidence from the source
+tree. Keep maintained product documentation and immutable historical links.</p></li>
+<li><p>Preserve the Portugal v3.3 datasets and matched 2024 references already merged
+on master; their edition is separate from the simulator version. Reconcile the
+documentation bundle after cleanup without regenerating physical inputs.</p></li>
+</ul>
+<p>Validation: the corrected runtime previously passed 1,020 tests, 16 physical
+scenarios, 63 dataset-interface audits, two Portuguese outage windows, six installed
+reference cases and four installed export formats. The release integration is
+retested against current master; current-run evidence is attached to the GitHub
+Release. The performance improvements are released separately in v1.9.13.</p>
+<p>Release integration: 1,063 tests passed on current master; all four strict
+auditors, critical lint, performance smoke, wheel/sdist checks and installed-wheel
+KPI/BAU/manifest export passed. No reference snapshots were rewritten.</p>
+<p>Compatibility: no change to BAU scheduling, physical models, KPI definitions or
+numerical tolerances. Internal modules are implementation details. Exact target
+SOC is not guaranteed by immediate-charging BAU; minimum service and target service
+remain separate metrics. No empirical equipment calibration is claimed.</p>
+<p>Earlier releases, with their original validation notes: <a class="reference internal" href="releases_archive.html"><span class="std std-doc">release archive</span></a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="publishing.html" class="btn btn-neutral float-left" title="Publishing Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="releases_archive.html" class="btn btn-neutral float-right" title="Earlier releases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jose Ramon Vazquez-Canteli, Kingsley Nweye, Zoltan Nagy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
