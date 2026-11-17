@@ -249,7 +249,7 @@ control. Planning notes, development diaries, release-run JSON, rendering QA and
 ad hoc observation dumps belong outside the checkout or in CI/release artifacts.
 Before removing work material, archive it externally and verify hashes; keep the
 source/destination mapping with that external evidence. Do not rewrite Git history.
-The [dataset catalogue](portugal_rec_native/README.md#proveniência-conservada-no-produto)
+The [dataset catalogue](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/portugal_rec_native/README.md#proveniência-conservada-no-produto)
 identifies the retained provenance files and their consumers. Distribution
 checksums describe the current package, not a previous documentation bundle.
 

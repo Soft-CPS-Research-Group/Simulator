@@ -2,7 +2,7 @@
 
 This fork publishes **`softcpsrecsimulator`** from
 [Soft-CPS-Research-Group/Simulator](https://github.com/Soft-CPS-Research-Group/Simulator).
-The Python import remains `citylearn`. Portuguese: [pt/publishing.md](pt/publishing.md).
+The Python import remains `citylearn`. Portuguese: [pt/publishing.md](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/pt/publishing.md).
 Default release owner: [@calofonseca](https://github.com/calofonseca).
 
 Publication is a separate maintainer action. Local testing and documentation
@@ -20,7 +20,7 @@ alone does not prove that local changes have been published.
    adding release-run JSON to `docs/`.
 3. Build and check the distributions. Use a fresh output directory for the version.
 4. Verify an installed wheel outside the source tree. The
-   [CI workflow](../.github/workflows/run_tests.yml) demonstrates the isolated
+   [CI workflow](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/.github/workflows/run_tests.yml) demonstrates the isolated
    `scripts/ci/installed_export_smoke.py` check, with explicit schema/output paths.
 
 ```console
@@ -52,7 +52,7 @@ need. Preserve inherited upstream tags: fork 1.7.0 uses
 
 ## Publication and verification
 
-The [Publish Python Package workflow](../.github/workflows/pypi_deploy.yml) runs
+The [Publish Python Package workflow](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/.github/workflows/pypi_deploy.yml) runs
 on a **published GitHub Release** or explicit `workflow_dispatch`; a tag push
 alone does not publish. Choose one trigger per release, avoiding an additional
 manual dispatch after publishing the GitHub Release.

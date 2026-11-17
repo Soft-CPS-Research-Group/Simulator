@@ -63,7 +63,7 @@ def guide_source_link(app, pagename, templatename, context, doctree):
     else:
         context["meta"] = dict(context.get("meta") or {})
         context["meta"]["github_url"] = (
-            "https://github.com/citylearn-project/CityLearn/blob/master/docs/"
+            "https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/"
             + pagename.removeprefix("guides/") + ".md"
         )
 

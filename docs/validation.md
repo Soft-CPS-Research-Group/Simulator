@@ -45,7 +45,7 @@ remain unchanged; no SoftCPS production datasets are needed for the default chec
 
 ## Published validation and measured improvements
 
-The [3.1.0 release notes](releases.md#v310---2026-11-02) retain the functional
+The [CityLearn 3.1.0 release notes](https://github.com/citylearn-project/CityLearn/blob/master/docs/releases.md#v310---2026-11-02) retain the functional
 changes, validation counts, benchmark protocol and measured before/after values.
 They distinguish the corrected functional baseline from the original 3.0.2
 release. Older measurements remain in the [release archive](releases_archive.md).

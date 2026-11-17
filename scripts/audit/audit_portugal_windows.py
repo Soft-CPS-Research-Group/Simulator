@@ -21,7 +21,10 @@ from citylearn.citylearn import CityLearnEnv
 from citylearn.agents.baseline import BusinessAsUsualAgent
 from audit_portugal_heldout_2024 import runtime_fingerprint
 
-fingerprint = runtime_fingerprint(ROOT)
+# The shipped Portugal REC datasets (CityLearn's pt_rec_*).
+SCHEMAS = sorted((ROOT/'data/datasets').glob('pt_rec_*/evaluation/*.json'))
+SCHEMA_PATHS = [str(p.relative_to(ROOT)) for p in SCHEMAS]
+fingerprint = runtime_fingerprint(ROOT, SCHEMA_PATHS)
 rows = json.loads(args.output.read_text()) if args.resume else []
 windows = [('long2023', 0)] if args.long_days else [('winter2023', 96*30), ('summer2024', 35040+96*180)]
 steps = args.long_days*96+1 if args.long_days else 192
@@ -30,8 +33,7 @@ if args.resume:
     assert all((r['window'], r['start']) in windows and
                (r['status'] != 'pass' or r['transitions'] == steps-1) for r in rows), 'Cannot resume with different window settings'
 completed = {(r['schema'], r['window'], r['start']) for r in rows if r['status'] == 'pass'}
-# The shipped Portugal REC datasets (CityLearn's pt_rec_*).
-for path in sorted((ROOT/'data/datasets').glob('pt_rec_*/evaluation/*.json')):
+for path in SCHEMAS:
     if args.long_days and path.stem not in {'rec_4', 'rec_30_combined', 'rec_100_allin'}:
         continue
     for label, start in windows:
@@ -129,5 +131,5 @@ for path in sorted((ROOT/'data/datasets').glob('pt_rec_*/evaluation/*.json')):
         del env
         gc.collect()
 
-assert runtime_fingerprint(ROOT) == fingerprint, 'Inputs changed during execution'
+assert runtime_fingerprint(ROOT, SCHEMA_PATHS) == fingerprint, 'Inputs changed during execution'
 sys.exit(0 if all(row['status'] == 'pass' for row in rows) else 1)

@@ -150,7 +150,7 @@ Pre-release data validation passed 161 focused tests, 72 boundary windows,
 Parquet files. Release-wide tests, audits and installed-package verification are
 reported with the GitHub release. No annual controller campaign or MARL training
 is included. Reference-data reuse and empirical limitations are documented in
-[the dataset validation](portugal_rec_native/Heldout_2024.md).
+[the dataset validation](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/portugal_rec_native/Heldout_2024.md).
 
 Package/import names remain `softcpsrecsimulator` / `citylearn`. The release tag
 and default online dataset ref are `softcpsrecsimulator-v2.0.2`. Install the

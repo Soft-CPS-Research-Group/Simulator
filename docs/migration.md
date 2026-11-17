@@ -387,5 +387,5 @@ are imported, and the datasets retired in 3.0.2 remain retired.
 
 The performance changes preserve trajectories and KPI values relative to the
 corrected functional implementation. They do not imply equality with all
-historical 3.0.2 results. See the [3.1.0 release notes](releases.md#v310---2026-11-02)
+historical 3.0.2 results. See the [CityLearn 3.1.0 release notes](https://github.com/citylearn-project/CityLearn/blob/master/docs/releases.md#v310---2026-11-02)
 for measured scope and limitations.
