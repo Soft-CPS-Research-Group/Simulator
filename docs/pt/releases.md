@@ -92,7 +92,10 @@ adicionais do SoftCPS. O import Python continua a ser `citylearn`.
   CityLearn 3.5.0. Os testes do gerador que precisam dessa cópia são ignorados
   sem ela; os restantes correm sobre os `pt_rec_*`. Ver o
   [guia de migração](../migration.md#upgrade-from-softcps-211-to-220).
-- VALIDATION_PT
+- A validação incluiu:
+  - **Testes:** 1.741 passaram e 35 foram ignorados. Desses, 34 são testes do gerador de Portugal que precisam da cópia local `rec_pt_2023_*_v2` e um é exclusivo de Windows. Com os pacotes da 2.1.1 presentes como essa cópia, os 149 testes de Portugal passaram. O `test_energy_provenance_toggle` falhou uma vez com quatro workers em paralelo e passou quando repetido sozinho. A fixture copia o dataset para a cache partilhada do utilizador, o que cria uma corrida entre workers; a fixture do CityLearn é igual.
+  - **Auditoria e pacote:** a auditoria completa passou: 16 cenários físicos, contratos entity, os 61 datasets incluídos e paridade. O wheel e o sdist passaram o `twine check`. O wheel instalado passou a verificação de exportação de KPIs, BAU e manifesto fora do checkout.
+  - **REC de Portugal:** os 19 schemas `pt_rec_*` correram 96 passos com o `BusinessAsUsualAgent` e o `evaluate_v2()` com a referência BAU nativa: os quatro `schema.json`, nove cenários principais e seis de comparação. A memória máxima foi 1,0 GB. Os rácios face ao BAU ao nível do distrito foram exatamente 1, como esperado para o BAU face à sua própria referência. Janelas maiores não foram corridas. Cada pasta `pt_rec_*` é idêntica byte a byte à do CityLearn `v3.5.0`.
 
 ## v2.1.1 — 2026-11-16 — referência BAU nativa em schemas entity estáticos
 

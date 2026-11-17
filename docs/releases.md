@@ -71,7 +71,9 @@ a build skip without it; the others run on `pt_rec_*`. See the
 
 ### Validation
 
-VALIDATION_EN
+- **Tests.** 1,741 passed and 35 skipped. Of the skips, 34 are Portugal generator tests that need a local `rec_pt_2023_*_v2` build, and one is Windows-only. With the 2.1.1 packages present as that build, all 149 Portugal tests passed. `test_energy_provenance_toggle` failed once under four parallel workers and passed when rerun alone. Its fixture copies the dataset into the shared user cache, which races between workers; CityLearn's test fixture is the same.
+- **Audits and packaging.** The full audit passed: 16 physics scenarios, entity contracts, all 61 packaged datasets and refactor parity. The wheel and sdist passed `twine check`. The installed wheel passed the KPI, BAU and manifest export check outside the checkout.
+- **Portugal REC.** All 19 `pt_rec_*` schemas ran a 96-step episode with `BusinessAsUsualAgent` and `evaluate_v2()` including the native BAU reference: the four `schema.json` files, nine main and six comparison scenarios. Peak memory was 1.0 GB. District BAU-relative ratios were exactly 1, as expected for BAU against its own reference. Longer windows were not run. Each `pt_rec_*` folder is byte-identical to CityLearn `v3.5.0`.
 
 ### Credits
 
