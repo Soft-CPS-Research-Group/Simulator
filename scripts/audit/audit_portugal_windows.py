@@ -18,10 +18,13 @@ args = parser.parse_args()
 args.output.parent.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(ROOT))
 from citylearn.citylearn import CityLearnEnv
-from citylearn.agents.baseline import NormalPolicy
+from citylearn.agents.baseline import BusinessAsUsualAgent
 from audit_portugal_heldout_2024 import runtime_fingerprint
 
-fingerprint = runtime_fingerprint(ROOT)
+# The shipped Portugal REC datasets (CityLearn's pt_rec_*).
+SCHEMAS = sorted((ROOT/'data/datasets').glob('pt_rec_*/evaluation/*.json'))
+SCHEMA_PATHS = [str(p.relative_to(ROOT)) for p in SCHEMAS]
+fingerprint = runtime_fingerprint(ROOT, SCHEMA_PATHS)
 rows = json.loads(args.output.read_text()) if args.resume else []
 windows = [('long2023', 0)] if args.long_days else [('winter2023', 96*30), ('summer2024', 35040+96*180)]
 steps = args.long_days*96+1 if args.long_days else 192
@@ -30,8 +33,8 @@ if args.resume:
     assert all((r['window'], r['start']) in windows and
                (r['status'] != 'pass' or r['transitions'] == steps-1) for r in rows), 'Cannot resume with different window settings'
 completed = {(r['schema'], r['window'], r['start']) for r in rows if r['status'] == 'pass'}
-for path in sorted((ROOT/'data/datasets').glob('rec_pt_*/evaluation/*.json')):
-    if args.long_days and path.stem not in {'core_4', 'core_30_combined', 'premium_100_allin'}:
+for path in SCHEMAS:
+    if args.long_days and path.stem not in {'rec_4', 'rec_30_combined', 'rec_100_allin'}:
         continue
     for label, start in windows:
         if (str(path), label, start) in completed:
@@ -48,7 +51,7 @@ for path in sorted((ROOT/'data/datasets').glob('rec_pt_*/evaluation/*.json')):
             env = CityLearnEnv(schema, render_mode='none', offline=True, random_seed=0,
                                export_kpis_on_episode_end=False)
             obs, _ = env.reset(seed=0)
-            policy = NormalPolicy(env)
+            policy = BusinessAsUsualAgent(env)
             row['members'] = len(env.buildings)
             ledger_seconds = [0.0]
             for method in ('begin_step', 'settle', 'synchronize'):
@@ -128,5 +131,5 @@ for path in sorted((ROOT/'data/datasets').glob('rec_pt_*/evaluation/*.json')):
         del env
         gc.collect()
 
-assert runtime_fingerprint(ROOT) == fingerprint, 'Inputs changed during execution'
+assert runtime_fingerprint(ROOT, SCHEMA_PATHS) == fingerprint, 'Inputs changed during execution'
 sys.exit(0 if all(row['status'] == 'pass' for row in rows) else 1)

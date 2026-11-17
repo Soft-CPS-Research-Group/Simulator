@@ -9,6 +9,79 @@ Portuguese version: [pt/releases.md](pt/releases.md).
 
 Default release owner for this fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.2.0 — 2026-11-17 — aligned with CityLearn 3.5.0
+
+Release maintainer: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+SoftCPS REC Simulator 2.2.0 runs the same simulator code, tests and documentation as
+[CityLearn 3.5.0](https://github.com/citylearn-project/CityLearn/releases/tag/v3.5.0).
+Only the distribution name (`softcpsrecsimulator`), the version, the dataset
+download defaults, the release documentation and the additional SoftCPS datasets
+differ. The Python import is still `citylearn`.
+
+### What's new
+
+- **New BAU, with changed BAU-relative KPIs.** `BusinessAsUsualAgent` is the
+  CityLearn 3.4.0 BAU: it decides from the entity observations and charges a
+  connected EV at once to 100% by default (`immediate-full-charge-v2`). With
+  `ev_charge_target='requested'` (`immediate-user-target-v1`) it stops at the
+  user's requested departure SOC; `business_as_usual_ev_charge_target` selects the
+  one `evaluate_v2()` uses as the KPI reference. **Every `business_as_usual`,
+  `delta_to_business_as_usual` and `ratio_to_business_as_usual` KPI can differ
+  from 2.1.1**, including those of the Portugal datasets. Rerun the controller
+  and its reference together.
+- **Basic, Smart and Community baselines.** `RBCBasicPolicy`, `RBCSmartPolicy`
+  and `RBCCommunityPolicy` are the baselines validated in the Soft-CPS Algorithms
+  repository. `NormalPolicy`, `NormalTargetPolicy`, `NormalNoBatteryPolicy`,
+  `ServiceOnlyBaselineAgent`, `GridAwareBaselineAgent` and
+  `CommunityAwareBaselineAgent` are removed.
+- **Unlimited headroom is 1,000,000 kW.** Entity headroom features of a building
+  without an electrical service limit read 1,000,000 kW (the observation bound)
+  instead of 0 kW, which read as "no capacity left".
+- **Portugal datasets renamed to CityLearn's `pt_rec_*`.** `pt_rec_4`,
+  `pt_rec_15`, `pt_rec_30` and `pt_rec_100`, byte-identical to CityLearn 3.5.0,
+  replace `rec_pt_2023_micro_4_v2`, `rec_pt_2023_core_15_v2`,
+  `rec_pt_2023_core_30_v2` and `rec_pt_2023_premium_100_v2`, which are removed.
+  Evaluation schemas are renamed too, for example
+  `rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json` becomes
+  `pt_rec_30/evaluation/rec_30_robustness.json`. The full mapping is in the
+  [migration guide](migration.md#upgrade-from-softcps-211-to-220); see also the
+  [Portugal REC datasets](portugal_rec_datasets.md) guide.
+- **Nested dataset downloads.** `DataSet.get_dataset()` takes CityLearn's
+  implementation: two GitHub API requests per dataset however deeply nested,
+  files from raw.githubusercontent.com, `CITYLEARN_GITHUB_TOKEN` or
+  `GITHUB_TOKEN` when set, and the account and repository given to `DataSet`. The
+  defaults remain `Soft-CPS-Research-Group/Simulator` at
+  `softcpsrecsimulator-v{version}`.
+- **CityLearn fixes and documentation.** Schema roots resolve from the schema
+  file, dynamic-topology physics checks cover active members only, and the
+  CityLearn guides, examples, documentation build and CI matrix (Python 3.9,
+  3.10 and 3.12; NumPy 1 and 2) are included.
+- **Dependencies.** `doe_xstock`, `openstudio` and `torchvision` are no longer
+  installed by default; `citylearn.end_use_load_profiles` needs the
+  `end_use_load_profiles` extra.
+
+SoftCPS keeps the 19 `ALADI *` datasets, `EC_Ermesinde` and its CLI fix for runs
+without Stable Baselines3. **The Portugal generator stays in SoftCPS**: its
+scripts, sources, results and catalogue still build the full `rec_pt_2023_*_v2`
+packages, now as a local working copy under `data/datasets` that Git ignores,
+while the shipped datasets match CityLearn 3.5.0. Generator tests that need such
+a build skip without it; the others run on `pt_rec_*`. See the
+[migration guide](migration.md#upgrade-from-softcps-211-to-220).
+
+### Validation
+
+- **Tests.** 1,741 passed and 35 skipped. Of the skips, 34 are Portugal generator tests that need a local `rec_pt_2023_*_v2` build, and one is Windows-only. With the 2.1.1 packages present as that build, all 149 Portugal tests passed. `test_energy_provenance_toggle` failed once under four parallel workers and passed when rerun alone. Its fixture copies the dataset into the shared user cache, which races between workers; CityLearn's test fixture is the same.
+- **Audits and packaging.** The full audit passed: 16 physics scenarios, entity contracts, all 61 packaged datasets and refactor parity. The wheel and sdist passed `twine check`. The installed wheel passed the KPI, BAU and manifest export check outside the checkout.
+- **Portugal REC.** All 19 `pt_rec_*` schemas ran a 96-step episode with `BusinessAsUsualAgent` and `evaluate_v2()` including the native BAU reference: the four `schema.json` files, nine main and six comparison scenarios. Peak memory was 1.0 GB. District BAU-relative ratios were exactly 1, as expected for BAU against its own reference. Longer windows were not run. Each `pt_rec_*` folder is byte-identical to CityLearn `v3.5.0`.
+
+### Credits
+
+**Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)) developed the
+CityLearn 3.4.0 baselines and 3.5.0 datasets and aligned SoftCPS with CityLearn 3.5.0.
+
+[Full changelog](https://github.com/Soft-CPS-Research-Group/Simulator/compare/softcpsrecsimulator-v2.1.1...softcpsrecsimulator-v2.2.0)
+
 ## v2.1.1 — 2026-11-16 — native BAU reference for static entity schemas
 
 Release maintainer: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
@@ -77,7 +150,7 @@ Pre-release data validation passed 161 focused tests, 72 boundary windows,
 Parquet files. Release-wide tests, audits and installed-package verification are
 reported with the GitHub release. No annual controller campaign or MARL training
 is included. Reference-data reuse and empirical limitations are documented in
-[the dataset validation](portugal_rec_native/Heldout_2024.md).
+[the dataset validation](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/portugal_rec_native/Heldout_2024.md).
 
 Package/import names remain `softcpsrecsimulator` / `citylearn`. The release tag
 and default online dataset ref are `softcpsrecsimulator-v2.0.2`. Install the

@@ -14,15 +14,18 @@ It is a fork-based project used for research and experimentation on:
   feasible action capacity and requested/limited/applied action feedback.
 - dynamic member and asset topology with repeatable multi-episode reset semantics.
 
-Current source release: `2.1.1`. This patch fixes the native BAU reference
-for static entity schemas with EV, storage or PV robustness events, such as
-Portugal REC-30 robustness. The Portugal dataset files are unchanged from 2.0.2.
-See the [release history](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/releases.md) for validation, measured gains and scope limits.
+Current source release: `2.2.0`. It aligns the simulator with CityLearn 3.5.0:
+new business-as-usual (BAU), Basic, Smart and Community baselines, unlimited
+electrical headroom published as 1,000,000 kW, and nested dataset downloads.
+BAU-relative KPIs change; see the
+[migration guide](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/migration.md#upgrade-from-softcps-211-to-220)
+and the [release history](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/releases.md).
 
 ## Project Positioning
 
-This package is a **fork project** built from the CityLearn codebase and extended for SoftCPS REC
-simulation needs.
+This package distributes the same simulator code as
+[CityLearn](https://github.com/citylearn-project/CityLearn), under the
+`softcpsrecsimulator` name, with additional SoftCPS datasets.
 
 ## Installation
 
@@ -41,4 +44,4 @@ from citylearn.citylearn import CityLearnEnv
 ## Source and Documentation
 
 - Source: https://github.com/Soft-CPS-Research-Group/Simulator
-- Original upstream project: https://github.com/intelligent-environments-lab/CityLearn
+- CityLearn: https://github.com/citylearn-project/CityLearn

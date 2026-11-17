@@ -16,14 +16,24 @@ CSV e Parquet sao intercambiaveis se:
 3. As unidades sao as mesmas.
 4. Os tipos conseguem ser convertidos para os construtores do simulador.
 
-## Portugal: motor corrente e proveniência histórica
+## Datasets públicos e dados locais
 
-A preparação original foi congelada contra `978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0). Esse commit identifica a proveniência dos relatórios históricos; os datasets correntes são executados pelo motor mantido neste repositório.
-Nove configurações: Core-4, Core-15, Core-30 Normal/Topologia/Safety/Robustness/Combinado e Premium Normal/All-in. DR apenas no All-in. Consultar `CURRENT_EVALUATION.json` em cada família; os schemas executáveis estão em `evaluation/`.
+Use `DataSet().get_dataset_names()` para consultar o catálogo público. Pode passar
+um nome público ao `CityLearnEnv` ou indicar o caminho do seu próprio `schema.json`.
+Cada primeira descarga usa dois pedidos à API do GitHub; sem autenticação há 60
+por hora. Defina `CITYLEARN_GITHUB_TOKEN` ou `GITHUB_TOKEN` para subir esse limite.
+As [notas dos datasets retirados](retired_datasets.md) ficam separadas do guia atual.
 
-As nove configurações Portugal abrangem 2023 e 2024 em sequência, preservando as saídas definitivas e a identidade dos equipamentos. Os EV nativos usam SOC prescrito por sessão, as máquinas seguem as fases da instalação e a DR usa a média anterior ao pedido. Na edição v3.2, todos os schemas usam `max(OMIE_PT_EUR_MWh / 1000, 0)` em EUR/kWh. O mercado comunitário está ativo: compras e vendas locais usam 80% desse preço; a exportação à rede vale zero. Não existe serviço privado depois da saída de um membro. Os testes de regressão em janelas de eventos não equivalem a uma validação contínua dos dois anos com um controlador.
+Os [datasets REC de Portugal](portugal_rec_datasets.md) oferecem quatro comunidades
+a 15 minutos, de 4 a 100 membros, cada uma com cenários de avaliação.
 
-[Catálogo / catalogue and reproduction](../portugal_rec_native/README.md).
+## Datasets SoftCPS
+
+O SoftCPS inclui os datasets do CityLearn e ainda os 19 datasets `ALADI *` e o
+`EC_Ermesinde`. Os datasets REC de Portugal são os `pt_rec_*` do CityLearn; os
+nomes anteriores do SoftCPS, `rec_pt_2023_*_v2`, foram removidos na 2.2.0. A
+correspondência entre nomes antigos e novos está no
+[guia de migração](../migration.md#upgrade-from-softcps-211-to-220).
 
 ## Contrato de Unidades
 
@@ -115,11 +125,12 @@ Cooling e heating demand nao podem ser positivos no mesmo timestep.
 |---|---:|---|
 | `electric_vehicle_charger_state` | enum | 1 connected, 2 incoming, 3 away/commuting. |
 | `electric_vehicle_id` | string | ID do EV. |
+| `electric_vehicle_session_id` | string | Opcional. ID da sessao de carregamento. Uma mudanca separa duas sessoes do mesmo EV, incluindo sessoes consecutivas. Valores em falta ou vazios nao sao uma mudanca. |
 | `electric_vehicle_departure_time` | steps | Steps ate departure. Default interno `-1`. |
 | `electric_vehicle_required_soc_departure` | percent | SOC requerido. Convertido para ratio. Default interno `-0.1`. |
 | `electric_vehicle_estimated_arrival_time` | steps | Steps ate chegada. Default interno `-1`. |
-| `electric_vehicle_estimated_soc_arrival` | percent | SOC estimado na chegada. Convertido para ratio. |
-| `electric_vehicle_current_soc` | percent ou ratio | Opcional. Telemetria de SOC para datasets baseados em sessões. Os inputs Portugal correntes usam SOC prescrito por chegada; os registos longitudinais de mobilidade são apenas descritivos. |
+| `electric_vehicle_estimated_soc_arrival` | percent | SOC estimado na chegada, nas linhas incoming (estado 2). Convertido para ratio. Na ligacao o EV parte da estimativa mais recente na linha imediatamente anterior e nas linhas incoming contiguas do mesmo EV e da mesma sessao antes dessa linha, normalmente a ultima linha incoming. A procura nao passa uma linha away (estado 3), outro EV nem uma mudanca de `electric_vehicle_session_id`. Sem essa estimativa o EV parte da estimativa na sua linha de ligacao, se existir, e caso contrario mantem o SOC simulado. As referencias de chegada dos KPIs e da auditoria de partida usam o mesmo valor. |
+| `electric_vehicle_current_soc` | percent ou ratio | Opcional. Telemetria de SOC atual. Na suite REC anual é uma referência neutra de inicialização de fronteira, com serviço a taxa constante, usada apenas quando um episódio começa dentro de uma sessão ocupada; não substitui a evolução do SOC num rollout ininterrupto. |
 
 Para datasets sub-horarios, os campos `*_time` devem estar em numero de timesteps da resolucao do dataset. Ex.: 1 hora em 15s = 240 steps.
 
@@ -264,4 +275,3 @@ Datasets de robustez definem `schema["robustness"]["enabled"] = true`, apontam `
 8. Preferir Parquet para datasets anuais/sub-minuto.
 9. Correr smoke run e `evaluate_v2()`.
 10. Correr `audit_physics.py` quando o dataset for novo ou critico.
-

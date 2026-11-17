@@ -9,7 +9,8 @@ Portuguese version: [pt/running_simulations.md](pt/running_simulations.md).
 | Case | Command | Notes |
 |---|---|---|
 | Standard install | `pip install softcpsrecsimulator` | The Python import path is still `citylearn`. |
-| Parquet datasets | `pip install pyarrow` | Required only when schemas point to `.parquet`, `.pq` or `.parq`. |
+| Parquet datasets | `pip install "softcpsrecsimulator[parquet]"` | Required when schemas or exports use Parquet. |
+| CLI and Stable Baselines3 | `pip install "stable-baselines3==2.3.2"` | The current CLI imports this library; use Python 3.11+ for CLI train/evaluate. |
 | PV autosizing | `pip install "softcpsrecsimulator[pysam]"` | Required only for EPW/PySAM autosizing. |
 | Local development | `.venv/bin/pip install -e .` | Use the repo `.venv` when available. |
 
@@ -19,7 +20,7 @@ Portuguese version: [pt/running_simulations.md](pt/running_simulations.md).
 import numpy as np
 from citylearn.citylearn import CityLearnEnv
 
-schema = "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json"
+schema = "citylearn_challenge_2022_phase_all_plus_evs"
 env = CityLearnEnv(schema, interface="flat", episode_time_steps=24, render_mode="none")
 
 observations, info = env.reset()
@@ -38,7 +39,7 @@ kpis_v2 = env.evaluate_v2()
 from citylearn.citylearn import CityLearnEnv
 
 env = CityLearnEnv(
-    "data/datasets/citylearn_three_phase_dynamic_topology_demo/schema.json",
+    "citylearn_three_phase_dynamic_topology_demo",
     interface="entity",
     topology_mode="dynamic",
 )
@@ -68,13 +69,13 @@ env = MultiCommunityEnv(
     communities=[
         {
             "community_id": "community_a",
-            "schema": "data/datasets/community_a/schema.json",
+            "schema": "citylearn_challenge_2022_phase_all_plus_evs",
             "env_kwargs": {"interface": "entity", "episode_time_steps": 48},
             "weight": 1.0,
         },
         {
             "community_id": "community_b",
-            "schema": "data/datasets/community_b/schema.json",
+            "schema": "citylearn_challenge_2022_phase_all",
             "env_kwargs": {"interface": "entity", "episode_time_steps": 48},
             "weight": 1.0,
         },
@@ -171,6 +172,12 @@ When `return_substeps=True`, `info` also includes `substep_rewards`, `substep_in
 
 ## CLI
 
+The current CLI requires Stable Baselines3 even for its listing commands:
+install `stable-baselines3==2.3.2` alongside CityLearn. Use Python 3.11 or newer
+for `simulate ... train/evaluate`, whose timestamp code uses `datetime.UTC`.
+The Python simulation loop above works on supported earlier Python versions
+without Stable Baselines3.
+
 ```bash
 citylearn --version
 citylearn list_datasets
@@ -224,8 +231,8 @@ for episode in range(episodes):
 
 | Call | Output | BAU sidecar cost |
 |---|---|---:|
-| `env.export_final_kpis(include_business_as_usual=False)` | KPI file only | no |
-| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=False)` | KPI file with BAU rows | yes |
+| `env.export_final_kpis(include_business_as_usual=False)` | KPI file and audit metadata | no |
+| `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=False)` | KPI file with BAU rows and audit metadata | yes |
 | `env.export_final_kpis(include_business_as_usual=True, export_business_as_usual_timeseries=True)` | KPI file with BAU rows and BAU time-series file | yes |
 
 Normal episode time series are controlled by `render_mode`/`render_enabled`, not by `export_final_kpis()`.
@@ -249,7 +256,7 @@ import numpy as np
 from citylearn.citylearn import CityLearnEnv
 
 env = CityLearnEnv(
-    "data/datasets/citylearn_three_phase_electrical_service_demo_15s_parquet/schema.json",
+    "citylearn_three_phase_electrical_service_demo_15s_parquet",
     simulation_start_time_step=0,
     simulation_end_time_step=120,
     episode_time_steps=120,
@@ -271,3 +278,9 @@ for _ in range(100):
 print(env.evaluate_v2().head())
 PY
 ```
+
+KPI-only exports include a manifest and service-audit JSON sidecars. They do not
+enable episode time-series output; CityLearn UI can load the folder as before.
+The manifest identifies input files by their path below the dataset root;
+[Portable experiment evidence](developer_guide.md#portable-experiment-evidence)
+lists which spellings of a file reference record the same evidence.

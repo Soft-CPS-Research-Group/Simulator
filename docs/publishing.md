@@ -2,7 +2,7 @@
 
 This fork publishes **`softcpsrecsimulator`** from
 [Soft-CPS-Research-Group/Simulator](https://github.com/Soft-CPS-Research-Group/Simulator).
-The Python import remains `citylearn`. Portuguese: [pt/publishing.md](pt/publishing.md).
+The Python import remains `citylearn`. Portuguese: [pt/publishing.md](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/pt/publishing.md).
 Default release owner: [@calofonseca](https://github.com/calofonseca).
 
 Publication is a separate maintainer action. Local testing and documentation
@@ -12,14 +12,15 @@ alone does not prove that local changes have been published.
 ## Prepare and validate
 
 1. Review the release diff. Update `citylearn/__init__.py`, the source version in
-   `README.md` and `README_PYPI.md`, and [releases.md](releases.md). Update affected
-   product/schema/KPI references and explain compatibility or migration limits.
+   `README_PYPI.md`, [releases.md](releases.md) and [migration.md](migration.md).
+   `README.md` carries no version. Update affected product/schema/KPI references
+   and explain compatibility or migration limits.
 2. Run the full suite and mandatory auditors from [developer_guide.md](developer_guide.md).
    Keep run evidence outside the checkout or in CI/release artifacts, rather than
    adding release-run JSON to `docs/`.
 3. Build and check the distributions. Use a fresh output directory for the version.
 4. Verify an installed wheel outside the source tree. The
-   [CI workflow](../.github/workflows/run_tests.yml) demonstrates the isolated
+   [CI workflow](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/.github/workflows/run_tests.yml) demonstrates the isolated
    `scripts/ci/installed_export_smoke.py` check, with explicit schema/output paths.
 
 ```console
@@ -34,8 +35,8 @@ alone does not prove that local changes have been published.
 
 For an authorised release, commit with the normal maintainer identity and push the
 reviewed release commit to `origin/master` once. Wait for its CI before publishing.
-The current CI covers Python 3.9/3.10, lint, tests, accounting audits, performance
-smoke and installed-distribution exports. Then create an unused release tag for
+The current CI covers Python 3.9, 3.10 and 3.12 with NumPy 2, Python 3.10 with
+NumPy 1, lint, tests, runtime audits, performance smoke and installed-wheel exports. Then create an unused release tag for
 the approved commit:
 
 ```console
@@ -51,7 +52,7 @@ need. Preserve inherited upstream tags: fork 1.7.0 uses
 
 ## Publication and verification
 
-The [Publish Python Package workflow](../.github/workflows/pypi_deploy.yml) runs
+The [Publish Python Package workflow](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/.github/workflows/pypi_deploy.yml) runs
 on a **published GitHub Release** or explicit `workflow_dispatch`; a tag push
 alone does not publish. Choose one trigger per release, avoiding an additional
 manual dispatch after publishing the GitHub Release.

@@ -1,5 +1,13 @@
 # Portugal REC — 2023 e 2024
 
+> **SoftCPS 2.2.0.** O repositório distribui os datasets `pt_rec_4`, `pt_rec_15`,
+> `pt_rec_30` e `pt_rec_100` do CityLearn 3.5.0, com apenas os ficheiros lidos
+> pelos schemas ([guia](../portugal_rec_datasets.md)). Os pacotes completos
+> `rec_pt_2023_*_v2` descritos abaixo deixaram de ser distribuídos: os scripts
+> `scripts/*portugal*` continuam a gerá-los em `data/datasets/`, como cópia de
+> trabalho local fora do Git. A correspondência de nomes está no
+> [guia de migração](../migration.md#upgrade-from-softcps-211-to-220).
+
 ## Edição corrente v3.3 — campanha reservada e referências emparelhadas
 
 A edição corrente é **portugal-native-2023-2024-v3.3**, revisão de campanha

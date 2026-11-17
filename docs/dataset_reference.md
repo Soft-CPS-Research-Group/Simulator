@@ -13,17 +13,24 @@ Portuguese version: [pt/dataset_reference.md](pt/dataset_reference.md).
 
 CSV and Parquet are interchangeable when the schema path is updated and columns, units and types remain equivalent.
 
-## Portugal: consolidated runtime and frozen provenance
+## Public datasets and local data
 
-The current working tree combines the maintained runtime with the Portuguese 2023–2024
-datasets. Their original preparation was frozen against runtime
-`978be68b0e0740deab15ecf536805f323b86fa57` (1.8.0); that remains the provenance of
-the archived reports, not the runtime of this consolidated checkout.
-Nine configurations: Core-4, Core-15, Core-30 Normal/Topology/Safety/Robustness/Combined and Premium Normal/All-in. DR only in All-in. Use each family's `CURRENT_EVALUATION.json`; executable variants are in `evaluation/`.
+Resolve available names with `DataSet().get_dataset_names()` or use the CLI after
+installing its dependencies. Pass a dataset name to `CityLearnEnv` for automatic
+download and caching, or pass your own local `schema.json` path. Use
+`offline=True` with locally available files to disable network fallbacks.
+Each first download uses two GitHub API requests; anonymous clients get 60 per
+hour. Set `CITYLEARN_GITHUB_TOKEN` or `GITHUB_TOKEN` to raise that limit.
 
-The same nine Portugal-oriented configurations span 2023 and 2024 continuously, preserving permanent departures and equipment identities. Native EVs use prescribed arrival SOC per session, native machines use the building phase split, and DR uses the pre-event average. In dataset edition v3.2, all schemas use `max(OMIE_PT_EUR_MWh / 1000, 0)` in EUR/kWh. The community market is enabled: local purchases and sales use 80% of that price, and grid exports have zero value. No private service continues after member exit. Event-window regression checks do not constitute continuous two-year controller validation.
+The [Portugal REC datasets](portugal_rec_datasets.md) provide four 15-minute
+communities of 4 to 100 members, each with evaluation scenarios.
 
-[Catálogo / catalogue and reproduction](portugal_rec_native/README.md).
+## SoftCPS datasets
+
+SoftCPS ships the CityLearn datasets plus the 19 `ALADI *` datasets and
+`EC_Ermesinde`. The Portugal REC datasets are CityLearn's `pt_rec_*`; the earlier
+SoftCPS names `rec_pt_2023_*_v2` were removed in 2.2.0, with an old-to-new mapping
+in the [migration guide](migration.md#upgrade-from-softcps-211-to-220).
 
 ## Unit Contract
 
@@ -95,12 +102,12 @@ Cooling and heating demand cannot both be positive in the same timestep.
 |---|---:|---|
 | `electric_vehicle_charger_state` | enum | 1 connected, 2 incoming, 3 away/commuting. |
 | `electric_vehicle_id` | string | EV ID. |
-| `electric_vehicle_session_id` | string | Optional session ID. A different non-empty ID starts a new session, even if the same EV is present on consecutive rows. Numeric-looking CSV IDs retain their original text. |
+| `electric_vehicle_session_id` | string | Optional charging-session ID. A change separates two sessions of the same EV, including back-to-back ones. Missing or empty values are not a change. |
 | `electric_vehicle_departure_time` | steps | Steps until departure. Internal default `-1`. |
 | `electric_vehicle_required_soc_departure` | percent | Required departure SOC. Converted to ratio. |
 | `electric_vehicle_estimated_arrival_time` | steps | Steps until arrival. Internal default `-1`. |
-| `electric_vehicle_estimated_soc_arrival` | percent | Estimated arrival SOC. Converted to ratio. Use the latest valid estimate from the same incoming session, then the plug-in row if needed. |
-| `electric_vehicle_current_soc` | percent or ratio | Optional current-SOC telemetry for session-based datasets. The current Portugal native inputs use prescribed arrival SOC per session; longitudinal mobility ledgers are descriptive only. |
+| `electric_vehicle_estimated_soc_arrival` | percent | Estimated arrival SOC on the incoming (state 2) rows. Converted to ratio. At connection the EV starts from the latest estimate on the row just before it and the contiguous incoming rows of the same EV and session before that row, usually the last incoming row. The lookup does not pass an away (state 3) row, another EV or a change of `electric_vehicle_session_id`. Without such an estimate the EV starts from the estimate on its connection row, if any, and otherwise keeps its simulated SOC. The KPI and departure-audit arrival references use the same value. |
+| `electric_vehicle_current_soc` | percent or ratio | Optional current-SOC telemetry. In the annual REC suite this is a neutral constant-rate boundary-initialization reference, used only when an episode starts inside an occupied session; it does not override SOC during an uninterrupted rollout. |
 
 For sub-hourly datasets, countdown fields must be expressed in timesteps at the dataset resolution. Example: 1 hour at 15s is 240 steps.
 

@@ -48,6 +48,8 @@ Portuguese version: [pt/robustness_reference.md](pt/robustness_reference.md).
 
 Observation and forecast corruption is agent-facing only. Rewards, physical KPIs and demand-response settlement still use the real simulator state. Action and asset-control events change the action effectively applied, so they can change physics and normal KPIs.
 
+A PV array has no action. An `asset` event on a `pv` target with `target_feature` `control` or `both` takes the array out of service: it generates nothing during the event, so net consumption, cost, emissions, energy provenance and PV KPIs all use zero generation for those steps. The business-as-usual reference sees the same outage. With `telemetry` only the PV keeps generating and only its observations are hidden.
+
 ## Validation and composition
 
 Event identifiers must be unique across the file, including disabled modules.
@@ -140,7 +142,6 @@ Existing KPI rows/names/formulas are preserved; the JSON provides explicit
 populations, denominators and coverage for the researcher, not hidden-policy input.
 
 In `MultiCommunityEnv`, robustness stays independent per child community. Portfolio rows aggregate robustness `_count` KPIs in the same way as other count KPIs.
-
 
 ## Agent observation contract
 

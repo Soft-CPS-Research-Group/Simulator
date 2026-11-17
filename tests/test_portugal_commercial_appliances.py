@@ -17,7 +17,10 @@ from revise_portugal_ev_mobility import source_frame
 from prepare_portugal_heldout_2024 import active_masks
 from portugal_commercial_appliance_validation import extract_cycles,hourly_days,REFERENCE
 
-COMMERCIAL=[ROOT/f"data/datasets/rec_pt_2023_{family}_v2" for family in ("core_30","premium_100")]
+from portugal_datasets import BUILD, requires_build
+
+# Member catalogues, operations, time series and end uses are generator outputs, not shipped.
+COMMERCIAL=[r for r in BUILD if r.name in ("rec_pt_2023_core_30_v2","rec_pt_2023_premium_100_v2")]
 
 
 def test_measured_reference_integrity_and_disjoint_buildings():
@@ -30,6 +33,7 @@ def test_measured_reference_integrity_and_disjoint_buildings():
     assert meta["appliance_protocol"]["house_split"]=={"2":"heldout","3":"development","5":"development","11":"heldout"}
 
 
+@requires_build
 @pytest.mark.parametrize("root",COMMERCIAL,ids=lambda p:p.name)
 def test_commercial_public_hours_presence_and_charging_remain_consistent(root):
     members=pd.read_parquet(root/"catalogs/members.parquet")
@@ -56,6 +60,7 @@ def test_commercial_public_hours_presence_and_charging_remain_consistent(root):
         assert m.physical_charger_count<=m.parking_spaces
 
 
+@requires_build
 def test_commercial_realizations_reproduce_but_do_not_replay_years_or_seeds():
     root=COMMERCIAL[-1];members=pd.read_parquet(root/"catalogs/members.parquet")
     m=members.loc[members.routine_archetype.eq("office")].iloc[0]
@@ -78,6 +83,7 @@ def test_commercial_realizations_reproduce_but_do_not_replay_years_or_seeds():
     finally:CONFIG.clear();CONFIG.update(old)
 
 
+@requires_build
 def test_people_are_discrete_and_independent_of_electrical_noise():
     root=COMMERCIAL[-1];members=pd.read_parquet(root/"catalogs/members.parquet")
     calendar=pd.read_parquet(root/"shared/calendar.parquet");old=deepcopy(CONFIG)
@@ -118,6 +124,7 @@ def test_care_residents_and_staff_are_distinct_from_daytime_visitors():
         assert visitors.sum()>0
 
 
+@requires_build
 @pytest.mark.parametrize("root",COMMERCIAL,ids=lambda p:p.name)
 def test_commercial_annual_budget_includes_every_appliance_once(root):
     members=pd.read_parquet(root/"catalogs/members.parquet")
@@ -135,6 +142,7 @@ def test_commercial_annual_budget_includes_every_appliance_once(root):
             assert abs(energy-target)<.01
 
 
+@requires_build
 def test_professional_linen_uses_cold_water_and_retains_hardware_power():
     from revise_portugal_realism import profiles_for
     root=COMMERCIAL[-1];apps=pd.read_parquet(root/"catalogs/deferrables.parquet")
@@ -152,6 +160,7 @@ def test_professional_linen_uses_cold_water_and_retains_hardware_power():
         assert full.duration_steps.ge(4).all()
 
 
+@requires_build
 def test_catering_warmup_and_all_feasible_batches_share_the_machine_rating():
     root=COMMERCIAL[-1];apps=pd.read_parquet(root/"catalogs/deferrables.parquet")
     app=next(apps.loc[apps.equipment_use.eq("catering_dishwashing_batch")].itertuples())
@@ -164,8 +173,9 @@ def test_catering_warmup_and_all_feasible_batches_share_the_machine_rating():
             assert np.max(values+support[start:start+len(values)])*4<=app.nominal_power_kw+1e-7
 
 
+@requires_build
 def test_domestic_programmes_never_draw_from_heldout_houses():
-    for root in sorted((ROOT/"data/datasets").glob("rec_pt_2023_*_v2")):
+    for root in BUILD:
         apps=pd.read_parquet(root/"catalogs/deferrables.parquet")
         for a in apps.loc[apps.equipment_use.isin(["household_laundry","household_dishes","staff_kitchen_dishes"])].itertuples():
             p=pd.read_parquet(root/f"deferrables/{a.deferrable_id}_profiles.parquet")
@@ -173,6 +183,7 @@ def test_domestic_programmes_never_draw_from_heldout_houses():
             assert p.duration_steps.nunique()>2
 
 
+@requires_build
 def test_professional_holding_load_is_not_a_shiftable_programme():
     root=COMMERCIAL[-1]
     apps=pd.read_parquet(root/"catalogs/deferrables.parquet")
@@ -187,6 +198,7 @@ def test_professional_holding_load_is_not_a_shiftable_programme():
     assert "reference_house" not in pro
 
 
+@requires_build
 @pytest.mark.parametrize("root",COMMERCIAL,ids=lambda p:p.name)
 def test_explicit_supplemental_clones_use_current_donor_realization(root):
     catalogue=json.loads((root/"evaluation/campaign_2024/catalogue.json").read_text())

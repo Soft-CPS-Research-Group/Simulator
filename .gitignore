@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+docs/source/guides/
 develop-eggs/
 dist/
 downloads/
@@ -209,6 +210,10 @@ data/datasets/citylearn_three_phase_dynamic_assets_only_demo_15s/
 data/datasets/citylearn_three_phase_electrical_service_demo_15s/
 data/datasets/citylearn_three_phase_dynamic_assets_only_demo_15s_parquet/
 data/datasets/citylearn_three_phase_electrical_service_demo_15s_parquet/
+
+# Local Portugal generator build (scripts/*portugal*). The repository ships
+# CityLearn's pt_rec_* datasets instead.
+data/datasets/rec_pt_2023_*_v2/
 
 # Rebuildable Portugal delivery package
 docs/portugal_rec_native.zip

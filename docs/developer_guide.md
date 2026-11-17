@@ -8,10 +8,13 @@ Portuguese version: [pt/developer_guide.md](pt/developer_guide.md).
 
 ## Local Environment
 
-Use the repository virtual environment when available:
+Create an isolated environment from a repository checkout:
 
 ```console
-.venv/bin/pip install -e .
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt -r test_requirements.txt
+python -m pip install -e .
 ```
 
 Optional dependencies:
@@ -21,6 +24,40 @@ Optional dependencies:
 | Parquet datasets | `.venv/bin/pip install pyarrow` |
 | PV autosizing | `.venv/bin/pip install ".[pysam]"` |
 | Build checks | `.venv/bin/pip install build twine` |
+
+## Portable experiment evidence
+
+`.gitattributes` makes every checkout byte-identical to the repository: text
+files use LF and files under `data/` and `tests/data/` are never converted, even
+with Git for Windows' default `core.autocrlf=true`. Experiment manifests hash
+these files, so the hashes then agree on all platforms. A checkout made before
+`.gitattributes` existed may still hold CRLF copies; `git status` lists converted
+data files as modified. Make a fresh clone and set it up as in
+[Local Environment](#local-environment): the clone applies the new checkout
+rules and leaves the existing working copy, including uncommitted changes,
+untouched. Then clear the dataset cache, which may hold copies made from the old
+checkout:
+
+```console
+git clone https://github.com/Soft-CPS-Research-Group/Simulator.git
+python -c "from citylearn.data import DataSet; DataSet().clear_cache()"
+```
+
+Manifests record each input file by its path below the dataset root, with `/`
+separators, so a moved or copied dataset keeps its evidence. On Windows, where
+`\` and `/` are both separators and file names ignore case, a reference that
+differs from the file's path only in separators or case records the file's
+on-disk spelling: with the dataset root `C:\data\demo` and the file
+`C:\data\demo\sub\weather.csv`, the references `sub\Weather.csv`,
+`SUB/weather.csv` and `C:\Data\Demo\sub\WEATHER.csv` all record
+`sub/weather.csv`. Other spellings of an input file keep their text, with `/`
+for `\` on Windows: `.` or `..` components, repeated separators, links, 8.3
+short names and files outside the dataset root. Strings that are not hashed
+input files (see `FILE_TYPES` in `citylearn/internal/temporal.py`) keep their
+text without the dataset root. On Linux and macOS every reference keeps its
+text, without the dataset root; macOS file names ignore case by default, but the
+evidence does not. If two runs spell one file in ways that are not normalised,
+the comparison reports `incompatible` rather than a pair.
 
 ## Core Validation
 
@@ -149,7 +186,7 @@ Public APIs remain centered on `CityLearnEnv` and `Building`. Internal orchestra
 | `loading_components.py` | Component constructor lookup, optional models, chargers, device seeds and autosizing. |
 | `runtime.py` | Episode runtime orchestration, `step`, action parsing, time progression and EV/charger association. |
 | `building_ops.py` | Building observation/action orchestration. |
-| `electrical_limits.py` | Pure kW allocation shared by native baseline prediction and runtime service limiting. |
+| `electrical_limits.py` | Pure kW allocation used by runtime service limiting. |
 | `kpi.py` | KPI/evaluation pipeline. |
 | `kpi_energy.py` | Energy, carbon, cost, comfort and district grid-shape records. |
 | `kpi_equipment.py` | Equipment calculations and per-evaluation EV/BESS/PV/phase aggregation. |
@@ -166,35 +203,36 @@ import-before-export ordering and the eight-pass maximum, recalculating totals
 after every reduction. Uncontrollable overload remains visible as residual
 pressure; the calculation cannot create supply or shed fixed loads.
 
-Prediction uses prospective loads. Runtime independently recalculates limits,
+A controller may predict with prospective loads. Runtime independently recalculates limits,
 converts powers to device actions, records feedback and applies battery/charger
 physics. During outages it additionally reads the live remaining kWh before each
 controllable load; do not replace that sequential check with a predicted budget.
 The legacy charger-only limiter and future appliance-profile feasibility checks
-retain their distinct contracts. BAU still requests immediate maximum EV charging
-to 100%, with proportional service sharing and no price/departure optimisation.
+retain their distinct contracts. The baselines submit their requests and the
+runtime shares the service limit; see [baselines](baselines.md) for each policy.
 
-## Development Rules
+## Build and check the documentation
 
-The KPI, entity and loading services retain their entry points and orchestrate
-these helpers. KPI families preserve legacy/extended row order and use a fresh
-equipment accumulator per evaluation. Counts, capacities and sample denominators
-are aggregated before district ratios; do not average member ratios instead.
-Entity population shares one time/bundle context per payload. Information masking
-and fault transformations retain their outer contract stages, while returned
-tables and edges own their arrays. Layout discovery/reference types stay in the
-interface service; reset/topology changes rebuild spaces and specifications.
+The canonical English guides are `docs/*.md`. The Sphinx extension copies them
+into the generated `docs/source/guides/` directory at build time, preserving
+cross-links and publishing the same text as the repository. Do not edit the
+generated directory. The scorecard name list is generated from the runtime
+selection. Historical releases appear under Project, not in the README.
 
-Loading separates series preparation from component creation while retaining
-conversion, cache, window, metadata, optional-input defaults and seed rules.
-Invalid component type lookups raise `ValueError` with their schema path and
-the import/attribute failure as cause. Errors inside a constructor propagate;
-the loader does not silently substitute another class. Facade methods used by
-existing internal consumers continue to delegate with their original signatures.
-Absent optional pricing/carbon inputs retain the existing zero-series defaults.
-Charger inputs still require their six core columns by name, while session IDs
-and measured SOC are optional telemetry. Legacy custom building facades may
-still expose aggregate BESS series instead of per-storage consumption histories.
+```console
+python -m pip install -r docs/requirements.txt
+sphinx-apidoc citylearn -o docs/source/api -e -M
+sphinx-build -b html docs/source docs/build/html
+python scripts/ci/check_docs.py docs/build/html
+python -m pytest -q tests/test_documentation_examples.py
+```
+
+Install Pandoc for the retained notebook tutorials. Use the `sphinx-build`
+executable: the current CLI reference detects that executable when returning
+its argument parser. Documentation examples are tested separately; the site
+build does not train learning agents.
+
+## Development rules
 
 | Rule | Reason |
 |---|---|
@@ -202,21 +240,6 @@ still expose aggregate BESS series instead of per-storage consumption histories.
 | Add tests for new physics or observations. | Sub-hourly and entity behavior are easy to regress silently. |
 | Prefer additive observations in patch releases. | Avoid breaking trained algorithms and wrappers. |
 | Run audits before tagging. | They catch contract drift outside normal unit tests. |
-
-## Build the documentation
-
-Install `docs/requirements.txt` and Pandoc for the retained notebook tutorials.
-Generate the API reference, then build the site with notebook execution disabled:
-
-```console
-sphinx-apidoc citylearn -o docs/source/api -e -M -f
-sphinx-build -b html -D nb_execution_mode=off -D nbsphinx_execute=never docs/source docs/build/html
-```
-
-The Sphinx [guide directory](source/guides.rst) links to the maintained Markdown
-references. Edit `docs/*.md` for those references and `docs/source/*.rst` for the
-site introductions. Build outputs and generated API files are not maintained
-sources and must not be committed.
 
 ## Repository content
 
@@ -226,10 +249,24 @@ control. Planning notes, development diaries, release-run JSON, rendering QA and
 ad hoc observation dumps belong outside the checkout or in CI/release artifacts.
 Before removing work material, archive it externally and verify hashes; keep the
 source/destination mapping with that external evidence. Do not rewrite Git history.
-The [dataset catalogue](portugal_rec_native/README.md#proveniência-conservada-no-produto)
+The [dataset catalogue](https://github.com/Soft-CPS-Research-Group/Simulator/blob/master/docs/portugal_rec_native/README.md#proveniência-conservada-no-produto)
 identifies the retained provenance files and their consumers. Distribution
 checksums describe the current package, not a previous documentation bundle.
 
+## Verification and internal modules in 3.1
+
+Run `python scripts/audit/run_full_audit.py --strict --output-dir /tmp/citylearn-audit`
+to verify physics, entity contracts, official datasets and six fixed-command
+reference trajectories. Missing dependencies/scripts, child failures and reference
+drift fail verification; ordinary runs do not rewrite snapshots. Algorithm audits
+remain explicit opt-in tools. Reference tests generate small temporary cases from
+existing fixtures; no SoftCPS production datasets are included.
+
+Public facades delegate to focused internal modules for energy/equipment/service/
+community KPIs, entity observation/layout preparation, loading inputs/components
+and robustness contracts/auditing. Electrical-service allocation is shared by
+control and runtime. Public imports, executable examples and the official registry
+retain CityLearn identity; internal modules are not stable extension APIs.
 
 ### Evaluation progress
 

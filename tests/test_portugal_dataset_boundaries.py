@@ -11,8 +11,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'scripts'))
 from repair_portugal_dataset_boundaries import censor_sessions, member_presence, TOTAL
+from portugal_datasets import BUILD, SHIPPED_SCHEMAS, requires_build
 
-FAMILIES = sorted((ROOT/'data/datasets').glob('rec_pt_2023_*_v2'))
+FAMILIES = BUILD
 SCHEMAS = [p for root in FAMILIES for p in sorted((root/'evaluation').glob('*.json'))]
 
 
@@ -35,6 +36,7 @@ def test_presence_respects_entry_exit_and_readmission():
     assert member_presence(schema, 'M', 8).tolist() == [False, False, True, True, False, False, True, True]
 
 
+@requires_build
 @pytest.mark.parametrize('root', FAMILIES, ids=lambda p: p.name)
 def test_catalogues_and_all_complete_sessions_are_individually_feasible(root):
     frame = pd.read_parquet(root/'catalogs/charging_sessions.parquet')
@@ -68,6 +70,7 @@ def test_catalogues_and_all_complete_sessions_are_individually_feasible(root):
         assert hashlib.sha256((root/relative).read_bytes()).hexdigest() == expected, relative
 
 
+@requires_build
 @pytest.mark.parametrize('path', SCHEMAS, ids=lambda p: p.stem)
 def test_native_outages_and_unknown_deadlines(path):
     root = path.parent.parent
@@ -85,10 +88,10 @@ def test_native_outages_and_unknown_deadlines(path):
             assert frame.loc[connected & ~mask, 'electric_vehicle_departure_time'].ge(1).all()
 
 
-@pytest.mark.parametrize('path', SCHEMAS, ids=lambda p: p.stem)
+@pytest.mark.parametrize('path', SHIPPED_SCHEMAS + SCHEMAS, ids=lambda p: f'{p.parents[1].name}-{p.stem}')
 def test_year_end_runs_without_false_ev_departures(path):
     from citylearn.citylearn import CityLearnEnv
-    from citylearn.agents.baseline import NormalPolicy
+    from citylearn.agents.baseline import BusinessAsUsualAgent
     from citylearn.internal.kpi import CityLearnKPIService
     root = path.parent.parent
     schema = json.loads(path.read_text())
@@ -100,7 +103,7 @@ def test_year_end_runs_without_false_ev_departures(path):
                        export_kpis_on_episode_end=False)
     try:
         obs, _ = env.reset(seed=0)
-        policy = NormalPolicy(env)
+        policy = BusinessAsUsualAgent(env)
         while not env.terminated:
             obs, reward, terminated, truncated, _ = env.step(policy.predict(obs, deterministic=True))
             assert np.isfinite(reward).all()
@@ -114,7 +117,7 @@ def test_year_end_runs_without_false_ev_departures(path):
                 sim = charger.charger_simulation
                 if sim.electric_vehicle_charger_state[-1] == 1:
                     assert sim.electric_vehicle_departure_time[-1] == -1
-            if building.name in ('Member_006', 'Member_024') and 'premium' in path.stem:
+            if building.name in ('Member_006', 'Member_024') and path.stem.startswith(('premium_100', 'rec_100')):
                 assert service._compute_ev_metrics(building)['departures_total'] == 0
                 reward_obs = building.observations(include_all=True)
                 # The public reward view must not turn unknown time into zero.

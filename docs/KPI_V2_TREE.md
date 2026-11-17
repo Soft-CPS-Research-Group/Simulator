@@ -1,12 +1,9 @@
 # KPI v2 Naming Tree
 
-Iteration 5 (from v1.9.8) adds `*_thermal_service_audit_*`, `district_equity_audit_*`
-and `district_demand_response_audit_{all|service|stress|unspecified}_*` populations,
-coverage and undefined rates. See [formulas, populations and migration](kpi_family_audit.md).
-These additions are absent from public v1.9.7; the older tree below remains a
-reference for the historical families.
-
-The additive `*_ev_departure_audit_*` family is the recommended service/feasibility view. It exposes unknown cases instead of assuming feasibility; see [definitions and denominators](ev_departure_audit.md). The historical names below retain their compatibility semantics.
+Use this page to navigate metric families. The [scorecard guide](scorecard.md)
+explains the headline selection and the [KPI reference](kpis_reference.md)
+provides definitions and a short command to list every name returned for your
+configured run. The `v2` name refers to the evaluation API used in CityLearn v3.
 
 ## Naming Contract
 
@@ -15,7 +12,7 @@ All KPI names in `evaluate_v2()` follow:
 `level_family_subfamily_metric_variant_unit`
 
 - `level`: `building` or `district`
-- `family`: `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`, `demand_response`
+- `family`: `cost`, `energy_grid`, `emissions`, `solar_self_consumption`, `ev`, `battery`, `electrical_service_phase`, `equity`, `comfort_resilience`, `deferrable_appliance`, `escalator`, `demand_response`, `robustness`
 - `subfamily`: e.g. `total`, `daily_average`, `ratio_to_baseline`, `shape_quality`, `community_market`, `events`, `performance`, `health`, `violations`, `imbalance`, `phase_peaks`, `benefit`, `distribution`, `discomfort`, `resilience`
 - `variant`: optional (e.g. `control`, `baseline`, `delta`, `min`, `max`, `average`, `total`, `daily_average`)
 - `unit`: optional and always at the end (e.g. `eur`, `kwh`, `kgco2`, `kw`, `count`, `percent`, `ratio`, `c`)
@@ -40,7 +37,7 @@ Examples:
 - `total_net_exchange_kwh = Σ_t net_t`
 - `daily_average_x = total_x / simulated_days`
 - `delta_x = control_x - baseline_x`
-- `ratio_to_baseline_x = control_x / baseline_x` (safe division)
+- `ratio_to_baseline_x = control_x / baseline_x` (safe division); for a negative net-exchange or cost baseline, `1 + (control_x - baseline_x) / |baseline_x|` (see the [KPI reference](kpis_reference.md#core-equations))
 - `solar_self_consumption = (generation_total - export_total) / generation_total`
 
 ---
@@ -201,6 +198,54 @@ single-precision runtime histories.
 - `district_demand_response_invalid_baseline_time_step_count`
 
 ---
+
+### `deferrable_appliance`
+
+- `district_deferrable_appliance_service_completed_cycles_count`
+- `district_deferrable_appliance_service_missed_cycles_count`
+- `district_deferrable_appliance_service_service_level_ratio`
+- `district_deferrable_appliance_service_served_energy_total_kwh`
+- `district_deferrable_appliance_service_unserved_energy_total_kwh`
+- `district_deferrable_appliance_service_average_start_delay_hours`
+
+### `escalator`
+
+- `district_escalator_service_requested_passengers_total_count`
+- `district_escalator_service_served_passengers_total_count`
+- `district_escalator_service_unserved_passengers_total_count`
+- `district_escalator_service_service_level_ratio`
+- `district_escalator_energy_electricity_consumption_total_kwh`
+- `district_escalator_operation_state_changes_count`
+
+### `robustness`
+
+Available when robustness is enabled:
+
+- `district_robustness_events_count`
+- `district_robustness_active_time_step_count`
+- `district_robustness_observation_corruption_count`
+- `district_robustness_forecast_corruption_count`
+- `district_robustness_action_corruption_count`
+- `district_robustness_asset_unavailable_time_step_count`
+- `district_robustness_missing_observation_count`
+- `district_robustness_action_dropout_count`
+
+## Native business-as-usual comparisons
+
+When `include_business_as_usual=True`, the output also includes native BAU
+values, control-minus-BAU differences and ratios. Examples:
+
+- `district_cost_total_business_as_usual_eur`
+- `district_cost_total_delta_to_business_as_usual_eur`
+- `district_energy_grid_total_import_business_as_usual_kwh`
+- `district_energy_grid_ratio_to_business_as_usual_import_total_ratio`
+- `district_battery_total_throughput_business_as_usual_kwh`
+- `district_solar_self_consumption_ratio_self_consumption_business_as_usual_ratio`
+- `district_energy_grid_shape_quality_peak_daily_average_to_business_as_usual_ratio`
+
+Building rows use the same reference convention for their supported metrics.
+The [scorecard](scorecard.md#two-different-baselines) explains how this differs
+from `baseline`, the conventional counterfactual.
 
 ## B1 (Single Building)
 

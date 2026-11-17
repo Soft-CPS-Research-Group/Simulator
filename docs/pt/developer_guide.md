@@ -20,6 +20,44 @@ Dependencias opcionais:
 | PV autosizing | `.venv/bin/pip install ".[pysam]"` |
 | Checks de build | `.venv/bin/pip install build twine` |
 
+## Evidência portátil de experiências
+
+O `.gitattributes` torna cada checkout idêntico ao repositório byte a byte: os
+ficheiros de texto usam LF e os ficheiros em `data/` e `tests/data/` nunca são
+convertidos, mesmo com o `core.autocrlf=true` por omissão do Git for Windows. Os
+manifestos de experiências calculam hashes destes ficheiros, que assim coincidem
+em todas as plataformas. Um checkout anterior ao `.gitattributes` pode ainda ter
+cópias CRLF; o `git status` mostra os ficheiros de dados convertidos como
+modificados. Fazer um clone novo e configurá-lo como em
+[Ambiente Local](#ambiente-local): o clone aplica as novas regras de checkout e
+deixa intacta a cópia de trabalho existente, incluindo as alterações não
+commitadas. Depois, limpar a cache de datasets, que pode conter cópias feitas a
+partir do checkout antigo:
+
+```console
+git clone https://github.com/Soft-CPS-Research-Group/Simulator.git
+python -c "from citylearn.data import DataSet; DataSet().clear_cache()"
+```
+
+Os manifestos registam cada ficheiro de entrada pelo seu caminho abaixo da raiz
+do dataset, com separadores `/`, pelo que um dataset movido ou copiado mantém a
+sua evidência. No Windows, onde `\` e `/` são ambos separadores e os nomes de
+ficheiros não distinguem maiúsculas de minúsculas, uma referência que só difere
+do caminho do ficheiro nos separadores ou nas maiúsculas regista a grafia do
+ficheiro no disco: com a raiz `C:\data\demo` e o ficheiro
+`C:\data\demo\sub\weather.csv`, as referências `sub\Weather.csv`,
+`SUB/weather.csv` e `C:\Data\Demo\sub\WEATHER.csv` registam todas
+`sub/weather.csv`. As outras grafias de um ficheiro de entrada mantêm o seu
+texto, com `/` em vez de `\` no Windows: componentes `.` ou `..`, separadores
+repetidos, ligações (links), nomes curtos 8.3 e ficheiros fora da raiz do
+dataset. As strings que não são ficheiros de entrada com hash (ver `FILE_TYPES`
+em `citylearn/internal/temporal.py`) mantêm o seu texto sem a raiz do dataset.
+No Linux e no macOS todas as referências mantêm o seu texto, sem a raiz do
+dataset; por omissão, os nomes de ficheiros no macOS não distinguem maiúsculas
+de minúsculas, mas a evidência distingue. Se duas execuções escreverem o mesmo
+ficheiro de formas que não são normalizadas, a comparação indica `incompatible`
+e não um par.
+
 ## Validacao Principal
 
 | Check | Comando |
@@ -151,7 +189,7 @@ As APIs publicas continuam centradas em `CityLearnEnv` e `Building`. A orquestra
 | `loading_components.py` | Resolução dos construtores, modelos opcionais, carregadores, sementes e dimensionamento. |
 | `runtime.py` | Runtime de episodios, `step`, parsing de acoes, progressao temporal e associacao EV/charger. |
 | `building_ops.py` | Orquestracao de observacoes e acoes por building. |
-| `electrical_limits.py` | Cálculo puro em kW partilhado pela previsão dos baselines nativos e pelos limites do motor. |
+| `electrical_limits.py` | Cálculo puro em kW usado pelos limites do serviço no motor. |
 | `kpi.py` | Pipeline de KPIs/avaliacao. |
 | `kpi_energy.py` | Registos de energia, carbono, custos, conforto e forma da carga do distrito. |
 | `kpi_equipment.py` | Cálculos dos equipamentos e agregação EV/BESS/PV/fases por avaliação. |
@@ -168,38 +206,16 @@ importação antes de exportação e o máximo de oito passagens, recalculando o
 totais após cada redução. Uma sobrecarga não controlável continua visível na
 pressão residual; este cálculo não cria energia nem corta cargas fixas.
 
-A previsão usa cargas prospetivas. O motor recalcula os limites, converte potência
+Um controlador pode prever com cargas prospetivas. O motor recalcula os limites, converte potência
 em ações, regista o feedback e aplica a física das baterias e dos carregadores.
 Durante cortes, consulta ainda o saldo real em kWh antes de cada carga
 controlável; essa verificação sequencial não pode ser substituída pela previsão.
 O limitador antigo exclusivo dos carregadores e a viabilidade futura dos ciclos
-das máquinas mantêm os seus contratos distintos. O BAU continua a pedir carga EV
-imediata máxima até 100%, com partilha proporcional e sem otimização por preço
-ou partida.
+das máquinas mantêm os seus contratos distintos. As baselines submetem os seus
+pedidos e o runtime partilha o limite do serviço; ver [baselines](../baselines.md)
+para cada política.
 
 ## Regras de Desenvolvimento
-
-Os serviços de KPIs, interface e carregamento conservam os pontos de entrada e
-coordenam estes módulos. As famílias de KPIs mantêm a ordem dos registos e usam
-um acumulador de equipamentos novo em cada avaliação. Contagens, capacidades
-e amostras são agregadas antes dos rácios do distrito; não se deve substituir
-esse cálculo por uma média dos rácios dos membros.
-As observações usam um contexto temporal e de bundles por payload. As máscaras
-de informação e as falhas mantêm as suas fases externas, enquanto as tabelas e
-relações devolvidas possuem cópias dos arrays. A descoberta dos IDs/referências
-continua no serviço; reset e mudanças de topologia reconstroem espaços e specs.
-
-O carregamento separa a preparação das séries da criação dos componentes,
-preservando conversões, cache, janelas, metadados, valores por defeito opcionais
-e sementes. Tipos de componentes inválidos dão `ValueError` com o caminho no
-schema e a causa de importação/atributo. Falhas dentro de um construtor propagam;
-o carregador não escolhe silenciosamente outra classe. Os métodos usados pelos
-consumidores internos conservam as assinaturas e delegam nos novos módulos.
-Entradas opcionais de preços/carbono ausentes mantêm as séries de zeros
-existentes. Os carregadores exigem as seis colunas base pelo nome; os IDs das
-sessões e o SOC medido continuam opcionais. Fachadas de buildings personalizadas
-antigas podem continuar a expor o consumo BESS agregado em vez dos históricos
-de cada bateria.
 
 | Regra | Motivo |
 |---|---|
@@ -219,3 +235,33 @@ correspondência de origem/destino nessa evidência externa. Não reescrever o G
 O [catálogo dos datasets](../portugal_rec_native/README.md#proveniência-conservada-no-produto)
 identifica os comprovativos conservados e os seus consumidores. Os checksums da
 distribuição descrevem o pacote corrente, não um pacote documental anterior.
+
+## Verificação e módulos internos na 3.1
+
+O comando `python scripts/audit/run_full_audit.py --strict --output-dir /tmp/citylearn-audit`
+verifica física, contrato de entidades, datasets oficiais e seis trajetórias de
+referência com comandos fixos. Falhas, dependências ausentes e referências divergentes
+produzem erro; a execução normal não reescreve snapshots. Auditorias de algoritmos
+continuam opcionais e explícitas. As referências de teste usam casos temporários
+pequenos e os fixtures existentes, sem incluir datasets do SoftCPS.
+
+As fachadas públicas delegam em módulos internos de energia/equipamentos/serviço/
+comunidade nos KPIs, observações/layout de entidades, componentes/inputs no loading
+e contratos/auditoria de robustez. O módulo de limites elétricos é partilhado pelo
+controlo e pelo runtime. Importações públicas, exemplos e catálogo mantêm a
+identidade CityLearn; estes módulos internos não são APIs de extensão estáveis.
+
+### Desempenho e leitura dos históricos
+
+A avaliação pode receber `progress_callback`, com eventos de etapa/membro/família
+de KPIs; os tempos não são acrescentados à tabela dos indicadores. O auditor
+contínuo distingue dispatch, avaliação e exportação nos ficheiros de progresso.
+
+Os históricos do mercado e da robustez mantêm todo o detalhe e a ordem em
+representações compactas sem perdas. Consultas por janela/iterador evitam
+materializar a execução inteira; leituras são snapshots independentes e alterações
+históricas devem ser atribuídas de volta. O reset limpa histórico e contadores.
+As máscaras de população dos KPIs e os replays EV são reutilizados apenas no
+contexto de avaliação/partida apropriado. Ciclos diferíveis são indexados e a
+preparação de previsões/observações é reutilizada dentro do pedido, mantendo a
+semântica e o fallback de recompensas personalizadas.

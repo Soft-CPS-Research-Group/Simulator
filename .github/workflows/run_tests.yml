@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches:
-      - '**'
+    branches: [master]
   pull_request:
+    branches: [master]
   workflow_dispatch:
 
 concurrency:
@@ -31,7 +31,7 @@ jobs:
 
       - name: Lint (critical rules)
         run: |
-          python -m ruff check citylearn tests scripts/manual scripts/ci --select E9,F821
+          python -m ruff check citylearn tests scripts/manual scripts/ci --select E9,F821,NPY201
 
   test:
     needs: lint
@@ -39,7 +39,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10"]
+        python-version: ["3.9", "3.10", "3.12"]
+        numpy: ["2.x"]
+        include:
+          # Results must stay identical on NumPy 1.x, which the package still supports.
+          - python-version: "3.10"
+            numpy: "1.x"
 
     steps:
       - name: Checkout repository
@@ -57,24 +62,24 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-py${{ matrix.python-version }}-cpu-pip-${{ hashFiles('requirements.txt', 'test_requirements.txt', 'setup.py') }}
+          key: ${{ runner.os }}-py${{ matrix.python-version }}-numpy${{ matrix.numpy }}-pip-${{ hashFiles('requirements.txt', 'test_requirements.txt', 'setup.py') }}
           restore-keys: |
-            ${{ runner.os }}-py${{ matrix.python-version }}-cpu-pip-
+            ${{ runner.os }}-py${{ matrix.python-version }}-numpy${{ matrix.numpy }}-pip-
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Hosted runners have no GPU; avoid downloading unused CUDA runtimes.
-          python -m pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
-          pip install -r requirements.txt
-          pip install -r test_requirements.txt
-          pip install -e .
+          if [ "${{ matrix.numpy }}" = "1.x" ]; then echo "numpy<2" > constraints.txt; else : > constraints.txt; fi
+          pip install -c constraints.txt -r requirements.txt
+          pip install -c constraints.txt -r test_requirements.txt
+          pip install -c constraints.txt -e .
+          python -c "import numpy; print('NumPy', numpy.__version__)"
 
       - name: Run tests
         run: python -m pytest -q --ignore=scripts/manual
 
       - name: Performance smoke check
-        if: matrix.python-version == '3.10'
+        if: matrix.python-version == '3.10' && matrix.numpy == '2.x'
         run: |
           mkdir -p ${{ runner.temp }}/perf
           python scripts/ci/perf_smoke.py \
@@ -91,43 +96,39 @@ jobs:
             --metrics-output ${{ runner.temp }}/perf/perf_smoke_report.json
 
       - name: Upload performance smoke report
-        if: always() && matrix.python-version == '3.10'
+        if: always() && matrix.python-version == '3.10' && matrix.numpy == '2.x'
         uses: actions/upload-artifact@v4
         with:
           name: perf-smoke-report
           path: ${{ runner.temp }}/perf/perf_smoke_report.json
           if-no-files-found: ignore
 
-      - name: Verify installed distribution exports outside the source tree
+      - name: Verify installed wheel exports outside the checkout
         run: |
-          python -m pip wheel --no-deps . --wheel-dir "${{ runner.temp }}/wheel"
-          python -m pip install --no-deps --force-reinstall "${{ runner.temp }}"/wheel/*.whl
+          python -m pip wheel --no-deps . --wheel-dir "${{ runner.temp }}/citylearn-wheel"
+          python -m pip install --no-deps --force-reinstall "${{ runner.temp }}"/citylearn-wheel/*.whl
           cd "${{ runner.temp }}"
           python -I "$GITHUB_WORKSPACE/scripts/ci/installed_export_smoke.py" \
             --schema "$GITHUB_WORKSPACE/tests/data/minute_ev_demo/schema.json" \
-            --output "${{ runner.temp }}/installed-export"
+            --output "${{ runner.temp }}/citylearn-installed-export"
 
-  accounting-audit:
+  runtime-audits:
     needs: lint
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
       - name: Install audit dependencies
-        run: |
-          python -m pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
-          pip install -r requirements.txt -r test_requirements.txt pyarrow -e .
-      - name: Audit physical time steps and topology boundaries
-        run: python scripts/audit/audit_physics.py --output outputs/audit/physics.json
+        run: pip install -r requirements.txt -r test_requirements.txt pyarrow nrel-pysam -e .
+      - name: Verify physics, entities, official datasets and fixed-command references
+        run: python scripts/audit/run_full_audit.py --strict --output-dir "${{ runner.temp }}/citylearn-audits"
       - name: Audit Portuguese winter and summer windows
-        run: python scripts/audit/audit_portugal_windows.py --output outputs/audit/portugal.json
-      - name: Audit supported dataset interfaces
-        run: python scripts/audit/audit_datasets.py --offline --max-steps 8 --output outputs/audit/datasets.json
-      - name: Upload accounting audit evidence
+        run: python scripts/audit/audit_portugal_windows.py --output "${{ runner.temp }}/citylearn-audits/portugal.json"
+      - name: Upload runtime audit evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: accounting-audit
-          path: outputs/audit/*.json
+          name: citylearn-runtime-audits
+          path: ${{ runner.temp }}/citylearn-audits/*.json

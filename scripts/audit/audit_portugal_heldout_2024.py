@@ -18,14 +18,19 @@ from prepare_portugal_heldout_2024 import (VERSION, REVISION, N23, TOTAL, DYNAMI
     read_json, dump, digest, resource_state, active_masks)
 
 
-def runtime_fingerprint(repo=ROOT):
+def runtime_fingerprint(repo=ROOT, schema_paths=None):
     """Bind reusable execution evidence to engine, executable schemas and inputs.
 
     Descriptive metadata is excluded; CityLearn does not consume these fields.
     File hashes are resolved against each schema's actual root directory.
+    By default the schemas are those of the generator manifest; pass
+    ``schema_paths`` (relative to ``repo``) to bind other schemas, such as the
+    shipped ``pt_rec_*`` datasets.
     """
     repo = Path(repo).resolve()
-    manifest = read_json(repo/'results/portugal_rec_native/manifest.json')
+    if schema_paths is None:
+        manifest = read_json(repo/'results/portugal_rec_native/manifest.json')
+        schema_paths = [entry['schema'] for entry in manifest['variants']+manifest['references']]
     schemas, files = {}, {}
     def collect(value, root):
         if isinstance(value, dict):
@@ -38,14 +43,14 @@ def runtime_fingerprint(repo=ROOT):
             path = (root/value).resolve()
             if path.is_file():
                 files[str(path.relative_to(repo))] = digest(path)
-    for entry in manifest['variants']+manifest['references']:
-        path = repo/entry['schema']
+    for relative in schema_paths:
+        path = repo/relative
         schema = read_json(path)
         root = (path.parent/schema['root_directory']).resolve()
         for key in ('dataset_id', 'dataset_family', 'dataset_contract_version', 'experimental_design', 'native_compatibility', 'root_directory'):
             schema.pop(key, None)
         collect(schema, root)
-        schemas[entry['schema']] = schema
+        schemas[str(relative)] = schema
     engine = {str(p.relative_to(ROOT)): digest(p) for p in sorted((ROOT/'citylearn').rglob('*.py'))}
     payload = json.dumps(dict(schemas=schemas, inputs=files, engine=engine), sort_keys=True).encode()
     return hashlib.sha256(payload).hexdigest()
@@ -280,7 +285,7 @@ def static_audit(repo=ROOT, write_cohorts=False):
 
 def runtime_window(path, start, end, label):
     from citylearn.citylearn import CityLearnEnv
-    from citylearn.agents.baseline import NormalPolicy
+    from citylearn.agents.baseline import BusinessAsUsualAgent
     schema = read_json(path)
     root = (path.parent/schema['root_directory']).resolve()
     original = deepcopy(schema)
@@ -293,7 +298,7 @@ def runtime_window(path, start, end, label):
     begin = time.monotonic()
     try:
         obs, _ = env.reset(seed=schema['random_seed'])
-        policy = NormalPolicy(env)
+        policy = BusinessAsUsualAgent(env)
         while True:
             global_t = start+env.time_step
             expected = resource_state(original, global_t)

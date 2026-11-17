@@ -1,15 +1,5 @@
 # KPIs Reference
 
-Iteration 5 (from v1.9.8) adds [audited DR, thermal service and equity populations](kpi_family_audit.md),
-explicit coverage and reference/reward evidence. It corrects comfort bands,
-conditional severity, active/executed samples and service-energy units. New audit
-ratios distinguish zero, unknown and not applicable; historical aggregates remain
-available. This work is absent from public v1.9.7.
-
-EV information quality is reported separately by the [departure audit](ev_departure_audit.md): confirmed feasible, infeasible and unknown, coverage, exclusive reasons, and observed service with explicit denominators. Historical EV KPI definitions remain available.
-
-Version 1.9.0 adds [energy provenance and external-boundary carbon accounting](energy_provenance.md). Legacy instantaneous PV absorption and pre-sharing emissions keep their existing meanings.
-
 The simulator exposes two KPI APIs.
 
 Portuguese version: [pt/kpis_reference.md](pt/kpis_reference.md).
@@ -20,6 +10,30 @@ Portuguese version: [pt/kpis_reference.md](pt/kpis_reference.md).
 | `evaluate_v2()` | primary | DataFrame with structured KPI names | Production, dashboards and scientific comparison. |
 
 For the full v2 naming tree, see [KPI_V2_TREE.md](KPI_V2_TREE.md).
+
+Audited KPI families add explicit populations, coverage and reasons beside the
+historical KPIs, which keep their definitions:
+[DR, thermal service and equity](kpi_family_audit.md),
+[EV departure service](ev_departure_audit.md),
+[deferrable appliance service](deferrable_service_audit.md) and
+[energy provenance and external-boundary carbon](energy_provenance.md).
+Robustness counters have a separate audit, `get_robustness_audit()`
+(`robustness-audit-v1`); see the [robustness reference](robustness_reference.md#kpis).
+
+Start with [How to read the scorecard](scorecard.md) for a compact selection,
+baseline interpretation and an executable table-selection example. The `v2`
+method name denotes the KPI interface, not CityLearn version 2.
+
+To list the exact names available in your own configured run:
+
+```python
+kpis = env.evaluate_v2()
+catalogue = kpis[["cost_function", "level"]].drop_duplicates().sort_values("cost_function")
+print(catalogue.to_string(index=False))
+```
+
+Feature-specific KPI availability follows the schema. A missing/undefined value
+is not a zero measurement; preserve it when exporting or comparing.
 
 ## Units
 
@@ -81,15 +95,26 @@ ratio_to_business_as_usual_x = control_x / business_as_usual_x
 self_consumption = (solar_generation_total - export_total) / solar_generation_total
 ```
 
-The equations above apply to positive reference totals. Net exchange and cost can
-have negative reference totals. For those totals, the baseline and BAU ratios use
-`1 + (control - reference) / abs(reference)`, so 1 means no change and a higher
-control total gives a higher ratio. If a reference is effectively zero, the ratio
-is 1 when the control total is also effectively zero and `None` otherwise.
+For a denominator within the numerical zero tolerance, safe division returns
+`1.0` if the numerator is also effectively zero, and `None` otherwise.
 
-During a grid outage the legacy counterfactual reports zero grid exchange, grid
-cost and grid emissions. With the community market enabled, the cost comparison
-settles both runs under the same market rules.
+Ratios stay lower-is-better when the reference total is negative. Net exchange
+(legacy `zero_net_energy`) and cost totals can be negative, for a net exporter
+or after community-market revenue. Their ratios to the baseline and to BAU use
+
+```text
+ratio_x = control_x / reference_x                        if reference_x > 0
+ratio_x = 1 + (control_x - reference_x) / |reference_x|  if reference_x < 0
+```
+
+so 1 still means no change and a higher control total gives a higher ratio.
+For a positive reference this is the plain ratio. Import, export and emission
+totals are never negative and use the plain ratio.
+
+The conventional `baseline` counterfactual follows the grid outage of the
+controlled run: at power-outage time steps the `*_without_storage*` net series,
+and their cost and emission series, are zero. Neither run exchanges energy with
+the grid while it is down.
 
 ## KPI Families
 
@@ -200,19 +225,12 @@ Available when `robustness.enabled=true`.
 
 Names are prefixed with `district_` or `building_`, for example `district_robustness_missing_observation_count`.
 
-These historical counters include queried terminal telemetry and remain unchanged.
-They are not restricted to completed energy intervals. For separate populations,
-event-step denominators and application coverage, use `get_robustness_audit()`
-(`robustness-audit-v1`), also attached to the V2 DataFrame and exported as a
-`.robustness.json` sidecar when enabled. A scheduled event whose target is absent
-has no application; an empty coverage denominator is `null`. See the
-[robustness reference](robustness_reference.md#kpis) for units and boundaries.
-
 ## Electrical Service and Phase KPIs
 
 | Concept | Unit | Meaning |
 |---|---:|---|
-| violation total | kWh | Energy above service/phase limits. |
+| violation total | kWh | Residual energy above service/phase limits after projection. |
+| requested pressure total | kWh | Excess associated with the unprojected controller request. |
 | violation timestep count | count | Number of timesteps with a violation. |
 | phase imbalance average | ratio | Average phase imbalance. |
 | phase import/export peak L1/L2/L3 | kW | Import/export peaks per phase. |
@@ -227,7 +245,7 @@ Available when `community_market.enabled=true`.
 | local traded daily average | district | kWh/day | Daily average local trade. |
 | community import share | district | ratio | Share of demand served locally. |
 | settled cost | building/district | eur | Cost after local settlement. |
-| counterfactual cost | building/district | eur | Cost without local trading, using the same grid import and export tariffs. |
+| counterfactual cost | building/district | eur | Cost without local market settlement. |
 | market savings | building/district | eur | Counterfactual minus settled cost. |
 
 ## Export
