@@ -13,7 +13,7 @@ it does not calibrate that model against real equipment.
 
 ```bash
 python scripts/audit/audit_balances.py \
-  --schema data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json \
+  --schema data/datasets/pt_rec_100/evaluation/rec_100_allin.json \
   --start 4176 --transitions 14 --policy normal --seed 0 \
   --output /tmp/balances-4176-4190.json
 ```

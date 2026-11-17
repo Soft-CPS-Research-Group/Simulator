@@ -280,7 +280,7 @@ def static_audit(repo=ROOT, write_cohorts=False):
 
 def runtime_window(path, start, end, label):
     from citylearn.citylearn import CityLearnEnv
-    from citylearn.agents.baseline import NormalPolicy
+    from citylearn.agents.baseline import BusinessAsUsualAgent
     schema = read_json(path)
     root = (path.parent/schema['root_directory']).resolve()
     original = deepcopy(schema)
@@ -293,7 +293,7 @@ def runtime_window(path, start, end, label):
     begin = time.monotonic()
     try:
         obs, _ = env.reset(seed=schema['random_seed'])
-        policy = NormalPolicy(env)
+        policy = BusinessAsUsualAgent(env)
         while True:
             global_t = start+env.time_step
             expected = resource_state(original, global_t)

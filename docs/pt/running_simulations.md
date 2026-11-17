@@ -17,7 +17,7 @@ Esta pagina e a referencia pratica para instalar, criar um ambiente, correr epis
 import numpy as np
 from citylearn.citylearn import CityLearnEnv
 
-schema = "data/datasets/citylearn_challenge_2022_phase_all_plus_evs/schema.json"
+schema = "citylearn_challenge_2022_phase_all_plus_evs"
 env = CityLearnEnv(schema, interface="flat", episode_time_steps=24, render_mode="none")
 
 observations, info = env.reset()
@@ -37,7 +37,7 @@ kpis_v2 = env.evaluate_v2()
 from citylearn.citylearn import CityLearnEnv
 
 env = CityLearnEnv(
-    "data/datasets/citylearn_three_phase_dynamic_topology_demo/schema.json",
+    "citylearn_three_phase_dynamic_topology_demo",
     interface="entity",
     topology_mode="dynamic",
 )
@@ -67,13 +67,13 @@ env = MultiCommunityEnv(
     communities=[
         {
             "community_id": "community_a",
-            "schema": "data/datasets/community_a/schema.json",
+            "schema": "citylearn_challenge_2022_phase_all_plus_evs",
             "env_kwargs": {"interface": "entity", "episode_time_steps": 48},
             "weight": 1.0,
         },
         {
             "community_id": "community_b",
-            "schema": "data/datasets/community_b/schema.json",
+            "schema": "citylearn_challenge_2022_phase_all",
             "env_kwargs": {"interface": "entity", "episode_time_steps": 48},
             "weight": 1.0,
         },
@@ -170,6 +170,10 @@ Quando `return_substeps=True`, o `info` tambem inclui `substep_rewards`, `subste
 
 ## CLI
 
+Na versão 3.0.2, a CLI requer `python -m pip install stable-baselines3==2.3.2`.
+Para os comandos de treino e avaliação, usar Python 3.11 ou mais recente.
+A primeira simulação pela API Python não exige esta dependência.
+
 ```bash
 citylearn --version
 citylearn list_datasets
@@ -248,7 +252,7 @@ import numpy as np
 from citylearn.citylearn import CityLearnEnv
 
 env = CityLearnEnv(
-    "data/datasets/citylearn_three_phase_electrical_service_demo_15s_parquet/schema.json",
+    "citylearn_three_phase_electrical_service_demo_15s_parquet",
     simulation_start_time_step=0,
     simulation_end_time_step=120,
     episode_time_steps=120,
@@ -270,3 +274,10 @@ for _ in range(100):
 print(env.evaluate_v2().head())
 PY
 ```
+
+Os exports apenas de KPIs incluem o manifesto e os metadados JSON de auditoria
+de serviço. Estes ficheiros não ativam séries temporais do episódio; a pasta
+continua compatível com a CityLearn UI. O manifesto identifica os ficheiros de
+entrada pelo caminho abaixo da raiz do dataset; a secção
+[Evidência portátil de experiências](developer_guide.md#evidência-portátil-de-experiências)
+indica que grafias de uma referência a um ficheiro registam a mesma evidência.

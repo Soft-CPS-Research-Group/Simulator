@@ -132,7 +132,7 @@ group means; absent/invalid groups or a nonpositive rich mean are undefined.
 
 ```bash
 python scripts/audit/audit_kpi_families.py \
-  --schema data/datasets/rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json \
+  --schema data/datasets/pt_rec_100/evaluation/rec_100_allin.json \
   --request-id development_dr_1 --policy normal --seed 0 \
   --output /tmp/dr-audit.json
 ```

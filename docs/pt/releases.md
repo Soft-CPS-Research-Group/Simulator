@@ -9,6 +9,91 @@ compatibilidade, alterações de contratos e âmbito da validação.
 
 Responsavel default por releases deste fork: [@calofonseca](https://github.com/calofonseca).
 
+## v2.2.0 — 2026-11-17 — alinhada com o CityLearn 3.5.0
+
+Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).
+
+O SoftCPS REC Simulator 2.2.0 tem o mesmo código do simulador, testes e
+documentação que o [CityLearn 3.5.0](https://github.com/citylearn-project/CityLearn/releases/tag/v3.5.0).
+Diferem apenas o nome da distribuição (`softcpsrecsimulator`), a versão, os
+valores por defeito dos downloads, a documentação de releases e os datasets
+adicionais do SoftCPS. O import Python continua a ser `citylearn`.
+
+- **Novo BAU; os KPIs relativos ao BAU mudam.** O `BusinessAsUsualAgent` é o BAU
+  do CityLearn 3.4.0: decide a partir das observações entity e carrega um EV
+  ligado de imediato até 100% por defeito (`immediate-full-charge-v2`). Com
+  `ev_charge_target='requested'` (`immediate-user-target-v1`) para no SOC de
+  partida pedido pelo utilizador; `business_as_usual_ev_charge_target` escolhe a
+  referência usada pelo `evaluate_v2()`. **Todos os KPIs `business_as_usual`,
+  `delta_to_business_as_usual` e `ratio_to_business_as_usual` podem diferir da
+  2.1.1**, incluindo os dos datasets de Portugal. Repetir o controlador e a
+  referência em conjunto.
+- **Baselines Basic, Smart e Community.** `RBCBasicPolicy`, `RBCSmartPolicy` e
+  `RBCCommunityPolicy` passam a ser as baselines validadas no repositório
+  Algorithms do Soft-CPS. `NormalPolicy`, `NormalTargetPolicy`,
+  `NormalNoBatteryPolicy`, `ServiceOnlyBaselineAgent`, `GridAwareBaselineAgent` e
+  `CommunityAwareBaselineAgent` foram removidos.
+- **Margem ilimitada publicada como 1.000.000 kW.** Nas tabelas entity, um
+  edifício sem limite de serviço elétrico publica a margem como 1.000.000 kW (o
+  limite da observação) em vez de 0 kW, que se lia como "sem capacidade".
+- **Datasets de Portugal renomeados para os `pt_rec_*` do CityLearn.** Os
+  `pt_rec_4`, `pt_rec_15`, `pt_rec_30` e `pt_rec_100`, idênticos byte a byte aos
+  do CityLearn 3.5.0, substituem os `rec_pt_2023_*_v2`, que são removidos. Os
+  ficheiros de dados lidos pelos schemas são os mesmos; mudam os nomes dos
+  datasets e dos schemas de avaliação. As vistas `preparation_2023`, os catálogos
+  das campanhas, as tabelas, os registos de proveniência e os checksums ficam no
+  depósito do dataset. Atualizar os nomes e caminhos nas configurações:
+
+| 2.1.1 (removido) | 2.2.0 |
+|---|---|
+| `rec_pt_2023_micro_4_v2` | `pt_rec_4` |
+| `rec_pt_2023_micro_4_v2/schema.json` | `pt_rec_4/schema.json` |
+| `rec_pt_2023_micro_4_v2/evaluation/core_4.json` | `pt_rec_4/evaluation/rec_4.json` |
+| `rec_pt_2023_core_15_v2` | `pt_rec_15` |
+| `rec_pt_2023_core_15_v2/schema.json` | `pt_rec_15/schema.json` |
+| `rec_pt_2023_core_15_v2/evaluation/core_15.json` | `pt_rec_15/evaluation/rec_15.json` |
+| `rec_pt_2023_core_30_v2` | `pt_rec_30` |
+| `rec_pt_2023_core_30_v2/schema.json` | `pt_rec_30/schema.json` |
+| `rec_pt_2023_core_30_v2/evaluation/core_30_normal.json` | `pt_rec_30/evaluation/rec_30_normal.json` |
+| `rec_pt_2023_core_30_v2/evaluation/core_30_topology.json` | `pt_rec_30/evaluation/rec_30_topology.json` |
+| `rec_pt_2023_core_30_v2/evaluation/core_30_safety.json` | `pt_rec_30/evaluation/rec_30_safety.json` |
+| `rec_pt_2023_core_30_v2/evaluation/core_30_robustness.json` | `pt_rec_30/evaluation/rec_30_robustness.json` |
+| `rec_pt_2023_core_30_v2/evaluation/core_30_combined.json` | `pt_rec_30/evaluation/rec_30_combined.json` |
+| `rec_pt_2023_core_30_v2/evaluation/references/core_30_combined_no_disturbances.json` | `pt_rec_30/evaluation/references/rec_30_combined_no_disturbances.json` |
+| `rec_pt_2023_core_30_v2/evaluation/references/core_30_combined_nominal_limits.json` | `pt_rec_30/evaluation/references/rec_30_combined_nominal_limits.json` |
+| `rec_pt_2023_core_30_v2/evaluation/references/core_30_topology_frozen_2024.json` | `pt_rec_30/evaluation/references/rec_30_topology_frozen_2024.json` |
+| `rec_pt_2023_premium_100_v2` | `pt_rec_100` |
+| `rec_pt_2023_premium_100_v2/schema.json` | `pt_rec_100/schema.json` |
+| `rec_pt_2023_premium_100_v2/evaluation/premium_100_normal.json` | `pt_rec_100/evaluation/rec_100_normal.json` |
+| `rec_pt_2023_premium_100_v2/evaluation/premium_100_allin.json` | `pt_rec_100/evaluation/rec_100_allin.json` |
+| `rec_pt_2023_premium_100_v2/evaluation/references/premium_100_allin_frozen_2024.json` | `pt_rec_100/evaluation/references/rec_100_allin_frozen_2024.json` |
+| `rec_pt_2023_premium_100_v2/evaluation/references/premium_100_allin_no_disturbances.json` | `pt_rec_100/evaluation/references/rec_100_allin_no_disturbances.json` |
+| `rec_pt_2023_premium_100_v2/evaluation/references/premium_100_allin_no_dr.json` | `pt_rec_100/evaluation/references/rec_100_allin_no_dr.json` |
+
+  Ver o guia [datasets REC de Portugal](portugal_rec_datasets.md).
+- **Downloads de pastas aninhadas.** O `DataSet.get_dataset()` usa a
+  implementação do CityLearn: dois pedidos à API do GitHub por dataset, ficheiros
+  de raw.githubusercontent.com, `CITYLEARN_GITHUB_TOKEN` ou `GITHUB_TOKEN` quando
+  definidos, e a conta e repositório dados ao `DataSet`. Os valores por defeito
+  continuam a ser `Soft-CPS-Research-Group/Simulator` na tag
+  `softcpsrecsimulator-v{versão}`.
+- **Correções e documentação do CityLearn.** As raízes dos schemas resolvem-se a
+  partir do ficheiro, as verificações físicas com topologia dinâmica consideram
+  apenas os membros ativos, e passam a incluir-se os guias, exemplos, construção
+  da documentação e matriz de CI do CityLearn (Python 3.9, 3.10 e 3.12; NumPy 1 e 2).
+- **Dependências.** `doe_xstock`, `openstudio` e `torchvision` deixam de ser
+  instalados por defeito; o `citylearn.end_use_load_profiles` precisa do extra
+  `end_use_load_profiles`.
+- O SoftCPS mantém os 19 datasets `ALADI *`, o `EC_Ermesinde` e a correção da
+  CLI sem Stable Baselines3. **O gerador de Portugal continua no SoftCPS**: os
+  scripts, fontes, resultados e catálogo continuam a gerar os pacotes completos
+  `rec_pt_2023_*_v2`, agora como cópia de trabalho local em `data/datasets`,
+  ignorada pelo Git, enquanto os datasets distribuídos coincidem com os do
+  CityLearn 3.5.0. Os testes do gerador que precisam dessa cópia são ignorados
+  sem ela; os restantes correm sobre os `pt_rec_*`. Ver o
+  [guia de migração](../migration.md#upgrade-from-softcps-211-to-220).
+- VALIDATION_PT
+
 ## v2.1.1 — 2026-11-16 — referência BAU nativa em schemas entity estáticos
 
 Responsável: **Tiago Fonseca** ([@calofonseca](https://github.com/calofonseca)).

@@ -149,6 +149,10 @@ arbitrary storage/controller dynamics without additional assumptions.
 
 ## Bounded audit and limitations
 
+The input-clock audit reads the canonical calendar (`shared/calendar.parquet`),
+which the shipped `pt_rec_*` datasets do not include. Run it on a local Portugal
+generator build (`rec_pt_2023_*_v2`, built by the `scripts/*portugal*` tools):
+
 ```bash
 python scripts/audit/audit_temporal.py \
   --schema data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json \
@@ -157,7 +161,7 @@ python scripts/audit/audit_temporal.py \
 
 Without `--start`, the CLI checks source clocks, common row coverage, local labels,
 structural event timestamps and EV catalogue boundaries. With `--start`, it also
-compares repeated, fresh-environment and KPI-query rollouts with NormalPolicy and
+compares repeated, fresh-environment and KPI-query rollouts with BusinessAsUsualAgent and
 physical checks. Exact trace equality is scoped to the exercised software/platform
 and deterministic policy; it is not cross-hardware bitwise certification.
 

@@ -16,25 +16,23 @@ def remote_dataset(tmp_path, monkeypatch):
     monkeypatch.setattr(DataSet, "_find_local_dataset_root", lambda *args: None)
     dataset = DataSet(offline=False)
     root = "data/datasets/nested_demo"
-    listing = {
-        root: [
-            dict(type="file", path=f"{root}/schema.json", download_url="https://example.test/schema"),
-            dict(type="dir", path=f"{root}/shared"),
-        ],
-        f"{root}/shared": [
-            dict(type="file", path=f"{root}/shared/pricing.parquet", download_url="https://example.test/pricing"),
-            dict(type="dir", path=f"{root}/shared/deeper"),
-        ],
-        f"{root}/shared/deeper": [
-            dict(type="file", path=f"{root}/shared/deeper/events.json", download_url="https://example.test/events"),
-        ],
-    }
+    # The parent listing gives the dataset's Git tree, which one recursive
+    # trees request lists in full.
+    listing = {"data/datasets": [dict(type="dir", name="nested_demo", path=root, sha="tree-sha")]}
+    tree = [
+        dict(type="blob", path="schema.json"),
+        dict(type="tree", path="shared"),
+        dict(type="blob", path="shared/pricing.parquet"),
+        dict(type="tree", path="shared/deeper"),
+        dict(type="blob", path="shared/deeper/events.json"),
+    ]
     contents = Mock(side_effect=lambda path: listing[path])
     monkeypatch.setattr(dataset, "get_github_contents", contents)
-    payloads = {"schema": b'{"pricing": "shared/pricing.parquet"}', "pricing": b"PAR1-test", "events": b"[]"}
+    monkeypatch.setattr(dataset, "get_github_tree", Mock(side_effect=lambda sha: list(tree)))
+    payloads = {"schema.json": b'{"pricing": "shared/pricing.parquet"}', "pricing.parquet": b"PAR1-test", "events.json": b"[]"}
     statuses = {}
 
-    def respond(url):
+    def respond(url, **kwargs):
         response = requests.Response()
         key = url.rsplit("/", 1)[-1]
         response.status_code = statuses.get(key, 200)
@@ -45,7 +43,7 @@ def remote_dataset(tmp_path, monkeypatch):
     session = requests.Session()
     monkeypatch.setattr(session, "get", Mock(side_effect=respond))
     monkeypatch.setattr(dataset, "get_requests_session", lambda: session)
-    return dataset, listing, statuses, contents
+    return dataset, tree, statuses, contents
 
 
 def test_download_includes_all_nested_files_and_reuses_complete_cache(remote_dataset):
@@ -61,7 +59,7 @@ def test_download_includes_all_nested_files_and_reuses_complete_cache(remote_dat
 
 def test_failed_nested_download_leaves_no_partial_cache_and_can_retry(remote_dataset):
     dataset, _, statuses, _ = remote_dataset
-    statuses["pricing"] = 503
+    statuses["pricing.parquet"] = 503
     with pytest.raises(requests.HTTPError):
         dataset.get_dataset("nested_demo")
     cache = Path(dataset.cache_directory) / "datasets"
@@ -71,17 +69,18 @@ def test_failed_nested_download_leaves_no_partial_cache_and_can_retry(remote_dat
 
 
 def test_missing_schema_does_not_create_valid_cache(remote_dataset):
-    dataset, listing, _, _ = remote_dataset
-    listing["data/datasets/nested_demo"].pop(0)
+    dataset, tree, _, _ = remote_dataset
+    tree.pop(0)
     with pytest.raises(FileNotFoundError, match="schema.json"):
         dataset.get_dataset("nested_demo")
     assert not list((Path(dataset.cache_directory) / "datasets").iterdir())
 
 
-@pytest.mark.parametrize("path", ["data/datasets/nested_demo/../escape", "data/datasets/another/file"])
+@pytest.mark.parametrize("path", ["../escape/schema.json", "shared/../../schema.json", "/etc/schema.json"])
 def test_remote_paths_cannot_escape_dataset_directory(remote_dataset, path):
-    dataset, listing, _, _ = remote_dataset
-    listing["data/datasets/nested_demo"] = [dict(type="file", path=path, download_url="https://example.test/schema")]
+    dataset, tree, _, _ = remote_dataset
+    tree[:] = [dict(type="blob", path=path)]
     with pytest.raises(ValueError):
         dataset.get_dataset("nested_demo")
-    assert not list((Path(dataset.cache_directory) / "datasets").iterdir())
+    cache = Path(dataset.cache_directory) / "datasets"
+    assert not cache.exists() or not list(cache.iterdir())

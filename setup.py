@@ -26,6 +26,8 @@ setuptools.setup(
     version=get_version(),
     author='Soft-CPS Research Group, Jose Ramon Vazquez-Canteli, Kingsley Nweye, Zoltan Nagy',
     author_email='jose@isep.ipp.pt',
+    maintainer='Tiago Fonseca',
+    maintainer_email='calof@isep.ipp.pt',
     description=(
         'SoftCPS REC Simulator: an energy-community RL simulator fork focused on EV/BESS/PV, '
         'electrical-service constraints, and community-market experimentation.'),
@@ -39,11 +41,13 @@ setuptools.setup(
     extras_require={
         'parquet': ['pyarrow'],
         'pysam': ['nrel-pysam'],
+        # Only citylearn.end_use_load_profiles (building new datasets from EULP/EnergyPlus) needs these.
+        'end_use_load_profiles': ['doe_xstock>=2.0.0', 'openstudio<=3.10.0'],
     },
     entry_points={'console_scripts': ['citylearn = citylearn.__main__:main']},
     project_urls={
         'Source': 'https://github.com/Soft-CPS-Research-Group/Simulator',
-        'Original Project': 'https://github.com/intelligent-environments-lab/CityLearn',
+        'Original Project': 'https://github.com/citylearn-project/CityLearn',
     },
     classifiers=[
         'Programming Language :: Python :: 3',

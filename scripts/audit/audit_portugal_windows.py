@@ -18,7 +18,7 @@ args = parser.parse_args()
 args.output.parent.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(ROOT))
 from citylearn.citylearn import CityLearnEnv
-from citylearn.agents.baseline import NormalPolicy
+from citylearn.agents.baseline import BusinessAsUsualAgent
 from audit_portugal_heldout_2024 import runtime_fingerprint
 
 fingerprint = runtime_fingerprint(ROOT)
@@ -30,8 +30,9 @@ if args.resume:
     assert all((r['window'], r['start']) in windows and
                (r['status'] != 'pass' or r['transitions'] == steps-1) for r in rows), 'Cannot resume with different window settings'
 completed = {(r['schema'], r['window'], r['start']) for r in rows if r['status'] == 'pass'}
-for path in sorted((ROOT/'data/datasets').glob('rec_pt_*/evaluation/*.json')):
-    if args.long_days and path.stem not in {'core_4', 'core_30_combined', 'premium_100_allin'}:
+# The shipped Portugal REC datasets (CityLearn's pt_rec_*).
+for path in sorted((ROOT/'data/datasets').glob('pt_rec_*/evaluation/*.json')):
+    if args.long_days and path.stem not in {'rec_4', 'rec_30_combined', 'rec_100_allin'}:
         continue
     for label, start in windows:
         if (str(path), label, start) in completed:
@@ -48,7 +49,7 @@ for path in sorted((ROOT/'data/datasets').glob('rec_pt_*/evaluation/*.json')):
             env = CityLearnEnv(schema, render_mode='none', offline=True, random_seed=0,
                                export_kpis_on_episode_end=False)
             obs, _ = env.reset(seed=0)
-            policy = NormalPolicy(env)
+            policy = BusinessAsUsualAgent(env)
             row['members'] = len(env.buildings)
             ledger_seconds = [0.0]
             for method in ('begin_step', 'settle', 'synchronize'):

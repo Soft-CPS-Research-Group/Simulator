@@ -12,12 +12,14 @@ sys.path.insert(0, str(ROOT/'scripts/audit'))
 from prepare_portugal_heldout_2024 import N23, read_json, resource_state
 from audit_portugal_heldout_2024 import static_audit, verify_pair, runtime_window
 import audit_portugal_heldout_2024 as audit
+from portugal_datasets import requires_build, shipped_path
 
 CAMPAIGN = read_json(ROOT/'results/portugal_rec_native/heldout_2024/campaign.json')
 PAIRS = CAMPAIGN['pairs']
 EVENTS = CAMPAIGN['events']
 
 
+@requires_build
 def test_heldout_2024_static_inputs_and_service_cohorts():
     report = static_audit(ROOT)
     assert report['declared_2024_events'] == 18
@@ -27,11 +29,13 @@ def test_heldout_2024_static_inputs_and_service_cohorts():
     assert all(c['excluded_by_2024_departure'] > 0 for c in report['cohorts'])
 
 
+@requires_build
 @pytest.mark.parametrize('pair', PAIRS, ids=lambda p:p['reference'])
 def test_only_declared_factor_changes(pair):
     assert verify_pair(ROOT, pair)['status'] == 'pass'
 
 
+@requires_build
 @pytest.mark.parametrize('pair', PAIRS, ids=lambda p:p['reference'])
 def test_pair_verifier_rejects_an_unmatched_random_seed(pair, monkeypatch):
     read = audit.read_json
@@ -49,7 +53,7 @@ def test_pair_verifier_rejects_an_unmatched_random_seed(pair, monkeypatch):
 @pytest.mark.parametrize('event', EVENTS, ids=lambda e:e['variant']+'-'+e['id'])
 def test_new_2024_event_changes_running_resources_and_interfaces(event):
     family = 'core_30' if event['variant'].startswith('core') else 'premium_100'
-    path = ROOT/f'data/datasets/rec_pt_2023_{family}_v2/evaluation/{event["variant"]}.json'
+    path = shipped_path(f'data/datasets/rec_pt_2023_{family}_v2/evaluation/{event["variant"]}.json')
     t = event['time_step']
     result = runtime_window(path, t-4, t+4, event['id'])
     assert len(result['executed_events']) == 1
@@ -59,12 +63,12 @@ def test_new_2024_event_changes_running_resources_and_interfaces(event):
 @pytest.mark.parametrize('pair', PAIRS, ids=lambda p:p['reference'])
 def test_references_execute_at_first_heldout_change(pair):
     t = next(e['time_step'] for e in EVENTS if e['variant']==pair['scenario'])
-    result = runtime_window(ROOT/pair['reference_schema'], t-2, t+2, 'first_heldout_change')
+    result = runtime_window(shipped_path(pair['reference_schema']), t-2, t+2, 'first_heldout_change')
     assert len(result['executed_events']) == (0 if pair['factor']=='topology_2024' else 1)
 
 
 def test_2024_is_not_a_reset_or_replay_of_2023():
-    path = ROOT/'data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json'
+    path = shipped_path('data/datasets/rec_pt_2023_core_30_v2/evaluation/core_30_topology.json')
     schema = read_json(path)
     previous = deepcopy(schema)
     previous['topology_events'] = [e for e in previous['topology_events'] if e['time_step']<N23]
@@ -77,20 +81,20 @@ def test_2024_is_not_a_reset_or_replay_of_2023():
 @pytest.mark.parametrize('pair', [p for p in PAIRS if p['factor']=='topology_2024'], ids=lambda p:p['scenario'])
 def test_frozen_counterfactual_has_identical_observations_and_actions_before_first_change(pair):
     from citylearn.citylearn import CityLearnEnv
-    from citylearn.agents.baseline import NormalPolicy
+    from citylearn.agents.baseline import BusinessAsUsualAgent
     t = next(e['time_step'] for e in EVENTS if e['variant']==pair['scenario'])
     envs = []
     try:
         observations = []
         for key in ('scenario_schema', 'reference_schema'):
-            path = ROOT/pair[key]
+            path = shipped_path(pair[key])
             schema = read_json(path)
             schema.update(root_directory=str((path.parent/schema['root_directory']).resolve()),
                 simulation_start_time_step=t-4, simulation_end_time_step=t+4, episode_time_steps=9)
             env = CityLearnEnv(schema, render_mode='none', offline=True, export_kpis_on_episode_end=False)
             envs.append(env)
             observations.append(env.reset(seed=schema['random_seed'])[0])
-        policies = [NormalPolicy(env) for env in envs]
+        policies = [BusinessAsUsualAgent(env) for env in envs]
         for tick in range(4):
             for key in ('tables', 'actions'):
                 assert envs[0].entity_specs[key] == envs[1].entity_specs[key]
@@ -109,10 +113,11 @@ def test_frozen_counterfactual_has_identical_observations_and_actions_before_fir
             env.close()
 
 
+@requires_build
 @pytest.mark.parametrize('family,variant', [('core_30', 'core_30_topology'), ('core_30', 'core_30_combined'), ('premium_100', 'premium_100_allin')])
 def test_preparation_view_runs_without_heldout_member_metadata(family, variant):
     from citylearn.citylearn import CityLearnEnv
-    from citylearn.agents.baseline import NormalPolicy
+    from citylearn.agents.baseline import BusinessAsUsualAgent
     path = ROOT/f'data/datasets/rec_pt_2023_{family}_v2/evaluation/preparation_2023/{variant}.json'
     schema = read_json(path)
     assert schema['simulation_end_time_step'] == N23-1
@@ -126,7 +131,7 @@ def test_preparation_view_runs_without_heldout_member_metadata(family, variant):
         assert newcomer not in env.schema['buildings']
         assert all(e['time_step'] < N23 for e in env.schema['topology_events'])
         assert env.time_steps == 8
-        policy = NormalPolicy(env)
+        policy = BusinessAsUsualAgent(env)
         while not env.terminated:
             obs, reward, _, _, _ = env.step(policy.predict(obs, deterministic=True))
             assert np.isfinite(reward).all()

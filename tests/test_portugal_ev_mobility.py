@@ -11,7 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/"scripts"))
 from revise_portugal_ev_mobility import N, N23, charge_trace, coast, local_step, required_energy, power_budgets, cycle_power_envelope, latest_charge_start
 
-FAMILIES = sorted((ROOT/"data/datasets").glob("rec_pt_2023_*_v2"))
+from portugal_datasets import BUILD, requires_build
+
+# Mobility ledgers and session catalogues are generator outputs, not shipped.
+FAMILIES = BUILD
 
 
 def test_appliance_envelope_bounds_every_allowed_start_and_is_zero_outside_window():
@@ -60,6 +63,7 @@ def test_civil_time_respects_dst_and_does_not_assume_96_slots_per_day():
         assert local_step(clock, day, 24)-local_step(clock, day, 0) == expected
 
 
+@requires_build
 @pytest.mark.parametrize("root", FAMILIES, ids=lambda p: p.name)
 def test_continuous_energy_budget_and_session_witness(root):
     vehicles = pd.read_parquet(root/"catalogs/electric_vehicles.parquet")
@@ -106,6 +110,7 @@ def test_continuous_energy_budget_and_session_witness(root):
     assert ((resident.target_soc-resident.arrival_soc_reference) >= .9).any()
 
 
+@requires_build
 @pytest.mark.parametrize("root", FAMILIES, ids=lambda p: p.name)
 def test_multiday_travel_and_charging_calendars(root):
     episodes = pd.read_parquet(root/"catalogs/mobility_episodes.parquet")
@@ -124,6 +129,7 @@ def test_multiday_travel_and_charging_calendars(root):
             assert opened[s.arrival_time_step:s.observed_end_time_step].all(), s.session_id
 
 
+@requires_build
 @pytest.mark.parametrize("root", FAMILIES, ids=lambda p: p.name)
 def test_native_charging_files_match_catalogue_and_preserve_unavailability(root):
     sessions = pd.read_parquet(root/"catalogs/charging_sessions.parquet").set_index("session_id")
@@ -146,6 +152,7 @@ def test_native_charging_files_match_catalogue_and_preserve_unavailability(root)
                 assert group.electric_vehicle_current_soc.iloc[0] == pytest.approx(s.arrival_soc_reference)
 
 
+@requires_build
 @pytest.mark.parametrize("root", FAMILIES, ids=lambda p: p.name)
 def test_runtime_can_complete_a_near_empty_to_full_request(root):
     from citylearn.citylearn import CityLearnEnv

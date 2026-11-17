@@ -21,9 +21,10 @@ observation contract and reference definition. Moving the same data to another
 root does not change the normalized contract. Changing an input, seed, target,
 asset or reference cannot silently become a paired controller comparison.
 
-Native BAU is identified by implementation, simulator version,
-`immediate-full-charge-v1` and resolved parameters. It uses privileged simulator
-state. The reference reuses the source episode's away-EV random stream, including
+Native BAU is identified by implementation, simulator version, definition
+version (`immediate-full-charge-v2`, or `immediate-user-target-v1` with
+`business_as_usual_ev_charge_target='requested'`) and resolved parameters. It
+reads entity observations (`observation_access='entity_observations'`). The reference reuses the source episode's away-EV random stream, including
 after repeated resets, and its resolved EV service tolerances. Initial inventory
 must agree before reference KPIs are produced. Definition agreement with Algorithms
 is not proof of numerical equivalence between independent implementations.

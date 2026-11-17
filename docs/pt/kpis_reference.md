@@ -1,15 +1,5 @@
 # KPIs Reference
 
-A iteração 5 (desde a v1.9.8) acrescenta [populações auditadas de DR, serviço térmico e equidade](../kpi_family_audit.md),
-cobertura e comprovativos da referência/recompensa. Corrige bandas de conforto,
-desvios condicionais, intervalos ativos/executados e unidades de energia servida.
-As novas taxas distinguem zero, desconhecido e não aplicável; os agregados antigos
-continuam disponíveis. Este trabalho não integra a v1.9.7 pública.
-
-A [auditoria de partidas EV](../ev_departure_audit.md) distingue viável, inviável e informação insuficiente, com cobertura, motivos e cumprimento observado. Os indicadores antigos mantêm as definições; o scorecard passa a recomendar as taxas auditadas acompanhadas da cobertura.
-
-A versão 1.9.0 acrescenta [origem/destino da energia e emissões na fronteira externa](../energy_provenance.md). Os indicadores antigos mantêm o significado de absorção solar instantânea e emissões anteriores à partilha.
-
 O simulador tem duas APIs de KPIs:
 
 | API | Estado | Formato | Uso recomendado |
@@ -18,6 +8,15 @@ O simulador tem duas APIs de KPIs:
 | `evaluate_v2()` | principal | DataFrame com nomes estruturados | Produção, dashboards, comparacao cientifica. |
 
 Para a arvore completa de nomes v2, ver tambem [`KPI_V2_TREE.md`](../KPI_V2_TREE.md).
+
+As famílias de KPIs auditadas acrescentam populações, cobertura e motivos
+explícitos aos KPIs históricos, que mantêm as definições:
+[DR, serviço térmico e equidade](../kpi_family_audit.md),
+[serviço nas partidas EV](../ev_departure_audit.md),
+[serviço das máquinas diferíveis](../deferrable_service_audit.md) e
+[origem da energia e carbono na fronteira externa](../energy_provenance.md).
+Os contadores de robustez têm uma auditoria própria, `get_robustness_audit()`
+(`robustness-audit-v1`); ver a [referência de robustez](robustness_reference.md#kpis).
 
 ## Contrato de Unidades
 
@@ -78,16 +77,18 @@ ratio_to_business_as_usual_x = control_x / business_as_usual_x
 self_consumption = (solar_generation_total - export_total) / solar_generation_total
 ```
 
-As equações acima aplicam-se a totais de referência positivos. A troca líquida
-com a rede e o custo podem ter referências negativas. Nesses casos, os rácios
-face à baseline e ao BAU usam `1 + (controlo - referência) / abs(referência)`.
-Um rácio de 1 significa que o total é igual ao da referência. Se a referência
-for aproximadamente zero, o rácio é 1 quando o total controlado também for
-aproximadamente zero e `None` nos restantes casos.
+Safe division devolve `None`/placeholder quando o denominador nao e fisicamente valido.
 
-Durante um corte, o contrafactual convencional reporta zero trocas com a rede,
-custo de rede e emissões da rede. Com o mercado comunitário ativo, a comparação
-de custos aplica as mesmas regras de mercado aos dois cenários.
+Os ratios continuam lower-is-better quando o total de referencia e negativo. O net exchange (legacy `zero_net_energy`) e os totais de custo podem ser negativos, para um exportador liquido ou depois de receitas do community market. Os seus ratios ao baseline e ao BAU usam
+
+```text
+ratio_x = control_x / reference_x                        se reference_x > 0
+ratio_x = 1 + (control_x - reference_x) / |reference_x|  se reference_x < 0
+```
+
+Assim 1 continua a significar sem alteracao e um total control maior da um ratio maior. Para uma referencia positiva e o ratio simples. Import, export e emissoes nunca sao negativos e usam o ratio simples.
+
+O counterfactual `baseline` segue o outage da rede do run controlado: nos time steps de power outage as series net `*_without_storage*`, e as suas series de custo e emissoes, sao zero. Nenhum dos runs troca energia com a rede enquanto ela esta em baixo.
 
 ## Familias Principais
 
@@ -217,7 +218,7 @@ Condicionais a `community_market.enabled=true`.
 | local traded daily average | district | kWh/day | Media diaria local. |
 | community import share | district | ratio | Share da demanda servida localmente. |
 | settled cost | building/district | eur | Custo apos settlement local. |
-| counterfactual cost | building/district | eur | Custo sem trocas locais, com as mesmas tarifas de compra e venda à rede. |
+| counterfactual cost | building/district | eur | Custo sem mercado local. |
 | market savings | building/district | eur | Diferenca entre counterfactual e settled. |
 
 ## Export

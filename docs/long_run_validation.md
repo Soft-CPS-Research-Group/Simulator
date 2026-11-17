@@ -2,7 +2,7 @@
 
 The offline `long-run-audit-v1` CLI keeps runtime physical
 checks active throughout a continuous episode and records the exact schema,
-loaded-input hashes, software versions, NormalPolicy parameters and audit-script
+loaded-input hashes, software versions, BusinessAsUsualAgent parameters and audit-script
 hash. It does not change datasets, dispatch, market pricing or rewards.
 
 ## Run
@@ -12,7 +12,7 @@ required dataset available. It is not an installed PyPI console command.
 
 ```bash
 python scripts/audit/audit_long_run.py \
-  --schema data/datasets/rec_pt_2023_micro_4_v2/evaluation/core_4.json \
+  --schema data/datasets/pt_rec_4/evaluation/rec_4.json \
   --start 0 --transitions 35040 --block-steps 960 \
   --seed 0 --output /tmp/micro4-year2023
 ```
@@ -22,7 +22,7 @@ observation: 35,040 dispatched 900-second intervals require 35,041 observations.
 The CLI preserves the declared native market: internal price 80% of purchase
 price, zero export price. Other market contracts require their own audit.
 
-NormalPolicy is identified as a privileged-state policy. Declared robustness seeds
+The BAU is identified by its definition version, parameters and observation access. Declared robustness seeds
 and events remain enabled; `--seed` does not silently rewrite explicit schema
 seeds. The campaign is not a comparison between controllers.
 

@@ -12,8 +12,9 @@ alone does not prove that local changes have been published.
 ## Prepare and validate
 
 1. Review the release diff. Update `citylearn/__init__.py`, the source version in
-   `README.md` and `README_PYPI.md`, and [releases.md](releases.md). Update affected
-   product/schema/KPI references and explain compatibility or migration limits.
+   `README_PYPI.md`, [releases.md](releases.md) and [migration.md](migration.md).
+   `README.md` carries no version. Update affected product/schema/KPI references
+   and explain compatibility or migration limits.
 2. Run the full suite and mandatory auditors from [developer_guide.md](developer_guide.md).
    Keep run evidence outside the checkout or in CI/release artifacts, rather than
    adding release-run JSON to `docs/`.
@@ -34,8 +35,8 @@ alone does not prove that local changes have been published.
 
 For an authorised release, commit with the normal maintainer identity and push the
 reviewed release commit to `origin/master` once. Wait for its CI before publishing.
-The current CI covers Python 3.9/3.10, lint, tests, accounting audits, performance
-smoke and installed-distribution exports. Then create an unused release tag for
+The current CI covers Python 3.9, 3.10 and 3.12 with NumPy 2, Python 3.10 with
+NumPy 1, lint, tests, runtime audits, performance smoke and installed-wheel exports. Then create an unused release tag for
 the approved commit:
 
 ```console

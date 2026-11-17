@@ -10,6 +10,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'scripts'))
 from apply_portugal_omie_pricing import build_prices, load_market, MARKET, PRICING, UTC
+from portugal_datasets import BUILD, SHIPPED, shipped_root
 
 
 def test_wholesale_units_and_negative_floor():
@@ -44,12 +45,14 @@ def test_current_prices_reconcile_to_independent_wholesale_components():
     raw = pd.concat([pd.read_parquet(ROOT/f'data/portugal_reference_{y}/price_components_btn_bi.parquet')
                      for y in (2023, 2024)], ignore_index=True)
     expected = raw.omie_eur_kwh.clip(lower=0).astype('float32')
-    for root in sorted((ROOT/'data/datasets').glob('rec_pt_2023_*_v2')):
+    # The shipped datasets and, when present, a local generator build.
+    for root in SHIPPED + BUILD:
         actual = pd.read_parquet(root/PRICING)
-        contract = json.loads((root/'settlement_contract.json').read_text())
-        assert contract['dataset_market_enabled'] is True
-        assert contract['active_pricing_file'] == PRICING
-        assert contract['local_price_ratio_to_grid_import'] == .8
+        if root in BUILD:  # The settlement contract file is not shipped.
+            contract = json.loads((root/'settlement_contract.json').read_text())
+            assert contract['dataset_market_enabled'] is True
+            assert contract['active_pricing_file'] == PRICING
+            assert contract['local_price_ratio_to_grid_import'] == .8
         np.testing.assert_array_equal(actual.electricity_pricing, expected)
         assert actual.shape == (70176, 4)
         assert np.isfinite(actual.to_numpy()).all() and (actual.to_numpy() >= 0).all()
@@ -61,7 +64,7 @@ def test_current_prices_reconcile_to_independent_wholesale_components():
 
 def test_forecasts_across_dst_new_year_and_last_horizon():
     raw, _ = load_market()
-    frame = pd.read_parquet(ROOT/'data/datasets/rec_pt_2023_micro_4_v2'/PRICING)
+    frame = pd.read_parquet(shipped_root('micro_4')/PRICING)
     issues = [pd.Timestamp(s, tz='UTC') for s in
               ['2023-01-01 00:00', '2023-03-26 00:45', '2023-10-29 00:45',
                '2023-12-31 12:45', '2023-12-31 13:00', '2024-03-31 00:45',
@@ -85,8 +88,8 @@ def test_missing_forecast_support_fails_instead_of_truncating_horizon():
 
 def test_real_negative_omie_window_settles_at_zero_without_nan_rewards():
     from citylearn.citylearn import CityLearnEnv
-    from citylearn.agents.baseline import NormalPolicy
-    root = ROOT/'data/datasets/rec_pt_2023_core_15_v2'
+    from citylearn.agents.baseline import BusinessAsUsualAgent
+    root = shipped_root('core_15')
     schema = json.loads((root/'schema.json').read_text())
     # 16 June 2024, 09:00 UTC: archived OMIE is -2 EUR/MWh.
     schema.update(root_directory=str(root), simulation_start_time_step=51108,
@@ -97,7 +100,7 @@ def test_real_negative_omie_window_settles_at_zero_without_nan_rewards():
                        export_kpis_on_episode_end=False)
     try:
         obs, _ = env.reset(seed=0)
-        policy = NormalPolicy(env)
+        policy = BusinessAsUsualAgent(env)
         local_energy = 0.
         while not env.terminated:
             obs, reward, terminated, truncated, _ = env.step(policy.predict(obs, deterministic=True))

@@ -79,7 +79,21 @@ class CityLearnPhysicsInvariantService:
         """Raise ``AssertionError`` if hard physics invariants are violated."""
 
         t = int(max(time_step, 0))
-        for building in self.env.buildings:
+        buildings = list(self.env.buildings)
+        topology = getattr(self.env, "_topology_service", None)
+        if (
+            getattr(self.env, "topology_mode", "static") == "dynamic"
+            and topology is not None
+            and hasattr(topology, "active_member_ids_at")
+        ):
+            active_member_ids = set(topology.active_member_ids_at(t))
+            buildings = [
+                building
+                for building in buildings
+                if str(getattr(building, "name", "")) in active_member_ids
+            ]
+
+        for building in buildings:
             self._assert_building_energy_balance(building, t)
             self._assert_outage_local_balance(building, t)
             self._assert_soc_bounds(building, t)

@@ -11,7 +11,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/"scripts"))
 from portugal_activity import N, N23, rng_for, presence
 
-FAMILIES = sorted((ROOT/"data/datasets").glob("rec_pt_2023_*_v2"))
+from portugal_datasets import BUILD, SHIPPED, requires_build, shipped_root, shipped_variant
+
+FAMILIES = BUILD
 
 
 def test_random_streams_preserve_nested_members_and_separate_years_and_processes():
@@ -22,6 +24,7 @@ def test_random_streams_preserve_nested_members_and_separate_years_and_processes
         assert not np.array_equal(a, rng_for(root, "Member_001", year, process).random(100))
 
 
+@requires_build
 @pytest.mark.parametrize("root", FAMILIES, ids=lambda p:p.name)
 def test_household_calendar_controls_presence_and_long_trip_energy(root):
     calendar = pd.read_parquet(root/"shared/calendar.parquet")
@@ -45,6 +48,7 @@ def test_household_calendar_controls_presence_and_long_trip_energy(root):
     assert counts.nunique() > 1, "Long trips must not be fixed two weekends + one holiday + one vacation per EV/year"
 
 
+@requires_build
 @pytest.mark.parametrize("root", FAMILIES, ids=lambda p:p.name)
 def test_cycles_respect_rating_windows_and_fixed_load_accounting(root):
     apps = pd.read_parquet(root/"catalogs/deferrables.parquet")
@@ -77,8 +81,8 @@ def test_cycles_respect_rating_windows_and_fixed_load_accounting(root):
 
 @pytest.mark.parametrize("family,variant", [("core_30", "core_30_combined"), ("premium_100", "premium_100_allin")])
 def test_event_years_are_not_replayed_and_true_sensor_dependencies_stay_joint(family, variant):
-    root = ROOT/f"data/datasets/rec_pt_2023_{family}_v2"
-    s = json.loads((root/f"evaluation/{variant}.json").read_text())
+    root = shipped_root(family)
+    s = json.loads((root/f"evaluation/{shipped_variant(variant)}.json").read_text())
     f = pd.read_parquet(root/s["robustness"]["events_file"])
     temporal = f.loc[(f.end_time_step-f.start_time_step) < N23]
     old = set(temporal.loc[temporal.start_time_step.lt(N23), "start_time_step"]+34944)
@@ -96,7 +100,7 @@ def test_event_years_are_not_replayed_and_true_sensor_dependencies_stay_joint(fa
 
 
 def test_dr_impossible_control_remains_labelled_and_service_requests_vary():
-    root = ROOT/"data/datasets/rec_pt_2023_premium_100_v2"
+    root = shipped_root("premium_100")
     f = pd.read_parquet(root/"evaluation/events/development/requests.parquet")
     stress = f.loc[f.stratum.eq("impossible_stress")]
     assert len(stress) == 2 and stress.target_power_kw.eq(1500).all()
@@ -106,24 +110,29 @@ def test_dr_impossible_control_remains_labelled_and_service_requests_vary():
     assert (routine.end_time_step-routine.start_time_step).nunique() > 1
 
 
-def test_confirmation_noise_has_independent_exposure_and_error_stream_ids():
-    root = ROOT/"data/datasets/rec_pt_2023_premium_100_v2"
+@requires_build
+def test_confirmation_noise_has_independent_exposure():
+    # The confirmation event catalogue is part of the generator build, not shipped.
+    root = next(r for r in BUILD if r.name == "rec_pt_2023_premium_100_v2")
     a = pd.read_parquet(root/"evaluation/events/development/measurement_noise.parquet")
     b = pd.read_parquet(root/"evaluation/events/confirmation/measurement_noise.parquet")
     assert not set(a.event_id) & set(b.event_id)
     assert len(set(a.start_time_step) & set(b.start_time_step)) < len(set(a.start_time_step))/4
+
+
+def test_confirmation_noise_has_independent_error_stream_ids():
     for family, variant in (("core_30", "core_30_robustness"), ("premium_100", "premium_100_allin")):
-        root = ROOT/f"data/datasets/rec_pt_2023_{family}_v2"
-        a = pd.read_parquet(root/f"evaluation/native_inputs/{variant}/robustness.parquet")
-        b = pd.read_parquet(root/f"evaluation/native_inputs/{variant}/confirmation_robustness.parquet")
+        root = shipped_root(family)/"evaluation/native_inputs"/shipped_variant(variant)
+        a = pd.read_parquet(root/"robustness.parquet")
+        b = pd.read_parquet(root/"confirmation_robustness.parquet")
         noise_a = set(a.loc[a.generation_regime.eq("controlled_noise_stress"), "event_id"])
         noise_b = set(b.loc[b.generation_regime.eq("controlled_noise_stress"), "event_id"])
         assert noise_a and noise_b and not noise_a & noise_b
 
 
 def test_shared_weather_uses_real_humidity_in_both_years_and_has_distinct_forecast_horizons():
-    first = pd.read_parquet(FAMILIES[0]/"shared/weather.parquet")
-    for root in FAMILIES[1:]:
+    first = pd.read_parquet(SHIPPED[0]/"shared/weather.parquet")
+    for root in SHIPPED[1:]:
         pd.testing.assert_frame_equal(first, pd.read_parquet(root/"shared/weather.parquet"))
     synthetic = np.clip(78-1.7*(first.outdoor_dry_bulb_temperature.iloc[:N23]-14), 30, 95)
     assert np.abs(first.outdoor_relative_humidity.iloc[:N23]-synthetic).mean() > 1.
@@ -139,8 +148,8 @@ def test_shared_weather_uses_real_humidity_in_both_years_and_has_distinct_foreca
 @pytest.mark.parametrize("family,variant", [("core_30", "core_30_combined"), ("premium_100", "premium_100_allin")])
 def test_revised_fault_window_activates_exact_declared_channels(family, variant):
     from citylearn.citylearn import CityLearnEnv
-    root = ROOT/f"data/datasets/rec_pt_2023_{family}_v2"
-    schema = json.loads((root/f"evaluation/{variant}.json").read_text())
+    root = shipped_root(family)
+    schema = json.loads((root/f"evaluation/{shipped_variant(variant)}.json").read_text())
     events = pd.read_parquet(root/schema["robustness"]["events_file"])
     selected = events.loc[events.generation_regime.eq("local_fault")].iloc[0]
     t = int(selected.start_time_step)

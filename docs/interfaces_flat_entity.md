@@ -148,7 +148,7 @@ charger_units = specs["tables"]["charger"]["units"]
 |---|---|
 | Exogenous observations | Read at timestep `t`. Examples: weather, pricing, schedules. |
 | Endogenous observations | Read at settled `t-1`. Examples: previous consumption and SOC after the last action. |
-| Terminal observation | Calendar and other exogenous values use the last input row. Endogenous values come from the last executed interval. |
+| Terminal observation | Same rule at the final `t`: exogenous and calendar features from the last data row, endogenous ones from the last executed interval. Building series still hold only executed intervals. Charger, deferrable-appliance and escalator states are not advanced and stay at the last executed interval. |
 | Topology events | Events at `k` are applied after interval `k-1` and before EV association and observation at `k`. |
 
 ## Entity Bundles
@@ -203,6 +203,11 @@ Added or removed chargers, deferrable appliances, PV systems, electrical storage
 members therefore do not leak into the next episode. Reusing one environment across training episodes
 has the same topology event timeline as recreating the environment for each episode.
 
+When a stationary battery is added or recommissioned, its configured initial
+SOC defines the opening stock. An initial SOC below the discharge reserve stays
+at that value. The battery can charge immediately and can discharge once its
+SOC exceeds the reserve.
+
 | Element | Agent guidance |
 |---|---|
 | `topology_version` | Re-read `entity_specs` when it changes. |
@@ -211,11 +216,15 @@ has the same topology event timeline as recreating the environment for each epis
 | Removed assets | Ignore IDs that disappear from `active_ids`. |
 | Added assets | Initialize model memory/hidden state for new IDs. |
 
-A stationary battery starts at its configured SOC when added or recommissioned.
-A discharge reserve limits discharge. It does not add energy to the opening stock.
-
-EV identity is independent of the charger. While an EV has no participating
-charger, its battery follows standby losses and seeded away mobility. A first
-activation uses the configured initial SOC, and an explicit arrival SOC enters
-the energy balance as an external adjustment. Departure metrics use the
-actual connection boundary. Charger exports report the port that served the EV.
+EV IDs identify vehicles independently of their chargers. Removing the last
+charger that references an EV suspends its participation in the community.
+The same EV continues to experience standby loss and the seeded away-mobility
+model while suspended, with no charging from the community. Reinstalling a
+charger brings back that EV and its evolved SOC. A valid arrival SOC from the
+dataset is an external adjustment. A catalogue EV first activated mid-episode
+opens at its configured initial SOC, and its opening stock enters the energy
+accounting when it connects. The EV can connect to one charger at a time.
+Departure metrics start a topology-induced connection at its observed opening
+SOC and count charging opportunities from that connection onwards.
+Charger exports show the connection that actually took place. An incoming
+vehicle appears as incoming until it connects.

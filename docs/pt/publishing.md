@@ -12,9 +12,10 @@ A versão no código não prova que todas as alterações locais já foram publi
 
 ## Preparar e validar
 
-1. Rever o diff. Atualizar `citylearn/__init__.py`, a versão em `README.md` e
-   `README_PYPI.md`, e [releases.md](releases.md). Atualizar os contratos afetados,
-   a compatibilidade e as migrações necessárias.
+1. Rever o diff. Atualizar `citylearn/__init__.py`, a versão em `README_PYPI.md`,
+   [releases.md](releases.md) e [migration.md](../migration.md). O `README.md` não
+   indica a versão. Atualizar os contratos afetados, a compatibilidade e as
+   migrações necessárias.
 2. Executar a suite completa e os auditores obrigatórios do
    [guia de desenvolvimento](developer_guide.md). Evidência de execução fica fora
    do checkout ou em artefactos de CI/releases, não em JSON de cada execução em `docs/`.
@@ -35,8 +36,9 @@ A versão no código não prova que todas as alterações locais já foram publi
 
 Numa publicação autorizada, fazer commit com a identidade habitual do mantenedor
 e enviar o commit revisto para `origin/master` uma vez. Aguardar a sua CI antes
-de publicar. A CI atual cobre Python 3.9/3.10, lint, testes, auditorias
-contabilísticas, desempenho e exportação do pacote instalado. Depois, criar uma
+de publicar. A CI atual cobre Python 3.9, 3.10 e 3.12 com NumPy 2, Python 3.10
+com NumPy 1, lint, testes, auditorias de execução, desempenho e exportação do
+wheel instalado. Depois, criar uma
 tag ainda não utilizada para o commit aprovado:
 
 ```console
